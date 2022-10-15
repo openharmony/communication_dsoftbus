@@ -291,7 +291,7 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open auth chan, port=%d", P2pLinkGetGcPort());
     connedItem->chanId.authRequestId = AuthGenRequestId();
-    if (AuthOpenConn(authInfo, connedItem->chanId.authRequestId, &authCb) != SOFTBUS_OK) {
+    if (AuthOpenConn(authInfo, connedItem->chanId.authRequestId, &authCb, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open auth chan fail");
     }
     SoftBusFree(arg);

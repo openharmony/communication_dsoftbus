@@ -61,6 +61,27 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
 AuthManager *GetAuthManagerByAuthId(int64_t authId);
 void DelAuthManager(AuthManager *auth, bool removeAuthFromList);
 
+int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
+int32_t AuthDevicePostTransData(int64_t authId, const AuthTransData *dataInfo);
+void AuthDeviceCloseConn(int64_t authId);
+int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
+
+/* for ProxyChannel & P2P TcpDirectchannel */
+int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool isIpConnection);
+int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
+int64_t AuthDeviceGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer);
+
+int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
+int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
+int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
+
+int32_t AuthDeviceGetConnInfo(int64_t authId, AuthConnInfo *connInfo);
+int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
+int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version);
+int32_t AuthDeviceGetServerSide(int64_t authId, bool *isServer);
+int32_t AuthDeviceInit(const AuthTransCallback *callback);
+void AuthDeviceDeinit(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
