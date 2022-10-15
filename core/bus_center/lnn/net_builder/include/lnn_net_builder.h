@@ -56,7 +56,7 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
 int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId);
 int32_t LnnUpdateNodeAddr(const char *addr);
 AuthVerifyCallback *LnnGetVerifyCallback(void);
-AuthVerifyCallback *LnnGetVerifyMetaCallback(void);
+AuthVerifyCallback *LnnGetMetaVerifyCallback(void);
 
 #ifdef __cplusplus
 }

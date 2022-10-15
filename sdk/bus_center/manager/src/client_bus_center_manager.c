@@ -103,6 +103,11 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0)
             && (addr1->info.ip.port == addr2->info.ip.port);
     }
+    if (addr1->type == CONNECTION_ADDR_SESSION) {
+        return ((addr1->info.session.sessionId == addr2->info.session.sessionId) &&
+            (addr1->info.session.channelId == addr2->info.session.channelId) &&
+            (addr1->type == addr2->type));
+    }
     return false;
 }
 
