@@ -254,13 +254,13 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId)
     AuthConnInfo auth = {0};
     AuthConnCallback cb = {0};
 
-    if (AuthGetPreferConnInfo(uuid, &auth) != SOFTBUS_OK) {
+    if (AuthGetPreferConnInfo(uuid, &auth, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthConn get auth info fail");
         return SOFTBUS_ERR;
     }
     cb.onConnOpened = OnAuthConnOpened;
     cb.onConnOpenFailed = OnAuthConnOpenFailed;
-    if (AuthOpenConn(&auth, reqId, &cb) != SOFTBUS_OK) {
+    if (AuthOpenConn(&auth, reqId, &cb, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthConn open auth conn fail");
         return SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED;
     }

@@ -28,6 +28,8 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/auth_session_fsm.c",
     "$authentication_path/src/auth_session_key.c",
     "$authentication_path/src/auth_session_message.c",
+    "$authentication_path/src/auth_interface.c",
+    "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
   ]
   if (dsoftbus_feature_ip_auth) {
     auth_server_src +=
@@ -39,6 +41,7 @@ if (dsoftbus_feature_lnn_net) {
   auth_server_src = [
     "$authentication_path/src/virtual/auth_interface_virtual.c",
     "$authentication_path/src/virtual/auth_tcp_connection_virtual.c",
+    "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
   ]
 }
 auth_server_inc = [

@@ -140,7 +140,7 @@ static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
         connInfo.type = AUTH_LINK_TYPE_BLE;
     }
     bool isAuthServer = !((cipher & AUTH_SERVER_SIDE) != 0);
-    return AuthGetIdByConnInfo(&connInfo, isAuthServer);
+    return AuthGetIdByConnInfo(&connInfo, isAuthServer, false);
 }
 
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
