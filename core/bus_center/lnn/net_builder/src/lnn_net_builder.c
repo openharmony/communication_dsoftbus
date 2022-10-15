@@ -1550,12 +1550,12 @@ void OnAuthMetaVerifyFailed(uint32_t requestId, int32_t reason)
     MetaNodeNotifyLeaveResult(NULL, SOFTBUS_ERR);
 }
 
-static AuthMetaVerifyCallback g_verifyMetaCallback = {
-    .OnAuthMetaVerifyPassed = OnAuthMetaVerifyPassed,
-    .OnAuthMetaVerifyFailed = OnAuthMetaVerifyFailed,
+static AuthVerifyCallback g_verifyMetaCallback = {
+    .onVerifyPassed = OnAuthMetaVerifyPassed,
+    .onVerifyFailed = OnAuthMetaVerifyFailed,
 };
 
-AuthMetaVerifyCallback *LnnGetVerifyMetaCallback(void)
+AuthVerifyCallback *LnnGetVerifyMetaCallback(void)
 {
     return &g_verifyMetaCallback;
 }

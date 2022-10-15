@@ -887,7 +887,7 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     }
 
     if (appInfo->appType != APP_TYPE_AUTH) {
-        chan->authId = AuthGetLatestIdByUuid(appInfo->peerData.deviceId, chan->type == CONNECT_TCP);
+        chan->authId = AuthGetLatestIdByUuid(appInfo->peerData.deviceId, chan->type == CONNECT_TCP, false);
         if (chan->authId == AUTH_INVALID_ID) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get authId for cipher err");
             return SOFTBUS_ERR;

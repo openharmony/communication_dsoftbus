@@ -78,6 +78,19 @@ if (expression) { \
 #define TO_INT32(value) ((int32_t)(((uint32_t)(value)) & INT32_MASK))
 #define TO_UINT32(value) ((uint32_t)(((uint32_t)(value)) & INT32_MASK))
 
+typedef struct {
+    uint32_t dataType;
+    int32_t module;
+    int64_t seq;
+    int32_t flag;
+    uint32_t len;
+} AuthDataHead;
+
+typedef struct {
+    void (*OnDataReceived)(int64_t authId, const AuthDataHead *head, const uint8_t *data, uint32_t len);
+    void (*OnDisconnected)(int64_t authId);
+} AuthTransCallback;
+
 /* Auth handler */
 typedef enum {
     EVENT_CONNECT_CMD,

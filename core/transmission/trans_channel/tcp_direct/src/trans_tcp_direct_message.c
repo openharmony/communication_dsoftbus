@@ -544,12 +544,12 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip addr fail");
             return AUTH_INVALID_ID;
         }
-        return AuthGetIdByConnInfo(&connInfo, !fromAuthServer);
+        return AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
     }
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth linktype %d flag 0x%x", linkType, cipherFlag);
-    return AuthGetIdByP2pMac(p2pMac, linkType, !fromAuthServer);
+    return AuthGetIdByP2pMac(p2pMac, linkType, !fromAuthServer, false);
 }
 
 static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, const uint8_t *pktData,

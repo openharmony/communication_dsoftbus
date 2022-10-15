@@ -84,15 +84,14 @@ typedef struct {
     void (*onVerifyFailed)(uint32_t requestId, int32_t reason);
 } AuthVerifyCallback;
 
-typedef struct {
-    void (*OnAuthMetaVerifyPassed)(uint32_t requestId, int64_t authMetaId, const NodeInfo *info);
-    void (*OnAuthMetaVerifyFailed)(uint32_t requestId, int32_t reason);
-} AuthMetaVerifyCallback;
-
 uint32_t AuthGenRequestId(void);
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback);
 void AuthHandleLeaveLNN(int64_t authId);
 int32_t AuthFlushDevice(const char *uuid);
+
+int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
+    uint32_t requestId, const AuthVerifyCallback *callBack);
+void AuthMetaReleaseVerify(int64_t authId);
 
 typedef struct {
     void (*onGroupCreated)(const char *groupId);
@@ -123,15 +122,15 @@ typedef struct {
     void (*onConnOpened)(uint32_t requestId, int64_t authId);
     void (*onConnOpenFailed)(uint32_t requestId, int32_t reason);
 } AuthConnCallback;
-int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
+int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta);
 int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo);
 void AuthCloseConn(int64_t authId);
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
+int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
-int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection);
-int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
-int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer);
+int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta);
+int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
+int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta);
 
 uint32_t AuthGetEncryptSize(uint32_t inLen);
 uint32_t AuthGetDecryptSize(uint32_t inLen);

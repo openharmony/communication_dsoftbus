@@ -327,7 +327,7 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer uuid fail.");
         return SOFTBUS_ERR;
     }
-    return AuthGetPreferConnInfo(uuid, connInfo);
+    return AuthGetPreferConnInfo(uuid, connInfo, false);
 }
 
 static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
@@ -347,7 +347,7 @@ static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnL
         .onConnOpened = OnConnOpened,
         .onConnOpenFailed = OnConnOpenFailed
     };
-    if (AuthOpenConn(&connInfo, requestId, &cb) != SOFTBUS_OK) {
+    if (AuthOpenConn(&connInfo, requestId, &cb, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open auth conn fail.");
         DelConnRequestItem(requestId);
         return SOFTBUS_ERR;
@@ -442,7 +442,7 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
         .onConnOpened = OnConnOpenedForDisconnect,
         .onConnOpenFailed = OnConnOpenFailedForDisconnect
     };
-    if (AuthOpenConn(&connInfo, requestId, &cb) != SOFTBUS_OK) {
+    if (AuthOpenConn(&connInfo, requestId, &cb, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open auth conn fail.");
         DelConnRequestItem(requestId);
         return SOFTBUS_ERR;

@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "auth_common.h"
 #include "auth_interface.h"
 #include "softbus_conn_interface.h"
 
@@ -27,14 +28,6 @@
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    uint32_t dataType;
-    int32_t module;
-    int64_t seq;
-    int32_t flag;
-    uint32_t len;
-} AuthDataHead;
 
 typedef struct {
     void (*onConnectResult)(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo);

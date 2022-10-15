@@ -577,7 +577,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId)
     AuthConnInfo auth = {0};
     AuthConnCallback cb = {0};
 
-    int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth);
+    int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, false);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOpenAuthConn get info fail: ret=%d", ret);
         return ret;
@@ -585,7 +585,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId)
 
     cb.onConnOpened = UdpOnAuthConnOpened;
     cb.onConnOpenFailed = UdpOnAuthConnOpenFailed;
-    ret = AuthOpenConn(&auth, requestId, &cb);
+    ret = AuthOpenConn(&auth, requestId, &cb, false);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOpenAuthConn open fail: ret=%d", ret);
         return ret;
