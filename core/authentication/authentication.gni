@@ -26,6 +26,7 @@ enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                          "$dep_dir",
                        ],
                        "value")
+
 if (dsoftbus_feature_lnn_net) {
   auth_server_src = [
     "$authentication_path/src/auth_common.c",
