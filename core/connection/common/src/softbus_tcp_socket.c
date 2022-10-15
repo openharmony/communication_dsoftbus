@@ -271,6 +271,19 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
     return 0;
 }
 
+int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
+{
+    if (fd < 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnSetTcpUserTimeOut invalid param");
+        return -1;
+    }
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_USER_TIMEOUT, &millSec, sizeof(millSec)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set SOFTBUS_TCP_USER_TIMEOUT failed");
+        return -1;
+    }
+    return 0;
+}
+
 static int32_t AcceptTcpClient(int fd, ConnectOption *clientAddr, int *cfd)
 {
     SoftBusSockAddrIn addr;
