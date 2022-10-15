@@ -186,7 +186,6 @@ static int32_t PostClosingTimeoutEvent(uint32_t connectionId)
 
 static void PackRequest(int32_t delta, uint32_t connectionId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[PackRequest: delta=%d, connectionId=%u]", delta, connectionId);
     int32_t refCount = -1;
     int32_t state = SetRefCountByConnId(delta, &refCount, connectionId);
     if (state != BR_CONNECTION_STATE_CONNECTED && state != BR_CONNECTION_STATE_CLOSING) {
@@ -194,10 +193,14 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
         return;
     }
 
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "br pack request: delta:%d, ref:%d, connectionId:%u, state:%d", delta, refCount, connectionId, state);
+
     if (state == BR_CONNECTION_STATE_CLOSING) {
         int32_t ret = PostClosingTimeoutEvent(connectionId);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "post close %u connection timeout event, ret: %d",
             connectionId, ret);
+        // continue, anyway
     }
 
     int32_t dataLen = 0;
@@ -287,8 +290,8 @@ static void ClientNoticeResultBrConnect(uint32_t connId, bool result, int32_t va
                     requestInfo->callback.OnConnectFailed(requestInfo->requestId, value);
                 }
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connnect notify, result:%d, connId:%d, requestId:%d",
-                result, connId, requestInfo->requestId);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+                "connnect notify, result:%d, connectionId:%u, requestId:%u", result, connId, requestInfo->requestId);
             ListDelete(&requestInfo->node);
             SoftBusFree(requestInfo);
         }
@@ -439,6 +442,8 @@ static void ConnectDeviceExist(uint32_t connId, uint32_t requestId, const Connec
     if (result->OnConnectSuccessed != NULL) {
         result->OnConnectSuccessed(requestId, connId, &connectionInfo);
     }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "connnect notify connected, connectionId:%u, requestId:%u", connId, requestId);
 
     (void)PackRequest(CONNECT_REF_INCRESE, connId);
 }
@@ -533,7 +538,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
 
 static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDevice]");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connect device, requestId:%u", requestId);
     if (HasDiffMacDeviceExit(option)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[has diff mac device]");
     }
@@ -558,7 +563,9 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
     } else if (connState == BR_CONNECTION_STATE_CLOSED) {
         int32_t connCount = GetBrConnectionCount();
         if (connCount == SOFTBUS_ERR || connCount > g_brMaxConnCount) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDevice connCount: %d", connCount);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+                "br connect device failed: connected device %d exceed than limit %d, requestId: %u",
+                    connCount, g_brMaxConnCount, requestId);
             result->OnConnectFailed(requestId, 0);
             SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, 0);
             ret = SOFTBUS_ERR;
@@ -665,13 +672,13 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
 
 static int32_t DisconnectDevice(uint32_t connectionId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[DisconnectDevice]");
     if (!IsExitConnectionById(connectionId)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[not find connectionId: %u]", connectionId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "br disconnect device failed: not find connection: %u", connectionId);
         return SOFTBUS_BRCONNECTION_DISCONNECT_NOTFIND;
     }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br disconnect device, connectionId:%u", connectionId);
     (void)PackRequest(CONNECT_REF_DECRESE, connectionId);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[DisconnectDevice over]");
     return SOFTBUS_OK;
 }
 
@@ -1064,11 +1071,10 @@ static void Resume(uint32_t connectionId)
 
 static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "[OnPackResponse: delta=%d, RemoteRef=%d, connectionIds=%u", delta, peerRef, connectionId);
     BrConnectionInfo *connInfo = GetConnectionRef(connectionId);
     if (connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[OnPackResponse] not find device");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "br OnPackResponse failed: not find device, connectionId: %u", connectionId);
         return;
     }
     connInfo->refCount += delta;
@@ -1077,7 +1083,9 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
     int32_t sideType = connInfo->sideType;
     ReleaseConnectionRef(connInfo);
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[onPackRequest: myRefCount=%d]", myRefCount);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "br OnPackResponse: delta=%d, remoteRef=%d, myRef:%d, connectionId=%u",
+            delta, peerRef, myRefCount, connectionId);
     if (peerRef > 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[remote device Ref is > 0, do not reply]");
         // resume connection when peer reference is larger than 0
@@ -1085,7 +1093,8 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
         return;
     }
     if (myRefCount <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[local device Ref <= 0, close connection now]");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+            "br OnPackResponse local device ref <= 0, and remote ref <=0 close connection now");
         SetBrConnStateByConnId(connectionId, BR_CONNECTION_STATE_CLOSING);
         if (sideType == BR_SERVICE_TYPE) {
             ConnBrOnEvent(ADD_CONN_BR_SERVICE_DISCONNECTED_MSG, mySocketFd, mySocketFd);
@@ -1130,12 +1139,12 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
         }
         OnPackResponse(keyDelta, keyReferenceNum, connectionId);
     } else if (keyMethod == METHOD_NOTIFY_RESPONSE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NOTIFY_RESPONSE");
         if (!GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyReferenceNum)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RESPONSE fail");
             return;
         }
-
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+            "br NOTIFY_RESPONSE, connectionId:%u, remote ref:%d", connectionId, keyReferenceNum);
         SetBrConnStateByConnId(connectionId, BR_CONNECTION_STATE_CONNECTED);
     } else if (keyMethod == METHOD_NOTIFY_ACK) {
         int32_t remoteWindows;
