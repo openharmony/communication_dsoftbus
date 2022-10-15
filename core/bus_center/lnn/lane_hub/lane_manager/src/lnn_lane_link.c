@@ -476,33 +476,6 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
     return SOFTBUS_OK;
 }
 
-static int32_t CheckP2pRoleConflict(const char *networkId)
-{
-    RoleIsConflictInfo info = {0};
-    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_P2P_ROLE, (int32_t *)&info.peerRole) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer p2p role fail.");
-        return SOFTBUS_ERR;
-    }
-    info.expectedRole = GetExpectedP2pRole();
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_GO_MAC, info.peerGoMac, sizeof(info.peerGoMac)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer p2p go mac fail.");
-        return SOFTBUS_ERR;
-    }
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, info.peerMac, sizeof(info.peerMac)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer p2p mac fail.");
-        return SOFTBUS_ERR;
-    }
-    if (strnlen(info.peerMac, P2P_MAC_LEN) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p mac is empty.");
-        return SOFTBUS_ERR;
-    }
-    info.isBridgeSupported = false;
-    if (P2pLinkIsRoleConflict(&info) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
 {
     if (networkId == NULL || p2pInfo == NULL) {
@@ -511,10 +484,6 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInf
     }
     if (g_pendingList == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pending not init.");
-        return SOFTBUS_ERR;
-    }
-    if (CheckP2pRoleConflict(networkId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p role conflict, not select p2p.");
         return SOFTBUS_ERR;
     }
     return OpenAuthConnToConnectP2p(networkId, pid, p2pInfo);
