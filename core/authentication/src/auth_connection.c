@@ -164,12 +164,12 @@ static void NotifyDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bo
 }
 
 /* AuthData */
-static uint32_t GetAuthDataSize(uint32_t len)
+uint32_t GetAuthDataSize(uint32_t len)
 {
     return AUTH_CONN_DATA_HEAD_SIZE + len;
 }
 
-static int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
+int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
     uint8_t *buf, uint32_t size)
 {
     if (size < GetAuthDataSize(head->len)) {
@@ -194,7 +194,7 @@ static int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
     return SOFTBUS_OK;
 }
 
-static const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head)
+const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head)
 {
     if (len < GetAuthDataSize(0)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthData: head not enough.");
@@ -346,7 +346,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
     NotifyDisconnected(GenConnId(connInfo.type, connectionId), &connInfo);
 }
 
-static int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
+int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
 {
     ConnectionInfo info = {0};
     int32_t ret = ConnGetConnectionInfo(connectionId, &info);

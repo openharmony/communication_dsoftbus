@@ -45,6 +45,7 @@
 #define DEVICE_NAME "DEVICE_NAME"
 #define DEVICE_TYPE "DEVICE_TYPE"
 #define DEVICE_UDID "DEVICE_UDID"
+#define DEVICE_UUID "DEVICE_UUID"
 #define NETWORK_ID "NETWORK_ID"
 #define NODE_ADDR "NODE_ADDR"
 #define VERSION_TYPE "VERSION_TYPE"
@@ -155,7 +156,7 @@ static int32_t UnpackDeviceIdMessage(const char *msg, AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion version)
+static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
         if (!AddStringToJsonObject(json, SW_VERSION, info->softBusVersion)) {
@@ -182,8 +183,15 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
     }
     if (!AddStringToJsonObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !AddStringToJsonObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
-        !AddStringToJsonObject(json, DEVICE_UDID, LnnGetDeviceUdid(info)) ||
-        !AddStringToJsonObject(json, NETWORK_ID, info->networkId) ||
+        !AddStringToJsonObject(json, DEVICE_UDID, LnnGetDeviceUdid(info))) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject fail.");
+        return SOFTBUS_ERR;
+    }
+    if (isMetaAuth && !AddStringToJsonObject(json, DEVICE_UUID, info->uuid)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject fail.");
+        return SOFTBUS_ERR;
+    }
+    if (!AddStringToJsonObject(json, NETWORK_ID, info->networkId) ||
         !AddStringToJsonObject(json, VERSION_TYPE, info->versionType) ||
         !AddNumberToJsonObject(json, CONN_CAP, info->netCapacity) ||
         !AddNumberToJsonObject(json, P2P_ROLE, LnnGetP2pRole(info)) ||
@@ -198,7 +206,7 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
     return SOFTBUS_OK;
 }
 
-static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion version)
+static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
         (void)GetJsonObjectStringItem(json, SW_VERSION, info->softBusVersion, VERSION_MAX_LEN);
@@ -220,6 +228,9 @@ static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
         (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));
     }
     (void)GetJsonObjectStringItem(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN);
+    if (isMetaAuth) {
+        (void)GetJsonObjectStringItem(json, DEVICE_UUID, info->uuid, UDID_BUF_LEN);
+    }
     (void)GetJsonObjectStringItem(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
     (void)GetJsonObjectStringItem(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
     (void)GetJsonObjectNumberItem(json, CONN_CAP, (int *)&info->netCapacity);
@@ -238,31 +249,31 @@ static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
     }
 }
 
-static int32_t PackBt(cJSON *json, const NodeInfo *info, SoftBusVersion version)
+static int32_t PackBt(cJSON *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_BT) ||
         !AddStringToJsonObject(json, BT_MAC, LnnGetBtMac(info))) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add bt info fail.");
         return SOFTBUS_ERR;
     }
-    if (PackCommon(json, info, version) != SOFTBUS_OK) {
+    if (PackCommon(json, info, version, isMetaAuth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PackCommon fail.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t UnpackBt(const cJSON *json, NodeInfo *info, SoftBusVersion version)
+static int32_t UnpackBt(const cJSON *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     (void)GetJsonObjectStringItem(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN);
     if (!GetJsonObjectNumber64Item(json, TRANSPORT_PROTOCOL, (int64_t *)&info->supportedProtocols)) {
         info->supportedProtocols = LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE;
     }
-    UnpackCommon(json, info, version);
+    UnpackCommon(json, info, version, isMetaAuth);
     return SOFTBUS_OK;
 }
 
-static int32_t PackWiFi(cJSON *json, const NodeInfo *info, SoftBusVersion version)
+static int32_t PackWiFi(cJSON *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (!AddNumberToJsonObject(json, CODE, CODE_VERIFY_IP) ||
         !AddNumberToJsonObject(json, BUS_MAX_VERSION, BUS_V2) ||
@@ -273,14 +284,14 @@ static int32_t PackWiFi(cJSON *json, const NodeInfo *info, SoftBusVersion versio
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add wifi info fail.");
         return SOFTBUS_ERR;
     }
-    if (PackCommon(json, info, version) != SOFTBUS_OK) {
+    if (PackCommon(json, info, version, isMetaAuth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PackCommon fail.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t UnpackWiFi(const cJSON *json, NodeInfo *info, SoftBusVersion version)
+static int32_t UnpackWiFi(const cJSON *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     (void)GetJsonObjectNumberItem(json, AUTH_PORT, &info->connectInfo.authPort);
     (void)GetJsonObjectNumberItem(json, SESSION_PORT, &info->connectInfo.sessionPort);
@@ -288,11 +299,11 @@ static int32_t UnpackWiFi(const cJSON *json, NodeInfo *info, SoftBusVersion vers
     if (!GetJsonObjectNumber64Item(json, TRANSPORT_PROTOCOL, (int64_t *)&info->supportedProtocols)) {
         info->supportedProtocols = LNN_PROTOCOL_IP;
     }
-    UnpackCommon(json, info, version);
+    UnpackCommon(json, info, version, isMetaAuth);
     return SOFTBUS_OK;
 }
 
-static char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version)
+char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "PackDeviceInfo: connType = %d.", linkType);
     const NodeInfo *info = LnnGetLocalNodeInfo();
@@ -307,9 +318,9 @@ static char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version)
     }
     int32_t ret;
     if (linkType == AUTH_LINK_TYPE_WIFI) {
-        ret = PackWiFi(json, info, version);
+        ret = PackWiFi(json, info, version, isMetaAuth);
     } else {
-        ret = PackBt(json, info, version);
+        ret = PackBt(json, info, version, isMetaAuth);
     }
     if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
@@ -324,8 +335,8 @@ static char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version)
     return msg;
 }
 
-static int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBusVersion version,
-    NodeInfo *nodeInfo)
+int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBusVersion version,
+    NodeInfo *nodeInfo, bool isMetaAuth)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "UnpackDeviceInfo: connType = %d.", linkType);
     cJSON *json = cJSON_Parse(msg);
@@ -335,9 +346,9 @@ static int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBu
     }
     int32_t ret;
     if (linkType == AUTH_LINK_TYPE_WIFI) {
-        ret = UnpackWiFi(json, nodeInfo, version);
+        ret = UnpackWiFi(json, nodeInfo, version, isMetaAuth);
     } else {
-        ret = UnpackBt(json, nodeInfo, version);
+        ret = UnpackBt(json, nodeInfo, version, isMetaAuth);
     }
     cJSON_Delete(json);
     return ret;
@@ -392,7 +403,7 @@ static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, Sess
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
-    char *msg = PackDeviceInfoMessage(info->connInfo.type, SOFTBUS_NEW_V1);
+    char *msg = PackDeviceInfoMessage(info->connInfo.type, SOFTBUS_NEW_V1, false);
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "pack device info fail.");
         return SOFTBUS_ERR;
@@ -438,7 +449,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         return SOFTBUS_DECRYPT_ERR;
     }
     if (UnpackDeviceInfoMessage((const char *)msg,
-        info->connInfo.type, info->version, &info->nodeInfo) != SOFTBUS_OK) {
+        info->connInfo.type, info->version, &info->nodeInfo, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unpack device info fail.");
         SoftBusFree(msg);
         return SOFTBUS_ERR;
