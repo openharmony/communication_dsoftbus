@@ -26,7 +26,7 @@
 #ifndef MIN_STACK_SIZE
 #define MIN_STACK_SIZE 0x8000
 #endif
-#define THREAD_POOL_NAME "SoftBusConnection"
+#define THREAD_POOL_NAME "SoftBusConnect"
 
 typedef void *(*Runnable)(void *argv);
 typedef struct ThreadAttr ThreadAttr;
