@@ -22,6 +22,8 @@ extern "C" {
 #endif
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len);
+int32_t LnnInitOhosAccount(void);
+void LnnOnOhosAccountChanged(void);
 bool LnnIsDefaultOhosAccount(void);
 
 #ifdef __cplusplus
