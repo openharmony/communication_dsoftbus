@@ -748,7 +748,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
     {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
-    {BYTE_KEY_USERID_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
+    {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -1021,13 +1021,10 @@ int32_t LnnInitLocalLedgerDelay(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_ERR;
     }
-
-    uint8_t accountHash[SHA_256_HASH_LEN] = {0};
-    if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local user id hash error!");
+    if (LnnInitOhosAccount() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init default ohos account failed");
         return SOFTBUS_ERR;
     }
-    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash, SHA_256_HASH_LEN);
     return SOFTBUS_OK;
 }
 

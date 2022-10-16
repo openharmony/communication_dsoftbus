@@ -28,7 +28,10 @@ static uint32_t g_dispatcherSize = 0;
 static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
-        if (g_dispatchers[i]->IsConcern(capability)) {
+        if (g_dispatchers[i] == NULL) {
+            continue;
+        }
+        if (g_dispatchers[i]->IsConcern != NULL && g_dispatchers[i]->IsConcern(capability)) {
             return g_dispatchers[i]->mediumInterface;
         }
     }
@@ -110,14 +113,20 @@ static int32_t BleDispatchStopPassiveDiscovery(const SubscribeOption *option)
 static void BleDispatchLinkStatusChanged(LinkStatus status)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
-        g_dispatchers[i]->mediumInterface->LinkStatusChanged(status);
+        if (g_dispatchers[i] != NULL && g_dispatchers[i]->mediumInterface != NULL &&
+            g_dispatchers[i]->mediumInterface->LinkStatusChanged != NULL) {
+            g_dispatchers[i]->mediumInterface->LinkStatusChanged(status);
+        }
     }
 }
 
 static void BleDispatchUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
-        g_dispatchers[i]->mediumInterface->UpdateLocalDeviceInfo(type);
+        if (g_dispatchers[i] != NULL && g_dispatchers[i]->mediumInterface != NULL &&
+            g_dispatchers[i]->mediumInterface->UpdateLocalDeviceInfo != NULL) {
+            g_dispatchers[i]->mediumInterface->UpdateLocalDeviceInfo(type);
+        }
     }
 }
 
