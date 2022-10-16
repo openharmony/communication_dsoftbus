@@ -39,7 +39,11 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
-
+    int ret = CheckPermissionState(sessionId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendBytes no permission, ret = %d", ret);
+        return ret;
+    }
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
@@ -68,6 +72,11 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
+    int ret = CheckPermissionState(sessionId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage no permission, ret = %d", ret);
+        return ret;
+    }
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
@@ -87,7 +96,11 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    int ret = CheckPermissionState(sessionId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendStream no permission, ret = %d", ret);
+        return ret;
+    }
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
@@ -110,7 +123,11 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         LOG_ERR("Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    int ret = CheckPermissionState(sessionId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendFile no permission, ret = %d", ret);
+        return ret;
+    }
     FileSchemaListener fileSchemaListener = {0};
     if (CheckFileSchema(sessionId, &fileSchemaListener) == SOFTBUS_OK) {
         if (SetSchemaCallback(fileSchemaListener.schema, sFileList, fileCnt) != SOFTBUS_OK) {
