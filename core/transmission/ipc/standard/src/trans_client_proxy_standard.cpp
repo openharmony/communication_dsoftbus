@@ -22,6 +22,31 @@
 #include "softbus_log.h"
 
 namespace OHOS {
+int32_t TransClientProxy::OnClientPermissonChangeInner(int32_t state, const char *pkgName)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInt32(state)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write PermStateChangeType failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write pkgName failed");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    if (remote->SendRequest(CLIENT_ON_PERMISSION_CHANGE, data, reply, option) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DataSyncPermissionChange send request failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     sptr<IRemoteObject> remote = Remote();

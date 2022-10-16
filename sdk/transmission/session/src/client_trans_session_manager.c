@@ -39,6 +39,54 @@ typedef struct {
     void (*OnSessionClosed)(int sessionId);
 } DestroySessionInfo;
 
+int32_t CheckPermissionState(int32_t sessionId)
+{
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+                return serverNode->permissionState ? SOFTBUS_OK : SOFTBUS_PERMISSION_DENIED;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_PERMISSION_DENIED;
+}
+
+void PermissionStateChange(const char *pkgName, int32_t state)
+{
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return;
+    }
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    ClientSessionServer *serverNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if ((strcmp(serverNode->pkgName, pkgName) == 0)) {
+            serverNode->permissionState = state > 0 ? true : false;
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s permission change, state = %d", pkgName, state);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+}
+
 int TransClientInit(void)
 {
     g_clientSessionServerList = CreateSoftBusList();
@@ -275,6 +323,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_MEM_ERR;
     }
+    server->permissionState = true;
     ListAdd(&g_clientSessionServerList->list, &server->node);
     g_clientSessionServerList->cnt++;
 

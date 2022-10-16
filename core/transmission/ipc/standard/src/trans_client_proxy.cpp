@@ -30,6 +30,20 @@ static sptr<TransClientProxy> GetClientProxy(const char *pkgName)
     return clientProxy;
 }
 
+int32_t InformPermissionChange(int32_t state, const char *pkgName)
+{
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
+        return SOFTBUS_ERR;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    if (clientProxy == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    return clientProxy->OnClientPermissonChangeInner(state, pkgName);
+}
+
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
