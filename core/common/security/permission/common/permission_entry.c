@@ -346,8 +346,8 @@ static int32_t CheckPermissionAppInfo(const SoftBusPermissionEntry *pe,
             continue;
         }
         if (!StrIsEmpty(appInfo->pkgName)) {
-            if ((CompareString(appInfo->pkgName, pItem->pkgName, false) != SOFTBUS_OK) &&
-                !StrIsEmpty(pItem->pkgName)) {
+            if (!StrIsEmpty(pItem->pkgName) &&
+                (CompareString(appInfo->pkgName, pItem->pkgName, false) != SOFTBUS_OK)) {
                 continue;
             }
             if (appInfo->type == SYSTEM_APP || appInfo->type == NORMAL_APP) {
