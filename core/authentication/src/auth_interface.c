@@ -133,7 +133,8 @@ void AuthCloseConn(int64_t authId)
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
         DelAuthManager(auth, false);
-        return AuthDeviceCloseConn(authId);
+        AuthDeviceCloseConn(authId);
+        return;
     }
     AuthMetaCloseConn(authId);
 }
