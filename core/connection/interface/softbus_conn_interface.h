@@ -43,6 +43,7 @@ typedef enum {
     MODULE_UDP_INFO = 17,
     MODULE_TIME_SYNC = 18,
     MODULE_PKG_VERIFY = 20,
+    MODULE_META_AUTH = 21,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101
 } ConnModule;
