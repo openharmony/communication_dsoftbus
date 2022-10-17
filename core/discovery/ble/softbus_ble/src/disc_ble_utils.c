@@ -172,7 +172,7 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     uint8_t account[SHA_256_HASH_LEN] = {0};
-    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, account, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, account, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscBleGetShortUserIdHash get local user id failed");
         return SOFTBUS_ERR;
     }

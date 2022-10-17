@@ -32,7 +32,7 @@
 #include "wifi_ap_msg.h"
 
 static const int32_t DELAY_LEN = 1000;
-static const int32_t RETRY_MAX = 10;
+static const int32_t RETRY_MAX = 20;
 
 namespace OHOS {
 namespace EventFwk {

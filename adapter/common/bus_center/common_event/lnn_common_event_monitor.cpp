@@ -23,6 +23,7 @@
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_ohos_account.h"
 #include "want.h"
 
 #include "softbus_adapter_mem.h"
@@ -30,54 +31,59 @@
 #include "softbus_log.h"
 
 static const int32_t DELAY_LEN = 1000;
-static const int32_t RETRY_MAX = 10;
+static const int32_t RETRY_MAX = 20;
 
 namespace OHOS {
 namespace EventFwk {
-class ScreenStateMonitor : public CommonEventSubscriber {
+class CommonEventMonitor : public CommonEventSubscriber {
 public:
-    explicit ScreenStateMonitor(const CommonEventSubscribeInfo &subscriberInfo);
-    virtual ~ScreenStateMonitor() {}
+    explicit CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo);
+    virtual ~CommonEventMonitor() {}
     virtual void OnReceiveEvent(const CommonEventData &data);
 };
 
-ScreenStateMonitor::ScreenStateMonitor(const CommonEventSubscribeInfo &subscriberInfo)
+CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo)
     :CommonEventSubscriber(subscriberInfo)
 {
 }
 
-void ScreenStateMonitor::OnReceiveEvent(const CommonEventData &data)
+void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    SoftBusScreenState state = SOFTBUS_SCREEN_UNKNOWN;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify ScreenState event %s", action.c_str());
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify common event %s", action.c_str());
 
-    if (action == CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
-        state = SOFTBUS_SCREEN_OFF;
-    } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
-        state = SOFTBUS_SCREEN_ON;
+    if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
+        LnnOnOhosAccountChanged();
     }
-    if (state != SOFTBUS_SCREEN_UNKNOWN) {
-        LnnNotifyScreenStateChangeEvent(state);
+
+    SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;
+    if (action == CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        screenState = SOFTBUS_SCREEN_OFF;
+    } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+        screenState = SOFTBUS_SCREEN_ON;
+    }
+    if (screenState != SOFTBUS_SCREEN_UNKNOWN) {
+        LnnNotifyScreenStateChangeEvent(screenState);
     }
 }
 
 class SubscribeEvent {
 public:
-    int32_t SubscribeScreenStateEvent();
+    int32_t SubscribeCommonEvent();
 private:
-    std::shared_ptr<ScreenStateMonitor> subscriber_ = nullptr;
+    std::shared_ptr<CommonEventMonitor> subscriber_ = nullptr;
 };
 
-int32_t SubscribeEvent::SubscribeScreenStateEvent()
+int32_t SubscribeEvent::SubscribeCommonEvent()
 {
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
-    subscriber_ = std::make_shared<ScreenStateMonitor>(subscriberInfo);
+    subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriber_)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SubscribeScreenStateEvent: subscribe ScreenState event err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SubscribeCommonEvent: subscribe common event err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -85,12 +91,12 @@ int32_t SubscribeEvent::SubscribeScreenStateEvent()
 } // namespace EventFwk
 } // namespace OHOS
 
-static void LnnSubscribeScreenState(void *para)
+static void LnnSubscribeCommonEvent(void *para)
 {
     (void)para;
     static int32_t retry = 0;
     if (retry > RETRY_MAX) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try subscribe ScreenState event max times");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try subscribe common event max times");
         return;
     }
     OHOS::EventFwk::SubscribeEvent *subscriberPtr = new OHOS::EventFwk::SubscribeEvent();
@@ -98,25 +104,25 @@ static void LnnSubscribeScreenState(void *para)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SubscribeEvent init fail");
         return;
     }
-    if (subscriberPtr->SubscribeScreenStateEvent() == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "subscribe ScreenState on or off state success");
+    if (subscriberPtr->SubscribeCommonEvent() == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "subscribe common event success");
     } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe ScreenState event fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe common event fail");
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeScreenState, NULL, DELAY_LEN) != SOFTBUS_OK) {
+        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeCommonEvent, NULL, DELAY_LEN) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async call subscribe screen state fail");
         }
     }
     delete subscriberPtr;
 }
 
-int32_t LnnInitScreenStateMonitorImpl(void)
+int32_t LnnInitCommonEventMonitorImpl(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeScreenState, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeCommonEvent, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init ScreenState LnnAsyncCallbackDelayHelper fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init common event monitor LnnAsyncCallbackDelayHelper fail");
     }
     return ret;
 }
