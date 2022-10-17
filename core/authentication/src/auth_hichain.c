@@ -312,7 +312,7 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
         }
         if (ret == HC_ERR_INVALID_PARAMS) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-                "hichain authDevice need to retry, current retry time = %d, err = %d", i+1, ret);
+                "hichain authDevice need to retry, current retry time = %d, err = %d", i + 1, ret);
             (void)SoftBusSleepMs(RETRY_MILLSECONDS);
         } else {
             break;
