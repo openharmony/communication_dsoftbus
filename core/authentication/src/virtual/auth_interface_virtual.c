@@ -206,6 +206,13 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
+{
+    (void)authId;
+    (void)isMetaAuth;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t AuthInit(void)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);

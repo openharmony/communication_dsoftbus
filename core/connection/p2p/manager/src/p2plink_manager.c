@@ -252,9 +252,6 @@ static void OpenP2pAuthFail(uint32_t requestId, int32_t reason)
 
 static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
 {
-    ConnectedNode *connedItem = NULL;
-    AuthConnCallback authCb = {0};
-
     if (arg == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "arg is invalid");
         return;
@@ -263,7 +260,7 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
     AuthConnInfo *authInfo = (AuthConnInfo *)arg;
     char *peerMac = (char *)(authInfo + 1);
 
-    connedItem = P2pLinkGetConnedDevByMac(peerMac);
+    ConnectedNode *connedItem = P2pLinkGetConnedDevByMac(peerMac);
     if (connedItem == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p auth can not find");
         SoftBusFree(arg);
@@ -276,8 +273,6 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
         return;
     }
 
-    authCb.onConnOpened = OpenP2pAuthSuccess;
-    authCb.onConnOpenFailed = OpenP2pAuthFail;
     if (P2pLinkGetGcPort() <= 0) {
         int32_t gcPort = AuthStartListening(AUTH_LINK_TYPE_P2P, P2pLinkGetMyIp(), 0);
         if (gcPort <= 0) {
@@ -289,9 +284,17 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
         P2pLinkSetGcPort(gcPort);
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open auth chan, port=%d", P2pLinkGetGcPort());
+    AuthConnCallback authCb = {
+        .onConnOpened = OpenP2pAuthSuccess,
+        .onConnOpenFailed = OpenP2pAuthFail
+    };
+    bool isMetaAuth = false;
+    authInfo->info.ipInfo.authId = connedItem->chanId.inAuthId;
+    (void)AuthGetMetaType(authInfo->info.ipInfo.authId, &isMetaAuth);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "open auth chan, inAuthId=%"PRId64", isMetaAuth=%d", connedItem->chanId.inAuthId, isMetaAuth);
     connedItem->chanId.authRequestId = AuthGenRequestId();
-    if (AuthOpenConn(authInfo, connedItem->chanId.authRequestId, &authCb, false) != SOFTBUS_OK) {
+    if (AuthOpenConn(authInfo, connedItem->chanId.authRequestId, &authCb, isMetaAuth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open auth chan fail");
     }
     SoftBusFree(arg);
