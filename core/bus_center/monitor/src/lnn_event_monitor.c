@@ -45,7 +45,7 @@ static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
     LnnInitWifiServiceMonitorImpl,
     LnnInitBtStateMonitorImpl,
     LnnInitDriverMonitorImpl,
-    LnnInitScreenStateMonitorImpl,
+    LnnInitCommonEventMonitorImpl,
     LnnInitDeviceNameMonitorImpl,
 };
 

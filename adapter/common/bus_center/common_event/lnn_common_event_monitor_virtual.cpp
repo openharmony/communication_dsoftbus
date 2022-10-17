@@ -17,7 +17,7 @@
 
 #include "softbus_errcode.h"
 
-int32_t LnnInitScreenStateMonitorImpl(void)
+int32_t LnnInitCommonEventMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
