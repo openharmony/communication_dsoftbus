@@ -177,8 +177,8 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
         return -1;
     }
 
-    int fd = -1;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
+    int32_t fd = -1;
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d", __func__, __LINE__, fd);
         return -1;
@@ -271,6 +271,7 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
     return 0;
 }
 
+#ifdef TCP_USER_TIMEOUT
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     if (fd < 0) {
@@ -283,8 +284,16 @@ int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
     }
     return 0;
 }
+#else
+int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
+{
+    (void)fd;
+    (void)millSec;
+    return 0;
+}
 
-static int32_t AcceptTcpClient(int fd, ConnectOption *clientAddr, int *cfd)
+#endif
+static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
 {
     SoftBusSockAddrIn addr;
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
