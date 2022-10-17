@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -569,6 +569,8 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *da
 /**
  * @brief Removes the current device from the LNN.
  *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
  * @param networkId Indicates the pointer to the network ID that is returned
  * after the device is added to the LNN via {@link JoinLNN}.
  * @param cb Indicates the callback for the result. If you set this parameter to <b>NULL</b>,
@@ -757,7 +759,7 @@ int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
  * The service is identified by <b>subscribeId</b> and <b>pkgName</b>.
  *
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
- * @param info Indicates the pointer to the service subscription information. For details, see {@link RefreshInfo}.
+ * @param info Indicates the pointer to the service subscription information. For details, see {@link SubscribeInfo}.
  * @param cb Indicates the service subscription callback {@link IRefreshCallback}.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
@@ -827,7 +829,7 @@ int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *in
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
  * For the same caller, the value of this parameter must be the same for all functions.
- * @param callerId The id of the caller, whitch cannot be <b>NULL</b>, and maxium length is {@CALLER_ID_MAX_LEN}.
+ * @param callerId The id of the caller, whitch cannot be <b>NULL</b>, and maxium length is {@link CALLER_ID_MAX_LEN}.
  * @param targetNetworkId The networkId of the target device to refresh online state, and could be <b>NULL</b>.
  * @param mode The duration or cycle parameter of heartbeat. For details, see {@link GearMode}.
  *
