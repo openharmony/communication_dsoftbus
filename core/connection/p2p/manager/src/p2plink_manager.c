@@ -289,8 +289,8 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
         .onConnOpenFailed = OpenP2pAuthFail
     };
     bool isMetaAuth = false;
-    auth->info.IpInfo.authId = connedItem->chanId.inAuthId;
-    (void)AuthGetMetaType(auth->info.IpInfo.authId, &isMetaAuth);
+    authInfo->info.IpInfo.authId = connedItem->chanId.inAuthId;
+    (void)AuthGetMetaType(authInfo->info.IpInfo.authId, &isMetaAuth);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "open auth chan, inAuthId=%"PRId64", isMetaAuth=%d", connedItem->chanId.inAuthId, isMetaAuth);
     connedItem->chanId.authRequestId = AuthGenRequestId();
