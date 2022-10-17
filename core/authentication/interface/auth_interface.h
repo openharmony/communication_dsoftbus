@@ -60,6 +60,7 @@ typedef struct {
         struct {
             char ip[IP_LEN];
             int32_t port;
+            int64_t authId; /* for open p2p auth conn */
         } ipInfo;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
@@ -143,6 +144,7 @@ int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo);
 int32_t AuthGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version);
+int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth);
 
 int32_t AuthInit(void);
 void AuthDeinit(void);
