@@ -197,7 +197,7 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     return SOFTBUS_OK;
 }
 
-int32_t TransOpenChannel(const SessionParam *c, TransInfo *transInfo)
+int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
     transInfo->channelId = INVALID_CHANNEL_ID;
