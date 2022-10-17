@@ -36,7 +36,7 @@ int32_t LnnInitWifiServiceMonitorImpl(void);
 
 int32_t LnnInitDriverMonitorImpl(void);
 
-int32_t LnnInitScreenStateMonitorImpl(void);
+int32_t LnnInitCommonEventMonitorImpl(void);
 
 int32_t LnnInitBtStateMonitorImpl(void);
 

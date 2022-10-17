@@ -57,7 +57,7 @@ typedef enum {
     NUM_KEY_DATA_CHANGE_FLAG,
     NUM_KEY_END,
     BYTE_KEY_BEGIN,
-    BYTE_KEY_USERID_HASH,
+    BYTE_KEY_ACCOUNT_HASH,
     BYTE_KEY_END,
 } InfoKey;
 
