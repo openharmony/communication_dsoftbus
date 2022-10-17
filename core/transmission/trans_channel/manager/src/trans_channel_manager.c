@@ -216,7 +216,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
         goto EXIT_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "sessionName[%s], get laneId[%u], link type[%u].", param->sessionName, laneId, connInfo.type);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "sessionName[%s], get laneId[%u], link type[%u].", param->sessionName, laneId, connInfo.type);
 
     if (TransGetConnectOptByConnInfo(&connInfo, &connOpt) != SOFTBUS_OK) {
         goto EXIT_ERR;
