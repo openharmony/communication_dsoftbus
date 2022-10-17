@@ -239,7 +239,15 @@ static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *b
     return SOFTBUS_OK;
 }
 
-static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum)
+static bool isMetaNode(NodeInfo *info)
+{
+    if (info == NULL) {
+        return false;
+    }
+    return info->metaInfo.isMetaNode;
+}
+
+static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum, bool isNeedMeta)
 {
     NodeInfo *info = NULL;
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
@@ -255,15 +263,21 @@ static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum)
             return SOFTBUS_ERR;
         }
         info = (NodeInfo *)it->node->value;
-        if (LnnIsNodeOnline(info)) {
-            (*infoNum)++;
+        if (!isNeedMeta) {
+            if (LnnIsNodeOnline(info)) {
+                (*infoNum)++;
+            }
+        } else {
+            if (LnnIsNodeOnline(info) || isMetaNode(info)) {
+                (*infoNum)++;
+            }
         }
     }
     LnnMapDeinitIterator(it);
     return SOFTBUS_OK;
 }
 
-static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum)
+static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum, bool isNeedMeta)
 {
     NodeInfo *nodeInfo = NULL;
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
@@ -281,9 +295,16 @@ static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum)
             return SOFTBUS_ERR;
         }
         nodeInfo = (NodeInfo *)it->node->value;
-        if (LnnIsNodeOnline(nodeInfo)) {
-            ConvertNodeInfoToBasicInfo(nodeInfo, info + i);
-            ++i;
+        if (!isNeedMeta) {
+            if (LnnIsNodeOnline(nodeInfo)) {
+                ConvertNodeInfoToBasicInfo(nodeInfo, info + i);
+                ++i;
+            }
+        } else {
+            if (LnnIsNodeOnline(nodeInfo) || isMetaNode(nodeInfo)) {
+                ConvertNodeInfoToBasicInfo(nodeInfo, info + i);
+                ++i;
+            }
         }
     }
     LnnMapDeinitIterator(it);
@@ -392,6 +413,9 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
         return state;
     }
     state = (nodeInfo->status == STATUS_ONLINE) ? true : false;
+    if (!state) {
+        state = nodeInfo->metaInfo.isMetaNode;
+    }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return state;
 }
@@ -399,6 +423,7 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DlGetDeviceUuid networkId =%S", networkId);
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (strncpy_s(buf, len, info->uuid, strlen(info->uuid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
@@ -616,7 +641,7 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
     const char *mac = NULL;
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (!LnnIsNodeOnline(info)) {
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
@@ -654,7 +679,7 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
     const char *mac = NULL;
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (!LnnIsNodeOnline(info)) {
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
@@ -678,7 +703,7 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (!LnnIsNodeOnline(info)) {
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
         return SOFTBUS_ERR;
     }
@@ -886,6 +911,7 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     }
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
     LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnAddMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -914,6 +940,8 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
         info->metaInfo.isMetaNode = false;
     }
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
+    LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnDeleteMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -921,6 +949,9 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
+    if (info == NULL) {
+        return REPORT_NONE;
+    }
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
@@ -945,6 +976,9 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         return REPORT_NONE;
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (oldInfo != NULL) {
+        info->metaInfo = oldInfo->metaInfo;
+    }
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "addOnlineNode find online node");
         UpdateAuthSeq(oldInfo, info);
@@ -1293,7 +1327,7 @@ int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum, bool isNeedMeta)
 {
     int ret = SOFTBUS_ERR;
 
@@ -1307,7 +1341,7 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     }
     do {
         *info = NULL;
-        if (GetDLOnlineNodeNumLocked(infoNum) != SOFTBUS_OK) {
+        if (GetDLOnlineNodeNumLocked(infoNum, isNeedMeta) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get online node num failed");
             break;
         }
@@ -1320,7 +1354,7 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc node info buffer failed");
             break;
         }
-        if (FillDLOnlineNodeInfoLocked(*info, *infoNum) != SOFTBUS_OK) {
+        if (FillDLOnlineNodeInfoLocked(*info, *infoNum, isNeedMeta) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill online node num failed");
             break;
         }
@@ -1334,6 +1368,16 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unlock mutex fail!");
     }
     return ret;
+}
+
+int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    return GetAllOnlineAndMetaNodeInfo(info, infoNum, false);
+}
+
+int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    return GetAllOnlineAndMetaNodeInfo(info, infoNum, true);
 }
 
 int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
@@ -1359,7 +1403,7 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
             return SOFTBUS_ERR;
         }
         NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
-        if (LnnIsNodeOnline(nodeInfo) &&
+        if ((LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) &&
             StrCmpIgnoreCase(nodeInfo->connectInfo.macAddr, btMac) == 0) {
             if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s networkId fail!");
