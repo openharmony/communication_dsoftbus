@@ -320,21 +320,33 @@ static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
     SetConnectDeviceResult(requestId, false, NULL, NULL);
 }
 
-static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connInfo)
+static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connInfo, bool isMetaAuth)
 {
     char uuid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get peer uuid fail.");
         return SOFTBUS_ERR;
     }
-    return AuthGetPreferConnInfo(uuid, connInfo, false);
+    return AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
+}
+
+static bool GetChannelAuthType(const char *peerNetWorkId)
+{
+    int32_t value = 0;
+    int32_t ret = LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_NODE, &value);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetChannelAuthType fail ,ret=%d", ret);
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetChannelAuthType success ,value=%d", value);
+    return ((1 << ONLINE_METANODE) == value) ? true : false;
 }
 
 static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
 {
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    if (GetPreferAuthConnInfo(networkId, &connInfo) != SOFTBUS_OK) {
+    bool isMetaAuth = GetChannelAuthType(networkId);
+    if (GetPreferAuthConnInfo(networkId, &connInfo, isMetaAuth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no auth conn exist.");
         return SOFTBUS_ERR;
     }
@@ -347,7 +359,7 @@ static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnL
         .onConnOpened = OnConnOpened,
         .onConnOpenFailed = OnConnOpenFailed
     };
-    if (AuthOpenConn(&connInfo, requestId, &cb, false) != SOFTBUS_OK) {
+    if (AuthOpenConn(&connInfo, requestId, &cb, isMetaAuth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open auth conn fail.");
         DelConnRequestItem(requestId);
         return SOFTBUS_ERR;
@@ -429,7 +441,8 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
     }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    if (GetPreferAuthConnInfo(networkId, &connInfo) != SOFTBUS_OK) {
+    bool isMetaAuth = GetChannelAuthType(networkId);
+    if (GetPreferAuthConnInfo(networkId, &connInfo, isMetaAuth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no auth conn exist.");
         return SOFTBUS_ERR;
     }
@@ -442,7 +455,7 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
         .onConnOpened = OnConnOpenedForDisconnect,
         .onConnOpenFailed = OnConnOpenFailedForDisconnect
     };
-    if (AuthOpenConn(&connInfo, requestId, &cb, false) != SOFTBUS_OK) {
+    if (AuthOpenConn(&connInfo, requestId, &cb, isMetaAuth) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open auth conn fail.");
         DelConnRequestItem(requestId);
         return SOFTBUS_ERR;
