@@ -236,6 +236,23 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer)
     }
     return AuthMetaGetServerSide(authId, isServer);
 }
+
+int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
+{
+    if (isMetaAuth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (auth != NULL) {
+        DelAuthManager(auth, false);
+        *isMetaAuth = false;
+        return SOFTBUS_OK;
+    }
+    *isMetaAuth = true;
+    return SOFTBUS_OK;
+}
+
 int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {
