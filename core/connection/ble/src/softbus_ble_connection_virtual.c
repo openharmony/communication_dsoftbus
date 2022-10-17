@@ -15,8 +15,15 @@
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 
+#define BLE_DISABLE 0
+
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
     (void)callback;
     return NULL;
+}
+
+int SoftBusGetBtState(void)
+{
+    return BLE_DISABLE;
 }
