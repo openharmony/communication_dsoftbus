@@ -94,6 +94,9 @@ static int32_t StartVerifySession(SessionConn *conn)
         .flags = (FLAG_REQUEST | cipherFlag),
         .dataLen = strlen(bytes), /* reset after encrypt */
     };
+    if (conn->isMeta) {
+        packetHead.flags |= FLAG_AUTH_META;
+    }
     if (TransTdcPostBytes(conn->channelId, &packetHead, bytes) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdc post bytes failed");
         cJSON_free(bytes);
