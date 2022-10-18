@@ -27,6 +27,7 @@
 #include "lnn_ohos_account.h"
 
 #include "softbus_adapter_ble_gatt.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -198,6 +199,13 @@ static bool HbHasTrustedDeviceRelation(void)
 int32_t LnnStartHeartbeatFrameDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) FSM start.");
+    if (SoftBusGetBtState() == BLE_ENABLE && !LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BT has been turned on");
+        if (LnnEnableHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1, true) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl enable ble heartbeat fail");
+            return SOFTBUS_ERR;
+        }
+    }
     if (LnnHbMediumMgrInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium manager init fail");
         return SOFTBUS_ERR;
