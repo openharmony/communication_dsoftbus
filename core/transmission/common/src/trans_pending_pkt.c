@@ -107,7 +107,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
         return SOFTBUS_ERR;
     }
 
-    PendingPktInfo *item;
+    PendingPktInfo *item = NULL;
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pending[%d] list not inited.", type);
