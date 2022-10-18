@@ -73,7 +73,7 @@ static int32_t AddConnTimeNode(const ConnectionInfo *info, ConnTimeNode *timeNod
     return SOFTBUS_OK;
 }
 
-static uint32_t CompareConnectInfo(const ConnectionInfo *src, const ConnectionInfo *dst)
+static int32_t CompareConnectInfo(const ConnectionInfo *src, const ConnectionInfo *dst)
 {
     if (src->type != dst->type) {
         return SOFTBUS_ERR;
@@ -108,6 +108,7 @@ static ConnTimeNode *GetConnTimeNode(const ConnectionInfo *info)
     LIST_FOR_EACH_ENTRY(listNode, &g_connTimeList->list, ConnTimeNode, node) {
         if (listNode != NULL) {
             if (CompareConnectInfo(&listNode->info, info) == SOFTBUS_OK) {
+                (void)SoftBusMutexUnlock(&g_listenerList->lock);
                 return listNode;
             }
         }
@@ -342,6 +343,10 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
 
 static void ReportConnectTime(const ConnectionInfo *info)
 {
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReportConnectTime:info is null");
+        return;
+    }
     uint32_t tmpTime = 0;
     SoftBusSysTime time = {0};
     ConnTimeNode *timeNode = GetConnTimeNode(info);
@@ -367,17 +372,21 @@ static void RecordStartTime(const ConnectOption *info)
         case CONNECT_BR:
             if (memcpy_s(&conInfo.brInfo.brMac, BT_MAC_LEN, info->brOption.brMac, BT_MAC_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BrOption memcpy fail");
+                return;
             }
             break;
         case CONNECT_BLE:
             if (memcpy_s(&conInfo.bleInfo.bleMac, BT_MAC_LEN, info->bleOption.bleMac, BT_MAC_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BleOption memcpy fail");
+                return;
             }
+            
             break;
         default:
             if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr,
                 MAX_SOCKET_ADDR_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BleOption memcpy fail");
+                return;
             }
             break;
     }
@@ -386,8 +395,7 @@ static void RecordStartTime(const ConnectOption *info)
         timeNode = (ConnTimeNode *)SoftBusCalloc(sizeof(ConnTimeNode));
         if (timeNode == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc node fail");
-        }
-        if (AddConnTimeNode(&conInfo, timeNode) != SOFTBUS_OK) {
+        } else if (AddConnTimeNode(&conInfo, timeNode) != SOFTBUS_OK) {
             SoftBusFree(timeNode);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddConnTimeNode fail");
         }
