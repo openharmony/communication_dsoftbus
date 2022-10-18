@@ -27,6 +27,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "trans_lane_pending_ctl.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 
@@ -572,12 +573,12 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     return;
 }
 
-static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId)
+static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta)
 {
     AuthConnInfo auth = {0};
     AuthConnCallback cb = {0};
 
-    int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, false);
+    int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOpenAuthConn get info fail: ret=%d", ret);
         return ret;
@@ -585,7 +586,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId)
 
     cb.onConnOpened = UdpOnAuthConnOpened;
     cb.onConnOpenFailed = UdpOnAuthConnOpenFailed;
-    ret = AuthOpenConn(&auth, requestId, &cb, false);
+    ret = AuthOpenConn(&auth, requestId, &cb, isMeta);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOpenAuthConn open fail: ret=%d", ret);
         return ret;
@@ -613,9 +614,10 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     }
     channelObj->requestId = requestId;
     channelObj->status = UDP_CHANNEL_STATUS_OPEN_AUTH;
+    channelObj->isMeta = TransGetAuthTypeByNetWorkId(channel->info.peerNetWorkId);
     ReleaseUdpChannelLock();
 
-    if (UdpOpenAuthConn(channel->info.peerData.deviceId, requestId) != SOFTBUS_OK) {
+    if (UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open auth conn fail");
         return SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED;
     }

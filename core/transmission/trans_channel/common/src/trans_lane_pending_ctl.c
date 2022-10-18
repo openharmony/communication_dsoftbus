@@ -17,6 +17,9 @@
 
 #include <securec.h>
 #include <unistd.h>
+#include "auth_interface.h"
+#include "bus_center_info_key.h"
+#include "bus_center_manager.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -543,4 +546,15 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get conn opt err: type=%d", info->type);
     return SOFTBUS_ERR;
+}
+
+bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
+{
+    int32_t value = 0;
+    int32_t ret = LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_NODE, &value);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthType fail, ret=%d", ret);
+        return false;
+    }
+    return ((1 << ONLINE_METANODE) == (uint32_t)value) ? true : false;
 }
