@@ -34,16 +34,113 @@
 #include "softbus_utils.h"
 #include "softbus_hisysevt_connreporter.h"
 
-#define SOFTBUS_CONNECT_TIME  1343463
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = {0};
 static SoftBusList *g_listenerList = NULL;
 static bool g_isInited = false;
+static SoftBusList *g_connTimeList = NULL;
+#define SEC_TIME 1000LL
 
 typedef struct TagConnListenerNode {
     ListNode node;
     ConnModule moduleId;
     ConnectCallback callback;
 } ConnListenerNode;
+
+typedef struct TagConnTimeNode {
+    ListNode node;
+    ConnectionInfo info;
+    uint32_t startTime;
+} ConnTimeNode;
+
+static int32_t AddConnTimeNode(const ConnectionInfo *info, ConnTimeNode *timeNode)
+{
+    if (g_connTimeList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_connTimeList is null");
+        return SOFTBUS_ERR;
+    }
+    SoftBusSysTime now = {0};
+    SoftBusGetTime(&now);
+    timeNode->startTime = (uint32_t)now.sec * SEC_TIME + (uint32_t)now.usec / SEC_TIME;
+    if (memcpy_s(&(timeNode->info), sizeof(ConnectionInfo), info, sizeof(ConnectionInfo)) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexLock(&g_connTimeList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
+    ListAdd(&(g_connTimeList->list), &(timeNode->node));
+    (void)SoftBusMutexUnlock(&g_connTimeList->lock);
+    return SOFTBUS_OK;
+}
+
+static uint32_t CompareConnectInfo(const ConnectionInfo *src, const ConnectionInfo *dst)
+{
+    if (src->type != dst->type) {
+        return SOFTBUS_ERR;
+    }
+    switch (src->type) {
+        case CONNECT_BLE:
+            if (memcmp(src->bleInfo.bleMac, dst->bleInfo.bleMac, BT_MAC_LEN) != EOK) {
+                return SOFTBUS_ERR;
+            }
+            break;
+        case CONNECT_BR:
+            if (memcmp(src->brInfo.brMac, dst->brInfo.brMac, BT_MAC_LEN) != EOK) {
+                return SOFTBUS_ERR;
+            }
+            break;
+        default:
+            if (memcmp(src->socketInfo.addr, dst->socketInfo.addr, sizeof(src->socketInfo.addr)) != EOK) {
+                return SOFTBUS_ERR;
+            }
+            break;
+    }
+    return SOFTBUS_OK;
+}
+
+static ConnTimeNode *GetConnTimeNode(const ConnectionInfo *info)
+{
+    ConnTimeNode *listNode = NULL;
+    if (SoftBusMutexLock(&g_connTimeList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return NULL;
+    }
+    LIST_FOR_EACH_ENTRY(listNode, &g_connTimeList->list, ConnTimeNode, node) {
+        if (listNode != NULL) {
+            if (CompareConnectInfo(&listNode->info, info) == SOFTBUS_OK) {
+                return listNode;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_listenerList->lock);
+    return NULL;
+}
+
+static void FreeConnTimeNode(ConnTimeNode *timeNode)
+{
+    ConnTimeNode *removeNode = NULL;
+    if (g_connTimeList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "connTimeList is null");
+        return;
+    }
+
+    if (SoftBusMutexLock(&g_connTimeList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return;
+    }
+
+    LIST_FOR_EACH_ENTRY(removeNode, &g_connTimeList->list, ConnTimeNode, node) {
+        if (removeNode->info.type == timeNode->info.type) {
+            if (CompareConnectInfo(&removeNode->info, &timeNode->info) == SOFTBUS_OK) {
+                ListDelete(&(removeNode->node));
+                break;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_connTimeList->lock);
+    SoftBusFree(removeNode);
+    return;
+}
 
 static int32_t ModuleCheck(ConnModule moduleId)
 {
@@ -243,6 +340,71 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
     return;
 }
 
+static void ReportConnectTime(const ConnectionInfo *info)
+{
+    uint32_t tmpTime = 0;
+    SoftBusSysTime time = {0};
+    ConnTimeNode *timeNode = GetConnTimeNode(info);
+    if (timeNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReportConnectTime:get timeNode fail");
+    } else {
+        SoftBusGetTime(&time);
+        tmpTime = (uint32_t)time.sec * SEC_TIME + (uint32_t)time.usec / SEC_TIME;
+        tmpTime -= timeNode->startTime;
+        int ret = SoftbusRecordConnInfo(info->type, SOFTBUS_EVT_CONN_SUCC, tmpTime);
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReportConnectTime:report conn time failed");
+        }
+        FreeConnTimeNode(timeNode);
+    }
+}
+
+static void RecordStartTime(const ConnectOption *info)
+{
+    ConnectionInfo conInfo;
+    conInfo.type = info->type;
+    switch (info->type) {
+        case CONNECT_BR:
+            if (memcpy_s(&conInfo.brInfo.brMac, BT_MAC_LEN, info->brOption.brMac, BT_MAC_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BrOption memcpy fail");
+            }
+            break;
+        case CONNECT_BLE:
+            if (memcpy_s(&conInfo.bleInfo.bleMac, BT_MAC_LEN, info->bleOption.bleMac, BT_MAC_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BleOption memcpy fail");
+            }
+            break;
+        default:
+            if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr,
+                MAX_SOCKET_ADDR_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BleOption memcpy fail");
+            }
+            break;
+    }
+    ConnTimeNode *timeNode = GetConnTimeNode(&conInfo);
+    if (timeNode == NULL) {
+        timeNode = (ConnTimeNode *)SoftBusCalloc(sizeof(ConnTimeNode));
+        if (timeNode == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc node fail");
+        }
+        if (AddConnTimeNode(&conInfo, timeNode) != SOFTBUS_OK) {
+            SoftBusFree(timeNode);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddConnTimeNode fail");
+        }
+    }
+}
+static int32_t InitTimeNodeList()
+{
+    if (g_connTimeList == NULL) {
+        g_connTimeList = CreateSoftBusList();
+        if (g_connTimeList == NULL) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create list fail \r\n");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     ConnListenerNode *node = NULL;
@@ -253,12 +415,13 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get node fail connId %u", connectionId);
         return;
     }
+
     for (int32_t i = 0; i < num; i++) {
         listener = node + i;
         listener->callback.OnConnected(connectionId, info);
     }
     SoftBusFree(node);
-    SoftbusRecordConnInfo(info->type, SOFTBUS_EVT_CONN_SUCC, SOFTBUS_CONNECT_TIME);
+    ReportConnectTime(info);
     return;
 }
 
@@ -323,6 +486,7 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
         SoftBusReportConnFaultEvt(info->type, SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT);
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
+    RecordStartTime(info);
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
 
@@ -494,7 +658,8 @@ int32_t ConnServerInit(void)
             return SOFTBUS_ERR;
         }
     }
-
+    InitTimeNodeList();
+        
     g_isInited = true;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connect manager init success. \r\n");
     return SOFTBUS_OK;
