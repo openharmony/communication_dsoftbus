@@ -31,6 +31,7 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
 int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType, const void *data,
     uint32_t len, int32_t type);
 int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param);
+int32_t InformPermissionChange(int32_t state, const char *pkgName);
 
 #ifdef __cplusplus
 }
