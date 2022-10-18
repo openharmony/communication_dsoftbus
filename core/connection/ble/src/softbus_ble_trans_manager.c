@@ -19,6 +19,7 @@
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_ble_gatt_client.h"
 #include "softbus_ble_gatt_server.h"
 #include "softbus_def.h"
@@ -157,6 +158,7 @@ static int32_t BleHalSend(const BleConnectionInfo *connInfo, const char *data, i
 
 int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len, int32_t seq, int32_t module)
 {
+#define BLE_SEND_PACKET_DELAY_LEN 10 // ms
     uint32_t tempLen = len;
     char *sendData = (char *)data;
     uint32_t dataLenMax = (uint32_t)(connInfo->mtu - MTU_HEADER_SIZE - sizeof(BleTransHeader));
@@ -193,6 +195,10 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len
         SoftBusFree(buff);
         sendData += sendLength;
         tempLen -= sendLength;
+        if (tempLen > 0) {
+            // Temporarily add delay to avoid packet loss
+            SoftBusSleepMs(BLE_SEND_PACKET_DELAY_LEN);
+        }
         offset += sendLength;
     }
     return SOFTBUS_OK;
