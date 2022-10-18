@@ -423,7 +423,6 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DlGetDeviceUuid networkId =%s", networkId);
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if (strncpy_s(buf, len, info->uuid, strlen(info->uuid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
