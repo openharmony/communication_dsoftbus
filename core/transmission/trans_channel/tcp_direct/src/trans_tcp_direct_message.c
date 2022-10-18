@@ -549,7 +549,8 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth linktype %d flag 0x%x", linkType, cipherFlag);
-    return AuthGetIdByP2pMac(p2pMac, linkType, !fromAuthServer, false);
+    bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
+    return AuthGetIdByP2pMac(p2pMac, linkType, !fromAuthServer, isAuthMeta);
 }
 
 static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, const uint8_t *pktData,

@@ -48,6 +48,7 @@ typedef struct {
     int64_t req;
     uint32_t requestId;
     int64_t authId;
+    bool isMeta;
     ListenerModule listenMod;
 } SessionConn;
 
