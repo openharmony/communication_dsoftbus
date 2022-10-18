@@ -211,27 +211,21 @@ static void ThreadPoolWorker(void *arg)
             SoftBusCondBroadcast(&(pool->queueNotFull));
         }
         SoftBusMutexUnlock(&(pool->mutex));
-        
-        // just only 'runnable' will be modified by other thread,
-        // and it's safe for reading other variables of job without protection
-        bool runnable = job->runnable;
-        SoftBusMutexUnlock(&(job->mutex));
-        if (runnable) {
-            (void)(*(job->callbackFunction))(job->arg);
-        }
 
-        if (SoftBusMutexLock(&(job->mutex)) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed after job execution", __func__);
-            continue;
-        }
+        // copy job task relative variables to run it after leave job mutex
+        bool runnable = job->runnable;
+        JobTask task = job->callbackFunction;
+        void *arg = job->arg;
         if (job->jobMode == ONCE || job->runnable == false) {
             SoftBusMutexUnlock(&(job->mutex));
             SoftBusMutexDestroy(&(job->mutex));
             SoftBusFree(job);
             job = NULL;
-        }
-        if (job != NULL) {
+        } else {
             SoftBusMutexUnlock(&(job->mutex));
+        }
+        if (runnable) {
+            (void)(task(arg));
         }
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Exit");

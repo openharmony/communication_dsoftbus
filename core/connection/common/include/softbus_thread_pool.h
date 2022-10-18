@@ -30,6 +30,7 @@ typedef enum {
     PERSISTENT = 1,
 } JobMode;
 
+typedef int32_t (*JobTask)(void *arg);
 struct Job {
     int32_t (*callbackFunction)(void *arg);
     void *arg;
