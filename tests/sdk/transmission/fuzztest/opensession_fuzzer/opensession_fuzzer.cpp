@@ -30,7 +30,7 @@ void OpenSessionTest(const uint8_t* data, size_t size)
     }
     char *mySessionName = nullptr;
     char *workId = nullptr;
-    SessionAttribute attr = memset(&attr, 0, sizeof(SessionAttribute));
+    SessionAttribute attr = {0};
     char *groupId = nullptr;
     char tmp[SESSION_NAME_SIZE_MAX + 1] = {0};
     if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
