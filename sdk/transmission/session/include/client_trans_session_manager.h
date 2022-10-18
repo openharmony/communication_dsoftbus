@@ -61,6 +61,7 @@ typedef struct {
         ISessionListener session;
     } listener;
     ListNode sessionList;
+    bool permissionState;
 } ClientSessionServer;
 
 typedef enum {
@@ -125,6 +126,10 @@ void ClientTransRegLnnOffline(void);
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 
 void ClientCleanAllSessionWhenServerDeath(void);
+
+int32_t CheckPermissionState(int32_t sessionId);
+
+void PermissionStateChange(const char *pkgName, int32_t state);
 
 #ifdef __cplusplus
 }
