@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 static int g_publishId = 0;
 static const char *g_pkgName = "com.softbus.test";
-static const char *g_pkgName_1 = "com.softbus.test1";
+static const char *g_pkgName1 = "com.softbus.test1";
 static const char *g_erroPkgName1 = "ErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroEErroE";
 
 const int32_t ERRO_CAPDATA_LEN = 514;
@@ -174,9 +174,9 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level0)
     EXPECT_TRUE(ret == 0);
 
     g_newpInfo1.publishId = GetPublishId();
-    ret = PublishLNN(g_pkgName_1, &g_newpInfo1, &g_publishCb);
+    ret = PublishLNN(g_pkgName1, &g_newpInfo1, &g_publishCb);
     EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName_1, g_newpInfo1.publishId);
+    ret = StopPublishLNN(g_pkgName1, g_newpInfo1.publishId);
     EXPECT_TRUE(ret == 0);
 }
 
