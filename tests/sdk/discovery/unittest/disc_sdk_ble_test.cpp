@@ -29,7 +29,7 @@ namespace OHOS {
 static int g_subscribeId = 0;
 static int g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
-static const char *g_pkgName_1 = "Softbus_Kits_1";
+static const char *g_pkgName1 = "Softbus_Kits_1";
 static const char *g_erroPkgName = "Softbus_Erro_Kits";
 
 class DiscSdkTestBle : public testing::Test {
@@ -961,7 +961,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest001, TestSize.Level1)
     ret = UnPublishService(g_erroPkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 
-    ret = UnPublishService(g_pkgName_1, tmpId);
+    ret = UnPublishService(g_pkgName1, tmpId);
     EXPECT_TRUE(ret != 0);
 }
 
@@ -1237,7 +1237,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest001, TestSize.Level1)
     ret = StopDiscovery(g_erroPkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 
-    ret = StopDiscovery(g_pkgName_1, tmpId);
+    ret = StopDiscovery(g_pkgName1, tmpId);
     EXPECT_TRUE(ret != 0);
 }
 
