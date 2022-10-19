@@ -1196,10 +1196,10 @@ uint32_t AuthGetEncryptSize(uint32_t inLen)
 
 uint32_t AuthGetDecryptSize(uint32_t inLen)
 {
-    if (inLen <= ENCRYPT_OVER_HEAD_LEN) {
+    if (inLen <= OVERHEAD_LEN) {
         return inLen;
     }
-    return inLen - ENCRYPT_OVER_HEAD_LEN;
+    return inLen - OVERHEAD_LEN;
 }
 
 int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
