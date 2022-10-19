@@ -36,11 +36,12 @@
 #define AUTH_GROUP_ID "auth group id"
 #define AUTH_SESSION_KEY "auth session key"
 
-#define AUTH_SESSION_WHITE_LIST_NUM (2)
+#define AUTH_SESSION_WHITE_LIST_NUM (3)
 
 static char g_sessionWhiteList[AUTH_SESSION_WHITE_LIST_NUM][SESSION_NAME_SIZE_MAX] = {
     "ohos.distributedhardware.devicemanager.resident",
-    "com.huawei.devicegroupmanage"
+    "com.huawei.devicegroupmanage",
+    "IShareAuthSession"
 };
 
 typedef struct {
