@@ -62,10 +62,11 @@ static int32_t AddConnTimeNode(const ConnectionInfo *info, ConnTimeNode *timeNod
     SoftBusGetTime(&now);
     timeNode->startTime = (uint32_t)now.sec * SEC_TIME + (uint32_t)now.usec / SEC_TIME;
     if (memcpy_s(&(timeNode->info), sizeof(ConnectionInfo), info, sizeof(ConnectionInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddConnTimeNode:memcpy timenode fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_connTimeList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddConnTimeNode:lock mutex failed");
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_connTimeList->list), &(timeNode->node));
@@ -80,20 +81,26 @@ static int32_t CompareConnectInfo(const ConnectionInfo *src, const ConnectionInf
     }
     switch (src->type) {
         case CONNECT_BLE:
-            if (memcmp(src->bleInfo.bleMac, dst->bleInfo.bleMac, BT_MAC_LEN) != EOK) {
+            if (strcasecmp(src->bleInfo.bleMac, dst->bleInfo.bleMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CompareConnectInfo:bleMac is different");
                 return SOFTBUS_ERR;
             }
             break;
         case CONNECT_BR:
-            if (memcmp(src->brInfo.brMac, dst->brInfo.brMac, BT_MAC_LEN) != EOK) {
+            if (strcasecmp(src->brInfo.brMac, dst->brInfo.brMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CompareConnectInfo:brMac is different");
+                return SOFTBUS_ERR;
+            }
+            break;
+        case CONNECT_TCP:
+            if (strcasecmp(src->socketInfo.addr, dst->socketInfo.addr)) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CompareConnectInfo:tcpIp is different");
                 return SOFTBUS_ERR;
             }
             break;
         default:
-            if (memcmp(src->socketInfo.addr, dst->socketInfo.addr, sizeof(src->socketInfo.addr)) != EOK) {
-                return SOFTBUS_ERR;
-            }
-            break;
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CompareConnectInfo:tcpIp is different");
+            return SOFTBUS_ERR;  
     }
     return SOFTBUS_OK;
 }
@@ -108,12 +115,12 @@ static ConnTimeNode *GetConnTimeNode(const ConnectionInfo *info)
     LIST_FOR_EACH_ENTRY(listNode, &g_connTimeList->list, ConnTimeNode, node) {
         if (listNode != NULL) {
             if (CompareConnectInfo(&listNode->info, info) == SOFTBUS_OK) {
-                (void)SoftBusMutexUnlock(&g_listenerList->lock);
+                (void)SoftBusMutexUnlock(&g_connTimeList->lock);
                 return listNode;
             }
         }
     }
-    (void)SoftBusMutexUnlock(&g_listenerList->lock);
+    (void)SoftBusMutexUnlock(&g_connTimeList->lock);
     return NULL;
 }
 
@@ -130,7 +137,7 @@ static void FreeConnTimeNode(ConnTimeNode *timeNode)
         return;
     }
 
-    LIST_FOR_EACH_ENTRY(removeNode, &g_connTimeList->list, ConnTimeNode, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(removeNode, &g_connTimeList->list, ConnTimeNode, node) {
         if (removeNode->info.type == timeNode->info.type) {
             if (CompareConnectInfo(&removeNode->info, &timeNode->info) == SOFTBUS_OK) {
                 ListDelete(&(removeNode->node));
@@ -366,28 +373,30 @@ static void ReportConnectTime(const ConnectionInfo *info)
 
 static void RecordStartTime(const ConnectOption *info)
 {
-    ConnectionInfo conInfo;
+    ConnectionInfo conInfo = {0};
     conInfo.type = info->type;
     switch (info->type) {
         case CONNECT_BR:
             if (memcpy_s(&conInfo.brInfo.brMac, BT_MAC_LEN, info->brOption.brMac, BT_MAC_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BrOption memcpy fail");
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:brMac memcpy fail");
                 return;
             }
             break;
         case CONNECT_BLE:
             if (memcpy_s(&conInfo.bleInfo.bleMac, BT_MAC_LEN, info->bleOption.bleMac, BT_MAC_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BleOption memcpy fail");
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:bleMac memcpy fail");
                 return;
             }
-            
             break;
-        default:
+        case CONNECT_TCP:
             if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr,
                 MAX_SOCKET_ADDR_LEN) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:BleOption memcpy fail");
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:addr memcpy fail");
                 return;
             }
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:do nothing");
             break;
     }
     ConnTimeNode *timeNode = GetConnTimeNode(&conInfo);
