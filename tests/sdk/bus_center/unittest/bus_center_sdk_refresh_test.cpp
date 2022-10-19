@@ -27,9 +27,9 @@ using namespace testing::ext;
 #define TEST_ERRO_MOUDULE       ((MODULE_LNN) + 3)
 
 namespace OHOS {
-static int subscribeId = 0;
+static int g_subscribeId = 0;
 static const char *g_pkgName = "com.softbus.test";
-static const char *g_pkgName_1 = "com.softbus.test1";
+static const char *g_pkgName1 = "com.softbus.test1";
 static const char *g_erroPkgName = "ErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroEErroE";
 
 const int32_t ERRO_CAPDATA_LEN = 514;
@@ -56,8 +56,8 @@ void BusCenterSdkRefresh::TearDownTestCase(void)
 
 static int GetSubscribeId(void)
 {
-    subscribeId++;
-    return subscribeId;
+    g_subscribeId++;
+    return g_subscribeId;
 }
 
 static SubscribeInfo g_sInfo2 = {
@@ -187,9 +187,9 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level0)
     ret = StopRefreshLNN(g_pkgName, g_sInfo3.subscribeId);
 
     g_sInfo3.subscribeId = GetSubscribeId();
-    ret = RefreshLNN(g_pkgName_1, &g_sInfo3, &g_refreshCb1);
+    ret = RefreshLNN(g_pkgName1, &g_sInfo3, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(g_pkgName_1, g_sInfo3.subscribeId);
+    ret = StopRefreshLNN(g_pkgName1, g_sInfo3.subscribeId);
 }
 
 /**
@@ -479,9 +479,9 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest010, TestSize.Level0)
     ret = StopRefreshLNN(g_pkgName, g_sInfo3.subscribeId);
 
     g_sInfo3.subscribeId = GetSubscribeId();
-    ret = RefreshLNN(g_pkgName_1, &g_sInfo3, &g_refreshCb1);
+    ret = RefreshLNN(g_pkgName1, &g_sInfo3, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(g_pkgName_1, g_sInfo3.subscribeId);
+    ret = StopRefreshLNN(g_pkgName1, g_sInfo3.subscribeId);
 }
 
 /**
@@ -965,9 +965,9 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest024, TestSize.Level0)
     ret = StopRefreshLNN(g_pkgName, g_sInfo3.subscribeId);
 
     g_sInfo3.subscribeId = GetSubscribeId();
-    ret = RefreshLNN(g_pkgName_1, &g_sInfo3, &g_refreshCb1);
+    ret = RefreshLNN(g_pkgName1, &g_sInfo3, &g_refreshCb1);
     EXPECT_TRUE(ret == 0);
-    ret = StopRefreshLNN(g_pkgName_1, g_sInfo3.subscribeId);
+    ret = StopRefreshLNN(g_pkgName1, g_sInfo3.subscribeId);
 }
 
 /**
