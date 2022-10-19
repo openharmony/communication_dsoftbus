@@ -55,9 +55,9 @@ HWTEST_F(TransSdkCommStreamTest, SendCommStreamTest001, TestSize.Level0)
     const StreamFrameInfo frameInfo = {0};
 
     int ret = SendStream(-1, &streamData, &extData, &frameInfo);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_ID, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendStream(sessionId, NULL, &extData, &frameInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 }

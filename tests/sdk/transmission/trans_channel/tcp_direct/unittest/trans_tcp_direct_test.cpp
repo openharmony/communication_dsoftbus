@@ -265,13 +265,13 @@ HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level0)
     uint32_t maxLen;
 
     ret = SendBytes(-1, data, len);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_ID, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendBytes(sessionId, NULL, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendBytes(sessionId, data, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen));
     ASSERT_EQ(SOFTBUS_OK, ret);
@@ -294,13 +294,13 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
     uint32_t maxLen;
 
     ret = SendMessage(-1, data, len);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_ID, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendMessage(sessionId, NULL, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SendMessage(sessionId, data, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen));
     ASSERT_EQ(SOFTBUS_OK, ret);
