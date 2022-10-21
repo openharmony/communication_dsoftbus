@@ -1,0 +1,86 @@
+diff --git a/adapter/common/net/wifi/net_wifi.gni b/adapter/common/net/wifi/net_wifi.gni
+index 6479e66d..155f8569 100644
+--- a/adapter/common/net/wifi/net_wifi.gni
++++ b/adapter/common/net/wifi/net_wifi.gni
+@@ -19,8 +19,7 @@ adapter_wifi_src = []
+ adapter_wifi_inc = [ "$softbus_adapter_wifi_path/include" ]
+ adapter_wifi_deps = []
+ 
+-if (defined(ohos_lite) || (defined(global_parts_info) &&
+-                           !defined(global_parts_info.communication_wifi))) {
++if (defined(ohos_lite) || softbus_communication_wifi_feature == false) {
+   if (dsoftbus_feature_lnn_net) {
+     adapter_wifi_src += [
+       "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter_virtual.c",
+diff --git a/core/adapter/core_adapter.gni b/core/adapter/core_adapter.gni
+index 7994ef9a..b78fb27e 100644
+--- a/core/adapter/core_adapter.gni
++++ b/core/adapter/core_adapter.gni
+@@ -59,15 +59,22 @@ if (defined(ohos_lite)) {
+     ]
+ 
+     bus_center_core_adapter_deps = [
+-      "${ability_base_path}:want",
+-      "${ability_base_path}:zuri",
+-      "${ability_runtime_inner_api_path}/dataobs_manager:dataobs_manager",
+-      "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
+-      "${ability_runtime_path}/frameworks/native/ability/native:data_ability_helper",
+       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
+       "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
+       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability:native_dataability",
+       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
+     ]
++#    mhy
++    if (softbus_abality_base_feature == true) {
++      bus_center_core_adapter_deps += [
++        "${ability_base_path}:want",
++        "${ability_base_path}:zuri",
++        "${ability_base_path}:want",
++        "${ability_base_path}:zuri",
++        "${ability_runtime_inner_api_path}/dataobs_manager:dataobs_manager",
++        "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
++        "${ability_runtime_path}/frameworks/native/ability/native:data_ability_helper",
++      ]
++    }
+   }
+ }
+diff --git a/core/connection/p2p/conn_p2p.gni b/core/connection/p2p/conn_p2p.gni
+index 80c686e7..0a3b5fad 100644
+--- a/core/connection/p2p/conn_p2p.gni
++++ b/core/connection/p2p/conn_p2p.gni
+@@ -28,7 +28,7 @@ p2p_connection_inc = [
+   "//foundation/communication/wifi/wifi/interfaces/kits/c",
+ ]
+ 
+-if (dsoftbus_feature_conn_p2p == true) {
++if (dsoftbus_feature_conn_p2p == true & softbus_communication_wifi_feature == true) {
+   p2p_connection_src += [
+     "$dsoftbus_root_path/core/connection/p2p/message/src/p2plink_message.c",
+     "$dsoftbus_root_path/core/connection/p2p/negotiation/src/p2plink_channel_freq.c",
+diff --git a/dsoftbus.gni b/dsoftbus.gni
+index c7a3566b..b2931e24 100644
+--- a/dsoftbus.gni
++++ b/dsoftbus.gni
+@@ -29,6 +29,22 @@ declare_args() {
+       "//foundation/communication/dsoftbus/adapter/default_config"
+ }
+ 
++declare_args() {
++  softbus_abality_base_feature = true
++}
++
++if (defined(global_parts_info) && !defined(global_parts_info.ability_base)) {
++  softbus_abality_base_feature = false
++}
++
++declare_args() {
++  softbus_communication_wifi_feature = true
++}
++
++if (defined(global_parts_info) && !defined(global_parts_info.communication_wifi)) {
++  softbus_communication_wifi_feature = false
++}
++
+ if (defined(ohos_lite)) {
+   import("//build/lite/config/component/lite_component.gni")
+   if (ohos_kernel_type == "liteos_m") {
