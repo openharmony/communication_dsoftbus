@@ -28,7 +28,8 @@ p2p_connection_inc = [
   "//foundation/communication/wifi/wifi/interfaces/kits/c",
 ]
 
-if (dsoftbus_feature_conn_p2p == true && softbus_communication_wifi_feature == true) {
+if (dsoftbus_feature_conn_p2p == true &&
+    softbus_communication_wifi_feature == true) {
   p2p_connection_src += [
     "$dsoftbus_root_path/core/connection/p2p/message/src/p2plink_message.c",
     "$dsoftbus_root_path/core/connection/p2p/negotiation/src/p2plink_channel_freq.c",
