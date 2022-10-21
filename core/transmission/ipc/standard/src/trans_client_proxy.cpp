@@ -41,7 +41,7 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    return clientProxy->OnClientPermissonChangeInner(state, pkgName);
+    return clientProxy->OnClientPermissonChange(pkgName, state);
 }
 
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
