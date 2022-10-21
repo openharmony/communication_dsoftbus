@@ -20,6 +20,9 @@
 #include "softbus_log.h"
 
 namespace OHOS {
+typedef std::pair<std::unordered_multimap<std::string, ClientObjPair>::iterator,
+    std::unordered_multimap<std::string, ClientObjPair>::iterator> ClientObjRange;
+
 SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
 {
     static SoftbusClientInfoManager instance;
@@ -27,7 +30,7 @@ SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
 }
 
 int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
-    const sptr<IRemoteObject::DeathRecipient> &abilityDeath)
+    const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid)
 {
     if (pkgName.empty() || object == nullptr || abilityDeath == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name, object or abilityDeath is nullptr\n");
@@ -35,14 +38,18 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
     }
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     std::pair<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> clientObject(object, abilityDeath);
-    clientObjectMap_.emplace(pkgName, clientObject);
+    ClientObjPair clientObjPair(pid, clientObject);
+    clientObjectMap_.emplace(pkgName, clientObjPair);
+
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
     std::string permissionName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    RegisterDataSyncPermission(tokenCaller, permissionName, pkgName);
+    RegisterDataSyncPermission(tokenCaller, permissionName, pkgName, pid);
+
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName)
+int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName,
+    int32_t* pid)
 {
     if (object == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveService object is nullptr\n");
@@ -50,9 +57,10 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
     }
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
-        if (iter->second.first == object) {
+        if (iter->second.second.first == object) {
             pkgName = iter->first;
-            object->RemoveDeathRecipient(iter->second.second);
+            *pid = iter->second.first;
+            object->RemoveDeathRecipient(iter->second.second.second);
             (void)clientObjectMap_.erase(iter);
             break;
         }
@@ -65,26 +73,42 @@ sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::s
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     auto iter = clientObjectMap_.find(pkgName);
     if (iter != clientObjectMap_.end()) {
-        return iter->second.first;
+        return iter->second.second.first;
     }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusClientProxy client proxy is nullptr\n");
     return nullptr;
 }
 
-void SoftbusClientInfoManager::GetSoftbusClientProxyMap(std::map<std::string, sptr<IRemoteObject>> &softbusClientMap)
+sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName, int32_t pid)
+{
+    std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
+    ClientObjRange range = clientObjectMap_.equal_range(pkgName);
+    for (auto iter = range.first; iter != range.second; iter++) {
+        if (pid == iter->second.first) {
+            return iter->second.second.first;
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusClientProxy with pid is nullptr\n");
+    return nullptr;
+}
+
+void SoftbusClientInfoManager::GetSoftbusClientProxyMap(std::multimap<std::string,
+    sptr<IRemoteObject>> &softbusClientMap)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
-        softbusClientMap.emplace(iter->first, iter->second.first);
+        softbusClientMap.emplace(iter->first, iter->second.second.first);
     }
 }
 
-bool SoftbusClientInfoManager::SoftbusClientIsExist(const std::string &pkgName)
+bool SoftbusClientInfoManager::SoftbusClientIsExist(const std::string &pkgName, int32_t pid)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
-    auto iter = clientObjectMap_.find(pkgName);
-    if (iter != clientObjectMap_.end()) {
-        return true;
+    ClientObjRange range = clientObjectMap_.equal_range(pkgName);
+    for (auto iter = range.first; iter != range.second; iter++) {
+        if (pid == iter->second.first) {
+            return true;
+        }
     }
     return false;
 }

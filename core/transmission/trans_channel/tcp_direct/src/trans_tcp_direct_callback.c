@@ -30,14 +30,14 @@ int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
-int32_t TransTdcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
+int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
 {
-    return g_channelCb.OnChannelOpened(pkgName, sessionName, channel);
+    return g_channelCb.OnChannelOpened(pkgName, pid, sessionName, channel);
 }
 
-int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t errCode)
+int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode)
 {
-    return g_channelCb.OnChannelOpenFailed(pkgName, channelId, CHANNEL_TYPE_TCP_DIRECT, errCode);
+    return g_channelCb.OnChannelOpenFailed(pkgName, pid, channelId, CHANNEL_TYPE_TCP_DIRECT, errCode);
 }
 
 int32_t TransTdcGetPkgName(const char *sessionName, char *pkgName, uint16_t len)

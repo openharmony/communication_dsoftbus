@@ -64,8 +64,9 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-void TransUdpDeathCallback(const char *pkgName)
+void TransUdpDeathCallback(const char *pkgName, int32_t pid)
 {
     (void)pkgName;
+    (void)pid;
     return;
 }

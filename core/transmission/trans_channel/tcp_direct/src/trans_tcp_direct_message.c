@@ -284,7 +284,14 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         return SOFTBUS_ERR;
     }
 
-    ret = TransTdcOnChannelOpened(pkgName, conn.appInfo.myData.sessionName, &info);
+    int uid = 0;
+    int pid = 0;
+    if (TransTdcGetUidAndPid(conn.appInfo.myData.sessionName, &uid, &pid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uid and pid fail.");
+        return SOFTBUS_ERR;
+    }
+
+    ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
     SetSessionConnStatusById(channelId, conn.status);
     return ret;
@@ -298,14 +305,19 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         return SOFTBUS_ERR;
     }
 
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    if (TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
-        return SOFTBUS_ERR;
-    }
-
     if (conn.serverSide == false) {
-        int ret = TransTdcOnChannelOpenFailed(pkgName, channelId, errCode);
+        int32_t uid = 0;
+        int32_t pid = 0;
+        char pkgName[PKG_NAME_SIZE_MAX] = {0};
+        if (TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
+            return SOFTBUS_ERR;
+        }
+        if (TransTdcGetUidAndPid(conn.appInfo.myData.sessionName, &uid, &pid) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uid and pid fail.");
+            return SOFTBUS_ERR;
+        }
+        int ret = TransTdcOnChannelOpenFailed(pkgName, pid, channelId, errCode);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
             "TCP direct channel failed, channelId = %d, ret = %d", channelId, ret);
         return ret;

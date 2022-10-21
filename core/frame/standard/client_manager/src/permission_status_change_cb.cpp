@@ -25,19 +25,19 @@ namespace OHOS {
 void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& result)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%{public}s changed.", result.permissionName.c_str());
-    if (InformPermissionChange(result.PermStateChangeType, this->pkgName.c_str()) != SOFTBUS_OK) {
+    if (InformPermissionChange(result.PermStateChangeType, this->pkgName.c_str(), pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "InformPermissionChange fail");
     }
 }
 
 void RegisterDataSyncPermission(const uint32_t callingTokenId,
-                                const std::string permissionName, const std::string pkgName)
+                                const std::string permissionName, const std::string pkgName, int32_t pid)
 {
     PermStateChangeScope scopeInfo;
     scopeInfo.permList = {permissionName};
     scopeInfo.tokenIDs = {callingTokenId};
     std::shared_ptr<PermissionStatusChangeCb> callbackPtr_ =
-        std::make_shared<PermissionStatusChangeCb>(scopeInfo, pkgName);
+        std::make_shared<PermissionStatusChangeCb>(scopeInfo, pkgName, pid);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "after tokenId:%{public}d register", callingTokenId);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RegisterPermStateChangeCallback failed.");

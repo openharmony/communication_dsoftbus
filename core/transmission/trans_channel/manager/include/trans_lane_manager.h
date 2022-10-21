@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include "lnn_lane_manager.h"
 #include "lnn_lane_interface.h"
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,11 +30,11 @@ int32_t TransLaneMgrInit(void);
 void TransLaneMgrDeinit(void);
 
 int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo, uint32_t laneId,
-    const char *pkgName);
+    AppInfoData *myDatae);
 
 int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType);
 
-void TransLaneMgrDeathCallback(const char *pkgName);
+void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid);
 
 int32_t TransGetLaneIdByChannelId(int32_t channelId, uint32_t *laneId);
 

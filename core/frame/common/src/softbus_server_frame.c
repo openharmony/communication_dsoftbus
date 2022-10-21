@@ -128,9 +128,9 @@ ERR_EXIT:
     return;
 }
 
-void ClientDeathCallback(const char *pkgName)
+void ClientDeathCallback(const char *pkgName, int32_t pid)
 {
     DiscServerDeathCallback(pkgName);
-    TransServerDeathCallback(pkgName);
+    TransServerDeathCallback(pkgName, pid);
     BusCenterServerDeathCallback(pkgName);
 }

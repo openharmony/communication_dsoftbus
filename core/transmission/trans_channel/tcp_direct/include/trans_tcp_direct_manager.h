@@ -54,7 +54,7 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
 
 void TransTcpDirectDeinit(void);
 
-void TransTdcDeathCallback(const char *pkgName);
+void TransTdcDeathCallback(const char *pkgName, int32_t pid);
 
 int32_t TransOpenDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 

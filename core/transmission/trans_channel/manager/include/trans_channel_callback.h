@@ -29,11 +29,12 @@ extern "C" {
 #endif
 
 typedef struct {
-    int32_t (*OnChannelOpened)(const char *pkgName, const char *sessionName, const ChannelInfo *channel);
-    int32_t (*OnChannelClosed)(const char *pkgName, int32_t channelId, int32_t channelType);
-    int32_t (*OnChannelOpenFailed)(const char *pkgName, int32_t channelId, int32_t channelType, int32_t errCode);
-    int32_t (*OnDataReceived)(const char *pkgName, int32_t channelId, int32_t channelType,
-        const void *data, uint32_t len, int32_t type);
+    int32_t (*OnChannelOpened)(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel);
+    int32_t (*OnChannelClosed)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType);
+    int32_t (*OnChannelOpenFailed)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
+        int32_t errCode);
+    int32_t (*OnDataReceived)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
+        TransReceiveData* receiveData);
     int32_t (*OnQosEvent)(const char *pkgName, const QosParam *param);
     int32_t (*GetPkgNameBySessionName)(const char *sessionName, char *pkgName, uint16_t len);
     int32_t (*GetUidAndPidBySessionName)(const char *sessionName, int32_t *uid, int32_t *pid);
@@ -41,7 +42,7 @@ typedef struct {
 
 IServerChannelCallBack *TransServerGetChannelCb(void);
 
-int32_t TransServerOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType);
+int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *networkId, int32_t routeType);
 
 #ifdef __cplusplus
 #if __cplusplus
