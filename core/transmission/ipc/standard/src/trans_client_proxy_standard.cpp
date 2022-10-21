@@ -22,7 +22,7 @@
 #include "softbus_log.h"
 
 namespace OHOS {
-int32_t TransClientProxy::OnClientPermissonChangeInner(int32_t state, const char *pkgName)
+int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t state)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
