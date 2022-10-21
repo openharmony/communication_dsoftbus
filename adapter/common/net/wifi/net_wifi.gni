@@ -19,8 +19,7 @@ adapter_wifi_src = []
 adapter_wifi_inc = [ "$softbus_adapter_wifi_path/include" ]
 adapter_wifi_deps = []
 
-if (defined(ohos_lite) || (defined(global_parts_info) &&
-                           !defined(global_parts_info.communication_wifi))) {
+if (defined(ohos_lite) || softbus_communication_wifi_feature == false) {
   if (dsoftbus_feature_lnn_net) {
     adapter_wifi_src += [
       "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter_virtual.c",
