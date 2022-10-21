@@ -90,10 +90,9 @@ void UnPackPacketHead(PacketHead *data)
     data->dataLen = (int32_t)SoftBusLtoHl((uint32_t)data->dataLen);
 }
 
-int32_t NotifyClientMsgReceived(const char *pkgName, int32_t channelId, const char *data, uint32_t len,
-    SessionPktType type)
+int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, TransReceiveData *receiveData)
 {
-    int32_t ret = TransProxyOnMsgReceived(pkgName, channelId, data, len, type);
+    int32_t ret = TransProxyOnMsgReceived(pkgName, pid, channelId, receiveData);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify err[%d]", ret);
     }
@@ -564,18 +563,24 @@ static SessionPktType PacketTypeToSessionType(ProxyPacketType pktType)
     }
 }
 
-int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPacketType flags, int32_t seq,
+int32_t TransProxyNotifySession(const char *pkgName, int32_t pid, int32_t channelId, ProxyPacketType flags, int32_t seq,
     const char *data, uint32_t len)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "flags:%d", flags);
+    TransReceiveData receiveData;
+    receiveData.data = (void*)data;
+    receiveData.dataLen = len;
     switch (flags) {
         case PROXY_FLAG_BYTES:
-            return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_BYTES);
+            receiveData.dataType = TRANS_SESSION_BYTES;
+            return NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
         case PROXY_FLAG_MESSAGE:
             TransProxySendSessionAck(channelId, seq);
-            return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_MESSAGE);
+            receiveData.dataType = TRANS_SESSION_MESSAGE;
+            return NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
         case PROXY_FLAG_ASYNC_MESSAGE:
-            return NotifyClientMsgReceived(pkgName, channelId, data, len, TRANS_SESSION_MESSAGE);
+            receiveData.dataType = TRANS_SESSION_MESSAGE;
+            return NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
         case PROXY_FLAG_ACK:
             return TransProxyProcSendMsgAck(channelId, data, (int32_t)len);
         case PROXY_FILE_FIRST_FRAME:
@@ -587,7 +592,8 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPac
         case PROXY_FILE_RESULT_FRAME:
         case PROXY_FILE_ACK_REQUEST_SENT:
         case PROXY_FILE_ACK_RESPONSE_SENT:
-            return NotifyClientMsgReceived(pkgName, channelId, data, len, PacketTypeToSessionType(flags));
+            receiveData.dataType = PacketTypeToSessionType(flags);
+            return NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid flags(%d)", flags);
             return SOFTBUS_INVALID_PARAM;
@@ -619,7 +625,7 @@ int32_t TransProxySessionDataLenCheck(uint32_t dataLen, ProxyPacketType type)
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channelId,
+static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t pid, int32_t channelId,
     const PacketHead *dataHead, const char *data)
 {
     ProxyDataInfo dataInfo = {0};
@@ -656,7 +662,7 @@ static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channel
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ProcessData debug: len %d \n", dataInfo.outLen);
-    if (TransProxyNotifySession(pkgName, channelId, (ProxyPacketType)dataHead->flags, dataHead->seq,
+    if (TransProxyNotifySession(pkgName, pid, channelId, (ProxyPacketType)dataHead->flags, dataHead->seq,
         (const char *)dataInfo.outData, dataInfo.outLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process data err");
         SoftBusFree(dataInfo.outData);
@@ -666,9 +672,10 @@ static int32_t TransProxyProcessSessionData(const char *pkgName, int32_t channel
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t channelId, const char *data, uint32_t len)
+static int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t pid, int32_t channelId,
+    TransReceiveData *receiveData)
 {
-    PacketHead *head = (PacketHead*)data;
+    PacketHead *head = (PacketHead*)receiveData->data;
     if (head == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param data.", __func__);
         return SOFTBUS_ERR;
@@ -682,8 +689,10 @@ static int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t channelId,
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dataLen %d", head->dataLen);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc dataLen[%d] inputLen[%d]", head->dataLen,  len);
-    int32_t ret = TransProxyProcessSessionData(pkgName, channelId, head, data + sizeof(PacketHead));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc dataLen[%d] inputLen[%d]", head->dataLen,
+        receiveData->dataLen);
+    int32_t ret = TransProxyProcessSessionData(pkgName, pid, channelId, head,
+        receiveData->data + sizeof(PacketHead));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process data err");
         return SOFTBUS_ERR;
@@ -817,7 +826,7 @@ static int32_t TransProxyNormalSliceProcess(SliceProcessor *processor, const Sli
 }
 
 static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const SliceHead *head,
-    const char *data, uint32_t len, const char *pkgName, int32_t channelId)
+    const char *data, uint32_t len, const char *pkgName, int32_t pid, int32_t channelId)
 {
     int32_t ret = TransProxySliceProcessChkPkgIsValid(processor, head, data, len);
     if (ret != SOFTBUS_OK) {
@@ -831,7 +840,10 @@ static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const Slice
     processor->expectedSeq++;
     processor->dataLen += (int32_t)len;
 
-    ret = TransProxyNoSubPacketProc(pkgName, channelId, processor->data, (uint32_t)processor->dataLen);
+    TransReceiveData receiveData;
+    receiveData.data = processor->data;
+    receiveData.dataLen = (uint32_t)processor->dataLen;
+    ret = TransProxyNoSubPacketProc(pkgName, pid, channelId, &receiveData);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process packets err");
         return ret;
@@ -841,10 +853,10 @@ static int32_t TransProxyLastSliceProcess(SliceProcessor *processor, const Slice
     return ret;
 }
 
-static int TransProxySubPacketProc(const char *pkgName, int32_t channelId, const SliceHead *head,
-    const char *data, uint32_t len)
+static int TransProxySubPacketProc(const char *pkgName, int32_t pid, int32_t channelId, const SliceHead *head,
+    TransReceiveData *receiveData)
 {
-    if (data == NULL || len == 0) {
+    if (receiveData == NULL || receiveData->data == NULL || receiveData->dataLen == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_channelSliceProcessorList == NULL) {
@@ -866,11 +878,12 @@ static int TransProxySubPacketProc(const char *pkgName, int32_t channelId, const
     int32_t index = head->priority;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
-        ret = TransProxyFirstSliceProcess(processor, head, data, len);
+        ret = TransProxyFirstSliceProcess(processor, head, receiveData->data, receiveData->dataLen);
     } else if (head->sliceNum == head->sliceSeq + 1) {
-        ret = TransProxyLastSliceProcess(processor, head, data, len, pkgName, channelId);
+        ret = TransProxyLastSliceProcess(processor, head, receiveData->data, receiveData->dataLen, pkgName,
+            pid, channelId);
     } else {
-        ret = TransProxyNormalSliceProcess(processor, head, data, len);
+        ret = TransProxyNormalSliceProcess(processor, head, receiveData->data, receiveData->dataLen);
     }
 
     SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
@@ -881,7 +894,7 @@ static int TransProxySubPacketProc(const char *pkgName, int32_t channelId, const
     return ret;
 }
 #define SLICE_HEAD_LEN (sizeof(PacketHead) + sizeof(SliceHead))
-int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t channelId, const char *data, uint32_t len)
+int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len)
 {
     SliceHead *headSlice = NULL;
     uint32_t dataLen;
@@ -898,16 +911,19 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t channelId, const c
     }
 
     dataLen = len - sizeof(SliceHead);
+    TransReceiveData receiveData;
+    receiveData.data = (void*)(data + sizeof(SliceHead));
+    receiveData.dataLen = dataLen;
     if (headSlice->sliceNum == 1) { // no sub packets
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "no sub packets proc");
-        return TransProxyNoSubPacketProc(pkgName, channelId, data + sizeof(SliceHead), dataLen);
+        return TransProxyNoSubPacketProc(pkgName, pid, channelId, &receiveData);
     } else {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "sub packets proc slicecount:%d", headSlice->sliceNum);
-        return TransProxySubPacketProc(pkgName, channelId, headSlice, data + sizeof(SliceHead), dataLen);
+        return TransProxySubPacketProc(pkgName, pid, channelId, headSlice, &receiveData);
     }
 }
 
-int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t channelId, const char *data, uint32_t len)
+int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data null.");
@@ -922,7 +938,7 @@ int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t channelId, const cha
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Auth ProcessData debug: len %d \n", len);
-    if (TransProxyNotifySession(pkgName, channelId, type, 0, (const char *)data, len) != SOFTBUS_OK) {
+    if (TransProxyNotifySession(pkgName, pid, channelId, type, 0, (const char *)data, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Auth process data err");
         return SOFTBUS_ERR;
     }

@@ -41,7 +41,7 @@ int32_t TransSessionServerAddItem(SessionServer *newNode);
 
 int32_t TransSessionServerDelItem(const char *sessionName);
 
-void TransDelItemByPackageName(const char *pkgName);
+void TransDelItemByPackageName(const char *pkgName, int32_t pid);
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len);
 

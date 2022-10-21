@@ -26,7 +26,7 @@
 
 static IServerChannelCallBack g_channelCallBack;
 
-static int32_t TransServerOnChannelOpened(const char *pkgName, const char *sessionName,
+static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
 {
     if (pkgName == NULL || sessionName == NULL || channel == NULL) {
@@ -38,10 +38,10 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, const char *sessi
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "NotifyQosChannelOpened failed.");
         return SOFTBUS_ERR;
     }
-    return ClientIpcOnChannelOpened(pkgName, sessionName, channel);
+    return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
 }
 
-static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
+static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
 {
     if (pkgName == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -51,14 +51,14 @@ static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t channelId
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);
-    if (ClientIpcOnChannelClosed(pkgName, channelId, channelType) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelClosed(pkgName, channelId, channelType, pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t channelId,
+static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
     int32_t channelType, int32_t errCode)
 {
     if (pkgName == NULL) {
@@ -67,7 +67,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t chann
     if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
     }
-    if (ClientIpcOnChannelOpenFailed(pkgName, channelId, channelType, errCode) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelOpenFailed(pkgName, channelId, channelType, errCode, pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
@@ -76,14 +76,14 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t chann
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
-    const void *data, uint32_t len, int32_t type)
+static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
+    TransReceiveData* receiveData)
 {
-    if (pkgName == NULL || data == NULL || len == 0) {
+    if (pkgName == NULL || receiveData == NULL || receiveData->data == NULL || receiveData->dataLen == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (ClientIpcOnChannelMsgReceived(pkgName, channelId, channelType, data, len, type) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelMsgReceived(pkgName, channelId, channelType, receiveData, pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail");
         return SOFTBUS_ERR;
     }
@@ -115,14 +115,14 @@ IServerChannelCallBack *TransServerGetChannelCb(void)
     return &g_channelCallBack;
 }
 
-int32_t TransServerOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType)
+int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *networkId, int32_t routeType)
 {
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransServerOnChannelLinkDown: pkgName=%s", pkgName);
 
-    if (ClientIpcOnChannelLinkDown(pkgName, networkId, routeType) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelLinkDown(pkgName, networkId, routeType, pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }

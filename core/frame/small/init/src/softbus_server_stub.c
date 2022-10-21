@@ -80,12 +80,17 @@ static TaskConfig GetTaskConfig(Service *service)
     return config;
 }
 
-static void ComponentDeathCallback(const char *pkgName)
+static void ComponentDeathCallback(const char *pkgName, int32_t pid)
 {
     DiscServerDeathCallback(pkgName);
-    TransServerDeathCallback(pkgName);
+    TransServerDeathCallback(pkgName, pid);
     BusCenterServerDeathCallback(pkgName);
 }
+
+typedef struct DeathCbArg {
+    char *pkgName;
+    int32_t pid;
+} DeathCbArg;
 
 static void ClientDeathCb(void *arg)
 {
@@ -93,17 +98,18 @@ static void ClientDeathCb(void *arg)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name is NULL.");
         return;
     }
+    DeathCbArg* argStrcut = (DeathCbArg*)arg;
     struct CommonScvId svcId = {0};
-    if (SERVER_GetIdentityByPkgName((const char *)arg, &svcId) != SOFTBUS_OK) {
+    if (SERVER_GetIdentityByPkgName((const char *)argStrcut->pkgName, &svcId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not found client by package name.");
-        SoftBusFree(arg);
-        arg = NULL;
+        SoftBusFree(argStrcut->pkgName);
+        SoftBusFree(argStrcut);
         return;
     }
-    SERVER_UnregisterService((const char *)arg);
-    ComponentDeathCallback((const char *)arg);
-    SoftBusFree(arg);
-    arg = NULL;
+    SERVER_UnregisterService((const char *)argStrcut->pkgName);
+    ComponentDeathCallback((const char *)argStrcut->pkgName, argStrcut->pid);
+    SoftBusFree(argStrcut->pkgName);
+    SoftBusFree(argStrcut);
     SvcIdentity sid = {0};
     sid.handle = svcId.handle;
     sid.token = svcId.token;
@@ -144,8 +150,18 @@ static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
         SoftBusFree(pkgName);
         goto EXIT;
     }
+
+    DeathCbArg *argStrcut = (DeathCbArg*)SoftBusMalloc(sizeof(DeathCbArg));
+    if (argStrcut == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus malloc failed!");
+        SoftBusFree(pkgName);
+        goto EXIT;
+    }
+    argStrcut->pkgName = pkgName;
+    argStrcut->pid = GetCallingPid();
+
     uint32_t cbId = 0;
-    AddDeathRecipient(svc, ClientDeathCb, pkgName, &cbId);
+    AddDeathRecipient(svc, ClientDeathCb, argStrcut, &cbId);
     svcId.cbId = cbId;
     ret = SERVER_RegisterService(name, &svcId);
 EXIT:

@@ -17,6 +17,7 @@
 #define SOFTBUS_SERVER_FRAME_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,7 +25,7 @@ extern "C" {
 
 void InitSoftBusServer(void);
 bool GetServerIsInit(void);
-void ClientDeathCallback(const char *pkgName);
+void ClientDeathCallback(const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 }
