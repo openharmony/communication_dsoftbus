@@ -49,7 +49,7 @@ public:
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
-    int32_t OnClientPermissonChangeInner(int32_t state, const char *pkgName);
+    int32_t OnClientPermissonChange(const char *pkgName, int32_t state);
 
 private:
     static inline BrokerDelegator<TransClientProxy> delegator_;
