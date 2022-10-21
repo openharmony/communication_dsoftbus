@@ -880,7 +880,7 @@ static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
     uint32_t num = 0;
     int64_t authIds[2]; /* 2: client and server may use same connection. */
     authIds[num++]= GetAuthIdByConnId(connId, false);
-    authIds[num++]= GetAuthIdByConnId(connId, false);
+    authIds[num++]= GetAuthIdByConnId(connId, true);
     for (uint32_t i = 0; i < num; i++) {
         if (authIds[i] == AUTH_INVALID_ID) {
             continue;
@@ -1196,10 +1196,10 @@ uint32_t AuthGetEncryptSize(uint32_t inLen)
 
 uint32_t AuthGetDecryptSize(uint32_t inLen)
 {
-    if (inLen <= ENCRYPT_OVER_HEAD_LEN) {
+    if (inLen <= OVERHEAD_LEN) {
         return inLen;
     }
-    return inLen - ENCRYPT_OVER_HEAD_LEN;
+    return inLen - OVERHEAD_LEN;
 }
 
 int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
