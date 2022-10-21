@@ -26,8 +26,8 @@ using namespace testing::ext;
 
 constexpr char UDID[] = "123456789";
 constexpr char PEER1_UDID[] = "123456789";
-constexpr uint32_t LEN = 5;
-constexpr uint32_t LEN2 = 4;
+constexpr uint32_t LEN = CONNECTION_ADDR_MAX + 1;
+constexpr uint32_t LEN2 = CONNECTION_ADDR_MAX;
 
 class LnnTopoManagerTest : public testing::Test {
 public:
