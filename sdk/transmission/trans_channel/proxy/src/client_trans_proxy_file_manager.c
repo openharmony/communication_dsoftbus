@@ -1248,7 +1248,7 @@ static int32_t CreateSendListenerInfo(SendListenerInfo **sendListenerInfo, int32
     if (sendInfo == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     do {
         ret = GetSendListenerInfoByChannelId(channelId, sendInfo);
         if (ret != SOFTBUS_OK) {
@@ -1307,7 +1307,7 @@ int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const c
     }
 
     SendListenerInfo *sendInfo = NULL;
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     do {
         ret = CreateSendListenerInfo(&sendInfo, channelId);
         if (ret != SOFTBUS_OK || sendInfo == NULL) {
