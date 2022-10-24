@@ -11,18 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("unittest") {
-  testonly = true
-  deps = [
-    "ble:softbus_conn_ble_test",
-    "br:softbus_conn_br_test",
-    "common/unittest:softbus_conn_common_test",
-    "manager:softbus_conn_manager_test",
-    "tcp:softbus_tcp_manager_test",
-  ]
-}
+import("//build/lite/config/component/lite_component.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-group("fuzztest") {
-  testonly = true
-  deps = [ "common/fuzztest/connectioncommon_fuzzer:ConnectionCommonFuzzTest" ]
+static_library("softbus_test_message_handler") {
+  sources = [ "message_handler_test.c" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$softbus_adapter_common/include",
+    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
+  ]
 }
