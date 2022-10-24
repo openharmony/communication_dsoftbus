@@ -18,17 +18,28 @@
 
 #include "dfs_session.h"
 #include "inner_session.h"
+#include "session.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "client_trans_session_manager.h"
+#include "client_trans_session_service.h"
 
 using namespace testing::ext;
 
 namespace OHOS {
+
 ConnectionAddr g_addrInfo;
+
 const char *g_testSessionName = "ohos.distributedschedule.dms.test";
 std::string g_testData = "TranSessionTest_GetSessionKeyTestData";
+
+#define TEST_FILE_NAME "test.filename.01"
+#define TEST_PKG_NAME_LEN (64)
+#define TEST_SESSION_NAME_LEN (64)
+#define TEST_NETWORK_ID_LEN (64)
+#define TEST_GROUP_ID_LEN (64)
 
 class TransSessionTest : public testing::Test {
 public:
@@ -45,10 +56,13 @@ public:
 };
 
 void TransSessionTest::SetUpTestCase(void)
-{}
+{
+    (void)TransClientInit();
+}
 
 void TransSessionTest::TearDownTestCase(void)
-{}
+{
+}
 
 /**
  * @tc.name: GetSessionKeyTest001
@@ -203,4 +217,115 @@ HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level0)
 
     NotifyAuthSuccess(sessionId);
 }
+
+/**
+ * @tc.name: SendFileTest001
+ * @tc.desc: use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionTest, SendFileTest001, TestSize.Level0)
+{
+    int32_t sessionId = 1;
+    int32_t ret = SendFile(sessionId, NULL, NULL, 1);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    const char *sFileList[] = { TEST_FILE_NAME };
+    ret = SendFile(sessionId, sFileList, NULL, 0);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = SendFile(sessionId, sFileList, NULL, 1);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SendFileTest002
+ * @tc.desc: use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level0)
+{
+    char pkgName[TEST_PKG_NAME_LEN] = "com.test.trans.session";
+    char mySessionName[TEST_SESSION_NAME_LEN] = "com.test.trans.session.sendfile";
+    char peerSessionName[TEST_SESSION_NAME_LEN] = "com.test.trans.session.sendfile";
+    char peerNetworkId[TEST_NETWORK_ID_LEN] = "1234567789";
+    char groupId[TEST_GROUP_ID_LEN] = "123";
+    SessionAttribute attr;
+    attr.dataType = 1;
+    attr.linkTypeNum = 0;
+    SessionParam param = {
+        .sessionName = mySessionName,
+        .peerSessionName = peerSessionName,
+        .peerDeviceId = peerNetworkId,
+        .groupId = groupId,
+        .attr = &attr,
+    };
+
+    const char *sFileList[] = { TEST_FILE_NAME };
+    int32_t sessionId = INVALID_SESSION_ID;
+    bool isEnabled = false;
+    ISessionListener listener;
+    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &listener);
+    (void)ClientAddSession(&param, &sessionId, &isEnabled);
+    
+    int32_t ret = SendFile(sessionId, sFileList, NULL, 1);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: QosReportTest001
+ * @tc.desc: use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionTest, QosReportTest001, TestSize.Level0)
+{
+    int32_t sessionId = 1;
+    int32_t appType = 1;
+    int32_t quality = -1;
+    int32_t ret = QosReport(sessionId, appType, quality);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    quality = 1;
+    ret = QosReport(sessionId, appType, quality);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+
+/**
+ * @tc.name: ClientCleanAllSessionWhenServerDeathTest001
+ * @tc.desc: use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize.Level0)
+{
+    ClientCleanAllSessionWhenServerDeath();
+
+    char pkgName[TEST_PKG_NAME_LEN] = "com.test.trans.session";
+    char mySessionName[TEST_SESSION_NAME_LEN] = "com.test.trans.session.sendfile";
+    char peerSessionName[TEST_SESSION_NAME_LEN] = "com.test.trans.session.sendfile";
+    char peerNetworkId[TEST_NETWORK_ID_LEN] = "1234567789";
+    char groupId[TEST_GROUP_ID_LEN] = "123";
+    SessionAttribute attr;
+    attr.dataType = 1;
+    attr.linkTypeNum = 0;
+    SessionParam param = {
+        .sessionName = mySessionName,
+        .peerSessionName = peerSessionName,
+        .peerDeviceId = peerNetworkId,
+        .groupId = groupId,
+        .attr = &attr,
+    };
+
+    int32_t sessionId = INVALID_SESSION_ID;
+    bool isEnabled = false;
+    ISessionListener listener;
+    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &listener);
+    (void)ClientAddSession(&param, &sessionId, &isEnabled);
+    ClientCleanAllSessionWhenServerDeath();
+    EXPECT_TRUE(true);
+}
+
 } // namespace OHOS

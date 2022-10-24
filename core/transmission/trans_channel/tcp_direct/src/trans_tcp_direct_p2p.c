@@ -39,15 +39,13 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 {
     int32_t listenerPort;
 
-    LocalListenerInfo info = {
-        .type = CONNECT_P2P,
-        .socketOption = {
-            .addr = "",
-            .port = *port,
-            .protocol = LNN_PROTOCOL_IP,
-            .moduleId = DIRECT_CHANNEL_SERVER_P2P
-        }
-    };
+    LocalListenerInfo info;
+    info.type = CONNECT_P2P;
+    (void)memset_s(info.socketOption.addr, sizeof(info.socketOption.addr), 0, sizeof(info.socketOption.addr));
+    info.socketOption.port = *port;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
+    info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
+
     if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:copy addr failed!", __func__);
         return SOFTBUS_ERR;
@@ -252,8 +250,10 @@ static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConn: requestId=%u", reqId);
-    AuthConnInfo auth = {0};
-    AuthConnCallback cb = {0};
+    AuthConnInfo auth;
+    (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    AuthConnCallback cb;
+    (void)memset_s(&auth, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
 
     if (AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthConn get auth info fail");
@@ -328,15 +328,12 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
 
 static int32_t ConnectTcpDirectPeer(const char *addr, int port)
 {
-    ConnectOption options = {
-        .type = CONNECT_P2P,
-        .socketOption = {
-            .addr = {0},
-            .port = port,
-            .protocol = LNN_PROTOCOL_IP,
-            .moduleId = DIRECT_CHANNEL_CLIENT
-        }
-    };
+    ConnectOption options;
+    options.type = CONNECT_P2P;
+    (void)memset_s(options.socketOption.addr, sizeof(options.socketOption.addr), 0, sizeof(options.socketOption.addr));
+    options.socketOption.port = port;
+    options.socketOption.protocol = LNN_PROTOCOL_IP;
+    options.socketOption.moduleId = DIRECT_CHANNEL_CLIENT;
 
     int32_t ret = strcpy_s(options.socketOption.addr, sizeof(options.socketOption.addr), addr);
     if (ret != SOFTBUS_OK) {
