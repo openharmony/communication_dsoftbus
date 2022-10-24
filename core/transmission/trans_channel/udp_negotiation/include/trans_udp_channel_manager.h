@@ -33,6 +33,7 @@ typedef struct {
     uint32_t timeOut;
     UdpChannelStatus status;
     uint32_t requestId;
+    bool isMeta;
 } UdpChannelInfo;
 
 SoftBusList *GetUdpChannelMgrHead(void);

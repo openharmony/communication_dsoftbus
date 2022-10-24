@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "auth_common.h"
 #include "auth_interface.h"
 #include "softbus_conn_interface.h"
 
@@ -27,14 +28,6 @@
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    uint32_t dataType;
-    int32_t module;
-    int64_t seq;
-    int32_t flag;
-    uint32_t len;
-} AuthDataHead;
 
 typedef struct {
     void (*onConnectResult)(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo);
@@ -55,6 +48,12 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo);
 
 const char *GetConnTypeStr(uint64_t connId);
 uint32_t GetConnId(uint64_t connId);
+
+uint32_t GetAuthDataSize(uint32_t len);
+int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
+    uint8_t *buf, uint32_t size);
+const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head);
+int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo);
 
 #define CONN_INFO "conn[%s:%u]"
 #define CONN_DATA(connId) GetConnTypeStr(connId), GetConnId(connId)

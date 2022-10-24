@@ -31,6 +31,10 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_async_callback_utils.h"
+#include "trans_channel_manager.h"
+
+#define DATA_SIZE 32
 
 typedef enum {
     STATE_AUTH_INDEX = 0,
@@ -253,6 +257,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     NodeInfo *info = NULL;
     const char *udid = NULL;
     bool needReportOffline = false;
+    bool isMetaAuth = false;
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     ReportCategory report;
 
@@ -260,6 +265,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     if (info == NULL) {
         return needReportOffline;
     }
+    isMetaAuth = (info->AuthTypeValue & (1 << ONLINE_METANODE)) != 0;
     udid = LnnGetDeviceUdid(info);
     report = LnnSetNodeOffline(udid, connInfo->addr.type, (int32_t)connInfo->authId);
     LnnGetLnnRelation(udid, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
@@ -272,7 +278,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
             needReportOffline = false;
         }
         // just remove node when peer device is not trusted
-        if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0) {
+        if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0 && !isMetaAuth) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]remove node", connFsm->id);
             LnnRemoveNode(udid);
         }
@@ -357,8 +363,28 @@ int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *dataKey)
 {
     (void)metaJoinNode;
     (void)dataKey;
-    int32_t rc;
-    rc = SOFTBUS_OK;
+    if (metaJoinNode == NULL || dataKey == NULL) {
+        return SOFTBUS_ERR;
+    }
+    int32_t rc = SOFTBUS_OK;
+    int32_t connId = 0;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "channelId: %d, type: %d",
+        metaJoinNode->addr.info.session.channelId, metaJoinNode->addr.info.session.type);
+    if (metaJoinNode->addr.type == CONNECTION_ADDR_SESSION) {
+        rc = TransGetConnByChanId(metaJoinNode->addr.info.session.channelId,
+            metaJoinNode->addr.info.session.type, &connId);
+        if (rc != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnJoinMetaNode fail");
+            return SOFTBUS_ERR;
+        }
+        metaJoinNode->requestId = AuthGenRequestId();
+        if (AuthMetaStartVerify(connId, dataKey->data, DATA_SIZE,
+            metaJoinNode->requestId, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
+                rc = SOFTBUS_ERR;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "AuthMetaStartVerify resultId=%d, requestId=%u", rc, metaJoinNode->requestId);
+    }
     return rc;
 }
 

@@ -37,6 +37,15 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
     return SOFTBUS_OK;
 }
 
+int32_t LnnInitOhosAccount(void)
+{
+    return SOFTBUS_OK;
+}
+
+void LnnOnOhosAccountChanged(void)
+{
+}
+
 bool LnnIsDefaultOhosAccount(void)
 {
     return false;

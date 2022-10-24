@@ -349,7 +349,8 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     return SOFTBUS_OK;
 }
 
-static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t flags, char *reply)
+static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t flags, char *reply)
+
 {
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
@@ -543,12 +544,13 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip addr fail");
             return AUTH_INVALID_ID;
         }
-        return AuthGetIdByConnInfo(&connInfo, !fromAuthServer);
+        return AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
     }
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get auth linktype %d flag 0x%x", linkType, cipherFlag);
-    return AuthGetIdByP2pMac(p2pMac, linkType, !fromAuthServer);
+    bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
+    return AuthGetIdByP2pMac(p2pMac, linkType, !fromAuthServer, isAuthMeta);
 }
 
 static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, const uint8_t *pktData,
@@ -726,7 +728,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         if (item->channelId != channelId) {
             continue;
         }
-        int32_t freeLen = item->size - (item->w - item->data);
+        int32_t freeLen = (int32_t)(item->size) - (item->w - item->data);
         if (recvLen > freeLen) {
             (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,

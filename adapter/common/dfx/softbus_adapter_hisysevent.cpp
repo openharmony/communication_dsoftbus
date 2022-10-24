@@ -21,10 +21,13 @@
 
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "message_handler.h"
 #include "hisysevent_c.h"
 
 static const char *g_domain = "DSOFTBUS";
+static bool g_init_lock = false;
+static SoftBusMutex g_dfx_lock;
 static HiSysEventParam g_dstParam[SOFTBUS_EVT_PARAM_BUTT];
 
 static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
@@ -100,6 +103,7 @@ static void HiSysEventParamDeInit(uint32_t size)
     for (uint32_t i = 0; i < size; i++) {
         if (g_dstParam[i].t == HISYSEVENT_STRING && g_dstParam[i].v.s != NULL) {
             SoftBusFree(g_dstParam[i].v.s);
+            g_dstParam[i].v.s = NULL;
         }
      }
  }
@@ -127,6 +131,14 @@ static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
     return hiSysEvtType;
 }
 
+static void InitHisEvtMutexLock()
+{
+    if (SoftBusMutexInit(&g_dfx_lock, NULL) != SOFTBUS_OK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "init HisEvtMutexLock fail");
+        return;
+    }
+}
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -138,10 +150,19 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
     if (reportMsg == nullptr) {
         return SOFTBUS_ERR;
     }
+    if (!g_init_lock) {
+        InitHisEvtMutexLock();
+        g_init_lock = true;
+    }
+    if (SoftBusMutexLock(&g_dfx_lock) != 0) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:lock failed", __func__);
+        return SOFTBUS_LOCK_ERR;
+    }
     ConvertMsgToHiSysEvent(reportMsg);
     OH_HiSysEvent_Write(g_domain, reportMsg->evtName, ConvertMsgType(reportMsg->evtType),
         g_dstParam, reportMsg->paramNum);
     HiSysEventParamDeInit(reportMsg->paramNum);
+    (void)SoftBusMutexUnlock(&g_dfx_lock);
     return SOFTBUS_OK;
 }
 
@@ -152,6 +173,7 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
     }
     if (msg->paramArray != nullptr) {
         SoftBusFree(msg->paramArray);
+        msg->paramArray = nullptr;
     }
     SoftBusFree(msg);
 }
@@ -165,6 +187,7 @@ SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
     msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
     if (msg->paramArray == nullptr) {
         SoftbusFreeEvtReporMsg(msg);
+        return nullptr;
     }
     return msg;
 }

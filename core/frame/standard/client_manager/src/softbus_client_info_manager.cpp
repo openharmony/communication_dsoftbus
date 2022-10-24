@@ -14,7 +14,8 @@
  */
 
 #include "softbus_client_info_manager.h"
-
+#include "permission_status_change_cb.h"
+#include "softbus_server.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -35,6 +36,9 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     std::pair<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> clientObject(object, abilityDeath);
     clientObjectMap_.emplace(pkgName, clientObject);
+    uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
+    std::string permissionName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    RegisterDataSyncPermission(tokenCaller, permissionName, pkgName);
     return SOFTBUS_OK;
 }
 

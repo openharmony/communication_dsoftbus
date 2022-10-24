@@ -59,10 +59,10 @@ typedef struct {
 typedef struct SocketInterface {
     const char* name;
     const ProtocolType type;
-    int32_t (*GetSockPort)(int fd);
-    int (*OpenServerSocket)(const LocalListenerInfo *option);
-    int (*OpenClientSocket)(const ConnectOption *option, const char* bindAddr, bool isNonBlock);
-    int (*AcceptClient)(int fd, ConnectOption *clientAddr, int *cfd);
+    int32_t (*GetSockPort)(int32_t fd);
+    int32_t (*OpenServerSocket)(const LocalListenerInfo *option);
+    int32_t (*OpenClientSocket)(const ConnectOption *option, const char* bindAddr, bool isNonBlock);
+    int32_t (*AcceptClient)(int32_t fd, ConnectOption *clientAddr, int32_t *cfd);
 } SocketInterface;
 
 int32_t ConnInitSockets(void);
@@ -79,6 +79,7 @@ ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout);
 void ConnCloseSocket(int32_t fd);
 void ConnShutdownSocket(int32_t fd);
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
+int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec);
 
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
 int32_t ConnGetSocketError(int32_t fd);

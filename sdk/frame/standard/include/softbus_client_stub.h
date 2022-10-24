@@ -73,6 +73,7 @@ private:
     int32_t OnPublishLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply);
 
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);

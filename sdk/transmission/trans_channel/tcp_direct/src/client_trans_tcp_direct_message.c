@@ -549,7 +549,7 @@ static int32_t TransClientUpdateTdcDataBufWInfo(int32_t channelId, char *recvBuf
         if (item->channelId != channelId) {
             continue;
         }
-        int32_t freeLen = item->size - (item->w - item->data);
+        int32_t freeLen = (int32_t)(item->size) - (item->w - item->data);
         if (recvLen > freeLen) {
             (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,

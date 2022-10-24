@@ -32,6 +32,7 @@
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
+#include "softbus_hisysevt_connreporter.h"
 
 #define INVALID_GATTC_ID (-1)
 #define DEFAULT_MTU_SIZE 512
@@ -248,6 +249,7 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
 {
     if (g_gattcIsInited != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc not init");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_NOT_INIT);
         return SOFTBUS_BLEGATTC_NONT_INIT;
     }
     if (bleAddr == NULL) {
@@ -266,6 +268,7 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         return SOFTBUS_ERR;
     }
     if (SoftbusGattcConnect(infoNode->clientId, bleAddr) != SOFTBUS_OK) {
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect failed");
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
@@ -294,6 +297,7 @@ int32_t SoftBusGattClientDisconnect(int32_t clientId)
 {
     if (g_gattcIsInited != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc not init");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_INIT_FAIL);
         return SOFTBUS_BLEGATTC_NONT_INIT;
     }
 
@@ -310,6 +314,7 @@ int32_t SoftBusGattClientDisconnect(int32_t clientId)
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleGattcInfoByClientId not exist");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_DISCONNECT_FAIL);
         return SOFTBUS_BLEGATTC_NODE_NOT_EXIST;
     }
     infoNode->state = BLE_GATT_CLIENT_STOPPING;
@@ -364,6 +369,7 @@ static void ConnectedMsgHandler(int32_t clientId, int status)
     if ((status != SOFTBUS_GATT_SUCCESS) ||
         (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_STARTED) != true)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnectedMsgHandler error");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_UPDATA_STATE_ERR);
         errCode = SOFTBUS_BLECONNECTION_CLIENT_UPDATA_STATE_ERR;
         goto EXIT;
     }
@@ -378,6 +384,7 @@ static void ConnectedMsgHandler(int32_t clientId, int status)
         goto EXIT;
     }
     if (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_SERVICE_SEARCHING) != true) {
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_UPDATA_STATE_ERR);
         errCode = SOFTBUS_BLECONNECTION_CLIENT_UPDATA_STATE_ERR;
         goto EXIT;
     }
@@ -636,7 +643,6 @@ static void TimeOutMsgHandler(int32_t clientId, int32_t errCode)
     halConnInfo.halConnId = clientId;
     halConnInfo.isServer = BLE_CLIENT_TYPE;
     (void)g_softBusBleConnCb->BleDisconnectCallback(halConnInfo, errCode);
-
     SoftbusBleGattcDisconnect(clientId);
 }
 

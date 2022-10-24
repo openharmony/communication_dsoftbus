@@ -216,7 +216,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
         goto EXIT_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get laneId[%u], link type[%u].", laneId, connInfo.type);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "sessionName[%s], get laneId[%u], link type[%u].", param->sessionName, laneId, connInfo.type);
 
     if (TransGetConnectOptByConnInfo(&connInfo, &connOpt) != SOFTBUS_OK) {
         goto EXIT_ERR;
@@ -501,4 +502,17 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
         default:
             return SOFTBUS_INVALID_PARAM;
     }
+}
+
+int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
+{
+    if (channelType != CHANNEL_TYPE_PROXY) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channelType:%d error", channelType);
+        return SOFTBUS_ERR;
+    }
+    if (TransProxyGetConnIdByChanId(channelId, connId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get proxy connId, channelId: %d", channelId);
+        return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+    }
+    return SOFTBUS_OK;
 }
