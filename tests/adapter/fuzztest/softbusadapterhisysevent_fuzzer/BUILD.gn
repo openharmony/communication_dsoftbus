@@ -18,19 +18,17 @@ import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("StopDiscoveryFuzzTest") {
-  module_out_path = "dsoftbus/discovery"
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/stopdiscovery_fuzzer"
+ohos_fuzztest("SoftBusAdapterHiSysEventFuzzTest") {
+  module_out_path = "dsoftbus/adapter"
+  fuzz_config_file = "$dsoftbus_root_path/tests/adapter/fuzztest/softbusadapterhisysevent_fuzzer"
+
   include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/include",
-    "//foundation/communication/dsoftbus/core/common/inner_communication",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/discovery",
-    "//foundation/communication/dsoftbus/interfaces/kits/common",
-    "//foundation/communication/dsoftbus/sdk/discovery/include",
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/communication/dsoftbus/sdk/discovery/manager/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
   ]
+
+  sources = [ "softbusadapterhisysevent_fuzzer.cpp" ]
+
   cflags = [
     "-g",
     "-O0",
@@ -38,14 +36,17 @@ ohos_fuzztest("StopDiscoveryFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fstack-protector-strong",
   ]
-  sources = [ "stopdiscovery_fuzzer.cpp" ]
 
   deps = [
-    "//foundation/communication/dsoftbus/adapter:softbus_adapter",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  if (is_standard_system) {
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }
 
 ###############################################################################
@@ -53,7 +54,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     # deps file
-    ":StopDiscoveryFuzzTest",
+    ":SoftBusAdapterHiSysEventFuzzTest",
   ]
 }
 ###############################################################################
