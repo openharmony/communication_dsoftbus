@@ -27,6 +27,11 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_SESSION_NAME "com.softbus.transmission.test"
+#define TEST_CONN_IP "192.168.8.1"
+#define TEST_AUTH_PORT 6000
+#define TEST_AUTH_DATA "test auth message data"
+
 class TransAuthChannelTest : public testing::Test {
 public:
     TransAuthChannelTest()
@@ -48,6 +53,22 @@ void TransAuthChannelTest::TearDownTestCase(void)
 {}
 
 /**
+ * @tc.name: TransAuthInitTest001
+ * @tc.desc: TransAuthInitTest001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthInitTest001, TestSize.Level1)
+{
+    IServerChannelCallBack cb;
+    (void)TransAuthInit(&cb);
+
+    int32_t ret = TransAuthInit(NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    TransAuthDeinit();
+}
+
+/**
  * @tc.name: TransOpenAuthMsgChannelTest001
  * @tc.desc: TransOpenAuthMsgChannel, use the wrong parameter.
  * @tc.type: FUNC
@@ -55,29 +76,67 @@ void TransAuthChannelTest::TearDownTestCase(void)
  */
 HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest001, TestSize.Level1)
 {
-    const char* sessionName = "com.softbus.transmission.test";
     int32_t channelId = 0;
     ConnectOption connInfo = {
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = {0},
-            .port = 6000,
+            .port = TEST_AUTH_PORT,
             .moduleId = MODULE_MESSAGE_SERVICE,
             .protocol = LNN_PROTOCOL_IP
         }
     };
-    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), "192.168.8.1") != EOK) {
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_CONN_IP) != EOK) {
         return;
     }
-    
-    int ret = TransOpenAuthMsgChannel(sessionName, NULL, &channelId);
-    EXPECT_TRUE(ret != 0);
 
-    ret = TransOpenAuthMsgChannel(sessionName, &connInfo, NULL);
-    EXPECT_TRUE(ret != 0);
+    IServerChannelCallBack cb;
+    (void)TransAuthInit(&cb);
+    int32_t ret = TransOpenAuthMsgChannel(TEST_SESSION_NAME, NULL, &channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransOpenAuthMsgChannel(TEST_SESSION_NAME, &connInfo, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     connInfo.type = CONNECT_BR;
-    ret = TransOpenAuthMsgChannel(sessionName, &connInfo, &channelId);
-    EXPECT_TRUE(ret != 0);
+    ret = TransOpenAuthMsgChannel(TEST_SESSION_NAME, &connInfo, &channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    TransAuthDeinit();
 }
+
+/**
+ * @tc.name: TransOpenAuthMsgChannelTest002
+ * @tc.desc: TransOpenAuthMsgChannel, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest002, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    ConnectOption connInfo = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = {0},
+            .port = TEST_AUTH_PORT,
+            .moduleId = MODULE_MESSAGE_SERVICE,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_CONN_IP) != EOK) {
+        return;
+    }
+
+    IServerChannelCallBack cb;
+    (void)TransAuthInit(&cb);
+    int32_t ret = TransOpenAuthMsgChannel(TEST_SESSION_NAME, &connInfo, &channelId);
+    if (ret != SOFTBUS_OK) {
+        printf("test open auth msg channel failed.");
+    }
+
+    const char *data = TEST_AUTH_DATA;
+    ret = TransSendAuthMsg(channelId, data, strlen(data));
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    TransAuthDeinit();
+}
+
 } // namespace OHOS
