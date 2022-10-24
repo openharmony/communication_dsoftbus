@@ -22,6 +22,13 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     return NULL;
 }
 
+DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *a, DiscoveryBleDispatcherInterface *b)
+{
+    (void)a;
+    (void)b;
+    return NULL;
+}
+
 void DiscBleDeinit(void)
 {
     return;
