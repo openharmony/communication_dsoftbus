@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,15 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-
-static_library("softbus_test_message_handler") {
-  sources = [ "message_handler_test.c" ]
-  include_dirs = [
-    "$dsoftbus_root_path/core/common/message_handler/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$softbus_adapter_common/include",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
-  ]
+group("fuzztest") {
+  testonly = true
+  deps = [ "fuzztest/messagehandler_fuzzer:MessageHandlerFuzzTest" ]
 }

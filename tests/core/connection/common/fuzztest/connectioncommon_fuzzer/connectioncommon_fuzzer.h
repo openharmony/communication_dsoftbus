@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef PUBLISHSERVICE_FUZZER_H
-#define PUBLISHSERVICE_FUZZER_H
+#ifndef CONNECTIONCOMMON_FUZZER_H
+#define CONNECTIONCOMMON_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "discovery_fuzzer"
+#include <cstdint>
+#include <unistd.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <fcntl.h>
 
-#endif
+#define FUZZ_PROJECT_NAME "connectioncommon_fuzzer"
+
+#endif // CONNECTIONCOMMON_FUZZER_H

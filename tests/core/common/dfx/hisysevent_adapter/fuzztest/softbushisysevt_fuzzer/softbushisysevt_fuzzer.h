@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef STARTDISCOVERY_FUZZER_H
-#define STARTDISCOVERY_FUZZER_H
+#ifndef SOFTBUSHISYSEVT_FUZZER_H
+#define SOFTBUSHISYSEVT_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "discovery_fuzzer"
+#define FUZZ_PROJECT_NAME "softbushisysevt_fuzzer"
 
-#endif
+#endif // SOFTBUSHISYSEVT_FUZZER_H

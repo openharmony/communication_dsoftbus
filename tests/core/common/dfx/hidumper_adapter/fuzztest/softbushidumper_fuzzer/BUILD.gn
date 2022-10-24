@@ -18,19 +18,17 @@ import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("UnPublishServiceFuzzTest") {
-  module_out_path = "dsoftbus/discovery"
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/unpublishservice_fuzzer"
+ohos_fuzztest("SoftBusHiDumperFuzzTest") {
+  module_out_path = "dsoftbus/common"
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/common/dfx/hidumper_adapter/fuzztest/softbushidumper_fuzzer"
+
   include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/include",
-    "//foundation/communication/dsoftbus/core/common/inner_communication",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/discovery",
-    "//foundation/communication/dsoftbus/interfaces/kits/common",
-    "//foundation/communication/dsoftbus/sdk/discovery/include",
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/communication/dsoftbus/sdk/discovery/manager/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
   ]
+
+  sources = [ "softbushidumper_fuzzer.cpp" ]
+
   cflags = [
     "-g",
     "-O0",
@@ -38,14 +36,14 @@ ohos_fuzztest("UnPublishServiceFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fstack-protector-strong",
   ]
-  sources = [ "unpublishservice_fuzzer.cpp" ]
 
-  deps = [
-    "//foundation/communication/dsoftbus/adapter:softbus_adapter",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
-  ]
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
 
-  external_deps = [ "c_utils:utils" ]
+  if (is_standard_system) {
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }
 
 ###############################################################################
@@ -53,7 +51,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     # deps file
-    ":UnPublishServiceFuzzTest",
+    ":SoftBusHiDumperFuzzTest",
   ]
 }
 ###############################################################################
