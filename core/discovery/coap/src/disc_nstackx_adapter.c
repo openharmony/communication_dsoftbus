@@ -27,6 +27,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_disc.h"
+#include "softbus_hisysevt_discreporter.h"
 
 #define JSON_WLAN_IP "wifiIpAddr"
 #define JSON_HW_ACCOUNT "hwAccountHashVal"
@@ -267,6 +268,7 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
         return SOFTBUS_INVALID_PARAM;
     }
     if (NSTACKX_SetFilterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
+        SoftbusRecordDiscFault(COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
     }
     return SOFTBUS_OK;

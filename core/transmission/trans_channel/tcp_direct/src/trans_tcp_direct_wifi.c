@@ -43,7 +43,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, true);
+    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, true, false);
     if (newConn->authId == AUTH_INVALID_ID) {
         SoftBusFree(newConn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel get authId fail");

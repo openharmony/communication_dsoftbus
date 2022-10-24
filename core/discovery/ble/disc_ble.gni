@@ -27,6 +27,7 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/share_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
   "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
 
 ble_discovery_deps = []

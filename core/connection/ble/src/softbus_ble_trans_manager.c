@@ -19,11 +19,13 @@
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_ble_gatt_client.h"
 #include "softbus_ble_gatt_server.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_hisysevt_connreporter.h"
 
 typedef struct {
     uint32_t seq;
@@ -87,11 +89,13 @@ char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, uint32_t len, uint32
 {
     if (value == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv invalid data");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DATA);
         return NULL;
     }
     BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnInfo);
     if (targetNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv unknown device");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DEVICE);
         return NULL;
     }
     BleTransHeader header;
@@ -154,6 +158,7 @@ static int32_t BleHalSend(const BleConnectionInfo *connInfo, const char *data, i
 
 int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len, int32_t seq, int32_t module)
 {
+#define BLE_SEND_PACKET_DELAY_LEN 10 // ms
     uint32_t tempLen = len;
     char *sendData = (char *)data;
     uint32_t dataLenMax = (uint32_t)(connInfo->mtu - MTU_HEADER_SIZE - sizeof(BleTransHeader));
@@ -182,6 +187,7 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend  module:%d", module);
         ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendLength + sizeof(BleTransHeader), module);
         if (ret != SOFTBUS_OK) {
+            SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleTransSend BleHalSend failed");
             SoftBusFree(buff);
             return ret;
@@ -189,6 +195,10 @@ int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len
         SoftBusFree(buff);
         sendData += sendLength;
         tempLen -= sendLength;
+        if (tempLen > 0) {
+            // Temporarily add delay to avoid packet loss
+            SoftBusSleepMs(BLE_SEND_PACKET_DELAY_LEN);
+        }
         offset += sendLength;
     }
     return SOFTBUS_OK;

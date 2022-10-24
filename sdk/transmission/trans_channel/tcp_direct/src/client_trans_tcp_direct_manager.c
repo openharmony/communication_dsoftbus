@@ -30,6 +30,8 @@
 #include "trans_server_proxy.h"
 
 #define HEART_TIME 300
+#define USER_TIME_OUT (30 * 1000)
+
 static SoftBusList *g_tcpDirectChannelInfoList = NULL;
 
 TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInfo *info)
@@ -180,7 +182,6 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] param invalid", __func__);
         return SOFTBUS_ERR;
     }
-    int32_t ret = SOFTBUS_ERR;
     if (ClientTransCheckTdcChannelExist(channel->channelId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -206,15 +207,18 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         SoftBusFree(item);
         goto EXIT_ERR;
     }
-
-    ret = ConnSetTcpKeepAlive(channel->fd, HEART_TIME);
-    if (ret != SOFTBUS_OK) {
+    if (ConnSetTcpKeepAlive(channel->fd, HEART_TIME) != SOFTBUS_OK) {
         TransDelDataBufNode(channel->channelId);
         SoftBusFree(item);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnSetTcpKeepAlive failed, fd[%d].", channel->fd);
         goto EXIT_ERR;
     }
-
+    if (ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT) != SOFTBUS_OK) {
+        TransDelDataBufNode(channel->channelId);
+        SoftBusFree(item);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnSetTcpUserTimeOut failed, fd[%d].", channel->fd);
+        goto EXIT_ERR;
+    }
     ListAdd(&g_tcpDirectChannelInfoList->list, &item->node);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 

@@ -14,7 +14,7 @@
  */
 
 #include "softbus_client_stub.h"
-
+#include "client_trans_session_manager.h"
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_channel_callback.h"
@@ -72,6 +72,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnRefreshLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_DEVICE_FOUND] =
         &SoftBusClientStub::OnRefreshDeviceFoundInner;
+    memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] =
+        &SoftBusClientStub::OnClientPermissonChangeInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -91,6 +93,22 @@ int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusClientStub: default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+}
+
+int32_t SoftBusClientStub::OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t state;
+    if (!data.ReadInt32(state)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnClientPermissonChangeInner read state failed!");
+        return SOFTBUS_ERR;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnClientPermissonChangeInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    PermissionStateChange(pkgName, state);
+    return SOFTBUS_OK;
 }
 
 int32_t SoftBusClientStub::OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply)

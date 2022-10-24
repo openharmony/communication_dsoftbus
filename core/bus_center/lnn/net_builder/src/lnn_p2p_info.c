@@ -92,7 +92,7 @@ static void ProcessSyncP2pInfo(void *para)
     int32_t infoNum = 0;
     uint32_t len;
     NodeBasicInfo *info = NULL;
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+    if (LnnGetAllOnlineAndMetaNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get all online node info fail.");
         return;
     }

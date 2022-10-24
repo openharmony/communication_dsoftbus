@@ -26,6 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
+#include "trans_lane_pending_ctl.h"
 #include "trans_tcp_direct_json.h"
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_message.h"
@@ -248,19 +249,19 @@ static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     return;
 }
 
-static int32_t OpenAuthConn(const char *uuid, uint32_t reqId)
+static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthConn: requestId=%u", reqId);
     AuthConnInfo auth = {0};
     AuthConnCallback cb = {0};
 
-    if (AuthGetPreferConnInfo(uuid, &auth) != SOFTBUS_OK) {
+    if (AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthConn get auth info fail");
         return SOFTBUS_ERR;
     }
     cb.onConnOpened = OnAuthConnOpened;
     cb.onConnOpenFailed = OnAuthConnOpenFailed;
-    if (AuthOpenConn(&auth, reqId, &cb) != SOFTBUS_OK) {
+    if (AuthOpenConn(&auth, reqId, &cb, isMeta) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthConn open auth conn fail");
         return SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED;
     }
@@ -476,13 +477,14 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     
     conn->req = (int64_t)seq;
+    conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
     ret = TransTdcAddSessionConn(conn);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(conn);
         return ret;
     }
 
-    ret = OpenAuthConn(appInfo->peerData.deviceId, requestId);
+    ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, conn->isMeta);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenP2pDirectChannel open auth conn fail");
         TransDelSessionConnById(newChannelId);

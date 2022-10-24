@@ -34,6 +34,7 @@ LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param);
 int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt);
 int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneId);
 int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo, uint32_t *laneId);
+bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 
 #ifdef __cplusplus
 }

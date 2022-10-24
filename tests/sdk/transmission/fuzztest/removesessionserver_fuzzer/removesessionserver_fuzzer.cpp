@@ -16,6 +16,8 @@
 #include "removesessionserver_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+#include "softbus_def.h"
 #include "inner_session.h"
 #include "session.h"
 #include "softbus_utils.h"
@@ -25,11 +27,15 @@ const char *g_sessionName = "objectstore";
 
 void RemoveSessionServerTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    char tmp[PKG_NAME_SIZE_MAX + 1] = {0};
+    if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
         return;
     }
 
-    RemoveSessionServer((const char*)data, g_sessionName);
+    RemoveSessionServer((const char*)tmp, g_sessionName);
 }
 } // namespace OHOS
 

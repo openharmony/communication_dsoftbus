@@ -54,6 +54,8 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
 
 int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo);
 
+int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId);
+
 #ifdef __cplusplus
 }
 #endif

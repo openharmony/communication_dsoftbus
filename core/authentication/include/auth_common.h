@@ -43,6 +43,8 @@ typedef enum {
     DATA_TYPE_CONNECTION = 0xFFFF0004,
     /* data type for closing ack */
     DATA_TYPE_CLOSE_ACK = 0xFFFF0005,
+    /* data type for meta negotiation */
+    DATA_TYPE_META_NEGOTIATION = 0xFFFF0006,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0
@@ -78,12 +80,26 @@ if (expression) { \
 #define TO_INT32(value) ((int32_t)(((uint32_t)(value)) & INT32_MASK))
 #define TO_UINT32(value) ((uint32_t)(((uint32_t)(value)) & INT32_MASK))
 
+typedef struct {
+    uint32_t dataType;
+    int32_t module;
+    int64_t seq;
+    int32_t flag;
+    uint32_t len;
+} AuthDataHead;
+
+typedef struct {
+    void (*OnDataReceived)(int64_t authId, const AuthDataHead *head, const uint8_t *data, uint32_t len);
+    void (*OnDisconnected)(int64_t authId);
+} AuthTransCallback;
+
 /* Auth handler */
 typedef enum {
     EVENT_CONNECT_CMD,
     EVENT_CONNECT_RESULT,
     EVENT_CONNECT_TIMEOUT,
     EVENT_UPDATE_SESSION_KEY,
+    EVENT_AUTH_META_TIMEOUT,
 } EventType;
 typedef void(*EventHandler)(const void *obj);
 int32_t PostAuthEvent(EventType event, EventHandler handler,

@@ -91,11 +91,12 @@ void UnregAuthTransListener(int32_t module)
     return;
 }
 
-int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
+int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)
 {
     (void)info;
     (void)requestId;
     (void)callback;
+    (void)isMeta;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -111,32 +112,36 @@ void AuthCloseConn(int64_t authId)
     return;
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
+int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     (void)uuid;
     (void)connInfo;
+    (void)isMeta;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection)
+int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
 {
     (void)uuid;
     (void)isIpConnection;
+    (void)isMeta;
     return AUTH_INVALID_ID;
 }
 
-int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
+int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
 {
     (void)connInfo;
     (void)isServer;
+    (void)isMeta;
     return AUTH_INVALID_ID;
 }
 
-int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer)
+int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta)
 {
     (void)p2pMac;
     (void)type;
     (void)isServer;
+    (void)isMeta;
     return AUTH_INVALID_ID;
 }
 
@@ -203,6 +208,13 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
 {
     (void)authId;
     (void)version;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
+{
+    (void)authId;
+    (void)isMetaAuth;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

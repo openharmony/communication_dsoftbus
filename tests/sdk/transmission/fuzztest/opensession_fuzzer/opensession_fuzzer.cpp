@@ -16,6 +16,8 @@
 #include "opensession_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+#include "softbus_def.h"
 #include "inner_session.h"
 #include "session.h"
 #include "softbus_utils.h"
@@ -23,14 +25,19 @@
 namespace OHOS {
 void OpenSessionTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     char *mySessionName = nullptr;
     char *workId = nullptr;
     SessionAttribute attr = {0};
     char *groupId = nullptr;
-    OpenSession((const char*)data, mySessionName, workId, groupId, &attr);
+    char tmp[SESSION_NAME_SIZE_MAX + 1] = {0};
+    if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+        return;
+    }
+
+    OpenSession((const char*)tmp, mySessionName, workId, groupId, &attr);
 }
 } // namespace OHOS
 

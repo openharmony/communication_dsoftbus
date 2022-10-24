@@ -23,11 +23,11 @@
 namespace OHOS {
 void CloseSessionTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
-    CloseSession(*((const int*)data));
+    CloseSession(size);
 }
 } // namespace OHOS
 

@@ -169,7 +169,7 @@ static int32_t BuildTrustedDevInfoRecord(const char *udid, TrustedDevInfoRecord 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local account hash failed.");
         return SOFTBUS_ERR;
     }
@@ -365,7 +365,7 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     if (udidArray == NULL || num == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local account hash failed.");
         return SOFTBUS_ERR;
     }

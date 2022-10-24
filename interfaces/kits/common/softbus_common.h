@@ -195,6 +195,7 @@ typedef enum {
     CONNECTION_ADDR_BR,       /**< BR */
     CONNECTION_ADDR_BLE,      /**< BLE */
     CONNECTION_ADDR_ETH,      /**< Ethernet */
+    CONNECTION_ADDR_SESSION,     /**< SESSION */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 /**
@@ -227,6 +228,12 @@ typedef struct {
             char ip[IP_STR_MAX_LEN];
             uint16_t port;            /**< Port number represented by the host byte order */
         } ip;
+        /**< Session address */
+        struct SessionAddr {
+            int32_t sessionId;  /**< Session Id in int format */
+            int32_t channelId;  /**< Channel Id in int format */
+            int32_t type;   /**< Session type in int format */
+        } session;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
 } ConnectionAddr;

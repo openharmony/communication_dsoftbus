@@ -323,40 +323,18 @@ static void RestartCoapDiscovery(void)
     SetCallLnnStatus(true);
 }
 
-static void OnAccountChanged(void)
-{
-    uint8_t accountHash[SHA_256_HASH_LEN] = {0};
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
-    if (LnnGetLocalByteInfo(BYTE_KEY_USERID_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAccountChanged get local user id fail");
-        return;
-    }
-    if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAccountChanged get account user id fail");
-        return;
-    }
-    if (memcmp(accountHash, localAccountHash, SHA_256_HASH_LEN) == EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "OnAccountChanged account not change");
-        return;
-    }
-
-    LnnSetLocalByteInfo(BYTE_KEY_USERID_HASH, accountHash, SHA_256_HASH_LEN);
-    DiscDeviceInfoChanged(TYPE_ACCOUNT);
-    LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
-}
-
 static void OnGroupCreated(const char *groupId)
 {
     (void)groupId;
     RestartCoapDiscovery();
-    OnAccountChanged();
+    LnnOnOhosAccountChanged();
     LnnHbOnAuthGroupCreated();
 }
 
 static void OnGroupDeleted(const char *groupId)
 {
     (void)groupId;
-    OnAccountChanged();
+    LnnOnOhosAccountChanged();
     LnnHbOnAuthGroupDeleted();
 }
 

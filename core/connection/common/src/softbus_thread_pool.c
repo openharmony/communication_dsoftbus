@@ -26,7 +26,7 @@
 #ifndef MIN_STACK_SIZE
 #define MIN_STACK_SIZE 0x8000
 #endif
-#define THREAD_POOL_NAME "THREAD_POOL"
+#define THREAD_POOL_NAME "SoftBusConnect"
 
 typedef void *(*Runnable)(void *argv);
 typedef struct ThreadAttr ThreadAttr;
@@ -211,17 +211,21 @@ static void ThreadPoolWorker(void *arg)
             SoftBusCondBroadcast(&(pool->queueNotFull));
         }
         SoftBusMutexUnlock(&(pool->mutex));
-        if (job->runnable) {
-            (void)(*(job->callbackFunction))(job->arg);
-        }
+
+        // copy job task relative variables to run it after leave job mutex
+        bool runnable = job->runnable;
+        JobTask task = job->callbackFunction;
+        void *arg = job->arg;
         if (job->jobMode == ONCE || job->runnable == false) {
             SoftBusMutexUnlock(&(job->mutex));
             SoftBusMutexDestroy(&(job->mutex));
             SoftBusFree(job);
             job = NULL;
-        }
-        if (job != NULL) {
+        } else {
             SoftBusMutexUnlock(&(job->mutex));
+        }
+        if (runnable) {
+            (void)(task(arg));
         }
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Exit");
@@ -315,7 +319,6 @@ int32_t ThreadPoolRemoveJob(ThreadPool *pool, uintptr_t handle)
     if (job != NULL && job->runnable == true && job->jobMode == PERSISTENT) {
         if (SoftBusMutexLock(&(job->mutex)) != 0) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-            SoftBusMutexUnlock(&(job->mutex));
             return SOFTBUS_LOCK_ERR;
         }
         job->runnable = false;
