@@ -133,7 +133,7 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     TcpDataPacketHead pktHead = {
         .magicNumber = MAGIC_NUMBER,
         .seq = finalSeq,
-        .flags = flags,
+        .flags = (uint32_t)flags,
         .dataLen = dataLen,
     };
     PackTcpDataPacketHead(&pktHead);
