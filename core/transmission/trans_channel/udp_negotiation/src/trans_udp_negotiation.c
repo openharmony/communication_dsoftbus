@@ -291,7 +291,7 @@ static int32_t sendUdpInfo(cJSON *replyMsg, int64_t authId, int64_t seq)
     return ret;
 }
 
-static int32_t SendReplyErrInfo(int errCode, const char* errDesc, int64_t authId, int64_t seq)
+static int32_t SendReplyErrInfo(int errCode, char* errDesc, int64_t authId, int64_t seq)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info in.");
     cJSON *replyMsg = cJSON_CreateObject();
