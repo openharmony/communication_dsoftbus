@@ -24,8 +24,8 @@ namespace OHOS {
         if (data == nullptr || size == 0) {
             return true;
         }
-        char *pkgName = nullptr;
-        StopRefreshLNN(pkgName, size);
+
+        StopRefreshLNN((const char *)data, (int32_t)data);
         return true;
     }
 }
