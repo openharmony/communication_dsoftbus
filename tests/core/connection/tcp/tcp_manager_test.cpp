@@ -897,7 +897,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
             .protocol = LNN_PROTOCOL_IP
         }
     };
-    
+
     int fd =  tcp->OpenClientSocket(&option, "127.0.0.1", true);
     int tos = 1;
     int ret = SetIpTos(fd, tos);
@@ -1592,4 +1592,16 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
     int fd = tcp->OpenServerSocket(&info);
     EXPECT_EQ(ConnSetTcpKeepAlive(fd, 100), SOFTBUS_OK);
 };
+
+/*
+* @tc.name: testTcpDisconnectDeviceNow001
+* @tc.desc: test TcpDisconnectDeviceNow invaild parma
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusTcpManagerTest, testTcpDisconnectDeviceNow001, TestSize.Level1)
+{
+    int ret = TcpDisconnectDeviceNow(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
 }

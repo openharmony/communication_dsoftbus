@@ -71,7 +71,7 @@ void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
     SOFTBUS_DPRINTF(fd, "   -l <item>  Dump the item in %s module, item is nesessary\n", moduleName);
 }
 
-static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDumpCb cb)
+static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(const char *varName, SoftBusVarDumpCb cb)
 {
     SoftBusDumpVarNode *varNode = (SoftBusDumpVarNode *)SoftBusCalloc(sizeof(SoftBusDumpVarNode));
     if (varNode == NULL) {
@@ -89,7 +89,7 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(char *varName, SoftBusVarDum
     return varNode;
 }
 
-int32_t SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
+int32_t SoftBusAddDumpVarToList(const char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
@@ -206,7 +206,7 @@ int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
         SoftBusDumpErrInfo(fd, argv[1]);
         SoftBusDumpShowHelp(fd);
     }
-    
+
     return SOFTBUS_OK;
 }
 
@@ -243,4 +243,3 @@ void SoftBusHiDumperModuleDeInit(void)
     SoftBusHiDumperBusCenterDeInit();
     SoftBusHiDumperReleaseHandler();
 }
-
