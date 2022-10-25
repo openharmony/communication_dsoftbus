@@ -52,6 +52,10 @@
 #define WAIT_ACK_LAST_TIME 5000
 #define WAIT_FRAME_ACK_TIMEOUT_COUNT 24
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     TRANS_FILE_RECV_IDLE_STATE = 0,
     TRANS_FILE_RECV_START_STATE,
@@ -97,5 +101,7 @@ void ClinetTransProxyFileManagerDeinit(void);
 
 int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const FileFrame *oneFrame);
-
+#ifdef __cplusplus
+}
+#endif
 #endif
