@@ -330,13 +330,13 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
         cJSON_Delete(replyMsg);
         return SOFTBUS_ERR;
     }
-    
+
     if (sendUdpInfo(replyMsg, authId, seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendReplyeErrInfo failed.");
         cJSON_Delete(replyMsg);
         return SOFTBUS_ERR;
     }
-    
+
     cJSON_Delete(replyMsg);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info out.");
     return SOFTBUS_OK;
