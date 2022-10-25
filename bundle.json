@@ -102,6 +102,7 @@
           "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/discovery/manager:unittest",
           "//foundation/communication/dsoftbus/tests/core/discovery/ble/dispatcher:unittest",
+          "//foundation/communication/dsoftbus/tests/core/discovery/coap/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/auth_channel:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/proxy_channel:unittest",

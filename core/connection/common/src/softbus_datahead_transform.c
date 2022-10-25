@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 #include "softbus_datahead_transform.h"
-#include <fcntl.h>
-#include <securec.h>
-#include <sys/select.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "softbus_adapter_errcode.h"
-#include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_adapter_socket.h"
 

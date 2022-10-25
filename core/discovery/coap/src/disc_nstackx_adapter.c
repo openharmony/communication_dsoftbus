@@ -511,7 +511,7 @@ int32_t DiscNstackxInit(void)
         DeinitLocalInfo();
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
     }
-    SoftBusRegDiscVarDump(NSTACKX_LOCAL_DEV_INFO, &NstackxLocalDevInfoDump);
+    SoftBusRegDiscVarDump((char *)NSTACKX_LOCAL_DEV_INFO, &NstackxLocalDevInfoDump);
     return SOFTBUS_OK;
 }
 
