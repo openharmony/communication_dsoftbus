@@ -414,6 +414,8 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
     }
     if (g_gattsCallback != NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "SoftBusRegisterGattsCallbacks register again");
+    } else {
+        g_gattsCallback = callback;
     }
     int ret = GattsRegisterHalCallback();
     if (ret != SOFTBUS_OK) {
@@ -433,7 +435,6 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
             return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
         }
     }
-    g_gattsCallback = callback;
     return SOFTBUS_OK;
 }
 
