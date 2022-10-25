@@ -124,8 +124,8 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
     (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
     (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int*)&(appInfo->streamType));
-    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", &(appInfo->udpChannelOptType));
-    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", &(appInfo->udpConnType));
+    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int*)&(appInfo->udpChannelOptType));
+    (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int*)&(appInfo->udpConnType));
 
     int code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);

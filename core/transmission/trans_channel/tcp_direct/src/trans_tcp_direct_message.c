@@ -225,7 +225,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusFree(buffer);
         return SOFTBUS_ENCRYPT_ERR;
     }
-    SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc conn fail");
         SoftBusFree(buffer);
@@ -424,7 +424,7 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
 
 static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request)
 {
-    SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         return NULL;
     }
@@ -453,21 +453,21 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
         &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
-        errDesc = "Peer Device Session Not Create";
+        errDesc = (char *)"Peer Device Session Not Create";
         goto ERR_EXIT;
     }
 
     if (GetUuidByChanId(channelId, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get Uuid By ChanId failed.");
         errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
-        errDesc = "Get Uuid By ChanId failed";
+        errDesc = (char *)"Get Uuid By ChanId failed";
         goto ERR_EXIT;
     }
 
     if (SetAppInfoById(channelId, &conn->appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set app info by id failed.");
         errCode = SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
-        errDesc = "Set App Info By Id Failed";
+        errDesc = (char *)"Set App Info By Id Failed";
         goto ERR_EXIT;
     }
 
@@ -478,7 +478,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if (NotifyChannelOpened(channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Notify App Channel Opened Failed");
         errCode = SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED;
-        errDesc = "Notify App Channel Opened Failed";
+        errDesc = (char *)"Notify App Channel Opened Failed";
         goto ERR_EXIT;
     }
     
