@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef UNPUBLISHSERVICE_FUZZER_H
-#define UNPUBLISHSERVICE_FUZZER_H
+#ifndef DISCOVERYSERVICE_FUZZER_H
+#define DISCOVERYSERVICE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "discovery_fuzzer"
+#define FUZZ_PROJECT_NAME "discoveryservice_fuzzer"
 
-#endif
+#endif // DISCOVERYSERVICE_FUZZER_H

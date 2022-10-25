@@ -13,10 +13,5 @@
 
 group("fuzztest") {
   testonly = true
-  deps = [
-    "publishservice_fuzzer:fuzztest",
-    "startdiscovery_fuzzer:fuzztest",
-    "stopdiscovery_fuzzer:fuzztest",
-    "unpublishservice_fuzzer:fuzztest",
-  ]
+  deps = [ "discoveryservice_fuzzer:DiscoveryServiceFuzzTest" ]
 }
