@@ -225,6 +225,8 @@ static void InsertTrustedDevInfoRecord(void *param)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt database failed.");
             break;
         }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "insert udid:%s to trusted dev info table.", AnonymizesUDID(udid));
         if (InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
             (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
         }
@@ -234,7 +236,6 @@ static void InsertTrustedDevInfoRecord(void *param)
         SoftBusFree(udid);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "insert udid:%s to trusted dev info table.", AnonymizesUDID(udid));
     SoftBusFree(udid);
 }
 
