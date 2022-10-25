@@ -51,7 +51,7 @@ typedef struct {
 void SoftBusDumpShowHelp(int fd);
 void SoftBusDumpErrInfo(int fd, const char *argv);
 void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList);
-int32_t SoftBusAddDumpVarToList(char *dumpVar, SoftBusVarDumpCb cb, ListNode *subModoleVarList);
+int32_t SoftBusAddDumpVarToList(const char *dumpVar, SoftBusVarDumpCb cb, ListNode *subModoleVarList);
 void SoftBusReleaseDumpVar(ListNode *varList);
 int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler);
 int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv);

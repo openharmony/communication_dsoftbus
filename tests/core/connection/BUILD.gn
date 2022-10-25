@@ -15,9 +15,11 @@ group("unittest") {
   testonly = true
   deps = [
     "ble:softbus_conn_ble_test",
+    "br:softbus_conn_br_manager_test",
     "br:softbus_conn_br_test",
     "common/unittest:softbus_conn_common_test",
     "manager:softbus_conn_manager_test",
+    "p2p:softbus_connection_p2p_test",
     "tcp:softbus_tcp_manager_test",
   ]
 }
