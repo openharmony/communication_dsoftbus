@@ -27,11 +27,14 @@
 #include "trans_tcp_direct_wifi.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_message.h"
+#include "trans_tcp_direct_p2p.c"
 #include "softbus_protocol_def.h"
 
 using namespace testing::ext;
 
 namespace OHOS {
+
+#define TEST_TRANS_UDID "1234567"
 
 class TransTcpDirectTest : public testing::Test {
 public:
@@ -250,4 +253,20 @@ HWTEST_F(TransTcpDirectTest, SessionConnListTest001, TestSize.Level1)
 
     DestroySoftBusList(GetSessionConnList());
 }
+
+/**
+ * @tc.name: OpenAuthConnTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, OpenAuthConnTest001, TestSize.Level1)
+{
+    const char* uuid = TEST_TRANS_UDID;
+    uint32_t reqId = 1;
+
+    int32_t ret = OpenAuthConn(uuid, reqId, false);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
 } // namespace OHOS
