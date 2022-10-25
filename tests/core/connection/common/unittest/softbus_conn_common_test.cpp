@@ -1759,4 +1759,63 @@ HWTEST_F(SoftbusCommonTest, testSocket002, TestSize.Level1)
     ret = ConnGetPeerSocketAddr(TEST_FD, &g_socketAddr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 };
+
+/*
+ * @tc.name: testConnSetTcpUserTimeOut001
+ * @tc.desc: Test ConnSetTcpUserTimeOut param is invalid
+ * @tc.in: test module, test number,test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolDestroy operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
+{
+    int32_t fd = -1;
+    uint32_t millSec= 1;
+    int ret = ConnSetTcpUserTimeOut(fd, millSec);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+ * @tc.name: testConnSetTcpUserTimeOut002
+ * @tc.desc: Test ConnSetTcpUserTimeOut param is invalid
+ * @tc.in: test module, test number,test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The ThreadPoolDestroy operates normally.
+ */
+HWTEST_F(SoftbusCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
+{
+    int32_t fd = 1;
+    uint32_t millSec= 321;
+    int ret = ConnSetTcpUserTimeOut(fd, millSec);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: testSocket003
+* @tc.desc: test ConnGetPeerSocketAddr param is invalid
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusCommonTest, testSocket003, TestSize.Level1)
+{
+    int ret;
+    SocketAddr socketAddr;
+    ret = ConnGetPeerSocketAddr(INVALID_FD, &socketAddr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: testSocket004
+* @tc.desc: test ConnGetLocalSocketPort port
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusCommonTest, testSocket004, TestSize.Level1)
+{
+    int ret;
+    ret = ConnGetLocalSocketPort(INVALID_FD);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
 }

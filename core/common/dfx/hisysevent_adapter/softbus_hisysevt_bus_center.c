@@ -81,11 +81,6 @@ SoftBusEvtReportMsg g_bleDuration;
 
 static int32_t InitDurationMsgDefault(SoftBusEvtReportMsg *msg)
 {
-    if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dfx don't get rate duration msg");
-        return SOFTBUS_ERR;
-    }
-
     if (msg->paramArray == NULL) {
         msg->paramNum = SOFTBUS_EVT_PARAM_FOUR;
         msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(sizeof(SoftBusEvtParam) * msg->paramNum);
@@ -131,10 +126,6 @@ static int32_t InitDurationMsgDefault(SoftBusEvtReportMsg *msg)
 
 static void RecoveryStatisticDuration(SoftBusEvtReportMsg *msg)
 {
-    if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dfx don't get rate duration msg");
-        return;
-    }
     msg->paramArray[EVT_INDEX_ZERO].paramValue.i32v = DEFAULT_INT_VALUE;
     msg->paramArray[EVT_INDEX_ONE].paramValue.i32v = DEFAULT_INT_VALUE;
     msg->paramArray[EVT_INDEX_TWO].paramValue.i32v = DEFAULT_INT_VALUE;
@@ -144,15 +135,10 @@ static void RecoveryStatisticDuration(SoftBusEvtReportMsg *msg)
     if (msg == &g_bleDuration) {
         msg->paramArray[EVT_INDEX_THREE].paramValue.i32v = CONNECTION_ADDR_BLE;
     }
-    return;
 }
 
 static int32_t InitRateOfSuccessMsgDefault(SoftBusEvtReportMsg *msg)
 {
-    if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dfx don't get rate duration msg");
-        return SOFTBUS_ERR;
-    }
     if (msg->paramArray == NULL) {
         msg->paramNum = SOFTBUS_EVT_PARAM_FOUR;
         msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(sizeof(SoftBusEvtParam) * msg->paramNum);
@@ -200,10 +186,6 @@ static int32_t InitRateOfSuccessMsgDefault(SoftBusEvtReportMsg *msg)
 
 static void RecoveryStatisticRateOfSuccessMsg(SoftBusEvtReportMsg *msg)
 {
-    if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dfx don't get rate duration msg");
-        return;
-    }
     msg->paramArray[EVT_INDEX_ZERO].paramValue.i32v = DEFAULT_INT_VALUE;
     msg->paramArray[EVT_INDEX_ONE].paramValue.i32v = DEFAULT_INT_VALUE;
     msg->paramArray[EVT_INDEX_TWO].paramValue.f = DEFAULT_FLOAT_VAULE;
