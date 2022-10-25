@@ -448,11 +448,16 @@ EXIT:
 int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
+    int32_t channelType;
     if (!data.ReadInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NotifyAuthSuccessInner read channel Id failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = NotifyAuthSuccess(channelId);
+    if (!data.ReadInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NotifyAuthSuccessInner read channel type failed!");
+        return SOFTBUS_ERR;
+    }
+    int32_t retReply = NotifyAuthSuccess(channelId, channelType);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NotifyAuthSuccessInner write reply failed!");
         return SOFTBUS_ERR;

@@ -348,12 +348,12 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
 
 void NotifyAuthSuccess(int sessionId)
 {
-    int32_t channelId;
-    int32_t type;
+    int32_t channelId = -1;
+    int32_t channelType = -1;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NotifyAuthSuccess sessionId:%d", sessionId);
-    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
+    int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &channelType, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session=%d channel err, ret:%d.", sessionId, ret);
         return;
     }
 
@@ -368,8 +368,9 @@ void NotifyAuthSuccess(int sessionId)
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "device is client side");
 
-    if (ServerIpcNotifyAuthSuccess(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess err");
+    if (ServerIpcNotifyAuthSuccess(channelId, channelType) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "channel=%d type=%d ServerIpcNotifyAuthSuccess err", channelId, channelType);
         return;
     }
 }
