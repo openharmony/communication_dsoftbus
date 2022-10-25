@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 int32_t SoftBusConnHiDumperInit(void);
-int32_t SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb);
+int32_t SoftBusRegConnVarDump(const char *dumpVar, SoftBusVarDumpCb cb);
 void SoftBusHiDumperConnDeInit(void);
 
 #ifdef __cplusplus
