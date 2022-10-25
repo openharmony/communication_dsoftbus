@@ -15,23 +15,23 @@
 
 #include <securec.h>
 
+#include "auth_interface.h"
+#include "cJSON.h"
 #include "gtest/gtest.h"
 #include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "auth_interface.h"
-#include "cJSON.h"
+#include "softbus_protocol_def.h"
+
 #include <arpa/inet.h>
 #include <unistd.h>
 
 #include "trans_tcp_direct_listener.c"
 #include "trans_tcp_direct_manager.c"
-#include "trans_tcp_direct_wifi.h"
-#include "trans_tcp_direct_sessionconn.h"
-#include "trans_tcp_direct_message.c"
 #include "trans_tcp_direct_p2p.c"
-#include "softbus_protocol_def.h"
+#include "trans_tcp_direct_sessionconn.h"
+#include "trans_tcp_direct_wifi.h"
 
 using namespace testing::ext;
 
