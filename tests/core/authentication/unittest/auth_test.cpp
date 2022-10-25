@@ -1529,7 +1529,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONN_ID_Test_001, TestSize.
 * @tc.name: DUP_SESSION_KEY_LIST_Test_001
 * @tc.desc: Dup Session Key List test
 * @tc.type: FUNC
-* @tc.require: 
+* @tc.require:
 */
 HWTEST_F(AuthTest, DUP_SESSION_KEY_LIST_Test_001, TestSize.Level1)
 {
