@@ -31,10 +31,12 @@ void TransAuthDeinit(void);
 int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
 int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt, int32_t *channedId);
-int32_t TransNotifyAuthDataSuccess(int32_t channelId);
+int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connOpt);
 int32_t TransCloseAuthChannel(int32_t channelId);
 int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len);
-int32_t TransGetAuthAppInfoByChanId(int32_t channelId, AppInfo *appInfo);
+int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo);
+int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
