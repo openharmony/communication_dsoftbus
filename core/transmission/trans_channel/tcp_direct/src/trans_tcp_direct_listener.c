@@ -141,7 +141,7 @@ static int32_t CreateSessionConnNode(
     }
     conn->appInfo.protocol = clientAddr->socketOption.protocol;
 
-    char *authState = NULL;
+    const char *authState = "";
     if (strcpy_s(conn->appInfo.myData.authState, sizeof(conn->appInfo.myData.authState), authState) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy auth state to app info failed.");
         SoftBusFree(conn);
