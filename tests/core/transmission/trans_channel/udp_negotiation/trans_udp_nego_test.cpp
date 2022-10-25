@@ -83,8 +83,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest002, TestSize.Level1)
 {
     int ret;
-	  int32_t errCode = 0;
-	
+	int32_t errCode = 0;
     ret = TransPackReplyErrInfo(NULL, errCode, NULL);
     EXPECT_TRUE(ret != 0);
 }
@@ -101,7 +100,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest003, TestSize.Level1)
 	int64_t authId = 0;
 	int64_t seq = 0;
 	std::string str = "ProcessMessage";
- const char* msg = str.c_str();
+    const char* msg = str.c_str();
 	cJSON *replyMsg = cJSON_Parse(msg);
 	
     ret = sendUdpInfo(NULL, authId, seq);
@@ -121,8 +120,8 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest004, TestSize.Level1)
 {
     int ret;
 	int errCode = 0;
- std::string str = "ProcessMessage";
-  const char* errDesc = str.c_str();
+    std::string str = "ProcessMessage";
+    const char* errDesc = str.c_str();
     ret = SendReplyErrInfo(errCode, NULL, NULL, NULL);
     EXPECT_TRUE(ret != 0);
 	
@@ -173,12 +172,11 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
 {
-	//423 428 438
 	int64_t seq = 0;
 	std::string str = "ProcessMessage";
- const char* msgStr = str.c_str();
+    const char* msgStr = str.c_str();
 	cJSON *msg = cJSON_Parse(msgStr);
-	TransOnExchangeUdpInfoReply(NULL,seq, msg);
+	TransOnExchangeUdpInfoReply(NULL, seq, msg);
 }
 
 /**
@@ -189,9 +187,8 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest008, TestSize.Level1)
 {
-	//TransOnExchangeUdpInfoRequest 454.461.466.473
 	int64_t seq = 0;
-	TransOnExchangeUdpInfoRequest(NULL,seq, NULL);
+	TransOnExchangeUdpInfoRequest(NULL, seq, NULL);
 }
 
 /**
@@ -202,7 +199,6 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest008, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
 {
-	//StartExchangeUdpInfo 516
 	int32_t ret;
 	UdpChannelInfo channel;
 	(void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
@@ -219,7 +215,6 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest010, TestSize.Level1)
 {
-	//UdpModuleCb 737 754
 	int64_t authId = 0;
 	AuthTransData *data;
 	(void)memset_s(&data, sizeof(AuthTransData), 0, sizeof(AuthTransData));
