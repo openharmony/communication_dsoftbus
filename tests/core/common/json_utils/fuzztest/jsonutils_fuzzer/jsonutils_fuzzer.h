@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef STOPDISCOVERY_FUZZER_H
-#define STOPDISCOVERY_FUZZER_H
+#ifndef JSONUTILS_FUZZER_H
+#define JSONUTILS_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "discovery_fuzzer"
+#define FUZZ_PROJECT_NAME "jsonutils_fuzzer"
 
-#endif
+#endif // JSONUTILS_FUZZER_H
