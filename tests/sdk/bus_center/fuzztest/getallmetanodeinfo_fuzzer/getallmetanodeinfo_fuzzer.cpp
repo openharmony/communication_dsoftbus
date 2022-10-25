@@ -15,6 +15,8 @@
 
 #include "getallmetanodeinfo_fuzzer.h"
 #include <cstddef>
+#include <cstring>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -24,7 +26,8 @@ namespace OHOS {
         if (data == nullptr || size == 0) {
             return true;
         }
-        MetaNodeInfo *info = nullptr;
+
+        MetaNodeInfo info[MAX_META_NODE_NUM];
         int32_t infoNum = MAX_META_NODE_NUM;
         GetAllMetaNodeInfo((const char *)data, info, &infoNum);
         return true;
