@@ -218,7 +218,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 {
     (void)module;
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnDataEvent malloc fail.");
         return SOFTBUS_ERR;
