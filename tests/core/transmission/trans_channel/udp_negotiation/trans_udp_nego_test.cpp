@@ -14,6 +14,7 @@
  */
  
 #include <securec.h>
+#include<stdbool.h>
 
 #include "auth_interface.h"
 #include "gtest/gtest.h"
@@ -25,8 +26,6 @@
 #include "trans_udp_channel_manager.c"
 #include "trans_udp_negotiation.c"
 #include "trans_udp_negotiation_exchange.c"
-
-#define PARAM_NEANINGLESS 10
 
 using namespace testing::ext;
 
@@ -148,7 +147,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest005, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
 {
     int errCode = 0;
-    int needClose = 0;
+    bool needClose = true;
     AppInfo info;
     (void)memset_s(&info, sizeof(AppInfo), 0, sizeof(AppInfo));
     info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
