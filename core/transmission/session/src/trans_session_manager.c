@@ -163,7 +163,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     return SOFTBUS_OK;
 }
 
-void TransDelItemByPackageName(const char *pkgName)
+void TransDelItemByPackageName(const char *pkgName, int32_t pid)
 {
     if (pkgName == NULL || g_sessionServerList == NULL) {
         return;
@@ -176,7 +176,7 @@ void TransDelItemByPackageName(const char *pkgName)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
-        if (strcmp(pos->pkgName, pkgName) == 0) {
+        if ((strcmp(pos->pkgName, pkgName) == 0) && (pos->pid == pid)) {
             ListDelete(&pos->node);
             g_sessionServerList->cnt--;
             SoftBusFree(pos);
@@ -272,7 +272,7 @@ void TransOnLinkDown(const char *networkId, int32_t routeType)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
-        (void)TransServerOnChannelLinkDown(pos->pkgName, networkId, routeType);
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, networkId, routeType);
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
 

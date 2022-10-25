@@ -30,6 +30,7 @@
 #include "softbus_utils.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_proxychannel_callback.h"
 
 static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)
 {
@@ -498,9 +499,8 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
     }
     char sessionKey[BASE64KEY] = {0};
     AppInfo *appInfo = &(chan->appInfo);
-    int32_t appType = 0;
 
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, &(appType)) ||
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, (int32_t*)&(appInfo->appType)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chan->identity, sizeof(chan->identity)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId,
                                  sizeof(appInfo->peerData.deviceId)) ||
@@ -512,36 +512,40 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }
-    appInfo->appType = (AppType)appType;
 
+    if (appInfo->appType != APP_TYPE_INNER) {
+        if (TransProxyGetUidAndPidBySessionName(appInfo->myData.sessionName, &appInfo->myData.uid,
+            &appInfo->myData.pid) != SOFTBUS_OK) {
+            goto ERR_EXIT;
+        }
+    }
     if (appInfo->appType == APP_TYPE_NORMAL) {
-        int32_t ret = UnpackHandshakeMsgForNormal(root, appInfo, sessionKey, BASE64KEY);
-        if (ret != SOFTBUS_OK) {
-            cJSON_Delete(root);
-            return ret;
+        if (UnpackHandshakeMsgForNormal(root, appInfo, sessionKey, BASE64KEY) != SOFTBUS_OK) {
+            goto ERR_EXIT;
         }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
         if (TransProxyUnpackAuthHandshakeMsg(root, appInfo) != SOFTBUS_OK) {
-            cJSON_Delete(root);
-            return SOFTBUS_ERR;
+            goto ERR_EXIT;
         }
     } else {
         if (!GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, sizeof(sessionKey))) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg");
-            cJSON_Delete(root);
-            return SOFTBUS_ERR;
+            goto ERR_EXIT;
         }
         size_t len = 0;
         int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
             &len, (uint8_t *)sessionKey, strlen(sessionKey));
         if (len != sizeof(appInfo->sessionKey) || ret != 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decode session fail %d ", ret);
-            cJSON_Delete(root);
-            return SOFTBUS_ERR;
+            goto ERR_EXIT;
         }
     }
+
     cJSON_Delete(root);
     return SOFTBUS_OK;
+ERR_EXIT:
+    cJSON_Delete(root);
+    return SOFTBUS_ERR;
 }
 
 char *TransProxyPackIdentity(const char *identity)

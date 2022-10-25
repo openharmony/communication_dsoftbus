@@ -23,9 +23,10 @@ namespace OHOS {
 void SoftBusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     std::string pkgName;
-    SoftbusClientInfoManager::GetInstance().SoftbusRemoveService(remote.promote(), pkgName);
+    int32_t pid;
+    SoftbusClientInfoManager::GetInstance().SoftbusRemoveService(remote.promote(), pkgName, &pid);
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
         "client service %s died, remove it from softbus server", pkgName.c_str());
-    ClientDeathCallback(pkgName.c_str());
+    ClientDeathCallback(pkgName.c_str(), pid);
 }
 }  // namespace OHOS

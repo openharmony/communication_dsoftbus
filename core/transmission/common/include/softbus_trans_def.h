@@ -41,6 +41,7 @@ typedef struct {
     int32_t channelType;
     int32_t eventId;
     int32_t tvCount;
+    int32_t pid;
     const QosTv *tvList;
 } QosParam;
 
@@ -83,6 +84,12 @@ typedef struct {
 typedef struct {
     unsigned char stats[TRAFFIC_LEN];
 } TrafficStats;
+
+typedef struct TransReceiveData {
+    void *data;
+    uint32_t dataLen;
+    int32_t dataType;
+} TransReceiveData;
 
 #ifdef __cplusplus
 }

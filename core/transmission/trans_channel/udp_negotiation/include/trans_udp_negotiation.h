@@ -37,7 +37,7 @@ int32_t NotifyUdpQosEvent(const AppInfo *info, int eventId, int tvCount, const Q
 
 void ReleaseUdpChannelId(int32_t channelId);
 
-void TransUdpDeathCallback(const char *pkgName);
+void TransUdpDeathCallback(const char *pkgName, int32_t pid);
 #ifdef __cplusplus
 }
 #endif

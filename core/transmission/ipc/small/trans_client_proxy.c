@@ -57,9 +57,10 @@ static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
     return udpPort;
 }
 
-int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
+int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel opened ipc server push");
+    (void)pid;
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
@@ -79,10 +80,8 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     WriteBuffer(&io, channel->sessionKey, channel->keyLen);
     WriteString(&io, channel->peerSessionName);
     WriteString(&io, channel->peerDeviceId);
-    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        if (!WriteFileDescriptor(&io, channel->fd)) {
+    if ((channel->channelType == CHANNEL_TYPE_TCP_DIRECT) && (!WriteFileDescriptor(&io, channel->fd))) {
             return SOFTBUS_ERR;
-        }
     }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
@@ -111,9 +110,11 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     return ans;
 }
 
-int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t errCode)
+int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
+    int32_t errCode, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel open failed ipc server push");
+    (void)pid;
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
@@ -135,11 +136,12 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     return ans;
 }
 
-int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType)
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType, int32_t pid)
 {
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    (void)pid;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ClientIpcOnChannelLinkDown: pkgName=%s", pkgName);
 
     IpcIo io;
@@ -163,9 +165,10 @@ int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, i
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
+int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
+    (void)pid;
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
@@ -187,17 +190,18 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
 }
 
 int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
-                                      const void *data, unsigned int len, int32_t type)
+                                      TransReceiveData *receiveData, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
+    (void)pid;
     IpcIo io;
-    uint8_t *tmpData = (uint8_t *)SoftBusCalloc(len + MAX_SOFT_BUS_IPC_LEN);
-    IpcIoInit(&io, tmpData, len + MAX_SOFT_BUS_IPC_LEN, 0);
+    uint8_t *tmpData = (uint8_t *)SoftBusCalloc(receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN);
+    IpcIoInit(&io, tmpData, receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&io, channelId);
     WriteInt32(&io, channelType);
-    WriteInt32(&io, type);
-    WriteUint32(&io, len);
-    WriteBuffer(&io, data, len);
+    WriteInt32(&io, receiveData->dataType);
+    WriteUint32(&io, receiveData->dataLen);
+    WriteBuffer(&io, receiveData->data, receiveData->dataLen);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenClosed get svc failed.");

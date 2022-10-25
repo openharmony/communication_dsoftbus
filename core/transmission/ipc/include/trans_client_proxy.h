@@ -24,14 +24,15 @@
 extern "C" {
 #endif
 
-int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel);
-int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t errCode);
-int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType);
-int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType);
-int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType, const void *data,
-    uint32_t len, int32_t type);
+int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid);
+int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
+    int32_t errCode, int32_t pid);
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType, int32_t pid);
+int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid);
+int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+    TransReceiveData *receiveData, int32_t pid);
 int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param);
-int32_t InformPermissionChange(int32_t state, const char *pkgName);
+int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 }

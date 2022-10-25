@@ -90,7 +90,7 @@ int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, 
 
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
-    std::map<std::string, sptr<IRemoteObject>> proxyMap;
+    std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
@@ -101,7 +101,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
 
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
-    std::map<std::string, sptr<IRemoteObject>> proxyMap;
+    std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);

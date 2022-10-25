@@ -151,17 +151,23 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     channelInfo.groupId = AUTH_GROUP_ID;
     channelInfo.sessionKey = AUTH_SESSION_KEY;
     channelInfo.keyLen = strlen(channelInfo.sessionKey) + 1;
-    return g_cb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.sessionName, &channelInfo);
+    return g_cb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
+        appInfo->myData.sessionName, &channelInfo);
 }
 
-static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t channelId, int32_t errCode)
+static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode)
 {
-    return g_cb->OnChannelOpenFailed(pkgName, channelId, CHANNEL_TYPE_AUTH, errCode);
+    return g_cb->OnChannelOpenFailed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH, errCode);
 }
 
-static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t channelId)
+static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
 {
-    return g_cb->OnChannelClosed(pkgName, channelId, CHANNEL_TYPE_AUTH);
+    return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH);
+}
+
+static int32_t AuthGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    return g_cb->GetUidAndPidBySessionName(sessionName, uid, pid);
 }
 
 static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t len)
@@ -170,8 +176,13 @@ static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t l
     if (GetChannelInfoByAuthId(authId, &channel) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    return g_cb->OnDataReceived(channel.appInfo.myData.pkgName, channel.appInfo.myData.channelId, CHANNEL_TYPE_AUTH,
-        data, len, TRANS_SESSION_BYTES);
+    TransReceiveData receiveData;
+    receiveData.data = (void*)data;
+    receiveData.dataLen = len;
+    receiveData.dataType = TRANS_SESSION_BYTES;
+
+    return g_cb->OnDataReceived(channel.appInfo.myData.pkgName, channel.appInfo.myData.pid,
+        channel.appInfo.myData.channelId, CHANNEL_TYPE_AUTH, &receiveData);
 }
 
 static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
@@ -271,6 +282,11 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         TransPostAuthChannelErrMsg(authId, ret, "check msginfo failed");
         goto EXIT_ERR;
     }
+    ret = AuthGetUidAndPidBySessionName(appInfo.myData.sessionName, &appInfo.myData.uid, &appInfo.myData.pid);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthGetUidAndPidBySessionName failed");
+        goto EXIT_ERR;
+    }
     ret = OnRequsetUpdateAuthChannel(authId, &appInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "update auth channel failed");
@@ -320,7 +336,8 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
 EXIT_ERR:
     AuthCloseChannel(authId);
     DelAuthChannelInfoByChanId(info.appInfo.myData.channelId);
-    (void)NotifyOpenAuthChannelFailed(info.appInfo.myData.pkgName, info.appInfo.myData.channelId, ret);
+    (void)NotifyOpenAuthChannelFailed(info.appInfo.myData.pkgName, info.appInfo.myData.pid,
+        info.appInfo.myData.channelId, ret);
     return;
 }
 
@@ -358,7 +375,8 @@ static void OnDisconnect(int32_t authId)
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv auth=%d channel disconnect event.", authId);
     DelAuthChannelInfoByChanId(dstInfo.appInfo.myData.channelId);
-    (void)NofifyCloseAuthChannel(dstInfo.appInfo.myData.pkgName, dstInfo.appInfo.myData.channelId);
+    (void)NofifyCloseAuthChannel(dstInfo.appInfo.myData.pkgName, dstInfo.appInfo.myData.pid,
+        dstInfo.appInfo.myData.channelId);
 }
 
 static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo)
@@ -646,7 +664,7 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         ListDelete(&channel->node);
         g_authChannelList->cnt--;
         AuthCloseChannel(channel->authId);
-        NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channelId);
+        NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
         SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_OK;

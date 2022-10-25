@@ -125,13 +125,14 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
-    return g_channelCb->OnChannelOpened((const char *)&appInfo->myData.pkgName, appInfo->myData.sessionName, &info);
+    return g_channelCb->OnChannelOpened((const char *)&appInfo->myData.pkgName, appInfo->myData.pid,
+        appInfo->myData.sessionName, &info);
 }
 
 int32_t NotifyUdpChannelClosed(const AppInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel closed, pkg[%s].", info->myData.pkgName);
-    int32_t ret = g_channelCb->OnChannelClosed(info->myData.pkgName,
+    int32_t ret = g_channelCb->OnChannelClosed(info->myData.pkgName, info->myData.pid,
         (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "on channel closed failed, ret=%d.", ret);
@@ -149,7 +150,15 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
-    ret = g_channelCb->OnChannelOpenFailed(pkgName, (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);
+    int32_t uid = 0;
+    int32_t pid = 0;
+    ret = g_channelCb->GetUidAndPidBySessionName(info->myData.sessionName, &uid, &pid);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uid and pid err.");
+        return SOFTBUS_ERR;
+    }
+
+    ret = g_channelCb->OnChannelOpenFailed(pkgName, pid, (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify udp channel open failed err.");
         return SOFTBUS_ERR;
@@ -172,6 +181,7 @@ int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount,
     param.eventId = eventId;
     param.tvCount = tvCount;
     param.tvList = tvList;
+    param.pid = info->myData.pid;
     return g_channelCb->OnQosEvent(pkgName, &param);
 }
 
@@ -361,6 +371,13 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
         appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetPkgNameBySessionName Failed, ret = %d", ret);
+        return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
+    }
+
+    ret = g_channelCb->GetUidAndPidBySessionName(appInfo->myData.sessionName, &appInfo->myData.uid,
+        &appInfo->myData.pid);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetUidAndPidBySessionName Failed, ret = %d", ret);
         return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
     }
 
@@ -808,7 +825,7 @@ void TransUdpChannelDeinit(void)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans udp channel deinit success.");
 }
 
-void TransUdpDeathCallback(const char *pkgName)
+void TransUdpDeathCallback(const char *pkgName, int32_t pid)
 {
     if (GetUdpChannelLock() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
@@ -817,7 +834,8 @@ void TransUdpDeathCallback(const char *pkgName)
     SoftBusList *udpChannelList = GetUdpChannelMgrHead();
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(udpChannelList->list), UdpChannelInfo, node) {
-        if (strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) {
+        if ((strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) &&
+            (udpChannelNode->info.myData.pid = pid)) {
             udpChannelNode->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
             if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open udp negotiation failed.");

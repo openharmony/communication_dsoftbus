@@ -40,7 +40,8 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnSesssionOpenFailProc: channelId=%d, side=%d, status=%d",
         node->channelId, node->serverSide, node->status);
     if (node->serverSide == false) {
-        if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->channelId, errCode) != SOFTBUS_OK) {
+        if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->appInfo.myData.pid,
+            node->channelId, errCode) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify channel open fail err");
         }
     }
@@ -184,7 +185,7 @@ void TransTcpDirectDeinit(void)
     (void)RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, NULL);
 }
 
-void TransTdcDeathCallback(const char *pkgName)
+void TransTdcDeathCallback(const char *pkgName, int32_t pid)
 {
     if (pkgName == NULL) {
         return;
@@ -201,7 +202,7 @@ void TransTdcDeathCallback(const char *pkgName)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
-        if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
+        if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
             ListDelete(&item->node);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);

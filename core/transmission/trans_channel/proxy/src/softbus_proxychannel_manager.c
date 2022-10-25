@@ -1195,7 +1195,7 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
     return;
 }
 
-void TransProxyDeathCallback(const char *pkgName)
+void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 {
     if ((pkgName == NULL) || (g_proxyChannelList == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pkgName or proxy channel list is null.");
@@ -1211,7 +1211,7 @@ void TransProxyDeathCallback(const char *pkgName)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (strcmp(item->appInfo.myData.pkgName, pkgName) == 0) {
+        if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
             ListDelete(&(item->node));
             g_proxyChannelList->cnt--;
             ListAdd(&destroyList, &(item->node));

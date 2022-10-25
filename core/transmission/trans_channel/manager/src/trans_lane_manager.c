@@ -32,6 +32,7 @@ typedef struct {
     int32_t channelId;
     int32_t channelType;
     char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
     uint32_t laneId;
     LaneConnInfo laneConnInfo;
 } TransLaneInfo;
@@ -135,7 +136,7 @@ void TransLaneMgrDeinit(void)
 }
 
 int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo, uint32_t laneId,
-    const char *pkgName)
+    AppInfoData *myData)
 {
     if (g_channelLaneList == NULL) {
         return SOFTBUS_ERR;
@@ -148,12 +149,13 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     newLane->channelId = channelId;
     newLane->channelType = channelType;
     newLane->laneId = laneId;
+    newLane->pid = myData->pid;
     if (memcpy_s(&(newLane->laneConnInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK) {
         SoftBusFree(newLane);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy failed.");
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(newLane->pkgName, sizeof(newLane->pkgName), pkgName) != EOK) {
+    if (strcpy_s(newLane->pkgName, sizeof(newLane->pkgName), myData->pkgName) != EOK) {
         SoftBusFree(newLane);
         return SOFTBUS_ERR;
     }
@@ -210,7 +212,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
     return SOFTBUS_ERR;
 }
 
-void TransLaneMgrDeathCallback(const char *pkgName)
+void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
 {
     if (g_channelLaneList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
@@ -223,7 +225,7 @@ void TransLaneMgrDeathCallback(const char *pkgName)
     TransLaneInfo *laneItem = NULL;
     TransLaneInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
-        if (strcmp(laneItem->pkgName, pkgName) == 0) {
+        if ((strcmp(laneItem->pkgName, pkgName) == 0) && (laneItem->pid == pid)) {
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
             LnnFreeLane(laneItem->laneId);
