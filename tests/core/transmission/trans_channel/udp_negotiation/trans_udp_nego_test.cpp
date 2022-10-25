@@ -70,7 +70,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     cJSON *msg = cJSON_Parse(msgStr);
     ret = TransUnpackReplyErrInfo(msg, &errCode);
-    EXPECT_TRUE(ret != 0); 
+    EXPECT_TRUE(ret != 0);
 }
 
 /**
@@ -203,7 +203,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     ret = StartExchangeUdpInfo(&channel, NULL, NULL);
-	EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != 0);
 }
 
 /**
