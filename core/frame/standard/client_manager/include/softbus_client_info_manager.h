@@ -25,22 +25,23 @@
 #include "iremote_proxy.h"
 
 namespace OHOS {
+typedef std::pair<int32_t, std::pair<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>>> ClientObjPair;
 class SoftbusClientInfoManager {
 public:
     static SoftbusClientInfoManager &GetInstance();
     int32_t SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
-        const sptr<IRemoteObject::DeathRecipient> &abilityDeath);
-    int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName);
+        const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid);
+    int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName, int32_t* pid);
     sptr<IRemoteObject> GetSoftbusClientProxy(const std::string &pkgName);
-    void GetSoftbusClientProxyMap(std::map<std::string, sptr<IRemoteObject>> &softbusClientMap);
-    bool SoftbusClientIsExist(const std::string &pkgName);
+    sptr<IRemoteObject> GetSoftbusClientProxy(const std::string &pkgName, int32_t pid);
+    void GetSoftbusClientProxyMap(std::multimap<std::string, sptr<IRemoteObject>> &softbusClientMap);
+    bool SoftbusClientIsExist(const std::string &pkgName, int32_t pid);
 
 private:
     ~SoftbusClientInfoManager() = default;
     SoftbusClientInfoManager() = default;
     std::recursive_mutex clientObjectMapLock_;
-    std::unordered_map<std::string, std::pair<sptr<IRemoteObject>,
-        sptr<IRemoteObject::DeathRecipient>>> clientObjectMap_;
+    std::unordered_multimap<std::string, ClientObjPair> clientObjectMap_;
     DISALLOW_COPY_AND_MOVE(SoftbusClientInfoManager);
 };
 } // namespace OHOS

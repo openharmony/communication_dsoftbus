@@ -29,17 +29,19 @@ extern "C" {
 
 int32_t TransProxySetCallBack(const IServerChannelCallBack *cb);
 
-int32_t TransProxyOnChannelOpened(const char *pkgName, const char *sessionName,
+int32_t TransProxyOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel);
 
-int32_t TransProxyOnChannelClosed(const char *pkgName, int32_t channelId);
+int32_t TransProxyOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId);
 
-int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t errCode);
+int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode);
 
-int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t channelId,
-    const void *data, uint32_t len, int32_t type);
+int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
+    TransReceiveData *receiveData);
 
 int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t len);
+
+int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid);
 
 #ifdef __cplusplus
 #if __cplusplus

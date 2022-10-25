@@ -28,16 +28,16 @@
 #include "softbus_utils.h"
 #include "trans_lane_pending_ctl.h"
 
-static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t channelId)
+static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
-    int32_t ret = TransProxyOnChannelClosed(pkgName, channelId);
+    int32_t ret = TransProxyOnChannelClosed(pkgName, pid, channelId);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel close, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
 
-static int32_t NotifyNormalChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t errCode)
+static int32_t NotifyNormalChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode)
 {
-    int32_t ret = TransProxyOnChannelOpenFailed(pkgName, channelId, errCode);
+    int32_t ret = TransProxyOnChannelOpenFailed(pkgName, pid, channelId, errCode);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel open fail, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
@@ -72,7 +72,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
 
-    ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.sessionName, &info);
+    ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channel open, channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
@@ -115,7 +115,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
         case APP_TYPE_AUTH:
-            ret = NotifyNormalChannelOpenFailed(appInfo->myData.pkgName, channelId, errCode);
+            ret = NotifyNormalChannelOpenFailed(appInfo->myData.pkgName, appInfo->myData.pid, channelId, errCode);
             break;
         case APP_TYPE_INNER:
             NotifyNetworkingChannelOpenFailed(channelId, appInfo->peerData.deviceId);
@@ -139,7 +139,7 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
         case APP_TYPE_AUTH:
-            ret = NotifyNormalChannelClosed(appInfo->myData.pkgName, channelId);
+            ret = NotifyNormalChannelClosed(appInfo->myData.pkgName, appInfo->myData.pid, channelId);
             break;
         case APP_TYPE_INNER:
             NotifyNetworkingChannelClosed(channelId);
@@ -160,10 +160,10 @@ int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, con
 
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
-            TransOnNormalMsgReceived(appInfo->myData.pkgName, channelId, data, len);
+            TransOnNormalMsgReceived(appInfo->myData.pkgName, appInfo->myData.pid, channelId, data, len);
             break;
         case APP_TYPE_AUTH:
-            TransOnAuthMsgReceived(appInfo->myData.pkgName, channelId, data, len);
+            TransOnAuthMsgReceived(appInfo->myData.pkgName, appInfo->myData.pid, channelId, data, len);
             break;
         case APP_TYPE_INNER:
             NotifyNetworkingMsgReceived(channelId, data, len);

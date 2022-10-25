@@ -86,7 +86,8 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name or object is nullptr\n");
         return SOFTBUS_ERR;
     }
-    if (SoftbusClientInfoManager::GetInstance().SoftbusClientIsExist(clientPkgName)) {
+    int32_t pid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
+    if (SoftbusClientInfoManager::GetInstance().SoftbusClientIsExist(clientPkgName, pid)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus client is exist.\n");
         return SOFTBUS_OK;
     }
@@ -100,7 +101,8 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddDeathRecipient failed\n");
         return SOFTBUS_ERR;
     }
-    if (SoftbusClientInfoManager::GetInstance().SoftbusAddService(clientPkgName, object, abilityDeath) != SOFTBUS_OK) {
+    if (SoftbusClientInfoManager::GetInstance().SoftbusAddService(clientPkgName,
+        object, abilityDeath, pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus add client service failed\n");
         return SOFTBUS_ERR;
     }

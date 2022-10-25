@@ -33,7 +33,7 @@ int TransServerInit(void);
 
 void TransServerDeinit(void);
 
-void TransServerDeathCallback(const char *pkgName);
+void TransServerDeathCallback(const char *pkgName, int32_t pid);
 #ifdef __cplusplus
 }
 #endif

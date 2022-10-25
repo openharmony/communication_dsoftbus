@@ -233,7 +233,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
 
     if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType,
-        &connInfo, laneId, appInfo->myData.pkgName) != SOFTBUS_OK) {
+        &connInfo, laneId, &appInfo->myData) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
 
@@ -368,6 +368,8 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
 
 int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
+    (void)chanType;
+    (void)appType;
     uint32_t laneId;
     int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
     if (ret != SOFTBUS_OK) {
@@ -459,12 +461,12 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
     }
 }
 
-void TransChannelDeathCallback(const char *pkgName)
+void TransChannelDeathCallback(const char *pkgName, int32_t pid)
 {
-    TransProxyDeathCallback(pkgName);
-    TransTdcDeathCallback(pkgName);
-    TransLaneMgrDeathCallback(pkgName);
-    TransUdpDeathCallback(pkgName);
+    TransProxyDeathCallback(pkgName, pid);
+    TransTdcDeathCallback(pkgName, pid);
+    TransLaneMgrDeathCallback(pkgName, pid);
+    TransUdpDeathCallback(pkgName, pid);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,

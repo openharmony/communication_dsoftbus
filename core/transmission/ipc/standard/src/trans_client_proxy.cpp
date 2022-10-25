@@ -23,20 +23,20 @@
 
 using namespace OHOS;
 
-static sptr<TransClientProxy> GetClientProxy(const char *pkgName)
+static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 {
-    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
     return clientProxy;
 }
 
-int32_t InformPermissionChange(int32_t state, const char *pkgName)
+int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -44,9 +44,9 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName)
     return clientProxy->OnClientPermissonChange(pkgName, state);
 }
 
-int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
+int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -54,9 +54,10 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     return clientProxy->OnChannelOpened(sessionName, channel);
 }
 
-int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t errCode)
+int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
+    int32_t errCode, int32_t pid)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -65,9 +66,9 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType)
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType, int32_t pid)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -76,9 +77,9 @@ int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, i
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
+int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -87,21 +88,22 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType, const void *data,
-                                      unsigned int len, int32_t type)
+int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+    TransReceiveData *receiveData, int32_t pid)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    clientProxy->OnChannelMsgReceived(channelId, channelType, data, len, type);
+    clientProxy->OnChannelMsgReceived(channelId, channelType, receiveData->data, receiveData->dataLen,
+        receiveData->dataType);
     return SOFTBUS_OK;
 }
 
 int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, param->pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;

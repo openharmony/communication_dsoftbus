@@ -24,14 +24,15 @@ namespace OHOS {
 using namespace Security::AccessToken;
 class PermissionStatusChangeCb : public PermStateChangeCallbackCustomize {
 public:
-    PermissionStatusChangeCb(const PermStateChangeScope &scopeInfo, std::string _pkgName)
-        : PermStateChangeCallbackCustomize(scopeInfo), pkgName(_pkgName) {}
+    PermissionStatusChangeCb(const PermStateChangeScope &scopeInfo, std::string _pkgName, int32_t _pid)
+        : PermStateChangeCallbackCustomize(scopeInfo), pkgName(_pkgName), pid(_pid) {}
     ~PermissionStatusChangeCb(void) {}
     void PermStateChangeCallback(PermStateChangeInfo& result) override;
     std::string pkgName;
+    int32_t pid;
 };
 
 void RegisterDataSyncPermission(const uint32_t callingTokenId,
-                                const std::string permissionName, const std::string pkgName);
+                                const std::string permissionName, const std::string pkgName, int32_t pid);
 } // namespace OHOS
 #endif // PERMISSION_STATUS_CHANGE_CB_H
