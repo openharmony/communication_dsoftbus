@@ -24,8 +24,8 @@ namespace OHOS {
         if (data == nullptr || size == 0) {
             return true;
         }
-        char *pkgName = nullptr;
-        StopTimeSync(pkgName, (const char *)data);
+
+        StopTimeSync((const char *)data, (const char *)data);
         return true;
     }
 }
