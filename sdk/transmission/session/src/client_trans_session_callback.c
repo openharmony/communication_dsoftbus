@@ -42,6 +42,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->isServer = channel->isServer;
     session->isEnable = true;
     session->info.flag = (int32_t)flag;
+    session->businessType = channel->businessType;
     session->routeType = channel->routeType;
     session->fileEncrypt = channel->encrypt;
     session->algorithm = channel->algorithm;

@@ -107,6 +107,7 @@ typedef enum {
     BUSINESS_TYPE_FILE = 3,
     BUSINESS_TYPE_STREAM = 4,
 
+    BUSINESS_TYPE_NOT_CARE,
     BUSINESS_TYPE_BUTT,
 } BusinessType;
 

@@ -59,6 +59,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.encrypt = appInfo->encrypt;
     info.algorithm = appInfo->algorithm;
     info.crc = appInfo->crc;
+    info.businessType = appInfo->businessType;
 
     int32_t ret = SOFTBUS_ERR;
     if (appInfo->appType != APP_TYPE_AUTH) {
