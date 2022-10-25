@@ -225,7 +225,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusFree(buffer);
         return SOFTBUS_ENCRYPT_ERR;
     }
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc conn fail");
         SoftBusFree(buffer);
@@ -424,7 +424,7 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
 
 static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request)
 {
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         return NULL;
     }
