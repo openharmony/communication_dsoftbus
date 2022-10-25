@@ -19,6 +19,7 @@ ble_connection_deps = []
 if (dsoftbus_feature_conn_ble == false) {
   ble_connection_src = [ "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection_virtual.c" ]
   ble_connection_inc = [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/common/include",
   ]

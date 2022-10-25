@@ -156,6 +156,19 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbToRecoveryNetwork(void)
+{
+    if (SoftBusGetBtState() != BLE_ENABLE || LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB no need to recovery ble network.");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB BT has been turned on, enable ble heartbeat process");
+    if (LnnEnableHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1, true) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl enable ble heartbeat to recovery fail");
+        return;
+    }
+}
+
 #ifdef HB_CONDITION_HAS_TRUSTED_RELATION
 static void HbFreeAccountGroups(char *accountGroups)
 {
@@ -199,17 +212,11 @@ static bool HbHasTrustedDeviceRelation(void)
 int32_t LnnStartHeartbeatFrameDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) FSM start.");
-    if (SoftBusGetBtState() == BLE_ENABLE && !LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BT has been turned on");
-        if (LnnEnableHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1, true) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl enable ble heartbeat fail");
-            return SOFTBUS_ERR;
-        }
-    }
     if (LnnHbMediumMgrInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium manager init fail");
         return SOFTBUS_ERR;
     }
+    HbToRecoveryNetwork();
     if (LnnStartNewHbStrategyFsm() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl start strategy fsm fail");
         return SOFTBUS_ERR;
@@ -297,14 +304,6 @@ void LnnHbOnAuthGroupCreated(void)
 
 void LnnHbOnAuthGroupDeleted(void)
 {
-    int32_t ret;
-
-    ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB account group deleted send ble heartbeat fail, ret=%d", ret);
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB send once ble broadcast to notify account group deleted.");
 #ifdef HB_CONDITION_HAS_TRUSTED_RELATION
     if (!HbHasTrustedDeviceRelation()) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "no trusted relation, heartbeat(HB) process stop.");
@@ -313,6 +312,13 @@ void LnnHbOnAuthGroupDeleted(void)
         return;
     }
 #endif
+
+    int32_t ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB account group deleted send ble heartbeat fail, ret=%d", ret);
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB send once ble broadcast to notify account group deleted.");
 }
 
 int32_t LnnInitHeartbeat(void)

@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "softbus_adapter_bt_common.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
-
-#define BLE_DISABLE 0
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
