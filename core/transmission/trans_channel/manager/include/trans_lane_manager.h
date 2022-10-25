@@ -30,7 +30,7 @@ int32_t TransLaneMgrInit(void);
 void TransLaneMgrDeinit(void);
 
 int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo, uint32_t laneId,
-    AppInfoData *myDatae);
+    AppInfoData *myData);
 
 int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType);
 
