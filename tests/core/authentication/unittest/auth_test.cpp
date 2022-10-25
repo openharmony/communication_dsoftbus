@@ -34,12 +34,14 @@
 #include "softbus_access_token_test.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_net_builder.h"
 
 namespace OHOS {
 using namespace testing::ext;
 constexpr uint32_t TEST_DATA_LEN = 10;
 constexpr uint32_t CRYPT_DATA_LEN = 200;
 constexpr uint32_t P2P_MAC_LEN = 6;
+constexpr uint32_t ENCRYPT_OVER_HEAD_LEN_TEST = 32;
 
 class AuthTest : public testing::Test {
 public:
@@ -1337,5 +1339,494 @@ HWTEST_F(AuthTest, AUTH_START_LISTENING_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
     ret = AuthStartListening(AUTH_LINK_TYPE_P2P, ip, port);
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001
+* @tc.desc: Find Auth Request By Conn Info test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001, TestSize.Level1)
+{
+    AuthConnInfo *authConnInfo = nullptr;
+    AuthRequest *request = nullptr;
+    AuthConnInfo authConnInfoValue;
+    AuthRequest requestValue;
+    (void)memset_s(&authConnInfoValue, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    (void)memset_s(&requestValue, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    int32_t ret = FindAuthRequestByConnInfo(authConnInfo, request);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = FindAuthRequestByConnInfo(&authConnInfoValue, request);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = FindAuthRequestByConnInfo(&authConnInfoValue, &requestValue);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+}
+
+/*
+* @tc.name: CHECK_VERIFY_CALLBACK_Test_001
+* @tc.desc: Check Verify Callback test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, CHECK_VERIFY_CALLBACK_Test_001, TestSize.Level1)
+{
+    bool ret = CheckVerifyCallback(LnnGetVerifyCallback());
+    EXPECT_TRUE(ret == true);
+    ret = CheckVerifyCallback(nullptr);
+    EXPECT_TRUE(ret == false);
+    AuthVerifyCallback verifyCb = {
+        .onVerifyPassed = nullptr,
+        .onVerifyFailed = nullptr,
+    };
+    ret = CheckVerifyCallback(&verifyCb);
+    EXPECT_TRUE(ret == false);
+}
+
+static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".",
+        requestId, authId);
+}
+
+static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpenFailedTest: requestId = %d, reason = %d.",
+        requestId, reason);
+}
+/*
+* @tc.name: CHECK_AUTH_CONN_CALLBACK_Test_001
+* @tc.desc: Check Auth Conn Callback test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, CHECK_AUTH_CONN_CALLBACK_Test_001, TestSize.Level1)
+{
+    AuthConnCallback cb = {
+        .onConnOpened = OnConnOpenedTest,
+        .onConnOpenFailed = OnConnOpenFailedTest,
+    };
+    AuthConnCallback connCb = {
+        .onConnOpened = nullptr,
+        .onConnOpenFailed = nullptr,
+    };
+    bool ret = CheckAuthConnCallback(nullptr);
+    EXPECT_TRUE(ret == false);
+    ret = CheckAuthConnCallback(&connCb);
+    EXPECT_TRUE(ret == false);
+    ret = CheckAuthConnCallback(&cb);
+    EXPECT_TRUE(ret == true);
+}
+
+/*
+* @tc.name: AUTH_SESSION_START_AUTH_Test_001
+* @tc.desc: Auth Session Start Auth test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
+{
+    uint32_t requestId = 0;
+    uint64_t connId = 0;
+    AuthConnInfo *connInfo = nullptr;
+    int32_t ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, connInfo, false);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: AUTH_SESSION_PROCESS_DEV_ID_DATA_Test_001
+* @tc.desc: Auth Session Process Dev Id Data test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_ID_DATA_Test_001,
+    TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    uint8_t *data = nullptr;
+    uint32_t len = 0;
+    int32_t ret = AuthSessionProcessDevIdData(authSeq, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: AUTH_SESSION_SAVE_SESSION_KEY_Test_001
+* @tc.desc: Auth Session Save Session Key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_SESSION_SAVE_SESSION_KEY_Test_001, TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    uint8_t *key = nullptr;
+    uint32_t len = 0;
+    int32_t ret = AuthSessionSaveSessionKey(authSeq, key, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: AUTH_SESSION_HANDLE_AUTH_RESULT_Test_001
+* @tc.desc: Auth Session Handle Auth Result test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_SESSION_HANDLE_AUTH_RESULT_Test_001, TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    int32_t reason = 0;
+    int32_t ret = AuthSessionHandleAuthResult(authSeq, reason);
+    EXPECT_TRUE(ret == NULL);
+}
+
+/*
+* @tc.name: AUTH_SESSION_PROCESS_DEV_INFO_DATA_Test_001
+* @tc.desc: Auth Session Process Dev Info Data test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_INFO_DATA_Test_001, TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    const uint8_t *data = nullptr;
+    uint32_t len = 0;
+    int32_t ret = AuthSessionProcessDevInfoData(authSeq, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: AUTH_SESSION_PROCESS_DEV_INFO_DATA_BY_CONN_ID_Test_001
+* @tc.desc: Auth Session Process Dev Info Data By Conn Id test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_INFO_DATA_BY_CONN_ID_Test_001, TestSize.Level1)
+{
+    int64_t connId = 0;
+    bool isServer = false;
+    const uint8_t *data = nullptr;
+    uint32_t len = 0;
+    int32_t ret = AuthSessionProcessDevInfoDataByConnId(connId, isServer, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONN_ID_Test_001
+* @tc.desc: Auth Session Process Close Ack By Conn Id test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONN_ID_Test_001, TestSize.Level1)
+{
+    int64_t connId = 0;
+    bool isServer = false;
+    const uint8_t *data = nullptr;
+    uint32_t len = 0;
+    int32_t ret = AuthSessionProcessCloseAckByConnId(connId, isServer, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: DUP_SESSION_KEY_LIST_Test_001
+* @tc.desc: Dup Session Key List test
+* @tc.type: FUNC
+* @tc.require: 
+*/
+HWTEST_F(AuthTest, DUP_SESSION_KEY_LIST_Test_001, TestSize.Level1)
+{
+    SessionKeyList *srcList = nullptr;
+    SessionKeyList *dstList = nullptr;
+    int32_t ret = DupSessionKeyList(srcList, dstList);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: HAS_SESSION_KEY_Test_001
+* @tc.desc: Has Session Key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, HAS_SESSION_KEY_Test_001, TestSize.Level1)
+{
+    SessionKeyList *list = nullptr;
+    int32_t ret = HasSessionKey(list);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+* @tc.name: ADD_SESSION_KEY_Test_001
+* @tc.desc: Add Session Key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, ADD_SESSION_KEY_Test_001, TestSize.Level1)
+{
+    SessionKeyList *list = nullptr;
+    int32_t index = 0;
+    SessionKey *key = nullptr;
+    SessionKey keyValue;
+    SessionKeyList listValue;
+    int32_t ret = AddSessionKey(list, index, key);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
+    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
+    ret = AddSessionKey(&listValue, index, &keyValue);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: GET_LATEST_SESSION_KEY_Test_001
+* @tc.desc: Get Latest Session Key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, GET_LATEST_SESSION_KEY_Test_001, TestSize.Level1)
+{
+    SessionKeyList *list = nullptr;
+    int32_t index = 0;
+    SessionKey *key = nullptr;
+    SessionKey keyValue;
+    SessionKeyList listValue;
+    int32_t ret = GetLatestSessionKey(list, &index, key);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
+    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
+    ret = GetLatestSessionKey(&listValue, &index, &keyValue);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: GET_SESSION_KEY_BY_INDEX_Test_001
+* @tc.desc: Get Session Key By Index test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, GET_SESSION_KEY_BY_INDEX_Test_001, TestSize.Level1)
+{
+    SessionKeyList *list = nullptr;
+    int32_t index = 0;
+    SessionKey *key = nullptr;
+    SessionKey keyValue;
+    SessionKeyList listValue;
+    int32_t ret = GetSessionKeyByIndex(list, index, key);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
+    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
+    ret = GetLatestSessionKey(&listValue, &index, &keyValue);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: ENCRYPT_DATA_Test_001
+* @tc.desc: Encrypt Data test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, ENCRYPT_DATA_Test_001, TestSize.Level1)
+{
+    SessionKeyList *list = nullptr;
+    SessionKeyList listValue;
+    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
+    uint8_t indata[TEST_DATA_LEN] = "1234";
+    int32_t inLen = strlen(indata);
+    uint8_t outData[TEST_DATA_LEN];
+    uint32_t outLen = TEST_DATA_LEN;
+    int32_t ret = EncryptData(list, indata, inLen, outData, &outLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = EncryptData(&listValue, indata, inLen, outData, &outLen);
+    EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+}
+
+/*
+* @tc.name: DECRYPT_DATA_Test_001
+* @tc.desc: Decrypt Data test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, DECRYPT_DATA_Test_001, TestSize.Level1)
+{
+    SessionKeyList *list = nullptr;
+    SessionKeyList listValue;
+    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
+    uint8_t indata[TEST_DATA_LEN] = "1234";
+    uint32_t inLen = strlen(indata);
+    int32_t inLenValue = ENCRYPT_OVER_HEAD_LEN_TEST + 1;
+    uint8_t outData[TEST_DATA_LEN];
+    uint32_t outLen = TEST_DATA_LEN;
+    int32_t ret = DecryptData(list, indata, inLenValue, outData, &outLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DecryptData(&listValue, indata, inLen, outData, &outLen);
+    EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
+}
+
+/*
+* @tc.name: PACK_DEVICE_INFO_MESSAGE_Test_001
+* @tc.desc: Pack Device Info Message test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, PACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
+{
+    int32_t linkType = 1;
+    SoftBusVersion version = SOFTBUS_OLD_V1;
+    bool isMetaAuth = false;
+    char *msg = PackDeviceInfoMessage(linkType, version, isMetaAuth);
+    EXPECT_TRUE(msg == NULL);
+}
+
+/*
+* @tc.name: UNPACK_DEVICE_INFO_MESSAGE_Test_001
+* @tc.desc: Unpack Device Info Message test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
+{
+    const char *msg = "";
+    int32_t linkType = 1;
+    SoftBusVersion version = SOFTBUS_OLD_V1;
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    bool isMetaAuth = false;
+    int32_t ret = UnpackDeviceInfoMessage(msg, linkType, version, &nodeInfo, isMetaAuth);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: POST_DEVICE_ID_MESSAGE_Test_001
+* @tc.desc: Post Device Id Message test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, POST_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
+{
+    AuthSessionInfo *info = nullptr;
+    AuthSessionInfo infoValue;
+    (void)memset_s(&infoValue, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    int32_t ret = PostDeviceIdMessage(GenSeq(false), info);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = PostDeviceIdMessage(GenSeq(false), &infoValue);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: PROCESS_DEVICE_ID_MESSAGE_Test_001
+* @tc.desc: Process Device Id Message test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
+{
+    AuthSessionInfo *info = nullptr;
+    AuthSessionInfo infoValue;
+    (void)memset_s(&infoValue, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    uint8_t data[TEST_DATA_LEN] = "123";
+    int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data));
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data));
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: POST_VERIFY_DEVICE_MESSAGE_Test_001
+* @tc.desc: Post Verify Device Message test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_Test_001, TestSize.Level1)
+{
+    const AuthManager *auth = nullptr;
+    AuthManager authValue;
+    (void)memset_s(&authValue, sizeof(AuthManager), 0, sizeof(AuthManager));
+    int32_t ret = PostVerifyDeviceMessage(auth);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = PostVerifyDeviceMessage(&authValue);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: SET_SOCKET_CALLBACK_Test_001
+* @tc.desc: Set Socket Callback test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, SET_SOCKET_CALLBACK_Test_001, TestSize.Level1)
+{
+    const SocketCallback *cb = nullptr;
+    int32_t ret = SetSocketCallback(cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: SOCKET_POST_BYTES_Test_001
+* @tc.desc: Socket Post Bytes test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
+{
+    int32_t fd = 0;
+    const AuthDataHead *head = NULL;
+    const uint8_t *data = NULL;
+    int32_t ret = SocketPostBytes(fd, head, data);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    AuthDataHead headValue;
+    uint8_t dataValue[TEST_DATA_LEN] = "123";
+    (void)memset_s(&headValue, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    ret = SocketPostBytes(fd, &headValue, dataValue);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: SOCKET_GET_CONN_INFO_Test_001
+* @tc.desc: Socket Get Conn Info test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
+{
+    int32_t fd = 0;
+    AuthConnInfo *connInfo = NULL;
+    bool isServer = false;
+    int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    AuthConnInfo connInfoValue;
+    (void)memset_s(&connInfoValue, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    ret = SocketGetConnInfo(fd, &connInfoValue, &isServer);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: REG_AUTH_CHANNEL_LISTENER_Test_001
+* @tc.desc: Reg Auth Channel Listener test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, REG_AUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
+{
+    int32_t module = MODULE_AUTH_CHANNEL;
+    const AuthChannelListener *listener = nullptr;
+    int32_t ret = RegAuthChannelListener(module, listener);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    AuthChannelListener listenerValue;
+    (void)memset_s(&listenerValue, sizeof(AuthChannelListener), 0, sizeof(AuthChannelListener));
+    ret = RegAuthChannelListener(module, &listenerValue);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: AUTH_OPEN_CHANNEL_Test_001
+* @tc.desc: Auth Open Channel test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_OPEN_CHANNEL_Test_001, TestSize.Level1)
+{
+    char *ip = nullptr;
+    char ipValue[32] = "0";
+    int32_t port = 22;
+    int32_t ret = AuthOpenChannel(ip, port);
+    EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
+    ret = AuthOpenChannel(ipValue, port);
+    EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
 }
 } // namespace OHOS
