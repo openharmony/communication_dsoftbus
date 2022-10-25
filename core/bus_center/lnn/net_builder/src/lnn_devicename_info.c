@@ -31,6 +31,11 @@
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_json_utils.h"
+#include "message_handler.h"
+
+#define DELAY_LEN 1000
+#define MAX_TRY 10
+static int32_t g_tryGetDevnameNums = 0;
 
 int32_t LnnSyncDeviceName(const char *networkId)
 {
@@ -99,19 +104,34 @@ static void HandlerGetDeviceName(void)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnSyncDeviceName fail");
         }
     }
+    SoftBusFree(info);
 }
 
-static void UpdataLocalFromSetting(void)
+static void UpdataLocalFromSetting(void *p)
 {
     char name[DEVICE_NAME_BUF_LEN] = {0};
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "UpdataLocalFromSetting enter");
     if (LnnGetSettingDeviceName(name, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HandlerGetDeviceName fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "UpdataLocalFromSetting fail");
+        g_tryGetDevnameNums++;
+        if (g_tryGetDevnameNums < MAX_TRY) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "g_tryGetDevnameNums: %d", g_tryGetDevnameNums);
+            SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+            if (looper == NULL) {
+                return;
+            }
+            int ret = LnnAsyncCallbackDelayHelper(looper, UpdataLocalFromSetting, NULL, DELAY_LEN);
+            if (ret != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init UpdataLocalFromSetting fail");
+            }
+        }
         return;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "UpdataLocalFromSetting set device name fail");
     }
+    RegisterNameMonitor();
+    return;
 }
 
 void UpdateDeviceNameFromSetting(void)
@@ -122,7 +142,7 @@ void UpdateDeviceNameFromSetting(void)
 void UpdateDeviceName(void *p)
 {
     UpdateDeviceNameFromSetting();
-    UpdataLocalFromSetting();
+    UpdataLocalFromSetting(p);
 }
 
 int32_t LnnInitDevicename(void)
