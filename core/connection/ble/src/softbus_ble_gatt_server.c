@@ -242,6 +242,8 @@ static void ResetGattService(SoftBusGattService *service)
             service->state = BLE_GATT_SERVICE_INVALID;
         }
     } else {
+        // clean up adapter status
+        SoftBusUnRegisterGattsCallbacks();
         service->state = BLE_GATT_SERVICE_INITIAL;
     }
     service->svcId = -1;
