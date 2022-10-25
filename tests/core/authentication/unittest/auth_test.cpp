@@ -1627,7 +1627,7 @@ HWTEST_F(AuthTest, ENCRYPT_DATA_Test_001, TestSize.Level1)
     SessionKeyList listValue;
     (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
     uint8_t indata[TEST_DATA_LEN] = "1234";
-    int32_t inLen = strlen(indata);
+    int32_t inLen = strlen(static_cast<const char*>(indata));
     uint8_t outData[TEST_DATA_LEN];
     uint32_t outLen = TEST_DATA_LEN;
     int32_t ret = EncryptData(list, indata, inLen, outData, &outLen);
@@ -1648,7 +1648,7 @@ HWTEST_F(AuthTest, DECRYPT_DATA_Test_001, TestSize.Level1)
     SessionKeyList listValue;
     (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
     uint8_t indata[TEST_DATA_LEN] = "1234";
-    uint32_t inLen = strlen(indata);
+    uint32_t inLen = strlen(static_cast<const char*>(indata));
     int32_t inLenValue = ENCRYPT_OVER_HEAD_LEN_TEST + 1;
     uint8_t outData[TEST_DATA_LEN];
     uint32_t outLen = TEST_DATA_LEN;
