@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +15,16 @@
  
 #include <securec.h>
 
+#include "auth_interface.h"
 #include "gtest/gtest.h"
+#include "softbus_app_info.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
-#include "trans_udp_negotiation_exchange.h"
-#include "trans_udp_negotiation.h"
-#include "softbus_app_info.h"
+#include "trans_udp_channel_manager.c"
 #include "trans_udp_negotiation.c"
 #include "trans_udp_negotiation_exchange.c"
-#include "trans_udp_channel_manager.c"
-#include "auth_interface.h"
 
 #define PARAM_NEANINGLESS 10
 
@@ -64,13 +62,12 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
 {
     int ret;
     int32_t errCode = 0;
-    std::string str = "ProcessMessage";
-    const char* msgStr = str.c_str();
+    char* msgStr = (char *)"ProcessMessage";
     ret = TransUnpackReplyErrInfo(NULL, NULL);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     cJSON *msg = cJSON_Parse(msgStr);
     ret = TransUnpackReplyErrInfo(msg, &errCode);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -84,7 +81,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest002, TestSize.Level1)
     int ret;
     int32_t errCode = 0;
     ret = TransPackReplyErrInfo(NULL, errCode, NULL);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -98,15 +95,14 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest003, TestSize.Level1)
     int ret;
     int64_t authId = 0;
     int64_t seq = 0;
-    std::string str = "ProcessMessage";
-    const char* msg = str.c_str();
+    char* msg = (char *)"ProcessMessage";
     cJSON *replyMsg = cJSON_Parse(msg);
 
     ret = sendUdpInfo(NULL, authId, seq);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = sendUdpInfo(replyMsg, NULL, NULL);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -119,13 +115,12 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest004, TestSize.Level1)
 {
     int ret;
     int errCode = 0;
-    std::string str = "ProcessMessage";
-    const char* errDesc = str.c_str();
+    char* errDesc = (char *)"ProcessMessage";
     ret = SendReplyErrInfo(errCode, NULL, NULL, NULL);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = SendReplyErrInfo(errCode, errDesc, NULL, NULL);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -141,7 +136,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest005, TestSize.Level1)
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
     ret = SendReplyUdpInfo(&appInfo, NULL, NULL);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -172,8 +167,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
 {
     int64_t seq = 0;
-    std::string str = "ProcessMessage";
-    const char* msgStr = str.c_str();
+    char* msgStr = (char *)"ProcessMessage";
     cJSON *msg = cJSON_Parse(msgStr);
     TransOnExchangeUdpInfoReply(NULL, seq, msg);
 }
@@ -203,7 +197,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     ret = StartExchangeUdpInfo(&channel, NULL, NULL);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
