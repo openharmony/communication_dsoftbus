@@ -62,7 +62,7 @@ static pthread_mutex_t g_brConnLock;
 static int32_t g_brMaxConnCount;
 
 static SoftBusHandler g_brAsyncHandler = {
-    .name = "g_brAsyncHandler"
+    .name = (char *)"g_brAsyncHandler"
 };
 
 static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
@@ -379,7 +379,7 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
             ReleaseConnectionRefByConnId(connectionId);
         }
 
-        ConnectOption option = {0};
+        ConnectOption option;
         option.type = CONNECT_BR;
         option.brOption.sideType = CONN_SIDE_CLIENT;
         if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, connectionInfo.brInfo.brMac) != EOK) {
@@ -732,7 +732,7 @@ static int32_t SendAck(const BrConnectionInfo *brConnInfo, uint32_t windows, uin
 static void WaitAck(BrConnectionInfo *brConnInfo, uint64_t seq)
 {
     char *data = NULL;
-    int32_t ret = GetBrPendingPacket(brConnInfo->connectionId, seq, WAIT_ACK_TIMES, &data);
+    int32_t ret = GetBrPendingPacket(brConnInfo->connectionId, seq, WAIT_ACK_TIMES, (void **)&data);
     if (ret == SOFTBUS_ALREADY_TRIGGERED) {
         brConnInfo->ackTimeoutCount = 0;
         if (brConnInfo->windows < MAX_WINDOWS) {

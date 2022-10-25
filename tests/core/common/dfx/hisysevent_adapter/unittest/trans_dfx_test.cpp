@@ -17,13 +17,8 @@
 #include <gtest/gtest.h>
 
 #include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_log.h"
-#include "softbus_common.h"
 #include "softbus_hisysevt_transreporter.h"
-#include "securec.h"
-#include "softbus_adapter_hisysevent.h"
-#include "softbus_hisysevt_common.h"
+#include "softbus_hidumper_trans.c"
 
 using namespace std;
 using namespace testing::ext;
@@ -56,5 +51,19 @@ HWTEST_F(TransDfxTest, CreateTransFaultEvtTest001, TestSize.Level0)
     int32_t errorCode = SOFTBUS_ACCESS_TOKEN_DENIED;
     SoftbusReportTransErrorEvt(errorCode);
 }
-}; // namespace OHOS
 
+/**
+ * @tc.name: SoftBusTransDumpHandler_001
+ * @tc.desc: Verify SoftBusTransDumpHandler function, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransDfxTest, SoftBusTransDumpHandler_001, TestSize.Level1)
+{
+    int fd = 1;
+    int argc = 1;
+    const char* argv = "aaa";
+    int ret = SoftBusTransDumpHandler(fd, argc, &argv);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+} // namespace OHOS

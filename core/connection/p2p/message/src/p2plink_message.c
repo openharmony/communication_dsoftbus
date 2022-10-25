@@ -62,7 +62,7 @@ static void P2pLinkNeoDataDispatch(int64_t authId, int64_t seq, const cJSON *msg
         case CMD_REUSE_RESPONSE:
         case CMD_REUSE:
         case CMD_GC_WIFI_CONFIG_STATE_CHANGE:
-            P2pLinkControlMsgProc(authId, seq, cmdType, msg);
+            P2pLinkControlMsgProc(authId, seq, (P2pLinkCmdType)cmdType, msg);
             break;
         case CMD_REQUEST_INFO:
         case CMD_RESPONSE_INFO:
@@ -157,7 +157,7 @@ static void P2pLinkAuthChannelCloseProcess(P2pLoopMsg msgType, void *param)
 static void P2pLinkAuthChannelClose(int64_t authId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkAuthChannelClose authId: %" PRId64, authId);
-    int64_t *param = SoftBusMalloc(sizeof(int64_t));
+    int64_t *param = (int64_t *)SoftBusMalloc(sizeof(int64_t));
     if (param == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkAuthChannelClose malloc failed");
         return;

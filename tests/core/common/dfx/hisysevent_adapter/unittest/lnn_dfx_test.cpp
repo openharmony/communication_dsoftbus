@@ -114,6 +114,27 @@ HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ReportBusCenterFaultEvtTest002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest002, TestSize.Level1)
+{
+    SoftBusEvtReportMsg msg;
+    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
+    int32_t errorCode = SOFTBUS_NETWORK_AUTH_TCP_ERR;
+    ConnectionAddr addr;
+    addr.type = CONNECTION_ADDR_WLAN;
+    int32_t ret = CreateBusCenterFaultEvt(&msg, errorCode, &addr);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ASSERT_NE(nullptr, msg.paramArray);
+
+    ret = ReportBusCenterFaultEvt(&msg);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
  * @tc.name: InitBusCenterDfxTest001
  * @tc.desc: Verify InitBusCenterDfx function, use the normal parameter.
  * @tc.type: FUNC
@@ -274,6 +295,18 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportDiscStartupEvt_001, TestSize.Level1
 }
 
 /**
+ * @tc.name: LnnDfxTest_SoftBusReportDiscStartupEvt_002
+ * @tc.desc: packageName is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportDiscStartupEvt_002, TestSize.Level1)
+{
+    int ret = SoftBusReportDiscStartupEvt(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
  * @tc.name: LnnDfxTest_SoftbusRecordDiscScanTimes_001
  * @tc.desc: Error register timeout callback test.
  * @tc.type: FUNC
@@ -313,4 +346,17 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_001, TestSize.Level1)
     ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-}; // namespace OHOS
+
+/**
+ * @tc.name: LnnDfxTest_SoftbusRecordDiscFault_002
+ * @tc.desc: ErrCodeConvert,errCode == g_error_map[i].originErrCode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_002, TestSize.Level1)
+{
+    int32_t errCode = SOFTBUS_DISCOVER_NOT_INIT;
+    int ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, errCode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+} // namespace OHOS
