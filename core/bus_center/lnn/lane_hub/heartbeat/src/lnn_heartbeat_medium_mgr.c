@@ -31,7 +31,6 @@
 #include "lnn_node_info.h"
 #include "lnn_ohos_account.h"
 
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
@@ -150,28 +149,6 @@ static bool HbIsRepeatedRecvInfo(const char *udidHash, ConnectionAddrType type, 
     return false;
 }
 
-static int32_t GenerateHexStringHash(const unsigned char *str, uint32_t len, char *hashStr)
-{
-    int32_t ret;
-    uint8_t hashResult[SHA_256_HASH_LEN] = {0};
-
-    if (str == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB generate str hash invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB generate str hash fail, ret=%d", ret);
-        return ret;
-    }
-    ret = ConvertBytesToHexString(hashStr, len + 1, hashResult, len / HEXIFY_UNIT_LEN);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB convert bytes to str hash fail ret=%d", ret);
-        return ret;
-    }
-    return SOFTBUS_OK;
-}
-
 static const NodeInfo *HbGetOnlineNodeByRecvInfo(const char *recvUdidHash, const ConnectionAddrType recvAddrType)
 {
     int32_t i, infoNum;
@@ -193,13 +170,13 @@ static const NodeInfo *HbGetOnlineNodeByRecvInfo(const char *recvUdidHash, const
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node online not have discType:%d", discType);
             continue;
         }
-        if (GenerateHexStringHash((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
-            HB_SHORT_UDID_HASH_HEX_LEN, udidHash) != SOFTBUS_OK) {
+        if (LnnGenerateHexStringHash((const unsigned char *)nodeInfo->deviceInfo.deviceUdid, udidHash,
+            HB_SHORT_UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
             continue;
         }
         if (strncmp(udidHash, recvUdidHash, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node udidHash:%s is online",
-                AnonymizesNetworkID(udidHash));
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node udidHash:%s networkId:%s is online",
+                AnonymizesUDID(udidHash), AnonymizesNetworkID(info[i].networkId));
             SoftBusFree(info);
             return nodeInfo;
         }
@@ -254,9 +231,9 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_
         return SOFTBUS_ERR;
     }
     devTypeStr = LnnConvertIdToDeviceType((uint16_t)device->devType);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, ">> heartbeat(HB) OnTock [udidHash:%s, devTypeHex:%02X, "
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, ">> heartbeat(HB) OnTock [udidHash:%s, hbType:%d, devTypeHex:%02X, "
         "devTypeStr:%s, ConnectionAddrType:%d, peerWeight:%d, masterWeight:%d, nowTime:%" PRIu64 "]",
-        AnonymizesUDID(device->devId), device->devType, devTypeStr != NULL ? devTypeStr : "",
+        AnonymizesUDID(device->devId), hbType, device->devType, devTypeStr != NULL ? devTypeStr : "",
         device->addr[0].type, weight, masterWeight, nowTime);
 
     const NodeInfo *nodeInfo = HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type);
