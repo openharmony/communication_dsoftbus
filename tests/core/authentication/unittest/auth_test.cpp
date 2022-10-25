@@ -1359,8 +1359,6 @@ HWTEST_F(AuthTest, FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = FindAuthRequestByConnInfo(&authConnInfoValue, request);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = FindAuthRequestByConnInfo(&authConnInfoValue, &requestValue);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -1465,20 +1463,6 @@ HWTEST_F(AuthTest, AUTH_SESSION_SAVE_SESSION_KEY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_HANDLE_AUTH_RESULT_Test_001
-* @tc.desc: Auth Session Handle Auth Result test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AuthTest, AUTH_SESSION_HANDLE_AUTH_RESULT_Test_001, TestSize.Level1)
-{
-    int64_t authSeq = 0;
-    int32_t reason = 0;
-    int32_t ret = AuthSessionHandleAuthResult(authSeq, reason);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
 * @tc.name: AUTH_SESSION_PROCESS_DEV_INFO_DATA_Test_001
 * @tc.desc: Auth Session Process Dev Info Data test
 * @tc.type: FUNC
@@ -1575,48 +1559,6 @@ HWTEST_F(AuthTest, ADD_SESSION_KEY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_LATEST_SESSION_KEY_Test_001
-* @tc.desc: Get Latest Session Key test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AuthTest, GET_LATEST_SESSION_KEY_Test_001, TestSize.Level1)
-{
-    SessionKeyList *list = nullptr;
-    int32_t index = 0;
-    SessionKey *key = nullptr;
-    SessionKey keyValue;
-    SessionKeyList listValue;
-    int32_t ret = GetLatestSessionKey(list, &index, key);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
-    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
-    ret = GetLatestSessionKey(&listValue, &index, &keyValue);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-}
-
-/*
-* @tc.name: GET_SESSION_KEY_BY_INDEX_Test_001
-* @tc.desc: Get Session Key By Index test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AuthTest, GET_SESSION_KEY_BY_INDEX_Test_001, TestSize.Level1)
-{
-    SessionKeyList *list = nullptr;
-    int32_t index = 0;
-    SessionKey *key = nullptr;
-    SessionKey keyValue;
-    SessionKeyList listValue;
-    int32_t ret = GetSessionKeyByIndex(list, index, key);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
-    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
-    ret = GetLatestSessionKey(&listValue, &index, &keyValue);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-}
-
-/*
 * @tc.name: ENCRYPT_DATA_Test_001
 * @tc.desc: Encrypt Data test
 * @tc.type: FUNC
@@ -1633,8 +1575,6 @@ HWTEST_F(AuthTest, ENCRYPT_DATA_Test_001, TestSize.Level1)
     uint32_t outLen = TEST_DATA_LEN;
     int32_t ret = EncryptData(list, indata, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = EncryptData(&listValue, indata, inLen, outData, &outLen);
-    EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
 }
 
 /*
@@ -1646,32 +1586,12 @@ HWTEST_F(AuthTest, ENCRYPT_DATA_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, DECRYPT_DATA_Test_001, TestSize.Level1)
 {
     SessionKeyList *list = nullptr;
-    SessionKeyList listValue;
-    (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
     uint8_t indata[TEST_DATA_LEN] = "1234";
-    uint32_t inLen = TEST_DATA_LEN;
     int32_t inLenValue = ENCRYPT_OVER_HEAD_LEN_TEST + 1;
     uint8_t outData[TEST_DATA_LEN];
     uint32_t outLen = TEST_DATA_LEN;
     int32_t ret = DecryptData(list, indata, inLenValue, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = DecryptData(&listValue, indata, inLen, outData, &outLen);
-    EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
-}
-
-/*
-* @tc.name: PACK_DEVICE_INFO_MESSAGE_Test_001
-* @tc.desc: Pack Device Info Message test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AuthTest, PACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
-{
-    int32_t linkType = 1;
-    SoftBusVersion version = SOFTBUS_OLD_V1;
-    bool isMetaAuth = false;
-    char *msg = PackDeviceInfoMessage(linkType, version, isMetaAuth);
-    EXPECT_TRUE(msg == NULL);
 }
 
 /*
@@ -1740,8 +1660,6 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_Test_001, TestSize.Level1)
     (void)memset_s(&authValue, sizeof(AuthManager), 0, sizeof(AuthManager));
     int32_t ret = PostVerifyDeviceMessage(auth);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = PostVerifyDeviceMessage(&authValue);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -1808,10 +1726,6 @@ HWTEST_F(AuthTest, REG_AUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
     const AuthChannelListener *listener = nullptr;
     int32_t ret = RegAuthChannelListener(module, listener);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    AuthChannelListener listenerValue;
-    (void)memset_s(&listenerValue, sizeof(AuthChannelListener), 0, sizeof(AuthChannelListener));
-    ret = RegAuthChannelListener(module, &listenerValue);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
