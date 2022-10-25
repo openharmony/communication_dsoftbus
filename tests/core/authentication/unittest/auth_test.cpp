@@ -1360,7 +1360,7 @@ HWTEST_F(AuthTest, FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001, TestSize.Level1)
     ret = FindAuthRequestByConnInfo(&authConnInfoValue, request);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = FindAuthRequestByConnInfo(&authConnInfoValue, &requestValue);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -1475,7 +1475,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_HANDLE_AUTH_RESULT_Test_001, TestSize.Level1)
     int64_t authSeq = 0;
     int32_t reason = 0;
     int32_t ret = AuthSessionHandleAuthResult(authSeq, reason);
-    EXPECT_TRUE(ret == NULL);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -1569,6 +1569,7 @@ HWTEST_F(AuthTest, ADD_SESSION_KEY_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
     (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
+    ListInit(&listValue);
     ret = AddSessionKey(&listValue, index, &keyValue);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
