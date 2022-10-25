@@ -293,7 +293,7 @@ HWTEST_F(TransTcpDirectTest, PackBytesTest001, TestSize.Level1)
         .flags = FLAG_REQUEST,
         .dataLen = strlen(bytes), /* reset after encrypt */
     };
-    const char *data = nullptr;
+    const char *data = NULL;
     char buffer[DC_MSG_PACKET_HEAD_SIZE_LEN] = {0};
     ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
     EXPECT_TRUE(ret != 0);
@@ -476,7 +476,7 @@ HWTEST_F(TransTcpDirectTest, OnAuthDataRecvTest002, TestSize.Level1)
         .flag = 0,
         .seq = 0,
         .len = 1,
-        .data = nullptr,
+        .data = NULL,
     };
     int64_t authId = 0;
     OnAuthDataRecv(authId, &dataInfo);
