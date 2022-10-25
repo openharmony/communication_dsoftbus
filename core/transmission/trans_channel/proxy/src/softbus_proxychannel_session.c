@@ -692,7 +692,7 @@ static int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t pid, int32
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc dataLen[%d] inputLen[%d]", head->dataLen,
         receiveData->dataLen);
     int32_t ret = TransProxyProcessSessionData(pkgName, pid, channelId, head,
-        receiveData->data + sizeof(PacketHead));
+        ((char*)receiveData->data + sizeof(PacketHead)));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process data err");
         return SOFTBUS_ERR;
