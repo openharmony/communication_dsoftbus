@@ -50,6 +50,7 @@ typedef struct {
 
 static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *para);
+static int32_t OnStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para);
@@ -59,6 +60,7 @@ static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *par
 
 static LnnHeartbeatStateHandler g_hbNoneStateHandler[] = {
     {EVENT_HB_CHECK_DEV_STATUS, OnCheckDevStatus},
+    {EVENT_HB_START_PROCESS, OnStartHbProcess},
     {EVENT_HB_STOP_SPECIFIC, OnStopHbByType},
     {EVENT_HB_AS_MASTER_NODE, OnTransHbFsmState},
     {EVENT_HB_AS_NORMAL_NODE, OnTransHbFsmState},
@@ -490,6 +492,25 @@ static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para)
     return ret;
 }
 
+static int32_t OnStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
+{
+    (void)msgType;
+    (void)para;
+    LnnHeartbeatFsm *hbFsm = NULL;
+
+    if (!CheckHbFsmStateMsgArgs(fsm)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start process get invalid fsm");
+        return SOFTBUS_ERR;
+    }
+    hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_AS_MASTER_NODE, NULL);
+    if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
+        /* Send once ble v0 heartbeat to recovery ble network. */
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
@@ -912,6 +933,15 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, 
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm)
+{
+    if (hbFsm == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post start msg get invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_START_PROCESS, NULL);
 }
 
 int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type)
