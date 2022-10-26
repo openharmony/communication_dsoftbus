@@ -40,7 +40,7 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
 
 int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality);
 
-int32_t TransNotifyAuthSuccess(int32_t channelId);
+int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType);
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
 

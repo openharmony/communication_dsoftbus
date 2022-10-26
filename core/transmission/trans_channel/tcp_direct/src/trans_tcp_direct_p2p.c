@@ -253,7 +253,7 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta)
     AuthConnInfo auth;
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb;
-    (void)memset_s(&auth, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
+    (void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
 
     if (AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthConn get auth info fail");

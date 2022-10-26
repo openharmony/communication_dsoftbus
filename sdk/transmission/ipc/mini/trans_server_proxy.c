@@ -60,9 +60,9 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     return TransOpenAuthChannel(sessionName, &connOpt);
 }
 
-int32_t ServerIpcNotifyAuthSuccess(int channelId)
+int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
-    return TransNotifyAuthSuccess(channelId);
+    return TransNotifyAuthSuccess(channelId, channelType);
 }
 
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
