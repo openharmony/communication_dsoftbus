@@ -170,7 +170,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
             return SOFTBUS_ERR;
         }
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
-        uint8_t *decData = SoftBusCalloc(decDataLen);
+        uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         if (decData == NULL) {
             return SOFTBUS_ERR;
         }
