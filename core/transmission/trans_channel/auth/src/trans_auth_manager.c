@@ -681,24 +681,42 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t TransNotifyAuthDataSuccess(int32_t channelId)
+int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
 {
     AuthChannelInfo chanInfo;
     if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth channel info by chanid=%d fail", channelId);
         return SOFTBUS_ERR;
     }
+
     if (!chanInfo.isConnOptValid) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel of conn opt invalid");
+        return SOFTBUS_ERR;
+    }
+
+    if (memcpy_s(connOpt, sizeof(ConnectOption), &(chanInfo.connOpt), sizeof(ConnectOption)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel connopt memcpy fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connOpt)
+{
+    if (connOpt == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s invalid param.", __func__);
         return SOFTBUS_ERR;
     }
     ConnectionAddr addr;
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    if (!LnnConvertOptionToAddr(&addr, &chanInfo.connOpt, CONNECTION_ADDR_WLAN)) {
+    if (!LnnConvertOptionToAddr(&addr, connOpt, CONNECTION_ADDR_WLAN)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel=%d convert addr fail.", channelId);
         return SOFTBUS_ERR;
     }
     return LnnNotifyDiscoveryDevice(&addr);
 }
 
-int32_t TransGetAuthAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
+int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
 {
     if (appInfo == NULL || g_authChannelList == NULL) {
         return SOFTBUS_INVALID_PARAM;

@@ -318,7 +318,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
     return channelId;
 }
 
-static uint32_t MergeStatsInterval(uint32_t *data, uint32_t left, uint32_t right)
+static uint32_t MergeStatsInterval(const uint32_t *data, uint32_t left, uint32_t right)
 {
     uint32_t result = 0;
     while (left <= right) {
@@ -418,9 +418,27 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
     return SOFTBUS_OK;
 }
 
-int32_t TransNotifyAuthSuccess(int32_t channelId)
+int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
-    return TransNotifyAuthDataSuccess(channelId);
+    int32_t ret = SOFTBUS_ERR;
+    ConnectOption connOpt;
+    switch (channelType) {
+        case CHANNEL_TYPE_AUTH:
+            ret = TransAuthGetConnOptionByChanId(channelId, &connOpt);
+            break;
+        case CHANNEL_TYPE_PROXY:
+            ret = TransProxyGetConnOptionByChanId(channelId, &connOpt);
+            break;
+        default:
+            ret = SOFTBUS_ERR;
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel=%d, type=%d invalid.", channelId, channelType);
+    }
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "channel=%d, type=%d,notfiy auth success error=%d.", channelId, channelType, ret);
+        return ret;
+    }
+    return TransNotifyAuthDataSuccess(channelId, &connOpt);
 }
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
@@ -498,7 +516,7 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
         case CHANNEL_TYPE_UDP:
             return TransGetUdpAppInfoByChannelId(channelId, appInfo);
         case CHANNEL_TYPE_AUTH:
-            return TransGetAuthAppInfoByChanId(channelId, appInfo);
+            return TransAuthGetAppInfoByChanId(channelId, appInfo);
         default:
             return SOFTBUS_INVALID_PARAM;
     }
