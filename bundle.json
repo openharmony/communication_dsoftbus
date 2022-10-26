@@ -105,6 +105,7 @@
           "//foundation/communication/dsoftbus/tests/core/discovery/ble/softbus_ble:unittest",
           "//foundation/communication/dsoftbus/tests/core/discovery/coap/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/udp_negotiation:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/auth_channel:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/proxy_channel:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest:fuzztest",
