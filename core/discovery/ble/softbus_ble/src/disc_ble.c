@@ -1035,13 +1035,8 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
     return SOFTBUS_OK;
 }
 
-static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
+static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
 {
-    if (info == NULL || option == NULL ||
-        (option->publishOption == NULL && option->subscribeOption == NULL) ||
-        (option->publishOption != NULL && option->subscribeOption != NULL)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     uint32_t *optionCapBitMap = NULL;
     bool isSameAccount = false;
     bool isWakeRemote = false;
@@ -1078,8 +1073,6 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
         info->rangingRefCnt -= 1;
         info->needUpdate = true;
     }
-
-    return SOFTBUS_OK;
 }
 
 static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t activeFlags, const void *option)
@@ -1110,11 +1103,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
             return SOFTBUS_ERR;
         }
     } else {
-        if (UnregisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnregisterCapability failed.");
-            SoftBusMutexUnlock(&g_bleInfoLock);
-            return SOFTBUS_ERR;
-        }
+        UnregisterCapability(&g_bleInfoManager[index], &regOption);
     }
 
     uint32_t newCap = g_bleInfoManager[index].capBitMap[0];
