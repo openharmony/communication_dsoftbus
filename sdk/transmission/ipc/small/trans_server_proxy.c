@@ -216,7 +216,7 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     return ret;
 }
 
-int32_t ServerIpcNotifyAuthSuccess(int channelId)
+int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcNotifyAuthSuccess begin");
 
@@ -224,6 +224,7 @@ int32_t ServerIpcNotifyAuthSuccess(int channelId)
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&request, channelId);
+    WriteInt32(&request, channelType);
     int32_t ret = SOFTBUS_ERR;
     if (g_serverProxy == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server proxy not init");

@@ -43,5 +43,6 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len
 void TransCreateConnByConnId(uint32_t connId);
 int32_t TransDecConnRefByConnId(uint32_t connId);
 int32_t TransAddConnRefByConnId(uint32_t connId);
+int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo);
 
 #endif
