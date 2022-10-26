@@ -32,7 +32,7 @@ DeviceManager *DeviceManager::Instance()
 
 std::string DeviceManager::GetRemoteByIndex(uint32_t index)
 {
-    if (index > m_remoteList.size()) {
+    if (index >= m_remoteList.size()) {
         return "NoSuchDevice";
     }
     return m_remoteList[index];

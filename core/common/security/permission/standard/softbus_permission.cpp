@@ -92,7 +92,7 @@ int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionNam
 
 bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 {
-    std::string pkg;
+    std::string pkg = "";
     if (pkgName != nullptr) {
         pkg = std::string(pkgName);
     } else {
@@ -106,7 +106,7 @@ bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 
 bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
 {
-    std::string pkg;
+    std::string pkg = "";
     if (pkgName != nullptr) {
         pkg = std::string(pkgName);
     } else {
