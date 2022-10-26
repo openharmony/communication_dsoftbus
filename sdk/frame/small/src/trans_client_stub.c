@@ -49,8 +49,8 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.fd = ReadFileDescriptor(data);
     }
+    ReadInt32(data, &(channel.businessType));
     if (channel.channelType == CHANNEL_TYPE_UDP) {
-        ReadInt32(data, &(channel.businessType));
         channel.myIp = (char *)ReadString(data, &size);
         ReadInt32(data, &(channel.streamType));
         ReadBool(data, &(channel.isUdpFile));
