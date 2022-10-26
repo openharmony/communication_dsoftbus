@@ -1089,13 +1089,8 @@ static int32_t TryElectMasterNodeOffline(const LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-static bool IsSupportMasterNodeElect(int64_t authId)
+static bool IsSupportMasterNodeElect(SoftBusVersion version)
 {
-    SoftBusVersion version = SOFTBUS_NEW_V1;
-    if (AuthGetVersion(authId, &version) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get softbus version fail");
-        return false;
-    }
     return version >= SOFTBUS_NEW_V1;
 }
 
@@ -1118,7 +1113,7 @@ static int32_t ProcessNodeStateChanged(const void *para)
             break;
         }
         isOnline = IsNodeOnline(connFsm->connInfo.peerNetworkId);
-        if (!IsSupportMasterNodeElect(connFsm->connInfo.authId)) {
+        if (!IsSupportMasterNodeElect(connFsm->connInfo.version)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer not support master node elect", connFsm->id);
             rc = SOFTBUS_OK;
             break;
