@@ -45,6 +45,7 @@ namespace OHOS {
     static void SoftbusClientMagSwitch(uint32_t cmd, const uint8_t *rawData)
     {
         void *info = (void *)rawData;
+        int32_t type = *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(rawData));
         cmd = cmd % NINE;
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
@@ -53,19 +54,19 @@ namespace OHOS {
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                ret = LnnOnNodeBasicInfoChanged(info, (int32_t)rawData);
+                ret = LnnOnNodeBasicInfoChanged(info, type);
                 break;
             }
             case CMD_SOFTBUS_THREE: {
-                ret = LnnOnJoinResult(info, (const char *)rawData, (int32_t)rawData);
+                ret = LnnOnJoinResult(info, (const char *)rawData, type);
                 break;
             }
             case CMD_SOFTBUS_FOUR: {
-                ret = LnnOnLeaveResult((const char *)rawData, (int32_t)rawData);
+                ret = LnnOnLeaveResult((const char *)rawData, type);
                 break;
             }
             case CMD_SOFTBUS_FIVE: {
-                ret = LnnOnTimeSyncResult((const void *)info, (int32_t)rawData);
+                ret = LnnOnTimeSyncResult((const void *)info, type);
                 break;
             }
             default:
