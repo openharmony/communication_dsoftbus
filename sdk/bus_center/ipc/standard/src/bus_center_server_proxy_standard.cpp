@@ -342,7 +342,7 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     *info = nullptr;
     if ((*infoNum) > 0) {
         uint32_t infoSize = (uint32_t)(*infoNum) * infoTypeLen;
-        void *nodeInfo = (void *)reply.ReadRawData(infoSize);
+        void *nodeInfo = const_cast<void *>(reply.ReadRawData(infoSize));
         if (nodeInfo == nullptr) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read node info failed!");
             return SOFTBUS_IPC_ERR;
@@ -392,7 +392,7 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo send request failed!");
         return SOFTBUS_IPC_ERR;
     }
-    void *nodeInfo = (void *)reply.ReadRawData(infoTypeLen);
+    void *nodeInfo = const_cast<void *>(reply.ReadRawData(infoTypeLen));
     if (nodeInfo == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetLocalDeviceInfo read node info failed!");
         return SOFTBUS_IPC_ERR;
@@ -448,7 +448,7 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     if (!reply.ReadInt32(infoLen)) {
         return SOFTBUS_IPC_ERR;
     }
-    void *retBuf = (void *)reply.ReadRawData(infoLen);
+    void *retBuf = const_cast<void *>(reply.ReadRawData(infoLen));
     if (retBuf == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo read retBuf failed!");
         return SOFTBUS_IPC_ERR;
@@ -773,7 +773,7 @@ int32_t BusCenterServerProxy::ActiveMetaNode(const MetaNodeConfigInfo *info, cha
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode send request failed!");
         return SOFTBUS_IPC_ERR;
     }
-    char *retBuf = (char *)reply.ReadCString();
+    char *retBuf = const_cast<char *>(reply.ReadCString());
     if (retBuf == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ActiveMetaNode read meta node id failed!");
         return SOFTBUS_IPC_ERR;
@@ -840,7 +840,8 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
         return SOFTBUS_IPC_ERR;
     }
     if (retInfoNum > 0) {
-        char *retBuf = (char *)reply.ReadRawData(retInfoNum * sizeof(MetaNodeInfo));
+        char *retBuf = reinterpret_cast<char *>(const_cast<void *>(
+            reply.ReadRawData(retInfoNum * sizeof(MetaNodeInfo))));
         if (retBuf == nullptr) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo read meta node failed!");
             return SOFTBUS_IPC_ERR;
