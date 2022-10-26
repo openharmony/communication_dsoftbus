@@ -13,27 +13,9 @@
  * limitations under the License.
  */
 
-#include "deactivemetanode_fuzzer.h"
-#include <cstddef>
-#include "softbus_bus_center.h"
-#include "softbus_errcode.h"
+#ifndef TEST_FUZZTEST_SOFTBUSCLIENTMANAGER_FUZZER_H
+#define TEST_FUZZTEST_SOFTBUSCLIENTMANAGER_FUZZER_H
 
-namespace OHOS {
-    bool DeactiveMetaNodeTest(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size == 0) {
-            return true;
-        }
+#define FUZZ_PROJECT_NAME "softbusclientmanager_fuzzer"
 
-        DeactiveMetaNode((const char *)data, (const char *)data);
-        return true;
-    }
-}
-
-/* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
-{
-    /* Run your code on data */
-    OHOS::DeactiveMetaNodeTest(data, size);
-    return 0;
-}
+#endif /* TEST_FUZZTEST_SOFTBUSCLIENTMANAGER_FUZZER_H */

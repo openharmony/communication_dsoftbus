@@ -15,20 +15,31 @@
 
 #include "starttimesync_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
 namespace OHOS {
+    static void OnTimeSyncResult(const TimeSyncResultInfo *info, int32_t retCode)
+    {
+        (void)info;
+        (void)retCode;
+    }
+
+    static ITimeSyncCb g_timeSyncCb = {
+        .onTimeSyncResult = OnTimeSyncResult,
+    };
+
     bool StartTimeSyncTest(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
             return true;
         }
-        char *workId = nullptr;
+
         TimeSyncAccuracy timeAccuracy = SUPER_HIGH_ACCURACY;
         TimeSyncPeriod period = NORMAL_PERIOD;
-        ITimeSyncCb *cb = nullptr;
-        StartTimeSync((const char *)data, workId, timeAccuracy, period, cb);
+
+        StartTimeSync((const char *)data, (const char *)data, timeAccuracy, period, &g_timeSyncCb);
         return true;
     }
 }
