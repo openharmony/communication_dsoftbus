@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
+#include <arpa/inet.h>
+#include <unistd.h>
 #include <securec.h>
 
 #include "auth_interface.h"
@@ -23,9 +25,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
-
-#include <arpa/inet.h>
-#include <unistd.h>
 
 #include "trans_tcp_direct_listener.c"
 #include "trans_tcp_direct_manager.c"
