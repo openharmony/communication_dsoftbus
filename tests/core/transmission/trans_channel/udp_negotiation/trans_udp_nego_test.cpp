@@ -14,7 +14,6 @@
  */
  
 #include <securec.h>
-#include<stdbool.h>
 
 #include "auth_interface.h"
 #include "gtest/gtest.h"
@@ -61,10 +60,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
 {
     int ret;
     int32_t errCode = 0;
-    char* msgStr = (char *)"ProcessMessage";
+    string msgStr = "ProcessMessage";
     ret = TransUnpackReplyErrInfo(NULL, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    cJSON *msg = cJSON_Parse(msgStr);
+    cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
     ret = TransUnpackReplyErrInfo(msg, &errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
@@ -94,8 +93,8 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest003, TestSize.Level1)
     int ret;
     int64_t authId = 0;
     int64_t seq = 0;
-    char* msg = (char *)"ProcessMessage";
-    cJSON *replyMsg = cJSON_Parse(msg);
+    string msg = "ProcessMessage";
+    cJSON *replyMsg = cJSON_Parse((char *)msg.c_str());
 
     ret = sendUdpInfo(NULL, authId, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -114,11 +113,11 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest004, TestSize.Level1)
 {
     int ret;
     int errCode = 0;
-    char* errDesc = (char *)"ProcessMessage";
+    string errDesc = "ProcessMessage";
     ret = SendReplyErrInfo(errCode, NULL, NULL, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = SendReplyErrInfo(errCode, errDesc, NULL, NULL);
+    ret = SendReplyErrInfo(errCode, (char *)errDesc.c_str(), NULL, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -166,8 +165,8 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
 {
     int64_t seq = 0;
-    char* msgStr = (char *)"ProcessMessage";
-    cJSON *msg = cJSON_Parse(msgStr);
+    string msgStr = "ProcessMessage";
+    cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
     TransOnExchangeUdpInfoReply(NULL, seq, msg);
 }
 
