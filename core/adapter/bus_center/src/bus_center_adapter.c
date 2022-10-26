@@ -21,9 +21,11 @@
 
 #include "bus_center_adapter.h"
 #include "parameter.h"
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_log.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 
@@ -37,8 +39,14 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
     const char *devType = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
-            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
-                return SOFTBUS_ERR;
+            if (LnnGetSettingDeviceName(value, len) == SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnGetSettingDeviceName success");
+                return SOFTBUS_OK;
+            } else {
+                if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+                    return SOFTBUS_ERR;
+                }
+                return SOFTBUS_OK;
             }
             break;
         case COMM_DEVICE_KEY_UDID:
