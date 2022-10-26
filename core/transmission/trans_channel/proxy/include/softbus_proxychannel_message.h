@@ -51,6 +51,7 @@ typedef enum {
 #define JSON_KEY_ENCRYPT "ENCRYPT"
 #define JSON_KEY_ALGORITHM "ALGORITHM"
 #define JSON_KEY_CRC "CRC"
+#define JSON_KEY_BUSINESS_TYPE "BUSINESS_TYPE"
 
 typedef struct {
     uint8_t type; // MsgType

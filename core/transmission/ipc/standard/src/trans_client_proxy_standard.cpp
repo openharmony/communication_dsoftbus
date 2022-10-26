@@ -117,8 +117,8 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr failed");
         return SOFTBUS_ERR;
     }
+    data.WriteInt32(channel->businessType);
     if (channel->channelType == CHANNEL_TYPE_UDP) {
-        data.WriteInt32(channel->businessType);
         data.WriteCString(channel->myIp);
         data.WriteInt32(channel->streamType);
         data.WriteBool(channel->isUdpFile);

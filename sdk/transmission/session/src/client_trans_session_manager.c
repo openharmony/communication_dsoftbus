@@ -758,6 +758,35 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
     return SOFTBUS_OK;
 }
 
+int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType)
+{
+    if ((sessionId < 0) || (businessType == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_clientSessionServerList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:not found", __func__);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    *businessType = sessionNode->businessType;
+
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_OK;
+}
+
+
 int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
 {
     if ((sessionId < 0) || (transInfo->channelId < 0)) {
@@ -902,6 +931,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->isServer = channel->isServer;
                 sessionNode->isEnable = true;
                 sessionNode->routeType = channel->routeType;
+                sessionNode->businessType = channel->businessType;
                 sessionNode->fileEncrypt = channel->encrypt;
                 sessionNode->algorithm = channel->algorithm;
                 sessionNode->crc = channel->crc;
