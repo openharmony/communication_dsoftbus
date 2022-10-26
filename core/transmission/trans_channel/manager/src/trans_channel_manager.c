@@ -322,7 +322,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
     return channelId;
 }
 
-static uint32_t MergeStatsInterval(uint32_t *data, uint32_t left, uint32_t right)
+static uint32_t MergeStatsInterval(const uint32_t *data, uint32_t left, uint32_t right)
 {
     uint32_t result = 0;
     while (left <= right) {
