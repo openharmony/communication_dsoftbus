@@ -85,10 +85,6 @@ static SoftBusHandler g_bleConnectAsyncHandler = {
     .name = (char *)"g_bleConnectAsyncHandler"
 };
 
-typedef struct {
-    int32_t type;
-} BleBasicInfo;
-
 static const int BLE_GATT_ATT_MTU_DEFAULT_PAYLOAD = 21;
 static const int BLE_GATT_ATT_MTU_MAX = 512;
 static const int BLE_ROLE_CLIENT = 1;
