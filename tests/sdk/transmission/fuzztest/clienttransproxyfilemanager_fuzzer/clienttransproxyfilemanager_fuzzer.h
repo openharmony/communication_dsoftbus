@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,17 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef SOFTBUSCLIENTTRANSPROXYFILEMANAGER_FUZZER_H
+#define SOFTBUSCLIENTTRANSPROXYFILEMANAGER_FUZZER_H
 
-#ifndef SOFTBUS_CLIENT_QOS_MANAGER_H
-#define SOFTBUS_CLIENT_QOS_MANAGER_H
+#include <cstdint>
+#include <unistd.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <fcntl.h>
 
-#include <stdint.h>
+#define FUZZ_PROJECT_NAME "clienttransproxyfilemanager_fuzzer"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-int32_t ClientQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality);
-#ifdef __cplusplus
-}
-#endif
 #endif

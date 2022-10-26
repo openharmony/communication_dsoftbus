@@ -12,29 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef CLIENTTRANSFILE_FUZZER_H
+#define CLIENTTRANSFILE_FUZZER_H
 
-#ifndef CLIENT_TRANS_PENDING_H
-#define CLIENT_TRANS_PENDING_H
+#include <cstdint>
+#include <unistd.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <fcntl.h>
 
-#include <stdint.h>
+#define FUZZ_PROJECT_NAME "clienttransfile_fuzzer"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct {
-    char *data;
-    uint32_t len;
-} TransPendData;
-
-int32_t InitPendingPacket(void);
-void DestroyPendingPacket(void);
-int32_t CreatePendingPacket(uint32_t id, uint64_t seq);
-void DeletePendingPacket(uint32_t id, uint64_t seq);
-
-int32_t GetPendingPacketData(uint32_t id, uint64_t seq, uint32_t waitMillis, bool isDelete, TransPendData *data);
-int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *data);
-#ifdef __cplusplus
-}
-#endif
 #endif
