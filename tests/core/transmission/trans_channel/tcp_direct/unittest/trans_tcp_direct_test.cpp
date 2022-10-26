@@ -29,6 +29,7 @@
 
 #include "trans_tcp_direct_listener.c"
 #include "trans_tcp_direct_manager.c"
+#include "trans_tcp_direct_message.c"
 #include "trans_tcp_direct_p2p.c"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
