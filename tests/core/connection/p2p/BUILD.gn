@@ -16,9 +16,29 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection"
 
-ohos_unittest("softbus_conn_ble_test") {
+ohos_unittest("softbus_connection_p2p_test") {
   module_out_path = module_output_path
+
+  if (dsoftbus_feature_conn_br == true) {
+    defines = [ "connection_enable_br_test" ]
+  } else {
+    defines = []
+  }
+
+  if (dsoftbus_feature_conn_ble == true) {
+    defines += [ "connection_enable_ble_test" ]
+  }
+
   include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/p2p/manager/include",
+    "$dsoftbus_root_path/core/connection/p2p/interface",
+    "$dsoftbus_root_path/core/connection/p2p/common/include",
+    "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -29,11 +49,16 @@ ohos_unittest("softbus_conn_ble_test") {
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/core/connection/ble/include",
-    "$dsoftbus_root_path/core/connection/ble/src",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/connection/p2p/message/src",
+    "$dsoftbus_root_path/core/connection/p2p/message/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/connection/p2p/adapter",
+    "$dsoftbus_root_path/core/connection/p2p/negotiation/include",
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
@@ -41,6 +66,8 @@ ohos_unittest("softbus_conn_ble_test") {
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock_main",
@@ -51,5 +78,5 @@ ohos_unittest("softbus_conn_ble_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
   ]
-  sources = [ "connection_ble_test.cpp" ]
+  sources = [ "connection_p2p_test.cpp" ]
 }
