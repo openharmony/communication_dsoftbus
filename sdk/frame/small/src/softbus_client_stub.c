@@ -101,7 +101,6 @@ static int InnerRegisterService(void)
     for (uint32_t i = 0; i < clientNameNum; i++) {
         while (RegisterService(clientName[i], &svcId) != SOFTBUS_OK) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
-            continue;
         }
         SoftBusFree(clientName[i]);
     }
@@ -227,7 +226,6 @@ int ClientRegisterService(const char *pkgName)
 
     while (RegisterService(pkgName, &svcId) != SOFTBUS_OK) {
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
-        continue;
     }
 
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ClientRegisterService success");
