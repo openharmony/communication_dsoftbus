@@ -30,8 +30,8 @@ void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& resu
     }
 }
 
-void RegisterDataSyncPermission(const uint32_t callingTokenId,
-                                const std::string permissionName, const std::string& pkgName, int32_t pid)
+void RegisterDataSyncPermission(const uint32_t& callingTokenId,
+                                const std::string& permissionName, const std::string& pkgName, int32_t pid)
 {
     PermStateChangeScope scopeInfo;
     scopeInfo.permList = {permissionName};
