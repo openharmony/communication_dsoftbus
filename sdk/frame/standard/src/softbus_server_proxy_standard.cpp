@@ -137,9 +137,10 @@ int32_t SoftBusServerProxyFrame::OpenAuthSession(const char *sessionName, const 
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::NotifyAuthSuccess(int32_t channelId)
+int32_t SoftBusServerProxyFrame::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
     (void)channelId;
+    (void)channelType;
     return SOFTBUS_OK;
 }
 
