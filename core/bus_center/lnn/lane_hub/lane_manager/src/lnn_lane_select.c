@@ -162,7 +162,7 @@ static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *re
 }
 
 static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType **recommendList, const uint32_t *listNum)
+    LaneLinkType **recommendList, uint32_t *listNum)
 {
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL) || (listNum == NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneSelect params invalid");

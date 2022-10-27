@@ -40,7 +40,7 @@ static int32_t CheckPermission(const char *pkgName, int32_t uid)
     return SOFTBUS_OK;
 }
 
-int32_t ServerJoinLNN(IpcIo *req, const IpcIo *reply)
+int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerJoinLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
@@ -320,7 +320,7 @@ int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerStopPublishLNN(IpcIo *req, const IpcIo *reply)
+int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerStopPublishLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
@@ -344,7 +344,7 @@ int32_t ServerStopPublishLNN(IpcIo *req, const IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-int32_t ServerRefreshLNN(IpcIo *req, const IpcIo *reply)
+int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerRefreshLNN ipc server pop.");
     if (req == NULL || reply == NULL) {
