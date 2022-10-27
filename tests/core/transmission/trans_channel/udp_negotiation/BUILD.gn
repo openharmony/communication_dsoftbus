@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,15 +16,13 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
-ohos_unittest("TransTcpDirectCoreTest") {
+ohos_unittest("TransUdpNegoTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/trans_tcp_direct_test.cpp" ]
+  sources = [ "trans_udp_nego_test.cpp" ]
 
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
 
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/connection/interface",
@@ -35,10 +33,10 @@ ohos_unittest("TransTcpDirectCoreTest") {
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
-    "$dsoftbus_root_path/core/connection/p2p/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+
     "//commonlibrary/c_utils/base/include",
     "unittest/common/",
-
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -51,8 +49,6 @@ ohos_unittest("TransTcpDirectCoreTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/coap/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
     "//base/security/device_auth/interfaces/innerkits",
     "//third_party/cJSON",
@@ -60,11 +56,15 @@ ohos_unittest("TransTcpDirectCoreTest") {
 
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/src",
     "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/coap/include",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
   ]
 
   deps = [
@@ -88,5 +88,5 @@ ohos_unittest("TransTcpDirectCoreTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":TransTcpDirectCoreTest" ]
+  deps = [ ":TransUdpNegoTest" ]
 }
