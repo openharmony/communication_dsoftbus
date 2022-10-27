@@ -44,6 +44,7 @@ const char* g_dataTypeList[BUSINESS_TYPE_BUTT] = {
     "Byte",
     "File",
     "Stream",
+    "NotCare",
 };
 
 typedef struct {

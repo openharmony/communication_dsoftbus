@@ -269,6 +269,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.peerUid = conn.appInfo.peerData.uid;
     info.peerPid = conn.appInfo.peerData.pid;
     info.routeType = conn.appInfo.routeType;
+    info.businessType = conn.appInfo.businessType;
 
     char buf[NETWORK_ID_BUF_LEN] = {0};
     int32_t ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
