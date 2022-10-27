@@ -50,6 +50,7 @@ ohos_unittest("SoftBusDiscBleTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//foundation/communication/dsoftbus/components/nstackx/nstackx_ctrl:nstackx_ctrl",
