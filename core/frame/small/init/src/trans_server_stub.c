@@ -173,7 +173,9 @@ int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply)
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = 0;
+    int32_t channelType = -1;
     ReadInt32(req, &channelId);
+    ReadInt32(req, &channelType);
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -190,7 +192,7 @@ int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply)
         return SOFTBUS_PERMISSION_DENIED;
     }
 
-    int32_t ret = TransNotifyAuthSuccess(channelId);
+    int32_t ret = TransNotifyAuthSuccess(channelId, channelType);
     WriteInt32(reply, ret);
     return ret;
 }

@@ -157,9 +157,9 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
     return TransOpenAuthChannel(sessionName, &connOpt);
 }
 
-int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId)
+int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
-    return TransNotifyAuthSuccess(channelId);
+    return TransNotifyAuthSuccess(channelId, channelType);
 }
 
 int32_t SoftBusServer::CloseChannel(int32_t channelId, int32_t channelType)
