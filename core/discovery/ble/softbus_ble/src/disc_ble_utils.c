@@ -237,12 +237,10 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const unsigned char *src, 
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const unsigned char *data, uint32_t dataLen)
 {
     uint32_t curLen = POS_TLV + ADV_HEAD_LEN;
-    unsigned char type =  0;
-    uint32_t len = 0;
     int32_t ret = SOFTBUS_OK;
     while (curLen < dataLen) {
-        type = (data[curLen] & DATA_TYPE_MASK) >> BYTE_SHIFT;
-        len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
+        unsigned char type = (data[curLen] & DATA_TYPE_MASK) >> BYTE_SHIFT;
+        uint32_t len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
         if (curLen + TL_LEN + len > dataLen) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "unexperted advData: out of range, "
                 "tlvType: %d, tlvLen: %u, current pos: %u, total pos: %u", type, len, curLen, dataLen);

@@ -276,6 +276,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
         !AddNumberToJsonObject(root, JSON_KEY_CRC, appInfo->crc)) {
         return SOFTBUS_ERR;
     }
+    (void)AddNumberToJsonObject(root, JSON_KEY_BUSINESS_TYPE, appInfo->businessType);
     return SOFTBUS_OK;
 }
 
@@ -467,6 +468,10 @@ static int32_t UnpackHandshakeMsgForNormal(cJSON *root, AppInfo *appInfo, char *
         appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
         appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     }
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_BUSINESS_TYPE, (int*)&appInfo->businessType)) {
+        appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
+    }
+    
     size_t len = 0;
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));

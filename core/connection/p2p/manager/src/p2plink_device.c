@@ -164,7 +164,7 @@ static void DevOffline(const P2pLinkGroup *group)
     ConnectedNode *next = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
-        if (DevIsNeedDel(item->peerMac, group) == true) {
+        if (DevIsNeedDel(item->peerMac, group)) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline");
             if (item->chanId.p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close p2p auth chan %" PRIu64, item->chanId.p2pAuthId);
@@ -447,7 +447,6 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_CONNECT_TIMEOUT);
                     P2pLinkDelConningDev(item);
-                    break;
                 }
                 break;
             default:

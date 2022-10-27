@@ -44,6 +44,7 @@ const char* g_dataTypeList[BUSINESS_TYPE_BUTT] = {
     "Byte",
     "File",
     "Stream",
+    "NotCare",
 };
 
 typedef struct {
@@ -148,5 +149,5 @@ int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 void SoftBusTransDumpHandlerInit(void)
 {
     InitTranHelpInfo();
-    SoftBusRegHiDumperHandler(MODULE_NAME_TRAN, g_transHelpInfo, SoftBusTransDumpHandler);
+    SoftBusRegHiDumperHandler((char*)MODULE_NAME_TRAN, g_transHelpInfo, SoftBusTransDumpHandler);
 }

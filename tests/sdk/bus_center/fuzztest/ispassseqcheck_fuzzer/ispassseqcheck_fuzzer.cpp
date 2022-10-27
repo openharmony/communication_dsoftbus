@@ -44,28 +44,30 @@ namespace OHOS {
 
     static void IsPassSeqCheckSwitch(uint32_t cmd, const uint8_t *rawData)
     {
+        int32_t seq = *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(rawData));
+        uint64_t bit = *const_cast<uint64_t *>(reinterpret_cast<const uint64_t *>(rawData));
         int32_t ret = 0;
         cmd = cmd % NINE;
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
                 seqInfo.minSeq = MINSEQ;
-                seqInfo.maxSeq = (int32_t)rawData;
-                seqInfo.recvBitmap = (uint64_t)rawData;
-                ret = IsPassSeqCheck(&seqInfo, (int32_t)rawData);
+                seqInfo.maxSeq = seq;
+                seqInfo.recvBitmap = bit;
+                ret = IsPassSeqCheck(&seqInfo, seq);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                seqInfo.minSeq = (int32_t)rawData;
+                seqInfo.minSeq = seq;
                 seqInfo.maxSeq = MAXSEQ;
-                seqInfo.recvBitmap = (uint64_t)rawData;
-                ret = IsPassSeqCheck(&seqInfo, (int32_t)rawData);
+                seqInfo.recvBitmap = bit;
+                ret = IsPassSeqCheck(&seqInfo, seq);
                 break;
             }
             case CMD_SOFTBUS_THREE: {
-                seqInfo.minSeq = (int32_t)rawData;
-                seqInfo.maxSeq = (int32_t)rawData;
-                seqInfo.recvBitmap = (uint64_t)rawData;
-                ret = IsPassSeqCheck(&seqInfo, (int32_t)rawData);
+                seqInfo.minSeq = seq;
+                seqInfo.maxSeq = seq;
+                seqInfo.recvBitmap = bit;
+                ret = IsPassSeqCheck(&seqInfo, seq);
                 break;
             }
             default:

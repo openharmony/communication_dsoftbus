@@ -18,6 +18,7 @@
 
 #include "disc_ble_dispatcher.h"
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 
 using namespace testing::ext;
 
@@ -240,6 +241,23 @@ static int32_t StopAdvertiseB(const SubscribeOption *option)
     }
     return SOFTBUS_ERR;
 }
+
+static PublishOption g_pOption0 = {
+    .freq = 1,
+    .capabilityBitmap = {0},
+    .capabilityData = nullptr,
+    .dataLen = 0,
+    .ranging = true
+};
+
+static SubscribeOption g_sOption0 = {
+    .freq = 1,
+    .isSameAccount = true,
+    .isWakeRemote = false,
+    .capabilityBitmap = {0},
+    .capabilityData = nullptr,
+    .dataLen = 0
+};
 
 static PublishOption g_pOption1 = {
     .freq = 1,
@@ -706,5 +724,61 @@ HWTEST_F(DiscoveryBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Leve
     interface->UpdateLocalDeviceInfo(type);
     afterFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
     EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
-};
+}
+
+/*
+* @tc.name: BleDispatchPublishOption001
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchPublishOption001");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int32_t ret = interface->Publish(&g_pOption0);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: BleDispatchSubscribeOption001
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchSubscribeOption001");
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    int32_t ret = interface->StartAdvertise(&g_sOption0);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/*
+* @tc.name: DiscBleInit001
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, DiscBleInit001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleInit001");
+    DiscoveryFuncInterface *interface = DiscBleInit(nullptr);
+    EXPECT_EQ(interface, nullptr);
+}
+
+/*
+* @tc.name: DiscBleInit002
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscoveryBleDispatcherTest, DiscBleInit002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleInit002");
+    DiscInnerCallback g_discMgrMediumCb;
+    g_discMgrMediumCb.OnDeviceFound = nullptr;
+    DiscoveryFuncInterface *interface = DiscBleInit(&g_discMgrMediumCb);
+    EXPECT_EQ(interface, nullptr);
+}
 }
