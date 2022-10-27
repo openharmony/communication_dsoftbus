@@ -15,9 +15,14 @@
 
 #ifndef SOFTBUS_PROXYCHANNEL_SESSION_H
 #define SOFTBUS_PROXYCHANNEL_SESSION_H
+
 #include "stdint.h"
 #include "softbus_def.h"
 #include "softbus_proxychannel_message.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
     PROXY_FLAG_BYTES = 0,
@@ -48,5 +53,9 @@ int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t pid, int32_t channel
 int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId);
 void TransSliceManagerDeInit(void);
 int32_t TransSliceManagerInit(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

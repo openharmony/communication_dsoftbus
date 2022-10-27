@@ -19,10 +19,22 @@
 #include "softbus_app_info.h"
 #include "softbus_json_utils.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
 #define ERR_MSG_MAX_LEN 128
 
 int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo);
 int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo);
 int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr, int32_t maxLen);
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif
