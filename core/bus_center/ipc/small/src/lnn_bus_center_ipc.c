@@ -65,7 +65,7 @@ int32_t LnnIpcInit (void)
     return SOFTBUS_OK;
 }
 
-static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
+static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
 
 static IServerDiscInnerCallback g_discInnerCb = {

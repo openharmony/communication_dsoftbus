@@ -36,8 +36,8 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
     }
 
     (void)memset_s(accountHash, len, 0, len);
-    if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()), DEFAULT_USER_ID.length(),
-        reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID.c_str(), DEFAULT_USER_ID.length(),
+        (unsigned char *)accountHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetOhosAccount generate default str hash fail");
         return SOFTBUS_ERR;
     }
@@ -63,7 +63,7 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
         return SOFTBUS_OK;
     }
 
-    return ConvertHexStringToBytes(reinterpret_cast<unsigned char *>(accountHash), len,
+    return ConvertHexStringToBytes((unsigned char *)accountHash, len,
         accountInfo.second.uid_.c_str(), accountInfo.second.uid_.length());
 }
 
@@ -72,8 +72,8 @@ int32_t LnnInitOhosAccount(void)
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
 
     if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()), DEFAULT_USER_ID.length(),
-            reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
+        if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID.c_str(), DEFAULT_USER_ID.length(),
+            (unsigned char *)accountHash) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "InitOhosAccount generate default str hash fail");
             return SOFTBUS_ERR;
         }
@@ -93,8 +93,8 @@ void LnnOnOhosAccountChanged(void)
     }
     if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "OnAccountChanged get account account hash fail");
-        if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()), DEFAULT_USER_ID.length(),
-            reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
+        if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID.c_str(), DEFAULT_USER_ID.length(),
+            (unsigned char *)accountHash) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnAccountChanged generate default str hash fail");
             return;
         }
@@ -119,8 +119,8 @@ bool LnnIsDefaultOhosAccount(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "IsDefaultOhosAccount get local accountHash fail");
         return false;
     }
-    if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()), DEFAULT_USER_ID.length(),
-        reinterpret_cast<unsigned char *>(defaultAccountHash)) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash((const unsigned char *)DEFAULT_USER_ID.c_str(), DEFAULT_USER_ID.length(),
+        (unsigned char *)defaultAccountHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "IsDefaultOhosAccount generate default str hash fail");
         return false;
     }
