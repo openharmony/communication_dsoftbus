@@ -148,8 +148,8 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     channelInfo.channelId = appInfo->myData.channelId;
     channelInfo.peerDeviceId = (char *)appInfo->peerData.deviceId;
     channelInfo.peerSessionName = (char *)appInfo->peerData.sessionName;
-    channelInfo.groupId = AUTH_GROUP_ID;
-    channelInfo.sessionKey = AUTH_SESSION_KEY;
+    channelInfo.groupId = (char *)AUTH_GROUP_ID;
+    channelInfo.sessionKey = (char *)AUTH_SESSION_KEY;
     channelInfo.keyLen = strlen(channelInfo.sessionKey) + 1;
     return g_cb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.sessionName, &channelInfo);
 }

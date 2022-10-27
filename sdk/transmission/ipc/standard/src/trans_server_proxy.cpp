@@ -76,7 +76,9 @@ int32_t TransServerProxyInit(void)
 
 void TransServerProxyDeInit(void)
 {
-    delete g_serverProxy;
+    if (g_serverProxy != nullptr) {
+        delete g_serverProxy;
+    }
     g_serverProxy = nullptr;
 }
 

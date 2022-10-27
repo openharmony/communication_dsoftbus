@@ -607,7 +607,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
 
 void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 {
-    ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
     }
@@ -731,7 +731,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 
 void TransProxyProcessResetMsg(const ProxyMessage *msg)
 {
-    ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessResetMsg calloc failed.");
         return;
@@ -800,7 +800,7 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 
 void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 {
-    ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessKeepAliveAck calloc failed.");
         return;
@@ -1000,7 +1000,7 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
         ListDelete(&(removeNode->node));
         if (removeNode->status == PROXY_CHANNEL_STATUS_TIMEOUT) {
             connId = removeNode->connId;
-            ProxyChannelInfo *resetMsg = SoftBusMalloc(sizeof(ProxyChannelInfo));
+            ProxyChannelInfo *resetMsg = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
             if (resetMsg != NULL) {
                 (void)memcpy_s(resetMsg, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
                 TransProxyPostResetPeerMsgToLoop(resetMsg);
@@ -1093,7 +1093,7 @@ int32_t TransProxyAuthSessionDataLenCheck(uint32_t dataLen, int32_t type)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
+static int32_t TransProxyManagerInitInner(const IServerChannelCallBack *cb)
 {
     if (SoftBusMutexInit(&g_myIdLock, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init lock failed");
@@ -1104,13 +1104,22 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
         return SOFTBUS_ERR;
     }
 
-    if (TransProxyTransInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyTransInit fail");
+    g_proxyChannelList = CreateSoftBusList();
+    if (g_proxyChannelList == NULL) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
+{
+    if (TransProxyManagerInitInner(cb) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init proxy manager failed");
         return SOFTBUS_ERR;
     }
 
-    g_proxyChannelList = CreateSoftBusList();
-    if (g_proxyChannelList == NULL) {
+    if (TransProxyTransInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyTransInit fail");
         return SOFTBUS_ERR;
     }
 
@@ -1171,8 +1180,29 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
     return SOFTBUS_OK;
 }
 
+
+static void TransProxyManagerDeinitInner(void)
+{
+    ProxyChannelInfo *item = NULL;
+    ProxyChannelInfo *nextNode = NULL;
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        ListDelete(&(item->node));
+        SoftBusFree(item);
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+
+    DestroySoftBusList(g_proxyChannelList);
+    SoftBusMutexDestroy(&g_myIdLock);
+}
+
 void TransProxyManagerDeinit(void)
 {
+    TransProxyManagerDeinitInner();
+
     TransSliceManagerDeInit();
     (void)RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, NULL);
     PendingDeinit(PENDING_TYPE_PROXY);
