@@ -320,13 +320,13 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, int64_t authId, int64_t seq)
         cJSON_Delete(replyMsg);
         return SOFTBUS_ERR;
     }
-    
+
     if (sendUdpInfo(replyMsg, authId, seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SendReplyeErrInfo failed.");
         cJSON_Delete(replyMsg);
         return SOFTBUS_ERR;
     }
-    
+
     cJSON_Delete(replyMsg);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp send reply info out.");
     return SOFTBUS_OK;
@@ -454,13 +454,13 @@ static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJS
     int32_t ret = ParseRequestAppInfo(authId, msg, &info);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get appinfo failed. ret = %d", ret);
-        errDesc = "peer device session name not create";
+        errDesc = (char *)"peer device session name not create";
         goto ERR_EXIT;
     }
     ret = ProcessUdpChannelState(&info, true);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process udp channel state failed. ret = %d", ret);
-        errDesc = "notify app error";
+        errDesc = (char *)"notify app error";
         goto ERR_EXIT;
     }
     if (SendReplyUdpInfo(&info, authId, seq) != SOFTBUS_OK) {
@@ -575,8 +575,10 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 
 static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta)
 {
-    AuthConnInfo auth = {0};
+    AuthConnInfo auth;
+    (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb = {0};
+	(void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
 
     int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
     if (ret != SOFTBUS_OK) {
