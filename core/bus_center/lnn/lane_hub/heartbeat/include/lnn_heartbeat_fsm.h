@@ -41,6 +41,7 @@ typedef enum {
     EVENT_HB_SEND_ONE_BEGIN = 5,
     EVENT_HB_SEND_ONE_END,
     EVENT_HB_CHECK_DEV_STATUS,
+    EVENT_HB_START_PROCESS,
     EVENT_HB_STOP_SPECIFIC,
     EVENT_HB_SET_MEDIUM_PARAM,
     EVENT_HB_UPDATE_SEND_INFO,
@@ -83,6 +84,7 @@ int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSe
     uint64_t delayMillis);
 int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay);
 int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, uint64_t delayMillis);
+int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm);
 int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type);
 int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType);
 int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbeatMediumParam *para);
