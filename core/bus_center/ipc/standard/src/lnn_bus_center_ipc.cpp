@@ -49,7 +49,7 @@ static std::vector<JoinLnnRequestInfo *> g_joinMetaNodeRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveMetaNodeRequestInfo;
 
-static int32_t OnRefreshDeviceFound(const char *packageName, const DeviceInfo *device,
+static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
 
 static IServerDiscInnerCallback g_discInnerCb = {
@@ -198,7 +198,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
 
 int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
-    ConnectionAddr *connAddr = (ConnectionAddr *)addr;
+    ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
     (void)addrTypeLen;
     if (pkgName == nullptr || connAddr == nullptr) {
@@ -219,7 +219,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 
 int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen)
 {
-    ConnectionAddr *connAddr = (ConnectionAddr *)addr;
+    ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
     (void)addrTypeLen;
     if (pkgName == nullptr || connAddr == nullptr) {
@@ -280,13 +280,13 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "infoTypeLen is invalid, infoTypeLen = %d", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
     }
-    return LnnGetAllOnlineNodeInfo((NodeBasicInfo **)info, infoNum);
+    return LnnGetAllOnlineNodeInfo(reinterpret_cast<NodeBasicInfo **>(info), infoNum);
 }
 
 int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
-    return LnnGetLocalDeviceInfo((NodeBasicInfo *)info);
+    return LnnGetLocalDeviceInfo(reinterpret_cast<NodeBasicInfo *>(info));
 }
 
 int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
@@ -369,7 +369,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     if (addr == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
-    ConnectionAddr *connAddr = (ConnectionAddr *)addr;
+    ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinLNNRequestInfo.begin(); iter != g_joinLNNRequestInfo.end();) {
@@ -389,7 +389,7 @@ int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char
     if (addr == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
-    ConnectionAddr *connAddr = (ConnectionAddr *)addr;
+    ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinMetaNodeRequestInfo.begin(); iter != g_joinMetaNodeRequestInfo.end();) {

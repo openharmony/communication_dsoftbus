@@ -115,7 +115,7 @@ static int32_t AddLaneQosObserverItem(LnnLanesObject *object, LnnLaneQosObserver
     return SOFTBUS_OK;
 }
 
-static void ClearLaneQosObserverList(LnnLanesObject *object)
+static void ClearLaneQosObserverList(const LnnLanesObject *object)
 {
     LaneObserverListItem *item = NULL;
     LaneObserverListItem *next = NULL;
