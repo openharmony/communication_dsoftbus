@@ -228,9 +228,10 @@ int32_t DiscServerProxy::OpenAuthSession(const char *sessionName, const Connecti
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId)
+int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
     (void)channelId;
+    (void)channelType;
     return SOFTBUS_OK;
 }
 
