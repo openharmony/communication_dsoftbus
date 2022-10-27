@@ -532,27 +532,6 @@ HWTEST_F(TransProxyChannelTest, TransProxyDestroyChannelListTest001, TestSize.Le
 }
 
 /**
- * @tc.name: TransProxyDeathCallbackTest001
- * @tc.desc: TransProxyDeathCallbackTest001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
-{
-    int32_t pid = 1;
-    const char *pkgName = "com.test.trans.proxy.channel.demo";
-
-    IServerChannelCallBack callBack;
-    TransProxyManagerInitInner(&callBack);
-
-    TransProxyDeathCallback(NULL, pid);
-    TransProxyDeathCallback(pkgName, pid);
-
-    TransProxyManagerDeinitInner();
-    EXPECT_TRUE(true);
-}
-
-/**
  * @tc.name: TransProxyPackMessageHeadTest001
  * @tc.desc: TransProxyPackMessageHeadTest001, use the wrong parameter.
  * @tc.type: FUNC
