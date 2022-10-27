@@ -168,24 +168,27 @@ static DiscBleListener g_bleListener = {
 
 //g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
-    1 << HICALL_CAPABILITY_BITMAP |
-    1 << PROFILE_CAPABILITY_BITMAP |
-    1 << HOMEVISIONPIC_CAPABILITY_BITMAP |
     1 << CASTPLUS_CAPABILITY_BITMAP |
-    1 << AA_CAPABILITY_BITMAP |
     1 << DVKIT_CAPABILITY_BITMAP |
-    1 << DDMP_CAPABILITY_BITMAP |
     1 << OSD_CAPABILITY_BITMAP;
 
 static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {
-    HICALL_CAPABILITY_BITMAP,
+    -1,
     CASTPLUS_CAPABILITY_BITMAP,
     DVKIT_CAPABILITY_BITMAP,
-    CASTPLUS_CAPABILITY_BITMAP,
+    -1,
     OSD_CAPABILITY_BITMAP,
-    DVKIT_CAPABILITY_BITMAP,
-    DDMP_CAPABILITY_BITMAP,
-    OSD_CAPABILITY_BITMAP
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
 };
 
 static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t arg2, void *obj);
@@ -210,24 +213,27 @@ static int ConvertCapBitMap(int oldCap)
         case 1 << OSD_CAPABILITY_BITMAP: // osdCapability
             return 0x10;
         case 1 << CASTPLUS_CAPABILITY_BITMAP:  // castPlus
-            return 0x2;
+            return 0x02;
         case 1 << DVKIT_CAPABILITY_BITMAP: // dvkit
-            return 0x4;
+            return 0x04;
         default:
             return oldCap;
     }
-    return oldCap;
 }
 
 static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums)
 {
     (void)nums;
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
-        if (SoftbusIsBitmapSet(srcCap, i)) {
-            SoftbusBitmapSet(dstCap, g_bleTransCapabilityMap[i]);
+        if (!SoftbusIsBitmapSet(srcCap, i)) {
+            continue;
+        }
+        int bleCapability = g_bleTransCapabilityMap[i];
+        if (bleCapability >= 0) {
+            SoftbusBitmapSet(dstCap, bleCapability);
         }
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "old= %u,new= %u", *srcCap, *dstCap);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "old= %u, new= %u", *srcCap, *dstCap);
 }
 
 static void ResetInfoUpdate(int adv)
@@ -467,7 +473,13 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
     if (ProcessHwHashAccout(foundInfo)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "same account");
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
+        if (tempCap == 0) {
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
+                "unsupport ble capability, %d", foundInfo->capabilityBitmap[0]);
+            return;
+        }
         foundInfo->capabilityBitmap[0] = tempCap;
+        foundInfo->capabilityBitmapNum = 1;
         g_discBleInnerCb->OnDeviceFound(foundInfo, &addtions);
     }
 }
