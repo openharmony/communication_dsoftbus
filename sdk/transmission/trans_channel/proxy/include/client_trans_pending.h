@@ -18,6 +18,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     char *data;
     uint32_t len;
@@ -30,5 +34,7 @@ void DeletePendingPacket(uint32_t id, uint64_t seq);
 
 int32_t GetPendingPacketData(uint32_t id, uint64_t seq, uint32_t waitMillis, bool isDelete, TransPendData *data);
 int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *data);
-
+#ifdef __cplusplus
+}
+#endif
 #endif
