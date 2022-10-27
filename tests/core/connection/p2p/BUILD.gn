@@ -65,9 +65,8 @@ ohos_unittest("softbus_connection_p2p_test") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock_main",
