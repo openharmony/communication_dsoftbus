@@ -656,12 +656,8 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
 
 int32_t LnnStartHeartbeat(void)
 {
-    if (g_hbFsm->state != STATE_HB_NONE_INDEX) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB heartbeat process has started!");
-        return SOFTBUS_OK;
-    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start.");
-    return LnnPostTransStateMsgToHbFsm(g_hbFsm, EVENT_HB_AS_MASTER_NODE);
+    return LnnPostStartMsgToHbFsm(g_hbFsm);
 }
 
 int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
