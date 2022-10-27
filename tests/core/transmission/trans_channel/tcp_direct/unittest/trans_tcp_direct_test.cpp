@@ -316,6 +316,7 @@ HWTEST_F(TransTcpDirectTest, OpenAuthConnTest001, TestSize.Level1)
     int32_t ret = OpenAuthConn(uuid, reqId, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
+
 /**
  * @tc.name: OpenDataBusReplyTest002
  * @tc.desc: Open the data channel for reply with error parameters.

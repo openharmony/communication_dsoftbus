@@ -22,6 +22,11 @@
 #include "softbus_proxychannel_message.h"
 #include "trans_channel_callback.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 int32_t TransProxyManagerInit(const IServerChannelCallBack *cb);
 void TransProxyManagerDeinit(void);
 
@@ -56,5 +61,9 @@ void TransProxyDeathCallback(const char *pkgName);
 int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo);
 int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId);
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

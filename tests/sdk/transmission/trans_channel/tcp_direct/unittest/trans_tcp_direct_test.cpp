@@ -15,12 +15,19 @@
 
 #include <gtest/gtest.h>
 
+#include "client_trans_tcp_direct_message.c"
+#include "client_trans_tcp_direct_message.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_access_token_test.h"
+
+#define MAX_LEN 2048
+#define TEST_FD 10
+#define RECV_BUF "testrecvBuf"
+#define BUF_LEN 10
 
 using namespace testing::ext;
 
@@ -306,5 +313,115 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = SendMessage(sessionId, data, maxLen + 1);
     EXPECT_EQ(SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT, ret);
+}
+
+/**
+ * @tc.name: TransClientGetTdcDataBufByChannelTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransClientGetTdcDataBufByChannelTest001, TestSize.Level0)
+{
+    int ret;
+    int channelId = 0;
+    int fd = TEST_FD;
+    int len = BUF_LEN;
+
+    ret = TransClientGetTdcDataBufByChannel(channelId, NULL, NULL);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, (size_t *)&len);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransDataListInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, (size_t *)&len);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransAddDataBufNode(channelId, fd);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, (size_t *)&len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDelDataBufNode(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDataListDeinit();
+}
+
+/**
+ * @tc.name: TransClientUpdateTdcDataBufWInfoTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransClientUpdateTdcDataBufWInfoTest001, TestSize.Level0)
+{
+    int ret;
+    int channelId = 0;
+    int fd = TEST_FD;
+    const char *recvBuf = RECV_BUF;
+    int recvLen = MAX_LEN;
+
+    ret = TransClientUpdateTdcDataBufWInfo(channelId, NULL, recvLen);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransClientUpdateTdcDataBufWInfo(channelId, const_cast<char *>(recvBuf), recvLen);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransDataListInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransClientUpdateTdcDataBufWInfo(channelId, const_cast<char *>(recvBuf), recvLen);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransAddDataBufNode(channelId, fd);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransClientUpdateTdcDataBufWInfo(channelId, const_cast<char *>(recvBuf), recvLen);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    recvLen = strlen(recvBuf);
+    ret = TransClientUpdateTdcDataBufWInfo(channelId, const_cast<char *>(recvBuf), recvLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransDelDataBufNode(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDataListDeinit();
+}
+
+/**
+ * @tc.name: TransTdcRecvDataTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001, TestSize.Level0)
+{
+    int ret;
+    int channelId = -1;
+    int fd = -1;
+
+    ret = TransTdcRecvData(channelId);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransDataListInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    channelId = 0;
+    ret = TransAddDataBufNode(channelId, fd);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransTdcRecvData(channelId);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransDelDataBufNode(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransDataListDeinit();
 }
 } // namespace OHOS
