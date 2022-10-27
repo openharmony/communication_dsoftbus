@@ -130,6 +130,10 @@ static AppInfo *GetAppInfo(const SessionParam *param)
         appInfo->streamType = (StreamType)param->attr->attr.streamAttr.streamType;
     } else if (param->attr->dataType == TYPE_FILE) {
         appInfo->businessType = BUSINESS_TYPE_FILE;
+    } else if (param->attr->dataType == TYPE_MESSAGE) {
+        appInfo->businessType = BUSINESS_TYPE_MESSAGE;
+    } else if (param->attr->dataType == TYPE_BYTES) {
+        appInfo->businessType = BUSINESS_TYPE_BYTE;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
@@ -318,7 +322,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
     return channelId;
 }
 
-static uint32_t MergeStatsInterval(uint32_t *data, uint32_t left, uint32_t right)
+static uint32_t MergeStatsInterval(const uint32_t *data, uint32_t left, uint32_t right)
 {
     uint32_t result = 0;
     while (left <= right) {

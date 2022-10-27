@@ -179,6 +179,7 @@ static void OnUdpChannelOpened(int32_t channelId)
     info.peerDeviceId = channel.info.peerDeviceId;
     info.peerSessionName = channel.info.peerSessionName;
     info.routeType = channel.routeType;
+    info.businessType = channel.businessType;
     if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
         g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
     }

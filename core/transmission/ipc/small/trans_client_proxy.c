@@ -88,8 +88,8 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened get svc failed.");
         return SOFTBUS_ERR;
     }
+    WriteInt32(&io, channel->businessType);
     if (channel->channelType == CHANNEL_TYPE_UDP) {
-        WriteInt32(&io, channel->businessType);
         WriteString(&io, channel->myIp);
         WriteInt32(&io, channel->streamType);
         WriteBool(&io, channel->isUdpFile);

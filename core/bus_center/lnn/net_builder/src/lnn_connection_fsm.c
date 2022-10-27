@@ -391,6 +391,7 @@ int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *dataKey)
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
     SoftBusSysTime times;
+    SoftBusVersion version;
     (void)SoftBusGetTime(&times);
     NodeInfo *nodeInfo = connInfo->nodeInfo;
     nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HB_TIME_FACTOR +
@@ -400,6 +401,11 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
     connInfo->nodeInfo->authSeq[LnnConvAddrTypeToDiscType(connInfo->addr.type)] = connInfo->authId;
     nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
     nodeInfo->relation[connInfo->addr.type]++;
+    if (AuthGetVersion(connInfo->authId, &version) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill version fail");
+        return SOFTBUS_ERR;
+    }
+    connInfo->version = version;
     if (AuthGetDeviceUuid(connInfo->authId, nodeInfo->uuid, sizeof(nodeInfo->uuid)) != SOFTBUS_OK ||
         nodeInfo->uuid[0] == '\0') {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill uuid fail");

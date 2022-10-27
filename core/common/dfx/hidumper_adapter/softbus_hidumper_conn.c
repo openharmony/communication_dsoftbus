@@ -25,7 +25,7 @@
 
 static LIST_HEAD(g_conn_var_list);
 
-int32_t SoftBusRegConnVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+int32_t SoftBusRegConnVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump invalid param");

@@ -64,7 +64,6 @@ static int InnerRegisterService(void)
     for (uint32_t i = 0; i < clientNameNum; i++) {
         while (serverProxyFrame->SoftbusRegisterService(clientName[i], nullptr) != SOFTBUS_OK) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
-            continue;
         }
         SoftBusFree(clientName[i]);
     }
@@ -99,23 +98,21 @@ static sptr<IRemoteObject> GetSystemAbility()
 
 static int32_t ServerProxyInit(void)
 {
+    std::lock_guard<std::mutex> lock(g_mutex);
     if (g_serverProxy == nullptr) {
-        std::lock_guard<std::mutex> lock(g_mutex);
+        g_serverProxy = GetSystemAbility();
         if (g_serverProxy == nullptr) {
-            g_serverProxy = GetSystemAbility();
-            if (g_serverProxy == nullptr) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
-                return SOFTBUS_ERR;
-            }
-            g_clientDeath = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) SoftBusClientDeathRecipient());
-            if (g_clientDeath == nullptr) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeathRecipient object is nullptr\n");
-                return SOFTBUS_ERR;
-            }
-            if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddDeathRecipient failed\n");
-                return SOFTBUS_ERR;
-            }
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+            return SOFTBUS_ERR;
+        }
+        g_clientDeath = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) SoftBusClientDeathRecipient());
+        if (g_clientDeath == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeathRecipient object is nullptr\n");
+            return SOFTBUS_ERR;
+        }
+        if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddDeathRecipient failed\n");
+            return SOFTBUS_ERR;
         }
     }
     return SOFTBUS_OK;
@@ -164,7 +161,6 @@ int ClientRegisterService(const char *pkgName)
     }
     while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) != SOFTBUS_OK) {
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
-        continue;
     }
 
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s softbus server register service success!\n", pkgName);

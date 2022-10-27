@@ -24,9 +24,11 @@ namespace OHOS {
         if (data == nullptr || size == 0) {
             return true;
         }
+
         NodeDeviceInfoKey key = NODE_KEY_NETWORK_CAPABILITY;
-        char udid[UDID_BUF_LEN] = {0};
-        GetNodeKeyInfo((const char *)data, (char *)data, key, (uint8_t *)udid, UDID_BUF_LEN);
+        uint8_t udid[UDID_BUF_LEN] = {0};
+        GetNodeKeyInfo((const char *)data,
+                       const_cast<char *>(reinterpret_cast<const char *>(data)), key, udid, UDID_BUF_LEN);
         return true;
     }
 }

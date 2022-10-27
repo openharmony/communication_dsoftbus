@@ -462,7 +462,7 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
     InnerDeviceInfoAddtions addtions = {
         .medium = BLE,
     };
-    
+
     unsigned int tempCap = 0;
     if (ProcessHwHashAccout(foundInfo)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "same account");
@@ -616,7 +616,7 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
     if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceName failed");
     }
-    info->devType = DiscBleGetDeviceType();
+    info->devType = (DeviceType)DiscBleGetDeviceType();
     bool isSameAccount = false;
     bool isWakeRemote = false;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
@@ -644,7 +644,7 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceName failed");
     }
-    info->devType = DiscBleGetDeviceType();
+    info->devType = (DeviceType)DiscBleGetDeviceType();
     uint32_t passiveCapBitMap[CAPABILITY_NUM] = {0};
     if (MatchRecvMessage(g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap,
         passiveCapBitMap, CAPABILITY_NUM) != SOFTBUS_OK) {
@@ -655,7 +655,7 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
         info->capabilityBitmap[pos] =
         g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[pos] | passiveCapBitMap[pos];
     }
-    
+
     int32_t activeCnt = g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].rangingRefCnt;
     int32_t passiveCnt = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].rangingRefCnt;
     info->range = activeCnt + passiveCnt;
@@ -1015,7 +1015,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             continue;
         }
         if (info->capabilityData[pos] == NULL) {
-            info->capabilityData[pos] = SoftBusCalloc(CUST_DATA_MAX_LEN);
+            info->capabilityData[pos] = (unsigned char *)SoftBusCalloc(CUST_DATA_MAX_LEN);
             if (info->capabilityData[pos] == NULL) {
                 return SOFTBUS_MALLOC_ERR;
             }
@@ -1035,13 +1035,8 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
     return SOFTBUS_OK;
 }
 
-static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
+static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
 {
-    if (info == NULL || option == NULL ||
-        (option->publishOption == NULL && option->subscribeOption == NULL) ||
-        (option->publishOption != NULL && option->subscribeOption != NULL)) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     uint32_t *optionCapBitMap = NULL;
     bool isSameAccount = false;
     bool isWakeRemote = false;
@@ -1078,8 +1073,6 @@ static int32_t UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
         info->rangingRefCnt -= 1;
         info->needUpdate = true;
     }
-    
-    return SOFTBUS_OK;
 }
 
 static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t activeFlags, const void *option)
@@ -1110,19 +1103,15 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
             return SOFTBUS_ERR;
         }
     } else {
-        if (UnregisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnregisterCapability failed.");
-            SoftBusMutexUnlock(&g_bleInfoLock);
-            return SOFTBUS_ERR;
-        }
+        UnregisterCapability(&g_bleInfoManager[index], &regOption);
     }
-    
+
     uint32_t newCap = g_bleInfoManager[index].capBitMap[0];
     int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ble discovery request summary, action: (%d, %d, %d) cap: %d->%d, "
         "ref ranging count: %d->%d", isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount,
         newRangingRefCount);
-    
+
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
 }
@@ -1249,14 +1238,15 @@ static DiscoveryFuncInterface g_discBleFuncInterface = {
     .StopScan = BleStopPassivePublish,
     .StartAdvertise = BleStartActiveDiscovery,
     .Subscribe = BleStartPassiveDiscovery,
-    .StopAdvertise = BleStopActiveDiscovery,
     .Unsubscribe = BleStopPassiveDiscovery,
+    .StopAdvertise = BleStopActiveDiscovery,
     .UpdateLocalDeviceInfo = BleUpdateLocalDeviceInfo
 };
 
 static DiscoveryBleDispatcherInterface g_discBleDispatcherInterface = {
-    .mediumInterface = &g_discBleFuncInterface,
-    .IsConcern = BleIsConcern
+    .IsConcern = BleIsConcern,
+    .mediumInterface = &g_discBleFuncInterface
+
 };
 
 static int32_t InitAdvertiser(void)
@@ -1507,7 +1497,7 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
     RecvMessage *recvMsg = GetRecvMessage(key);
     if (recvMsg == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "key is not exit");
-        recvMsg = SoftBusCalloc(sizeof(RecvMessage));
+        recvMsg = (RecvMessage *)SoftBusCalloc(sizeof(RecvMessage));
         if (recvMsg == NULL) {
             SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc recv msg failed");
             SoftBusMutexUnlock(&g_recvMessageInfo.lock);
@@ -1631,7 +1621,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
 
 static int32_t DiscBleLooperInit(void)
 {
-    g_discBleHandler.name = "ble_disc_handler";
+    g_discBleHandler.name = (char *)"ble_disc_handler";
     g_discBleHandler.HandleMessage = DiscBleMsgHandler;
     g_discBleHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_discBleHandler.looper == NULL) {
@@ -1737,9 +1727,9 @@ DiscoveryBleDispatcherInterface *DiscSoftbusBleInit(DiscInnerCallback *discInner
         goto EXIT;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftbusBleInit success");
-    SoftBusRegDiscVarDump(BLE_INFO_MANAGER, &BleInfoDump);
-    SoftBusRegDiscVarDump(BlE_ADVERTISER, &BleAdvertiserDump);
-    SoftBusRegDiscVarDump(RECV_MESSAGE_INFO, &RecvMessageInfoDump);
+    SoftBusRegDiscVarDump((char *)BLE_INFO_MANAGER, &BleInfoDump);
+    SoftBusRegDiscVarDump((char *)BlE_ADVERTISER, &BleAdvertiserDump);
+    SoftBusRegDiscVarDump((char *)RECV_MESSAGE_INFO, &RecvMessageInfoDump);
     return &g_discBleDispatcherInterface;
 
 EXIT:

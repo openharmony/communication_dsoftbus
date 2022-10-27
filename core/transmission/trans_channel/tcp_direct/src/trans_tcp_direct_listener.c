@@ -141,7 +141,7 @@ static int32_t CreateSessionConnNode(
     }
     conn->appInfo.protocol = clientAddr->socketOption.protocol;
 
-    char *authState = "";
+    const char *authState = "";
     if (strcpy_s(conn->appInfo.myData.authState, sizeof(conn->appInfo.myData.authState), authState) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy auth state to app info failed.");
         SoftBusFree(conn);
@@ -218,7 +218,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 {
     (void)module;
-    SessionConn *conn = SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnDataEvent malloc fail.");
         return SOFTBUS_ERR;

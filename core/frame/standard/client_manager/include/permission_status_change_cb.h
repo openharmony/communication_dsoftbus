@@ -32,7 +32,7 @@ public:
     int32_t pid;
 };
 
-void RegisterDataSyncPermission(const uint32_t callingTokenId,
-                                const std::string permissionName, const std::string pkgName, int32_t pid);
+void RegisterDataSyncPermission(const uint32_t& callingTokenId,
+                                const std::string& permissionName, const std::string& pkgName, int32_t pid);
 } // namespace OHOS
 #endif // PERMISSION_STATUS_CHANGE_CB_H

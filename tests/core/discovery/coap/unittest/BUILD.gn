@@ -1,0 +1,63 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+module_output_path = "dsoftbus/discovery"
+
+ohos_unittest("DiscoveryCoapDiscNstackxAdapterTest") {
+  module_out_path = module_output_path
+  sources = [ "disc_nstackx_adapter_test.cpp" ]
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/core/common/include",
+    "//foundation/communication/dsoftbus/core/discovery/ble/dispatcher/include",
+    "//foundation/communication/dsoftbus/core/discovery/manager/include",
+    "//foundation/communication/dsoftbus/core/discovery/interface",
+    "//foundation/communication/dsoftbus/core/discovery/coap/include",
+    "//foundation/communication/dsoftbus/core/discovery/coap/src",
+    "//foundation/communication/dsoftbus/core/bus_center/interface",
+    "//foundation/communication/dsoftbus/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "//foundation/communication/dsoftbus/adapter/common/include",
+    "//foundation/communication/dsoftbus/adapter/default_config/spec_config",
+    "//foundation/communication/dsoftbus//core/common/dfx/hidumper_adapter/include",
+    "//third_party/cJSON",
+  ]
+
+  deps = [
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+    "//foundation/communication/dsoftbus/core/common:softbus_utils",
+    "//foundation/communication/dsoftbus/core/frame:softbus_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":DiscoveryCoapDiscNstackxAdapterTest" ]
+}
