@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-native_source_path = rebase_path("$dsoftbus_core_path")
+native_source_path = rebase_path("$dsoftbus_root_path")
 dep_dir = "dsoftbus_enhance/test/core/discovery"
 has_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                [
