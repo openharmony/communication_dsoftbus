@@ -21,9 +21,14 @@ trans_sdk_test_common_src = [
 
 trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/sdk/transmission/session/include",
   "$dsoftbus_root_path/interfaces/inner_kits/transport",
   "$dsoftbus_root_path/interfaces/kits/transport",
   "$dsoftbus_root_path/tests/sdk/common/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/src",
+  "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+  "$dsoftbus_root_path/sdk/transmission/session/include",
 ]
 trans_sdk_test_common_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
@@ -44,9 +49,13 @@ if (defined(ohos_lite)) {
       include_dirs += [
         "$dsoftbus_root_path/core/common/softbus_property/include",
         "$softbus_adapter_config/spec_config",
+        "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
       ]
       deps = trans_sdk_test_common_deps
-      deps += [ "$hilog_lite_deps_path" ]
+      deps += [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$hilog_lite_deps_path",
+      ]
     }
   }
 } else {
