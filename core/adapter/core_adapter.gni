@@ -22,10 +22,6 @@ br_adapter_inc = [
   "//foundation/communication/bluetooth/interfaces/innerkits/native_c/include",
 ]
 
-declare_args() {
-  dsoftbus_get_devicename = true
-}
-
 if (defined(ohos_lite)) {
   bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
 
