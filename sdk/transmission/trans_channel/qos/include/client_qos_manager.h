@@ -18,6 +18,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int32_t ClientQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality);
-
+#ifdef __cplusplus
+}
+#endif
 #endif

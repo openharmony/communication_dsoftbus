@@ -47,6 +47,7 @@ typedef struct {
     int32_t peerPid;
     bool isEncrypt;
     int32_t routeType;
+    int32_t businessType;
     int32_t fileEncrypt;
     int32_t algorithm;
     int32_t crc;
@@ -95,6 +96,8 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
 int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32_t *type, bool *isEnable);
 
 int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo);
+
+int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType);
 
 int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *data);
 
