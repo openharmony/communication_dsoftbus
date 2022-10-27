@@ -41,9 +41,12 @@ static DiscInnerCallback g_discInnerCallback = {
     .OnDeviceFound = TestOnDeviceFound,
 };
 
+static DiscInnerCallback g_discInnerCallBack = {
+    .OnDeviceFound = nullptr,
+};
+
 int SoftBusGetBtState()
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Get, GXY, BT, STATE");
     if (g_softbusBtState) {
         return BLE_ENABLE;
     }
@@ -725,5 +728,983 @@ HWTEST_F(SoftBusDiscBleTest, RegisterCapability001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     RegisterCapability(&infoTest, &optionTest);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest, RegisterCapability001, End");
+}
+
+/*
+* @tc.name: UnregisterCapability001
+* @tc.desc: test dispatcher
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, UnregisterCapability001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability001 Start");
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    SubscribeOption subscribeOption = {
+        .freq = LOW,
+        .isSameAccount = false,
+        .isWakeRemote = false,
+        .capabilityBitmap = { 0x1 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+    };
+    DiscBleOption discBleOption = {
+        .publishOption = nullptr,
+        .subscribeOption = &subscribeOption,
+    };
+    DiscBleInfo discBleInfo  = {
+        .needUpdate = false,
+        .capBitMap = { 0x01 },
+        .capCount = { 1 },
+        .capabilityData = {capabilityDate},
+        .capDataLen = { 1 },
+        .isSameAccount = { false },
+        .isWakeRemote = { false },
+        .freq = { LOW },
+        .rangingRefCnt = 1,
+    };
+
+    UnregisterCapability(&discBleInfo, &discBleOption);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability001 End");
+}
+
+/*
+* @tc.name: UnregisterCapability002
+* @tc.desc: test UnregisterCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, UnregisterCapability002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability002 Start");
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    DiscBleInfo discBleInfo  = {
+        .needUpdate = false,
+        .capBitMap = { 0x01 },
+        .capCount = { 1 },
+        .capabilityData = { capabilityDate },
+        .capDataLen = { 1 },
+        .isSameAccount = { false },
+        .isWakeRemote = { false },
+        .freq = { LOW },
+        .rangingRefCnt = 1,
+    };
+    DiscBleOption discBleOption = {
+        .publishOption = &publishOption,
+        .subscribeOption = nullptr,
+    };
+    UnregisterCapability(&discBleInfo, &discBleOption);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability002 End");
+}
+
+/*
+* @tc.name: UnregisterCapability003
+* @tc.desc: test UnregisterCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, UnregisterCapability003, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability003 Start");
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = true,
+    };
+    DiscBleInfo discBleInfo  = {
+        .needUpdate = false,
+        .capBitMap = { 0x01 },
+        .capCount = { 1 },
+        .capabilityData = { capabilityDate },
+        .capDataLen = { 1 },
+        .isSameAccount = { false },
+        .isWakeRemote = { false },
+        .freq = { LOW },
+        .rangingRefCnt = -1,
+    };
+    DiscBleOption discBleOption = {
+        .publishOption = &publishOption,
+        .subscribeOption = nullptr,
+    };
+    UnregisterCapability(&discBleInfo, &discBleOption);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability003 End");
+}
+
+/*
+* @tc.name: UnregisterCapability004
+* @tc.desc: test UnregisterCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, UnregisterCapability004, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability004 Start");
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    DiscBleInfo discBleInfo  = {
+        .needUpdate = false,
+        .capBitMap = { 0x01 },
+        .capCount = { 1 },
+        .capabilityData = { capabilityDate },
+        .capDataLen = { 1 },
+        .isSameAccount = { false },
+        .isWakeRemote = { false },
+        .freq = { LOW },
+        .rangingRefCnt = -1,
+    };
+    DiscBleOption discBleOption = {
+        .publishOption = &publishOption,
+        .subscribeOption = nullptr,
+    };
+    UnregisterCapability(&discBleInfo, &discBleOption);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability004 End");
+}
+
+/*
+* @tc.name: UnregisterCapability005
+* @tc.desc: test UnregisterCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, UnregisterCapability005, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability005 Start");
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x1 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = true,
+    };
+    DiscBleInfo discBleInfo  = {
+        .needUpdate = false,
+        .capBitMap = { 0x01 },
+        .capCount = { 1 },
+        .capabilityData = { capabilityDate },
+        .capDataLen = { 1 },
+        .isSameAccount = { false },
+        .isWakeRemote = { false },
+        .freq = { LOW },
+        .rangingRefCnt = 1,
+    };
+    DiscBleOption discBleOption = {
+        .publishOption = &publishOption,
+        .subscribeOption = nullptr,
+    };
+    UnregisterCapability(&discBleInfo, &discBleOption);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UnregisterCapability005 End");
+}
+
+/*
+* @tc.name: ProcessBleInfoManager001
+* @tc.desc: test ProcessBleInfoManager
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, ProcessBleInfoManager001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleInfoManager001 Start");
+    bool isStart = false;
+    uint8_t publishFlag = 1;
+    uint8_t activeFlag = 1;
+    void *option = nullptr;
+    auto ret = ProcessBleInfoManager(isStart, publishFlag, activeFlag, option);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleInfoManager001 End");
+}
+
+/*
+* @tc.name: BleStartActivePublish001
+* @tc.desc: test BleStartActivePublish
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStartActivePublish001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartActivePublish001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    LooperInit();
+    DiscBleLooperInit();
+    uint8_t capabilityDate[] = {'a'};
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    g_softbusBtState = false;
+    auto ret = BleStartActivePublish(&publishOption);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartActivePublish001 End");
+}
+
+/*
+* @tc.name: BleStartActivePublish002
+* @tc.desc: test BleStartActivePublish
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStartActivePublish002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartActivePublish002 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t capabilityDate[] = { 'a' };
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    g_softbusBtState = true;
+    auto ret = BleStartActivePublish(&publishOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartActivePublish002 End");
+}
+
+/*
+* @tc.name: BleStartPassivePublish001
+* @tc.desc: test BleStartPassivePublish
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStartPassivePublish001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartPassivePublish001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t capabilityDate[] = { 'a' };
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    auto ret = BleStartPassivePublish(&publishOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartPassivePublish001 End");
+}
+
+/*
+* @tc.name: BleStopActivePublish001
+* @tc.desc: test BleStopActivePublish
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStopActivePublish001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopActivePublish001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t capabilityDate[] = { 'a' };
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    auto ret = BleStopActivePublish(&publishOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopActivePublish001 End");
+}
+
+/*
+* @tc.name: BleStopPassivePublish001
+* @tc.desc: test BleStopPassivePublish
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStopPassivePublish001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopPassivePublish001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t capabilityDate[] = {'a'};
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = { 0x01 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    auto ret = BleStopPassivePublish(&publishOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopPassivePublish001 End");
+}
+
+/*
+* @tc.name: BleStartActiveDiscovery001
+* @tc.desc: test BleStartActiveDiscovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStartActiveDiscovery001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartActiveDiscovery001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    SubscribeOption subscribeOption = {
+        .freq = LOW,
+        .isSameAccount = false,
+        .isWakeRemote = false,
+        .capabilityBitmap = { 0x1 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+    };
+    auto ret = BleStartActiveDiscovery(&subscribeOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartActiveDiscovery001 End");
+}
+
+/*
+* @tc.name: BleStartPassiveDiscovery001
+* @tc.desc: test BleStartPassiveDiscovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStartPassiveDiscovery001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartPassiveDiscovery001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    SubscribeOption subscribeOption = {
+        .freq = LOW,
+        .isSameAccount = false,
+        .isWakeRemote = false,
+        .capabilityBitmap = { 0x1 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+    };
+    auto ret = BleStartPassiveDiscovery(&subscribeOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStartPassiveDiscovery001 End");
+}
+
+/*
+* @tc.name: BleStopActiveDiscovery001
+* @tc.desc: test BleStopActiveDiscovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStopActiveDiscovery001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopActiveDiscovery001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    SubscribeOption subscribeOption = {
+        .freq = LOW,
+        .isSameAccount = false,
+        .isWakeRemote = false,
+        .capabilityBitmap = { 0x1 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+    };
+    auto ret = BleStopActiveDiscovery(&subscribeOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopActiveDiscovery001 End");
+}
+void OnDeviceFound1(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions) {}
+
+/*
+* @tc.name: BleStopPassiveDiscovery001
+* @tc.desc: test BleStopPassiveDiscovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleStopPassiveDiscovery001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopPassiveDiscovery001 Start");
+    ListInit(&g_recvMessageInfo.node);
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscBleLooperInit();
+    uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    capabilityDate[0] = 'a';
+    SubscribeOption subscribeOption = {
+        .freq = LOW,
+        .isSameAccount = false,
+        .isWakeRemote = false,
+        .capabilityBitmap = { 0x1 },
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+    };
+    auto ret = BleStopPassiveDiscovery(&subscribeOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleStopPassiveDiscovery001 End");
+}
+
+/*
+* @tc.name: BleIsConcern001
+* @tc.desc: test BleIsConcern
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleIsConcern001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleIsConcern001 Start");
+    auto ret = BleIsConcern(0);
+    EXPECT_EQ (ret, false);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleIsConcern001 End");
+}
+
+/*
+* @tc.name: BleIsConcern002
+* @tc.desc: test BleIsConcern
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleIsConcern002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleIsConcern002 Start");
+    auto ret = BleIsConcern(1);
+    EXPECT_EQ (ret, true);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleIsConcern002 End");
+}
+
+/*
+* @tc.name: DiscSoftbusBleInit001
+* @tc.desc: test DiscSoftbusBleInit
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, DiscSoftbusBleInit001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest,DiscSoftbusBleInit001,Start");
+    auto *ret = DiscSoftbusBleInit(nullptr);
+    EXPECT_EQ(ret, nullptr);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest,DiscSoftbusBleInit001,End");
+}
+
+/*
+* @tc.name: DiscSoftbusBleInit002
+* @tc.desc: test DiscSoftbusBleInit
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, DiscSoftbusBleInit002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscSoftbusBleInit002 Start");
+    auto *ret = DiscSoftbusBleInit(&g_discInnerCallBack);
+    EXPECT_EQ(ret, nullptr);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscSoftbusBleInit002 End");
+}
+
+/*
+* @tc.name: DiscSoftbusBleInit003
+* @tc.desc: test DiscSoftbusBleInit
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, DiscSoftbusBleInit003, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscSoftbusBleInit003 Start");
+    auto *ret = DiscSoftbusBleInit(&g_discInnerCallback);
+    EXPECT_EQ(ret, &g_discBleDispatcherInterface);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscSoftbusBleInit003 End");
+}
+
+/*
+* @tc.name: DiscBleLooperInit001
+* @tc.desc: test DiscBleLooperInit
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, DiscBleLooperInit001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscBleLooperInit001 Start");
+    auto ret = DiscBleLooperInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscBleLooperInit001 End");
+}
+
+/*
+* @tc.name: InitBleListener001
+* @tc.desc: test InitBleListener
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, InitBleListener001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest InitBleListener001 Start");
+    auto ret = InitBleListener();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest InitBleListener001 End");
+}
+
+/*
+* @tc.name: DiscSoftbusBleDeinit001
+* @tc.desc: test DiscSoftbusBleDeinit
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, DiscSoftbusBleDeinit001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscSoftbusBleDeinit001 Start");
+    g_isScanning = true;
+    DiscSoftbusBleDeinit();
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscSoftbusBleDeinit001 End");
+}
+
+/*
+* @tc.name: UpdateAdvertiserDeviceInfo001
+* @tc.desc: test UpdateAdvertiserDeviceInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, UpdateAdvertiserDeviceInfo001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UpdateAdvertiserDeviceInfo001 Start");
+    auto ret = UpdateAdvertiserDeviceInfo(1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UpdateAdvertiserDeviceInfo001 End");
+}
+
+/*
+* @tc.name: UpdateAdvertiserDeviceInfo002
+* @tc.desc: test UpdateAdvertiserDeviceInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, UpdateAdvertiserDeviceInfo002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UpdateAdvertiserDeviceInfo002 Start");
+    uint32_t capabilityBitmap = 0x01;
+    ConnectionAddr connectionAddr = {
+        .type = CONNECTION_ADDR_BLE,
+        .info = {
+            .ble = {
+                .bleMac = "123456789abc",
+                .udidHash = { 0x01 },
+            },
+        },
+        .peerUid = "abcd",
+    };
+    DeviceInfo deviceInfo = {
+        .devId = "bac",
+        .accountHash = "abc",
+        .devType = DESKTOP_PC,
+        .devName = "abc",
+        .isOnline = true,
+        .addrNum = 1,
+        .addr = { connectionAddr },
+        .capabilityBitmapNum = 1,
+        .capabilityBitmap = { capabilityBitmap },
+        .custData = { "hello" },
+        .range = 1,
+    };
+    DiscBleAdvertiser discBleAdvertiser = {
+        .advId = 1,
+        .isAdvertising = true,
+        .deviceInfo = deviceInfo,
+        .GetDeviceInfo = GetDeviceInfo,
+    };
+    g_bleAdvertiser[1] = discBleAdvertiser;
+    auto ret = UpdateAdvertiserDeviceInfo(1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest UpdateAdvertiserDeviceInfo002 End");
+}
+
+/*
+* @tc.name: ProcessBleDiscFunc001
+* @tc.desc: test ProcessBleDiscFunc
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, ProcessBleDiscFunc001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleDiscFunc001 Start");
+    auto ret = ProcessBleDiscFunc(true, BLE_PUBLISH, BLE_ACTIVE, PUBLISH_ACTIVE_SERVICE, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleDiscFunc001 End");
+}
+
+/*
+* @tc.name: ProcessBleDiscFunc002
+* @tc.desc: test ProcessBleDiscFunc
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, ProcessBleDiscFunc002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleDiscFunc002 Start");
+    uint8_t capabilityDate[] = { 'a' };
+    PublishOption publishOption = {
+        .freq = LOW,
+        .capabilityBitmap = {0x01},
+        .capabilityData = capabilityDate,
+        .dataLen = 1,
+        .ranging = false,
+    };
+    PublishOption publishOption1 [] = {publishOption};
+    g_softbusBtState = false;
+    auto ret = ProcessBleDiscFunc(true, BLE_PUBLISH, BLE_ACTIVE, PUBLISH_ACTIVE_SERVICE, (void *)publishOption1);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleDiscFunc002 End");
+}
+
+/*
+* @tc.name: StartPassiveDiscovery001
+* @tc.desc: test ProcessBleDiscFunc
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, StartPassiveDiscovery001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleDiscFunc001 Start");
+    StartPassiveDiscovery(nullptr);
+    SoftBusMessage softBusMessage = {
+        .what = START_PASSIVE_DISCOVERY,
+        .arg1 = 1,
+        .arg2 = 2,
+        .time = 12,
+        .obj = nullptr,
+        .handler = nullptr,
+        .FreeMessage = nullptr,
+    };
+    g_isScanning = true;
+    StartActiveDiscovery(&softBusMessage);
+    softBusMessage.what = START_ACTIVE_DISCOVERY;
+    StartActiveDiscovery(&softBusMessage);
+    g_softbusBtState = true;
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    softBusMessage.what = START_PASSIVE_DISCOVERY;
+    StartActiveDiscovery(&softBusMessage);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ProcessBleDiscFunc001 End");
+}
+
+/*
+* @tc.name: Recovery001
+* @tc.desc: test Recovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, Recovery001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest Recovery001 Start");
+    Recovery(nullptr);
+    SoftBusMessage softBusMessage = {
+        .what = START_PASSIVE_DISCOVERY,
+        .arg1 = 1,
+        .arg2 = 2,
+        .time = 12,
+        .obj = nullptr,
+        .handler = nullptr,
+        .FreeMessage = nullptr,
+    };
+    Recovery(&softBusMessage);
+    g_softbusBtState = true;
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    softBusMessage.what = RECOVERY;
+    Recovery(&softBusMessage);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest Recovery001 End");
+}
+
+/*
+* @tc.name: BleDiscTurnOff001
+* @tc.desc: test BleDiscTurnOff
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleDiscTurnOff001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleDiscTurnOff001 Start");
+    BleDiscTurnOff(nullptr);
+    SoftBusMessage softBusMessage = {
+        .what = START_PASSIVE_DISCOVERY,
+        .arg1 = 1,
+        .arg2 = 2,
+        .time = 12,
+        .obj = nullptr,
+        .handler = nullptr,
+        .FreeMessage = nullptr,
+    };
+    BleDiscTurnOff(&softBusMessage);
+    g_softbusBtState = true;
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    softBusMessage.what = RECOVERY;
+    BleDiscTurnOff(&softBusMessage);
+    DiscBleDeinit();
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleDiscTurnOff001 End");
+}
+
+/*
+* @tc.name: ReplyPassiveNonBroadcast001
+* @tc.desc: test ReplyPassiveNonBroadcast
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, ReplyPassiveNonBroadcast001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ReplyPassiveNonBroadcast001 Start");
+    auto ret = ReplyPassiveNonBroadcast();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest ReplyPassiveNonBroadcast001 End");
+}
+
+/*
+* @tc.name: RemoveRecvMsgFunc001
+* @tc.desc: test RemoveRecvMsgFunc
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, RemoveRecvMsgFunc001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest RemoveRecvMsgFunc001 Start");
+    SoftBusMessage softBusMessage = {
+        .what = START_PASSIVE_DISCOVERY,
+        .arg1 = 1,
+        .arg2 = 2,
+        .time = 12,
+        .obj = nullptr,
+        .handler = nullptr,
+        .FreeMessage = nullptr,
+    };
+    auto args = softBusMessage.arg1;
+    auto ret = RemoveRecvMsgFunc(&softBusMessage, (void*)&args);
+    EXPECT_EQ(ret, 1);
+    args = args + 1;
+    auto ans = RemoveRecvMsgFunc(&softBusMessage, (void*)&args);
+    EXPECT_EQ(ans, 1);
+    softBusMessage.what = PROCESS_TIME_OUT;
+    auto tmp = RemoveRecvMsgFunc(&softBusMessage, (void*)&args);
+    EXPECT_EQ(tmp, 1);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest RemoveRecvMsgFunc001 End");
+}
+
+/*
+* @tc.name: GetRecvMessage001
+* @tc.desc: test GetRecvMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, GetRecvMessage001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest GetRecvMessage001 Start");
+    auto ret = GetRecvMessage(nullptr);
+    EXPECT_EQ(ret, nullptr);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest GetRecvMessage001 End");
+}
+
+/*
+* @tc.name: MatchRecvMessage001
+* @tc.desc: test MatchRecvMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, MatchRecvMessage001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest MatchRecvMessage001 Start");
+    auto ret = MatchRecvMessage(nullptr, nullptr, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest MatchRecvMessage001 End");
+}
+
+/*
+* @tc.name: MatchRecvMessage002
+* @tc.desc: test MatchRecvMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, MatchRecvMessage002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest MatchRecvMessage002 Start");
+    uint32_t publishInfo[] = { 0x1, 0xa };
+    uint32_t capBitMap[] = { 0x1 };
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    auto ret = MatchRecvMessage(publishInfo, capBitMap, 1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest MatchRecvMessage002 End");
+}
+
+/*
+* @tc.name: StartTimeout001
+* @tc.desc: test StartTimeout
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, StartTimeout001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest StartTimeout001 Start");
+    StartTimeout(nullptr);
+    StartTimeout("123");
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    StartTimeout("123");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest StartTimeout001 End");
+}
+
+/*
+* @tc.name: RemoveTimeout001
+* @tc.desc: test RemoveTimeout
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, RemoveTimeout001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest RemoveTimeout001 Start");
+    RemoveTimeout(nullptr);
+    RemoveTimeout("123");
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    RemoveTimeout("123");
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest RemoveTimeout001 End");
+}
+
+/*
+* @tc.name: AddRecvMessage001
+* @tc.desc: test AddRecvMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, AddRecvMessage001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest AddRecvMessage001 Start");
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    auto ret = AddRecvMessage(nullptr, nullptr, true);
+    EXPECT_EQ (ret, SOFTBUS_INVALID_PARAM);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest AddRecvMessage001 End");
+}
+
+/*
+* @tc.name: AddRecvMessage002
+* @tc.desc: test AddRecvMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, AddRecvMessage002, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest AddRecvMessage002 Start");
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    uint32_t capbitmap[] = { 0x1 };
+    auto ret = AddRecvMessage("123", capbitmap, true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest AddRecvMessage002 End");
+}
+
+/*
+* @tc.name: RemoveRecvMessage001
+* @tc.desc: test RemoveRecvMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, RemoveRecvMessage001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest RemoveRecvMessage001 Start");
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    RemoveRecvMessage(0X01);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest RemoveRecvMessage001 End");
+}
+
+/*
+* @tc.name: DiscBleMsgHandler001
+* @tc.desc: test DiscBleMsgHandler
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, DiscBleMsgHandler001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscBleMsgHandler001 Start");
+    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
+    BleGattLockInit();
+    SoftBusMutexInit(&g_bleInfoLock, nullptr);
+    SoftBusMessage softBusMessage = {
+        .what = START_PASSIVE_DISCOVERY,
+        .arg1 = 1,
+        .arg2 = 2,
+        .time = 12,
+        .obj = nullptr,
+        .handler = nullptr,
+        .FreeMessage = nullptr,
+    };
+    softBusMessage.what = START_PASSIVE_DISCOVERY;
+    DiscBleMsgHandler(&softBusMessage);
+    softBusMessage.what = STOP_DISCOVERY;
+    DiscBleMsgHandler(&softBusMessage);
+    softBusMessage.what = REPLY_PASSIVE_NON_BROADCAST;
+    DiscBleMsgHandler(&softBusMessage);
+    softBusMessage.what = PROCESS_TIME_OUT;
+    DiscBleMsgHandler(&softBusMessage);
+    softBusMessage.what = RECOVERY;
+    DiscBleMsgHandler(&softBusMessage);
+    softBusMessage.what = TURN_OFF;
+    DiscBleMsgHandler(&softBusMessage);
+    softBusMessage.what = 20;
+    DiscBleMsgHandler(&softBusMessage);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest DiscBleMsgHandler001 End");
+}
+
+/*
+* @tc.name: BleInfoDump001
+* @tc.desc: test BleInfoDump
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftBusDiscBleTest, BleInfoDump001, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleInfoDump001 Start");
+    DiscSoftbusBleInit(&g_discInnerCallback);
+    BleInfoDump(9);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "SoftBusDiscBleTest BleInfoDump001 End");
 }
 }
