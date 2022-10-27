@@ -355,14 +355,13 @@ static void ReportConnectTime(const ConnectionInfo *info)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReportConnectTime:info is null");
         return;
     }
-    uint32_t tmpTime = 0;
     SoftBusSysTime time = {0};
     ConnTimeNode *timeNode = GetConnTimeNode(info);
     if (timeNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReportConnectTime:get timeNode failed");
     } else {
         SoftBusGetTime(&time);
-        tmpTime = (uint32_t)time.sec * SEC_TIME + (uint32_t)time.usec / SEC_TIME;
+        uint32_t tmpTime = (uint32_t)time.sec * SEC_TIME + (uint32_t)time.usec / SEC_TIME;
         tmpTime -= timeNode->startTime;
         int ret = SoftbusRecordConnInfo(info->type, SOFTBUS_EVT_CONN_SUCC, tmpTime);
         if (ret != SOFTBUS_OK) {
