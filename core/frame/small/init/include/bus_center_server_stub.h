@@ -25,7 +25,7 @@ extern "C" {
 #endif
 #endif
 
-int32_t ServerJoinLNN(IpcIo *req, const IpcIo *reply);
+int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerJoinMetaNode(IpcIo *req, IpcIo *reply);
 int32_t ServerLeaveLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerLeaveMetaNode(IpcIo *req, IpcIo *reply);
@@ -36,8 +36,8 @@ int32_t ServerSetNodeDataChangeFlag(IpcIo *req, IpcIo *reply);
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply);
 int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply);
 int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply);
-int32_t ServerStopPublishLNN(IpcIo *req, const IpcIo *reply);
-int32_t ServerRefreshLNN(IpcIo *req, const IpcIo *reply);
+int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply);
+int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerActiveMetaNode(IpcIo *req, IpcIo *reply);
 int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply);
