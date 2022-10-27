@@ -14,7 +14,6 @@
  */
 
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <gtest/gtest.h>
 #include <securec.h>
@@ -26,106 +25,66 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-
-#define TEST_BLE_MAC "11:22:33:44:55:66"
-
-static unsigned int g_connId = 0;
-static unsigned int g_secondConnId = 0;
-
-#define WAIT_CONNECTION_COUNT 8
-#define WAIT_CONNECTION_SLEEP_TIME 1
+#include "softbus_ble_connection.c"
 
 using namespace testing::ext;
-
 namespace OHOS {
+static uint32_t g_connId;
+
 void ConnectedCB(unsigned int connectionId, const ConnectionInfo *info)
 {
-        if (info->type == CONNECT_BLE) {
+    if (info->type == CONNECT_BLE) {
         g_connId = connectionId;
     }
-    return;
 }
 
-void DisConnectCB(unsigned int connectionId, const ConnectionInfo *info)
-{
-    return;
-}
-
-void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len)
-{
-    return;
-}
-
-void ConnectSuccessedCB(unsigned int requestId, unsigned int connectionId, const ConnectionInfo *info)
-{
-    g_connId = connectionId;
-    return;
-}
-
-void SecondConnectSuccessedCB(unsigned int requestId, unsigned int connectionId, const ConnectionInfo *info)
-{
-    g_secondConnId = connectionId;
-    return;
-}
-
-void ConnectFailedCB(unsigned int requestId, int reason)
-{
-    return;
-}
+void DisConnectCB(unsigned int connectionId, const ConnectionInfo *info) {}
+void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len) {}
 
 class ConnectionBleTest : public testing::Test {
 public:
-    ConnectionBleTest()
-    {}
-    ~ConnectionBleTest()
-    {}
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
+    static void SetUpTestCase();
+    static void TearDownTestCase() {}
+    void SetUp() override {}
+    void TearDown() override {}
 };
 
-void ConnectionBleTest::SetUpTestCase(void)
+void ConnectionBleTest::SetUpTestCase()
 {
     SoftbusConfigInit();
     ConnServerInit();
+    LooperInit();
+    BleConnLooperInit();
+    SoftBusMutexAttr attr;
+    attr.type = SOFTBUS_MUTEX_RECURSIVE;
+    SoftBusMutexInit(&g_connectionLock, &attr);
+    BleQueueInit();
 }
 
-void ConnectionBleTest::TearDownTestCase(void)
-{}
-
-void ConnectionBleTest::SetUp(void)
-{}
-
-void ConnectionBleTest::TearDown(void)
-{}
-
 /*
-* @tc.name: testConnmanger001
+* @tc.name: ManagerTest001
 * @tc.desc: test ConnTypeIsSupport
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionBleTest, testConnmanger001, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest001, TestSize.Level1)
 {
     int ret;
-    printf("testConnmanger001\r\n");
-
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest001");
     ret = ConnTypeIsSupport(CONNECT_BLE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-};
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
 
 /*
-* @tc.name: testConnmanger002
+* @tc.name: ManagerTest002
 * @tc.desc: test invalid param
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionBleTest, testConnmanger002, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest002, TestSize.Level1)
 {
-    printf("test begin testConnmanger002 \r\n");
-    int ret;
-    ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest002");
+    int ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ret = ConnConnectDevice(nullptr, 0, nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
@@ -139,105 +98,180 @@ HWTEST_F(ConnectionBleTest, testConnmanger002, TestSize.Level1)
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ConnUnSetConnectCallback(static_cast<ConnModule>(0));
     EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
-};
+}
 
 /*
-* @tc.name: testConnmanger003
+* @tc.name: ManagerTest003
 * @tc.desc: test set unset callback and post disconnect without connect
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionBleTest, testConnmanger003, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
 {
-    printf("test begin ConnManagerTest004 \r\n");
-    int ret;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest003");
     ConnectCallback connCb;
-
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
-    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     g_connId = 0;
-};
+}
 
 /*
-* @tc.name: testConnmanger004
+* @tc.name: ManagerTest004
 * @tc.desc: Test start stop listening.
 * @tc.in: Test module, Test number,Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The ConnStartLocalListening and ConnStopLocalListening operates normally.
 */
-HWTEST_F(ConnectionBleTest, testConnmanger004, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest004, TestSize.Level1)
 {
-    int ret;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest004");
     ConnectCallback connCb;
-    LocalListenerInfo info;
-
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
-    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    LocalListenerInfo info;
     info.type = CONNECT_BLE;
     ret = ConnStartLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = ConnStopLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     g_connId = 0;
-};
+}
 
 /*
-* @tc.name: testConnmanger005
+* @tc.name: ManagerTest005
 * @tc.desc: Test ConnTypeIsSupport.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require: The ConnTypeIsSupport operates normally.
 */
-HWTEST_F(ConnectionBleTest, testConnmanger005, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest005, TestSize.Level1)
 {
-    int ret;
-    printf("testConnmanger016\r\n");
-
-    ret = ConnTypeIsSupport(CONNECT_P2P);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest005");
+    int ret = ConnTypeIsSupport(CONNECT_P2P);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-};
+}
 
 /*
-* @tc.name: testConnmanger006
+* @tc.name: ManagerTest006
 * @tc.desc: Test ConnTypeIsSupport.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The ConnTypeIsSupport operates normally.
 */
-HWTEST_F(ConnectionBleTest, testConnmanger006, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest006, TestSize.Level1)
 {
-    int ret;
-    printf("testConnmanger017\r\n");
-
-    ret = ConnTypeIsSupport(CONNECT_BR);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest006");
+    int ret = ConnTypeIsSupport(CONNECT_BR);
     EXPECT_EQ(SOFTBUS_OK, ret);
-};
+}
 
 /*
-* @tc.name: testConnmanger007
+* @tc.name: ManagerTest007
 * @tc.desc: Test ConnTypeIsSupport.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require: The ConnTypeIsSupport operates normally.
 */
-HWTEST_F(ConnectionBleTest, testConnmanger007, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest007, TestSize.Level1)
 {
-    int ret;
-    printf("testConnmanger018\r\n");
-
-    ret = ConnTypeIsSupport(CONNECT_TCP);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest007");
+    int ret = ConnTypeIsSupport(CONNECT_TCP);
     EXPECT_EQ(SOFTBUS_OK, ret);
-};
+}
+
+/*
+ * @tc.name: PackRequest
+ * @tc.desc: test reference process is valid
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(ConnectionBleTest, PackRequest, TestSize.Level1)
+{
+    BleConnectionInfo *info = CreateBleConnectionNode();
+    info->refCount = CONNECT_REF_INCRESE;
+    ListAdd(&g_connection_list, &info->node);
+    PackRequest(CONNECT_REF_DECRESE, info->connId);
+    EXPECT_EQ(info->state, BLE_CONNECTION_STATE_CLOSING);
+
+    ListDelete(&info->node);
+    SoftBusFree(info);
+}
+
+/*
+ * @tc.name: OnPackResponse
+ * @tc.desc: test reference process is valid
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(ConnectionBleTest, OnPackResponse, TestSize.Level1)
+{
+    BleConnectionInfo *info = CreateBleConnectionNode();
+    info->state = BLE_CONNECTION_STATE_CLOSING;
+    ListAdd(&g_connection_list, &info->node);
+    OnPackResponse(CONNECT_REF_INCRESE, CONNECT_REF_INCRESE, info->connId);
+    EXPECT_EQ(info->state, BLE_CONNECTION_STATE_CONNECTED);
+
+    ListDelete(&info->node);
+    SoftBusFree(info);
+}
+
+/*
+ * @tc.name: BleConnectionMsgHandler
+ * @tc.desc: test message handle function
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(ConnectionBleTest, BleConnectionMsgHandler, TestSize.Level1)
+{
+    SoftBusMessage *message = MallocMessage();
+    message->what = BLE_CONNECTION_DISCONNECT_OUT;
+    BleConnectionMsgHandler(message);
+
+    BleConnectionInfo *info = CreateBleConnectionNode();
+    info->state = BLE_CONNECTION_STATE_CLOSED;
+    ListAdd(&g_connection_list, &info->node);
+    message->arg1 = info->connId;
+    BleConnectionMsgHandler(message);
+    EXPECT_EQ(info->state, BLE_CONNECTION_STATE_CLOSED);
+
+    FreeMessage(message);
+    ListDelete(&info->node);
+    SoftBusFree(info);
+}
+
+/*
+ * @tc.name: BleConnectionRemoveMessageFunc
+ * @tc.desc: remove message function
+ * @tc.in: test module, test number, test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(ConnectionBleTest, BleConnectionRemoveMessageFunc, TestSize.Level1)
+{
+    int64_t clientId = INT32_MAX;
+    SoftBusMessage *message = MallocMessage();
+    message->what = BLE_CONNECTION_DISCONNECT_OUT;
+    message->arg1 = clientId;
+    BleConnectionRemoveMessageFunc(message, &clientId);
+}
 }
