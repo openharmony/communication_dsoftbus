@@ -578,7 +578,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     AuthConnInfo auth;
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb = {0};
-	(void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
+    (void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
 
     int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
     if (ret != SOFTBUS_OK) {
