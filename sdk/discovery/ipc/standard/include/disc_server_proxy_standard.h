@@ -36,7 +36,7 @@ public:
     int32_t CreateSessionServer(const char *pkgName, const char *sessionName) override;
     int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) override;
     int32_t OpenSession(const SessionParam *param, TransInfo *info) override;
-    int32_t NotifyAuthSuccess(int32_t channelId) override;
+    int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) override;
     int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) override;
     int32_t CloseChannel(int32_t channelId, int32_t channelType) override;
     int32_t SendMessage(int32_t channelId, int32_t channelType, const void *data,

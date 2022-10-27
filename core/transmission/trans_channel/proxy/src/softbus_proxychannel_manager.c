@@ -1305,3 +1305,24 @@ int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
     return SOFTBUS_ERR;
 }
 
+int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
+{
+    if (connOpt == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_ERR;
+    }
+
+    int32_t connId = -1;
+    int32_t ret = TransProxyGetConnIdByChanId(channelId, &connId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel=%d get proxy connid fail, %d.", channelId, ret);
+        return ret;
+    }
+
+    ret = TransProxyGetConnInfoByConnId(connId, connOpt);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel=%d get conn optinfo fail, %d.", channelId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}

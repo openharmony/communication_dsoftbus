@@ -11,14 +11,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/lite/config/component/lite_component.gni")
+import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus/connection"
+module_output_path = "dsoftbus/discovery"
 
-ohos_unittest("softbus_conn_ble_test") {
+ohos_unittest("SoftBusDiscBleTest") {
   module_out_path = module_output_path
+  sources = [ "disc_ble_softbus_test.cpp" ]
+
   include_dirs = [
+    "//foundation/communication/dsoftbus/core/common/include",
+    "//foundation/communication/dsoftbus/core/discovery/ble/dispatcher/include",
+    "//foundation/communication/dsoftbus/core/discovery/manager/include",
+    "//foundation/communication/dsoftbus/core/discovery/interface",
+    "//foundation/communication/dsoftbus/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -34,22 +43,33 @@ ohos_unittest("softbus_conn_ble_test") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
-    "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "//third_party/googletest:gtest_main",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-  ]
-  sources = [ "connection_ble_test.cpp" ]
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":SoftBusDiscBleTest" ]
 }

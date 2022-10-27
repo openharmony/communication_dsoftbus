@@ -251,7 +251,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     return channelId;
 }
 
-int32_t TransServerProxy::NotifyAuthSuccess(int channelId)
+int32_t TransServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
@@ -265,6 +265,10 @@ int32_t TransServerProxy::NotifyAuthSuccess(int channelId)
     }
     if (!data.WriteInt32(channelId)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write channel id failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channelType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write channel type failed!");
         return SOFTBUS_ERR;
     }
 
