@@ -272,8 +272,8 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read addr failed!");
         return SOFTBUS_ERR;
     }
+    data.ReadInt32(channel.businessType);
     if (channel.channelType == CHANNEL_TYPE_UDP) {
-        data.ReadInt32(channel.businessType);
         channel.myIp = (char *)data.ReadCString();
         data.ReadInt32(channel.streamType);
         data.ReadBool(channel.isUdpFile);

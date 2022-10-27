@@ -44,6 +44,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendBytes no permission, ret = %d", ret);
         return ret;
     }
+
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
@@ -52,6 +53,16 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     }
     if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+
+    int32_t businessType = BUSINESS_TYPE_BUTT;
+    if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    if ((businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+        (type != CHANNEL_TYPE_AUTH)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
     return ClientTransChannelSendBytes(channelId, type, data, len);
@@ -77,6 +88,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage no permission, ret = %d", ret);
         return ret;
     }
+
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
@@ -85,6 +97,16 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     }
     if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+
+    int32_t businessType = BUSINESS_TYPE_BUTT;
+    if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    if ((businessType != BUSINESS_TYPE_MESSAGE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+        (type != CHANNEL_TYPE_AUTH)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
     return ClientTransChannelSendMessage(channelId, type, data, len);
@@ -101,6 +123,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendStream no permission, ret = %d", ret);
         return ret;
     }
+
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
@@ -112,6 +135,16 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
     }
     if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+
+    int32_t businessType = BUSINESS_TYPE_BUTT;
+    if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    if ((businessType != BUSINESS_TYPE_STREAM) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+        (type != CHANNEL_TYPE_AUTH)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
@@ -136,11 +169,22 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
             return SOFTBUS_ERR;
         }
     }
+
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
     if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+
+    int32_t businessType = BUSINESS_TYPE_BUTT;
+    if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    if ((businessType != BUSINESS_TYPE_FILE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+        (type != CHANNEL_TYPE_AUTH)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
     if (isEnable != true) {

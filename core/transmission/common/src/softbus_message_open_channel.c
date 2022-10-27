@@ -89,6 +89,7 @@ char *PackRequest(const AppInfo *appInfo)
             return NULL;
         }
     }
+    (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cJSON_PrintUnformatted failed");
@@ -141,6 +142,11 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get route type");
     }
     appInfo->routeType = (RouteType)routeType;
+
+    if (!GetJsonObjectNumberItem(msg, BUSINESS_TYPE, (int*)&appInfo->businessType)) {
+        appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
+    }
+
     return SOFTBUS_OK;
 }
 
