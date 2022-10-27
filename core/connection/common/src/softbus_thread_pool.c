@@ -215,7 +215,7 @@ static void ThreadPoolWorker(void *arg)
         // copy job task relative variables to run it after leave job mutex
         bool runnable = job->runnable;
         JobTask task = job->callbackFunction;
-        void *arg = job->arg;
+        void *arguement = job->arg;
         if (job->jobMode == ONCE || job->runnable == false) {
             SoftBusMutexUnlock(&(job->mutex));
             SoftBusMutexDestroy(&(job->mutex));
@@ -225,7 +225,7 @@ static void ThreadPoolWorker(void *arg)
             SoftBusMutexUnlock(&(job->mutex));
         }
         if (runnable) {
-            (void)(task(arg));
+            (void)(task(arguement));
         }
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Exit");
