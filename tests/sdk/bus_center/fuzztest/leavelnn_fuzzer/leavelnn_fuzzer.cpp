@@ -21,26 +21,11 @@
 #include "softbus_errcode.h"
 
 namespace OHOS {
-    static ConnectionAddr addr;
-    static const int32_t MAX_CONNECT_TYPE = CONNECTION_ADDR_MAX;
-    static const char *IP = "192.168.43.16";
-    static const int32_t port = 6007;
-
-    void OnJoinLNNResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
+    static void OnLeaveLNNResult(const char *networkId, int32_t retCode)
     {
-        (void)addr;
         (void)networkId;
         (void)retCode;
     }
-
-    void GenRandAddr(const uint8_t *data, size_t size)
-    {
-        addr.type = (ConnectionAddrType)(size % MAX_CONNECT_TYPE);
-        memcpy_s(addr.peerUid, MAX_ACCOUNT_HASH_LEN, data, size);
-        memcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
-        addr.info.ip.port = port + size;
-    }
-
 
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
@@ -48,12 +33,12 @@ namespace OHOS {
             return true;
         }
 
-        GenRandAddr(data, size);
         char tmp[65] = {0};
         if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
             return true;
         }
-        JoinLNN((const char *)tmp, &addr, OnJoinLNNResult);
+
+        LeaveLNN((const char *)tmp, (const char *)data, OnLeaveLNNResult);
         return true;
     }
 }
