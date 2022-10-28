@@ -179,7 +179,7 @@ HWTEST_F(AuthTest, UPDATE_AUTH_REQUEST_CONN_INFO_Test_001, TestSize.Level1)
     AuthConnInfo connInfo;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    int32_t ret = UpdateAuthRequestConnInfo(requestId, (const AuthConnInfo *)&connInfo);
+    int32_t ret = UpdateAuthRequestConnInfo(requestId, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
 }
 
@@ -513,7 +513,7 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_001, TestSize.Level1)
     AuthManager auth = {0};
 
     InitSessionKeyList(&auth.sessionKeyList);
-    int32_t ret = PostVerifyDeviceMessage((const AuthManager *)&auth);
+    int32_t ret = PostVerifyDeviceMessage(&auth);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
 }
 
@@ -596,7 +596,7 @@ HWTEST_F(AuthTest, REGAUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
     ret = RegAuthChannelListener(module, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     listener.onDataReceived = nullptr;
-    ret = RegAuthChannelListener(module, (const AuthChannelListener *)&listener);
+    ret = RegAuthChannelListener(module, &listener);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -638,17 +638,17 @@ HWTEST_F(AuthTest, AUTH_POST_CHANNEL_DATA_Test_001, TestSize.Level1)
     };
     int32_t ret;
 
-    ret = AuthPostChannelData(channelId, (const AuthChannelData *)&data);
+    ret = AuthPostChannelData(channelId, &data);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     channelId = 0;
     ret = AuthPostChannelData(channelId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     data.len = 0;
-    ret = AuthPostChannelData(channelId, (const AuthChannelData *)&data);
+    ret = AuthPostChannelData(channelId, &data);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     data.len = 0;
     data.data = testData;
-    ret = AuthPostChannelData(channelId, (const AuthChannelData *)&data);
+    ret = AuthPostChannelData(channelId, &data);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -712,7 +712,7 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = AuthStartVerify(nullptr, requestId, &callback);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthStartVerify((const AuthConnInfo *)&connInfo, requestId, nullptr);
+    ret = AuthStartVerify(&connInfo, requestId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -730,10 +730,10 @@ HWTEST_F(AuthTest, AUTH_FLUSH_DEVICE_Test_001, TestSize.Level1)
     ret = AuthFlushDevice(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '\0';
-    ret = AuthFlushDevice((const char *)uuid);
+    ret = AuthFlushDevice(const_cast<const char *>(uuid));
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
-    ret = AuthFlushDevice((const char *)uuid);
+    ret = AuthFlushDevice(const_cast<const char *>(uuid));
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -753,12 +753,12 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001, TestSize.Level1)
     ret = AuthDeviceGetPreferConnInfo(nullptr, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '\0';
-    ret = AuthDeviceGetPreferConnInfo((const char *)uuid, &connInfo);
+    ret = AuthDeviceGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
-    ret = AuthDeviceGetPreferConnInfo((const char *)uuid, nullptr);
+    ret = AuthDeviceGetPreferConnInfo(const_cast<const char *>(uuid), nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthDeviceGetPreferConnInfo((const char *)uuid, &connInfo);
+    ret = AuthDeviceGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo);
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
 }
 
@@ -794,12 +794,12 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001, TestSize.Level1)
     ret = AuthDeviceGetLatestIdByUuid(nullptr, true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     uuid[0] = '\0';
-    ret = AuthDeviceGetLatestIdByUuid((const char *)uuid, true);
+    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     uuid[0] = '1';
-    ret = AuthDeviceGetLatestIdByUuid((const char *)uuid, true);
+    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthDeviceGetLatestIdByUuid((const char *)uuid, false);
+    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -817,7 +817,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = AuthDeviceGetIdByConnInfo(nullptr, true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthDeviceGetIdByConnInfo((const AuthConnInfo *)&connInfo, true);
+    ret = AuthDeviceGetIdByConnInfo(&connInfo, true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -837,10 +837,10 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     ret = AuthDeviceGetIdByP2pMac(nullptr, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     p2pMac[0] = '\0';
-    ret = AuthDeviceGetIdByP2pMac((const char *)p2pMac, type, isServer);
+    ret = AuthDeviceGetIdByP2pMac(const_cast<const char *>(p2pMac), type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     p2pMac[0] = '1';
-    ret = AuthDeviceGetIdByP2pMac((const char *)p2pMac, type, isServer);
+    ret = AuthDeviceGetIdByP2pMac(const_cast<const char *>(p2pMac), type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -858,7 +858,7 @@ HWTEST_F(AuthTest, REGAUTH_TRANS_LISTENER_Test_001, TestSize.Level1)
 
     ret = RegAuthTransListener(module, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = RegAuthTransListener(module, (const AuthTransListener *)&listener);
+    ret = RegAuthTransListener(module, &listener);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     UnregAuthTransListener(MODULE_P2P_LINK);
 }
@@ -878,13 +878,13 @@ HWTEST_F(AuthTest, AUTH_GET_PREFER_CONNINFO_Test_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = AuthGetPreferConnInfo(nullptr, &connInfo, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthGetPreferConnInfo((const char *)uuid, nullptr, false);
+    ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), nullptr, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '\0';
-    ret = AuthGetPreferConnInfo((const char *)uuid, &connInfo, false);
+    ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
-    ret = AuthGetPreferConnInfo((const char *)uuid, &connInfo, false);
+    ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -904,14 +904,14 @@ HWTEST_F(AuthTest, AUTH_OPEN_CONN_Test_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = AuthOpenConn(nullptr, requestId, &callback, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthOpenConn((const AuthConnInfo *)&info, requestId, nullptr, false);
+    ret = AuthOpenConn(&info, requestId, nullptr, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthOpenConn((const AuthConnInfo *)&info, requestId, &callback, false);
+    ret = AuthOpenConn(&info, requestId, &callback, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     info.type = AUTH_LINK_TYPE_WIFI;
-    ret = AuthOpenConn((const AuthConnInfo *)&info, requestId, &callback, false);
+    ret = AuthOpenConn(&info, requestId, &callback, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthOpenConn((const AuthConnInfo *)&info, requestId, &callback, true);
+    ret = AuthOpenConn(&info, requestId, &callback, true);
     EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
 }
 
@@ -959,10 +959,10 @@ HWTEST_F(AuthTest, AUTH_GET_LATESTID_BY_UUID_Test_001, TestSize.Level1)
 
     ret = AuthGetLatestIdByUuid(nullptr, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetLatestIdByUuid((const char *)uuid, true, true);
+    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), true, true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     uuid[0] = '\0';
-    ret = AuthGetLatestIdByUuid((const char *)uuid, true, false);
+    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -995,10 +995,10 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     type = AUTH_LINK_TYPE_BR;
     ret = AuthGetIdByP2pMac(nullptr, type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetIdByP2pMac((const char *)p2pMac, type, true, false);
+    ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     p2pMac[0] = '\0';
-    ret = AuthGetIdByP2pMac((const char *)p2pMac, type, true, false);
+    ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -1074,10 +1074,10 @@ HWTEST_F(AuthTest, AUTH_SET_P2P_MAC_Test_001, TestSize.Level1)
 
     ret = AuthSetP2pMac(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthSetP2pMac(authId, (const char *)p2pMac);
+    ret = AuthSetP2pMac(authId, const_cast<const char *>(p2pMac));
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
     p2pMac[0] = '\0';
-    ret = AuthSetP2pMac(authId, (const char *)p2pMac);
+    ret = AuthSetP2pMac(authId, const_cast<const char *>(p2pMac));
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -1247,13 +1247,13 @@ HWTEST_F(AuthTest, CONVERT_TO_CONNECT_OPTION_Test_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     connInfo.type = AUTH_LINK_TYPE_BR;
-    ret = ConvertToConnectOption((const AuthConnInfo *)&connInfo, &option);
+    ret = ConvertToConnectOption(&connInfo, &option);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    ret = ConvertToConnectOption((const AuthConnInfo *)&connInfo, &option);
+    ret = ConvertToConnectOption(&connInfo, &option);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     connInfo.type = AUTH_LINK_TYPE_P2P;
-    ret = ConvertToConnectOption((const AuthConnInfo *)&connInfo, &option);
+    ret = ConvertToConnectOption(&connInfo, &option);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -1273,13 +1273,13 @@ HWTEST_F(AuthTest, CONVERT_TO_AUTH_CONNINFO_Test_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     info.type = CONNECT_TCP;
     info.socketInfo.protocol = LNN_PROTOCOL_IP;
-    ret = ConvertToAuthConnInfo((const ConnectionInfo *)&info, &connInfo);
+    ret = ConvertToAuthConnInfo(&info, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     info.type = CONNECT_BR;
-    ret = ConvertToAuthConnInfo((const ConnectionInfo *)&info, &connInfo);
+    ret = ConvertToAuthConnInfo(&info, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     info.type = CONNECT_BLE;
-    ret = ConvertToAuthConnInfo((const ConnectionInfo *)&info, &connInfo);
+    ret = ConvertToAuthConnInfo(&info, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
