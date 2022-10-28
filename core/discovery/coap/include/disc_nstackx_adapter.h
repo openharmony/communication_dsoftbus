@@ -54,6 +54,7 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t d
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option);
 int32_t DiscCoapStopDiscovery(void);
 void DiscCoapUpdateLocalIp(LinkStatus status);
+void DiscCoapUpdateDevName(void);
 
 #ifdef __cplusplus
 #if __cplusplus

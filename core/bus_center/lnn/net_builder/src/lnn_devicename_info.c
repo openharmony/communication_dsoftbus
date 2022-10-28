@@ -19,6 +19,7 @@
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
@@ -95,6 +96,7 @@ static void HandlerGetDeviceName(void)
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HandlerGetDeviceName set device name fail");
     }
+    DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get online node fail");
         return;
@@ -131,7 +133,7 @@ static void UpdataLocalFromSetting(void *p)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "UpdataLocalFromSetting set device name fail");
     }
     RegisterNameMonitor();
-    return;
+    DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
 }
 
 void UpdateDeviceNameFromSetting(void)
