@@ -29,7 +29,7 @@
 #include "softbus_log.h"
 #include "system_ability_definition.h"
 
-static const int32_t DELAY_LEN = 6000;
+static const int32_t DELAY_LEN = 7000;
 static LnnDeviceNameHandler g_eventHandler = nullptr;
 
 namespace OHOS {
@@ -62,7 +62,6 @@ static void CreateDataAbilityHelperInstance(void)
         return;
     }
 
-    auto uri = std::make_shared<Uri>(SETTINGS_DATA_DEVICE_NAME_URI);
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataAbilityHelperInstance saManager NULL");
@@ -79,9 +78,6 @@ static void CreateDataAbilityHelperInstance(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataAbilityHelperInstance create fail.");
         return;
     }
-
-    sptr<LnnSettingDataEventMonitor> settingDataObserver = std::make_unique<LnnSettingDataEventMonitor>().release();
-    g_dataAbilityHelper->RegisterObserver(*uri, settingDataObserver);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "CreateDataAbilityHelperInstance exit success.");
 }
 
@@ -126,6 +122,18 @@ static int32_t GetDeviceNameFromDataAbilityHelper(char *deviceName, uint32_t len
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataAbilityHelper, deviceName=%s.", deviceName);
     return SOFTBUS_OK;
 }
+
+static void RegisterNameMonitorHelper(void)
+{
+    if (g_dataAbilityHelper == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RegisterNameMonitorHelper g_dataAbilityHelper == NULL.");
+        return;
+    }
+    auto uri = std::make_shared<Uri>(SETTINGS_DATA_DEVICE_NAME_URI);
+    sptr<LnnSettingDataEventMonitor> settingDataObserver = std::make_unique<LnnSettingDataEventMonitor>().release();
+    g_dataAbilityHelper->RegisterObserver(*uri, settingDataObserver);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "RegisterNameMonitorHelper success");
+}
 }
 }
 
@@ -161,4 +169,9 @@ int32_t LnnInitDeviceNameMonitorImpl(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init DeviceName LnnAsyncCallbackDelayHelper fail");
     }
     return ret;
+}
+
+void RegisterNameMonitor(void)
+{
+    OHOS::BusCenter::RegisterNameMonitorHelper();
 }
