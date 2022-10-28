@@ -30,7 +30,6 @@ typedef enum {
     SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, /* the default val is 4096 */
     SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN, /* the default val is 990 */
     SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN, /* the default val is 10 */
-    SOFTBUS_INT_CONN_BR_MAX_CONN_NUM, /* the default val is 20 */
     SOFTBUS_INT_CONN_TCP_MAX_LENGTH, /* the default val is 3072 */
     SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM, /* the default val is 30 */
     SOFTBUS_INT_CONN_TCP_TIME_OUT, /* the default val is 100 */
