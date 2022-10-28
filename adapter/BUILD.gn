@@ -65,7 +65,6 @@ if (defined(ohos_lite)) {
         cflags = [ "-Wall" ]
       }
       sources = [
-        "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
         "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
         "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
@@ -80,7 +79,6 @@ if (defined(ohos_lite)) {
       if (board_name == "v200zr") {
         sources = []
         sources = [
-          "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
           "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
           "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
@@ -119,7 +117,6 @@ if (defined(ohos_lite)) {
       ]
       cflags_cc = [ "-fPIC" ]
       sources = [
-        "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
         "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
         "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
@@ -169,7 +166,6 @@ if (defined(ohos_lite)) {
     ]
     sources = [
       "$dsoftbus_feature_product_config_path/spec_config/softbus_config_adapter.c",
-      "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
       "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
       "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
