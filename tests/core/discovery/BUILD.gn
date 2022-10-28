@@ -25,12 +25,16 @@ has_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 group("unittest") {
   testonly = true
-  deps = [
-    "ble/dispatcher:unittest",
-    "ble/softbus_ble:unittest",
-    "coap/unittest:unittest",
-    "manager:unittest",
-  ]
+  deps = [ "manager:unittest" ]
+  if (dsoftbus_feature_disc_ble) {
+    deps += [
+      "ble/dispatcher:unittest",
+      "ble/softbus_ble:unittest",
+    ]
+  }
+  if (dsoftbus_feature_disc_coap) {
+    deps += [ "coap/unittest:unittest" ]
+  }
   if (has_enhance_test) {
     deps +=
         [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:unittest" ]
