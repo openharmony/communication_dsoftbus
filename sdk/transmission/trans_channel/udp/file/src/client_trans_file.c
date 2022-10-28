@@ -19,6 +19,8 @@
 #include "client_trans_file_listener.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -43,7 +45,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fatal error occurred.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send dfileId=%d type=%d fatal error.", dfileId, msgType);
         TransOnUdpChannelClosed(udpChannel.channelId);
         return;
     }
@@ -104,7 +106,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         return;
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fatal error occurred.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv dfileId=%d type=%d fatal error.", dfileId, msgType);
         TransOnUdpChannelClosed(udpChannel.channelId);
         return;
     }
@@ -187,9 +189,38 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
     return fileSession;
 }
 
+static void *TransCloseDFileProcTask(void *args)
+{
+    int32_t *dfileId = (int32_t *)args;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "rsync close dfile=%d.", *dfileId);
+    NSTACKX_DFileClose(*dfileId);
+    SoftBusFree(dfileId);
+    return NULL;
+}
+
 void TransCloseFileChannel(int32_t dfileId)
 {
-    NSTACKX_DFileClose(dfileId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start close file channel, dfile=%d.", dfileId);
+    SoftBusThreadAttr threadAttr;
+    SoftBusThread tid;
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "thread attr init failed, ret=%d.", ret);
+        return;
+    }
+    int32_t *args = (int32_t *)SoftBusCalloc(sizeof(int32_t));
+    if (args == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close dfile %d calloc failed.", dfileId);
+        return;
+    }
+    *args = dfileId;
+    threadAttr.detachState = SOFTBUS_THREAD_DETACH;
+    ret = SoftBusThreadCreate(&tid, &threadAttr, TransCloseDFileProcTask, args);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create closedfile thread failed, ret=%d.", ret);
+        SoftBusFree(args);
+        return;
+    }
 }
 
 void RegisterFileCb(const UdpChannelMgrCb *fileCb)
