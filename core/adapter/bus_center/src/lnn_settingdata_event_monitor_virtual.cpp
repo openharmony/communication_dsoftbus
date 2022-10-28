@@ -46,3 +46,7 @@ int32_t LnnInitDeviceNameMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
+
+void RegisterNameMonitor(void)
+{
+}
