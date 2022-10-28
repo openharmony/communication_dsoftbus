@@ -46,11 +46,20 @@ ohos_fuzztest("StreamCommonDataFuzzTest") {
 
 ###############################################################################
 group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":StreamCommonDataFuzzTest",
-  ]
+  if (dsoftbus_feature_trans_udp == true) {
+    if (dsoftbus_feature_trans_udp_stream == true) {
+      if (!defined(ohos_lite)) {
+        testonly = true
+        deps = []
+        deps += [
+          # deps file
+          ":StreamCommonDataFuzzTest",
+        ]
+      }
+    }
+  } else {
+    testonly = true
+    deps = []
+  }
 }
 ###############################################################################
