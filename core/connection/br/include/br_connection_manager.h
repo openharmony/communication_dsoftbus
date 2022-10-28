@@ -95,8 +95,6 @@ void InitBrConnectionManager(int32_t brBuffSize);
 
 uint32_t GetLocalWindowsByConnId(uint32_t connId);
 
-int32_t GetBrConnectionCount(void);
-
 bool IsExitConnectionById(uint32_t connId);
 
 bool IsExitBrConnectByFd(int32_t socketFd);
