@@ -194,5 +194,30 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "CastPlus*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "CastEngineService",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "ohos.communication.netmanager_enhanced.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "PKG_NAME": "ohos.communication.netmanager_enhanced",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
