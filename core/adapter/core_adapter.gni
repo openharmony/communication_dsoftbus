@@ -25,40 +25,48 @@ br_adapter_inc = [
 declare_args() {
   dsoftbus_get_devicename = true
 }
+bus_center_core_adapter_src =
+    [ "$dsoftbus_root_path/core/adapter/bus_center/src/bus_center_adapter.c" ]
+bus_center_core_adapter_inc = [
+  "$dsoftbus_root_path/adapter/common/include",
+  "//base/startup/init/interfaces/innerkits/include/syspara",
+]
+
+bus_center_core_adapter_deps =
+    [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
 
 if (defined(ohos_lite)) {
-  bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
+  bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
 
-  bus_center_core_adapter_inc = [
+  bus_center_core_adapter_inc += [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
   ]
 
-  bus_center_core_adapter_deps = []
+  bus_center_core_adapter_deps += []
 } else {
   if (dsoftbus_get_devicename == false) {
-    bus_center_core_adapter_src = [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
+    bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
 
-    bus_center_core_adapter_inc =
+    bus_center_core_adapter_inc +=
         [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
 
-    bus_center_core_adapter_deps = []
+    bus_center_core_adapter_deps += []
   } else {
-    bus_center_core_adapter_src = [
+    bus_center_core_adapter_src += [
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp",
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
     ]
 
-    bus_center_core_adapter_inc = [
+    bus_center_core_adapter_inc += [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
-      "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb/include",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability/include",
       "//base/account/os_account/interfaces/innerkits/ohosaccount/native/include/",
     ]
 
-    bus_center_core_adapter_deps = [
+    bus_center_core_adapter_deps += [
       "${ability_base_path}:want",
       "${ability_base_path}:zuri",
       "${ability_runtime_inner_api_path}/dataobs_manager:dataobs_manager",
