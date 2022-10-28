@@ -1070,6 +1070,9 @@ static void DiscUpdateLocalDeviceInfo(InfoTypeChanged type)
     if (g_discBleInterface != NULL && g_discBleInterface->UpdateLocalDeviceInfo != NULL) {
         g_discBleInterface->UpdateLocalDeviceInfo(type);
     }
+    if (g_discCoapInterface != NULL && g_discCoapInterface->UpdateLocalDeviceInfo != NULL) {
+        g_discCoapInterface->UpdateLocalDeviceInfo(type);
+    }
 }
 
 void DiscDeviceInfoChanged(InfoTypeChanged type)
