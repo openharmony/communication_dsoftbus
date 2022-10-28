@@ -59,7 +59,6 @@
 #define BR_CLOSE_TIMEOUT (5 * 1000)
 
 static pthread_mutex_t g_brConnLock;
-static int32_t g_brMaxConnCount;
 
 static SoftBusHandler g_brAsyncHandler = {
     .name = (char *)"g_brAsyncHandler"
@@ -97,7 +96,7 @@ static int32_t g_brSendQueueMaxLen;
 
 static SoftBusBtStateListener g_sppBrCallback;
 static bool g_startListenFlag = false;
-static int32_t g_brEnable = SOFTBUS_BR_STATE_TURN_OFF;
+static volatile int32_t g_brEnable = SOFTBUS_BR_STATE_TURN_OFF;
 
 static void BrFreeMessage(SoftBusMessage *msg)
 {
@@ -561,17 +560,7 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is closing:%u, current:%u, try pending request, ret: %d",
             connId, requestId, ret);
     } else if (connState == BR_CONNECTION_STATE_CLOSED) {
-        int32_t connCount = GetBrConnectionCount();
-        if (connCount == SOFTBUS_ERR || connCount > g_brMaxConnCount) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-                "br connect device failed: connected device %d exceed than limit %d, requestId: %u",
-                    connCount, g_brMaxConnCount, requestId);
-            result->OnConnectFailed(requestId, 0);
-            SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, 0);
-            ret = SOFTBUS_ERR;
-        } else {
-            ret = ConnectDeviceFirstTime(option, requestId, result);
-        }
+        ret = ConnectDeviceFirstTime(option, requestId, result);
     }
     (void)pthread_mutex_unlock(&g_brConnLock);
     return ret;
@@ -833,54 +822,38 @@ static int32_t InitDataQueue(void)
 
 void *ConnBrAccept(void *arg)
 {
-#define TRY_OPEN_SERVER_COUNT 5
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnBrAccept start\n");
-    int32_t serverId;
-    int32_t clientId;
-    char name[BR_SERVER_NAME_LEN] = {0};
-    int32_t ret;
-    int32_t num = 0;
-    int32_t tryCount = 0;
-    while (tryCount < TRY_OPEN_SERVER_COUNT) {
-        if (g_sppDriver == NULL || !g_startListenFlag || g_brEnable != SOFTBUS_BR_STATE_TURN_ON) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_sppDriver failed EXIT!");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br server thread start");
+    static const char *name = "SOFTBUS_BR_SERVER";
+    while (true) {
+        if (!g_startListenFlag || g_brEnable != SOFTBUS_BR_STATE_TURN_ON) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+                "it is not ready for listen, as isAccept:%d, g_brEnable:%d", g_startListenFlag, g_brEnable);
             break;
         }
-        int32_t connCount = GetBrConnectionCount();
-        if (connCount == SOFTBUS_ERR || connCount > g_brMaxConnCount) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connCount: %d", connCount);
-            SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
-            continue;
-        }
-        (void)memset_s(name, sizeof(name), 0, sizeof(name));
-        ret = sprintf_s(name, BR_SERVER_NAME_LEN, "SOFTBUS_BR_%d", num);
-        if (ret <= 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnBrAccept sprintf_s failed %d", num);
-            SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
-            tryCount++;
-            continue;
-        }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "OpenSppServer %s start", name);
-        serverId = g_sppDriver->OpenSppServer(name, strlen(name), UUID, 0);
+        int32_t serverId = g_sppDriver->OpenSppServer(name, strlen(name), UUID, 0);
         if (serverId == SOFTBUS_ERR) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenSppServer name %s failed", name);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open spp server failed, name: %s", name);
             SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
-            tryCount++;
             continue;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "OpenSppServer ok");
-        clientId = g_sppDriver->Accept(serverId);
-        if (clientId != SOFTBUS_ERR && g_brEnable == SOFTBUS_BR_STATE_TURN_ON) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Accept ok clientId: %d", clientId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open spp server ok, name: %s, serverId:%d", name, serverId);
+        while (true) {
+            if (!g_startListenFlag || g_brEnable != SOFTBUS_BR_STATE_TURN_ON) {
+                break;
+            }
+            int32_t clientId = g_sppDriver->Accept(serverId);
+            if (clientId == SOFTBUS_ERR) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, name:%s, serverId:%d", name, serverId);
+                break;
+            }
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "accept ok clientId: name:%s, serverId:%d, clientId:%d",
+                name, serverId, clientId);
             ConnBrOnEvent(ADD_CONN_BR_SERVICE_CONNECTED_MSG, clientId, clientId);
-        } else {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "spp Accept %s failed, clientId: %d", name, clientId);
         }
         g_sppDriver->CloseSppServer(serverId);
-        num++;
-        tryCount = 0;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenSppServer failed EXIT!");
+    g_startListenFlag = false;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br server thread exit");
     return NULL;
 }
 
@@ -920,7 +893,6 @@ static int32_t InitProperty()
 {
     g_brBuffSize = INVALID_LENGTH;
     g_brSendPeerLen = INVALID_LENGTH;
-    g_brMaxConnCount = INVALID_LENGTH;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
         (unsigned char*)&g_brBuffSize, sizeof(g_brBuffSize)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br BuffSize fail");
@@ -936,11 +908,6 @@ static int32_t InitProperty()
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br SendQueueMaxLen fail");
     }
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br SendQueueMaxLen is %u", g_brSendQueueMaxLen);
-    if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_CONN_NUM,
-        (unsigned char*)&g_brMaxConnCount, sizeof(g_brMaxConnCount)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br MaxConnCount fail");
-    }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br MaxConnCount is %d", g_brMaxConnCount);
     if (g_brBuffSize == INVALID_LENGTH || g_brBuffSize > MAX_BR_SIZE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");
         return SOFTBUS_ERR;
@@ -951,10 +918,6 @@ static int32_t InitProperty()
     }
     if (g_brSendQueueMaxLen == SOFTBUS_ERR || g_brSendQueueMaxLen > MAX_BR_PEER_SIZE) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brSendQueueMaxLen");
-        return SOFTBUS_ERR;
-    }
-    if (g_brMaxConnCount == INVALID_LENGTH) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brMaxConnCount");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

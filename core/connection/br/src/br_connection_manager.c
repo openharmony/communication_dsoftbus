@@ -73,21 +73,6 @@ uint32_t GetLocalWindowsByConnId(uint32_t connId)
     return 0;
 }
 
-int32_t GetBrConnectionCount(void)
-{
-    if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mutex failed");
-        return SOFTBUS_ERR;
-    }
-    ListNode *item = NULL;
-    int32_t count = 0;
-    LIST_FOR_EACH(item, &g_connection_list) {
-        count++;
-    }
-    (void)pthread_mutex_unlock(&g_connectionLock);
-    return count;
-}
-
 bool IsExitConnectionById(uint32_t connId)
 {
     (void)pthread_mutex_lock(&g_connectionLock);
