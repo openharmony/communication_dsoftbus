@@ -1712,6 +1712,23 @@ int32_t ConfigureLocalDeviceInfo(const NSTACKX_LocalDeviceInfo *devInfo)
     return NSTACKX_EOK;
 }
 
+void ConfigureLocalDeviceName(const char *localDeviceName)
+{
+    char backupDevName[NSTACKX_MAX_DEVICE_NAME_LEN] = {0};
+    if (memcpy_s(backupDevName, sizeof(backupDevName), g_localDeviceInfo.deviceName,
+        sizeof(g_localDeviceInfo.deviceName)) != EOK) {
+        DFINDER_LOGE(TAG, "backup local device name failed!");
+        return;
+    }
+    if (strncpy_s(g_localDeviceInfo.deviceName, NSTACKX_MAX_DEVICE_NAME_LEN,
+        localDeviceName, NSTACKX_MAX_DEVICE_NAME_LEN - 1) != EOK) {
+        DFINDER_LOGW(TAG, "copy local device failed, will use current name");
+        if (strcpy_s(g_localDeviceInfo.deviceName, NSTACKX_MAX_DEVICE_NAME_LEN, backupDevName) != EOK) {
+            DFINDER_LOGE(TAG, "config device name failed and cannot restore!");
+        }
+    }
+}
+
 static CoapBroadcastType CheckAdvertiseInfo(const uint32_t advertiseCount, const uint32_t advertiseDuration)
 {
     if ((advertiseCount == 0) && (advertiseDuration == 0)) {
