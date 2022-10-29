@@ -311,7 +311,7 @@ static SubscribeOption g_sOption3 = {
 };
 
 static LinkStatus status = LINK_STATUS_UP;
-static InfoTypeChanged type = TYPE_NAME;
+static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
 class DiscoveryBleDispatcherTest : public testing::Test {
 public:
     DiscoveryBleDispatcherTest()
