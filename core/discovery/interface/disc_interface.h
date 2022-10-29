@@ -43,7 +43,7 @@ typedef enum {
 } LinkStatus;
 
 typedef enum {
-    TYPE_NAME,
+    TYPE_LOCAL_DEVICE_NAME,
     TYPE_ACCOUNT,
 } InfoTypeChanged;
 
