@@ -11,17 +11,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
 group("unittest") {
   testonly = true
   deps = [
-    "ble:softbus_conn_ble_test",
-    "br:softbus_conn_br_manager_test",
-    "br:softbus_conn_br_test",
     "common/unittest:softbus_conn_common_test",
     "manager:softbus_conn_manager_test",
-    "p2p:softbus_connection_p2p_test",
-    "tcp:softbus_tcp_manager_test",
   ]
+  if (dsoftbus_feature_conn_br) {
+    deps += [
+      "br:softbus_conn_br_manager_test",
+      "br:softbus_conn_br_test",
+    ]
+  }
+  if (dsoftbus_feature_conn_ble) {
+    deps += [ "ble:softbus_conn_ble_test" ]
+  }
+  if (dsoftbus_feature_conn_p2p) {
+    deps += [ "p2p:softbus_connection_p2p_test" ]
+  }
+  if (dsoftbus_feature_conn_tcp) {
+    deps += [ "tcp:softbus_tcp_manager_test" ]
+  }
 }
 
 group("fuzztest") {
