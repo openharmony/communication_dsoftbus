@@ -25,7 +25,8 @@ namespace OHOS {
             return true;
         }
 
-        StopRefreshLNN((const char *)data, *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(data)));
+        StopRefreshLNN(reinterpret_cast<const char *>(data),
+            *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(data)));
         return true;
     }
 }

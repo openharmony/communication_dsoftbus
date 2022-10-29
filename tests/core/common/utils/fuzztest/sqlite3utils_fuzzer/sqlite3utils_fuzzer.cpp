@@ -45,27 +45,27 @@ namespace OHOS {
 
     static void Splite3UtilsSwitch(uint32_t cmd, const uint8_t *rawData, size_t size)
     {
-        int32_t ret = 0;
         bool isExist = false;
         if (size < sizeof(DbContext)) {
             return;
         }
         ctx = const_cast<DbContext *>(reinterpret_cast<const DbContext *>(rawData));
-        ret = OpenDatabase(&ctx);
+        OpenDatabase(&ctx);
         cmd = cmd % FOUR;
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
-                ret = CreateTable(ctx, TABLE_TRUSTED_DEV_INFO);
-                ret = DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO);
+                CreateTable(ctx, TABLE_TRUSTED_DEV_INFO);
+                DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                ret = CheckTableExist(ctx, TABLE_TRUSTED_DEV_INFO, &isExist);
+                CheckTableExist(ctx, TABLE_TRUSTED_DEV_INFO, &isExist);
                 break;
             }
             case CMD_SOFTBUS_THREE: {
-                ret = EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1));
-                ret = GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID);
+                EncryptedDb(ctx, PASSWORD1, sizeof(PASSWORD1));
+                GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO,
+                    const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(USER1_ID)));
                 break;
             }
             default:

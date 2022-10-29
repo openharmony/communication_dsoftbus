@@ -42,22 +42,21 @@ namespace OHOS {
 
     static void SoftbusUtilsSwitch(uint32_t cmd, const uint8_t *rawData, size_t size)
     {
-        int32_t ret = 0;
         cmd = cmd % FOUR;
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
                 char outBuf[] = "\0";
                 uint32_t outBufLen = 0;
-                ret = ConvertBytesToHexString(outBuf, outBufLen, (const unsigned char *)rawData, size);
+                ConvertBytesToHexString(outBuf, outBufLen, reinterpret_cast<const unsigned char *>(rawData), size);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                ret = StrCmpIgnoreCase((const char *)rawData, (const char *)rawData);
+                StrCmpIgnoreCase(reinterpret_cast<const char *>(rawData), reinterpret_cast<const char *>(rawData));
                 break;
             }
             case CMD_SOFTBUS_THREE: {
                 bool valid = false;
-                valid = IsValidString((const char *)rawData, size);
+                valid = IsValidString(reinterpret_cast<const char *>(rawData), size);
                 break;
             }
             default:

@@ -21,7 +21,6 @@ namespace OHOS {
     constexpr size_t THRESHOLD = 10;
     constexpr int32_t OFFSET = 4;
     constexpr uint32_t NINE = 9;
-    int32_t ret = 0;
     enum  CmdId {
         CMD_SOFTBUS_ONE,
         CMD_SOFTBUS_TWO,
@@ -44,29 +43,29 @@ namespace OHOS {
 
     static void SoftbusClientMagSwitch(uint32_t cmd, const uint8_t *rawData)
     {
-        void *info = (void *)rawData;
+        void *info = const_cast<void *>(reinterpret_cast<const void *>(rawData));
         int32_t type = *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(rawData));
         cmd = cmd % NINE;
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
                 bool isOnline = true;
-                ret = LnnOnNodeOnlineStateChanged(isOnline, info);
+                LnnOnNodeOnlineStateChanged(isOnline, info);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                ret = LnnOnNodeBasicInfoChanged(info, type);
+                LnnOnNodeBasicInfoChanged(info, type);
                 break;
             }
             case CMD_SOFTBUS_THREE: {
-                ret = LnnOnJoinResult(info, (const char *)rawData, type);
+                LnnOnJoinResult(info, reinterpret_cast<const char *>(rawData), type);
                 break;
             }
             case CMD_SOFTBUS_FOUR: {
-                ret = LnnOnLeaveResult((const char *)rawData, type);
+                LnnOnLeaveResult(reinterpret_cast<const char *>(rawData), type);
                 break;
             }
             case CMD_SOFTBUS_FIVE: {
-                ret = LnnOnTimeSyncResult((const void *)info, type);
+                LnnOnTimeSyncResult(reinterpret_cast<const void *>(info), type);
                 break;
             }
             default:
