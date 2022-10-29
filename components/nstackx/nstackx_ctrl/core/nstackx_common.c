@@ -825,6 +825,10 @@ L_ERROR:
 
 int32_t NSTACKX_RegisterDeviceName(const char *devName)
 {
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
     if (devName == NULL || devName[0] == '\0') {
         DFINDER_LOGE(TAG, "register local device name is invalid");
         return NSTACKX_EFAILED;
