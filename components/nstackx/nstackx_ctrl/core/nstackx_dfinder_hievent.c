@@ -23,7 +23,7 @@
 
 #define TAG "nStackXDFinder"
 #define STAT_EVT_PARA_NUM 4
-#define STAT_EVT_NAME "dfinderStatistics"
+#define STAT_EVT_NAME "DFINDER_STATS"
 
 static void *g_softObj;
 static DFinderEventFunc g_eventFunc;
@@ -38,19 +38,19 @@ static int g_statisticsIdx[STAT_EVT_PARA_NUM] = {
 static DFinderEventParam g_statisticsPara[STAT_EVT_PARA_NUM] = {
     {
         .type = DFINDER_PARAM_TYPE_UINT64,
-        .name = "invalidOptionCnt"
+        .name = "INVALID_OPTION_CNT"
     },
     {
         .type = DFINDER_PARAM_TYPE_UINT64,
-        .name = "buildPktFailCnt"
+        .name = "BUILD_PKT_FAIL_CNT"
     },
     {
         .type = DFINDER_PARAM_TYPE_UINT64,
-        .name = "invalidRspCnt"
+        .name = "INVALID_RSP_CNT"
     },
     {
         .type = DFINDER_PARAM_TYPE_UINT64,
-        .name = "overDeviceLimitCnt"
+        .name = "OVER_DEVICE_LIMIT_CNT"
     }
 };
 
