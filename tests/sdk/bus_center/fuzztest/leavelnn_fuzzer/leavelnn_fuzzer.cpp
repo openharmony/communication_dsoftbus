@@ -38,7 +38,7 @@ namespace OHOS {
             return true;
         }
 
-        LeaveLNN((const char *)tmp, (const char *)data, OnLeaveLNNResult);
+        LeaveLNN(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(data), OnLeaveLNNResult);
         return true;
     }
 }
