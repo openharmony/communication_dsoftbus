@@ -25,7 +25,7 @@ namespace OHOS {
             return true;
         }
 
-        StopTimeSync((const char *)data, (const char *)data);
+        StopTimeSync(reinterpret_cast<const char *>(data), reinterpret_cast<const char *>(data));
         return true;
     }
 }
