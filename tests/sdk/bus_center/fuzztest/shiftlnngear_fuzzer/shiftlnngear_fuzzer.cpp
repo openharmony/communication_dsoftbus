@@ -63,7 +63,7 @@ namespace OHOS {
                 break;
         }
         g_mode.wakeupFlag = (size % MAX_SIZE_WAKEUP_MODE) ? true : false;
-        int32_t callerIdLen = size % CALLER_ID_MAX_LEN + 1;
+        size_t callerIdLen = size % CALLER_ID_MAX_LEN + 1;
         callerId = (char *)malloc(callerIdLen);
         if (callerId == nullptr) {
             return;

@@ -27,7 +27,8 @@ namespace OHOS {
         AesGcmCipherKey cipherKey;
         char decryptData[32];
         uint32_t decryptLen = 32;
-        SoftBusDecryptData(&cipherKey, (const unsigned char*)data, size, (unsigned char*)decryptData, &decryptLen);
+        SoftBusDecryptData(&cipherKey, reinterpret_cast<const unsigned char*>(data), size,
+            reinterpret_cast<unsigned char*>(decryptData), &decryptLen);
         return true;
     }
 }
