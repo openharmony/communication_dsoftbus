@@ -314,6 +314,7 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
 {
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close udp channel=%d.", channelId);
     if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseUdpChannel get channel=%d failed.", channelId);
         return SOFTBUS_ERR;
