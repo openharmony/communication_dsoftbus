@@ -218,7 +218,7 @@ typedef enum {
     DFINDER_PARAM_TYPE_STRING,
 } DFinderEventParamType;
 
-#define DFINDER_EVENT_NAME_LEN 32
+#define DFINDER_EVENT_NAME_LEN 33
 #define DFINDER_EVENT_TAG_LEN 16
 
 typedef struct {

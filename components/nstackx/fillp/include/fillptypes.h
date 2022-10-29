@@ -639,7 +639,7 @@ typedef struct {
  */
 typedef FILLP_INT (*FillpEvtCbkFunc)(IN FILLP_INT fd, IN FILLP_CONST FtEventCbkInfo *info);
 
-#define FILLP_DFX_EVENT_NAME_LEN 128
+#define FILLP_DFX_EVENT_NAME_LEN 33
 
 typedef enum {
     FILLP_DFX_EVENT_TYPE_FAULT,
