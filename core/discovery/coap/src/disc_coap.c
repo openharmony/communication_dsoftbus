@@ -422,7 +422,11 @@ static void CoapUpdateLocalIp(LinkStatus status)
 
 static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
-    (void)type;
+    if (type == TYPE_LOCAL_DEVICE_NAME) {
+        DiscCoapUpdateDevName();
+    } else {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "the change type not support: %d", type);
+    }
 }
 
 static DiscoveryFuncInterface g_discCoapFuncInterface = {
