@@ -155,6 +155,9 @@ typedef struct {
 /* Register local device information */
 DFINDER_EXPORT int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo);
 
+/* Register local device name */
+DFINDER_EXPORT int32_t NSTACKX_RegisterDeviceName(const char *devName);
+
 /* Register local device information with deviceHash */
 DFINDER_EXPORT int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo, uint64_t deviceHash);
 
