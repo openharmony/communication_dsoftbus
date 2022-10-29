@@ -174,6 +174,7 @@ uint8_t GetModeInfo(void);
 void SetDeviceHash(uint64_t deviceHash);
 
 int32_t ConfigureLocalDeviceInfo(const NSTACKX_LocalDeviceInfo *localDeviceInfo);
+void ConfigureLocalDeviceName(const char *localDeviceName);
 void ConfigureDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySettings);
 
 #ifdef DFINDER_SUPPORT_MULTI_NIF

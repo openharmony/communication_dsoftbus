@@ -457,6 +457,21 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
     }
 }
 
+void DiscCoapUpdateDevName(void)
+{
+    char localDevName[NSTACKX_MAX_DEVICE_NAME_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "get local device name failed, ret = %d.", ret);
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "register new local device name: %s", localDevName);
+    ret = NSTACKX_RegisterDeviceName(localDevName);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "register local device name failed, ret = %d.", ret);
+    }
+}
+
 static void DeinitLocalInfo(void)
 {
     if (g_localDeviceInfo != NULL) {

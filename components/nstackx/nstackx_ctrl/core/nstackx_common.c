@@ -699,6 +699,14 @@ static void ConfigureLocalDeviceInfoInner(void *argument)
     free(localDeviceInfo);
 }
 
+static void ConfigureLocalDeviceNameInner(void *argument)
+{
+    char *localDevName = (char *)argument;
+
+    ConfigureLocalDeviceName(localDevName);
+    free(localDevName);
+}
+
 #ifndef _WIN32
 static int32_t VerifyNifNameIp(const char *networkName, const char *networkIp, uint32_t *matchCnt)
 {
@@ -813,6 +821,33 @@ int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
 L_ERROR:
     free(dupLocalDeviceInfo);
     return NSTACKX_EFAILED;
+}
+
+int32_t NSTACKX_RegisterDeviceName(const char *devName)
+{
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+    if (devName == NULL || devName[0] == '\0') {
+        DFINDER_LOGE(TAG, "register local device name is invalid");
+        return NSTACKX_EFAILED;
+    }
+    char *dupDevName = (char *)malloc(sizeof(char) * NSTACKX_MAX_DEVICE_NAME_LEN);
+    if (dupDevName == NULL) {
+        return NSTACKX_ENOMEM;
+    }
+    if (strncpy_s(dupDevName, NSTACKX_MAX_DEVICE_NAME_LEN, devName, strlen(devName)) != EOK) {
+        DFINDER_LOGE(TAG, "strncpy dupDevName failed");
+        free(dupDevName);
+        return NSTACKX_EFAILED;
+    }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, ConfigureLocalDeviceNameInner, dupDevName) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to configure local device name!");
+        free(dupDevName);
+        return NSTACKX_EFAILED;
+    }
+    return NSTACKX_EOK;
 }
 
 int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo, uint64_t deviceHash)
