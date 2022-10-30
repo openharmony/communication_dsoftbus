@@ -19,6 +19,8 @@ module_output_path = "dsoftbus/LNN"
 ohos_unittest("LNNTest") {
   module_out_path = module_output_path
   sources = [
+    "ipc/bus_center_client_proxy_standard_test.cpp",
+    "ipc/lnn_bus_center_ipc_test.cpp",
     "net_builder/lnn_connection_fsm_test.cpp",
     "net_builder/lnn_network_info_test.cpp",
     "net_builder/lnn_node_weight_test.cpp",
@@ -46,13 +48,18 @@ ohos_unittest("LNNTest") {
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/sdk/frame/standard/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
@@ -65,6 +72,7 @@ ohos_unittest("LNNTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//base/security/device_auth/services:deviceauth_sdk",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//third_party/googletest:gtest_main",
   ]
 
