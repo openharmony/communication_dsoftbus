@@ -29,6 +29,7 @@ bus_center_sdk_test_inc = [
   "$dsoftbus_root_path/tests/sdk/common/include",
   "//commonlibrary/c_utils/base/include",
   "//third_party/bounds_checking_function/include",
+  "$dsoftbus_root_path/sdk/bus_center/manager/include",
 ]
 bus_center_sdk_test_deps = [
   "$dsoftbus_root_path/core/frame:softbus_server",
