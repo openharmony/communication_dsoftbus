@@ -280,7 +280,7 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "the callback is invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "build link, linktype:%d", reqInfo->linkType);
     if (g_linkTable[reqInfo->linkType](reqId, reqInfo, callback) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane link is failed");
         return SOFTBUS_ERR;
