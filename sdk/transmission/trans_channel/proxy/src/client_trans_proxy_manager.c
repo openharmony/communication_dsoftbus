@@ -135,44 +135,14 @@ void ClientTransProxyCloseChannel(int32_t channelId)
 
 int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len)
 {
-#define PROXY_MAX_BYTES_LEN (4 * 1024)
-    int32_t encryp = 0;
-    int32_t ret = GetEncryptByChannelId(channelId, CHANNEL_TYPE_PROXY, &encryp);
-    if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (encryp == 1) {
-        if (len > PROXY_MAX_BYTES_LEN) {
-            return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
-        }
-    } else {
-        if (len > g_authMaxByteBufSize) {
-            return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
-        }
-    }
-    ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_BYTES);
+    int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_BYTES);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send bytes: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }
 
 int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32_t len)
 {
-#define PROXY_MAX_MESSAGE_LEN (1 * 1024)
-    int32_t encryp = 0;
-    int32_t ret = GetEncryptByChannelId(channelId, CHANNEL_TYPE_PROXY, &encryp);
-    if (ret != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (encryp == 1) {
-        if (len > PROXY_MAX_MESSAGE_LEN) {
-            return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
-        }
-    } else {
-        if (len > g_authMaxMessageBufSize) {
-            return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
-        }
-    }
-    ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_MESSAGE);
+    int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_MESSAGE);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }
