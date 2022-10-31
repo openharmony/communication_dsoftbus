@@ -16,30 +16,35 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
-##############################fuzztest##########################################
-ohos_fuzztest("ClientTransSessionManagerFuzzTest") {
-  module_out_path = "dsoftbus/transmission"
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranssessionmanager_fuzzer"
 
+##############################fuzztest##########################################
+ohos_fuzztest("ClientTransSessionServiceFuzzTest") {
+  module_out_path = "dsoftbus/transmission"
+  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranssessionservice_fuzzer"
   include_dirs = [
     "//foundation/communication/dsoftbus/core/common/inner_communication",
     "//foundation/communication/dsoftbus/core/common/inner_communication",
     "//foundation/communication/dsoftbus/adapter/common/include",
     "//foundation/communication/dsoftbus/core/common/include",
     "//foundation/communication/dsoftbus/interfaces/kits/common",
+    "//foundation/communication/dsoftbus/interfaces/kits/transport",
     "//foundation/communication/dsoftbus/interfaces/inner_kits/transport",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/common/include",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_core/dfile/interface/",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_util/interface",
+    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
-    "//foundation/communication/dsoftbus/core/transmission/common/include",
   ]
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
-  sources = [ "clienttranssessionmanager_fuzzer.cpp" ]
+  sources = [ "clienttranssessionservice_fuzzer.cpp" ]
   deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
 
   external_deps = [ "c_utils:utils" ]
@@ -48,10 +53,9 @@ ohos_fuzztest("ClientTransSessionManagerFuzzTest") {
 ###############################################################################
 group("fuzztest") {
   testonly = true
-  deps = []
-  deps += [
+  deps = [
     # deps file
-    ":ClientTransSessionManagerFuzzTest",
+    ":ClientTransSessionServiceFuzzTest",
   ]
 }
 ###############################################################################
