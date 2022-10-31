@@ -214,7 +214,7 @@ typedef enum {
     DFile_PARAM_TYPE_STRING
 } DFileEventParamType;
 
-#define DFile_EVENT_NAME_LEN 128
+#define DFile_EVENT_NAME_LEN 33
 #define DFile_EVENT_TAG_LEN 16
 
 typedef struct {
