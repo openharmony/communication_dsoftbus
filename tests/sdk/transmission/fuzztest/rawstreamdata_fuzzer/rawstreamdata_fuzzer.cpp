@@ -32,11 +32,15 @@ namespace OHOS {
         char *buf = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
         if (memcpy_s(buf, Communication::SoftBus::MAX_STREAM_LEN + 1,
             data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
+            delete []buf;
+            buf = nullptr;
             return;
         }
         char *ext = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
         if (memcpy_s(ext, Communication::SoftBus::MAX_STREAM_LEN + 1,
             data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
+            delete []ext;
+            ext = nullptr;
             return;
         }
         std::unique_ptr<char[]> inputbuf (buf);
