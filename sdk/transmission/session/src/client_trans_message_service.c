@@ -19,10 +19,32 @@
 #include "client_trans_file.h"
 #include "client_trans_file_listener.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_session_service.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+
+int CheckSendLen(int32_t channelType, int32_t businessType, unsigned int len)
+{
+    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
+    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType: %d, businessType: %d",
+            channelType, businessType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType: %d.", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    if (len > maxLen) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
+        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
+    }
+
+    return SOFTBUS_OK;
+}
 
 int SendBytes(int sessionId, const void *data, unsigned int len)
 {
@@ -31,14 +53,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t maxLen;
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        return SOFTBUS_GET_CONFIG_VAL_ERR;
-    }
-    if (len > maxLen) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
-        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
-    }
+
     int ret = CheckPermissionState(sessionId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendBytes no permission, ret = %d", ret);
@@ -46,13 +61,17 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     }
 
     int32_t channelId = INVALID_CHANNEL_ID;
-    int32_t type = CHANNEL_TYPE_BUTT;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
-    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &isEnable) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+
+    if (CheckSendLen(channelType, BUSINESS_TYPE_BYTE, len) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
 
     int32_t businessType = BUSINESS_TYPE_BUTT;
@@ -60,12 +79,12 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if ((businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (type != CHANNEL_TYPE_AUTH)) {
+        (channelType != CHANNEL_TYPE_AUTH)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
-    return ClientTransChannelSendBytes(channelId, type, data, len);
+    return ClientTransChannelSendBytes(channelId, channelType, data, len);
 }
 
 int SendMessage(int sessionId, const void *data, unsigned int len)
@@ -75,14 +94,6 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t maxLen;
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        return SOFTBUS_GET_CONFIG_VAL_ERR;
-    }
-    if (len > maxLen) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
-        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
-    }
     int ret = CheckPermissionState(sessionId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage no permission, ret = %d", ret);
@@ -90,13 +101,17 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     }
 
     int32_t channelId = INVALID_CHANNEL_ID;
-    int32_t type = CHANNEL_TYPE_BUTT;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
-    if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+    if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &isEnable) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+
+    if (CheckSendLen(channelType, BUSINESS_TYPE_MESSAGE, len) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
 
     int32_t businessType = BUSINESS_TYPE_BUTT;
@@ -104,12 +119,12 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if ((businessType != BUSINESS_TYPE_MESSAGE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (type != CHANNEL_TYPE_AUTH)) {
+        (channelType != CHANNEL_TYPE_AUTH)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
-    return ClientTransChannelSendMessage(channelId, type, data, len);
+    return ClientTransChannelSendMessage(channelId, channelType, data, len);
 }
 
 int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
