@@ -246,6 +246,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB offline timing not support addrType:%d now.", addrType);
         return SOFTBUS_INVALID_PARAM;
     }
+    (void)LnnStopOfflineTimingStrategy(networkId, addrType);
     if (LnnStartOfflineTimingStrategy(networkId, addrType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl start offline timing strategy fail");
         return SOFTBUS_ERR;
