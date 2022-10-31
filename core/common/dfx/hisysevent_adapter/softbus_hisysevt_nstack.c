@@ -24,7 +24,7 @@
 
 #ifdef FILLP_ENHANCED
 /* below define must keep the same with DStream DFinder DMsg DFile */
-#define NSTACK_DFX_EVENT_NAME_LEN 128
+#define NSTACK_DFX_EVENT_NAME_LEN 33
 
 typedef enum {
     NSTACK_DFX_EVT_TYPE_FAULT,
