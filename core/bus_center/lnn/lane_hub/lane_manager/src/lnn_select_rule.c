@@ -76,7 +76,7 @@ static bool IsWlan2P4G(void)
 
 static bool IsEnableWlan2P4G(const char *networkId)
 {
-    if (IsWlan2P4G() == false) {
+    if (!IsWlan2P4G()) {
         return false;
     }
     int32_t local, remote;
@@ -93,7 +93,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
 
 static bool IsEnableWlan5G(const char *networkId)
 {
-    if (IsWlan2P4G() == true) {
+    if (IsWlan2P4G()) {
         return false;
     }
     int32_t local, remote;
