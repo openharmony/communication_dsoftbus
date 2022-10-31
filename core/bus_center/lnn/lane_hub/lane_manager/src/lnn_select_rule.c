@@ -76,6 +76,9 @@ static bool IsWlan2P4G(void)
 
 static bool IsEnableWlan2P4G(const char *networkId)
 {
+    if (IsWlan2P4G() == false) {
+        return false;
+    }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
@@ -85,14 +88,14 @@ static bool IsEnableWlan2P4G(const char *networkId)
         ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)))) {
         return true;
     }
-    if (IsWlan2P4G() == true) {
-        return true;
-    }
     return false;
 }
 
 static bool IsEnableWlan5G(const char *networkId)
 {
+    if (IsWlan2P4G() == true) {
+        return false;
+    }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
@@ -101,9 +104,6 @@ static bool IsEnableWlan5G(const char *networkId)
     if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH))) &&
         ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)))) {
         return true;
-    }
-    if (IsWlan2P4G() == true) {
-        return false;
     }
     return false;
 }
