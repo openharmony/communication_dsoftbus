@@ -154,6 +154,7 @@
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sessionserviceimpl_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/closesession_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransstream_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranssessionservice_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransudpstreaminterface_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clientqosmanager_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranspending_fuzzer:fuzztest",
