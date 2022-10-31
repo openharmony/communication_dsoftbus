@@ -204,6 +204,15 @@ typedef struct {
     } info;
 } QosTv;
 
+typedef enum {
+    /* Value type of this option is uint32_t, this option only can be get */
+    SESSION_OPTION_MAX_SENDBYTES_SIZE = 0,
+    /* Value type of this option is uint32_t, this option only can be get */
+    SESSION_OPTION_MAX_SENDMESSAGE_SIZE,
+
+    SESSION_OPTION_BUTT,
+} SessionOption;
+
 /**
  * @brief Defines session callbacks.
  *
@@ -528,6 +537,24 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
  * @version 1.0
  */
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
+
+/**
+ * @brief Get Session based on a session ID.
+ *
+ * @param sessionId Indicates the session ID.
+ * @param option Indicates the session option type to get.
+ * @param optionValue Indicates the session option value to get, which cannot be <b>NULL</b>.
+ * @param valueSize Indicates the size of data which optionValue point to, whic cannot be <b>0</b>.
+ * The common error codes are as follows:
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the option is invalid, optionValue is NULL or valueSize is Zero.
+ * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_NO_ENABLE</b> if the session current be not enabled.
+ * @return Returns <b>SOFTBUS_OK</b>if the function is called successfully, return other internal errorcodes otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
+
+int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize);
 
 #ifdef __cplusplus
 }
