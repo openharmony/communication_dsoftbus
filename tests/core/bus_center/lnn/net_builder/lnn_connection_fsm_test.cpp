@@ -219,4 +219,26 @@ HWTEST_F(LnnConnectionFsmTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level0
     int32_t ret = LnnStopConnectionFsm(fsm, FsmStopCallback);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
+
+/*
+* @tc.name: ON_JOIN_META_NODE_TEST_001
+* @tc.desc: test OnJoinMetaNode
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnConnectionFsmTest, ON_JOIN_META_NODE_TEST_001, TestSize.Level1)
+{
+    MetaJoinRequestNode metaJoinNode;
+    CustomData dataKey = {0};
+    int32_t ret;
+
+    (void)memset_s(&metaJoinNode, sizeof(MetaJoinRequestNode), 0, sizeof(MetaJoinRequestNode));
+    ret = OnJoinMetaNode(nullptr, &dataKey);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = OnJoinMetaNode(&metaJoinNode, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    metaJoinNode.addr.type = CONNECTION_ADDR_SESSION;
+    ret = OnJoinMetaNode(&metaJoinNode, &dataKey);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
 } // namespace OHOS
