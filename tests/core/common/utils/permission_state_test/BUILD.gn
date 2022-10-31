@@ -1,0 +1,58 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+module_output_path = "dsoftbus/common"
+
+ohos_unittest("PermissionsStateTest") {
+  module_out_path = module_output_path
+  sources = [ "permission_state_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/transmission/ipc/include",
+    "$dsoftbus_root_path/core/frame/standard/client_manager/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "access_token:libprivacy_sdk",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":PermissionsStateTest" ]
+}
