@@ -14,7 +14,16 @@
 group("fuzztest") {
   testonly = true
   deps = [
+    "bindparatext_fuzzer:BindParaTextFuzzTest",
+    "convertbtmactobinary_fuzzer:ConvertBtMacToBinaryFuzztest",
+    "convertbtmactostr_fuzzer:ConvertBtMacToStrFuzztest",
+    "converthexstringtobytes_fuzzer:ConvertHexStringToBytesfuzztest",
+    "encrypteddb_fuzzer:EncryptedDbFuzzTest",
+    "insertrecord_fuzzer:InsertRecordFuzzTest",
+    "removeallrecord_fuzzer:RemoveAllRecordFuzzTest",
+    "removerecordbykey_fuzzer:RemoveRecordByKeyFuzzTest",
     "softbusutils_fuzzer:SoftBusUtilsFuzzTest",
     "sqlite3utils_fuzzer:Sqlite3UntilsFuzzTest",
+    "updatedbpassword_fuzzer:UpdateDbPasswordFuzzTest",
   ]
 }
