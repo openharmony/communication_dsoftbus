@@ -283,7 +283,7 @@ HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level0)
     ret = SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen));
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = SendMessage(sessionId, data, maxLen + 1);
-    EXPECT_EQ(SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level0)
     ret = SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_LENGTH, (unsigned char *)&maxLen, sizeof(maxLen));
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = SendMessage(sessionId, data, maxLen + 1);
-    EXPECT_EQ(SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
