@@ -30,13 +30,13 @@ typedef struct {
     const char name[SCHEMA_MAX_LENGTH];
     int (*OpenFd)(const char *filename, int32_t flag, int32_t mode);
     int (*CloseFd)(int32_t fd);
-}FileSchema;
+} FileSchema;
 
 typedef struct {
     ListNode node;
     char mySessionName[SESSION_NAME_SIZE_MAX];
     FileSchema schema;
-}FileSchemaListener;
+} FileSchemaListener;
 
 void RegisterFileCb(const UdpChannelMgrCb *fileCb);
 
