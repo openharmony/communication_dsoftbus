@@ -409,7 +409,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     }
     
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "SocketPostBytes: fd=%d, module=%d, seq=%"PRId64", flag=%d, len=%u.",
+        "SocketPostBytes: fd=%d, module=%d, seq=%" PRId64 ", flag=%d, len=%u.",
         fd, pktHead.module, pktHead.seq, pktHead.flag, pktHead.len);
     ssize_t ret = ConnSendSocketData(fd, (const char *)buf, (size_t)size, 0);
     SoftBusFree(buf);
@@ -465,13 +465,12 @@ static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *he
         return;
     }
 
-    AuthChannelData channelData = {
-        .module = head->module,
-        .seq = head->seq,
-        .flag = head->flag,
-        .len = head->len,
-        .data = data,
-    };
+    AuthChannelData channelData = {0};
+    channelData.module = head->module;
+    channelData.seq = head->seq;
+    channelData.flag = head->flag;
+    channelData.len = head->len;
+    channelData.data = data;
     listener->onDataReceived(channelId, &channelData);
 }
 
