@@ -876,7 +876,7 @@ HWTEST_F(AuthTest, REGAUTH_TRANS_LISTENER_Test_001, TestSize.Level1)
     ret = RegAuthTransListener(module, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = RegAuthTransListener(module, &listener);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     RegAuthTransListener(MODULE_UDP_INFO, &listener);
     UnregAuthTransListener(MODULE_UDP_INFO);
 }
@@ -897,21 +897,21 @@ HWTEST_F(AuthTest, AUTH_GET_PREFER_CONNINFO_Test_001, TestSize.Level1)
     ret = AuthGetPreferConnInfo(nullptr, &connInfo, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetPreferConnInfo(nullptr, &connInfo, true);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), nullptr, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), nullptr, true);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     uuid[0] = '\0';
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, true);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     uuid[0] = '1';
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, true);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -1005,7 +1005,7 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
     ret = AuthGetIdByConnInfo(nullptr, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     ret = AuthGetIdByConnInfo(nullptr, true, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -1024,16 +1024,16 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     ret = AuthGetIdByP2pMac(nullptr, type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     ret = AuthGetIdByP2pMac(nullptr, type, true, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     p2pMac[0] = '\0';
     ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -1246,7 +1246,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_AUTH_INIT_FAIL);
     AuthDeviceDeinit();
     ret = AuthDeviceInit(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_INIT_FAIL);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthDeviceDeinit();
 }
 
@@ -1830,23 +1830,6 @@ HWTEST_F(AuthTest, AUTH_GET_DECRYPT_SIZE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ON_CONNECT_EVENT_Test_001
-* @tc.desc: Auth On Connect Event test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AuthTest, AUTH_ON_CONNECT_EVENT_Test_001, TestSize.Level1)
-{
-    ListenerModule module = AUTH;
-    int32_t events = SOFTBUS_SOCKET_OUT;
-    int32_t cfd = 1;
-    ConnectOption option;
-    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    int32_t ret = OnConnectEvent(module, events, cfd, &option);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-}
-
-/*
 * @tc.name: NOTIFY_TRANS_DATA_RECEIVED_Test_001
 * @tc.desc: Notify Trans Data Received test
 * @tc.type: FUNC
@@ -1874,5 +1857,22 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     NotifyTransDataReceived(authId, &head, reinterpret_cast<const uint8_t *>(data), len);
     NotifyTransDisconnected(authId);
     UnregAuthTransListener(MODULE_UDP_INFO);
+}
+
+/*
+* @tc.name: AUTH_ON_CONNECT_EVENT_Test_001
+* @tc.desc: Auth On Connect Event test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTest, AUTH_ON_CONNECT_EVENT_Test_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH;
+    int32_t events = SOFTBUS_SOCKET_OUT;
+    int32_t cfd = 0;
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    int32_t ret = OnConnectEvent(module, events, cfd, &option);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS
