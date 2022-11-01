@@ -546,14 +546,14 @@ HWTEST_F(TransTcpDirectTest, UnpackReplyErrCodeTest001, TestSize.Level1)
     cJSON *msg = cJSON_Parse(str.c_str());
     ret = UnpackReplyErrCode(msg, NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
-    cJSON_free(msg);
+    cJSON_Delete(msg);
 
     string errDesc = "testDesc";
     str = PackError(SOFTBUS_ERR, errDesc.c_str());
     cJSON *json = cJSON_Parse(str.c_str());
     ret = UnpackReplyErrCode(json, &errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    cJSON_free(json);
+    cJSON_Delete(json);
 }
 
 /**
