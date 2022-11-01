@@ -25,6 +25,8 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
+#include "trans_channel_callback.c"
+#include "trans_channel_manager.h"
 #include "trans_tcp_direct_listener.c"
 #include "trans_tcp_direct_manager.c"
 #include "trans_tcp_direct_message.c"
@@ -43,6 +45,7 @@ namespace OHOS {
 #define DC_MSG_PACKET_HEAD_SIZE_LEN 24
 #define MODULE_P2P_LISTEN 16
 #define MSG_FLAG_REQUEST 0
+#define TEST_PKG_NAME "com.test.trans.demo.pkgname"
 
 class TransTcpDirectTest : public testing::Test {
 public:
@@ -522,5 +525,67 @@ HWTEST_F(TransTcpDirectTest, TransDelSessionConnByIdTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectTest, OnSessionOpenFailProcTest001, TestSize.Level1)
 {
     OnSessionOpenFailProc(NULL, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+}
+
+/**
+ * @tc.name: UnpackReplyErrCodeTest001
+ * @tc.desc: UnpackReplyErrCodeTest001, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, UnpackReplyErrCodeTest001, TestSize.Level1)
+{
+    int32_t errCode = SOFTBUS_ERR;
+    int32_t ret = UnpackReplyErrCode(NULL, &errCode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = UnpackReplyErrCode(NULL, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    string str = "testData";
+    cJSON *msg = cJSON_Parse(str.c_str());
+    ret = UnpackReplyErrCode(msg, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    cJSON_Delete(msg);
+
+    string errDesc = "testDesc";
+    str = PackError(SOFTBUS_ERR, errDesc.c_str());
+    cJSON *json = cJSON_Parse(str.c_str());
+    ret = UnpackReplyErrCode(json, &errCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    cJSON_Delete(json);
+}
+
+/**
+ * @tc.name: TransServerOnChannelOpenFailedTest001
+ * @tc.desc: TransServerOnChannelOpenFailedTest001, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransServerOnChannelOpenFailedTest001, TestSize.Level1)
+{
+    (void)TransChannelInit();
+    const char *pkgName = TEST_PKG_NAME;
+    int32_t ret = TransServerOnChannelOpenFailed(pkgName, -1, 0, SOFTBUS_ERR);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = TransServerOnChannelOpenFailed(NULL, -1, 0, SOFTBUS_ERR);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    TransChannelDeinit();
+}
+
+/**
+ * @tc.name: TransGetAuthTypeByNetWorkIdTest001
+ * @tc.desc: TransGetAuthTypeByNetWorkIdTest001, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransGetAuthTypeByNetWorkIdTest001, TestSize.Level1)
+{
+    (void)TransChannelInit();
+    string networkId = "testNetworkId";
+    bool ret = TransGetAuthTypeByNetWorkId(networkId.c_str());
+    EXPECT_NE(true, ret);
+    TransChannelDeinit();
 }
 } // namespace OHOS
