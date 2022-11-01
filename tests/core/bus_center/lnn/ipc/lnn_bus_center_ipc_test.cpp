@@ -14,39 +14,43 @@
  */
 
 #include <gtest/gtest.h>
-#include <securec.h>
-#include <cstring>
-#include <mutex>
-#include <vector>
+
 #include <arpa/inet.h>
-#include <net/if.h>
+#include <cerrno>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
+#include <mutex>
+#include <net/if.h>
+#include <securec.h>
 #include <string>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <cerrno>
+#include <vector>
+
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "lnn_bus_center_ipc.h"
 #include "lnn_connection_addr_utils.h"
-#include "lnn_network_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
+#include "lnn_ipc_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_meta_node_ledger.h"
+#include "lnn_network_manager.h"
 #include "lnn_sync_item_info.h"
+#include "lnn_time_sync_manager.h"
+#include "message_handler.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
-#include "lnn_ipc_utils.h"
-#include "lnn_meta_node_ledger.h"
-#include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_permission.h"
-#include "lnn_bus_center_ipc.h"
+
 
 namespace OHOS {
 using namespace testing::ext;

@@ -17,12 +17,23 @@
 #include <securec.h>
 
 #include "bus_center_info_key.h"
+#include "bus_center_manager.h"
+#include "client_bus_center_manager.h"
+#include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_huks_utils.h"
 #include "lnn_lane_info.h"
 #include "lnn_lane_manager.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_meta_node_ledger.h"
+#include "lnn_network_id.h"
+#include "lnn_net_ledger.h"
+#include "lnn_net_ledger.c"
+#include "lnn_node_info.h"
 #include "lnn_sync_item_info.h"
 #include "message_handler.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -51,6 +62,7 @@ constexpr char NODE4_UDID[] = "123456ABCDEY";
 constexpr char NODE4_NETWORK_ID[] = "235689BNHFCY";
 constexpr char NODE4_UUID[] = "235689BNHFCY";
 constexpr char NODE4_BT_MAC[] = "56789TTY";
+constexpr char NODE5_NETWORK_ID[] = "235689BNHFCZ";
 constexpr uint32_t REMOTE_PROXY_PORT = 8080;
 constexpr uint32_t REMOTE_AUTH_PORT = 7070;
 constexpr uint32_t REMOTE_SESSION_PORT = 6060;
@@ -298,6 +310,138 @@ static void ConstructAllCapacityLocalInfo()
 }
 
 /*
+* @tc.name: SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001
+* @tc.desc: SoftbusDumpPrintNetCapacity test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.Level1)
+{
+    int fd = 0;
+    NodeBasicInfo nodeInfo;
+
+    (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE5_NETWORK_ID, strlen(NODE5_NETWORK_ID));
+    EXPECT_NE(SoftbusDumpPrintNetCapacity(fd, &nodeInfo), SOFTBUS_OK);
+
+    ConstructCommonLocalInfo();
+    ConstructWiFiLocalInfo(true);
+
+    (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID));
+    EXPECT_EQ(SoftbusDumpPrintNetCapacity(fd, &nodeInfo), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001
+* @tc.desc: SoftbusDumpPrintNetType test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001, TestSize.Level1)
+{
+    int fd = 0;
+    NodeBasicInfo nodeInfo;
+
+    (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE5_NETWORK_ID, strlen(NODE5_NETWORK_ID));
+    EXPECT_NE(SoftbusDumpPrintNetType(fd, &nodeInfo), SOFTBUS_OK);
+
+    ConstructCommonLocalInfo();
+    ConstructWiFiLocalInfo(true);
+
+    (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID));
+    EXPECT_EQ(SoftbusDumpPrintNetType(fd, &nodeInfo), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001
+* @tc.desc: Lnn Set Node Data Change Flag test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
+{
+    char *networkId = nullptr;
+    char networkIdSecond[NETWORK_ID_BUF_LEN] = "1234";
+    uint16_t dataChangeFlag = 0;
+    EXPECT_EQ(LnnSetNodeDataChangeFlag(networkId, dataChangeFlag), SOFTBUS_ERR);
+    EXPECT_EQ(LnnSetNodeDataChangeFlag(networkIdSecond, dataChangeFlag), SOFTBUS_ERR);
+
+    ConstructCommonLocalInfo();
+    EXPECT_EQ(LnnSetNodeDataChangeFlag(LOCAL_NETWORKID, dataChangeFlag), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SET_DATA_CHANGE_FLAG_Test_001
+* @tc.desc: Lnn Set Data Change Flag test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LedgerLaneHubTest, LNN_SET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NodeInfo *nodeinfo = nullptr;
+    uint16_t dataChangeFlag = 0;
+    EXPECT_TRUE(LnnSetDataChangeFlag(nodeinfo, dataChangeFlag) == SOFTBUS_INVALID_PARAM);
+    nodeinfo = &info;
+    EXPECT_TRUE(LnnSetDataChangeFlag(nodeinfo, dataChangeFlag) == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
+* @tc.desc: Lnn Get Data Change Flag test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LedgerLaneHubTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NodeInfo *nodeinfo = nullptr;
+    EXPECT_TRUE(LnnGetDataChangeFlag(nodeinfo) == 0);
+    nodeinfo = &info;
+    EXPECT_TRUE(LnnGetDataChangeFlag(nodeinfo) == 0);
+}
+
+/*
+* @tc.name: LNN_GET_LOCAL_STR_INFO_Test_001
+* @tc.desc: Lnn Get Local Str Info test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    char *nodeInfo = reinterpret_cast<char*>(&info);
+    uint32_t len = 0;
+    EXPECT_TRUE(LnnSetLocalStrInfo(NUM_KEY_DATA_CHANGE_FLAG, nodeInfo) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_AUTH_PORT, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_SESSION_PORT, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_PROXY_PORT, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_NET_CAP, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_DISCOVERY_TYPE, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_DEV_TYPE_ID, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_MASTER_NODE_WEIGHT, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_P2P_ROLE, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetLocalStrInfo(NUM_KEY_DATA_CHANGE_FLAG, nodeInfo, len) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_INIT_LOCAL_LEDGER_DELAY_Test_001
+* @tc.desc: Lnn Init Local Ledger Delay test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_OK);
+}
+
+/*
 * @tc.name: LANE_HUB_WLAN2P4G_MESSAGE_LANE_Test_001
 * @tc.desc: Wlan2P4G message lane test
 * @tc.type: FUNC
@@ -305,7 +449,10 @@ static void ConstructAllCapacityLocalInfo()
 */
 HWTEST_F(LedgerLaneHubTest, LANE_HUB_WLAN2P4G_MESSAGE_LANE_Test_001, TestSize.Level1)
 {
+    NodeInfo *info = nullptr;
+    EXPECT_EQ(LnnAddOnlineNode(info), REPORT_NONE);
     ConstructWlan2P4GNode();
+    LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
     LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(false);
