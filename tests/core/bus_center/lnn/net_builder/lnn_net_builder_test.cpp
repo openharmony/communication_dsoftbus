@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "bus_center_event.h"
+#include "bus_center_manager.h"
 
 constexpr char NETWORKID[] = "ABCDEFG";
 constexpr char OLD_NETWORKID[] = "ABCDEFG";
@@ -208,6 +209,47 @@ HWTEST_F(LnnNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
     ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnUpdateNodeAddr(MASTER_UDID);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: META_NODE_SERVER_JOIN_TEST_001
+* @tc.desc: test MetaNodeServerJoin
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
+{
+    ConnectionAddr addr = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = PORT
+    };
+    CustomData dataKey = {0};
+    int32_t ret;
+
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = MetaNodeServerJoin(&addr, &dataKey);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: META_NODE_SERVER_LEAVE_TEST_001
+* @tc.desc: test MetaNodeServerLeave
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_LEAVE_TEST_001, TestSize.Level0)
+{
+    const char *networkId = "1234";
+    int32_t ret;
+
+    ret = MetaNodeServerLeave(networkId);
+    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
+    ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = MetaNodeServerLeave(networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
