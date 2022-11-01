@@ -19,6 +19,7 @@
 #include <pthread.h>
 #include <stdint.h>
 
+#include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "lnn_node_info.h"
 
@@ -52,6 +53,8 @@ void LnnDeinitDistributedLedger(void);
 
 ReportCategory LnnAddOnlineNode(NodeInfo *info);
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId);
+int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type);
+int32_t LnnClearAuthTypeValue(uint32_t *authTypeValue, AuthType type);
 void LnnRemoveNode(const char *udid);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
