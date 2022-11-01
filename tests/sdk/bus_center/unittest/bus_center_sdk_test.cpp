@@ -611,6 +611,21 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001, TestSiz
 }
 
 /*
+* @tc.name: SERVER_IPC_SET_NODE_DATA_CHANGE_Test001
+* @tc.desc: Meta Node On Leave Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_Test002, TestSize.Level1)
+{
+    BusCenterServerProxyInit();
+    char pkgName[] = "pkgname";
+    char networkId[] = "12313"; 
+    uint16_t dataChangeFlag = 11;
+    ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+}
+
+/*
 * @tc.name: SERVER_IPC_JOIN_META_NODE_Test001
 * @tc.desc: Server Ipc Join Meta Node Result
 * @tc.type: FUNC
@@ -634,6 +649,23 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_NODE_Test001, TestSize.Level1)
 }
 
 /*
+* @tc.name: SERVER_IPC_JOIN_META_Test001
+* @tc.desc: Meta Node On Leave Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_Test002, TestSize.Level1)
+{
+    char pkgName[] = "111";
+    void *addr = nullptr; 
+    CustomData *dataKey = nullptr;
+    unsigned int addrTypeLen = 2;
+    ServerIpcJoinMetaNode(pkgName, addr, dataKey, addrTypeLen);
+    BusCenterServerProxyInit();
+    ServerIpcJoinMetaNode(pkgName, addr, dataKey, addrTypeLen);
+}
+
+/*
 * @tc.name: SERVER_IPC_LEAVE_META_NODE_Test001
 * @tc.desc: Server Ipc Leave Meta Node Result
 * @tc.type: FUNC
@@ -649,5 +681,20 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_LEAVE_META_NODE_Test001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = ServerIpcLeaveMetaNode(pkgNameValue, networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: SERVER_IPC_LEAVE_META_Test001
+* @tc.desc: Meta Node On Leave Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_LEAVE_META_Test002, TestSize.Level1)
+{
+    char pkgName[] = "pkgname";
+    char networkId[] = "111";
+    ServerIpcLeaveMetaNode(pkgName, networkId);
+    BusCenterServerProxyInit();
+    ServerIpcLeaveMetaNode(pkgName, networkId);
 }
 } // namespace OHOS
