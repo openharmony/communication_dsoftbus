@@ -566,10 +566,10 @@ HWTEST_F(TransTcpDirectTest, TransServerOnChannelOpenFailedTest001, TestSize.Lev
 {
     (void)TransChannelInit();
     const char *pkgName = TEST_PKG_NAME;
-    int32_t ret = TransServerOnChannelOpenFailed(pkgName, 0, -1, 0, SOFTBUS_ERR);
+    int32_t ret = TransServerOnChannelOpenFailed(pkgName, -1, 0, SOFTBUS_ERR);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransServerOnChannelOpenFailed(NULL, 0, -1, 0, SOFTBUS_ERR);
+    ret = TransServerOnChannelOpenFailed(NULL, -1, 0, SOFTBUS_ERR);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();
 }
