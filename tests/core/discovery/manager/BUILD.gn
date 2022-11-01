@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus/disc_manager"
+module_output_path = "dsoftbus/discovery"
 
 ohos_unittest("DiscManagerTest") {
   module_out_path = module_output_path
