@@ -34,8 +34,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 
-#define INVALID_SEQ -1
-#define INVALID_AUTH_ID -2
+#define INVALID_SEQ (-1)
+#define INVALID_AUTH_ID (-2)
 
 class TransUdpNegoTest : public testing::Test {
 public:
@@ -57,8 +57,8 @@ void TransUdpNegoTest::SetUpTestCase(void)
 void TransUdpNegoTest::TearDownTestCase(void)
 {}
 
-char* GetMsgInfo(void) {
-
+char* GetMsgInfo(void)
+{
     AppInfo info;
     info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
     cJSON *requestMsg = cJSON_CreateObject();
@@ -103,9 +103,9 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest002, TestSize.Level1)
 {
     int ret;
     int32_t errCode = 0;
-	string msgStr = "ProcessMessage";
-	cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
-	const char* errDesc = "errDesc";
+    string msgStr = "ProcessMessage";
+    cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
+    const char* errDesc = "errDesc";
 
     ret = TransPackReplyErrInfo(NULL, errCode, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -194,11 +194,11 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
     newChannel.seq = 1;
     int64_t authId = AUTH_INVALID_ID;
 
-    if (TransAddUdpChannel(&newChannel) == SOFTBUS_OK){
+    if (TransAddUdpChannel(&newChannel) == SOFTBUS_OK) {
         TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
     }
     TransOnExchangeUdpInfoReply(INVALID_AUTH_ID, newChannel.seq, msg);
-	  TransOnExchangeUdpInfoReply(authId, newChannel.seq, msg);
+    TransOnExchangeUdpInfoReply(authId, newChannel.seq, msg);
     cJSON_Delete(msg);
     TransChannelDeinit();
 }
@@ -219,7 +219,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
     newChannel.seq = 1;
     int64_t authId = AUTH_INVALID_ID;
 
-    if (TransAddUdpChannel(&newChannel) == SOFTBUS_OK){
+    if (TransAddUdpChannel(&newChannel) == SOFTBUS_OK) {
         TransOnExchangeUdpInfoRequest(authId, newChannel.seq, NULL);
     }
 
