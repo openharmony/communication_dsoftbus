@@ -80,6 +80,7 @@ if (defined(ohos_lite)) {
     deps = [
       ":SqliteTest",
       ":softbus_utils_test",
+      "permission_state_test:PermissionsStateTest",
     ]
   }
 }
