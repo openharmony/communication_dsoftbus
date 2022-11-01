@@ -211,7 +211,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
 {
-    (void)TransChannelInit(); 
+    (void)TransChannelInit();
     char* data = GetMsgInfo();
     cJSON *msg = cJSON_Parse(data);
 
@@ -274,7 +274,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest010, TestSize.Level1)
 {
-    IServerChannelCallBack *cb = TransServerGetChannelCb();  
+    IServerChannelCallBack *cb = TransServerGetChannelCb();
     int ret = TransUdpChannelInit(cb);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
