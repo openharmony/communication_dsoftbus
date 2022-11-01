@@ -22,6 +22,7 @@ group("fuzztest") {
     "clienttransproxyfilemanager_fuzzer:fuzztest",
     "clienttransproxymanager_fuzzer:fuzztest",
     "clienttranssessionmanager_fuzzer:fuzztest",
+    "clienttranssessionservice_fuzzer:fuzztest",
     "clienttransstream_fuzzer:fuzztest",
     "clienttranstcpdirectlistener_fuzzer:fuzztest",
     "clienttransudpmanager_fuzzer:fuzztest",
