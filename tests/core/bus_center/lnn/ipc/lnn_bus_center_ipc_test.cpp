@@ -47,146 +47,164 @@
 #include "softbus_log.h"
 #include "softbus_permission.h"
 #include "lnn_bus_center_ipc.h"
+#include "lnn_bus_center_ipc.cpp"
 
 namespace OHOS {
 using namespace testing::ext;
-    constexpr uint8_t DEFAULT_LEN = 32;
-    constexpr uint8_t DEFAULT_SIZE = 5;
-    constexpr uint8_t DEFAULT_TIME = 2;
-    static int InitServer()
-    {
-        if (ConnServerInit() == SOFTBUS_ERR) {
-            printf("softbus conn server init failed.");
-            return SOFTBUS_ERR;
-        }
-        if (AuthInit() == SOFTBUS_ERR) {
-            printf("softbus auth init failed.");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitLocalLedger() != SOFTBUS_OK) {
-            printf("init local net ledger fail!");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitDistributedLedger() != SOFTBUS_OK) {
-            printf("init distributed net ledger fail!");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitEventMonitor() != SOFTBUS_OK) {
-            printf("init event monitor failed");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitNetworkManager() != SOFTBUS_OK) {
-            printf("init lnn network manager fail!");
-            return SOFTBUS_ERR;
-        }
-        return SOFTBUS_OK;
-    }
+constexpr uint8_t DEFAULT_LEN = 32;
+constexpr uint8_t DEFAULT_SIZE = 5;
 
-    class LnnBusCenterIpcTest : public testing::Test {
-    public:
-        static void SetUpTestCase();
-        static void TearDownTestCase();
-        void SetUp();
-        void TearDown();
+class LnnBusCenterIpcTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+};
+
+void LnnBusCenterIpcTest::SetUpTestCase()
+{
+}
+
+void LnnBusCenterIpcTest::TearDownTestCase()
+{
+}
+
+void LnnBusCenterIpcTest::SetUp()
+{
+}
+
+void LnnBusCenterIpcTest::TearDown()
+{
+}
+
+/*
+* @tc.name: META_NODE_IPC_SERVER_JOIN_Test_001
+* @tc.desc: Meta Node Ipc Server Join test
+* @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_JOIN_Test_001, TestSize.Level0)
+{
+    char *pkgName = nullptr;
+    void *addr = nullptr;
+    CustomData dataKey;
+    memcpy_s(dataKey.data, sizeof(CustomData), "test", DEFAULT_SIZE);
+    uint32_t addrTypeLen = 0;
+    ConnectionAddr addrValue;
+    (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    char pkgNameValue[DEFAULT_LEN] = "test";
+    int32_t ret = MetaNodeIpcServerJoin(pkgName, &addrValue, &dataKey, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = MetaNodeIpcServerJoin(pkgNameValue, addr, &dataKey, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = MetaNodeIpcServerJoin(pkgNameValue, (void *)&addrValue, &dataKey, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
+}
+
+/*
+* @tc.name: META_NODE_IPC_SERVER_LEAVE_Test_001
+* @tc.desc: Meta Node Ipc Server Leave test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Level0)
+{
+    char *pkgName = nullptr;
+    char *networkId = nullptr;
+    char pkgNameValue[DEFAULT_LEN] = "test";
+    char networkIdValue[DEFAULT_LEN] = "12345";
+    int32_t ret = MetaNodeIpcServerLeave(pkgName, networkIdValue);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = MetaNodeIpcServerLeave(pkgNameValue, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = MetaNodeIpcServerLeave(pkgNameValue, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = MetaNodeIpcServerLeave(pkgNameValue, networkIdValue);
+    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
+}
+
+/*
+* @tc.name: META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001
+* @tc.desc: Meta Node Ipc Notify Join Result test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001, TestSize.Level0)
+{
+    void *addr = nullptr;
+    uint32_t addrTypeLen = 0;
+    ConnectionAddr addrValue;
+    (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    char *networkId = nullptr;
+    char networkIdValue[DEFAULT_LEN] = "1234";
+    int32_t retCode = 0;
+    CustomData dataKey;
+    memcpy_s(dataKey.data, sizeof(CustomData), "test", DEFAULT_SIZE);
+    int32_t ret = MetaNodeIpcNotifyJoinResult(addr, addrTypeLen, networkId, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = MetaNodeIpcNotifyJoinResult((void *)&addrValue, addrTypeLen, networkIdValue, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001
+* @tc.desc: Meta Node Ipc Notify Leave Result test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001, TestSize.Level0)
+{
+    char networkIdValue[DEFAULT_LEN] = "123";
+    const char *pkgName = "000";
+    const char *networkId = "123";
+    int32_t retCode = 0;
+
+    int32_t ret = MetaNodeIpcNotifyLeaveResult(nullptr, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AddLeaveMetaNodeInfo(pkgName, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = MetaNodeIpcNotifyLeaveResult(networkIdValue, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001
+* @tc.desc: Is Repeat Join Meta Node Request test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001, TestSize.Level0)
+{
+    const char *pkgName = "000";
+    int32_t ret;
+    ConnectionAddr addr  = {
+        .type = CONNECTION_ADDR_BR,
+        .info.br.brMac = "11:22:33:44:55:66",
+        .peerUid = "001"
     };
 
-    void LnnBusCenterIpcTest::SetUpTestCase()
-    {
-        EXPECT_TRUE(InitServer() == SOFTBUS_OK);
-        sleep(DEFAULT_TIME);
-    }
+    ret = AddJoinMetaNodeInfo(pkgName, &addr);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = IsRepeatJoinMetaNodeRequest(pkgName, &addr);
+    EXPECT_TRUE(ret == true);
+}
 
-    void LnnBusCenterIpcTest::TearDownTestCase()
-    {
-    }
+/*
+* @tc.name: IS_REPEAT_LEAVE_META_NODE_REQUEST_Test_001
+* @tc.desc: Is Repeat Leave Meta Node Request test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_LEAVE_META_NODE_REQUEST_Test_001, TestSize.Level0)
+{
+    const char *pkgName = "000";
+    const char *networkId = "123";
+    int32_t ret;
 
-    void LnnBusCenterIpcTest::SetUp()
-    {
-    }
-
-    void LnnBusCenterIpcTest::TearDown()
-    {
-    }
-
-    /*
-    * @tc.name: META_NODE_IPC_SERVER_JOIN_Test_001
-    * @tc.desc: Meta Node Ipc Server Join test
-    * @tc.type: FUNC
-    * @tc.require:
-    */
-    HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_JOIN_Test_001, TestSize.Level0)
-    {
-        char *pkgName = nullptr;
-        void *addr = nullptr;
-        CustomData dataKey;
-        memcpy_s(dataKey.data, sizeof(CustomData), "test", DEFAULT_SIZE);
-        uint32_t addrTypeLen = 0;
-        ConnectionAddr addrValue;
-        (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-        char pkgNameValue[DEFAULT_LEN] = "test";
-        int32_t ret = MetaNodeIpcServerJoin(pkgName, addr, &dataKey, addrTypeLen);
-        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-        ret = MetaNodeIpcServerJoin(pkgNameValue, (void *)&addrValue, &dataKey, addrTypeLen);
-        EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
-    }
-
-    /*
-    * @tc.name: META_NODE_IPC_SERVER_LEAVE_Test_001
-    * @tc.desc: Meta Node Ipc Server Leave test
-    * @tc.type: FUNC
-    * @tc.require:
-    */
-    HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Level0)
-    {
-        char *pkgName = nullptr;
-        char *networkId = nullptr;
-        char pkgNameValue[DEFAULT_LEN] = "test";
-        char networkIdValue[DEFAULT_LEN] = "12345";
-        int32_t ret = MetaNodeIpcServerLeave(pkgName, networkId);
-        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-        ret = MetaNodeIpcServerLeave(pkgNameValue, networkId);
-        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-        ret = MetaNodeIpcServerLeave(pkgNameValue, networkIdValue);
-        EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
-    }
-
-    /*
-    * @tc.name: META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001
-    * @tc.desc: Meta Node Ipc Notify Join Result test
-    * @tc.type: FUNC
-    * @tc.require:
-    */
-    HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001, TestSize.Level0)
-    {
-        void *addr = nullptr;
-        uint32_t addrTypeLen = 0;
-        ConnectionAddr addrValue;
-        (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-        char *networkId = nullptr;
-        char networkIdValue[DEFAULT_LEN] = "1234";
-        int32_t retCode = 0;
-        CustomData dataKey;
-        memcpy_s(dataKey.data, sizeof(CustomData), "test", DEFAULT_SIZE);
-        int32_t ret = MetaNodeIpcNotifyJoinResult(addr, addrTypeLen, networkId, retCode);
-        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-        ret = MetaNodeIpcNotifyJoinResult((void *)&addrValue, addrTypeLen, networkIdValue, retCode);
-        EXPECT_TRUE(ret == SOFTBUS_OK);
-    }
-
-    /*
-    * @tc.name: META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001
-    * @tc.desc: Meta Node Ipc Notify Leave Result test
-    * @tc.type: FUNC
-    * @tc.require:
-    */
-    HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001, TestSize.Level0)
-    {
-        char *networkId = nullptr;
-        char networkIdValue[DEFAULT_LEN] = "12345";
-        int32_t retCode = 0;
-        int32_t ret = MetaNodeIpcNotifyLeaveResult(networkId, retCode);
-        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-        ret = MetaNodeIpcNotifyLeaveResult(networkIdValue, retCode);
-        EXPECT_TRUE(ret == SOFTBUS_OK);
-    }
+    ret = AddLeaveMetaNodeInfo(pkgName, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = IsRepeatLeaveMetaNodeRequest(pkgName, networkId);
+    EXPECT_TRUE(ret == true);
+}
 } // namespace OHOS
