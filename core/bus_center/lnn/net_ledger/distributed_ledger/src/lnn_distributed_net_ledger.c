@@ -21,7 +21,6 @@
 
 #include <securec.h>
 
-#include "auth_interface.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
 #include "lnn_lane_info.h"
@@ -77,7 +76,7 @@ static DistributedNetLedger g_distributedNetLedger;
 
 int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
 {
-    if (authTypeValue == NULL || type >= BIT_COUNT) {
+    if (authTypeValue == NULL || type >= AUTH_TYPE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -87,7 +86,7 @@ int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
 
 int32_t LnnClearAuthTypeValue(uint32_t *authTypeValue, AuthType type)
 {
-    if (authTypeValue == NULL || type >= BIT_COUNT) {
+    if (authTypeValue == NULL || type >= AUTH_TYPE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
         return SOFTBUS_INVALID_PARAM;
     }

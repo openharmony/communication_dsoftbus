@@ -30,7 +30,6 @@ ohos_unittest("LNNTest") {
     "unittest/lane_test.cpp",
     "unittest/ledger_lane_hub_test.cpp",
     "unittest/lnn_huks_test.cpp",
-    "unittest/lnn_net_ledger_test.cpp",
     "unittest/net_builder_test.cpp",
     "unittest/net_ledger_test.cpp",
   ]

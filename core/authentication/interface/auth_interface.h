@@ -69,7 +69,9 @@ typedef struct {
 typedef enum {
     ONLINE_HICHAIN = 0,
     ONLINE_METANODE,
-    ONLINE_MIX
+    ONLINE_MIX,
+
+    AUTH_TYPE_BUTT,
 } AuthType;
 
 typedef struct {
