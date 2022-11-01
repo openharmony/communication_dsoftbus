@@ -52,35 +52,6 @@ namespace OHOS {
 using namespace testing::ext;
     constexpr uint8_t DEFAULT_LEN = 32;
     constexpr uint8_t DEFAULT_SIZE = 5;
-    constexpr uint8_t DEFAULT_TIME = 2;
-    static int InitServer()
-    {
-        if (ConnServerInit() == SOFTBUS_ERR) {
-            printf("softbus conn server init failed.");
-            return SOFTBUS_ERR;
-        }
-        if (AuthInit() == SOFTBUS_ERR) {
-            printf("softbus auth init failed.");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitLocalLedger() != SOFTBUS_OK) {
-            printf("init local net ledger fail!");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitDistributedLedger() != SOFTBUS_OK) {
-            printf("init distributed net ledger fail!");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitEventMonitor() != SOFTBUS_OK) {
-            printf("init event monitor failed");
-            return SOFTBUS_ERR;
-        }
-        if (LnnInitNetworkManager() != SOFTBUS_OK) {
-            printf("init lnn network manager fail!");
-            return SOFTBUS_ERR;
-        }
-        return SOFTBUS_OK;
-    }
 
     class LnnBusCenterIpcTest : public testing::Test {
     public:
@@ -92,8 +63,6 @@ using namespace testing::ext;
 
     void LnnBusCenterIpcTest::SetUpTestCase()
     {
-        EXPECT_TRUE(InitServer() == SOFTBUS_OK);
-        sleep(DEFAULT_TIME);
     }
 
     void LnnBusCenterIpcTest::TearDownTestCase()
