@@ -20,9 +20,9 @@
 #include <cstdlib>
 #include <fcntl.h>
 
-#ifndef CLIENTTRANSSESSIONMANAGER_FUZZER_H
-#define CLIENTTRANSSESSIONMANAGER_FUZZER_H
+#ifndef CLIENTTRANSSESSIONSERVICE_FUZZER_H
+#define CLIENTTRANSSESSIONSERVICE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "clienttranssessionmanager_fuzzer"
+#define FUZZ_PROJECT_NAME "clienttranssessionservice_fuzzer"
 
 #endif
