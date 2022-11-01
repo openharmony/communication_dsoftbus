@@ -452,19 +452,22 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyAddChanItemTest001, TestSize.Level1)
 {
-    ProxyChannelInfo info;
-    info.appInfo.appType = APP_TYPE_AUTH;
-    info.myId = 0;
-    info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
-    (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    if (info == NULL) {
+        return;
+    }
+    info->appInfo.appType = APP_TYPE_AUTH;
+    info->myId = 0;
+    info->peerId = 0;
+    info->authId = AUTH_INVALID_ID;
+    (void)strcpy_s(info->identity, sizeof(info->identity), TEST_CHANNEL_INDENTITY);
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
 
     int32_t ret = TransProxyAddChanItem(NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyAddChanItem(&info);
+    ret = TransProxyAddChanItem(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyManagerDeinitInner();
@@ -535,22 +538,25 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
  */
 HWTEST_F(TransProxyChannelTest, TransProxyCreateChanInfoTest001, TestSize.Level1)
 {
-    ProxyChannelInfo info;
-    info.appInfo.appType = APP_TYPE_AUTH;
-    info.myId = 0;
-    info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
-    (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    if (info == NULL) {
+        return;
+    }
+    info->appInfo.appType = APP_TYPE_AUTH;
+    info->myId = 0;
+    info->peerId = 0;
+    info->authId = AUTH_INVALID_ID;
+    (void)strcpy_s(info->identity, sizeof(info->identity), TEST_CHANNEL_INDENTITY);
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
 
     AppInfo appInfo;
     appInfo.appType = APP_TYPE_NORMAL;
-    int32_t ret = TransProxyCreateChanInfo(&info, 1, &appInfo);
+    int32_t ret = TransProxyCreateChanInfo(info, 1, &appInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     appInfo.appType = APP_TYPE_AUTH;
-    ret = TransProxyCreateChanInfo(&info, 1, &appInfo);
+    ret = TransProxyCreateChanInfo(info, 1, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransProxyManagerDeinitInner();
