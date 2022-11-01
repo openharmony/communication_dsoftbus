@@ -176,18 +176,28 @@ HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001, TestSi
 */
 HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001, TestSize.Level0)
 {
-    const char *pkgName = "000";
+    const char *pkgName1 = "000";
+    const char *pkgName2 = "001";
     int32_t ret;
-    ConnectionAddr addr  = {
+    ConnectionAddr addr1  = {
         .type = CONNECTION_ADDR_BR,
         .info.br.brMac = "11:22:33:44:55:66",
         .peerUid = "001"
     };
+    ConnectionAddr addr2  = {
+        .type = CONNECTION_ADDR_BR,
+        .info.br.brMac = "10:20:30:40:50:60",
+        .peerUid = "002"
+    };
 
-    ret = AddJoinMetaNodeInfo(pkgName, &addr);
+    ret = AddJoinMetaNodeInfo(pkgName1, &addr1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = IsRepeatJoinMetaNodeRequest(pkgName, &addr);
+    ret = IsRepeatJoinMetaNodeRequest(pkgName1, &addr1);
     EXPECT_TRUE(ret == true);
+    ret = IsRepeatJoinMetaNodeRequest(pkgName2, &addr1);
+    EXPECT_TRUE(ret == false);
+    ret = IsRepeatJoinMetaNodeRequest(pkgName1, &addr2);
+    EXPECT_TRUE(ret == false);
 }
 
 /*
@@ -198,13 +208,19 @@ HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001, TestSiz
 */
 HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_LEAVE_META_NODE_REQUEST_Test_001, TestSize.Level0)
 {
-    const char *pkgName = "000";
+    const char *pkgName1 = "000";
+    const char *pkgName2 = "001";
     const char *networkId = "123";
+    const char *errNetworkId = "124";
     int32_t ret;
 
-    ret = AddLeaveMetaNodeInfo(pkgName, networkId);
+    ret = AddLeaveMetaNodeInfo(pkgName1, networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = IsRepeatLeaveMetaNodeRequest(pkgName, networkId);
+    ret = IsRepeatLeaveMetaNodeRequest(pkgName1, networkId);
     EXPECT_TRUE(ret == true);
+    ret = IsRepeatLeaveMetaNodeRequest(pkgName2, networkId);
+    EXPECT_TRUE(ret == false);
+    ret = IsRepeatLeaveMetaNodeRequest(pkgName1, errNetworkId);
+    EXPECT_TRUE(ret == false);
 }
 } // namespace OHOS

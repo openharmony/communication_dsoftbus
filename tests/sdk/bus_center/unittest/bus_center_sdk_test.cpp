@@ -16,7 +16,8 @@
 #include <gtest/gtest.h>
 
 #include <securec.h>
-
+#include "bus_center_server_proxy.h"
+#include "bus_center_server_proxy_standard.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
@@ -591,4 +592,62 @@ HWTEST_F(BusCenterSdkTest, META_NODE_ON_LEAVE_RESULT_Test001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
+/*
+* @tc.name: SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001
+* @tc.desc: ServerIpcSetNodeDataChangeFlag Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001, TestSize.Level1)
+{
+    char pkgName[] = "test";
+    char networkId[] = "ABCDEFG";
+    char *networkId1 = nullptr;
+    uint16_t dataChangeFlag = false;
+    int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId1, dataChangeFlag);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: SERVER_IPC_JOIN_META_NODE_Test001
+* @tc.desc: Server Ipc Join Meta Node Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_NODE_Test001, TestSize.Level1)
+{
+    char *pkgName = nullptr;
+    void *addr = nullptr;
+    uint32_t addrTypeLen = 0;
+    CustomData dataKey;
+    ConnectionAddr connAddr;
+    (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    (void)memset_s(&dataKey, sizeof(CustomData), 0, sizeof(CustomData));
+    char pkgNameValue[] = "test";
+    int32_t ret = ServerIpcJoinMetaNode(pkgName, addr, &dataKey, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    addr = (void*)&connAddr;
+    ret = ServerIpcJoinMetaNode(pkgNameValue, addr, &dataKey, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_IPC_ERR);
+}
+
+/*
+* @tc.name: SERVER_IPC_LEAVE_META_NODE_Test001
+* @tc.desc: Server Ipc Leave Meta Node Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_LEAVE_META_NODE_Test001, TestSize.Level1)
+{
+    char *pkgName = nullptr;
+    char pkgNameValue[] = "test";
+    char networkId[] = "ABCDEFG";
+    char *networkId1 = nullptr;
+    int32_t ret = ServerIpcLeaveMetaNode(pkgName, networkId1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcLeaveMetaNode(pkgNameValue, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
 } // namespace OHOS
