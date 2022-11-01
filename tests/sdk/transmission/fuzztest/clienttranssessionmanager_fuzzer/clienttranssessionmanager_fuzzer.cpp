@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,9 @@ static int OnSessionOpened(int sessionId, int result)
 }
 static void OnSessionClosed(int sessionId) {}
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len) {}
+static void OnBytesReceived(int sessionId, const void* data, unsigned int len) {}
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len) {}
+static void OnMessageReceived(int sessionId, const void* data, unsigned int len) {}
 
 static ISessionListener g_sessionlistener = {
     .OnSessionOpened = OnSessionOpened,
@@ -44,7 +44,7 @@ void ClientAddNewSessionTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size == 0)) {
         return;
     }
-    const char *testSessionName   = "testsessionname";
+    const char* testSessionName   = "testsessionname";
     SessionInfo session;
     ClientAddNewSession(testSessionName, &session);
 }
@@ -54,7 +54,7 @@ void ClientAddAuthSessionTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size == 0)) {
         return;
     }
-    const char *testSessionName   = "testsessionname";
+    const char* testSessionName   = "testsessionname";
     int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
     ClientAddAuthSession(testSessionName, &sessionId);
 }
@@ -99,11 +99,73 @@ void ClientGetSessionCallbackTest(const uint8_t* data, size_t size)
         return;
     }
     int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    const char *testSessionName   = "testsessionname";
+    const char* testSessionName = "testsessionname";
 
     ClientGetSessionCallbackById(sessionId, &g_sessionlistener);
     ClientGetSessionCallbackByName(testSessionName, &g_sessionlistener);
 }
+
+void ClientTransOnLinkDownTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    char* networkId = nullptr;
+    int32_t routeType = *(reinterpret_cast<const int32_t*>(data));
+
+    ClientTransOnLinkDown(networkId, routeType);
+}
+
+void ClientRemovePermissionTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    char tmp = *(reinterpret_cast<const char*>(data));
+    ClientRemovePermission(&tmp);
+}
+
+void ClientGetFileConfigInfoByIdTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    ClientGetFileConfigInfoById(sessionId, NULL, NULL, NULL);
+}
+
+void GetEncryptByChannelIdTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t channelType = *(reinterpret_cast<const int32_t*>(data));
+    int32_t encryp = 0;
+    GetEncryptByChannelId(channelId, channelType, &encryp);
+}
+
+void ClientGetSessionIdByChannelIdTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t channelType = *(reinterpret_cast<const int32_t*>(data));
+    int32_t sessionId;
+    ClientGetSessionIdByChannelId(channelId, channelType, &sessionId);
+}
+
+void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    ChannelInfo channel;
+    int32_t sessionId;
+    ClientEnableSessionByChannelId(&channel, &sessionId);
+}
+
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -115,6 +177,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::ClientGetSessionDataTest(data, size);
     OHOS::ClientSetChannelBySessionIdTest(data, size);
     OHOS::ClientGetSessionCallbackTest(data, size);
+    OHOS::ClientTransOnLinkDownTest(data, size);
+    OHOS::ClientRemovePermissionTest(data, size);
+    OHOS::ClientGetFileConfigInfoByIdTest(data, size);
+    OHOS::GetEncryptByChannelIdTest(data, size);
+    OHOS::ClientGetSessionIdByChannelIdTest(data, size);
+    OHOS::ClientEnableSessionByChannelIdTest(data, size);
     return 0;
 }
 
