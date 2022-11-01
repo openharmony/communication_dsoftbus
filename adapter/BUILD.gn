@@ -188,7 +188,7 @@ if (defined(ohos_lite)) {
                                  ],
                                  "value")
 
-    if (enhanced_range) {
+    if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
       include_dirs += [ "//base/msdp/algorithm/ble_range/include" ]
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
       public_deps += [ "//base/msdp/algorithm/ble_range:msdp_ble_range" ]
