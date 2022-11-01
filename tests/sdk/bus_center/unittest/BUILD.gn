@@ -30,12 +30,17 @@ bus_center_sdk_test_inc = [
   "//commonlibrary/c_utils/base/include",
   "//third_party/bounds_checking_function/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+  "$dsoftbus_root_path/core/frame/standard/init/include",
+  "$dsoftbus_root_path/core/transmission/common/include",
 ]
 bus_center_sdk_test_deps = [
   "$dsoftbus_root_path/core/frame:softbus_server",
   "$dsoftbus_root_path/sdk:softbus_client",
   "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
   "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+  "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
   "//third_party/bounds_checking_function:libsec_static",
 ]
 
