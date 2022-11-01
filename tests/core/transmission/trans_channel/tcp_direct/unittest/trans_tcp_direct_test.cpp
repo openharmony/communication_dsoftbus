@@ -17,6 +17,9 @@
 #include <unistd.h>
 #include <securec.h>
 
+#include "auth_manager.h"
+#include "auth_session_fsm.h"
+#include "auth_session_key.h"
 #include "auth_interface.h"
 #include "cJSON.h"
 #include "gtest/gtest.h"
@@ -46,7 +49,17 @@ namespace OHOS {
 #define DC_MSG_PACKET_HEAD_SIZE_LEN 24
 #define MODULE_P2P_LISTEN 16
 #define MSG_FLAG_REQUEST 0
+#define TEST_SOCKET_PORT 6000
+#define TEST_SOCKET_ADDR "192.168.8.119"
+#define TEST_SOCKET_INVALID_PORT (-1)
+
+#define TEST_RECV_DATA "receive data"
+#define TEST_JSON "{errcode:1}"
+#define TEST_MESSAGE "testMessage"
+#define TEST_NETWORK_ID "testNetworkId"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
+
+static SessionConn *g_conn = NULL;
 
 class TransTcpDirectTest : public testing::Test {
 public:
@@ -62,11 +75,45 @@ public:
     {}
 };
 
+void TestAddTestSessionConn(void)
+{
+    g_conn = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, false);
+    if (g_conn == NULL) {
+        printf("create session conn failed.\n");
+        return;
+    }
+    g_conn->channelId = 1;
+    g_conn->authId = 1;
+    g_conn->serverSide = false;
+    if (TransTdcAddSessionConn(g_conn) != SOFTBUS_OK) {
+        printf("add session conn failed.\n");
+    }
+}
+
+void TestDelSessionConn(void)
+{
+    TransDelSessionConnById(g_conn->channelId);
+}
+
 void TransTcpDirectTest::SetUpTestCase(void)
-{}
+{
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(SOFTBUS_OK == ret);
+
+    IServerChannelCallBack *cb = TransServerGetChannelCb();
+    ret = TransTcpDirectInit(cb);
+    EXPECT_TRUE(SOFTBUS_OK == ret);
+
+    TestAddTestSessionConn();
+}
 
 void TransTcpDirectTest::TearDownTestCase(void)
-{}
+{
+    AuthCommonDeinit();
+    TransTcpDirectDeinit();
+
+    TestDelSessionConn();
+}
 
 /**
  * @tc.name: StartSessionListenerTest001
@@ -76,41 +123,24 @@ void TransTcpDirectTest::TearDownTestCase(void)
  */
 HWTEST_F(TransTcpDirectTest, StartSessionListenerTest001, TestSize.Level1)
 {
-    int32_t ret = 0;
-    LocalListenerInfo info = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "",
-            .port = 6000,
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
+    int32_t ret = SOFTBUS_OK;
+    LocalListenerInfo info;
+    info.type = CONNECT_TCP;
+    (void)memset_s(info.socketOption.addr, sizeof(info.socketOption.addr), 0, sizeof(info.socketOption.addr));
+    info.socketOption.port = TEST_SOCKET_PORT;
+    info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
     ret = TransTdcStartSessionListener(UNUSE_BUTT, &info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    LocalListenerInfo info2 = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "192.168.8.119",
-            .port = -1,
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
-    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info2);
+    (void)strcpy_s(info.socketOption.addr, strlen(TEST_SOCKET_ADDR) + 1, TEST_SOCKET_ADDR);
+    info.socketOption.port = TEST_SOCKET_INVALID_PORT;
+    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    LocalListenerInfo info3 = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "",
-            .port = -1,
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
-    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info3);
+    (void)memset_s(info.socketOption.addr, sizeof(info.socketOption.addr), 0, sizeof(info.socketOption.addr));
+    info.socketOption.port = TEST_SOCKET_INVALID_PORT;
+    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -122,7 +152,7 @@ HWTEST_F(TransTcpDirectTest, StartSessionListenerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, StoptSessionListenerTest001, TestSize.Level1)
 {
-    int32_t ret = 0;
+    int32_t ret = SOFTBUS_OK;
     ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_WIFI);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
@@ -135,19 +165,18 @@ HWTEST_F(TransTcpDirectTest, StoptSessionListenerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
 {
-    int32_t ret = 0;
+    int32_t ret = SOFTBUS_OK;
+
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+    (void)memset_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr),
+        0, sizeof(connInfo.socketOption.addr));
+    connInfo.socketOption.port = TEST_SOCKET_PORT;
+    connInfo.socketOption.moduleId = MODULE_MESSAGE_SERVICE;
+    connInfo.socketOption.protocol = LNN_PROTOCOL_IP;
     AppInfo appInfo;
-    ConnectOption connInfo = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = {0},
-            .port = 6000,
-            .moduleId = MODULE_MESSAGE_SERVICE,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), "192.168.8.1") != EOK) {
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR) != EOK) {
         return;
     }
     int32_t fd = 1;
@@ -160,6 +189,9 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
 
     ret = TransOpenDirectChannel(&appInfo, &connInfo, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransOpenDirectChannel(&appInfo, &connInfo, &fd);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -170,23 +202,20 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest002, TestSize.Level1)
 {
-    int32_t ret = 0;
+    int32_t ret = SOFTBUS_OK;
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    ConnectOption connInfo = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = {0},
-            .port = 6000,
-            .moduleId = MODULE_MESSAGE_SERVICE,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
-    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), "192.168.8.1") != EOK) {
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+    (void)memset_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr),
+        0, sizeof(connInfo.socketOption.addr));
+    connInfo.socketOption.port = TEST_SOCKET_PORT;
+    connInfo.socketOption.moduleId = MODULE_MESSAGE_SERVICE;
+    connInfo.socketOption.protocol = LNN_PROTOCOL_IP;
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR) != EOK) {
         return;
     }
     int32_t channelId = 0;
-
     ret = OpenTcpDirectChannel(&appInfo, &connInfo, &channelId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
@@ -199,7 +228,7 @@ HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, TransTdcPostBytesTest001, TestSize.Level1)
 {
-    int32_t ret = 0;
+    int32_t ret = SOFTBUS_OK;
     const char *bytes = "Get Message";
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
@@ -231,8 +260,9 @@ HWTEST_F(TransTcpDirectTest, GetCipherFlagByAuthIdTest001, TestSize.Level1)
 {
     int64_t authId = 0;
     uint32_t flag = 0;
+    bool isAuthServer = false;
 
-    int32_t ret = GetCipherFlagByAuthId(authId, &flag, NULL);
+    int32_t ret = GetCipherFlagByAuthId(authId, &flag, &isAuthServer);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -244,26 +274,20 @@ HWTEST_F(TransTcpDirectTest, GetCipherFlagByAuthIdTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, SessionConnListTest001, TestSize.Level1)
 {
-    SessionConn conn;
-    ListInit(&conn.node);
-
-    int32_t ret = CreatSessionConnList();
-    ASSERT_TRUE(ret == SOFTBUS_OK);
-
-    ret = TransTdcAddSessionConn(&conn);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
     AppInfo appInfo;
-    ret = GetAppInfoById(conn.channelId, &appInfo);
+    int32_t authId = AUTH_INVALID_ID;
+    
+    int32_t ret = GetAppInfoById(g_conn->channelId, &appInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = SetAuthIdByChanId(conn.channelId, 0);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    int32_t authId = GetAuthIdByChanId(conn.channelId);
+    authId = GetAuthIdByChanId(g_conn->channelId);
     EXPECT_TRUE(authId != AUTH_INVALID_ID);
 
-    DestroySoftBusList(GetSessionConnList());
+    ret = SetAuthIdByChanId(g_conn->channelId, AUTH_INVALID_ID);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    authId = GetAuthIdByChanId(g_conn->channelId);
+    EXPECT_TRUE(authId == AUTH_INVALID_ID);
 }
 
 /**
@@ -274,7 +298,17 @@ HWTEST_F(TransTcpDirectTest, SessionConnListTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, StartVerifySessionTest001, TestSize.Level1)
 {
-    int32_t ret = StartVerifySession(NULL);
+    int64_t authSeq = 0;
+    AuthSessionInfo info;
+    SessionKey sessionKey;
+
+    int32_t ret = StartVerifySession(g_conn);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = StartVerifySession(g_conn);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -286,22 +320,28 @@ HWTEST_F(TransTcpDirectTest, StartVerifySessionTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, PackBytesTest001, TestSize.Level1)
 {
-    int32_t ret = 0;
-    int32_t channelId = -1;
-    const char *bytes = "Get Message";
-    TdcPacketHead packetHead = {
-        .magicNumber = MAGIC_NUMBER,
-        .module = MODULE_SESSION,
-        .seq = 0,
-        .flags = FLAG_REQUEST,
-        .dataLen = strlen(bytes), /* reset after encrypt */
-    };
-    const char *data = "data";
+    int32_t ret = SOFTBUS_OK;
+    const char *data = TEST_MESSAGE;
+    const char *bytes = TEST_MESSAGE;
+    int32_t channelId = g_conn->channelId;
+    TdcPacketHead packetHead;
+    packetHead.magicNumber = MAGIC_NUMBER;
+    packetHead.module = MODULE_SESSION;
+    packetHead.seq = 0;
+    packetHead.flags = FLAG_REQUEST;
+    packetHead.dataLen = strlen(bytes);
     char buffer[DC_MSG_PACKET_HEAD_SIZE_LEN] = {0};
+
     ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    channelId = 0;
+
+    ret = SetAuthIdByChanId(channelId, 1);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
     ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = PackBytes(-1, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -328,13 +368,20 @@ HWTEST_F(TransTcpDirectTest, OpenAuthConnTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OpenDataBusReplyTest002, TestSize.Level1)
 {
-    int32_t ret = 0;
-    int32_t channelId = 0;
+    int32_t ret = SOFTBUS_OK;
+    int32_t channelId = g_conn->channelId;
     uint64_t seq = 0;
-    const char* msg = "ProcessMessage";
+    int32_t errCode = SOFTBUS_ERR;
+    char *msg = PackError(errCode, TEST_MESSAGE);
     cJSON *reply = cJSON_Parse(msg);
+
     ret = OpenDataBusReply(channelId, seq, reply);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenDataBusReply(0, seq, reply);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    cJSON_Delete(reply);
 }
 
 /**
@@ -345,12 +392,12 @@ HWTEST_F(TransTcpDirectTest, OpenDataBusReplyTest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OpenDataBusRequestErrorTest003, TestSize.Level1)
 {
-    int32_t ret;
-    int32_t chnanelId = 0;
+    int32_t ret = SOFTBUS_OK;
+    int32_t channelId = 0;
     uint64_t seq = 0;
     int32_t errCode = 0;
     uint32_t flags = 0;
-    ret = OpenDataBusRequestError(chnanelId, seq, NULL, errCode, flags);
+    ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -362,10 +409,13 @@ HWTEST_F(TransTcpDirectTest, OpenDataBusRequestErrorTest003, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, GetUuidByChanIdTest004, TestSize.Level1)
 {
-    int32_t ret = 0;
+    int32_t ret = SOFTBUS_OK;
     int32_t channelId = 0;
     uint32_t len = 0;
     ret = GetUuidByChanId(channelId, NULL, len);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = GetUuidByChanId(g_conn->channelId, NULL, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -377,11 +427,13 @@ HWTEST_F(TransTcpDirectTest, GetUuidByChanIdTest004, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OpenDataBusRequestTest005, TestSize.Level1)
 {
-    int32_t ret = 0;
-    int32_t channelId = 0;
+    int32_t ret = SOFTBUS_OK;
     uint32_t flags = 0;
     uint64_t seq = 0;
-    ret = OpenDataBusRequest(channelId, flags, seq, NULL);
+    ret = OpenDataBusRequest(0, flags, seq, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenDataBusRequest(g_conn->channelId, flags, seq, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -398,6 +450,13 @@ HWTEST_F(TransTcpDirectTest, ProcessMessageTest006, TestSize.Level1)
     uint64_t seq = 0;
     int32_t ret = ProcessMessage(channelId, flags, seq, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    channelId = g_conn->channelId;
+    ret = ProcessMessage(channelId, flags, seq, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = ProcessMessage(channelId, flags, seq, TEST_MESSAGE);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -408,11 +467,11 @@ HWTEST_F(TransTcpDirectTest, ProcessMessageTest006, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, GetAuthIdByChannelInfoTest007, TestSize.Level1)
 {
-    int32_t channelId = 111;
+    int32_t channelId = g_conn->channelId;
     uint64_t seq = 0;
     uint32_t cipherFlag = 0;
     int32_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -423,10 +482,10 @@ HWTEST_F(TransTcpDirectTest, GetAuthIdByChannelInfoTest007, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, DecryptMessageTest008, TestSize.Level1)
 {
-    int32_t channelId = 0;
+    int32_t channelId = g_conn->channelId;
     uint8_t* outData = nullptr;
     uint32_t dataLen = DC_MSG_PACKET_HEAD_SIZE_LEN;
-    const char *bytes = "Get Message";
+    const char *bytes = TEST_MESSAGE;
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
         .module = MODULE_SESSION,
@@ -446,8 +505,16 @@ HWTEST_F(TransTcpDirectTest, DecryptMessageTest008, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, ProcessReceivedDataTest009, TestSize.Level1)
 {
-    int32_t channelId = 0;
+    int32_t channelId = g_conn->channelId;
+    int32_t fd = 1;
+
     int32_t ret = ProcessReceivedData(channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransSrvAddDataBufNode(channelId, fd);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = ProcessReceivedData(channelId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -459,9 +526,9 @@ HWTEST_F(TransTcpDirectTest, ProcessReceivedDataTest009, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, SendAuthDataTest001, TestSize.Level1)
 {
-    int64_t authId = 0;
+    int64_t authId = 1;
     int64_t seq = 0;
-    const char *data = "message";
+    const char *data = TEST_MESSAGE;
     int32_t ret = SendAuthData(authId, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
@@ -474,34 +541,20 @@ HWTEST_F(TransTcpDirectTest, SendAuthDataTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OnAuthDataRecvTest002, TestSize.Level1)
 {
-    AuthTransData dataInfo = {
-        .module = 0,
-        .flag = 0,
-        .seq = 0,
-        .len = 1,
-        .data = NULL,
-    };
     int64_t authId = 0;
+    AuthTransData dataInfo;
+    (void)memset_s(&dataInfo, sizeof(AuthTransData), 0, sizeof(AuthTransData));
+    dataInfo.len = 1;
+    dataInfo.data = NULL;
+
+    OnAuthDataRecv(authId, NULL);
     OnAuthDataRecv(authId, &dataInfo);
 
-    AuthTransData dataInfo1 = {
-        .module = 0,
-        .flag = 0,
-        .seq = 0,
-        .len = 0,
-        .data = (const uint8_t*)"reveive data",
-    };
-    OnAuthDataRecv(authId, &dataInfo1);
-    OnAuthDataRecv(authId, NULL);
+    dataInfo.data = (const uint8_t *)TEST_RECV_DATA;
+    OnAuthDataRecv(authId, &dataInfo);
 
-    AuthTransData dataInfo2 = {
-        .module = 0,
-        .flag = 0,
-        .seq = 0,
-        .len = 0,
-        .data = (const uint8_t*)"reveive data",
-    };
-    OnAuthDataRecv(authId, &dataInfo2);
+    dataInfo.len = AUTH_TRANS_DATA_LEN;
+    OnAuthDataRecv(authId, &dataInfo);
 }
 
 /**
@@ -512,7 +565,7 @@ HWTEST_F(TransTcpDirectTest, OnAuthDataRecvTest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, TransDelSessionConnByIdTest001, TestSize.Level1)
 {
-    int32_t channelId = 0;
+    int32_t channelId = g_conn->channelId;
     TransDelSessionConnById(channelId);
 }
 
@@ -524,7 +577,7 @@ HWTEST_F(TransTcpDirectTest, TransDelSessionConnByIdTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OnSessionOpenFailProcTest001, TestSize.Level1)
 {
-    OnSessionOpenFailProc(NULL, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+    OnSessionOpenFailProc(g_conn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
 }
 
 /**
@@ -542,16 +595,18 @@ HWTEST_F(TransTcpDirectTest, UnpackReplyErrCodeTest001, TestSize.Level1)
     ret = UnpackReplyErrCode(NULL, NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    string str = "testData";
+    string str = TEST_JSON;
     cJSON *msg = cJSON_Parse(str.c_str());
     ret = UnpackReplyErrCode(msg, NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
+    cJSON_Delete(msg);
 
-    string errDesc = "testDesc";
+    string errDesc = TEST_JSON;
     str = PackError(SOFTBUS_ERR, errDesc.c_str());
     cJSON *json = cJSON_Parse(str.c_str());
     ret = UnpackReplyErrCode(json, &errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    cJSON_Delete(json);
 }
 
 /**
@@ -562,14 +617,12 @@ HWTEST_F(TransTcpDirectTest, UnpackReplyErrCodeTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, TransServerOnChannelOpenFailedTest001, TestSize.Level1)
 {
-    (void)TransChannelInit();
     const char *pkgName = TEST_PKG_NAME;
     int32_t ret = TransServerOnChannelOpenFailed(pkgName, 0, -1, 0, SOFTBUS_ERR);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransServerOnChannelOpenFailed(NULL, 0, -1, 0, SOFTBUS_ERR);
     EXPECT_NE(SOFTBUS_OK, ret);
-    TransChannelDeinit();
 }
 
 /**
@@ -580,11 +633,9 @@ HWTEST_F(TransTcpDirectTest, TransServerOnChannelOpenFailedTest001, TestSize.Lev
  */
 HWTEST_F(TransTcpDirectTest, TransGetAuthTypeByNetWorkIdTest001, TestSize.Level1)
 {
-    (void)TransChannelInit();
-    string networkId = "testNetworkId";
+    string networkId = TEST_NETWORK_ID;
     bool ret = TransGetAuthTypeByNetWorkId(networkId.c_str());
     EXPECT_NE(true, ret);
-    TransChannelDeinit();
 }
 
 } // namespace OHOS
