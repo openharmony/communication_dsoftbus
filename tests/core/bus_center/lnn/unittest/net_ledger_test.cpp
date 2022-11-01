@@ -15,10 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <securec.h>
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
