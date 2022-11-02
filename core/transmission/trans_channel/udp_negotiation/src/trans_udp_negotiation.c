@@ -120,12 +120,12 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
         info.peerIp = (char*)appInfo->peerData.addr;
     }
     int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
-        (char *)&appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
+        (char*)appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
         return SOFTBUS_ERR;
     }
-    return g_channelCb->OnChannelOpened((const char *)&appInfo->myData.pkgName, appInfo->myData.pid,
+    return g_channelCb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
         appInfo->myData.sessionName, &info);
 }
 
