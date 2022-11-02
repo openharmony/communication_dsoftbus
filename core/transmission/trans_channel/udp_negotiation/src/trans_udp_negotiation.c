@@ -417,6 +417,9 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
  * */
 static void ProcessAbnormalUdpChannelState(const AppInfo *info, int32_t errCode, bool needClose)
 {
+    if (errCode == SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED) {
+        return;
+    }
     if (info->udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
         (void)NotifyUdpChannelOpenFailed(info, errCode);
         (void)TransDelUdpChannel(info->myData.channelId);
@@ -478,11 +481,15 @@ static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJS
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process udp channel state failed. ret = %d", ret);
         errDesc = (char *)"notify app error";
+        ProcessAbnormalUdpChannelState(&info, ret, false);
         goto ERR_EXIT;
     }
-    if (SendReplyUdpInfo(&info, authId, seq) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reply udp info failed.");
-        (void)TransDelUdpChannel(info.myData.channelId);
+    ret = SendReplyUdpInfo(&info, authId, seq);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send reply udp info failed. ret = %d.", ret);
+        errDesc = (char *)"send reply error";
+        ProcessAbnormalUdpChannelState(&info, ret, false);
+        goto ERR_EXIT;
     }
     return;
 
