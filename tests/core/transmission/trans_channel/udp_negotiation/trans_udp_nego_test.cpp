@@ -22,13 +22,13 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
+#include "trans_channel_manager.h"
 #include "trans_udp_channel_manager.c"
 #include "trans_udp_negotiation.c"
 #include "trans_udp_negotiation_exchange.c"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 #include "trans_udp_negotiation_exchange.h"
-#include "trans_channel_manager.h"
 
 using namespace testing::ext;
 
