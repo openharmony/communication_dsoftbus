@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include <securec.h>
 
 #include "auth_interface.h"
@@ -197,7 +197,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
     int64_t authId = AUTH_INVALID_ID;
 
     int32_t ret = TransAddUdpChannel(newChannel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
     TransOnExchangeUdpInfoReply(INVALID_AUTH_ID, newChannel->seq, msg);
@@ -229,7 +229,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
     int64_t authId = AUTH_INVALID_ID;
 
     int32_t ret = TransAddUdpChannel(newChannel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     TransOnExchangeUdpInfoRequest(authId, newChannel->seq, NULL);
 
     cJSON_Delete(msg);
