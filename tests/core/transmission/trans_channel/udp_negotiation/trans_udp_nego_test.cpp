@@ -22,13 +22,13 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
+#include "trans_channel_manager.h"
 #include "trans_udp_channel_manager.c"
 #include "trans_udp_negotiation.c"
 #include "trans_udp_negotiation_exchange.c"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 #include "trans_udp_negotiation_exchange.h"
-#include "trans_channel_manager.h"
 
 using namespace testing::ext;
 
@@ -84,10 +84,9 @@ char* TestGetMsgInfo(void)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
 {
-    int32_t ret;
     int32_t errCode = 0;
     string msgStr = "ProcessMessage";
-    ret = TransUnpackReplyErrInfo(NULL, NULL);
+    int32_t ret = TransUnpackReplyErrInfo(NULL, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
     ret = TransUnpackReplyErrInfo(msg, &errCode);
@@ -103,13 +102,12 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest002, TestSize.Level1)
 {
-    int32_t ret;
     int32_t errCode = 0;
     string msgStr = "ProcessMessage";
     cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
     const char* errDesc = "errDesc";
 
-    ret = TransPackReplyErrInfo(NULL, errCode, NULL);
+    int32_t ret = TransPackReplyErrInfo(NULL, errCode, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = TransPackReplyErrInfo(msg, errCode, errDesc);
@@ -125,13 +123,12 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest003, TestSize.Level1)
 {
-    int32_t ret;
     int64_t authId = AUTH_INVALID_ID;
     int64_t seq = 0;
     string msg = "ProcessMessage";
     cJSON *replyMsg = cJSON_Parse((char *)msg.c_str());
 
-    ret = sendUdpInfo(NULL, authId, seq);
+    int32_t ret = sendUdpInfo(NULL, authId, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = sendUdpInfo(replyMsg, NULL, NULL);
@@ -147,10 +144,9 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest003, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest004, TestSize.Level1)
 {
-    int32_t ret;
     int32_t errCode = 0;
     string errDesc = "ProcessMessage";
-    ret = SendReplyErrInfo(errCode, NULL, NULL, NULL);
+    int32_t ret = SendReplyErrInfo(errCode, NULL, NULL, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = SendReplyErrInfo(errCode, (char *)errDesc.c_str(), NULL, NULL);
