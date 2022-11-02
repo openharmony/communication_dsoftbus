@@ -270,7 +270,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
     int32_t ret = memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     EXPECT_TRUE(ret == SOFTBUS_OK);
     UdpModuleCb(authId, NULL);
-    
+
     data.data = NULL;
     UdpModuleCb(authId, &data);
     
