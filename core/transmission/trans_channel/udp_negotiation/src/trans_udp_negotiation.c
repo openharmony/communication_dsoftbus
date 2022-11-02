@@ -557,7 +557,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     }
     if (StartExchangeUdpInfo(channel, authId, channel->seq) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOnAuthConnOpened neg fail");
-        ProcessAbnormalUdpChannelState(&channel->info, true, SOFTBUS_TRANS_HANDSHAKE_ERROR);
+        ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_HANDSHAKE_ERROR, true);
         SoftBusFree(channel);
         goto EXIT_ERR;
     }
@@ -832,18 +832,32 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
+    ListNode destroyList;
+    ListInit(&destroyList);
+
     SoftBusList *udpChannelList = GetUdpChannelMgrHead();
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(udpChannelList->list), UdpChannelInfo, node) {
-        if ((strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) &&
-            (udpChannelNode->info.myData.pid = pid)) {
+        if ((strcmp(udpChannelNode->info.myData.pkgName, pkgName) == 0) && (udpChannelNode->info.myData.pid == pid)) {
             udpChannelNode->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
-            if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open udp negotiation failed.");
+            UdpChannelInfo *tempNode = (UdpChannelInfo*)SoftBusMalloc(sizeof(UdpChannelInfo));
+            if (tempNode == NULL) {
+                continue;
             }
+            *tempNode = *udpChannelNode;
+            ListAdd(&destroyList, &tempNode->node);
         }
     }
     (void)ReleaseUdpChannelLock();
+
+    UdpChannelInfo *udpChannelNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(udpChannelNode, udpChannelNodeNext, &(udpChannelList->list), UdpChannelInfo, node) {
+        if (OpenAuthConnForUdpNegotiation(udpChannelNode) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open udp negotiation failed.");
+        }
+        ListDelete(&udpChannelNode->node);
+        SoftBusFree(udpChannelNode);
+    }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransUdpDeathCallback end[pkgName = %s]", pkgName);
     return;
 }
