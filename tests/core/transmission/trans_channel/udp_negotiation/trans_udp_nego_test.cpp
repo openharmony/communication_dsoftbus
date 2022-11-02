@@ -57,16 +57,18 @@ void TransUdpNegoTest::SetUpTestCase(void)
 void TransUdpNegoTest::TearDownTestCase(void)
 {}
 
-char* GetMsgInfo(void)
+char* TestGetMsgInfo(void)
 {
     AppInfo info;
     info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
     cJSON *requestMsg = cJSON_CreateObject();
     if (requestMsg == NULL) {
+        cJSON_Delete(requestMsg);
         return NULL;
     }
 
     if (TransPackRequestUdpInfo(requestMsg, &info) != SOFTBUS_OK) {
+        cJSON_Delete(requestMsg);
         return NULL;
     }
     char *msgStr = cJSON_PrintUnformatted(requestMsg);
@@ -82,7 +84,7 @@ char* GetMsgInfo(void)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     int32_t errCode = 0;
     string msgStr = "ProcessMessage";
     ret = TransUnpackReplyErrInfo(NULL, NULL);
@@ -101,7 +103,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     int32_t errCode = 0;
     string msgStr = "ProcessMessage";
     cJSON *msg = cJSON_Parse((char *)msgStr.c_str());
@@ -123,7 +125,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     int64_t authId = AUTH_INVALID_ID;
     int64_t seq = 0;
     string msg = "ProcessMessage";
@@ -145,8 +147,8 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest003, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest004, TestSize.Level1)
 {
-    int ret;
-    int errCode = 0;
+    int32_t ret;
+    int32_t errCode = 0;
     string errDesc = "ProcessMessage";
     ret = SendReplyErrInfo(errCode, NULL, NULL, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -170,7 +172,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest005, TestSize.Level1)
 
     appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
 
-    int ret = SendReplyUdpInfo(NULL, authId, seq);
+    int32_t ret = SendReplyUdpInfo(NULL, authId, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = SendReplyUdpInfo(&appInfo, NULL, seq);
@@ -186,20 +188,25 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest005, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
 {
     (void)TransChannelInit();
-    char* data = GetMsgInfo();
+    char* data = TestGetMsgInfo();
     cJSON *msg = cJSON_Parse(data);
 
-    UdpChannelInfo newChannel;
-    (void)memset_s(&newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
-    newChannel.seq = 1;
+    UdpChannelInfo *newChannel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
+    if (newChannel == NULL) {
+        return;
+    }
+
+    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+    newChannel->seq = 1;
     int64_t authId = AUTH_INVALID_ID;
 
-    if (TransAddUdpChannel(&newChannel) == SOFTBUS_OK) {
+    if (TransAddUdpChannel(newChannel) == SOFTBUS_OK) {
         TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
     }
-    TransOnExchangeUdpInfoReply(INVALID_AUTH_ID, newChannel.seq, msg);
-    TransOnExchangeUdpInfoReply(authId, newChannel.seq, msg);
+    TransOnExchangeUdpInfoReply(INVALID_AUTH_ID, newChannel->seq, msg);
+    TransOnExchangeUdpInfoReply(authId, newChannel->seq, msg);
     cJSON_Delete(msg);
+    SoftBusFree(newChannel);
     TransChannelDeinit();
 }
 
@@ -212,18 +219,23 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
 {
     (void)TransChannelInit();
-    char* data = GetMsgInfo();
+    char* data = TestGetMsgInfo();
     cJSON *msg = cJSON_Parse(data);
 
-    UdpChannelInfo newChannel;
-    newChannel.seq = 1;
-    int64_t authId = AUTH_INVALID_ID;
-
-    if (TransAddUdpChannel(&newChannel) == SOFTBUS_OK) {
-        TransOnExchangeUdpInfoRequest(authId, newChannel.seq, NULL);
+    UdpChannelInfo *newChannel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
+    if (newChannel == NULL) {
+        return;
     }
 
+    (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+    newChannel->seq = 1;
+    int64_t authId = AUTH_INVALID_ID;
+
+    if (TransAddUdpChannel(newChannel) == SOFTBUS_OK) {
+        TransOnExchangeUdpInfoRequest(authId, newChannel->seq, NULL);
+    }
     cJSON_Delete(msg);
+    SoftBusFree(newChannel);
     TransChannelDeinit();
 }
 
@@ -235,11 +247,15 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest008, TestSize.Level1)
 {
-    int32_t ret;
+    int64_t seq = 0;
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
-    ret = StartExchangeUdpInfo(&channel, NULL, NULL);
+    int32_t ret = StartExchangeUdpInfo(&channel, NULL, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+    ret = StartExchangeUdpInfo(&channel, NULL, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -275,26 +291,9 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest010, TestSize.Level1)
 {
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int ret = TransUdpChannelInit(cb);
+    int32_t ret = TransUdpChannelInit(cb);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     (void)TransUdpChannelDeinit();
-}
-
-/**
- * @tc.name: TransUdpNegoTest011
- * @tc.desc: extern module active publish, stop session whitout start.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpNegoTest, TransUdpNegoTest011, TestSize.Level1)
-{
-    int64_t seq = 0;
-    UdpChannelInfo channel;
-    (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
-    channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
-
-    int32_t ret = StartExchangeUdpInfo(&channel, NULL, seq);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 }
