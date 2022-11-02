@@ -90,6 +90,7 @@ if (defined(ohos_lite)) {
     testonly = true
     deps = [
       ":TransSdkTest",
+      "monitor_permission_test:MonitorPermission",
       "permission:DynamicPermissionTest",
     ]
   }
