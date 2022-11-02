@@ -35,6 +35,7 @@ using namespace testing::ext;
 namespace OHOS {
 
 #define INVALID_ID (-1)
+#define INVALID_SEQ (-1)
 #define INVALID_AUTH_ID (-2)
 
 class TransUdpNegoTest : public testing::Test {
@@ -267,7 +268,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
 {
     int64_t authId = AUTH_INVALID_ID;
     AuthTransData data;
-    int32_t ret = memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+
     EXPECT_TRUE(ret == SOFTBUS_OK);
     UdpModuleCb(authId, NULL);
 
