@@ -34,7 +34,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
-#define INVALID_SEQ (-1)
+#define INVALID_ID (-1)
 #define INVALID_AUTH_ID (-2)
 
 class TransUdpNegoTest : public testing::Test {
@@ -161,8 +161,8 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest004, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest005, TestSize.Level1)
 {
-    int64_t authId = -1;
-    int64_t seq = -1;
+    int64_t authId = INVALID_ID;
+    int64_t seq = INVALID_SEQ;
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
@@ -196,9 +196,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
     newChannel->seq = 1;
     int64_t authId = AUTH_INVALID_ID;
 
-    if (TransAddUdpChannel(newChannel) == SOFTBUS_OK) {
-        TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
-    }
+    int32_t ret = TransAddUdpChannel(newChannel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
     TransOnExchangeUdpInfoReply(INVALID_AUTH_ID, newChannel->seq, msg);
     TransOnExchangeUdpInfoReply(authId, newChannel->seq, msg);
     cJSON_Delete(msg);
@@ -227,9 +228,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
     newChannel->seq = 1;
     int64_t authId = AUTH_INVALID_ID;
 
-    if (TransAddUdpChannel(newChannel) == SOFTBUS_OK) {
-        TransOnExchangeUdpInfoRequest(authId, newChannel->seq, NULL);
-    }
+    int32_t ret = TransAddUdpChannel(newChannel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    TransOnExchangeUdpInfoRequest(authId, newChannel->seq, NULL);
+
     cJSON_Delete(msg);
     SoftBusFree(newChannel);
     TransChannelDeinit();
@@ -265,6 +267,8 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
 {
     int64_t authId = AUTH_INVALID_ID;
     AuthTransData data;
+    int32_t ret = memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     UdpModuleCb(authId, NULL);
     
     data.data = NULL;
