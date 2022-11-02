@@ -294,6 +294,6 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest010, TestSize.Level1)
     int32_t ret = TransUdpChannelInit(cb);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    (void)TransUdpChannelDeinit();
+    TransUdpChannelDeinit();
 }
 }
