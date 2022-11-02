@@ -268,8 +268,9 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
 {
     int64_t authId = AUTH_INVALID_ID;
     AuthTransData data;
-
+    int32_t ret = memset_s(&data, sizeof(AuthTransData), 0, sizeof(AuthTransData));
     EXPECT_TRUE(ret == SOFTBUS_OK);
+
     UdpModuleCb(authId, NULL);
 
     data.data = NULL;
