@@ -470,12 +470,25 @@ typedef struct {
 } GearMode;
 
 /**
+ * @brief Enumerates secret key types.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    PROXY_TRANSMISION = 0,  /**< Proxy Transmision */
+    PROXY_HEARTBEAT = 1,    /**< Proxy Heartbeat */
+    CUSTOM_UNKNOWN,         /**< Proxy Unknown */
+} CustomType;
+
+/**
  * @brief Defines  parameter, see {@link GearMode}.
  *
  * @since 1.0
  * @version 1.0
  */
 typedef struct {
+    CustomType type;        /**< user type */
     uint8_t data[256];      /**< user data */
 } CustomData;
 
@@ -554,7 +567,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
  * For the same caller, the value of this parameter must be the same for all functions.
  * @param target Indicates the pointer to the address of the specified device. For details, see {@link ConnectionAddr}.
- * @param dataKey Indicates the pointer to the key of the specified device.
+ * @param customData Indicates the pointer to the key of the specified device.
  * @param cb Indicates the callback for the result. If you set this parameter to NULL, you will not receive the result.
  *
  * @return Returns <b>0</b> if the request to add the device is accepted, and the result can be obtained from the
@@ -564,7 +577,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
  * @since 1.0
  * @version 1.0
  */
-int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *dataKey, OnJoinMetaNodeResult cb);
+int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb);
 
 /**
  * @brief Removes the current device from the LNN.

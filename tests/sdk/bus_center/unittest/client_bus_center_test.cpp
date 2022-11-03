@@ -85,13 +85,13 @@ HWTEST_F(ClientBusMangerTest, JOIN_METANODE_Test_001, TestSize.Level1)
     char pkgName[] = "test";
     ConnectionAddr connAddr;
     (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    CustomData dataKey;
-    (void)memset_s(&dataKey, sizeof(CustomData), 0, sizeof(CustomData));
+    CustomData customData;
+    (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
     OnJoinLNNResult cb = nullptr;
-    int32_t ret = JoinMetaNodeInner(pkgName, &connAddr, &dataKey, cb);
+    int32_t ret = JoinMetaNodeInner(pkgName, &connAddr, &customData, cb);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     g_busCenterClient.isInit = true;
-    JoinMetaNodeInner(pkgName, &connAddr, &dataKey, cb);
+    JoinMetaNodeInner(pkgName, &connAddr, &customData, cb);
 }
 
 /*
