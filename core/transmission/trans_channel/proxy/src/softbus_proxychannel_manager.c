@@ -35,6 +35,7 @@
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
+#include "trans_channel_limit.h"
 #include "trans_pending_pkt.h"
 
 #define PROXY_CHANNEL_CONTROL_TIMEOUT 19
@@ -640,6 +641,7 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     (void)OnProxyChannelOpened(info->channelId, &(info->appInfo), PROXY_CHANNEL_CLIENT);
     SoftBusFree(info);
 }
+
 static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
 {
     if (chan->appInfo.appType != APP_TYPE_INNER) {
@@ -671,39 +673,55 @@ static inline void ConstructProxyChannelInfo(ProxyChannelInfo *chan, const Proxy
     chan->type = type;
 }
 
-void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
+static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
-    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-
-    if (chan == NULL) {
-        return;
+    int32_t ret = TransProxyUnpackHandshakeMsg(msg->data, chan);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackHandshakeMsg fail.");
+        return ret;
+    }
+    if ((chan->appInfo.appType == APP_TYPE_AUTH) &&
+        (!CheckSessionNameValidOnAuthChannel(chan->appInfo.myData.sessionName))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy auth check sessionname valid.");
+        return SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED;
     }
 
-    if (TransProxyUnpackHandshakeMsg(msg->data, chan) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackHandshakeMsg fail");
-        SoftBusFree(chan);
-        return;
-    }
-
-    ConnectionInfo info = {0};
-    if (ConnGetConnectionInfo(msg->connId, &info) != SOFTBUS_OK) {
+    ConnectionInfo info;
+    (void)memset_s(&info, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
+    ret = ConnGetConnectionInfo(msg->connId, &info);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetConnectionInfo fail connectionId %u", msg->connId);
-        SoftBusFree(chan);
-        return;
+        return ret;
     }
 
     int16_t newChanId = TransProxyGetNewMyId();
     ConstructProxyChannelInfo(chan, msg, newChanId, info.type);
 
-    int ret = TransProxyGetLocalInfo(chan);
+    ret = TransProxyGetLocalInfo(chan);
     if (ret!= SOFTBUS_OK) {
-        if (ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) {
-            if (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ErrHandshake fail");
-            }
-        }
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyGetLocalInfo fail ret=%d.", ret);
+        return ret;
+    }
+
+    return SOFTBUS_OK;
+}
+
+void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    if (chan == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy handshake calloc failed.");
+        return;
+    }
+
+    int32_t ret = TransProxyFillChannelInfo(msg, chan);
+    if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) &&
+        (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ErrHandshake fail, connId=%u.", msg->connId);
+    }
+    if (ret != SOFTBUS_OK) {
         SoftBusFree(chan);
         return;
     }
@@ -715,17 +733,17 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         return;
     }
 
-    if (OnProxyChannelOpened(newChanId, &(chan->appInfo), PROXY_CHANNEL_SERVER) != SOFTBUS_OK) {
+    if (OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnProxyChannelOpened  fail");
         (void)TransProxyCloseConnChannel(msg->connId);
-        TransProxyDelChanByChanId(newChanId);
+        TransProxyDelChanByChanId(chan->channelId);
         return;
     }
 
     if (TransProxyAckHandshake(msg->connId, chan, SOFTBUS_OK) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AckHandshake fail");
-        OnProxyChannelClosed(newChanId, &(chan->appInfo));
-        TransProxyDelChanByChanId(newChanId);
+        OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
     }
 }
 
