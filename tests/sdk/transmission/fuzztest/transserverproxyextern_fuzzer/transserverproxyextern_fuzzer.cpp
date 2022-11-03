@@ -52,7 +52,7 @@ namespace OHOS {
 
     void ServerIpcNotifyAuthSuccessTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
 
@@ -64,7 +64,7 @@ namespace OHOS {
 
     void ServerIpcCloseChannelTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
@@ -75,7 +75,7 @@ namespace OHOS {
 
     void ServerIpcSendMessageTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
 
@@ -92,7 +92,7 @@ namespace OHOS {
 
     void ServerIpcQosReportTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
 
@@ -106,7 +106,7 @@ namespace OHOS {
 
     void ServerIpcStreamStatsTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
 
@@ -118,7 +118,7 @@ namespace OHOS {
 
     void ServerIpcRippleStatsTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
 
@@ -146,7 +146,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     OHOS::TransServerProxyDeInitTest(data, size);
     OHOS::ServerIpcOpenAuthSessionTest(data, size);
-    OHOS::ServerIpcNotifyAuthSuccessTest(data, size);
     OHOS::ServerIpcCloseChannelTest(data, size);
     OHOS::ServerIpcSendMessageTest(data, size);
     OHOS::ServerIpcQosReportTest(data, size);
