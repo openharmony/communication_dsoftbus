@@ -118,15 +118,15 @@ using namespace testing::ext;
     {
         char *pkgName = nullptr;
         void *addr = nullptr;
-        CustomData dataKey;
-        memcpy_s(dataKey.data, sizeof(CustomData), "test", DEFAULT_SIZE);
+        CustomData customData;
+        memcpy_s(customData.data, sizeof(CustomData), "test", DEFAULT_SIZE);
         uint32_t addrTypeLen = 0;
         ConnectionAddr addrValue;
         (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
         char pkgNameValue[DEFAULT_LEN] = "test";
-        int32_t ret = MetaNodeIpcServerJoin(pkgName, addr, &dataKey, addrTypeLen);
+        int32_t ret = MetaNodeIpcServerJoin(pkgName, addr, &customData, addrTypeLen);
         EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-        ret = MetaNodeIpcServerJoin(pkgNameValue, (void *)&addrValue, &dataKey, addrTypeLen);
+        ret = MetaNodeIpcServerJoin(pkgNameValue, (void *)&addrValue, &customData, addrTypeLen);
         EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     }
 
@@ -165,8 +165,8 @@ using namespace testing::ext;
         char *networkId = nullptr;
         char networkIdValue[DEFAULT_LEN] = "1234";
         int32_t retCode = 0;
-        CustomData dataKey;
-        memcpy_s(dataKey.data, sizeof(CustomData), "test", DEFAULT_SIZE);
+        CustomData customData;
+        memcpy_s(customData.data, sizeof(CustomData), "test", DEFAULT_SIZE);
         int32_t ret = MetaNodeIpcNotifyJoinResult(addr, addrTypeLen, networkId, retCode);
         EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
         ret = MetaNodeIpcNotifyJoinResult((void *)&addrValue, addrTypeLen, networkIdValue, retCode);
