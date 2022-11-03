@@ -22,6 +22,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "client_bus_center_manager.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -500,4 +501,94 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     ret = StopRefreshLNN(TEST_PKG_NAME_1, tmpId3);
     EXPECT_TRUE(ret == 0);
 }
+
+/**
+* @tc.name: SET_NODE_DATA_CHANGE_FLAG_INNER_Test001
+* @tc.desc: Set Node Data Change Flag Inner
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test001, TestSize.Level0)
+{
+    char pkgName[] = "test";
+    char *networkId = nullptr;
+    uint16_t dataChangeFlag = 0;
+    int32_t ret = SetNodeDataChangeFlagInner(pkgName, networkId, dataChangeFlag);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: JOIN_META_NODE_INNER_Test001
+* @tc.desc: JoinMetaNodeInner
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, JOIN_META_NODE_INNER_Test001, TestSize.Level1)
+{
+    char pkgName[] = "test";
+    CustomData dataKey;
+    (void)memset_s(&dataKey, sizeof(CustomData), 0, sizeof(CustomData));
+    OnJoinMetaNodeResult cb = nullptr;
+    ConnectionAddr *target = nullptr;
+    int32_t ret = JoinMetaNodeInner(pkgName, target, &dataKey, cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LEAVE_META_NODE_INNER_Test001
+* @tc.desc: Leave Meta Node Inner
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, LEAVE_META_NODE_INNER_Test001, TestSize.Level1)
+{
+    char pkgName[] = "test";
+    char networkId[] = "0123456789";
+    char *networkId1 = nullptr;
+    OnLeaveMetaNodeResult cb = nullptr;
+    int32_t  ret = LeaveMetaNodeInner(pkgName, networkId1, cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    printf("LeaveMetaNodeInner ret2 = %d\n", ret);
+    ret = LeaveMetaNodeInner(pkgName, networkId, cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    printf("LeaveMetaNodeInner ret3 = %d\n", ret);
+}
+
+/*
+* @tc.name: META_NODE_ON_JOIN_RESULT_Test001
+* @tc.desc: Meta Node On Join Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, META_NODE_ON_JOIN_RESULT_Test001, TestSize.Level1)
+{
+    void *addr = nullptr;
+    char networkId[] = "0123456789";
+    int32_t retCode = SOFTBUS_OK;
+    int32_t ret = MetaNodeOnJoinResult(addr, networkId, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ConnectionAddr connAddr;
+    (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    addr = (void*)&connAddr;
+    ret = MetaNodeOnJoinResult(addr, networkId, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: META_NODE_ON_LEAVE_RESULT_Test001
+* @tc.desc: Meta Node On Leave Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, META_NODE_ON_LEAVE_RESULT_Test001, TestSize.Level1)
+{
+    int32_t retCode = SOFTBUS_OK;
+    char networkId[] = "ABCDEFG";
+    char *networkId1 = nullptr;
+    int32_t ret = MetaNodeOnLeaveResult(networkId1, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = MetaNodeOnLeaveResult(networkId, retCode);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
 } // namespace OHOS
