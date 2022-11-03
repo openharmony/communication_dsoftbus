@@ -351,6 +351,11 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
         return;
     }
     type = (LnnSyncInfoType)(*(int32_t *)data);
+    if (type < 0 || type >= LNN_INFO_TYPE_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "received data is exception");
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return;
+    }
     handler = g_syncInfoManager.handlers[type];
     if (handler == NULL) {
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
