@@ -49,8 +49,10 @@ int32_t LnnInitProductMonitorImpl(void)
 
     if (HdfDeviceRegisterEventListener(g_serv, &g_listener) != HDF_SUCCESS) {
         HILOG_WARN(SOFTBUS_HILOG_ID, "fail to register event listener");
+        HdfIoServiceRecycle(g_serv);
+        g_serv = NULL;
         return SOFTBUS_OK;
     }
-    HILOG_ERROR(SOFTBUS_HILOG_ID, "start success...");
+    HILOG_INFO(SOFTBUS_HILOG_ID, "start success...");
     return SOFTBUS_OK;
 }

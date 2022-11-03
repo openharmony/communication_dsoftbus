@@ -30,13 +30,15 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
       "$hilog_lite_include_path",
     ]
+    if (board_name == "v200zr") {
+      defines = [ "DSOFTBUS_V200ZR" ]
+    }
   }
 
   common_include = [
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//utils/native/base/include",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
+    "//base/startup/init/interfaces/innerkits/include/syspara",
     "//third_party/bounds_checking_function/include",
   ]
 
@@ -49,20 +51,49 @@ if (defined(ohos_lite)) {
             [ "$hispark_pegasus_sdk_path/third_party/lwip_sack/include" ]
         defines = [ "HISPARK_PEGASUS_USE_NETIF_GET_ADDR" ]
       }
-      cflags = [ "-Wall" ]
+      if (board_toolchain_type == "iccarm") {
+        include_dirs += [
+          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
+          "//third_party/lwip/src/include",
+        ]
+        cflags = [
+          "--diag_suppress",
+          "Pe226,Pe513",
+        ]
+        ldflags = [ "-lpthread" ]
+      } else {
+        cflags = [ "-Wall" ]
+      }
       sources = [
-        "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
-        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_socket.c",
-        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_thread.c",
+        "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
         "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
+        "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
+        "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/range/softbus_adapter_range.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
+      if (board_name == "v200zr") {
+        sources = []
+        sources = [
+          "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
+          "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
+          "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
+          "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
+          "$softbus_adapter_common/log/softbus_adapter_log.c",
+          "$softbus_adapter_common/range/softbus_adapter_range.c",
+          "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
+        ]
+      }
 
       deps = [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+
       if (dsoftbus_feature_encrypt == 0) {
         sources +=
             [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
@@ -86,21 +117,23 @@ if (defined(ohos_lite)) {
       ]
       cflags_cc = [ "-fPIC" ]
       sources = [
-        "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
-        "$softbus_adapter_common/kernel/liteos_a/lnn_ip_utils_adapter.c",
-        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
-        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
-        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_socket.c",
-        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_thread.c",
-        "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+        "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
+        "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
+        "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
+        "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
+        "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
+        "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
+        "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
         "$softbus_adapter_common/log/softbus_adapter_log.c",
+        "$softbus_adapter_common/range/softbus_adapter_range.c",
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = [
         "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-        "//base/startup/syspara_lite/frameworks/parameter/src:sysparam",
+        "//base/startup/init/interfaces/innerkits:libbegetutil",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
+
       if (dsoftbus_feature_encrypt == 0) {
         sources +=
             [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
@@ -127,26 +160,42 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
-      "//utils/native/base/include",
+      "//base/startup/init/interfaces/innerkits/include/syspara",
+      "//commonlibrary/c_utils/base/include",
       "//third_party/bounds_checking_function/include",
     ]
     sources = [
       "$dsoftbus_feature_product_config_path/spec_config/softbus_config_adapter.c",
-      "$softbus_adapter_common/bus_center/platform/bus_center_adapter.c",
-      "$softbus_adapter_common/kernel/liteos_a/lnn_ip_utils_adapter.c",
-      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_file.c",
-      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_mem.c",
-      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_socket.c",
-      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_thread.c",
-      "$softbus_adapter_common/kernel/liteos_a/softbus_adapter_timer.c",
+      "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
+      "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
+      "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
+      "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
+      "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
+      "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
+      "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
       "$softbus_adapter_common/log/softbus_adapter_log.c",
     ]
-    public_deps = [
-      "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
-      "//third_party/bounds_checking_function:libsec_static",
-      "//utils/native/base:utils",
-    ]
+    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
+    native_source_path = rebase_path("$dsoftbus_root_path")
+
+    ble_enhanced_impl =
+        "dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c"
+    enhanced_range = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                 [
+                                   "$native_source_path",
+                                   "$ble_enhanced_impl",
+                                 ],
+                                 "value")
+
+    if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
+      include_dirs += [ "//base/msdp/algorithm/ble_range/include" ]
+      sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
+      public_deps += [ "//base/msdp/algorithm/ble_range:msdp_ble_range" ]
+    } else {
+      sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
+    }
+
     if (dsoftbus_feature_encrypt == 0) {
       sources += [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
       public_deps += [ "//third_party/mbedtls" ]
@@ -156,7 +205,10 @@ if (defined(ohos_lite)) {
     }
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps = [
+        "hisysevent_native:libhisysevent",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
     }
     part_name = "dsoftbus"
     subsystem_name = "communication"

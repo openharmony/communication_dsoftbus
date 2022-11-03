@@ -62,6 +62,7 @@ extern "C" {
 #define SOFTBUS_TCP_KEEPIDLE SOFTBUS_TCP_KEEPIDLE_
 #define SOFTBUS_TCP_KEEPINTVL SOFTBUS_TCP_KEEPINTVL_
 #define SOFTBUS_TCP_KEEPCNT SOFTBUS_TCP_KEEPCNT_
+#define SOFTBUS_TCP_USER_TIMEOUT SOFTBUS_TCP_USER_TIMEOUT_
 
 #define SOFTBUS_SHUT_RD SOFTBUS_SHUT_RD_
 #define SOFTBUS_SHUT_WR SOFTBUS_SHUT_WR_
@@ -93,11 +94,11 @@ typedef struct {
     char saData[SA_DATA_SIZE];
 } SoftBusSockAddr;
 
+#pragma pack (1)
 typedef struct {
     unsigned long sAddr;
 } SoftBusInAddr;
 
-#pragma pack (1)
 typedef struct {
     uint16_t sinFamily; /* address family */
     uint16_t sinPort; /* Port number */

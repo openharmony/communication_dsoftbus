@@ -43,16 +43,37 @@ int32_t SoftBusStartWifiScan(void)
 
 int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
 {
+    (void)cb;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
 {
+    (void)result;
+    (void)size;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
 {
+    (void)cb;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
+{
+    (void)channelList;
+    (void)num;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    return BAND_UNKNOWN;
+}
+
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
+{
+    (void)info;
+    return SOFTBUS_OK;
+}

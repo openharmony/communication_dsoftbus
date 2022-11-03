@@ -1,0 +1,172 @@
+#  Copyright (c) 2022 Huawei Device Co., Ltd.
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+#####################################################
+#     below is the format of defining event         #
+#####################################################
+#domain: domain name.  [Only one domain name can be defined at the top]
+#
+#author: the author name who defined this event.
+#date: the date when this event was defined, format is YYYY-MM-DD.
+#logged: source file which refer to this event.
+#usage: the usage of this event.
+#//Define event name and event properties.
+#@EVENT_NAME: the event definition part begin.
+#  // __BASE is used for defining the basic info of the event.
+#  // "type" optional values are: FAULT, STATISTICS, SECURITY, BEHAVIOR.
+#  // "level" optional values are: CRITICAL, MINOR.
+#  // "tag" set tags with may used by subscriber of this event, multiple tags devided by space.
+#  // "desc" full description of this event.
+#  @PARAMETER: {type: parameter type, arrsize: array length(optional), desc: parameter description}.
+#  // follow the __BASE block, each line defines a parameter of this event.
+#  // "type" optional values are: INT8, UINT8, INT16, UINT16, INT32, UINT32, INT64, UINT64, FLOAT, DOUBLE, STRING.
+#  // "arrsize" of the parameter is an array, set a non-zero value.
+#  // "desc" full description of this parameter.
+
+#####################################################
+#           SoftBus hisysevent definition           #
+#####################################################
+
+domain: DSOFTBUS
+
+DISC_STARTUP:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: start discovery}
+  PACKAGE_NAME: {type: STRING, desc: the appname which call softbus }
+
+FIRST_DISC_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: first discovery device duration}
+  MEDIUM: {type: UINT8, desc: discovery medium }
+  MAX_DISC_DURATION: {type: UINT32, desc: max discovery time duration }
+  MIN_DISC_DURATION: {type: UINT32, desc: min discovery time duration }
+  AVG_DISC_DURATION: {type: UINT32, desc: average discovery time duration }
+
+SCAN_TIMES:
+  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic scan times }
+  MEDIUM: {type: UINT8, desc: scan medium }
+  SCAN_COUNTER: {type: UINT32, desc: scan counter}
+
+DISC_FAULT:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: statistic all the exception in disc process }
+  MEDIUM: {type: UINT8, desc: disc medium }
+  ERROR_CODE: {type: INT32, desc: error code }
+  ERROR_COUNTER: {type: UINT32, desc: error counter }
+
+CONN_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: statistic the connection duration}
+  MEDIUM: {type: UINT8, desc: connection medium }
+  MAX_CONN_DURATION: {type: UINT32, desc: max connection time duration }
+  MIN_CONN_DURATION: {type: UINT32, desc: min connection time duration }
+  AVG_CONN_DURATION: {type: UINT32, desc: average connection time duration }
+
+CONN_SUCC_RATE:
+  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic connect success rate }
+  MEDIUM: {type: UINT8, desc: connection medium }
+  SUCC_TIMES: {type: UINT32, desc: conn success times }
+  FAIL_TIMES: {type: UINT32, desc: conn fail times }
+  SUCC_RATE: {type: FLOAT, desc: connection success rate}
+
+CONN_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: report the fault of connection }
+  MEDIUM: {type: UINT8, desc: connection medium }
+  ERROR_CODE: {type: INT32, desc: error code }
+
+TRANS_OPEN_SESSION_CNT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: the success count and the fail count of open session }
+  SUCCESS_CNT: {type: UINT32, desc: the success count of open session }
+  FAIL_CNT: {type: UINT32, desc: the fail count of open session }
+  SUCCESS_RATE: {type: FLOAT, desc: the success rate of open session }
+
+TRANS_OPEN_SESSION_TIME_COST:
+  __BASE: {type: STATISTIC, level: MINOR, desc: the time comsuming of open session }
+  MAX_TIME_COST: {type: UINT32, desc: the max time comsuming of open session }
+  MIN_TIME_COST: {type: UINT32, desc: the min time comsuming of open session }
+  AVE_TIME_COST: {type: UINT32, desc: the average time comsuming of open session }
+  TIMES_UNDER_500MS: {type: UINT32, desc: the times unders 500ms of open session }
+  TIMES_BETWEEN_500MS_1S: {type: UINT32, desc: the times between 500ms to 1s of open session }
+  TIMES_BETWEEN_1S_2S: {type: UINT32, desc: the times between 1s to 2s of open session }
+  TIMES_ABOVE_2S: {type: UINT32, desc: the times above 2s of open session }
+
+TRANS_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: the transmission fail }
+  ERROR_CODE: {type: INT32, desc: error code }
+
+BUS_CENTER_FAULT_EVT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: bus center all the exception}
+  ERROR_CODE: {type: INT32, desc: error code}
+  ERROR_STR: {type: STRING, desc: error code string}
+  CONN_TYPE: {type: INT32, desc: connection type}
+
+BUS_CENTER_SUCCESS_RATE:
+  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn rate of success}
+  TOTAL_COUNT: {type: INT32, desc: lnn total count}
+  SUCCESS_COUNT: {type: INT32, desc: lnn success count}
+  SUCCESS_RATE: {type: FLOAT, desc: lnn rate of success}
+  CONN_TYPE: {type: INT32, desc: connection type}
+
+BUS_CENTER_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn duration}
+  AVG_DURATION: {type: INT32, desc: lnn average duration}
+  MAX_DURATION: {type: INT32, desc: lnn max duration}
+  MIN_DURATION: {type: INT32, desc: lnn min duration}
+  CONN_TYPE: {type: INT32, desc: connection type}
+
+DFILE_WAIT_HEADER_TIMEOUT_EVT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: wait file header time out}
+  ERROR_CODE: {type: STRING, desc: error code}
+
+DFILE_SERVER_CREATE_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: server created}
+
+DFILE_CLIENT_CREATE_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: client created}
+
+DFILE_SEND_BEGIN_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: send begin}
+
+DFILE_PEER_SHUTTED_EVT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: peer shutted}
+
+DFILE_TRANS_COMPLETE_EVT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: transfer complete}
+  TRANSRATE: {type: STRING, desc: transmission speed}
+
+DFILE_ACCEPT_SOCKET_EVT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: accept socket}
+
+FILLP_LINK_EVT:
+  __BASE: {type: FAULT, level: MINOR, desc: fillp link disconnect}
+  SOCK_IDX: {type: UINT32, desc: fillp socket index}
+  LINK_EVT_TYPE: {type: UINT8, desc: fillp link event type}
+
+FILLP_PKT_EVT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: fillp data package event}
+  SOCK_IDX: {type: UINT32, desc: fillp socket index}
+  PKT_EVT_TYPE: {type: UINT8, desc: fillp package event type}
+  DROP_CNT: {type: UINT32, desc: fillp package dropcnt}
+
+FILLP_SOCK_QOS_EVT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: fillp socket Qos event}
+  SOCK_IDX: {type: UINT32, desc: fillp socket index}
+  RTT: {type: UINT32, desc: fillp socket rtt}
+  TOTAL_RECV_PKT: {type: UINT32, desc: fillp socket recv package num}
+  TOTAL_RECV_BYTES: {type: UINT32, desc: fillp socket recv bytes}
+  TOTAL_SEND_PKT: {type: UINT32, desc: fillp socket send package num}
+  TOTAL_SEND_BYTES: {type: UINT32, desc: fillp socket send bytes}
+  JITTER: {type: UINT32, desc: fillp socket jitter}
+
+DFINDER_STATS:
+  __BASE: {type: STATISTIC, level: MINOR, desc: dfinder statistics}
+  INVALID_OPTION_CNT: {type: UINT64, desc: the count of invalid option}
+  BUILD_PKT_FAIL_CNT: {type: UINT64, desc: the count when building packet failed}
+  INVALID_RSP_CNT: {type: UINT64, desc: the count of invalid message}
+  OVER_DEVICE_LIMIT_CNT: {type: UINT64, desc: the count when the device number is over limit}

@@ -18,9 +18,10 @@
 void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
 {
 #ifdef SOFTBUS_PRINTF
+    (void)level;
     printf("%s\n", buf);
     return;
-#endif
+#else
     switch (level) {
         case SOFTBUS_LOG_DBG:
             HILOG_DEBUG(SOFTBUS_HILOG_ID, "%{public}s", buf);
@@ -37,4 +38,5 @@ void SoftBusOutPrint(const char *buf, SoftBusLogLevel level)
         default:
             break;
     }
+#endif
 }

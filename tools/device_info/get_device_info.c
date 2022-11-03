@@ -20,7 +20,6 @@
 #include "softbus_common.h"
 
 static char const *g_pkgName = "ohos.dsoftbus.tool";
-#define NUM_BUF_SIZE 4
 
 static void PrintNodeProperty(const NodeBasicInfo *nodeInfo)
 {
@@ -75,7 +74,7 @@ static void PrintNodePropertyNum(const NodeBasicInfo *nodeInfo)
     key = NODE_KEY_NETWORK_CAPABILITY;
     int32_t netCapacity = 0;
     if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
-    (uint8_t *)&netCapacity, NUM_BUF_SIZE) != 0) {
+    (uint8_t *)&netCapacity, LNN_COMMON_LEN) != 0) {
         printf("GetNodeKeyInfo Fail!\n");
     } else {
         printf("netCapacity = %d\n", netCapacity);
@@ -83,7 +82,7 @@ static void PrintNodePropertyNum(const NodeBasicInfo *nodeInfo)
     key = NODE_KEY_NETWORK_TYPE;
     int32_t netType = 0;
     if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
-    (uint8_t *)&netType, NUM_BUF_SIZE) != 0) {
+    (uint8_t *)&netType, LNN_COMMON_LEN) != 0) {
         printf("GetNodeKeyInfo Fail!\n");
     } else {
         printf("netType = %d\n", netType);
