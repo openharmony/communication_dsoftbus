@@ -134,7 +134,7 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
-        return SOFTBUS_INVALID_PARAM;
+        return;
     }
     char *buf = NULL;
     int32_t bufLen = 0;
