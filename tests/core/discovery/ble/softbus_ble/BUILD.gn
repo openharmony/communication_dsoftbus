@@ -18,7 +18,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/discovery"
 
-ohos_unittest("SoftBusDiscBleTest") {
+ohos_unittest("DiscSoftBusBleTest") {
   module_out_path = module_output_path
   sources = [ "disc_ble_softbus_test.cpp" ]
 
@@ -72,5 +72,5 @@ ohos_unittest("SoftBusDiscBleTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":SoftBusDiscBleTest" ]
+  deps = [ ":DiscSoftBusBleTest" ]
 }
