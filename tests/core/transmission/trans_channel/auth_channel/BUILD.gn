@@ -30,6 +30,7 @@ ohos_unittest("TransAuthChannelCoreTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/src",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
