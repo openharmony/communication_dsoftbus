@@ -538,7 +538,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     return rc;
 }
 
-int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *dataKey, OnJoinLNNResult cb)
+int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinLNNResult cb)
 {
     int32_t rc;
 
@@ -556,7 +556,7 @@ int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomDat
             rc = SOFTBUS_ALREADY_EXISTED;
             break;
         }
-        rc = ServerIpcJoinMetaNode(pkgName, target, dataKey, sizeof(*target));
+        rc = ServerIpcJoinMetaNode(pkgName, target, customData, sizeof(*target));
         if (rc != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : request join MetaNode");
         } else {
