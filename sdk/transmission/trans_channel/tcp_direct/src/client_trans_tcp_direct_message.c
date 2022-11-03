@@ -385,7 +385,7 @@ static int32_t TransResizeDataBuffer(ClientDataBuf *oldBuf, uint32_t pkgLen)
         return SOFTBUS_MEM_ERR;
     }
     SoftBusFree(oldBuf->data);
-    oLdBuf->data = NULL;
+    oldBuf->data = NULL;
     oldBuf->data = newBuf;
     oldBuf->size = pkgLen;
     oldBuf->w = newBuf + bufLen;

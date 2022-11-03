@@ -192,7 +192,7 @@ int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
     ProxyChannelInfo *nextNode = NULL;
 
     if (g_proxyChannelList == NULL || chan == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans proxy get channel param nullptr!")
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans proxy get channel param nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -903,7 +903,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 
 int32_t TransProxySendMsg(int32_t channelId, const char *data, int32_t dataLen, int32_t priority)
 {
-    int32_t ret SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_ERR;
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc in trans proxy send message.id[%d]", channelId);

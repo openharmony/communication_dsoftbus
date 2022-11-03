@@ -103,6 +103,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "proxy channel openfailed: channelId=%d, appType=%d", channelId, appInfo->appType);
 
+    int32_t ret = SOFTBUS_ERR;
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
             ret = NotifyNormalChannelOpenFailed(appInfo->myData.pkgName, channelId);
