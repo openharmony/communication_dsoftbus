@@ -98,7 +98,6 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
 
     ret = RegTrustDataChangeListener(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)RegTrustDataChangeListener(&listener);
 }
 
 /*
@@ -118,7 +117,6 @@ HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = HichainStartAuth(authSeq, udid, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)HichainStartAuth(authSeq, udid, uid);
 }
 
 /*
