@@ -56,17 +56,25 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     const FrameInfo *param)
 {
     (void)channelId;
+    (void)data;
+    (void)ext;
+    (void)param;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     (void)channelId;
+    (void)sFileList;
+    (void)dFileList;
+    (void)filCnt;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
 {
+    (void)dfileId;
+    (void)udpChannel;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

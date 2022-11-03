@@ -120,9 +120,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo ok");
     return appInfo;
 EXIT_ERR:
-    if (appInfo != NULL) {
-        SoftBusFree(appInfo);
-    }
+    SoftBusFree(appInfo);
     return NULL;
 }
 
@@ -231,7 +229,6 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     transInfo->channelType = CHANNEL_TYPE_BUTT;
     LnnLanesObject *object = NULL;
     const LnnLaneInfo *info = NULL;
-    AppInfo *appInfo = NULL;
     ConnectOption connOpt = {0};
 
     if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
@@ -242,7 +239,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     if (param->groupId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    appInfo = GetAppInfo(param);
+    AppInfo *appInfo = GetAppInfo(param);
     if (appInfo == NULL) {
         goto EXIT_ERR;
     }
@@ -268,9 +265,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
-    if (appInfo != NULL) {
-        SoftBusFree(appInfo);
-    }
+    SoftBusFree(appInfo);
     if (object != NULL) {
         LnnReleaseLanesObject(object);
     }

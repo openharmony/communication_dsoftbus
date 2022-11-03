@@ -87,7 +87,7 @@ int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJs
         !AddNumberToJsonObject(obj, "ERR_CODE", errcode) ||
         !AddStringToJsonObject(obj, "ERR_DESC", errMsg)) {
         cJSON_Delete(obj);
-        return SOFTBUS_PARSE_JSON_ERR;        
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     char *data = cJSON_PrintUnformatted(obj);
     if (data == NULL) {

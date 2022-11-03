@@ -65,6 +65,7 @@ void TransLaneMgrDeinit(void)
         LnnReleaseLanesObject(laneItem->lanesObj);
         SoftBusFree(laneItem);
     }
+    g_channelLaneList->cnt = 0;
     (void)pthread_mutex_unlock(&g_channelLaneList->lock);
     DestroySoftBusList(g_channelLaneList);
     g_channelLaneList = NULL;

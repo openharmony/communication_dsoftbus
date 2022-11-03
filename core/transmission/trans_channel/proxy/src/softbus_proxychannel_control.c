@@ -28,10 +28,14 @@
 
 int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, int32_t payLoadLen, int32_t priority)
 {
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     char *buf = NULL;
     int32_t bufLen = 0;
     ProxyMessageHead msgHead = {0};
-
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     if (info->appInfo.appType != APP_TYPE_NORMAL) {
         msgHead.chiper = (msgHead.chiper | ENCRYPTED);
@@ -48,12 +52,15 @@ int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, int32
 
 int32_t TransProxyHandshake(ProxyChannelInfo *info)
 {
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *buf = NULL;
     int32_t bufLen = 0;
     char *payLoad = NULL;
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
-
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.chiper = (msgHead.chiper | ENCRYPTED);
     msgHead.myId = info->myId;
@@ -87,12 +94,15 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
 
 int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
 {
+    if (chan == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *buf = NULL;
     int32_t bufLen = 0;
     char *payLoad = NULL;
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
-
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send handshake ack msg myid %d peerid %d",
         chan->myId, chan->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
@@ -122,12 +132,15 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan)
 
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
 {
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *buf = NULL;
     int32_t bufLen = 0;
     char *payLoad = NULL;
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
-
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_KEEPALIVE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     payLoad = TransProxyPackIdentity(info->identity);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack keepalive fail");
@@ -154,12 +167,15 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
 
 int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
 {
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *buf = NULL;
     int32_t bufLen = 0;
     char *payLoad = NULL;
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
-
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     payLoad = TransProxyPackIdentity(info->identity);
     if (payLoad == NULL) {
@@ -187,12 +203,16 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
 
 int32_t TransProxyResetPeer(ProxyChannelInfo *info)
 {
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     char *buf = NULL;
     int32_t bufLen = 0;
     char *payLoad = NULL;
     int32_t payLoadLen;
     ProxyMessageHead msgHead = {0};
-
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send reset msg myId %d peerid %d", info->myId, info->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     payLoad = TransProxyPackIdentity(info->identity);
