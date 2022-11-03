@@ -51,12 +51,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev001, TestSize.Level1
 */
 HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev002, TestSize.Level1)
 {
-    P2pLinkDisconnectInfo info = {
-        .authId = 11,
-        .peerMac = "abc",
-        .pid = 11,
-    };
-    P2pLinkLoopDisconnectDev(P2PLOOP_P2PAUTHCHAN_OK, &info);
+    auto *info = static_cast<P2pLinkDisconnectInfo *>(SoftBusMalloc(sizeof(P2pLinkDisconnectInfo)));
+    info->pid = 11;
+    info->authId = 11;
+    (void)strcpy_s(info->peerMac, sizeof(info->peerMac), "abc");
+
+    P2pLinkLoopDisconnectDev(P2PLOOP_P2PAUTHCHAN_OK, info);
     EXPECT_EQ(true, true);
 }
 
