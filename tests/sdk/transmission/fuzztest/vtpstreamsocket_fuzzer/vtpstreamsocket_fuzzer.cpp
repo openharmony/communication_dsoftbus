@@ -23,16 +23,18 @@
 #include "stream_common_data.h"
 
 namespace OHOS {
+    Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
     void VtpCreateClientTest(const uint8_t* data, size_t size)
     {
         if ((data == nullptr) || (size < sizeof(int))) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
 
         int streamType = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
+
         vtpStreamSocket.CreateClient(ipPort, streamType, sessionKey);
         vtpStreamSocket.CreateClient(ipPort, ipPort, streamType, sessionKey);
     }
@@ -42,10 +44,11 @@ namespace OHOS {
         if ((data == nullptr) || (size < sizeof(int))) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         int streamType = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
+
         vtpStreamSocket.CreateServer(ipPort, streamType, sessionKey);
     }
 
@@ -54,7 +57,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         vtpStreamSocket.DestroyStreamSocket();
     }
 
@@ -63,20 +66,20 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         Communication::SoftBus::IpAndPort ipPort;
         vtpStreamSocket.Connect(ipPort);
     }
 
     void VtpSetOptionTest(const uint8_t* data, size_t size)
     {
-
         if ((data == nullptr) || (size < sizeof(int))) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         int type = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::StreamAttr tmp;
+
         vtpStreamSocket.SetOption(type, tmp);
     }
 
@@ -85,8 +88,9 @@ namespace OHOS {
         if ((data == nullptr) || (size < sizeof(int))) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         int type = *(reinterpret_cast<const int*>(data));
+
         vtpStreamSocket.GetOption(type);
     }
 
@@ -95,8 +99,9 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         std::shared_ptr<Communication::SoftBus::IStreamSocketListener> receiver = nullptr;
+
         vtpStreamSocket.SetStreamListener(receiver);
     }
 
@@ -105,7 +110,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         vtpStreamSocket.GetEncryptOverhead();
     }
 
@@ -114,7 +119,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         vtpStreamSocket.Encrypt(nullptr, size, nullptr, size);
     }
 
@@ -123,7 +128,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+
         vtpStreamSocket.Decrypt(nullptr, size, nullptr, size);
     }
 }
