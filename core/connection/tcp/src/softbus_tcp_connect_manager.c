@@ -55,7 +55,7 @@ static void DelAllConnInfo(void);
 static int32_t TcpOnConnectEvent(int32_t events, int32_t cfd, const char *ip);
 static int32_t TcpOnDataEvent(int32_t events, int32_t fd);
 
-int32_t TcpGetConnNum(void)
+uint32_t TcpGetConnNum(void)
 {
     if (g_tcpConnInfoList == NULL) {
         return 0;
@@ -329,7 +329,7 @@ int32_t TcpDisconnectDevice(uint32_t connectionId)
 
 int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
 {
-    if (g_tcpConnInfoList == NULL) {
+    if (g_tcpConnInfoList == NULL || option == NULL) {
         return SOFTBUS_ERR;
     }
     if (pthread_mutex_lock(&g_tcpConnInfoList->lock) != 0) {
@@ -480,17 +480,17 @@ static int32_t InitProperty(void)
         (unsigned char*)&g_tcpMaxConnNum, sizeof(g_tcpMaxConnNum)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp MaxConnNum fail");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp MaxConnNum is %u", g_tcpMaxConnNum);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp MaxConnNum is %d", g_tcpMaxConnNum);
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH,
         (unsigned char*)&g_tcpMaxLen, sizeof(g_tcpMaxLen)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp MaxLen fail");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp MaxLen is %u", g_tcpMaxLen);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp MaxLen is %d", g_tcpMaxLen);
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_TIME_OUT,
         (unsigned char*)&g_tcpTimeOut, sizeof(g_tcpTimeOut)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get tcp TimeOut fail");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp TimeOut is %u", g_tcpTimeOut);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "tcp TimeOut is %d", g_tcpTimeOut);
     if (g_tcpMaxConnNum == INVALID_DATA || g_tcpTimeOut == INVALID_DATA ||
         g_tcpMaxLen == INVALID_DATA) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");

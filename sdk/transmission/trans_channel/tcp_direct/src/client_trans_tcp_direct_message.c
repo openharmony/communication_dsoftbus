@@ -150,6 +150,10 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
 
 int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
 {
+    if (data == NULL || len == 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client]%s cId[%d] param invalid.", __func__, channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
@@ -167,6 +171,10 @@ int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len)
 
 int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len)
 {
+    if (data == NULL || len == 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client]%s cId[%d] param invalid.", __func__, channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByIdWithIncSeq(channelId, &channel) == NULL) {
@@ -377,6 +385,7 @@ static int32_t TransResizeDataBuffer(ClientDataBuf *oldBuf, uint32_t pkgLen)
         return SOFTBUS_MEM_ERR;
     }
     SoftBusFree(oldBuf->data);
+    oLdBuf->data = NULL;
     oldBuf->data = newBuf;
     oldBuf->size = pkgLen;
     oldBuf->w = newBuf + bufLen;

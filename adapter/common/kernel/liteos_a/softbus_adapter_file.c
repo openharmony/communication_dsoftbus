@@ -72,7 +72,7 @@ int SoftBusWriteFile(const char *fileName, const char *writeBuf, int len)
         return SOFTBUS_FILE_ERR;
     }
     int ret = write(fd, writeBuf, len);
-    if (ret != len) {
+    if (len > INT_MAX || ret != len) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteDeviceId write fail");
         close(fd);
         return SOFTBUS_FILE_ERR;
