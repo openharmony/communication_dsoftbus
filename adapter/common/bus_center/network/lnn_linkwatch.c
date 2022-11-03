@@ -106,8 +106,9 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
     while (true) {
         status = SoftBusSocketRecv(fd, answer, maxlen, 0);
         if (status < 0) {
-            if (status == SOFTBUS_ADAPTER_SOCKET_EINTR || status == SOFTBUS_ADAPTER_SOCKET_EAGAIN)
+            if (status == SOFTBUS_ADAPTER_SOCKET_EINTR || status == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
                 continue;
+            }
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink receive error (%d)", status);
             SoftBusSocketClose(fd);
             return SOFTBUS_ERR;
@@ -142,6 +143,9 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
 
 bool LnnIsLinkReady(const char *iface)
 {
+    if (iface == NULL) {
+        return false;
+    }
     struct ifinfomsg *info = NULL;
     struct {
         struct nlmsghdr hdr;

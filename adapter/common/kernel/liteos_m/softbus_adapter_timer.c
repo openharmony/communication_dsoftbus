@@ -22,11 +22,25 @@
 
 #define MS_PER_SECOND 1000
 
-void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
+static TimerFunc g_timerfunc = NULL;
+
+static void HandleTimeoutAdapterFun(void)
+{
+    if (g_timerfunc != NULL) {
+        g_timerfunc();
+    }
+}
+
+void SetTimerFunc(TimerFunc func)
+{
+    g_timerfunc = func;
+}
+
+void *SoftBusCreateTimer(void **timerId, unsigned int type)
 {
     (void)timerId;
 
-    void *id = osTimerNew((osTimerFunc_t)timerFunc, type, NULL, NULL);
+    void *id = osTimerNew((osTimerFunc_t)HandleTimeoutAdapterFun, (osTimerType_t)type, NULL, NULL);
     if (id != NULL) {
         HILOG_INFO(SOFTBUS_HILOG_ID, "create timer success");
         return id;
@@ -37,6 +51,10 @@ void *SoftBusCreateTimer(void **timerId, void *timerFunc, unsigned int type)
 
 int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
+    if (timerId == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
+        return SOFTBUS_ERR;
+    }
     if (osTimerStart(timerId, ms * osKernelGetTickFreq() / MS_PER_SECOND) != osOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "start timer failed");
         (void)osTimerDelete(timerId);
@@ -48,6 +66,10 @@ int SoftBusStartTimer(void *timerId, unsigned int ms)
 
 int SoftBusDeleteTimer(void *timerId)
 {
+    if (timerId == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
+        return SOFTBUS_ERR;
+    }
     if (osTimerDelete(timerId) != osOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "delete timer failed");
         return SOFTBUS_ERR;

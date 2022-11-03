@@ -25,8 +25,14 @@ extern "C" {
 #define WIFI_MAC_LEN 6
 #define WIFI_MAX_KEY_LEN 65
 #define WIFI_MAX_CONFIG_SIZE 10
-#define WIFI_SCAN_HOTSPOT_LIMIT 64
+#define WIFI_MAX_SCAN_HOTSPOT_LIMIT 128
 #define MAX_CALLBACK_NUM 5
+
+typedef enum {
+    BAND_UNKNOWN,
+    BAND_24G,
+    BAND_5G,
+} SoftBusBand;
 
 typedef struct {
     char ssid[WIFI_MAX_SSID_LEN];
@@ -36,18 +42,40 @@ typedef struct {
     int32_t netId;
     int32_t isHiddenSsid;
 } SoftBusWifiDevConf;
+
 typedef struct {
     /* call back for scan result */
     void (*onSoftBusWifiScanResult)(int state, int size);
 } ISoftBusScanResult;
+
 typedef struct {
     char ssid[WIFI_MAX_SSID_LEN];
     unsigned char bssid[WIFI_MAC_LEN];
-    int securityType;
+    int32_t securityType;
+    int32_t rssi;
+    int32_t band;
+    int32_t frequency;
+    int32_t channelWidth;
+    int32_t centerFrequency0;
+    int32_t centerFrequency1;
+    int64_t timestamp;
+} SoftBusWifiScanInfo;
+
+typedef enum {
+    SOFTBUS_API_WIFI_DISCONNECTED,
+    SOFTBUS_API_WIFI_CONNECTED,
+} SoftBusWifiConnState;
+
+typedef struct {
+    char ssid[WIFI_MAX_SSID_LEN];
+    unsigned char bssid[WIFI_MAC_LEN];
     int rssi;
     int band;
     int frequency;
-} SoftBusWifiScanInfo;
+    SoftBusWifiConnState connState;
+    unsigned short disconnectedReason;
+    unsigned int ipAddress;
+} SoftBusWifiLinkedInfo;
 
 int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num);
 int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig);
@@ -55,8 +83,11 @@ int32_t SoftBusDisconnectDevice(void);
 int32_t SoftBusStartWifiScan(void);
 int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb);
 /* parameter *result is released by the caller. */
-int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size);
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size);
 int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb);
+int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num);
+SoftBusBand SoftBusGetLinkBand(void);
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info);
 
 #ifdef __cplusplus
 }

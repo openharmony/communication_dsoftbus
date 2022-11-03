@@ -9,6 +9,9 @@
     "author": {},
     "repository": "",
     "license": "Apache License 2.0",
+    "segment": {
+      "destPath": "foundation/communication/dsoftbus"
+    },
     "component": {
       "name": "dsoftbus",
       "subsystem": "communication",
@@ -16,6 +19,9 @@
         "mini",
         "small",
         "standard"
+      ],
+      "hisysevent_config": [
+        "//foundation/communication/dsoftbus/hisysevent.yaml"
       ],
       "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
       "features": [
@@ -29,32 +35,44 @@
         "dsoftbus_get_devicename",
         "dsoftbus_feature_product_config_path",
         "dsoftbus_feature_ifname_prefix",
-        "dsoftbus_feature_lnn_wifiservice_dependence"
+        "dsoftbus_feature_lnn_wifiservice_dependence",
+        "dsoftbus_standard_feature_dfinder_support_multi_nif",
+        "dsoftbus_feature_protocol_newip"
       ],
       "rom": "967KB",
       "ram": "28MB",
       "deps": {
         "components": [
-          "libhilog",
-          "libipc_single",
-          "libsystem_ability_fwk",
-          "libsyspara",
-          "samgr_proxy",
-          "utils_base"
+          "ability_base",
+          "ability_runtime",
+          "bluetooth",
+          "drivers_interface_wlan",
+          "hiviewdfx_hilog_native",
+          "ipc",
+          "os_account",
+          "relational_store",
+          "c_utils",
+          "wifi"
         ],
         "third_party": [
+          "bounds_checking_function",
+          "cJSON",
           "libcoap",
-          "libmbedtls",
-          "bounds_checking_function"
+          "thirdparty_mbedtls"
         ]
       },
       "build": {
-        "sub_component": [
-          "//foundation/communication/dsoftbus/core:softbus_server",
-          "//foundation/communication/dsoftbus/sdk:softbus_client",
-          "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
-          "//foundation/communication/dsoftbus/tools:tool"
-        ],
+        "group_type":{
+          "base_group":[],
+          "fwk_group":[
+            "//foundation/communication/dsoftbus/sdk:softbus_client"
+          ],
+          "service_group":[
+            "//foundation/communication/dsoftbus/core:softbus_server",
+            "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
+            "//foundation/communication/dsoftbus/tools:tool"
+          ]
+        },
         "inner_kits": [
           {
             "name": "//foundation/communication/dsoftbus/sdk:softbus_client",
@@ -70,33 +88,89 @@
           }
         ],
         "test": [
+          "//foundation/communication/dsoftbus/tests/adapter/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/adapter/unittest:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
           "//foundation/communication/dsoftbus/tests/core/bus_center/lnn:unittest",
+          "//foundation/communication/dsoftbus/tests/core/common/utils/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/common/utils:unittest",
-          "//foundation/communication/dsoftbus/tests/core/connection:connectionTest",
-          "//foundation/communication/dsoftbus/tests/core/discovery/manager:unittest",
+          "//foundation/communication/dsoftbus/tests/core/common/dfx/hidumper_adapter/fuzztest:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/common/dfx/hisysevent_adapter/fuzztest:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/common/dfx/hisysevent_adapter/unittest:unittest",
+          "//foundation/communication/dsoftbus/tests/core/common/message_handler:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/common/json_utils:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/connection:unittest",
+          "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/publishservice_fuzzer:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/startdiscovery_fuzzer:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/stopdiscovery_fuzzer:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest/unpublishservice_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/udp_negotiation:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/auth_channel:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/proxy_channel:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/discovery/unittest:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/integration_test:integration_test",
+          "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getlocalnodedeviceinfo_fuzzer:GetLocalNodeDeviceInfoFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/ispassseqcheck_fuzzer:IsPassSeqCheckFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/publishlnn_fuzzer:PublishLNNFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/refreshlnn_fuzzer:RefreshLNNFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/regnodedevicestatecb_fuzzer:RegNodeDeviceStateCbFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/joinlnn_fuzzer:JoinLNNFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/leavelnn_fuzzer:LeaveLNNFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/shiftlnngear_fuzzer:ShiftLnnGearFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/activemetanode_fuzzer:ActiveMetaNodeFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getallnodedeviceinfo_fuzzer:GetAllNodeDeviceInfoFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/deactivemetanode_fuzzer:DeactiveMetaNodeFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getallmetanodeinfo_fuzzer:GetAllMetaNodeInfoFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getnodekeyinfo_fuzzer:GetNodeKeyInfoFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/softbusclientmanager_fuzzer:SoftBusClientMagFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/starttimesync_fuzzer:StartTimeSyncFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/stoppublishlnn_fuzzer:StopPublishLNNFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/stoprefreshlnn_fuzzer:StopRefreshLNNFuzzTest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/stoptimesync_fuzzer:StopTimeSyncFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/createsessionserver_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/openauthsession_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/removesessionserver_fuzzer:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sendbytes_fuzzer:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/closesession_fuzzer:fuzztest"
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/softbussendmessage_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/setfilereceivelistener_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/setfilesendlistener_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/getmysessionname_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/getpeerdeviceid_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/getpeersessionname_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/getsessionside_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/opensession_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/qosreport_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/rawstreamdata_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sendfile_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sendstream_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/streamadaptor_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/streamcommondata_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/streamdepacketizer_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/streammsgmanager_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sessionimpl_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sessionserviceimpl_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/closesession_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransstream_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranssessionservice_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransudpstreaminterface_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clientqosmanager_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranspending_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransproxyfilecommon_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransproxyfilemanager_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransproxymanager_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranschannelcallback_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransudpmanager_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranstcpdirectlistener_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransfile_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttranssessionmanager_fuzzer:fuzztest",
+          "//foundation/communication/dsoftbus/tests/sdk/bus_center/benchmarktest:BusCenterTest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/benchmarktest:TransTest",
+          "//foundation/communication/dsoftbus/tests/sdk/discovery/benchmarktest:DiscoveryTest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel:unittest"
         ]
       }
     }

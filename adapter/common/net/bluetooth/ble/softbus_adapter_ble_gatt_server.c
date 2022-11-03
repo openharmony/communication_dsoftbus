@@ -34,9 +34,9 @@ static const char SOFTBUS_APP_UUID[BT_UUID_LEN] = {
 };
 
 SoftBusGattsCallback *g_gattsCallback = NULL;
-static BtGattServerCallbacks g_bleGattsHalCallback = { 0 };
-static int g_halServerId = -1;
-static int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
+static BtGattServerCallbacks g_bleGattsHalCallback = {0};
+static volatile int g_halServerId = -1;
+static volatile int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 
 int CheckGattsStatus(void)
 {
@@ -157,7 +157,10 @@ int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
         return SOFTBUS_ERR;
     }
     BdAddr addr;
-    (void)memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN);
+    if (memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattsDisconnect memcpy fail");
+        return SOFTBUS_ERR;
+    }
     if (BleGattsDisconnect(g_halServerId, addr, connId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -410,8 +413,9 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
         return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
     }
     if (g_gattsCallback != NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegisterGattsCallbacks fail:callback exist");
-        return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "SoftBusRegisterGattsCallbacks register again");
+    } else {
+        g_gattsCallback = callback;
     }
     int ret = GattsRegisterHalCallback();
     if (ret != SOFTBUS_OK) {
@@ -423,13 +427,14 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
         BtUuid uuid;
         uuid.uuid = (char *)SOFTBUS_APP_UUID;
         uuid.uuidLen = sizeof(SOFTBUS_APP_UUID);
+        g_halRegFlag = 0;
         ret = BleGattsRegister(uuid);
         if (ret != SOFTBUS_OK) {
+            g_halRegFlag = -1;
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsRegister failed%d", ret);
             return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
         }
     }
-    g_gattsCallback = callback;
     return SOFTBUS_OK;
 }
 
@@ -447,6 +452,6 @@ void SoftBusUnRegisterGattsCallbacks(void)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsUnRegister error.");
         return;
     }
-    g_gattsCallback = NULL;
+    g_halServerId = -1;
     g_halRegFlag = -1;
 }

@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "wifi_device.h"
+#include "wifi_hid2d.h"
 
 static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceWifiConf, SoftBusWifiDevConf *wifiConf)
 {
@@ -212,25 +213,70 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, unsigned int *size)
+static int32_t ConvertSoftBusWifiScanInfoFromWifi(WifiScanInfo *info, SoftBusWifiScanInfo *result, uint32_t *size)
 {
-    int32_t ret;
+    if (info == NULL || result == NULL || size == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    for (uint32_t i = 0; i < (*size); i++) {
+        if (strcpy_s(result->ssid, WIFI_MAX_SSID_LEN, info->ssid) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy ssid fail");
+            return SOFTBUS_ERR;
+        }
+        if (memcpy_s(result->bssid, WIFI_MAC_LEN, info->bssid, sizeof(info->bssid)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy bssid fail");
+            return SOFTBUS_ERR;
+        }
+        result->securityType =  (int32_t)(info->securityType);
+        result->rssi = (int32_t)(info->rssi);
+        result->band = (int32_t)(info->band);
+        result->frequency = (int32_t)(info->frequency);
+        result->channelWidth = (int32_t)(info->channelWidth);
+        result->centerFrequency0 =(int32_t)(info->centerFrequency0);
+        result->centerFrequency1 = (int32_t)(info->centerFrequency1);
+        result->timestamp = info->timestamp;
+        ++result;
+        ++info;
+    }
+    return SOFTBUS_OK;
+}
 
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
+{
     if (size == NULL || result == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para size or result is NULL.");
         return SOFTBUS_ERR;
     }
-    *result = (SoftBusWifiScanInfo *)SoftBusMalloc(sizeof(SoftBusWifiScanInfo) * WIFI_SCAN_HOTSPOT_LIMIT);
-    if (*result == NULL) {
+    WifiScanInfo *info = (WifiScanInfo *)SoftBusMalloc(sizeof(WifiScanInfo) * WIFI_MAX_SCAN_HOTSPOT_LIMIT);
+    if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi scan information failed.");
         return SOFTBUS_ERR;
     }
-    *size = WIFI_SCAN_HOTSPOT_LIMIT;
-    ret = GetScanInfoList((WifiScanInfo *)*result, size);
-    if (ret != WIFI_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softBus get wifi scan list failed.");
+    (void)memset_s(info, sizeof(WifiScanInfo)*WIFI_MAX_SCAN_HOTSPOT_LIMIT, 0,
+        sizeof(WifiScanInfo)*WIFI_MAX_SCAN_HOTSPOT_LIMIT);
+    *size = WIFI_MAX_SCAN_HOTSPOT_LIMIT;
+    int32_t ret = GetScanInfoList(info, (unsigned int *)size);
+    if (ret != WIFI_SUCCESS || size == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus get wifi scan list failed.");
+        SoftBusFree(info);
         return SOFTBUS_ERR;
     }
+    *result = (SoftBusWifiScanInfo *)SoftBusMalloc(sizeof(SoftBusWifiScanInfo) * (*size));
+    if (*result == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc softbus wifi scan information failed.");
+        SoftBusFree(info);
+        return SOFTBUS_ERR;
+    }
+    (void)memset_s(*result, sizeof(SoftBusWifiScanInfo)* (*size), 0, sizeof(SoftBusWifiScanInfo)* (*size));
+    if (ConvertSoftBusWifiScanInfoFromWifi(info, *result, size) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConvertSoftBusWifiScaninfoFromWifi failed.");
+        SoftBusFree(*result);
+        *result = NULL;
+        SoftBusFree(info);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(info);
     return SOFTBUS_OK;
 }
 
@@ -266,3 +312,50 @@ int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
+{
+    if (channelList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para channelList is NULL.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = Hid2dGetChannelListFor5G(channelList, num);
+    if (ret != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get channel 5G list failed.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    WifiLinkedInfo result;
+    GetLinkedInfo(&result);
+    if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand failed.");
+        return BAND_UNKNOWN;
+    }
+    if (result.band == BAND_24G) {
+        return BAND_24G;
+    } else if (result.band == BAND_5G) {
+        return BAND_5G;
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand success.");
+        return BAND_UNKNOWN;
+    }
+}
+
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
+{
+    WifiLinkedInfo result;
+    if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkedInfo failed.");
+        return SOFTBUS_ERR;
+    }
+    info->frequency = result.frequency;
+    info->band = result.band;
+    info->connState = SOFTBUS_API_WIFI_DISCONNECTED;
+    if (result.connState == WIFI_CONNECTED) {
+        info->connState = SOFTBUS_API_WIFI_CONNECTED;
+    }
+    return SOFTBUS_OK;
+}

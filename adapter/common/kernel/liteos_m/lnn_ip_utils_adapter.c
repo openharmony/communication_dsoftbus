@@ -30,7 +30,6 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
     char *netMaskStr = NULL;
     ip4_addr_t *ipAddr = NULL;
     ip4_addr_t *netMask = NULL;
-    ip4_addr_t *gw = NULL;
 
     netif = netif_find(ifName);
     if (netif == NULL) {
@@ -38,11 +37,10 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
         return SOFTBUS_ERR;
     }
 #ifdef HISPARK_PEGASUS_USE_NETIF_GET_ADDR
-    netifapi_netif_get_addr(netif, ipAddr, netMask, gw);
+    netifapi_netif_get_addr(netif, ipAddr, netMask, NULL);
 #else
-    ipAddr = netif_ip4_addr(netif);
-    netMask = netif_ip4_netmask(netif);
-    gw = netif_ip4_gw(netif);
+    ipAddr = (ip4_addr_t *)netif_ip4_addr(netif);
+    netMask = (ip4_addr_t *)netif_ip4_netmask(netif);
 #endif
     ipStr = ip4addr_ntoa(ipAddr);
     if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {

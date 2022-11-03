@@ -26,7 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define STATE_LISTENER_MAX_NUM 4
+#define STATE_LISTENER_MAX_NUM 6
 #define BR_STATE_CB_TRANSPORT 1
 
 typedef struct {
@@ -50,6 +50,32 @@ static int ConvertBtState(const int transport, int state)
     }
 }
 
+static int ConvertAclState(GapAclState state)
+{
+    switch (state) {
+        case OHOS_GAP_ACL_STATE_CONNECTED:
+            return SOFTBUS_ACL_STATE_CONNECTED;
+        case OHOS_GAP_ACL_STATE_DISCONNECTED:
+            return SOFTBUS_ACL_STATE_DISCONNECTED;
+        case OHOS_GAP_ACL_STATE_LE_CONNECTED:
+            return SOFTBUS_ACL_STATE_LE_CONNECTED;
+        case OHOS_GAP_ACL_STATE_LE_DISCONNECTED:
+            return SOFTBUS_ACL_STATE_LE_DISCONNECTED;
+        default:
+            break;
+    }
+    return -1;
+}
+
+static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
+{
+    SoftBusBtAddr btAddr = {0};
+    if (memcpy_s(btAddr.addr, sizeof(btAddr.addr), bdAddr->addr, sizeof(bdAddr->addr)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy bdAddr fail");
+    }
+    return btAddr;
+}
+
 static StateListener g_stateListener[STATE_LISTENER_MAX_NUM];
 static bool g_isRegCb = false;
 
@@ -64,6 +90,28 @@ static void WrapperStateChangeCallback(const int transport, const int status)
             g_stateListener[listenerId].listener != NULL &&
             g_stateListener[listenerId].listener->OnBtStateChanged != NULL) {
             g_stateListener[listenerId].listener->OnBtStateChanged(listenerId, st);
+        }
+    }
+}
+
+static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state, unsigned int reason)
+{
+    if (bdAddr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperAclStateChangedCallback addr is null");
+        return;
+    }
+
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u\n",
+        bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], state, reason);
+    int listenerId;
+    int aclState = ConvertAclState(state);
+    SoftBusBtAddr btAddr = ConvertBtAddr(bdAddr);
+    for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
+        if (g_stateListener[listenerId].isUsed &&
+            g_stateListener[listenerId].listener != NULL &&
+            g_stateListener[listenerId].listener->OnBtAclStateChanged != NULL) {
+            g_stateListener[listenerId].listener->OnBtAclStateChanged(listenerId, &btAddr, aclState);
         }
     }
 }
@@ -101,6 +149,7 @@ static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, i
 
 static BtGapCallBacks g_softbusGapCb = {
     .stateChangeCallback = WrapperStateChangeCallback,
+    .aclStateChangedCallbak = WrapperAclStateChangedCallback,
     .pairRequestedCallback = WrapperPairRequestedCallback,
     .pairConfiremedCallback = WrapperPairConfiremedCallback
 };

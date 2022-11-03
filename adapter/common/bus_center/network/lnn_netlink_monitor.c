@@ -34,6 +34,7 @@
 #include "lnn_network_manager.h"
 #include "securec.h"
 #include "softbus_adapter_errcode.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
@@ -44,7 +45,7 @@
     (((len) >= (int32_t)(sizeof(struct nlmsghdr))) && (((nlh)->nlmsg_len) >= sizeof(struct nlmsghdr)) && \
         ((int32_t)((nlh)->nlmsg_len) <= (len)))
 
-#define DEFAULT_NETLINK_RECVBUF (4 * 1024)
+#define DEFAULT_NETLINK_RECVBUF (8 * 1024)
 
 static int32_t CreateNetlinkSocket(void)
 {
@@ -64,7 +65,10 @@ static int32_t CreateNetlinkSocket(void)
         SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
-    (void)memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr));
+    if (memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sockaddr_nl failed");
+        return SOFTBUS_ERR;
+    }
     nladdr.nl_family = SOFTBUS_AF_NETLINK;
     // Kernel will assign a unique nl_pid if set to zero.
     nladdr.nl_pid = 0;
@@ -89,6 +93,10 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
 
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
+    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct ifaddrmsg))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Wrong len");
+        return;
+    }
     struct ifaddrmsg *ifa = (struct ifaddrmsg *)NLMSG_DATA(nlh);
     LnnNetIfType type = LNN_NETIF_TYPE_ETH;
     char ifnameBuffer[NET_IF_NAME_LEN];
@@ -137,7 +145,6 @@ static void *NetlinkMonitorThread(void *para)
 {
     int32_t sockFd;
     int32_t len;
-    uint8_t buffer[DEFAULT_NETLINK_RECVBUF];
     struct nlmsghdr *nlh = NULL;
 
     (void)para;
@@ -147,7 +154,13 @@ static void *NetlinkMonitorThread(void *para)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create netlink socket failed");
         return NULL;
     }
+    uint8_t *buffer = (uint8_t *)SoftBusCalloc(DEFAULT_NETLINK_RECVBUF * sizeof(uint8_t));
+    if (buffer == NULL) {
+        SoftBusSocketClose(sockFd);
+        return NULL;
+    }
     while (true) {
+        (void)memset_s(buffer, DEFAULT_NETLINK_RECVBUF, 0, DEFAULT_NETLINK_RECVBUF);
         len = SoftBusSocketRecv(sockFd, buffer, DEFAULT_NETLINK_RECVBUF, 0);
         if (len < 0 && len == SOFTBUS_ADAPTER_SOCKET_EINTR) {
             continue;
@@ -177,8 +190,9 @@ static void *NetlinkMonitorThread(void *para)
             nlh = NLMSG_NEXT(nlh, len);
         }
     }
-    close(sockFd);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink monitor thread exit");
+    SoftBusSocketClose(sockFd);
+    SoftBusFree(buffer);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread exit");
     return NULL;
 }
 

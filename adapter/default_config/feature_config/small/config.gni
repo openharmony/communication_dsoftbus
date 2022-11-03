@@ -20,6 +20,8 @@ declare_args() {
   dsoftbus_feature_conn_ble = false
   dsoftbus_feature_conn_p2p = false
 
+  dsoftbus_feature_protocol_newip = false
+
   dsoftbus_feature_trans_udp = true
   dsoftbus_feature_trans_udp_stream = false
   dsoftbus_feature_trans_udp_file = true
@@ -38,4 +40,5 @@ declare_args() {
   dsoftbus_feature_ifname_prefix = false
 
   dsoftbus_feature_encrypt = 0
+  dsoftbus_standard_feature_dfinder_support_multi_nif = true
 }

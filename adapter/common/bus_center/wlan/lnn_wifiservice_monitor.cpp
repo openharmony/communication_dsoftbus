@@ -25,14 +25,14 @@
 #include "lnn_async_callback_utils.h"
 #include "want.h"
 #include "wifi_msg.h"
-
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "wifi_event.h"
+#include "wifi_ap_msg.h"
 
 static const int32_t DELAY_LEN = 1000;
-static const int32_t RETRY_MAX = 10;
-static LnnMonitorEventHandler g_eventHandler;
+static const int32_t RETRY_MAX = 20;
 
 namespace OHOS {
 namespace EventFwk {
@@ -52,7 +52,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
-    SoftBusWifiState state = SOFTBUS_UNKNOWN;
+    SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify wifiservice event %s, code(%d)", action.c_str(), code);
 
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
@@ -73,12 +73,28 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
             case int(OHOS::Wifi::WifiState::DISABLED):
                 state = SOFTBUS_WIFI_DISABLED;
                 break;
+            case int(OHOS::Wifi::WifiState::ENABLED):
+                state = SOFTBUS_WIFI_ENABLED;
+                break;
             default: {
                 break;
             }
         }
     }
-    if (state != SOFTBUS_UNKNOWN) {
+    if (action == CommonEventSupport::COMMON_EVENT_WIFI_HOTSPOT_STATE) {
+        switch (code) {
+            case int(OHOS::Wifi::ApState::AP_STATE_STARTED):
+                state = SOFTBUS_AP_ENABLED;
+                break;
+            case int(OHOS::Wifi::ApState::AP_STATE_CLOSED):
+                state = SOFTBUS_AP_DISABLED;
+                break;
+            default: {
+                break;
+            }
+        }
+    }
+    if (state != SOFTBUS_WIFI_UNKNOWN) {
         LnnNotifyWlanStateChangeEvent(state);
     }
 }
@@ -87,7 +103,20 @@ class SubscribeEvent {
 public:
     int32_t SubscribeWifiConnStateEvent();
     int32_t SubscribeWifiPowerStateEvent();
+    int32_t SubscribeAPConnStateEvent();
 };
+
+int32_t SubscribeEvent::SubscribeAPConnStateEvent()
+{
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_WIFI_HOTSPOT_STATE);
+    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
+    if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 int32_t SubscribeEvent::SubscribeWifiConnStateEvent()
 {
@@ -129,8 +158,9 @@ static void LnnSubscribeWifiService(void *para)
         return;
     }
     if (subscriberPtr->SubscribeWifiConnStateEvent() == SOFTBUS_OK &&
-        subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice conn and power state success");
+        subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK &&
+        subscriberPtr->SubscribeAPConnStateEvent() == SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "subscribe wifiservice conn and power state success");
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice event fail");
         retry++;
