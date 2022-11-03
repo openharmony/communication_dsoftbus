@@ -527,11 +527,11 @@ HWTEST_F(BusCenterSdkTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test001, TestSize.Lev
 HWTEST_F(BusCenterSdkTest, JOIN_META_NODE_INNER_Test001, TestSize.Level1)
 {
     char pkgName[] = "test";
-    CustomData dataKey;
-    (void)memset_s(&dataKey, sizeof(CustomData), 0, sizeof(CustomData));
+    CustomData customData;
+    (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
     OnJoinMetaNodeResult cb = nullptr;
     ConnectionAddr *target = nullptr;
-    int32_t ret = JoinMetaNodeInner(pkgName, target, &dataKey, cb);
+    int32_t ret = JoinMetaNodeInner(pkgName, target, &customData, cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -636,15 +636,15 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_NODE_Test001, TestSize.Level1)
     char *pkgName = nullptr;
     void *addr = nullptr;
     uint32_t addrTypeLen = 0;
-    CustomData dataKey;
+    CustomData customData;
     ConnectionAddr connAddr;
     (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    (void)memset_s(&dataKey, sizeof(CustomData), 0, sizeof(CustomData));
+    (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
     char pkgNameValue[] = "test";
-    int32_t ret = ServerIpcJoinMetaNode(pkgName, addr, &dataKey, addrTypeLen);
+    int32_t ret = ServerIpcJoinMetaNode(pkgName, addr, &customData, addrTypeLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     addr = (void*)&connAddr;
-    ret = ServerIpcJoinMetaNode(pkgNameValue, addr, &dataKey, addrTypeLen);
+    ret = ServerIpcJoinMetaNode(pkgNameValue, addr, &customData, addrTypeLen);
     EXPECT_TRUE(ret == SOFTBUS_IPC_ERR);
 }
 
@@ -658,11 +658,11 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_Test002, TestSize.Level1)
 {
     char pkgName[] = "111";
     void *addr = nullptr; 
-    CustomData *dataKey = nullptr;
+    CustomData *customData = nullptr;
     unsigned int addrTypeLen = 2;
-    ServerIpcJoinMetaNode(pkgName, addr, dataKey, addrTypeLen);
+    ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
     BusCenterServerProxyInit();
-    ServerIpcJoinMetaNode(pkgName, addr, dataKey, addrTypeLen);
+    ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
 }
 
 /*

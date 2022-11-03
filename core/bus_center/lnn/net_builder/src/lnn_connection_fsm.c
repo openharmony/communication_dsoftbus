@@ -359,11 +359,9 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     return rc;
 }
 
-int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *dataKey)
+int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData)
 {
-    (void)metaJoinNode;
-    (void)dataKey;
-    if (metaJoinNode == NULL || dataKey == NULL) {
+    if (metaJoinNode == NULL || customData == NULL) {
         return SOFTBUS_ERR;
     }
     int32_t rc = SOFTBUS_OK;
@@ -378,7 +376,7 @@ int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *dataKey)
             return SOFTBUS_ERR;
         }
         metaJoinNode->requestId = AuthGenRequestId();
-        if (AuthMetaStartVerify(connId, dataKey->data, DATA_SIZE,
+        if (AuthMetaStartVerify(connId, customData->data, DATA_SIZE,
             metaJoinNode->requestId, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
                 rc = SOFTBUS_ERR;
         }

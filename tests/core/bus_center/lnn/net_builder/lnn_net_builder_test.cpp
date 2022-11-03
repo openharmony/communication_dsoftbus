@@ -224,13 +224,16 @@ HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
         .type = CONNECTION_ADDR_WLAN,
         .info.ip.port = PORT
     };
-    CustomData dataKey = {0};
+    CustomData customData = {
+        .type = PROXY_TRANSMISION,
+        .data = {0},
+    };
     int32_t ret;
 
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = MetaNodeServerJoin(&addr, &dataKey);
+    ret = MetaNodeServerJoin(&addr, &customData);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
