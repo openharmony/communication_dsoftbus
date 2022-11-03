@@ -52,5 +52,6 @@ group("fuzztest") {
     "streamcommondata_fuzzer:fuzztest",
     "streamdepacketizer_fuzzer:fuzztest",
     "streammsgmanager_fuzzer:fuzztest",
+    "transserverproxyextern_fuzzer:fuzztest",
   ]
 }
