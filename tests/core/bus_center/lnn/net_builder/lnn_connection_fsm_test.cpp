@@ -229,16 +229,19 @@ HWTEST_F(LnnConnectionFsmTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level0
 HWTEST_F(LnnConnectionFsmTest, ON_JOIN_META_NODE_TEST_001, TestSize.Level1)
 {
     MetaJoinRequestNode metaJoinNode;
-    CustomData dataKey = {0};
+    CustomData customData = {
+        .type = PROXY_TRANSMISION,
+        .data = {0},
+    };
     int32_t ret;
 
     (void)memset_s(&metaJoinNode, sizeof(MetaJoinRequestNode), 0, sizeof(MetaJoinRequestNode));
-    ret = OnJoinMetaNode(nullptr, &dataKey);
+    ret = OnJoinMetaNode(nullptr, &customData);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = OnJoinMetaNode(&metaJoinNode, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     metaJoinNode.addr.type = CONNECTION_ADDR_SESSION;
-    ret = OnJoinMetaNode(&metaJoinNode, &dataKey);
+    ret = OnJoinMetaNode(&metaJoinNode, &customData);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS

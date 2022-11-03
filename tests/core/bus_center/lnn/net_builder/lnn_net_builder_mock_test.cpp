@@ -206,16 +206,16 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_002, TestSize.Level1)
     MetaJoinRequestNode metaJoinNode;
     int32_t ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, nullptr, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    CustomData dataKey;
+    CustomData customData;
     metaJoinNode.addr.type = CONNECTION_ADDR_SESSION;
     NetBuilderDepsInterfaceMock mock;
     EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &dataKey, true);
+    ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &dataKey, false);
+    ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, false);
 }
 } // namespace OHOS

@@ -328,11 +328,11 @@ int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey, unsigned int addrTypeLen)
+int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *customData, unsigned int addrTypeLen)
 {
     (void)pkgName;
     (void)addr;
-    (void)dataKey;
+    (void)customData;
     (void)addrTypeLen;
     return SOFTBUS_OK;
 }

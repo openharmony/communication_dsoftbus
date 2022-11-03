@@ -137,7 +137,7 @@ typedef struct {
 
 typedef struct {
     ConnectionAddr addr;
-    CustomData dataKey;
+    CustomData customData;
 } ConnectionAddrKey;
 
 typedef struct {
@@ -464,10 +464,10 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
 }
 
 static int32_t PostJoinRequestToMetaNode(MetaJoinRequestNode *metaJoinNode, const ConnectionAddr *addr,
-    CustomData *dataKey, bool needReportFailure)
+    CustomData *customData, bool needReportFailure)
 {
     int32_t rc = SOFTBUS_OK;
-    if (OnJoinMetaNode(metaJoinNode, dataKey) != SOFTBUS_OK) {
+    if (OnJoinMetaNode(metaJoinNode, customData) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PostJoin Request To MetaNode failed");
         rc = SOFTBUS_ERR;
         if (needReportFailure) {
@@ -524,7 +524,7 @@ static int32_t TrySendJoinMetaNodeRequest(const ConnectionAddrKey *addrDataKey, 
         return SOFTBUS_INVALID_PARAM;
     }
     const ConnectionAddr *addr = &addrDataKey->addr;
-    CustomData dataKey = addrDataKey->dataKey;
+    CustomData customData = addrDataKey->customData;
     MetaJoinRequestNode *metaJoinNode = NULL;
     int32_t rc;
     metaJoinNode = FindMetaNodeByAddr(addr);
@@ -537,7 +537,7 @@ static int32_t TrySendJoinMetaNodeRequest(const ConnectionAddrKey *addrDataKey, 
             return SOFTBUS_ERR;
         }
     }
-    rc = PostJoinRequestToMetaNode(metaJoinNode, addr, &dataKey, needReportFailure);
+    rc = PostJoinRequestToMetaNode(metaJoinNode, addr, &customData, needReportFailure);
     SoftBusFree((void *)addrDataKey);
     return rc;
 }
@@ -1933,11 +1933,11 @@ int32_t LnnServerJoin(ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
-int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *dataKey)
+int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData)
 {
     ConnectionAddrKey addrDataKey = {
         .addr = *addr,
-        .dataKey = *dataKey,
+        .customData = *customData,
     };
     ConnectionAddrKey *para = NULL;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "MetaNodeServerJoin enter!");
