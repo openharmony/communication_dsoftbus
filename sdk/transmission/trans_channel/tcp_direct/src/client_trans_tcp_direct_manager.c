@@ -134,8 +134,13 @@ void TransTdcCloseChannel(int32_t channelId)
 
 static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
 {
+    if (channel == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client]%s param invalid", __func__);
+        return NULL;
+    }
     TcpDirectChannelInfo *item = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
     if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client]%s param invalid", __func__);
         return NULL;
     }
     item->channelId = channel->channelId;

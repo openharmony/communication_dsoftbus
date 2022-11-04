@@ -538,12 +538,11 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
         goto EXIT_ERR;
     }
     info->appInfo.myData.channelId = GenerateAuthChannelId();
+    pthread_mutex_unlock(&g_authChannelList->lock);
     if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo) != SOFTBUS_OK) {
-        pthread_mutex_unlock(&g_authChannelList->lock);
         goto EXIT_ERR;
     }
     info->isConnOptValid = false;
-    pthread_mutex_unlock(&g_authChannelList->lock);
     return info;
 EXIT_ERR:
     SoftBusFree(info);

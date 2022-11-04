@@ -206,7 +206,7 @@ static int32_t GetNeedUpdateAdvertiser(int32_t adv)
 
 static void BleAdvEnableCallback(int advId, int status)
 {
-    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS) {
+    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS || advID < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BleAdvEnableCallback failed");
         return;
     }
@@ -216,7 +216,7 @@ static void BleAdvEnableCallback(int advId, int status)
 
 static void BleAdvDisableCallback(int advId, int status)
 {
-    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS) {
+    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS || advID < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BleAdvDisableCallback failed");
         return;
     }
@@ -537,6 +537,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     if (advData->scanRspData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc failed");
         SoftBusFree(advData->advData);
+        advData->advData = NULL;
         return SOFTBUS_MALLOC_ERR;
     }
     unsigned short advLength = (boardcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : boardcastData->dataLen;
@@ -860,6 +861,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             }
         }
         if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+            SoftBusFree(info->capabilityData[pos]);
             return SOFTBUS_MEM_ERR;
         }
         info->capDataLen[pos] = custDataLen;
