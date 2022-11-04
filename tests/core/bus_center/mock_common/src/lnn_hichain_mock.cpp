@@ -13,37 +13,37 @@
  * limitations under the License.
  */
 
-#include "auth_hichain_mock.h"
+#include "lnn_hichain_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 void *g_hichainInterface;
-AuthHichainInterfaceMock::AuthHichainInterfaceMock()
+LnnHichainInterfaceMock::LnnHichainInterfaceMock()
 {
     g_hichainInterface = reinterpret_cast<void *>(this);
 }
 
-AuthHichainInterfaceMock::~AuthHichainInterfaceMock()
+LnnHichainInterfaceMock::~LnnHichainInterfaceMock()
 {
     g_hichainInterface = nullptr;
 }
 
-int32_t AuthHichainInterfaceMock::InvokeAuthDevice(int32_t osAccountId, int64_t authReqId, const char *authParams,
+int32_t LnnHichainInterfaceMock::InvokeAuthDevice(int32_t osAccountId, int64_t authReqId, const char *authParams,
     const DeviceAuthCallback *gaCallback)
 {
     return 0;
 }
 
-int32_t AuthHichainInterfaceMock::InvokeDataChangeListener(const char *appId, const DataChangeListener *listener)
+int32_t LnnHichainInterfaceMock::InvokeDataChangeListener(const char *appId, const DataChangeListener *listener)
 {
     return 0;
 }
 
-static AuthHichainInterface *GetHichainInterface()
+static LnnHichainInterface *GetHichainInterface()
 {
-    return reinterpret_cast<AuthHichainInterfaceMock *>(g_hichainInterface);
+    return reinterpret_cast<LnnHichainInterfaceMock *>(g_hichainInterface);
 }
 
 extern "C" {
