@@ -29,7 +29,7 @@ int BusCenterClientInit(void);
 void BusCenterClientDeinit(void);
 
 int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
-int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *dataKey, OnJoinMetaNodeResult cb);
+int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb);
 int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 int32_t LeaveMetaNodeInner(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb);
 int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback);

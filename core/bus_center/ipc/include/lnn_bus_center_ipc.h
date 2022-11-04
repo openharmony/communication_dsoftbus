@@ -27,7 +27,7 @@ extern "C" {
 
 int32_t LnnIpcInit (void);
 int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen);
-int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen);
+int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen);
 int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId);
 int32_t MetaNodeIpcServerLeave(const char *pkgName, const char *networkId);
 int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum);

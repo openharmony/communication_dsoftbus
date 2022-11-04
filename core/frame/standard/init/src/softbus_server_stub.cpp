@@ -568,13 +568,13 @@ int32_t SoftBusServerStub::JoinMetaNodeInner(MessageParcel &data, MessageParcel 
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner read addr failed!");
         return SOFTBUS_IPC_ERR;
     }
-    CustomData *dataKey = NULL;
-    dataKey = (CustomData *)data.ReadRawData(sizeof(CustomData));
-    if (dataKey == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner read dataKey failed!");
+    CustomData *customData = NULL;
+    customData = (CustomData *)data.ReadRawData(sizeof(CustomData));
+    if (customData == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner read customData failed!");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t retReply = JoinMetaNode(clientName, (void *)addr, dataKey, addrTypeLen);
+    int32_t retReply = JoinMetaNode(clientName, (void *)addr, customData, addrTypeLen);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner write reply failed!");
         return SOFTBUS_IPC_ERR;
