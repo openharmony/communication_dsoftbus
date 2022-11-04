@@ -32,7 +32,7 @@
 namespace OHOS {
 void ClientTransChannelCallbackTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
 

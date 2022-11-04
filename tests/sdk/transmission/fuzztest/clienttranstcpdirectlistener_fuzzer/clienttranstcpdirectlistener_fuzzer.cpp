@@ -148,7 +148,7 @@ namespace OHOS {
 
     void ClientTransTdcOnChannelOpenedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
         }
         char tmp[SESSION_NAME_SIZE_MAX] = {0};
@@ -167,7 +167,7 @@ namespace OHOS {
     }
     void ClientTransTdcOnSessionOpenedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
         }
         ChannelInfo channel = {0};
@@ -229,10 +229,10 @@ namespace OHOS {
 
     void ClientTransTdcOnDataReceivedTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        #define PROXY_MAX_MESSAGE_LEN (1 * 1024)
+        if ((data == nullptr) || (size < PROXY_MAX_MESSAGE_LEN)) {
             return;
         }
-        #define PROXY_MAX_MESSAGE_LEN (1 * 1024)
         char tmp[PROXY_MAX_MESSAGE_LEN] = {0};
         if (memcpy_s(tmp, sizeof(tmp) - 1, data, sizeof(tmp) - 1) != EOK) {
             return;
