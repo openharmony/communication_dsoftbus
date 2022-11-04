@@ -21,9 +21,10 @@
 #include "vtp_stream_socket.h"
 #include "stream_common.h"
 #include "stream_common_data.h"
-
+using namespace Communication;
+using namespace SoftBus;
 namespace OHOS {
-    Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
+    VtpStreamSocket vtpStreamSocket;
 
     void VtpCreateClientTest(const uint8_t* data, size_t size)
     {

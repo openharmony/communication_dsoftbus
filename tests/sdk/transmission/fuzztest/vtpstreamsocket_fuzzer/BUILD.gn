@@ -40,7 +40,6 @@ ohos_fuzztest("VtpStreamSocketFuzzTest") {
     "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
     "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/include",
     "//foundation/communication/dsoftbus/core/transmission/common/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]

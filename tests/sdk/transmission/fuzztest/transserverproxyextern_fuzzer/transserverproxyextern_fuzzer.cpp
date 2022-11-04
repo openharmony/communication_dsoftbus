@@ -30,7 +30,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-
 namespace OHOS {
     void TransServerProxyDeInitTest(const uint8_t* data, size_t size)
     {
