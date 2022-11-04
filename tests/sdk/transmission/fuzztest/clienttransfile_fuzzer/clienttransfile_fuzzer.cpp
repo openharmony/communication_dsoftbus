@@ -29,15 +29,15 @@
 
 namespace OHOS {
 
-    static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+    static int OnReceiveFileStarted(int sessionId, const char* files, int fileCnt)
     {
         return 0;
     }
 
-    static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+    static void OnReceiveFileFinished(int sessionId, const char* files, int fileCnt)
     {}
 
-    static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+    static int OnReceiveFileProcess(int sessionId, const char* firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
     {
         return 0;
     }
@@ -47,7 +47,7 @@ namespace OHOS {
         return 0;
     }
 
-    static int OnSendFileFinished(int sessionId, const char *firstFile)
+    static int OnSendFileFinished(int sessionId, const char* firstFile)
     {
         return 0;
     }
@@ -60,11 +60,9 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        
-        ChannelInfo channel = {0};
-        channel.isUdpFile = true;
+        const char* sessionName = reinterpret_cast<const char*>(data);
         int32_t fileport = 0;
-        TransOnFileChannelOpened((char *)data, &channel, &fileport);
+        TransOnFileChannelOpened(sessionName, nullptr, &fileport);
     }
 
     void TransSetFileReceiveListenerTest(const uint8_t* data, size_t size)
@@ -78,8 +76,9 @@ namespace OHOS {
             .OnReceiveFileFinished = OnReceiveFileFinished,
             .OnFileTransError = OnFileTransError,
         };
-        const char *rootDir = "/data/recv/";
-        TransSetFileReceiveListener((char *)data, &fileRecvListener, rootDir);
+        const char* sessionName = reinterpret_cast<const char*>(data);
+        const char* rootDir = "/data/recv/";
+        TransSetFileReceiveListener(sessionName, &fileRecvListener, rootDir);
     }
 
     void TransSetFileSendListenerTest(const uint8_t* data, size_t size)
@@ -93,7 +92,8 @@ namespace OHOS {
             .OnSendFileFinished = OnSendFileFinished,
             .OnFileTransError = OnFileTransError,
         };
-        TransSetFileSendListener((char *)data, &sendListener);
+        const char* sessionName = reinterpret_cast<const char*>(data);
+        TransSetFileSendListener(sessionName, &sendListener);
     }
 
     void TransGetFileListenerTest(const uint8_t* data, size_t size)
@@ -103,24 +103,24 @@ namespace OHOS {
         }
 
         FileListener fileListener;
-        TransGetFileListener((char *)data, &fileListener);
+        const char* sessionName = reinterpret_cast<const char*>(data);
+        TransGetFileListener(sessionName, &fileListener);
     }
 
     void StartNStackXDFileServerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
 
         #define DEFAULT_KEY_LENGTH 32
-        char *myIP = nullptr;
-        int32_t len = *(reinterpret_cast<const int32_t*>(size));
-        StartNStackXDFileServer(myIP, data, DEFAULT_KEY_LENGTH, NULL, &len);
+        int32_t len = *(reinterpret_cast<const int32_t*>(data));
+        StartNStackXDFileServer(nullptr, data, DEFAULT_KEY_LENGTH, NULL, &len);
     }
 
     void TransDeleteFileListenerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
         }
         char tmp[SESSION_NAME_SIZE_MAX + 1] = {0};
