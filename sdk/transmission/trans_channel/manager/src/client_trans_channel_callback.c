@@ -60,8 +60,8 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
 
 int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d",
-        channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnChannelOpenFailed(channelId);
@@ -78,8 +78,8 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType)
 
 int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelClosed: channelId=%d, channelType=%d",
-        channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "[client] TransOnChannelClosed: channelId=%d, channelType=%d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnChannelClosed(channelId);
@@ -96,8 +96,8 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d",
-        channelId, channelType);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnDataReceived(channelId, data, len, type);

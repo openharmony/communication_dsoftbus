@@ -437,13 +437,13 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
     head.flag = 0;
     head.len = strlen(data) + 1;
 
-    if (memcpy_s(buf, dataLen, (void *)&head, headSize)) {
+    if (memcpy_s(buf, dataLen, (void *)&head, headSize) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s head error");
         cJSON_free(data);
         SoftBusFree(buf);
         return;
     }
-    if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1)) {
+    if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s data error");
         cJSON_free(data);
         SoftBusFree(buf);

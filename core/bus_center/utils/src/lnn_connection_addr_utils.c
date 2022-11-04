@@ -22,6 +22,9 @@
 
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
 {
+    if (addr1 == NULL || addr2 == NULL) {
+        return false;
+    }
     if (addr1->type != addr2->type) {
         return false;
     }

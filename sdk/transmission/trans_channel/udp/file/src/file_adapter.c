@@ -81,7 +81,7 @@ static int OpenTcpServer(const char *ip, int port)
 int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort)
 {
-    if (myIP == NULL) {
+    if (myIP == NULL || filePort == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }

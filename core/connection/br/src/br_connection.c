@@ -528,7 +528,11 @@ static int32_t ConnectDeviceFristTime(const ConnectOption *option, uint32_t requ
     // init lock
 
     requestInfo->requestId = requestId;
-    (void)memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result));
+    if (memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result)) != EOK) {
+        ReleaseBrconnectionNode(newConnInfo);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDeviceFirstTime memcpy_s fail");
+        return SOFTBUS_ERR;
+    }
     newConnectionInfo->state = BR_CONNECTION_STATE_CONNECTING;
     newConnectionInfo->sideType = BR_CLIENT_TYPE;
     int32_t socketFd = SOFTBUS_ERR;
