@@ -24,6 +24,7 @@
 #include "softbus_log.h"
 #include "wifi_device.h"
 #include "wifi_hid2d.h"
+#include "wifi_p2p.h"
 
 static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceWifiConf, SoftBusWifiDevConf *wifiConf)
 {
@@ -356,6 +357,18 @@ int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
     info->connState = SOFTBUS_API_WIFI_DISCONNECTED;
     if (result.connState == WIFI_CONNECTED) {
         info->connState = SOFTBUS_API_WIFI_CONNECTED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo* groupInfo)
+{
+    WifiP2pGroupInfo result;
+    if (GetCurrentGroup(&result) != WIFI_SUCCESS) {
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(groupInfo, sizeof(SoftBusWifiP2pGroupInfo), &result, sizeof(WifiP2pGroupInfo)) != EOK) {
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
