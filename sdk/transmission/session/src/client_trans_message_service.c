@@ -59,8 +59,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if ((businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (type != CHANNEL_TYPE_AUTH)) {
+    if ((businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
@@ -103,8 +102,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if ((businessType != BUSINESS_TYPE_MESSAGE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (type != CHANNEL_TYPE_AUTH)) {
+    if ((businessType != BUSINESS_TYPE_MESSAGE) && (businessType != BUSINESS_TYPE_NOT_CARE)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
@@ -141,8 +139,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if ((businessType != BUSINESS_TYPE_STREAM) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (type != CHANNEL_TYPE_AUTH)) {
+    if ((businessType != BUSINESS_TYPE_STREAM) && (businessType != BUSINESS_TYPE_NOT_CARE)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
@@ -181,8 +178,7 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if ((businessType != BUSINESS_TYPE_FILE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (type != CHANNEL_TYPE_AUTH)) {
+    if ((businessType != BUSINESS_TYPE_FILE) && (businessType != BUSINESS_TYPE_NOT_CARE)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
