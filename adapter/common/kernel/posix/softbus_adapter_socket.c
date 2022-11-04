@@ -117,8 +117,12 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
     return err;
 }
 
-static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr * sysAddr)
+static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr * sysAddr, uint32_t len)
 {
+    if (len < sizeof(softbusAddr->saFamily)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:invalid len", __func__);
+        return SOFTBUS_ADAPTER_ERR;
+    }
     if ((softbusAddr == NULL) || (sysAddr == NULL)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:invalid input", __func__);
         return SOFTBUS_ADAPTER_ERR;
@@ -128,7 +132,7 @@ static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct s
         return SOFTBUS_ADAPTER_ERR;
     }
     sysAddr->sa_family = softbusAddr->saFamily;
-    if (memcpy_s(sysAddr->sa_data, sizeof(sysAddr->sa_data), softbusAddr->saData, sizeof(softbusAddr->saData))
+    if (memcpy_s(sysAddr->sa_data, sizeof(sysAddr->sa_data), softbusAddr->saData, len - sizeof(softbusAddr->saFamily))
         != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:memcpy fail", __func__);
         return SOFTBUS_ADAPTER_ERR;
@@ -196,7 +200,8 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr, int32_
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen)
 {
     struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(addr, &sysAddr) != SOFTBUS_ADAPTER_OK) {
+    int32_t len = (sizeof(SoftBusSockAddr) > addrLen) ? addrLen : sizeof(SoftBusSockAddr);
+    if (SoftBusAddrToSysAddr(addr, &sysAddr, len) != SOFTBUS_ADAPTER_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket bind sys addr to softbus addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -227,7 +232,7 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ad
         return SOFTBUS_ADAPTER_INVALID_PARAM;
     }
     struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(addr, &sysAddr) != SOFTBUS_ADAPTER_OK) {
+    if (SoftBusAddrToSysAddr(addr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket accept softbus addr to sys addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -247,7 +252,7 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ad
 int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen)
 {
     struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(addr, &sysAddr) != SOFTBUS_ADAPTER_OK) {
+    if (SoftBusAddrToSysAddr(addr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket connect sys addr to softbus addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -379,7 +384,7 @@ int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int
         return SOFTBUS_ADAPTER_ERR;
     }
     struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(toAddr, &sysAddr) != SOFTBUS_ADAPTER_OK) {
+    if (SoftBusAddrToSysAddr(toAddr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket sendto sys addr to softbus addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -411,7 +416,7 @@ int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t
         return SOFTBUS_ADAPTER_ERR;
     }
     struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(fromAddr, &sysAddr) != SOFTBUS_ADAPTER_OK) {
+    if (SoftBusAddrToSysAddr(fromAddr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket recvfrom sys addr to softbus addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
