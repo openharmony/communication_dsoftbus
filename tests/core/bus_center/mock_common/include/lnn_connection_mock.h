@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef AUTH_CONNECTION_MOCK_H
-#define AUTH_CONNECTION_MOCK_H
+#ifndef LNN_CONNECTION_MOCK_H
+#define LNN_CONNECTION_MOCK_H
 
 #include <gmock/gmock.h>
 #include <mutex>
@@ -22,10 +22,10 @@
 #include "softbus_conn_interface.h"
 
 namespace OHOS {
-class AuthConnectInterface {
+class LnnConnectInterface {
 public:
-    AuthConnectInterface() {};
-    virtual ~AuthConnectInterface() {};
+    LnnConnectInterface() {};
+    virtual ~LnnConnectInterface() {};
 
     virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
@@ -39,10 +39,10 @@ public:
     virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
 };
-class AuthConnectInterfaceMock : public AuthConnectInterface {
+class LnnConnectInterfaceMock : public LnnConnectInterface {
 public:
-    AuthConnectInterfaceMock();
-    ~AuthConnectInterfaceMock() override;
+    LnnConnectInterfaceMock();
+    ~LnnConnectInterfaceMock() override;
     MOCK_METHOD2(ConnGetConnectionInfo, int32_t (uint32_t, ConnectionInfo *));
     MOCK_METHOD2(ConnSetConnectCallback, int32_t (ConnModule, const ConnectCallback *));
     MOCK_METHOD1(ConnUnSetConnectCallback, void (ConnModule));
