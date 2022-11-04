@@ -18,26 +18,25 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "i_stream_socket.h"
 #include "vtp_stream_socket.h"
 #include "stream_common.h"
 #include "stream_common_data.h"
-using namespace Communication;
-using namespace SoftBus;
-namespace OHOS {
-    VtpStreamSocket vtpStreamSocket;
 
+namespace OHOS {
+    std::shared_ptr<IStreamSocket> vtpStreamSocket = std::make_shared<VtpStreamSocket>();
     void VtpCreateClientTest(const uint8_t* data, size_t size)
     {
         if ((data == nullptr) || (size < sizeof(int))) {
             return;
         }
-
+        
         int streamType = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
-        vtpStreamSocket.CreateClient(ipPort, streamType, sessionKey);
-        vtpStreamSocket.CreateClient(ipPort, ipPort, streamType, sessionKey);
+        vtpStreamSocket->CreateClient(ipPort, streamType, sessionKey);
+        vtpStreamSocket->CreateClient(ipPort, ipPort, streamType, sessionKey);
     }
 
     void VtpCreateServerTest(const uint8_t* data, size_t size)
@@ -50,7 +49,7 @@ namespace OHOS {
         Communication::SoftBus::IpAndPort ipPort;
         std::pair<uint8_t*, uint32_t> sessionKey = std::make_pair(nullptr, 0);
 
-        vtpStreamSocket.CreateServer(ipPort, streamType, sessionKey);
+        vtpStreamSocket->CreateServer(ipPort, streamType, sessionKey);
     }
 
     void VtpDestroyStreamSocketTest(const uint8_t* data, size_t size)
@@ -59,7 +58,7 @@ namespace OHOS {
             return;
         }
 
-        vtpStreamSocket.DestroyStreamSocket();
+        vtpStreamSocket->DestroyStreamSocket();
     }
 
     void VtpConnectTest(const uint8_t* data, size_t size)
@@ -69,7 +68,7 @@ namespace OHOS {
         }
 
         Communication::SoftBus::IpAndPort ipPort;
-        vtpStreamSocket.Connect(ipPort);
+        vtpStreamSocket->Connect(ipPort);
     }
 
     void VtpSetOptionTest(const uint8_t* data, size_t size)
@@ -81,7 +80,7 @@ namespace OHOS {
         int type = *(reinterpret_cast<const int*>(data));
         Communication::SoftBus::StreamAttr tmp;
 
-        vtpStreamSocket.SetOption(type, tmp);
+        vtpStreamSocket->SetOption(type, tmp);
     }
 
     void VtpGetOptionTest(const uint8_t* data, size_t size)
@@ -92,7 +91,7 @@ namespace OHOS {
 
         int type = *(reinterpret_cast<const int*>(data));
 
-        vtpStreamSocket.GetOption(type);
+        vtpStreamSocket->GetOption(type);
     }
 
     void VtpSetStreamListenerTest(const uint8_t* data, size_t size)
@@ -103,7 +102,7 @@ namespace OHOS {
 
         std::shared_ptr<Communication::SoftBus::IStreamSocketListener> receiver = nullptr;
 
-        vtpStreamSocket.SetStreamListener(receiver);
+        vtpStreamSocket->SetStreamListener(receiver);
     }
 
     void VtpGetEncryptOverheadTest(const uint8_t* data, size_t size)
@@ -112,7 +111,7 @@ namespace OHOS {
             return;
         }
 
-        vtpStreamSocket.GetEncryptOverhead();
+        vtpStreamSocket->GetEncryptOverhead();
     }
 
     void VtpEncrypt(const uint8_t* data, size_t size)
@@ -121,7 +120,7 @@ namespace OHOS {
             return;
         }
 
-        vtpStreamSocket.Encrypt(nullptr, size, nullptr, size);
+        vtpStreamSocket->Encrypt(nullptr, size, nullptr, size);
     }
 
     void VtpDecrypt(const uint8_t* data, size_t size)
@@ -130,7 +129,7 @@ namespace OHOS {
             return;
         }
 
-        vtpStreamSocket.Decrypt(nullptr, size, nullptr, size);
+        vtpStreamSocket->Decrypt(nullptr, size, nullptr, size);
     }
 }
 
