@@ -24,6 +24,8 @@
 #include "stream_common_data.h"
 
 namespace OHOS {
+namespace Communication {
+namespace SoftBus {
     std::shared_ptr<IStreamSocket> vtpStreamSocket = std::make_shared<VtpStreamSocket>();
     void VtpCreateClientTest(const uint8_t* data, size_t size)
     {
@@ -132,19 +134,21 @@ namespace OHOS {
         vtpStreamSocket->Decrypt(nullptr, size, nullptr, size);
     }
 }
+}
+}
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::VtpCreateServerTest(data, size);
-    OHOS::VtpDestroyStreamSocketTest(data, size);
-    OHOS::VtpConnectTest(data, size);
-    OHOS::VtpSetOptionTest(data, size);
-    OHOS::VtpGetOptionTest(data, size);
-    OHOS::VtpSetStreamListenerTest(data, size);
-    OHOS::VtpGetEncryptOverheadTest(data, size);
-    OHOS::VtpEncrypt(data, size);
-    OHOS::VtpDecrypt(data, size);
+    OHOS::Communication::SoftBus::VtpCreateServerTest(data, size);
+    OHOS::Communication::SoftBus::VtpDestroyStreamSocketTest(data, size);
+    OHOS::Communication::SoftBus::VtpConnectTest(data, size);
+    OHOS::Communication::SoftBus::VtpSetOptionTest(data, size);
+    OHOS::Communication::SoftBus::VtpGetOptionTest(data, size);
+    OHOS::Communication::SoftBus::VtpSetStreamListenerTest(data, size);
+    OHOS::Communication::SoftBus::VtpGetEncryptOverheadTest(data, size);
+    OHOS::Communication::SoftBus::VtpEncrypt(data, size);
+    OHOS::Communication::SoftBus::VtpDecrypt(data, size);
     return 0;
 }
