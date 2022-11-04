@@ -526,11 +526,11 @@ HWTEST_F(BusCenterSdkTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test001, TestSize.Lev
 HWTEST_F(BusCenterSdkTest, JOIN_META_NODE_INNER_Test001, TestSize.Level1)
 {
     char pkgName[] = "test";
-    CustomData dataKey;
-    (void)memset_s(&dataKey, sizeof(CustomData), 0, sizeof(CustomData));
+    CustomData customData;
+    (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
     OnJoinMetaNodeResult cb = nullptr;
     ConnectionAddr *target = nullptr;
-    int32_t ret = JoinMetaNodeInner(pkgName, target, &dataKey, cb);
+    int32_t ret = JoinMetaNodeInner(pkgName, target, &customData, cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

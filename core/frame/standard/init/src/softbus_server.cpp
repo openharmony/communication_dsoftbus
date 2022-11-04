@@ -178,9 +178,9 @@ int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTyp
     return LnnIpcServerJoin(pkgName, addr, addrTypeLen);
 }
 
-int32_t SoftBusServer::JoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen)
+int32_t SoftBusServer::JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
 {
-    return MetaNodeIpcServerJoin(pkgName, addr, dataKey, addrTypeLen);
+    return MetaNodeIpcServerJoin(pkgName, addr, customData, addrTypeLen);
 }
 
 int32_t SoftBusServer::LeaveLNN(const char *pkgName, const char *networkId)

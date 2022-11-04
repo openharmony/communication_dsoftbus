@@ -261,11 +261,11 @@ int32_t DiscServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t addrT
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::JoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen)
+int32_t DiscServerProxy::JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
 {
     (void)pkgName;
     (void)addr;
-    (void)dataKey;
+    (void)customData;
     (void)addrTypeLen;
     return SOFTBUS_OK;
 }

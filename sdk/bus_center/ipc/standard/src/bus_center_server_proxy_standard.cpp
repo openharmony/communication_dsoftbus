@@ -171,7 +171,7 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::JoinMetaNode(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen)
+int32_t BusCenterServerProxy::JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
 {
     if (pkgName == nullptr || addr == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -199,7 +199,7 @@ int32_t BusCenterServerProxy::JoinMetaNode(const char *pkgName, void *addr, Cust
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteRawData(dataKey, sizeof(CustomData))) {
+    if (!data.WriteRawData(customData, sizeof(CustomData))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr failed!");
         return SOFTBUS_IPC_ERR;
     }

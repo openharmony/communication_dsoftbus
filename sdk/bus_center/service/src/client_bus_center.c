@@ -208,9 +208,9 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
     return JoinLNNInner(pkgName, target, cb);
 }
 
-int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *dataKey, OnJoinMetaNodeResult cb)
+int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb)
 {
-    if (pkgName == NULL || target == NULL || dataKey == NULL || cb == NULL) {
+    if (pkgName == NULL || target == NULL || customData == NULL || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : params are NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -226,7 +226,7 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *da
             return ret;
         }
     }
-    return JoinMetaNodeInner(pkgName, target, dataKey, cb);
+    return JoinMetaNodeInner(pkgName, target, customData, cb);
 }
 
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
