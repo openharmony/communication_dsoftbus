@@ -33,59 +33,69 @@ int32_t ReportStatisticEvt()
 
 void SoftBusHiSysEvtBusCenterFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
     InitBusCenterDfx();
 
     LnnStatisticData statisticData = { 0 };
+    statisticData.retCode = size;
     AddStatisticDuration(&statisticData);
     AddStatisticRateOfSuccess(&statisticData);
 
-    SoftBusEvtReportMsg msg;
-    memset_s(&msg, sizeof(SoftBusEvtReportMsg), 0, sizeof(SoftBusEvtReportMsg));
-    ConnectionAddr addr;
-    addr.type = CONNECTION_ADDR_WLAN;
-    int32_t ret = CreateBusCenterFaultEvt(&msg, SOFTBUS_NETWORK_AUTH_TCP_ERR, &addr);
-    if (ret == SOFTBUS_OK && msg.paramArray != nullptr) {
-        ReportBusCenterFaultEvt(&msg);
+    char *tmpString = reinterpret_cast<char *>(const_cast<uint8_t *>(data));
+    int32_t tmpErrCode = *(reinterpret_cast<const int32_t *>(data));
+    int32_t ret = CreateBusCenterFaultEvt(reinterpret_cast<SoftBusEvtReportMsg *>(tmpString),
+        tmpErrCode, reinterpret_cast<ConnectionAddr *>(tmpString));
+    if (ret == SOFTBUS_OK) {
+        ReportBusCenterFaultEvt(reinterpret_cast<SoftBusEvtReportMsg *>(tmpString));
     }
 }
 
 void SoftBusHiSysEvtCommonFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
-    SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_LNN_WLAN_DURATION, ReportStatisticEvt);
-    GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_LNN_WLAN_DURATION);
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    StatisticEvtType evtType = *(reinterpret_cast<const StatisticEvtType *>(data));
+    SetStatisticEvtReportFunc(evtType, ReportStatisticEvt);
+    GetStatisticEvtReportFunc(evtType);
 }
 
 void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
     InitConnStatisticSysEvt();
-    int32_t ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
+    SoftBusConnMedium connMedium = *(reinterpret_cast<const SoftBusConnMedium *>(data));
+    SoftBusConnErrCode errCode = *(reinterpret_cast<const SoftBusConnErrCode *>(data));
+    int32_t ret = SoftBusReportConnFaultEvt(connMedium, errCode);
     if (ret == SOFTBUS_OK) {
-        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_EVT_CONN_FAIL, 0);
+        SoftbusRecordConnInfo(connMedium, SOFTBUS_EVT_CONN_FAIL, 0);
     }
 }
 
 void SoftBusHiSysEvtDiscReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+
     InitDiscStatisticSysEvt();
-    SoftbusRecordDiscScanTimes(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE);
-    SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, 0);
-    SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, 0);
-    char pkgName[] = "testPackage";
-    SoftBusReportDiscStartupEvt(pkgName);
+    uint8_t discMedium = *(reinterpret_cast<const uint8_t *>(data));
+    uint32_t discParam = (uint32_t)size;
+    SoftbusRecordDiscScanTimes(discMedium);
+    SoftbusRecordFirstDiscTime(discMedium, discParam);
+    SoftbusRecordDiscFault(discMedium, discParam);
+    SoftBusReportDiscStartupEvt(reinterpret_cast<const char *>(data));
 }
 
 void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
     InitTransStatisticSysEvt();
     GetSoftbusRecordTimeMillis();
     SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);
