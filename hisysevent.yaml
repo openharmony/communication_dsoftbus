@@ -163,3 +163,10 @@ FILLP_SOCK_QOS_EVT:
   SEND_PKT_LOSS: {type: UINT32, desc: fillp socket send package loss}
   SEND_RATE_BPS: {type: UINT64, desc: fillp socket send rate}
   JITTER: {type: UINT64, desc: fillp socket jitter}
+
+DFINDER_STATS:
+  __BASE: {type: STATISTIC, level: MINOR, desc: dfinder statistics}
+  INVALID_OPTION_CNT: {type: UINT64, desc: the count of invalid option}
+  BUILD_PKT_FAIL_CNT: {type: UINT64, desc: the count when building packet failed}
+  INVALID_RSP_CNT: {type: UINT64, desc: the count of invalid message}
+  OVER_DEVICE_LIMIT_CNT: {type: UINT64, desc: the count when the device number is over limit}
