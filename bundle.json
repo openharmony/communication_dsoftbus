@@ -99,6 +99,7 @@
           "//foundation/communication/dsoftbus/tests/core/common/dfx/hisysevent_adapter/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/core/common/message_handler:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/common/json_utils:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/common/log:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/connection:unittest",
           "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
