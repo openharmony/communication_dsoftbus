@@ -37,7 +37,7 @@
 namespace OHOS {
 void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if ((data == nullptr) || (size < sizeof(uint64_t))) {
         return;
     }
 
@@ -46,7 +46,6 @@ void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
     char *destFile = nullptr;
     uint64_t index = *(reinterpret_cast<const uint64_t*>(data));
     uint64_t frameNumber = *(reinterpret_cast<const uint64_t*>(data));
-    uint8_t buffer = *(reinterpret_cast<const uint8_t*>(data));
     uint32_t bufferSize = *(reinterpret_cast<const uint32_t*>(data));
     int32_t fileCount = *(reinterpret_cast<const int32_t*>(data));
     char *path = nullptr;
@@ -62,7 +61,7 @@ void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
 
     FrameIndexToType(index, frameNumber);
 
-    BufferToFileList(&buffer, bufferSize, &fileCount);
+    BufferToFileList(nullptr, bufferSize, &fileCount);
 
     TransGetFileName(path);
 

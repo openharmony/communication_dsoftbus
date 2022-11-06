@@ -112,7 +112,7 @@ namespace OHOS {
 
     void TransUdpDeleteFileListenerlTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
         }
         char tmp[SESSION_NAME_SIZE_MAX + 1] = {0};

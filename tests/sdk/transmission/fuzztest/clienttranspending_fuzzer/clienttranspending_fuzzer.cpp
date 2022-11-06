@@ -31,7 +31,7 @@
 namespace OHOS {
 void ClientTransPendingTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if ((data == nullptr) || (size < sizeof(uint64_t))) {
         return;
     }
 

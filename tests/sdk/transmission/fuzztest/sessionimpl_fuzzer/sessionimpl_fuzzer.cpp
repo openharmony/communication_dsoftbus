@@ -23,7 +23,7 @@
 namespace OHOS {
 void SessionTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if ((data == nullptr) || (size < sizeof(int))) {
         return;
     }
     Communication::SoftBus::SessionImpl session;
@@ -32,18 +32,18 @@ void SessionTest(const uint8_t* data, size_t size)
     session.SetSessionId(sessionId);
     session.GetSessionId();
 
-    std::string sessionName(reinterpret_cast<const char*>(data), size);
+    std::string sessionName(data, data + size);
     session.SetMySessionName(sessionName);
     session.SetPeerSessionName(sessionName);
 }
 
 void SetOpeTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    if ((data == nullptr) || (size < sizeof(pid_t)) || (size < sizeof(uid_t))) {
         return;
     }
     Communication::SoftBus::SessionImpl session;
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string deviceId(data, data + size);
     session.SetPeerDeviceId(deviceId);
     session.SetDeviceId(deviceId);
     session.SetIsServer(true);
