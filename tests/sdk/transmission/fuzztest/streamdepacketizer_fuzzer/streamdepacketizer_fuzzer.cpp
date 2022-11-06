@@ -28,7 +28,7 @@ using namespace std;
 namespace OHOS {
     void DepacketizeHeaderTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < Communication::SoftBus::MAX_STREAM_LEN - OVERHEAD_LEN)) {
             return;
         }
         char tmp[Communication::SoftBus::MAX_STREAM_LEN - OVERHEAD_LEN + 1] = {0};
@@ -42,7 +42,7 @@ namespace OHOS {
 
     void DepacketizeBufferTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < Communication::SoftBus::MAX_STREAM_LEN - OVERHEAD_LEN)) {
             return;
         }
         char tmp[Communication::SoftBus::MAX_STREAM_LEN - OVERHEAD_LEN + 1] = {0};
