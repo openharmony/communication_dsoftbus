@@ -24,12 +24,27 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
-            return true;
+            return false;
         }
 
         MetaNodeInfo info[MAX_META_NODE_NUM];
         int32_t infoNum = MAX_META_NODE_NUM;
-        GetAllMetaNodeInfo((const char *)data, info, &infoNum);
+
+        char *tmp = (char *)malloc(size);
+        if (tmp == nullptr) {
+            return false;
+        }
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        GetAllMetaNodeInfo(reinterpret_cast<const char *>(tmp), info, &infoNum);
+        free(tmp);
         return true;
     }
 }
