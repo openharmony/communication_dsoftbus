@@ -71,6 +71,7 @@ HWTEST_F(LnnNetBuilderMockTest, META_AUTH_META_VERIFY_TEST_001, TestSize.Level1)
     int64_t authMetaId = 1;
     NodeInfo info;
     OnAuthMetaVerifyPassed(requestId, authMetaId, &info);
+    LnnDeinitNetBuilder();
 }
 
 /*
@@ -83,7 +84,7 @@ HWTEST_F(LnnNetBuilderMockTest, META_AUTH_META_VERIFY_TEST_002, TestSize.Level1)
 {
     int32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    uint32_t requestId = 0;
+    uint32_t requestId = 1;
     int64_t authMetaId = 1;
     NodeInfo info;
     ConnectionAddr addr;
@@ -91,6 +92,7 @@ HWTEST_F(LnnNetBuilderMockTest, META_AUTH_META_VERIFY_TEST_002, TestSize.Level1)
     MetaJoinRequestNode *node = TryJoinRequestMetaNode(&addr, true);
     EXPECT_TRUE(node != nullptr);
     OnAuthMetaVerifyPassed(requestId, authMetaId, &info);
+    LnnDeinitNetBuilder();
 }
 
 /*
@@ -141,6 +143,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_NODE_TEST_001, TestSize.Level1)
     networkId[0] = 'x';
     ret = ProcessLeaveMetaNodeRequest(networkId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+    LnnDeinitNetBuilder();
 }
 
 /*
@@ -193,6 +196,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_001, TestSize.Level1)
     (void)memcpy_s(addrKey->addr.info.br.brMac, BT_MAC_LEN, "11:22:33:44:55:66", BT_MAC_LEN);
     ret = TrySendJoinMetaNodeRequest(addrKey, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnDeinitNetBuilder();
 }
 
 /*
