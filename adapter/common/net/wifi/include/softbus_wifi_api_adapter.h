@@ -76,9 +76,9 @@ typedef enum {
 typedef struct {
     char ssid[WIFI_MAX_SSID_LEN];
     unsigned char bssid[WIFI_MAC_LEN];
-    int rssi;
-    int band;
-    int frequency;
+    int32_t rssi;
+    int32_t band;
+    int32_t frequency;
     SoftBusWifiConnState connState;
     unsigned short disconnectedReason;
     unsigned int ipAddress;
@@ -101,10 +101,10 @@ typedef enum SoftBusP2pDeviceStatus {
 } SoftBusP2pDeviceStatus;
 
 typedef struct SoftBusWifiP2pWfdInfo {
-    int wfdEnabled; /* 0: false, 1: true */
-    int deviceInfo;
-    int ctrlPort;
-    int maxThroughput;
+    int32_t wfdEnabled; /* 0: false, 1: true */
+    int32_t deviceInfo;
+    int32_t ctrlPort;
+    int32_t maxThroughput;
 } SoftBusWifiP2pWfdInfo;
 
 typedef struct SoftBusWifiP2pDevice {
@@ -115,22 +115,22 @@ typedef struct SoftBusWifiP2pDevice {
     SoftBusP2pDeviceStatus status;
     SoftBusWifiP2pWfdInfo wfdInfo;
     unsigned int supportWpsConfigMethods;
-    int deviceCapabilitys;
-    int groupCapabilitys;
+    int32_t deviceCapabilitys;
+    int32_t groupCapabilitys;
 } SoftBusWifiP2pDevice;
 
 typedef struct SoftBusWifiP2pGroupInfo {
     SoftBusWifiP2pDevice owner;
-    int isP2pGroupOwner; /* 0: false, 1: true */
+    int32_t isP2pGroupOwner; /* 0: false, 1: true */
     char passphrase[WIFI_PASSPHRASE_LENGTH]; /* the value ranges from 8 to 63. */
     char interface[WIFI_INTERFACE_LENGTH];
     char groupName[WIFI_P2P_NAME_LENGTH];
-    int networkId;
-    int frequency; /* for example : freq=2412 to select 2.4 GHz channel 1.(Based on 2.4 GHz or 5 GHz) */
-    int isP2pPersistent; /* 0: false, 1: true */
+    int32_t networkId;
+    int32_t frequency; /* for example : freq=2412 to select 2.4 GHz channel 1.(Based on 2.4 GHz or 5 GHz) */
+    int32_t isP2pPersistent; /* 0: false, 1: true */
     SoftBusP2pGroupStatus groupStatus;
     SoftBusWifiP2pDevice clientDevices[WIFI_MAX_DEVICES_NUM];
-    int clientDevicesSize; /* the true size of clientDevices array */
+    int32_t clientDevicesSize; /* the true size of clientDevices array */
     char goIpAddress[WIFI_IP_ADDR_STR_LEN];
 } SoftBusWifiP2pGroupInfo;
 
