@@ -78,7 +78,7 @@ int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo* groupInfo)
+int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
 {
     (void)groupInfo;
     return SOFTBUS_OK;
