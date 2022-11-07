@@ -143,7 +143,7 @@ namespace OHOS {
         char mySessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
         RemoveSessionServerInner(nullptr, mySessionName);
     }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

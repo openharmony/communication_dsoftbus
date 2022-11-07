@@ -36,7 +36,6 @@ ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
     "//third_party/bounds_checking_function/include",
     "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest",
   ]
 
   cflags = [
