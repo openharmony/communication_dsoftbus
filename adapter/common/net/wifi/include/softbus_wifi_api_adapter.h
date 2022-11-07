@@ -145,7 +145,7 @@ int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb);
 int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num);
 SoftBusBand SoftBusGetLinkBand(void);
 int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info);
-int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo* groupInfo);
+int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo);
 
 #ifdef __cplusplus
 }
