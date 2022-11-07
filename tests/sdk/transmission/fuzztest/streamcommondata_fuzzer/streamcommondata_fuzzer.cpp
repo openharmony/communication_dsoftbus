@@ -27,7 +27,7 @@ using namespace std;
 namespace OHOS {
     void InitStreamDataTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < Communication::SoftBus::MAX_STREAM_LEN)) {
             return;
         }
         char *buf = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
