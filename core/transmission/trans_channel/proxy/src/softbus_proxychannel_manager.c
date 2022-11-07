@@ -608,6 +608,10 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
 
 void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 {
+    if (msg->data[msg->dateLen - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
+	return;
+    }
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
@@ -708,6 +712,10 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
 
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
+    if (msg->data[msg->dateLen - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
+        return;
+    }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -749,6 +757,10 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 
 void TransProxyProcessResetMsg(const ProxyMessage *msg)
 {
+    if (msg->data[msg->dateLen - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
+        return;
+    }
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessResetMsg calloc failed.");
@@ -789,6 +801,10 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
 
 void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 {
+    if (msg->data[msg->dateLen - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
+        return;
+    }
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessKeepAlive calloc failed.");
@@ -818,6 +834,10 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 
 void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 {
+    if (msg->data[msg->dateLen - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
+        return;
+    }
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProxyProcessKeepAliveAck calloc failed.");
