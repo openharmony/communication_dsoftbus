@@ -16,6 +16,7 @@
 #ifndef AUTH_HICHAIN_H
 #define AUTH_HICHAIN_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -25,7 +26,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    void (*onGroupCreated)(const char *groupId);
+    void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId);
     void (*onDeviceNotTrusted)(const char *udid);
 } TrustDataChangeListener;
@@ -34,6 +35,7 @@ void UnregTrustDataChangeListener(void);
 
 int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid);
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len);
+uint32_t HichainGetJoinedGroups(int32_t groupType);
 
 void HichainDestroy(void);
 
