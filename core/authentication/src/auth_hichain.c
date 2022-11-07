@@ -21,6 +21,8 @@
 #include "auth_session_fsm.h"
 #include "device_auth.h"
 #include "device_auth_defines.h"
+
+#include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
@@ -182,7 +184,7 @@ static void OnGroupCreated(const char *groupInfo)
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain OnGroupCreated, type=%d", info.groupType);
     if (g_dataChangeListener.onGroupCreated != NULL) {
-        g_dataChangeListener.onGroupCreated(info.groupId);
+        g_dataChangeListener.onGroupCreated(info.groupId, (int32_t)info.groupType);
     }
 }
 
@@ -341,6 +343,26 @@ int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+uint32_t HichainGetJoinedGroups(int32_t groupType)
+{
+    uint32_t groupCnt = 0;
+    char *accountGroups = NULL;
+
+    const DeviceGroupManager *gmInstance = GetGmInstance();
+    if (gmInstance == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain GetGmInstance fail.");
+        return groupCnt;
+    }
+    if (gmInstance->getJoinedGroups(0, AUTH_APPID, (GroupType)groupType, &accountGroups, &groupCnt) != 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain getJoinedGroups groupCnt fail.");
+        groupCnt = 0;
+    }
+    if (accountGroups != NULL) {
+        SoftBusFree(accountGroups);
+    }
+    return groupCnt;
 }
 
 void HichainDestroy(void)

@@ -31,6 +31,9 @@ extern "C" {
 
 #define AUTH_INVALID_ID (-1)
 
+#define AUTH_IDENTICAL_ACCOUNT_GROUP 1
+#define AUTH_PEER_TO_PEER_GROUP 256
+
 typedef enum {
     /* nearby type v1 */
     SOFTBUS_OLD_V1 = 1,
@@ -97,11 +100,13 @@ int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t 
 void AuthMetaReleaseVerify(int64_t authId);
 
 typedef struct {
-    void (*onGroupCreated)(const char *groupId);
+    void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId);
 } GroupChangeListener;
 int32_t RegGroupChangeListener(const GroupChangeListener *listener);
 void UnregGroupChangeListener(void);
+
+bool AuthHasTrustedRelation(void);
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port);
 void AuthStopListening(AuthLinkType type);
