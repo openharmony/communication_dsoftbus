@@ -16,6 +16,7 @@
 #include "clienttranssessionservice_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
 #include "dfs_session.h"
 #include "session.h"
 #include "client_trans_session_service.h"
@@ -23,19 +24,25 @@
 namespace OHOS {
     void GetSessionKeyTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        #define SESSION_KEY_LENGTH 32
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
-
-        unsigned int len = *(reinterpret_cast<const uint32_t*>(size));
-        int32_t sessionId = *(reinterpret_cast<const int32_t*>(size));
-        char tmp = *(reinterpret_cast<const char*>(data));
-        GetSessionKey(sessionId, &tmp, len);
+        if (size > SESSION_KEY_LENGTH) {
+            return;
+        }
+        unsigned int len = SESSION_KEY_LENGTH;
+        int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+        char tmp[SESSION_KEY_LENGTH + 1] = {0};
+        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+            return;
+        }
+        GetSessionKey(sessionId, tmp, len);
     }
 
     void GetSessionHandleTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int handle = 1;
@@ -45,7 +52,7 @@ namespace OHOS {
 
     void DisableSessionListenerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -60,14 +67,13 @@ namespace OHOS {
         #define SESSION_NAME_SIZE_MAX 256
         #define DEVICE_ID_SIZE_MAX 65
         #define GROUP_ID_SIZE_MAX 65
-        char mySessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
         char peerSessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
         char peerNetworkId[DEVICE_ID_SIZE_MAX] = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
         SessionAttribute attr = {
             .dataType = TYPE_BYTES,
         };
         char groupId[GROUP_ID_SIZE_MAX] = "TEST_GROUP_ID";
-        OpenSessionSync(mySessionName, peerSessionName, peerNetworkId, groupId, &attr);
+        OpenSessionSync(nullptr, peerSessionName, peerNetworkId, groupId, &attr);
     }
 }
 

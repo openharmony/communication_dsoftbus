@@ -23,7 +23,7 @@
 namespace OHOS {
     void GetPkgNameInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -33,7 +33,7 @@ namespace OHOS {
 
     void GetPeerDeviceIdInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -43,7 +43,7 @@ namespace OHOS {
 
     void GetPeerSessionNameInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         
@@ -54,7 +54,7 @@ namespace OHOS {
 
     void GetMySessionNameInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -64,7 +64,7 @@ namespace OHOS {
 
     void IsServerSideInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -74,7 +74,7 @@ namespace OHOS {
 
     void GetPeerPidInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -84,7 +84,7 @@ namespace OHOS {
 
     void GetPeerUidInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -94,7 +94,7 @@ namespace OHOS {
 
     void SendBytesInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -107,13 +107,12 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        char *tmp = const_cast<char*>(reinterpret_cast<const char*>(data));
-        RemovePermissionInner(tmp);
+        RemovePermissionInner(nullptr);
     }
 
     void CloseSessionInnerTest(const uint8_t* data, size_t size)
     {
-        if ((data == nullptr) || (size == 0)) {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
         int sessionId = *(reinterpret_cast<const int32_t*>(data));
@@ -142,8 +141,7 @@ namespace OHOS {
         }
         #define SESSION_NAME_SIZE_MAX 256
         char mySessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
-        char *tmp = const_cast<char*>(reinterpret_cast<const char*>(data));
-        RemoveSessionServerInner(tmp, mySessionName);
+        RemoveSessionServerInner(nullptr, mySessionName);
     }
 }
 
