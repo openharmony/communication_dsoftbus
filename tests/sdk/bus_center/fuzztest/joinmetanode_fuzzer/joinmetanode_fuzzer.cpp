@@ -51,19 +51,28 @@ namespace OHOS {
 
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size == 0) {
-            return true;
+        if (data == nullptr || size < sizeof(CustomData)) {
+            return false;
         }
-        char pkgName[65] = {0};
-        if (memcpy_s(pkgName, sizeof(pkgName) - 1, data, size) != EOK) {
-            return true;
+
+        char *pkgName = (char *)malloc(size);
+        if (pkgName == nullptr) {
+            return false;
         }
-        if (strnlen((const char *)pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
-            return true;
+        if (memset_s(pkgName, size, '\0', size) != EOK) {
+            free(pkgName);
+            return false;
         }
+        if (memcpy_s(pkgName, size, data, size - 1) != EOK) {
+            free(pkgName);
+            return false;
+        }
+
         GenRandAddr(data, size);
-        JoinMetaNode((const char *)pkgName, &addr, (CustomData *)data, JoinMetaNodeCb);
-        LeaveMetaNode(pkgName, (const char*)data, LeaveMetaNodeCb);
+        JoinMetaNode(reinterpret_cast<const char *>(pkgName), &addr, (CustomData *)data, JoinMetaNodeCb);
+        LeaveMetaNode(reinterpret_cast<const char *>(pkgName),
+                      reinterpret_cast<const char *>(pkgName), LeaveMetaNodeCb);
+        free(pkgName);
         return true;
     }
 }
