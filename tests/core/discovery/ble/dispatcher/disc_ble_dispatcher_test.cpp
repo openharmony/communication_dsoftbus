@@ -605,7 +605,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->Publish(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.publishCntA;
     afterFunCntB = g_interfaceFunCntB.publishCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -614,7 +614,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->StartScan(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.startScanCntA;
     afterFunCntB = g_interfaceFunCntB.startScanCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -623,7 +623,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->Unpublish(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.unpublishCntA;
     afterFunCntB = g_interfaceFunCntB.unpublishCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -632,7 +632,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->StopScan(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.stopScanCntA;
     afterFunCntB = g_interfaceFunCntB.stopScanCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 };
@@ -658,7 +658,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->StartAdvertise(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
     afterFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -667,7 +667,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->Subscribe(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.subscribeCntA;
     afterFunCntB = g_interfaceFunCntB.subscribeCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -676,7 +676,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->Unsubscribe(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.unsubscribeCntA;
     afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -685,7 +685,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->StopAdvertise(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
     afterFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 };
