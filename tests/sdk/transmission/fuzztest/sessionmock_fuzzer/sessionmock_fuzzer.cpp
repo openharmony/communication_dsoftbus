@@ -46,7 +46,7 @@ namespace OHOS {
         if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
-        
+
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
         char *tmp = const_cast<char*>(reinterpret_cast<const char*>(data));
         GetPeerSessionNameInner(sessionId, tmp, size);
@@ -163,4 +163,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::RemoveSessionServerInnerTest(data, size);
     return 0;
 }
-

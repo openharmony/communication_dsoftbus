@@ -41,7 +41,7 @@ namespace OHOS {
     {
         return 0;
     }
-    
+
     static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
     {
         return 0;
