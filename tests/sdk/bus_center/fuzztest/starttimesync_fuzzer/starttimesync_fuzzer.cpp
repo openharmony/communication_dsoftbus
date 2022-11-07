@@ -33,13 +33,28 @@ namespace OHOS {
     bool StartTimeSyncTest(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
-            return true;
+            return false;
         }
 
         TimeSyncAccuracy timeAccuracy = SUPER_HIGH_ACCURACY;
         TimeSyncPeriod period = NORMAL_PERIOD;
 
-        StartTimeSync((const char *)data, (const char *)data, timeAccuracy, period, &g_timeSyncCb);
+        char *tmp = (char *)malloc(size);
+        if (tmp == nullptr) {
+            return false;
+        }
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        StartTimeSync(reinterpret_cast<const char *>(tmp),
+                      reinterpret_cast<const char *>(tmp), timeAccuracy, period, &g_timeSyncCb);
+        free(tmp);
         return true;
     }
 }

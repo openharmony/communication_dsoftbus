@@ -15,6 +15,7 @@
 
 #include "getnodekeyinfo_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -22,13 +23,28 @@ namespace OHOS {
     bool GetNodeKeyInfoTest(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
-            return true;
+            return false;
         }
 
         NodeDeviceInfoKey key = NODE_KEY_NETWORK_CAPABILITY;
         uint8_t udid[UDID_BUF_LEN] = {0};
-        GetNodeKeyInfo((const char *)data,
-                       const_cast<char *>(reinterpret_cast<const char *>(data)), key, udid, UDID_BUF_LEN);
+
+        char *tmp = (char *)malloc(size);
+        if (tmp == nullptr) {
+            return false;
+        }
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        GetNodeKeyInfo(reinterpret_cast<const char *>(tmp),
+                       reinterpret_cast<const char *>(tmp), key, udid, UDID_BUF_LEN);
+        free(tmp);
         return true;
     }
 }
