@@ -17,7 +17,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 module_output_path = "dsoftbus/adapter"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SoftBusDecryptDataTest") {
+ohos_fuzztest("SoftBusDecryptDataFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/adapter/fuzztest/softbusdecryptdata_fuzzer"
   include_dirs = [ "$dsoftbus_root_path/adapter/common/include" ]
