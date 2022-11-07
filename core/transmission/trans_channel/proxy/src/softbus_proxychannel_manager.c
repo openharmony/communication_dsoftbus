@@ -780,7 +780,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     }
     if ((info->type == CONNECT_BR || info->type == CONNECT_BLE) &&
         info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
-        (void)TransProxyCloseConnChannelReset(msg->connId, false);
+        (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
     } else {
         (void)TransProxyCloseConnChannel(msg->connId);
     }
