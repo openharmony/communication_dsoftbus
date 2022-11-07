@@ -158,7 +158,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest003, TestSize.Level0)
 
 /**
  * @tc.name: CreateSessionServerTest004
- * @tc.desc: extern module active publish, create 9 sessionServer, succ 8, failed at 9th.
+ * @tc.desc: extern module active publish, create 11 sessionServer, succ 10, failed at 11th.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -174,7 +174,9 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
         "ohos.distributedschedule.dms.test5",
         "ohos.distributedschedule.dms.test6",
         "ohos.distributedschedule.dms.test7",
-        "ohos.distributedschedule.dms.test8"
+        "ohos.distributedschedule.dms.test8",
+        "ohos.distributedschedule.dms.test9",
+        "ohos.distributedschedule.dms.test10"
     };
 
     for (i = 0; i < MAX_SESSION_SERVER_NUMBER; i++) {
