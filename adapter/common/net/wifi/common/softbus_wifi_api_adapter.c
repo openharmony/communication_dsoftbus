@@ -361,7 +361,7 @@ int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo* groupInfo)
+int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
 {
     WifiP2pGroupInfo result;
     if (GetCurrentGroup(&result) != WIFI_SUCCESS) {
