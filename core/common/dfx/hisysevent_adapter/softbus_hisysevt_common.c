@@ -35,7 +35,7 @@ StatisticEvtReportFunc g_statisticEvtReportFunc[SOFTBUS_STATISTIC_EVT_BUTT] = {N
 
 StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type)
 {
-    if (type >= SOFTBUS_STATISTIC_EVT_BUTT) {
+    if (type < SOFTBUS_STATISTIC_EVT_START || type >= SOFTBUS_STATISTIC_EVT_BUTT) {
         return NULL;
     }
     
@@ -44,7 +44,7 @@ StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type)
 
 int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc func)
 {
-    if (type >= SOFTBUS_STATISTIC_EVT_BUTT) {
+    if (type < SOFTBUS_STATISTIC_EVT_START || type >= SOFTBUS_STATISTIC_EVT_BUTT || func == NULL) {
         return SOFTBUS_ERR;
     }
     g_statisticEvtReportFunc[type] = func;

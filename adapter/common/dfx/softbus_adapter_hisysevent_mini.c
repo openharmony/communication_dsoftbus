@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_hisysevent.h"
 
@@ -37,8 +38,14 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
 
 SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
 {
+    if (paramNum <= SOFTBUS_EVT_PARAM_ZERO || paramNum >= SOFTBUS_EVT_PARAM_BUTT) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "param is invalid");
+        return NULL;
+    }
+
     SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
     if (msg == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "report msg is null");
         return NULL;
     }
 
