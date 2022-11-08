@@ -30,6 +30,11 @@ static LIST_HEAD(g_hidumperhander_list);
 
 void SoftBusDumpShowHelp(int fd)
 {
+    if (fd < 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd is invalid.");
+        return;
+    }
+
     SOFTBUS_DPRINTF(fd, "Usage: hidumper -s 4700 -a \"[Option]\" \n");
     SOFTBUS_DPRINTF(fd, "  Option: [-h] ");
     ListNode *item = NULL;
@@ -54,11 +59,19 @@ void SoftBusDumpShowHelp(int fd)
 
 void SoftBusDumpErrInfo(int fd, const char *argv)
 {
+    if (fd < 0 || argv == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "param is invalid.");
+        return;
+    }
     SOFTBUS_DPRINTF(fd, "the command %s is invalid, please input again!\n", argv);
 }
 
 void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
 {
+    if (fd < 0 || moduleName == NULL || varList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "param is invalid.");
+        return;
+    }
     SOFTBUS_DPRINTF(fd, "Usage: hidumper -s 4700 -a \" %s [Option] \n", moduleName);
     SOFTBUS_DPRINTF(fd, "  Option: [-h]  | [-l <");
     ListNode *item = NULL;
@@ -91,7 +104,7 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(const char *varName, SoftBus
 
 int32_t SoftBusAddDumpVarToList(const char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
 {
-    if (strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
+    if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL || varList == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
         return SOFTBUS_ERR;
     }
@@ -159,8 +172,8 @@ void SoftBusHiDumperReleaseHandler(void)
 
 int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
 {
-    if (strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN ||
-        handler == NULL) {
+    if (moduleName == NULL || strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || helpInfo == NULL ||
+        strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN || handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegHiDumperHandler invalid param");
         return SOFTBUS_ERR;
     }

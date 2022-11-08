@@ -26,6 +26,8 @@
 #include "softbus_hisysevt_transreporter.h"
 
 namespace OHOS {
+static constexpr int TEST_PKG_NAME_MAX_LEN = 65;
+static constexpr int TEST_STRING_MAX_LEN = 100;
 int32_t ReportStatisticEvt()
 {
     return 0;
@@ -33,53 +35,55 @@ int32_t ReportStatisticEvt()
 
 void SoftBusHiSysEvtBusCenterFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
     InitBusCenterDfx();
 
-    LnnStatisticData statisticData = { 0 };
+    LnnStatisticData statisticData = {0};
+    statisticData.retCode = *(reinterpret_cast<const int32_t *>(data));
     AddStatisticDuration(&statisticData);
     AddStatisticRateOfSuccess(&statisticData);
-
-    SoftBusEvtReportMsg msg;
-    memset_s(&msg, sizeof(SoftBusEvtReportMsg), 0, sizeof(SoftBusEvtReportMsg));
-    ConnectionAddr addr;
-    addr.type = CONNECTION_ADDR_WLAN;
-    int32_t ret = CreateBusCenterFaultEvt(&msg, SOFTBUS_NETWORK_AUTH_TCP_ERR, &addr);
-    if (ret == SOFTBUS_OK && msg.paramArray != nullptr) {
-        ReportBusCenterFaultEvt(&msg);
+    char tmpString[TEST_STRING_MAX_LEN] = {0};
+    if (memcpy_s(tmpString, sizeof(tmpString) - 1, data, size) != EOK) {
+        return;
+    }
+    int32_t tmpErrCode = *(reinterpret_cast<const int32_t *>(data));
+    int32_t ret = CreateBusCenterFaultEvt(reinterpret_cast<SoftBusEvtReportMsg *>(tmpString),
+        tmpErrCode, reinterpret_cast<ConnectionAddr *>(tmpString));
+    if (ret == SOFTBUS_OK) {
+        ReportBusCenterFaultEvt(reinterpret_cast<SoftBusEvtReportMsg *>(tmpString));
     }
 }
 
 void SoftBusHiSysEvtCommonFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
-    SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_LNN_WLAN_DURATION, ReportStatisticEvt);
-    GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_LNN_WLAN_DURATION);
+    StatisticEvtType evtType = *(reinterpret_cast<const StatisticEvtType *>(data));
+    SetStatisticEvtReportFunc(evtType, ReportStatisticEvt);
+    GetStatisticEvtReportFunc(evtType);
 }
 
 void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
     InitConnStatisticSysEvt();
-    int32_t ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
+    SoftBusConnMedium connMedium = *(reinterpret_cast<const SoftBusConnMedium *>(data));
+    SoftBusConnErrCode errCode = *(reinterpret_cast<const SoftBusConnErrCode *>(data));
+    int32_t ret = SoftBusReportConnFaultEvt(connMedium, errCode);
     if (ret == SOFTBUS_OK) {
-        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_EVT_CONN_FAIL, 0);
+        SoftbusRecordConnInfo(connMedium, SOFTBUS_EVT_CONN_FAIL, 0);
     }
 }
 
 void SoftBusHiSysEvtDiscReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
     InitDiscStatisticSysEvt();
-    SoftbusRecordDiscScanTimes(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE);
-    SoftbusRecordFirstDiscTime(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, 0);
-    SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, 0);
-    char pkgName[] = "testPackage";
-    SoftBusReportDiscStartupEvt(pkgName);
+    uint8_t discMedium = *(reinterpret_cast<const uint8_t *>(data));
+    uint32_t discParam = *(reinterpret_cast<const uint32_t *>(data));
+    char tmpPkgName[TEST_PKG_NAME_MAX_LEN] = {0};
+    if (memcpy_s(tmpPkgName, sizeof(tmpPkgName) - 1, data, size) != EOK) {
+        return;
+    }
+    SoftbusRecordDiscScanTimes(discMedium);
+    SoftbusRecordFirstDiscTime(discMedium, discParam);
+    SoftbusRecordDiscFault(discMedium, discParam);
+    SoftBusReportDiscStartupEvt(tmpPkgName);
 }
 
 void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t* data, size_t size)
