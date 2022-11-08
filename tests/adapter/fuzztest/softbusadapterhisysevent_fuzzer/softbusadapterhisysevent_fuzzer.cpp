@@ -37,9 +37,8 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 
 void SoftBusAdapterHiSysEventFuzzTest(const uint8_t* data, size_t size)
 {
-    (void)data;
-    (void)size;
-    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
+    int32_t tmpParam = *(reinterpret_cast<const int32_t *>(data));
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(tmpParam);
     if (msg == nullptr) {
         return;
     }
