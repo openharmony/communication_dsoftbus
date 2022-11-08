@@ -380,6 +380,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
     if (node == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cId[%d] node is null.", channelId);
+        SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_ERR;
     }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
@@ -394,8 +395,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     }
 
     uint32_t plainLen;
-    int ret = TransTdcDecrypt(channel.detail.sessionKey, node->data + DC_DATA_HEAD_SIZE,
-        dataLen, plain, &plainLen);
+    int ret = TransTdcDecrypt(channel.detail.sessionKey, node->data + DC_DATA_HEAD_SIZE, dataLen, plain, &plainLen);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt fail.");
         SoftBusFree(plain);
