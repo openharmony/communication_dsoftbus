@@ -81,7 +81,6 @@ void CheckPermissionTest::TearDownTestCase()
 {
 }
 
-
 /**
  * @tc.name: CheckPermissionTest001
  * @tc.desc: CheckpermissionAPI.

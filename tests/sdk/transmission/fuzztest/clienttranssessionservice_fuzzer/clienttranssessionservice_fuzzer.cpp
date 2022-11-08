@@ -75,7 +75,7 @@ namespace OHOS {
         char groupId[GROUP_ID_SIZE_MAX] = "TEST_GROUP_ID";
         OpenSessionSync(nullptr, peerSessionName, peerNetworkId, groupId, &attr);
     }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

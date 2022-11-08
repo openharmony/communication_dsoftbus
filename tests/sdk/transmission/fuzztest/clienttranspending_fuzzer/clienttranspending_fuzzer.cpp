@@ -27,7 +27,6 @@
 #include "softbus_log.h"
 #include "softbus_type_def.h"
 
-
 namespace OHOS {
 void ClientTransPendingTest(const uint8_t* data, size_t size)
 {
@@ -46,7 +45,7 @@ void ClientTransPendingTest(const uint8_t* data, size_t size)
     GetPendingPacketData(id, seq, waitMillis, isDelete, &pendDate);
     SetPendingPacketData(id, seq, &pendDate);
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
