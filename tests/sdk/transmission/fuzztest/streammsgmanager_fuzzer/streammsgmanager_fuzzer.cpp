@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,8 +57,7 @@ namespace OHOS {
         Communication::SoftBus::StreamMsgManager streamMsgManager;
         streamMsgManager.Update((const Communication::SoftBus::HistoryStats &)stats);
     }
-
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -69,4 +68,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::UpdateTest(data, size);
     return 0;
 }
-

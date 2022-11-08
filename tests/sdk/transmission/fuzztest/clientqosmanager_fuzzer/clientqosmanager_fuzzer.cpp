@@ -19,7 +19,6 @@
 #include "client_qos_manager.h"
 #include "trans_server_proxy.h"
 
-
 namespace OHOS {
 void ClientQosReportTest(const uint8_t* data, size_t size)
 {
@@ -34,7 +33,7 @@ void ClientQosReportTest(const uint8_t* data, size_t size)
 
     ClientQosReport(channelId, chanType, appType, quality);
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -43,4 +42,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::ClientQosReportTest(data, size);
     return 0;
 }
-

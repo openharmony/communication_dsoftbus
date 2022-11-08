@@ -51,7 +51,7 @@ namespace OHOS {
         streamcommondata.InitStreamData(std::move(inputbuf), Communication::SoftBus::MAX_STREAM_LEN + 1,
             std::move(inputext), Communication::SoftBus::MAX_STREAM_LEN + 1);
     }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

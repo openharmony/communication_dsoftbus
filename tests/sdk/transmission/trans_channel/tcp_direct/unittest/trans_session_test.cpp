@@ -29,7 +29,6 @@
 using namespace testing::ext;
 
 namespace OHOS {
-
 ConnectionAddr g_addrInfo;
 
 const char *g_testSessionName = "ohos.distributedschedule.dms.test";
@@ -292,7 +291,6 @@ HWTEST_F(TransSessionTest, QosReportTest001, TestSize.Level0)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-
 /**
  * @tc.name: ClientCleanAllSessionWhenServerDeathTest001
  * @tc.desc: use the normal parameter.
@@ -327,5 +325,4 @@ HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize
     ClientCleanAllSessionWhenServerDeath();
     EXPECT_TRUE(true);
 }
-
 } // namespace OHOS
