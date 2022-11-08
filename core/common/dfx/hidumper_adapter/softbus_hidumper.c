@@ -137,7 +137,7 @@ void SoftBusReleaseDumpVar(ListNode *varList)
 
 static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
 {
-    HandlerNode *handlerNode = SoftBusCalloc(sizeof(HandlerNode));
+    HandlerNode *handlerNode = (HandlerNode *)SoftBusCalloc(sizeof(HandlerNode));
     if (handlerNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode malloc fail.");
         return NULL;
