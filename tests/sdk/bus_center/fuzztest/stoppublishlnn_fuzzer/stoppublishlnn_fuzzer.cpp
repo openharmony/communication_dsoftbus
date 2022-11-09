@@ -15,18 +15,33 @@
 
 #include "stoppublishlnn_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
 namespace OHOS {
     bool StopPublishLNNTest(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size == 0) {
-            return true;
+        if (data == nullptr || size < sizeof(int32_t)) {
+            return false;
         }
 
-        StopPublishLNN(reinterpret_cast<const char *>(data),
-            *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(data)));
+        char *tmp = (char *)malloc(size);
+        if (tmp == nullptr) {
+            return false;
+        }
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        StopPublishLNN(reinterpret_cast<const char *>(tmp),
+                       *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(tmp)));
+        free(tmp);
         return true;
     }
 }
