@@ -14,11 +14,22 @@
  */
 
 #include "connectioncommon_fuzzer.h"
+
 #include <vector>
 #include <securec.h>
+#include <pthread.h>
+#include <cstddef>
+#include <string>
 #include "softbus_datahead_transform.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_conn_manager.h"
+#include "softbus_base_listener.h"
+#include "softbus_protocol_def.h"
+#include "softbus_thread_pool.h"
+
+static pthread_mutex_t g_isInitedLock;
+static int g_count = 0;
 
 namespace OHOS {
 static void DoDataHeadTransformFuzz(const uint8_t *data, size_t size)
@@ -85,6 +96,57 @@ static void DoSocketFuzz(const uint8_t *data, size_t size)
     }
     ConnDeinitSockets();
 }
+
+static int32_t ConnectEvent(ListenerModule module, int32_t events, int32_t cfd, const ConnectOption *clientAddr)
+{
+    return 0;
+}
+
+static int32_t DataEvent(ListenerModule module, int32_t events, int32_t fd)
+{
+    return 0;
+}
+
+static void DoBaseListenerFuzz(const uint8_t *data, size_t size)
+{
+    ListenerModule module = DIRECT_CHANNEL_CLIENT;
+    StartBaseClient(module);
+    StopBaseListener(module);
+    DestroyBaseListener(module);
+
+    LocalListenerInfo info;
+    if (memcpy_s(&info, sizeof(LocalListenerInfo), data, size) == EOK) {
+        StartBaseListener(&info);
+    }
+
+    SoftbusBaseListener listener;
+    listener.onConnectEvent = ConnectEvent;
+    listener.onDataEvent = DataEvent;
+    GetSoftbusBaseListener(module, &listener);
+    SetSoftbusBaseListener(module, &listener);
+}
+
+static void DoTriggerFuzz()
+{
+    AddTrigger(AUTH_P2P, 0, WRITE_TRIGGER);
+    DelTrigger(AUTH_P2P, 0, WRITE_TRIGGER);
+}
+
+static int32_t ThreadPoolTask(void* arg)
+{
+    pthread_mutex_lock(&g_isInitedLock);
+    g_count++;
+    pthread_mutex_unlock(&g_isInitedLock);
+    return 0;
+}
+
+static void DoThreadPoolFuzz()
+{
+    ThreadPool* pool = ThreadPoolInit(5, 5);
+    ThreadPoolAddJob(pool, ThreadPoolTask, nullptr, PERSISTENT, (uintptr_t)0);
+    ThreadPoolRemoveJob(pool, (uintptr_t)0);
+    ThreadPoolDestroy(pool);
+}
 }
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -95,5 +157,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     OHOS::DoDataHeadTransformFuzz(data, size);
     OHOS::DoSocketFuzz(data, size);
+    OHOS::DoBaseListenerFuzz(data, size);
+    OHOS::DoTriggerFuzz();
+    OHOS::DoThreadPoolFuzz();
     return 0;
 }
