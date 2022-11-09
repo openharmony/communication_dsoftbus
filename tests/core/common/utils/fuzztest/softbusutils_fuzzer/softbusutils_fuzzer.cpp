@@ -42,31 +42,44 @@ namespace OHOS {
 
     static void SoftbusUtilsSwitch(uint32_t cmd, const uint8_t *rawData, size_t size)
     {
+        char *tmp = (char *)malloc(size);
+        if (tmp == nullptr) {
+            return;
+        }
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return;
+        }
+        if (memcpy_s(tmp, size, rawData, size - 1) != EOK) {
+            free(tmp);
+            return;
+        }
+
         cmd = cmd % FOUR;
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
                 char outBuf[] = "\0";
                 uint32_t outBufLen = 0;
-                ConvertBytesToHexString(outBuf, outBufLen, reinterpret_cast<const unsigned char *>(rawData), size);
+                ConvertBytesToHexString(outBuf, outBufLen, reinterpret_cast<const unsigned char *>(tmp), size);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                StrCmpIgnoreCase(reinterpret_cast<const char *>(rawData), reinterpret_cast<const char *>(rawData));
+                StrCmpIgnoreCase(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp));
                 break;
             }
             case CMD_SOFTBUS_THREE: {
-                bool valid = false;
-                valid = IsValidString(reinterpret_cast<const char *>(rawData), size);
+                IsValidString(reinterpret_cast<const char *>(tmp), size);
                 break;
             }
             default:
                 break;
         }
+        free(tmp);
     }
 
     bool DoSomethingInterestingWithMyAPI(const uint8_t *rawData, size_t size)
     {
-        if (rawData == nullptr) {
+        if (rawData == nullptr || size < THRESHOLD) {
             return false;
         }
         uint32_t cmd = Convert2Uint32(rawData);
@@ -81,10 +94,6 @@ namespace OHOS {
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    if (size < OHOS::THRESHOLD) {
-        return 0;
-    }
-
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
