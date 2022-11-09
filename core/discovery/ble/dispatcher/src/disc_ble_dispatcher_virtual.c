@@ -22,10 +22,11 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     return NULL;
 }
 
-DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *a, DiscoveryBleDispatcherInterface *b)
+DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
+    DiscoveryBleDispatcherInterface *interfaceB)
 {
-    (void)a;
-    (void)b;
+    (void)interfaceA;
+    (void)interfaceB;
     return NULL;
 }
 
