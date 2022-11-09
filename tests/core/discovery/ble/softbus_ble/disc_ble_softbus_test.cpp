@@ -347,13 +347,13 @@ HWTEST_F(DiscSoftBusBleTest, ProcessHwHashAccout001, TestSize.Level1)
     foundInfoTest.capabilityBitmap[0] = 1 << pos;
     foundInfoTest.capabilityBitmap[1] = 0x0;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] = false;
-    bool ret = ProcessHwHashAccout(&foundInfoTest);
+    bool ret = ProcessHashAccout(&foundInfoTest);
     EXPECT_EQ(ret, true);
 
     foundInfoTest.capabilityBitmap[0] = 1 << pos;
     foundInfoTest.capabilityBitmap[1] = 0x0;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] = true;
-    ret = ProcessHwHashAccout(&foundInfoTest);
+    ret = ProcessHashAccout(&foundInfoTest);
     EXPECT_EQ(ret, false);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ProcessHwHashAccout001, End");
 }

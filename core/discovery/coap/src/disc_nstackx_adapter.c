@@ -30,7 +30,7 @@
 #include "softbus_hisysevt_discreporter.h"
 
 #define JSON_WLAN_IP "wifiIpAddr"
-#define JSON_HW_ACCOUNT "hwAccountHashVal"
+#define JSON_ACCOUNT "hwAccountHashVal"
 #define JSON_SERVICE_DATA "serviceData"
 #define SERVICE_DATA_PORT "port"
 #define DEVICE_UDID "UDID"
@@ -58,10 +58,10 @@ static void ParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
     }
 }
 
-static void ParseHwAccountHash(const cJSON *data, DeviceInfo *device)
+static void ParseAccountHash(const cJSON *data, DeviceInfo *device)
 {
-    if (!GetJsonObjectStringItem(data, JSON_HW_ACCOUNT, device->accountHash, sizeof(device->accountHash))) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse hw account hash value failed.");
+    if (!GetJsonObjectStringItem(data, JSON_ACCOUNT, device->accountHash, sizeof(device->accountHash))) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "parse account hash value failed.");
         return;
     }
 }
@@ -121,7 +121,7 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
     }
 
     ParseWifiIpAddr(reserveInfo, device);
-    ParseHwAccountHash(reserveInfo, device);
+    ParseAccountHash(reserveInfo, device);
     ParseServiceData(reserveInfo, device);
     cJSON_Delete(reserveInfo);
     return SOFTBUS_OK;
