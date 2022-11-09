@@ -24,11 +24,11 @@
 #include "lnn_device_info.h"
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_mem.h"
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F

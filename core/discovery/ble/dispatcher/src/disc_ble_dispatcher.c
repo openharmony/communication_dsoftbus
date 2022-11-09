@@ -178,11 +178,12 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     return &g_discBleFrameFuncInterface;
 }
 
-DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *a, DiscoveryBleDispatcherInterface *b)
+DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
+    DiscoveryBleDispatcherInterface *interfaceB)
 {
     g_dispatcherSize = 0;
-    g_dispatchers[g_dispatcherSize++] = a;
-    g_dispatchers[g_dispatcherSize++] = b;
+    g_dispatchers[g_dispatcherSize++] = interfaceA;
+    g_dispatchers[g_dispatcherSize++] = interfaceB;
     return &g_discBleFrameFuncInterface;
 }
 
