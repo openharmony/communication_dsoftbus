@@ -15,6 +15,8 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 adapter_ble_external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
 adapter_ble_inc = [
+  "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common",
   "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
