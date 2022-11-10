@@ -1,0 +1,56 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import(
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/net_bluetooth.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+module_output_path = "dsoftbus/adapter"
+
+ohos_unittest("BluetoothAdapterTest") {
+  module_out_path = module_output_path
+  sources = [
+    "adapter_bt_utils_test.cpp",
+    "bluetooth_mock.cpp",
+    "softbus_adapter_bt_common_test.cpp",
+  ]
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  sources += adapter_ble_src
+  include_dirs += adapter_ble_inc
+  deps += adapter_ble_deps
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":BluetoothAdapterTest" ]
+}
