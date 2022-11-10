@@ -30,7 +30,7 @@ int32_t TransChannelInit(void);
 
 void TransChannelDeinit(void);
 
-int32_t TransOpenChannel(const SessionParam *param, TransInfo *info);
+int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo);
 
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt);
 

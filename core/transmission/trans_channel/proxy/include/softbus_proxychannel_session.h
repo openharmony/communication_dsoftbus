@@ -47,7 +47,7 @@ typedef enum {
     PROXY_CHANNEL_PRORITY_BUTT = 3,
 } ProxyChannelPriority;
 
-int32_t TransProxyPostSessionData(int32_t channelId, const uint8_t *data, uint32_t len, SessionPktType flags);
+int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len, SessionPktType flags);
 int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len);
 int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len);
 int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId);

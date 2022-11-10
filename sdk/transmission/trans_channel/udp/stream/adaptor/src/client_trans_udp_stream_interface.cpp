@@ -48,9 +48,9 @@ static inline void ConvertStreamFrameInfo(const StreamFrameInfo *inFrameInfo,
     outFrameInfo->bitrate = 0;
 }
 
-int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamData *ext, const StreamFrameInfo *param)
+int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamData *ext, const StreamFrameInfo *param)
 {
-    if (indata == nullptr || indata->buf == nullptr || param == nullptr) {
+    if (inData == nullptr || inData->buf == nullptr || param == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid argument!");
         return SOFTBUS_ERR;
     }
@@ -67,11 +67,11 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
 
     std::unique_ptr<IStream> stream = nullptr;
     if (adaptor->GetStreamType() == RAW_STREAM) {
-        ssize_t dataLen = indata->bufLen + adaptor->GetEncryptOverhead();
+        ssize_t dataLen = inData->bufLen + adaptor->GetEncryptOverhead();
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
-            "bufLen = %d, GetEncryptOverhead() = %zd", indata->bufLen, adaptor->GetEncryptOverhead());
+            "bufLen = %d, GetEncryptOverhead() = %zd", inData->bufLen, adaptor->GetEncryptOverhead());
         std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
-        ssize_t encLen = adaptor->Encrypt(indata->buf, indata->bufLen, data.get(), dataLen, adaptor->GetSessionKey());
+        ssize_t encLen = adaptor->Encrypt(inData->buf, inData->bufLen, data.get(), dataLen, adaptor->GetSessionKey());
         if (encLen != dataLen) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
                 "encrypted failed, dataLen = %zd, encryptLen = %zd", dataLen, encLen);
@@ -80,17 +80,17 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
 
         stream = IStream::MakeRawStream(data.get(), dataLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
     } else if (adaptor->GetStreamType() == COMMON_VIDEO_STREAM || adaptor->GetStreamType() == COMMON_AUDIO_STREAM) {
-        if (indata->bufLen < 0 || indata->bufLen > Communication::SoftBus::MAX_STREAM_LEN ||
+        if (inData->bufLen < 0 || inData->bufLen > Communication::SoftBus::MAX_STREAM_LEN ||
             (ext != nullptr && (ext->bufLen < 0 || ext->bufLen > Communication::SoftBus::MAX_STREAM_LEN))) {
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
         Communication::SoftBus::StreamData data = {
-            .buffer = std::make_unique<char[]>(indata->bufLen),
-            .bufLen = indata->bufLen,
+            .buffer = std::make_unique<char[]>(inData->bufLen),
+            .bufLen = inData->bufLen,
             .extBuffer = nullptr,
             .extLen = 0,
         };
-        int32_t ret = memcpy_s(data.buffer.get(), data.bufLen, indata->buf, indata->bufLen);
+        int32_t ret = memcpy_s(data.buffer.get(), data.bufLen, inData->buf, inData->bufLen);
         if (ret != EOK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data! ret: %d", ret);
             return SOFTBUS_ERR;

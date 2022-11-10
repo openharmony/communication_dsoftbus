@@ -556,5 +556,5 @@ bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthType fail, ret=%d", ret);
         return false;
     }
-    return ((1 << ONLINE_METANODE) == (uint32_t)value) ? true : false;
+    return ((uint32_t)value == (1 << ONLINE_METANODE)) ? true : false;
 }

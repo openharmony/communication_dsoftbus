@@ -26,9 +26,9 @@ public:
         : IRemoteProxy<ISoftBusServer>(impl) {}
     virtual ~TransServerProxy() = default;
 
-    int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *info) override;
+    int32_t StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo) override;
     int32_t StopDiscovery(const char *pkgName, int subscribeId) override;
-    int32_t PublishService(const char *pkgName, const PublishInfo *info) override;
+    int32_t PublishService(const char *pkgName, const PublishInfo *pubInfo) override;
     int32_t UnPublishService(const char *pkgName, int publishId) override;
     int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
 
@@ -38,7 +38,7 @@ public:
     int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) override;
     int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) override;
     int32_t CloseChannel(int32_t channelId, int32_t channelType) override;
-    int32_t SendMessage(int32_t channelId, int32_t channelType, const void *data,
+    int32_t SendMessage(int32_t channelId, int32_t channelType, const void *dataInfo,
         uint32_t len, int32_t msgType) override;
 
     int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) override;
@@ -54,7 +54,7 @@ public:
         int32_t period) override;
     int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) override;
     int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int quality) override;
-    int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data) override;
+    int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *statsData) override;
     int32_t GrantPermission(int uid, int pid, const char *sessionName) override;
     int32_t RemovePermission(const char *sessionName) override;
     int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *statsData) override;
