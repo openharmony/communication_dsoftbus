@@ -30,6 +30,7 @@ group("unittest") {
     deps += [
       "ble/dispatcher:unittest",
       "ble/softbus_ble:unittest",
+      "ble/softbus_ble_mock:unittest",
     ]
   }
   if (dsoftbus_feature_disc_coap) {
