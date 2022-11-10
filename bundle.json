@@ -88,6 +88,7 @@
           }
         ],
         "test": [
+          "//foundation/communication/dsoftbus/tests/adapter/bluetooth:unittest",
           "//foundation/communication/dsoftbus/tests/adapter/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/adapter/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
