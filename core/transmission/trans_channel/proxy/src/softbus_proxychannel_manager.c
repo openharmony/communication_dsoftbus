@@ -702,7 +702,7 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     ConstructProxyChannelInfo(chan, msg, newChanId, info.type);
 
     ret = TransProxyGetLocalInfo(chan);
-    if (ret!= SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyGetLocalInfo fail ret=%d.", ret);
         return ret;
     }
