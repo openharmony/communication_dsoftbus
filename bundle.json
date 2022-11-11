@@ -127,7 +127,6 @@
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/deactivemetanode_fuzzer:DeactiveMetaNodeFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getallmetanodeinfo_fuzzer:GetAllMetaNodeInfoFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getnodekeyinfo_fuzzer:GetNodeKeyInfoFuzzTest",
-          "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/softbusclientmanager_fuzzer:SoftBusClientMagFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/starttimesync_fuzzer:StartTimeSyncFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/stoppublishlnn_fuzzer:StopPublishLNNFuzzTest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/stoprefreshlnn_fuzzer:StopRefreshLNNFuzzTest",
