@@ -15,6 +15,7 @@ import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("//foundation/communication/dsoftbus/tests/utils/utils.gni")
 
 module_output_path = "dsoftbus/discovery"
 
@@ -26,8 +27,8 @@ ohos_unittest("DiscBleMockTest") {
     "ble_mock.cpp",
     "bus_center_mock.cpp",
     "disc_ble_test.cpp",
-    "exception_branch_checker.cpp",
   ]
+  sources += test_utils_src
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -55,6 +56,7 @@ ohos_unittest("DiscBleMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
+  include_dirs += test_utils_inc
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
