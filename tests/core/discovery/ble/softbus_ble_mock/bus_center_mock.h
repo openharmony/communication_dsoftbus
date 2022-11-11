@@ -53,7 +53,7 @@ public:
     static int32_t ActionOfLnnGetLocalByteInfo(InfoKey key, uint8_t *out, uint32_t outSize);
     static bool ActionOfLnnIsDefaultOhosAccount();
 
-    static inline std::string deviceName = "Huawei Mate 30";
+    static inline std::string deviceName = "My Device";
     static inline std::string deviceUDID = "012345670123456701234567012345670123456701234567012345670123456701234567";
     static inline uint8_t accountHash[] = {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
