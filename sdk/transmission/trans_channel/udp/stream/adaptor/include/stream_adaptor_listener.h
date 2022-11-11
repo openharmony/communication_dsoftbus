@@ -29,7 +29,7 @@ public:
     StreamAdaptorListener() = default;
     explicit StreamAdaptorListener(std::shared_ptr<StreamAdaptor> adaptor) : adaptor_(adaptor) {}
     virtual ~StreamAdaptorListener() override = default;
-    void OnStreamReceived(std::unique_ptr<IStream> stream)
+    void OnStreamReceived(std::unique_ptr<IStream> stream) override
     {
         if (adaptor_ == nullptr || adaptor_->GetListenerCallback() == nullptr ||
             adaptor_->GetListenerCallback()->OnStreamReceived == nullptr) {
