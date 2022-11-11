@@ -29,7 +29,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
 
-void LnnHbOnAuthGroupCreated(void);
+void LnnHbOnAuthGroupCreated(int32_t groupType);
 void LnnHbOnAuthGroupDeleted(void);
 
 int32_t LnnInitHeartbeat(void);
