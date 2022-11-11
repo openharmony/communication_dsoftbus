@@ -441,7 +441,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     return SOFTBUS_OK;
 }
 
-static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
+static int32_t BlePostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "BlePostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
@@ -450,20 +450,20 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     }
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
-        SoftBusFree((void *)data);
+        SoftBusFree(data);
         return SOFTBUS_ERR;
     }
     BleConnectionInfo *connInfo = GetBleConnInfoByConnId(connectionId);
     if (connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes GetBleConnInfo failed");
         SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
-        SoftBusFree((void *)data);
+        SoftBusFree(data);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
     }
     SendQueueNode *node = (SendQueueNode *)SoftBusCalloc(sizeof(SendQueueNode));
     if (node == NULL) {
-        SoftBusFree((void *)data);
+        SoftBusFree(data);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -478,7 +478,7 @@ static int32_t BlePostBytes(uint32_t connectionId, const char *data, int32_t len
     int ret = BleEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BlePostBytes enqueue failed");
-        SoftBusFree((void *)data);
+        SoftBusFree(data);
         SoftBusFree(node);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return ret;
