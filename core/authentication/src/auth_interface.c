@@ -16,6 +16,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "auth_hichain.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
 
@@ -251,6 +252,15 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
     }
     *isMetaAuth = true;
     return SOFTBUS_OK;
+}
+
+bool AuthHasTrustedRelation(void)
+{
+    uint32_t sameGroupCnt = HichainGetJoinedGroups(AUTH_IDENTICAL_ACCOUNT_GROUP);
+    uint32_t pointGroupCnt = HichainGetJoinedGroups(AUTH_PEER_TO_PEER_GROUP);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "hichain getJoinedGroups sameGroupCnt:%u pointGroupCnt:%u.", sameGroupCnt, pointGroupCnt);
+    return sameGroupCnt != 0 || pointGroupCnt != 0;
 }
 
 int32_t AuthInit(void)
