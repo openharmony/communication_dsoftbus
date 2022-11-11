@@ -653,7 +653,7 @@ int32_t TransCloseAuthChannel(int32_t channelId)
 
 int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len)
 {
-    if (data == NULL || len <= 0) {
+    if (msg == NULL || len <= 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
