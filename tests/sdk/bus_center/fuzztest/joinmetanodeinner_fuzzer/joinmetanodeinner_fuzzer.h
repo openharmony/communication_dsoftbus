@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TEST_FUZZTEST_JOINMETANODELNNER_FUZZER_H
-#define TEST_FUZZTEST_JOINMETANODELNNER_FUZZER_H
+#ifndef TEST_FUZZTEST_JOINMETANODEINNER_FUZZER_H
+#define TEST_FUZZTEST_JOINMETANODEINNER_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "joinmetanodelnner_fuzzer"
+#define FUZZ_PROJECT_NAME "joinmetanodeinner_fuzzer"
 
-#endif /* TEST_FUZZTEST_JOINMETANODELNNER_FUZZER_H */
+#endif /* TEST_FUZZTEST_JOINMETANODEINNER_FUZZER_H */
