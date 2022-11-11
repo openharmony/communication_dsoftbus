@@ -235,10 +235,10 @@ void RegisterFileCb(const UdpChannelMgrCb *fileCb)
     g_udpChannelMgrCb = fileCb;
 }
 
-int32_t TransSendFile(int32_t dfileId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+int32_t TransSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     if (dFileList == NULL) {
-        return NSTACKX_DFileSendFiles(dfileId, sFileList, fileCnt, NULL);
+        return NSTACKX_DFileSendFiles(channelId, sFileList, fileCnt, NULL);
     }
-    return NSTACKX_DFileSendFilesWithRemotePath(dfileId, sFileList, dFileList, fileCnt, NULL);
+    return NSTACKX_DFileSendFilesWithRemotePath(channelId, sFileList, dFileList, fileCnt, NULL);
 }
