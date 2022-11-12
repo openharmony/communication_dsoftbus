@@ -56,7 +56,7 @@ int ObjectConnectDevice(const ConnectOption *option, unsigned int requestId, con
     return 0;
 }
 
-int ObjectPostBytes(unsigned int connectionId, const char *data, int len, int pid, int flag)
+int ObjectPostBytes(unsigned int connectionId, char *data, int len, int pid, int flag)
 {
     int module;
     int bufLen = 15;
@@ -231,7 +231,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger001, TestSize.Level1)
 
 #ifdef connection_enable_ble_test
     ret = ConnTypeIsSupport(CONNECT_BLE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     GTEST_LOG_(INFO) << "BLE Support";
 #endif
 };

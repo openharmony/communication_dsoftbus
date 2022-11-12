@@ -655,10 +655,10 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
     return SOFTBUS_OK;
 }
 
-int32_t LnnStartHeartbeat(void)
+int32_t LnnStartHeartbeat(uint64_t delayMillis)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start.");
-    return LnnPostStartMsgToHbFsm(g_hbFsm);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start delay %" PRIu64 " msec.", delayMillis);
+    return LnnPostStartMsgToHbFsm(g_hbFsm, delayMillis);
 }
 
 int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)

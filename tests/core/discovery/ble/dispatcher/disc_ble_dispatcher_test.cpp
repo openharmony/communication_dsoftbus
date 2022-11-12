@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "disc_ble_dispatcher.h"
+#include "disc_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -167,6 +168,7 @@ static void LinkStatusChangedA(LinkStatus status)
 
 static void UpdateLocalDeviceInfoA(InfoTypeChanged type)
 {
+    (void)type;
     g_interfaceFunCntA.updateLocalDeviceInfoCntA = 1;
 }
 
@@ -310,8 +312,6 @@ static SubscribeOption g_sOption3 = {
     .dataLen = 0
 };
 
-static LinkStatus status = LINK_STATUS_UP;
-static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
 class DiscoveryBleDispatcherTest : public testing::Test {
 public:
     DiscoveryBleDispatcherTest()
@@ -324,7 +324,7 @@ public:
     void TearDown();
 };
 
-static DiscoveryFuncInterface funA = {
+static DiscoveryFuncInterface g_discoveryFuncA = {
     .Publish = PublishA,
     .StartScan = StartScanA,
     .Unpublish = UnpublishA,
@@ -334,15 +334,15 @@ static DiscoveryFuncInterface funA = {
     .Unsubscribe = UnsubscribeA,
     .StopAdvertise = StopAdvertiseA,
     .LinkStatusChanged = LinkStatusChangedA,
-    .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
+    .UpdateLocalDeviceInfo = UpdateLocalDeviceInfoA,
 };
 
-static DiscoveryBleDispatcherInterface a = {
+static DiscoveryBleDispatcherInterface g_interfaceA = {
     .IsConcern = IsConcernA,
-    .mediumInterface = &funA,
+    .mediumInterface = &g_discoveryFuncA,
 };
 
-static DiscoveryFuncInterface funB = {
+static DiscoveryFuncInterface g_discoveryFuncB = {
     .Publish = PublishB,
     .StartScan = StartScanB,
     .Unpublish = UnpublishB,
@@ -352,12 +352,12 @@ static DiscoveryFuncInterface funB = {
     .Unsubscribe = UnsubscribeB,
     .StopAdvertise = StopAdvertiseB,
     .LinkStatusChanged = LinkStatusChangedA,
-    .UpdateLocalDeviceInfo =UpdateLocalDeviceInfoA,
+    .UpdateLocalDeviceInfo = UpdateLocalDeviceInfoA,
 };
 
-static DiscoveryBleDispatcherInterface b = {
+static DiscoveryBleDispatcherInterface g_interfaceB = {
     .IsConcern = IsConcernB,
-    .mediumInterface = &funB,
+    .mediumInterface = &g_discoveryFuncB,
 };
 
 void DiscoveryBleDispatcherTest::SetUpTestCase(void)
@@ -381,7 +381,7 @@ void DiscoveryBleDispatcherTest::TearDown(void)
 HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 {
     printf("testDiscPublish001\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
@@ -394,7 +394,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.publishCntA;
     afterFunCntB = g_interfaceFunCntB.publishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.startScanCntA;
@@ -403,7 +403,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.startScanCntA;
     afterFunCntB = g_interfaceFunCntB.startScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.unpublishCntA;
@@ -412,7 +412,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.unpublishCntA;
     afterFunCntB = g_interfaceFunCntB.unpublishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.stopScanCntA;
@@ -421,7 +421,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.stopScanCntA;
     afterFunCntB = g_interfaceFunCntB.stopScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 };
 
@@ -434,7 +434,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
 {
     printf("testDiscovery001\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
@@ -447,7 +447,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
     afterFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.subscribeCntA;
@@ -456,7 +456,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.subscribeCntA;
     afterFunCntB = g_interfaceFunCntB.subscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.unsubscribeCntA;
@@ -465,7 +465,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.unsubscribeCntA;
     afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
@@ -474,7 +474,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
     afterFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
     afterFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 };
 
@@ -487,7 +487,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
 HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 {
     printf("testDiscPublish002\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
@@ -501,7 +501,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.publishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.startScanCntA;
     beforeFunCntB = g_interfaceFunCntB.startScanCntB;
@@ -510,7 +510,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.startScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.unpublishCntA;
     beforeFunCntB = g_interfaceFunCntB.unpublishCntB;
@@ -519,7 +519,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.unpublishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.stopScanCntA;
     beforeFunCntB = g_interfaceFunCntB.stopScanCntB;
@@ -528,7 +528,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.stopScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 };
 
 /*
@@ -540,7 +540,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
 {
     printf("testDiscovery002\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
@@ -554,7 +554,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.subscribeCntA;
     beforeFunCntB = g_interfaceFunCntB.subscribeCntB;
@@ -563,7 +563,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.subscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.unsubscribeCntA;
     beforeFunCntB = g_interfaceFunCntB.unsubscribeCntB;
@@ -572,7 +572,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
     beforeFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
     beforeFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
@@ -581,7 +581,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
     afterFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
-    EXPECT_EQ(beforeFunCntB+1, afterFunCntB);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 };
 
 /*
@@ -593,7 +593,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
 HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 {
     printf("testDiscDispatcher003\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
@@ -605,7 +605,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->Publish(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.publishCntA;
     afterFunCntB = g_interfaceFunCntB.publishCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -614,7 +614,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->StartScan(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.startScanCntA;
     afterFunCntB = g_interfaceFunCntB.startScanCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -623,7 +623,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->Unpublish(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.unpublishCntA;
     afterFunCntB = g_interfaceFunCntB.unpublishCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -632,7 +632,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
     ret = interface->StopScan(&g_pOption3);
     afterFunCntA = g_interfaceFunCntA.stopScanCntA;
     afterFunCntB = g_interfaceFunCntB.stopScanCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 };
@@ -646,7 +646,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
 {
     printf("testDiscovery003\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int ret;
     int32_t beforeFunCntA;
     int32_t beforeFunCntB;
@@ -658,7 +658,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->StartAdvertise(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
     afterFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -667,7 +667,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->Subscribe(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.subscribeCntA;
     afterFunCntB = g_interfaceFunCntB.subscribeCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -676,7 +676,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->Unsubscribe(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.unsubscribeCntA;
     afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
@@ -685,7 +685,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
     ret = interface->StopAdvertise(&g_sOption3);
     afterFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
     afterFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(beforeFunCntA, afterFunCntA);
     EXPECT_EQ(beforeFunCntB, afterFunCntB);
 };
@@ -699,13 +699,14 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
 HWTEST_F(DiscoveryBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
 {
     printf("testLinkStatusChanged001\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    static LinkStatus status = LINK_STATUS_UP;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t beforeFunCntA;
     int32_t afterFunCntA;
     beforeFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
     interface->LinkStatusChanged(status);
     afterFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
 };
 
 /*
@@ -717,13 +718,14 @@ HWTEST_F(DiscoveryBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
 HWTEST_F(DiscoveryBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
 {
     printf("testUpdateLocalDeviceInfo001\r\n");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t beforeFunCntA;
     int32_t afterFunCntA;
     beforeFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
     interface->UpdateLocalDeviceInfo(type);
     afterFunCntA = g_interfaceFunCntA.updateLocalDeviceInfoCntA;
-    EXPECT_EQ(beforeFunCntA+1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
 }
 
 /*
@@ -735,7 +737,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Leve
 HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchPublishOption001");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->Publish(&g_pOption0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
@@ -749,7 +751,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level
 HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchSubscribeOption001");
-    DiscoveryFuncInterface *interface = DiscBleInitForTest(&a, &b);
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->StartAdvertise(&g_sOption0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }

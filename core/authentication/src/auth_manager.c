@@ -501,10 +501,10 @@ static void OnDeviceNotTrusted(const char *peerUdid)
     g_verifyListener.onDeviceNotTrusted(peerUdid);
 }
 
-static void OnGroupCreated(const char *groupId)
+static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupCreated != NULL) {
-        g_groupChangeListener.onGroupCreated(groupId);
+        g_groupChangeListener.onGroupCreated(groupId, groupType);
     }
 }
 

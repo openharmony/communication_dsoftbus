@@ -15,6 +15,7 @@
 
 #include "deactivemetanode_fuzzer.h"
 #include <cstddef>
+#include <securec.h>
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -22,10 +23,24 @@ namespace OHOS {
     bool DeactiveMetaNodeTest(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
-            return true;
+            return false;
         }
 
-        DeactiveMetaNode((const char *)data, (const char *)data);
+        char *tmp = (char *)malloc(size);
+        if (tmp == nullptr) {
+            return false;
+        }
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        DeactiveMetaNode(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp));
+        free(tmp);
         return true;
     }
 }

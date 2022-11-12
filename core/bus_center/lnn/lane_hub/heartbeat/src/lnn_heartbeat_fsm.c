@@ -155,6 +155,10 @@ static bool CheckHbFsmStateMsgArgs(const FsmStateMachine *fsm)
 static void FreeUnhandledHbMessage(int32_t msgType, void *para)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB free unhandled msg(%d)", msgType);
+    if (msgType == EVENT_HB_UPDATE_SEND_INFO) {
+        /* this event use pointer to transfer parameters */
+        return;
+    }
     if (para != NULL) {
         SoftBusFree(para);
     }
@@ -591,7 +595,7 @@ static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB try as master node post msg fail");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) try as master node in %" PRIu64 " mecs", delayMillis);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) try as master node in %" PRIu64 " msec", delayMillis);
 }
 
 static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *para)
@@ -949,13 +953,13 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, 
     return SOFTBUS_OK;
 }
 
-int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm)
+int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm, uint64_t delayMillis)
 {
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post start msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    return LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_START_PROCESS, NULL);
+    return LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_START_PROCESS, NULL, delayMillis);
 }
 
 int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type)

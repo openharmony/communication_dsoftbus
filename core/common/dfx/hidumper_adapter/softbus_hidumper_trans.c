@@ -76,18 +76,31 @@ ShowDumpInfosFunc g_ShowRegisterSessionInfosFunc = NULL;
 
 void SetShowRegisterSessionInfosFunc(ShowDumpInfosFunc func)
 {
+    if (func == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is NULL");
+        return;
+    }
     g_ShowRegisterSessionInfosFunc = func;
 }
 
 ShowDumpInfosFunc g_ShowRunningSessionInfosFunc = NULL;
 void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
 {
+    if (func == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is NULL");
+        return;
+    }
     g_ShowRunningSessionInfosFunc = func;
 }
 
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid)
 {
+    if (fd < 0 || pkgName == NULL || sessionName == NULL || uid < 0 || pid < 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid");
+        return;
+    }
+
     char uidArr[MAX_ID_LEN] = {0};
     char pidArr[MAX_ID_LEN] = {0};
     char uidStr[MAX_ID_LEN] = {0};
@@ -107,6 +120,11 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
+    if (fd < 0 || type < DUMPER_LANE_BR || type >= DUMPER_LANE_LINK_TYPE_BUTT || appInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid");
+        return;
+    }
+
     char deviceId[DEVICE_ID_SIZE_MAX] = {0};
     char srcAddr[MAX_SOCKET_ADDR_LEN] = {0};
     char dstAddr[MAX_SOCKET_ADDR_LEN] = {0};

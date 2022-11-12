@@ -16,7 +16,8 @@
 #include <gtest/gtest.h>
 
 #include <securec.h>
-
+#include "bus_center_server_proxy.h"
+#include "bus_center_server_proxy_standard.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
@@ -526,11 +527,11 @@ HWTEST_F(BusCenterSdkTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test001, TestSize.Lev
 HWTEST_F(BusCenterSdkTest, JOIN_META_NODE_INNER_Test001, TestSize.Level1)
 {
     char pkgName[] = "test";
-    CustomData dataKey;
-    (void)memset_s(&dataKey, sizeof(CustomData), 0, sizeof(CustomData));
+    CustomData customData;
+    (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
     OnJoinMetaNodeResult cb = nullptr;
     ConnectionAddr *target = nullptr;
-    int32_t ret = JoinMetaNodeInner(pkgName, target, &dataKey, cb);
+    int32_t ret = JoinMetaNodeInner(pkgName, target, &customData, cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -591,4 +592,109 @@ HWTEST_F(BusCenterSdkTest, META_NODE_ON_LEAVE_RESULT_Test001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
+/*
+* @tc.name: SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001
+* @tc.desc: ServerIpcSetNodeDataChangeFlag Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001, TestSize.Level1)
+{
+    char pkgName[] = "test";
+    char networkId[] = "ABCDEFG";
+    char *networkId1 = nullptr;
+    uint16_t dataChangeFlag = false;
+    int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId1, dataChangeFlag);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: SERVER_IPC_SET_NODE_DATA_CHANGE_Test001
+* @tc.desc: Meta Node On Leave Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_Test002, TestSize.Level1)
+{
+    BusCenterServerProxyInit();
+    char pkgName[] = "pkgname";
+    char networkId[] = "12313"; 
+    uint16_t dataChangeFlag = 11;
+    ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+}
+
+/*
+* @tc.name: SERVER_IPC_JOIN_META_NODE_Test001
+* @tc.desc: Server Ipc Join Meta Node Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_NODE_Test001, TestSize.Level1)
+{
+    char *pkgName = nullptr;
+    void *addr = nullptr;
+    uint32_t addrTypeLen = 0;
+    CustomData customData;
+    ConnectionAddr connAddr;
+    (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
+    char pkgNameValue[] = "test";
+    int32_t ret = ServerIpcJoinMetaNode(pkgName, addr, &customData, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    addr = (void*)&connAddr;
+    ret = ServerIpcJoinMetaNode(pkgNameValue, addr, &customData, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_IPC_ERR);
+}
+
+/*
+* @tc.name: SERVER_IPC_JOIN_META_Test001
+* @tc.desc: Meta Node On Leave Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_Test002, TestSize.Level1)
+{
+    char pkgName[] = "111";
+    void *addr = nullptr; 
+    CustomData *customData = nullptr;
+    unsigned int addrTypeLen = 2;
+    ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
+    BusCenterServerProxyInit();
+    ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
+}
+
+/*
+* @tc.name: SERVER_IPC_LEAVE_META_NODE_Test001
+* @tc.desc: Server Ipc Leave Meta Node Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_LEAVE_META_NODE_Test001, TestSize.Level1)
+{
+    char *pkgName = nullptr;
+    char pkgNameValue[] = "test";
+    char networkId[] = "ABCDEFG";
+    char *networkId1 = nullptr;
+    int32_t ret = ServerIpcLeaveMetaNode(pkgName, networkId1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcLeaveMetaNode(pkgNameValue, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: SERVER_IPC_LEAVE_META_Test001
+* @tc.desc: Meta Node On Leave Result
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(BusCenterSdkTest, SERVER_IPC_LEAVE_META_Test002, TestSize.Level1)
+{
+    char pkgName[] = "pkgname";
+    char networkId[] = "111";
+    ServerIpcLeaveMetaNode(pkgName, networkId);
+    BusCenterServerProxyInit();
+    ServerIpcLeaveMetaNode(pkgName, networkId);
+}
 } // namespace OHOS

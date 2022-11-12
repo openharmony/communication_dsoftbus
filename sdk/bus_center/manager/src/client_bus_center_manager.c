@@ -307,7 +307,7 @@ static void DuplicateNodeStateCbList(ListNode *list)
     NodeStateCallbackItem *copyItem = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.nodeStateCbList, NodeStateCallbackItem, node) {
-        copyItem = SoftBusMalloc(sizeof(NodeStateCallbackItem));
+        copyItem = (NodeStateCallbackItem *)SoftBusMalloc(sizeof(NodeStateCallbackItem));
         if (copyItem == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc node state callback item fail");
             continue;
@@ -327,7 +327,7 @@ static void DuplicateTimeSyncResultCbList(ListNode *list, const char *networkId)
         if (strcmp(item->networkId, networkId) != 0) {
             continue;
         }
-        copyItem = SoftBusMalloc(sizeof(TimeSyncCallbackItem));
+        copyItem = (TimeSyncCallbackItem *)SoftBusMalloc(sizeof(TimeSyncCallbackItem));
         if (copyItem == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc time sync callback item fail");
             continue;
@@ -538,7 +538,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     return rc;
 }
 
-int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *dataKey, OnJoinLNNResult cb)
+int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinLNNResult cb)
 {
     int32_t rc;
 
@@ -556,7 +556,7 @@ int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomDat
             rc = SOFTBUS_ALREADY_EXISTED;
             break;
         }
-        rc = ServerIpcJoinMetaNode(pkgName, target, dataKey, sizeof(*target));
+        rc = ServerIpcJoinMetaNode(pkgName, target, customData, sizeof(*target));
         if (rc != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : request join MetaNode");
         } else {
@@ -865,7 +865,7 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join lnn cb list in join result");
     }
-    while ((item = FindJoinLNNCbItem(addr, NULL)) != NULL) {
+    while ((item = FindJoinLNNCbItem((ConnectionAddr *)addr, NULL)) != NULL) {
         ListDelete(&item->node);
         if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock join lnn cb list in join result");
@@ -899,7 +899,7 @@ int32_t MetaNodeOnJoinResult(void *addr, const char *networkId, int32_t retCode)
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join MetaNode cb list in join result");
     }
-    while ((item = FindJoinMetaNodeCbItem(addr, NULL)) != NULL) {
+    while ((item = FindJoinMetaNodeCbItem((ConnectionAddr *)addr, NULL)) != NULL) {
         ListDelete(&item->node);
         if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock join MetaNode cb list in join result");
@@ -1085,7 +1085,7 @@ int32_t LnnOnTimeSyncResult(const void *info, int retCode)
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, TimeSyncCallbackItem, node) {
         if (item->cb.onTimeSyncResult != NULL) {
-            item->cb.onTimeSyncResult(info, retCode);
+            item->cb.onTimeSyncResult((TimeSyncResultInfo *)info, retCode);
         }
     }
     return SOFTBUS_OK;
@@ -1108,6 +1108,6 @@ void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
 void LnnOnRefreshDeviceFound(const void *device)
 {
     if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
-        g_busCenterClient.refreshCb.OnDeviceFound(device);
+        g_busCenterClient.refreshCb.OnDeviceFound((const DeviceInfo *)device);
     }
 }

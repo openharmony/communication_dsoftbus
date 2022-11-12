@@ -42,6 +42,8 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
 {
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
+            "dispatch publish action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
         return SOFTBUS_ERR;
     }
     switch (type) {
@@ -50,6 +52,9 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
         case UNPUBLISH_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
+                "dispatch publish action failed: unsupport type '%d', capability '%u'", type,
+                option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
 }
@@ -58,6 +63,8 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
 {
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
+            "dispatch subcribe action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
         return SOFTBUS_ERR;
     }
     switch (type) {
@@ -66,6 +73,9 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
+            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
+                "dispatch subcribe action failed: unsupport type '%d', capability '%u'", type,
+                option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
 }
@@ -168,11 +178,12 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     return &g_discBleFrameFuncInterface;
 }
 
-DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *a, DiscoveryBleDispatcherInterface *b)
+DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
+    DiscoveryBleDispatcherInterface *interfaceB)
 {
     g_dispatcherSize = 0;
-    g_dispatchers[g_dispatcherSize++] = a;
-    g_dispatchers[g_dispatcherSize++] = b;
+    g_dispatchers[g_dispatcherSize++] = interfaceA;
+    g_dispatchers[g_dispatcherSize++] = interfaceB;
     return &g_discBleFrameFuncInterface;
 }
 

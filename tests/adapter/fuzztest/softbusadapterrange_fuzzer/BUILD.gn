@@ -14,21 +14,12 @@
 #####################hydra-fuzz###################
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
-module_output_path = "dsoftbus/bus_center"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("JoinMetaNodeInnerFuzzTest") {
-  module_out_path = module_output_path
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/joinmetanodelnner_fuzzer"
-  include_dirs = [
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "//commonlibrary/c_utils/base/include",
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/sdk/bus_center/service/include",
-    "$dsoftbus_root_path/sdk/bus_center/manager/include",
-  ]
+ohos_fuzztest("SoftBusAdapterRangeFuzzTest") {
+  module_out_path = "dsoftbus/adapter"
+  fuzz_config_file = "//foundation/communication/dsoftbus/tests/adapter/fuzztest/softbusadapterrange_fuzzer"
+  include_dirs = [ "$dsoftbus_root_path/adapter/common/include" ]
   cflags = [
     "-g",
     "-O0",
@@ -36,12 +27,22 @@ ohos_fuzztest("JoinMetaNodeInnerFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fstack-protector-strong",
   ]
-  sources = [ "joinmetanodelnner_fuzzer.cpp" ]
+  sources = [ "softbusadapterrange_fuzzer.cpp" ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [ "//foundation/communication/dsoftbus/adapter:softbus_adapter" ]
 
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
   ]
 }
+
+###############################################################################
+group("fuzztest") {
+  testonly = true
+  deps = [
+    # deps file
+    ":SoftBusAdapterRangeFuzzTest",
+  ]
+}
+###############################################################################

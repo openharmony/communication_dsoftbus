@@ -42,6 +42,10 @@ ohos_unittest("AuthTest") {
     "//third_party/cJSON",
     "unittest/common/",
     "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   ]
 
   deps = [
@@ -80,13 +84,14 @@ ohos_unittest("AuthTestMock") {
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_meta_manager_virtual.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "unittest/auth_connection_mock.cpp",
-    "unittest/auth_hichain_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "unittest/auth_net_ledger_mock.cpp",
     "unittest/auth_test_enhance.cpp",
   ]
 
   include_dirs = [
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "//base/security/device_auth/interfaces/innerkits",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -114,6 +119,10 @@ ohos_unittest("AuthTestMock") {
     "//third_party/cJSON",
     "unittest/common/",
     "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   ]
 
   deps = [

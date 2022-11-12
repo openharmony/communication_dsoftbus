@@ -24,11 +24,11 @@
 #include "lnn_device_info.h"
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_mem.h"
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F
@@ -124,15 +124,15 @@ int32_t DiscBleGetDeviceName(char *deviceName)
     return SOFTBUS_OK;
 }
 
-uint8_t DiscBleGetDeviceType(void)
+uint16_t DiscBleGetDeviceType(void)
 {
     char type[DEVICE_TYPE_BUF_LEN] = {0};
-    uint8_t typeId;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get local device type failed.");
         return TYPE_UNKNOW_ID;
     }
-    if (LnnConvertDeviceTypeToId(type, (uint16_t *)&typeId) != SOFTBUS_OK) {
+    uint16_t typeId = 0;
+    if (LnnConvertDeviceTypeToId(type, &typeId) != SOFTBUS_OK) {
         return TYPE_UNKNOW_ID;
     }
     return typeId;
@@ -234,6 +234,19 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const unsigned char *src, 
     return ret;
 }
 
+static int32_t ParseDeviceType(DeviceWrapper *device, const unsigned char* data, const uint32_t len)
+{
+    uint8_t recvDevType[DEVICE_TYPE_LEN] = {0};
+    if (CopyValue(recvDevType, DEVICE_TYPE_LEN, (void *)data, len, "TLV_TYPE_DEVICE_TYPE") != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    device->info->devType = recvDevType[0];
+    if (len == DEVICE_TYPE_LEN) {
+        device->info->devType = (recvDevType[1] << ONE_BYTE_LENGTH) | recvDevType[0];
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const unsigned char *data, uint32_t dataLen)
 {
     uint32_t curLen = POS_TLV + ADV_HEAD_LEN;
@@ -249,25 +262,25 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const unsigned char *data, u
         switch (type) {
             case TLV_TYPE_DEVICE_ID_HASH:
                 ret = CopyValue(device->info->devId, DISC_MAX_DEVICE_ID_LEN,
-                    &data[curLen + 1], len, "TLV_TYPE_DEVICE_ID_HASH");
+                                (void *)&data[curLen + 1], len, "TLV_TYPE_DEVICE_ID_HASH");
                 break;
             case TLV_TYPE_DEVICE_TYPE:
-                ret = CopyValue(&device->info->devType, DEVICE_TYPE_LEN,
-                    &data[curLen + 1], len, "TLV_TYPE_DEVICE_TYPE");
+                ret = ParseDeviceType(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_DEVICE_NAME:
                 ret = CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
-                    &data[curLen + 1], len, "TLV_TYPE_DEVICE_NAME");
+                                (void *)&data[curLen + 1], len, "TLV_TYPE_DEVICE_NAME");
                 break;
             case TLV_TYPE_CUST:
                 ret = CopyValue(device->info->custData, DISC_MAX_CUST_DATA_LEN,
-                    &data[curLen + 1], len, "TLV_TYPE_CUST");
+                                (void *)&data[curLen + 1], len, "TLV_TYPE_CUST");
                 break;
             case TLV_TYPE_BR_MAC:
                 ret = CopyBrAddrValue(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_RANGE_POWER:
-                ret = CopyValue(&device->power, RANGE_POWER_TYPE_LEN, &data[curLen + 1], len, "TLV_TYPE_RANGE_POWER");
+                ret = CopyValue(&device->power, RANGE_POWER_TYPE_LEN, (void *)&data[curLen + 1], len,
+                                "TLV_TYPE_RANGE_POWER");
                 break;
             default:
                 SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "Unknown TLV, tlvType: %d, tlvLen: %u, just skip",

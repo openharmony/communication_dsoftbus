@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef AUTH_HICHAIN_MOCK_H
-#define AUTH_HICHAIN_MOCK_H
+#ifndef LNN_HICHAIN_MOCK_H
+#define LNN_HICHAIN_MOCK_H
 
 #include <gmock/gmock.h>
 #include <mutex>
@@ -22,10 +22,10 @@
 #include "device_auth.h"
 
 namespace OHOS {
-class AuthHichainInterface {
+class LnnHichainInterface {
 public:
-    AuthHichainInterface() {};
-    virtual ~AuthHichainInterface() {};
+    LnnHichainInterface() {};
+    virtual ~LnnHichainInterface() {};
 
     virtual int32_t InitDeviceAuthService() = 0;
     virtual void DestroyDeviceAuthService() = 0;
@@ -33,10 +33,10 @@ public:
     virtual DeviceGroupManager *GetGmInstance() = 0;
 };
 
-class AuthHichainInterfaceMock : public AuthHichainInterface {
+class LnnHichainInterfaceMock : public LnnHichainInterface {
 public:
-    AuthHichainInterfaceMock();
-    ~AuthHichainInterfaceMock() override;
+    LnnHichainInterfaceMock();
+    ~LnnHichainInterfaceMock() override;
     MOCK_METHOD0(InitDeviceAuthService, int32_t ());
     MOCK_METHOD0(DestroyDeviceAuthService, void ());
     MOCK_METHOD0(GetGaInstance, GroupAuthManager *());
@@ -45,6 +45,10 @@ public:
     static int32_t InvokeAuthDevice(int32_t osAccountId, int64_t authReqId, const char *authParams,
         const DeviceAuthCallback *gaCallback);
     static int32_t InvokeDataChangeListener(const char *appId, const DataChangeListener *listener);
+    static int32_t InvokeGetJoinedGroups1(int32_t osAccountId, const char *appId, int groupType,
+        char **returnGroupVec, uint32_t *groupNum);
+    static int32_t InvokeGetJoinedGroups2(int32_t osAccountId, const char *appId, int groupType,
+        char **returnGroupVec, uint32_t *groupNum);
 };
 
 } // namespace OHOS
