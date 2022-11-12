@@ -11,12 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("fuzztest") {
-  testonly = true
-  deps = [ "fuzztest/softbuslog_fuzzer:fuzztest" ]
-}
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-group("unittest") {
-  testonly = true
-  deps = [ "unittest:SoftBusLogTest" ]
+module_output_path = "dsoftbus/common"
+
+ohos_unittest("SoftBusLogTest") {
+  module_out_path = module_output_path
+  sources = [ "softbus_log_test.cpp" ]
+  include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
+  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  if (is_standard_system) {
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }
