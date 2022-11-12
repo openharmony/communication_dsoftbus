@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "softbus_access_token_test.h"
 #include "discovery_service.h"
 
 using namespace testing::ext;
@@ -45,7 +46,9 @@ public:
 };
 
 void DiscSdkOnlyL2Test::SetUpTestCase(void)
-{}
+{
+    SetAceessTokenPermission("discSdkOnlyL2Test");
+}
 
 void DiscSdkOnlyL2Test::TearDownTestCase(void)
 {}
