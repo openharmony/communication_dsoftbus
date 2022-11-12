@@ -42,6 +42,11 @@ namespace OHOS {
         addr.info.ip.port = port + size;
     }
 
+    static void OnLeaveLNNResult(const char *networkId, int32_t retCode)
+    {
+        (void)networkId;
+        (void)retCode;
+    }
 
     bool JoinLnnFuzzerTest(const uint8_t* data, size_t size)
     {
@@ -49,16 +54,23 @@ namespace OHOS {
             return true;
         }
 
-        char tmp[65] = {0};
-        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
-            return true;
+        char *tmp = (char *)malloc(size);
+        if (tmp == nullptr) {
+            return false;
         }
-        if (strnlen((const char *)tmp, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
-            return true;
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
         }
 
         GenRandAddr(data, size);
-        JoinLNN((const char *)tmp, &addr, OnJoinLNNResult);
+        JoinLNN(reinterpret_cast<const char *>(tmp), &addr, OnJoinLNNResult);
+        LeaveLNN(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp), OnLeaveLNNResult);
+        free(tmp);
         return true;
     }
 }

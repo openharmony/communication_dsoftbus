@@ -138,7 +138,7 @@ typedef struct {
 } DiscBleListener;
 
 typedef struct {
-    uint32_t *optionCapBitMap;
+    uint32_t optionCapBitMap[CAPABILITY_NUM];
     unsigned char *custData;
     uint32_t custDataLen;
     uint32_t freq;
@@ -368,7 +368,7 @@ static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, D
     }
 }
 
-static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
+static bool ProcessHashAccout(DeviceInfo *foundInfo)
 {
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (!CheckCapBitMapExist(CAPABILITY_NUM, foundInfo->capabilityBitmap, pos)) {
@@ -470,7 +470,7 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
     };
 
     unsigned int tempCap = 0;
-    if (ProcessHwHashAccout(foundInfo)) {
+    if (ProcessHashAccout(foundInfo)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "same account");
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         if (tempCap == 0) {
@@ -786,10 +786,17 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
     if (DiscBleGetDeviceIdHash((unsigned char *)deviceIdHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceId Hash failed");
     }
-    uint8_t devType = info->devType;
     (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_ID_HASH, (const void *)deviceIdHash,
         SHORT_DEVICE_ID_HASH_LENGTH);
-    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, (const void *)&devType, DEVICE_TYPE_LEN);
+    uint16_t devType = info->devType;
+    uint8_t sendDevType[DEVICE_TYPE_LEN] = {0};
+    uint32_t devTypeLen = 1;
+    sendDevType[0] = devType & DEVICE_TYPE_MASK;
+    if (devType >= (1 << ONE_BYTE_LENGTH)) {
+        sendDevType[1] = (devType >> ONE_BYTE_LENGTH) & DEVICE_TYPE_MASK;
+        devTypeLen++;
+    }
+    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, (const void *)sendDevType, devTypeLen);
     if (advId == NON_ADV_ID) {
         AssembleNonOptionalTlv(info, boardcastData);
     }
@@ -977,7 +984,7 @@ static int32_t StopScaner(void)
 static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
 {
     if (option->publishOption != NULL) {
-        bleOption->optionCapBitMap = option->publishOption->capabilityBitmap;
+        bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(option->publishOption->capabilityBitmap[0]);
         bleOption->custDataLen = option->publishOption->dataLen;
         bleOption->custData = option->publishOption->capabilityData;
         bleOption->isSameAccount = false;
@@ -985,7 +992,7 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->freq = (uint32_t)(option->publishOption->freq);
         bleOption->ranging = option->publishOption->ranging;
     } else {
-        bleOption->optionCapBitMap = option->subscribeOption->capabilityBitmap;
+        bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(option->subscribeOption->capabilityBitmap[0]);
         bleOption->custDataLen = option->subscribeOption->dataLen;
         bleOption->custData = option->subscribeOption->capabilityData;
         bleOption->isSameAccount = option->subscribeOption->isSameAccount;
@@ -993,7 +1000,6 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
         bleOption->freq = (uint32_t)(option->subscribeOption->freq);
         bleOption->ranging = false;
     }
-    bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(bleOption->optionCapBitMap[0]);
 }
 
 static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option)
@@ -1003,6 +1009,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
         return SOFTBUS_INVALID_PARAM;
     }
     BleOption bleOption;
+    (void)memset_s(&bleOption, sizeof(BleOption), 0, sizeof(BleOption));
     GetBleOption(&bleOption, option);
     uint32_t *optionCapBitMap = bleOption.optionCapBitMap;
     uint32_t custDataLen = bleOption.custDataLen;

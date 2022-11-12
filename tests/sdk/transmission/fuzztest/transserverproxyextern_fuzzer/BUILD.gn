@@ -1,0 +1,64 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+module_output_path = "dsoftbus/transmission"
+
+##############################fuzztest##########################################
+ohos_fuzztest("TransServerProxyExternFuzzTest") {
+  module_out_path = module_output_path
+
+  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/transserverproxyextern_fuzzer"
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/interfaces/kits/transport",
+    "//foundation/communication/dsoftbus/core/common/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/manager/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/auth/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/proxy/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/tcp_direct/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/common/include",
+    "//foundation/communication/dsoftbus/adapter/common/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
+    "//foundation/communication/dsoftbus/core/transmission/common/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/ipc/include",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+
+  sources = [ "transserverproxyextern_fuzzer.cpp" ]
+
+  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+
+  external_deps = [ "c_utils:utils" ]
+}
+
+group("fuzztest") {
+  testonly = true
+  deps = []
+  deps += [
+    # deps file
+    ":TransServerProxyExternFuzzTest",
+  ]
+}

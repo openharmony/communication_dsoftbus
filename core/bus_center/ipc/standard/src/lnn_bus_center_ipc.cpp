@@ -217,7 +217,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
     return ret;
 }
 
-int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *dataKey, uint32_t addrTypeLen)
+int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
@@ -231,7 +231,7 @@ int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *dataK
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = MetaNodeServerJoin(connAddr, dataKey);
+    int32_t ret = MetaNodeServerJoin(connAddr, customData);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinMetaNodeInfo(pkgName, connAddr);
     }

@@ -180,8 +180,13 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
 
 SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
 {
+    if (paramNum <= SOFTBUS_EVT_PARAM_ZERO || paramNum >= SOFTBUS_EVT_PARAM_BUTT) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "param is invalid");
+        return nullptr;
+    }
     SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
     if (msg == nullptr) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "report msg is null");
         return nullptr;
     }
     msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);

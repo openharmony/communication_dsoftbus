@@ -19,9 +19,9 @@
 #include <cinttypes>
 
 #include "auth_common.h"
-#include "auth_connection_mock.h"
+#include "lnn_connection_mock.h"
 #include "auth_hichain.h"
-#include "auth_hichain_mock.h"
+#include "lnn_hichain_mock.h"
 #include "auth_interface.h"
 #include "auth_net_ledger_mock.h"
 #include "message_handler.h"
@@ -70,7 +70,7 @@ void AuthTestEnhance::TearDown()
 */
 HWTEST_F(AuthTestEnhance, AUTH_START_LISTENING_Test_001, TestSize.Level0)
 {
-    AuthConnectInterfaceMock connMock;
+    LnnConnectInterfaceMock connMock;
     {
         EXPECT_CALL(connMock, ConnStartLocalListening(_)).WillRepeatedly(Return(SOFTBUS_OK));
         int32_t port = 5566;
@@ -98,13 +98,32 @@ HWTEST_F(AuthTestEnhance, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
     const char *udid = "1111222233334444";
     const char *uid = "8888";
     int64_t authSeq = 5678;
-    AuthHichainInterfaceMock hichainMock;
+    LnnHichainInterfaceMock hichainMock;
     GroupAuthManager authManager;
-    authManager.authDevice = AuthHichainInterfaceMock::InvokeAuthDevice;
+    authManager.authDevice = LnnHichainInterfaceMock::InvokeAuthDevice;
     EXPECT_CALL(hichainMock, InitDeviceAuthService()).WillRepeatedly(Return(0));
     EXPECT_CALL(hichainMock, GetGaInstance()).WillRepeatedly(Return(&authManager));
     int32_t ret = HichainStartAuth(authSeq, udid, uid);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: AUTH_HICHAIN_GET_JOINED_GROUPS_Test_001
+* @tc.desc: auth common test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AuthTestEnhance, AUTH_HICHAIN_GET_JOINED_GROUPS_Test_001, TestSize.Level1)
+{
+    LnnHichainInterfaceMock hichainMock;
+    DeviceGroupManager groupManager;
+    EXPECT_CALL(hichainMock, GetGmInstance()).WillOnce(ReturnNull()).WillOnce(ReturnNull());
+    EXPECT_TRUE(!AuthHasTrustedRelation());
+    groupManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups1;
+    EXPECT_CALL(hichainMock, GetGmInstance()).WillRepeatedly(Return(&groupManager));
+    EXPECT_TRUE(AuthHasTrustedRelation());
+    groupManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups2;
+    EXPECT_TRUE(!AuthHasTrustedRelation());
 }
 
 /*
@@ -115,11 +134,11 @@ HWTEST_F(AuthTestEnhance, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
 */
 HWTEST_F(AuthTestEnhance, AUTH_INIT_Test_001, TestSize.Level0)
 {
-    AuthConnectInterfaceMock connMock;
-    AuthHichainInterfaceMock hichainMock;
+    LnnConnectInterfaceMock connMock;
+    LnnHichainInterfaceMock hichainMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
-    groupManager.regDataChangeListener = AuthHichainInterfaceMock::InvokeDataChangeListener;
+    groupManager.regDataChangeListener = LnnHichainInterfaceMock::InvokeDataChangeListener;
     EXPECT_CALL(connMock, ConnSetConnectCallback(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hichainMock, InitDeviceAuthService()).WillRepeatedly(Return(0));
     EXPECT_CALL(hichainMock, GetGaInstance()).WillRepeatedly(Return(&authManager));

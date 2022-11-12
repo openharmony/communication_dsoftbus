@@ -213,7 +213,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     AppInfo *appInfo = GetAppInfo(param);
     if (appInfo == NULL) {
-        goto EXIT_ERR;
+        return INVALID_CHANNEL_ID;
     }
 
     if (TransGetLaneInfo(param, &connInfo, &laneId) != SOFTBUS_OK) {

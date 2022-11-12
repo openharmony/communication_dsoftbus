@@ -183,6 +183,10 @@ static void NstackHiEventCb(void *softObj, const NstackDfxEvent *info)
 
 void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
 {
+    if (softObj == NULL || info == NULL) {
+        LOG_ERR("param is NULL");
+        return;
+    }
     NstackDfxEvent nstackInfo;
     if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(FillpDfxEvent)) != EOK) {
         LOG_ERR("change FillpDfxEvent to NstackDfxEvent failed!");

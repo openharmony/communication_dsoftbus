@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
   if (ohos_build_type == "debug") {
-    unittest("seq_verification_test") {
+    unittest("SeqVerificationTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/tests/unittest/dsoftbus"
       sources = [ "unittest/sequence_verification_test.cpp" ]
@@ -34,7 +34,7 @@ if (defined(ohos_lite)) {
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
   module_output_path = "dsoftbus/common"
-  ohos_unittest("seq_verification_test") {
+  ohos_unittest("SeqVerificationTest") {
     module_out_path = module_output_path
     sources = [ "unittest/sequence_verification_test.cpp" ]
 
@@ -48,6 +48,6 @@ if (defined(ohos_lite)) {
 
   group("unittest") {
     testonly = true
-    deps = [ ":seq_verification_test" ]
+    deps = [ ":SeqVerificationTest" ]
   }
 }

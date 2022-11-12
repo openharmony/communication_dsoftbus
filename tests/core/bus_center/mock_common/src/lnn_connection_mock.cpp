@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-#include "auth_connection_mock.h"
+#include "lnn_connection_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 void *g_connInterface;
-AuthConnectInterfaceMock::AuthConnectInterfaceMock()
+LnnConnectInterfaceMock::LnnConnectInterfaceMock()
 {
     g_connInterface = reinterpret_cast<void *>(this);
 }
 
-AuthConnectInterfaceMock::~AuthConnectInterfaceMock()
+LnnConnectInterfaceMock::~LnnConnectInterfaceMock()
 {
     g_connInterface = nullptr;
 }
 
-static AuthConnectInterface *GetConnInterface()
+static LnnConnectInterface *GetConnInterface()
 {
-    return reinterpret_cast<AuthConnectInterfaceMock *>(g_connInterface);
+    return reinterpret_cast<LnnConnectInterfaceMock *>(g_connInterface);
 }
 
 extern "C" {

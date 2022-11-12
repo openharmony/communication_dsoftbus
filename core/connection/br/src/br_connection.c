@@ -74,7 +74,7 @@ static int32_t StartLocalListening(const LocalListenerInfo *info);
 
 static int32_t StopLocalListening(const LocalListenerInfo *info);
 
-static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag);
+static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag);
 
 static ConnectFuncInterface g_brInterface = {
     .ConnectDevice = ConnectDevice,
@@ -624,7 +624,7 @@ static uint32_t ServerOnBrConnect(int32_t socketFd)
     return connectionId;
 }
 
-static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
+static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
@@ -633,13 +633,14 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
     if (state != BR_CONNECTION_STATE_CONNECTED) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connectionId(%u) device is not ready, state: %d",
             connectionId, state);
-        SoftBusFree((void *)data);
+        SoftBusFree(data);
         return SOFTBUS_BRCONNECTION_POSTBYTES_ERROR;
     }
 
     SendBrQueueNode *node = (SendBrQueueNode *)SoftBusCalloc(sizeof(SendBrQueueNode));
     if (node == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PostBytes SoftBusCalloc failed");
+        SoftBusFree(data);
         return SOFTBUS_MALLOC_ERR;
     }
     node->connectionId = connectionId;
@@ -652,7 +653,7 @@ static int32_t PostBytes(uint32_t connectionId, const char *data, int32_t len, i
     int32_t ret = BrEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Br enqueue failed, ret: %d", ret);
-        SoftBusFree((void *)data);
+        SoftBusFree(data);
         SoftBusFree(node);
         return ret;
     }

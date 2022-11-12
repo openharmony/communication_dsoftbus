@@ -37,7 +37,7 @@ typedef struct {
      * @return <b>SOFTBUS_OK</b> if the connection to the device is successfully.
      */
     int32_t (*ConnectDevice)(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
-    
+
     /**
      * @brief Send data to the peer. Enable br/ble/tcp to send data.
      * @see {@link TcpPostBytes} or {@link PostBytes} or {@link BlePostBytes}.
@@ -48,7 +48,7 @@ typedef struct {
      * @param[in] flag Message send flag.
      * @return <b>SOFTBUS_OK</b> if sending by byte is successfully.
      */
-    int32_t (*PostBytes)(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag);
+    int32_t (*PostBytes)(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag);
 
     /**
      * @brief To disconnect the device, use the br/ble/tcp type of disconnect device logically to disconnect

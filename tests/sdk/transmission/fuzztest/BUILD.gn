@@ -22,6 +22,7 @@ group("fuzztest") {
     "clienttransproxyfilemanager_fuzzer:fuzztest",
     "clienttransproxymanager_fuzzer:fuzztest",
     "clienttranssessionmanager_fuzzer:fuzztest",
+    "clienttranssessionservice_fuzzer:fuzztest",
     "clienttransstream_fuzzer:fuzztest",
     "clienttranstcpdirectlistener_fuzzer:fuzztest",
     "clienttransudpmanager_fuzzer:fuzztest",
@@ -40,7 +41,9 @@ group("fuzztest") {
     "sendbytes_fuzzer:fuzztest",
     "sendfile_fuzzer:fuzztest",
     "sendstream_fuzzer:fuzztest",
+    "sessioncallbackmock_fuzzer:fuzztest",
     "sessionimpl_fuzzer:fuzztest",
+    "sessionmock_fuzzer:fuzztest",
     "sessionserviceimpl_fuzzer:fuzztest",
     "setfilereceivelistener_fuzzer:fuzztest",
     "setfilesendlistener_fuzzer:fuzztest",
@@ -49,5 +52,6 @@ group("fuzztest") {
     "streamcommondata_fuzzer:fuzztest",
     "streamdepacketizer_fuzzer:fuzztest",
     "streammsgmanager_fuzzer:fuzztest",
+    "transserverproxyextern_fuzzer:fuzztest",
   ]
 }

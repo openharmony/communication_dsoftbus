@@ -13,9 +13,18 @@
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-bus_center_sdk_test_src = [ "bus_center_sdk_test.cpp" ]
+bus_center_sdk_test_src = [
+  "bus_center_sdk_test.cpp",
+  "client_bus_center_test.cpp",
+]
 softbus_center_sdk_test_src = [ "softbus_center_sdk_test.cpp" ]
 bus_center_sdk_test_inc = [
+  "$dsoftbus_root_path/adapter/default_config/spec_config",
+  "$dsoftbus_root_path/sdk/bus_center/manager/src",
+  "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/core/bus_center/interface",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
@@ -30,12 +39,20 @@ bus_center_sdk_test_inc = [
   "//commonlibrary/c_utils/base/include",
   "//third_party/bounds_checking_function/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+  "$dsoftbus_root_path/core/frame/standard/init/include",
+  "$dsoftbus_root_path/core/transmission/common/include",
 ]
 bus_center_sdk_test_deps = [
+  "$dsoftbus_root_path/adapter:softbus_adapter",
+  "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/core/frame:softbus_server",
   "$dsoftbus_root_path/sdk:softbus_client",
   "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
   "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+  "//foundation/communication/dsoftbus/sdk:softbus_client",
+  "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
   "//third_party/bounds_checking_function:libsec_static",
 ]
 
