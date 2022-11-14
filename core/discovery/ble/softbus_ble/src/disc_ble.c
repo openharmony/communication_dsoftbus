@@ -786,10 +786,17 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BoardcastData *
     if (DiscBleGetDeviceIdHash((unsigned char *)deviceIdHash) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Get deviceId Hash failed");
     }
-    uint8_t devType = info->devType;
     (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_ID_HASH, (const void *)deviceIdHash,
         SHORT_DEVICE_ID_HASH_LENGTH);
-    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, (const void *)&devType, DEVICE_TYPE_LEN);
+    uint16_t devType = info->devType;
+    uint8_t sendDevType[DEVICE_TYPE_LEN] = {0};
+    uint32_t devTypeLen = 1;
+    sendDevType[0] = devType & DEVICE_TYPE_MASK;
+    if (devType >= (1 << ONE_BYTE_LENGTH)) {
+        sendDevType[1] = (devType >> ONE_BYTE_LENGTH) & DEVICE_TYPE_MASK;
+        devTypeLen++;
+    }
+    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, (const void *)sendDevType, devTypeLen);
     if (advId == NON_ADV_ID) {
         AssembleNonOptionalTlv(info, boardcastData);
     }
