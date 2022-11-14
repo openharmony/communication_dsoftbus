@@ -39,7 +39,6 @@ void RunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
 
 void RunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay)
 {
-{
     (void)name;
     (void)task;
     (void)interval;
