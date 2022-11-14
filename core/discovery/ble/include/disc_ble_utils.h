@@ -54,7 +54,7 @@ void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 
 int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len);
 int32_t DiscBleGetDeviceName(char *deviceName);
-uint8_t DiscBleGetDeviceType(void);
+uint16_t DiscBleGetDeviceType(void);
 int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr);
 int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len);
 
