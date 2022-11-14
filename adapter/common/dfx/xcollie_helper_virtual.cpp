@@ -16,20 +16,33 @@
 #include "xcollie_helper.h"
 int SetTimer(const char *name, unsigned int timeout, void(*func)(void*), void *args)
 {
+    (void)name;
+    (void)timeout;
+    (void)func;
+    (void)args;
     return -1;
 }
 
 void CancelTimer(int id)
 {
+    (void)id;
     return;
 }
 
 void RunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
 {
+    (void)name;
+    (void)task;
+    (void)delay;
     return;
 }
 
 void RunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay)
 {
+{
+    (void)name;
+    (void)task;
+    (void)interval;
+    (void)delay;
     return;
 }
