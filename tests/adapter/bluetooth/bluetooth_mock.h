@@ -21,22 +21,49 @@
 
 #include "softbus_adapter_bt_common.h"
 
-class BluetoothCommonn
-{
+// declare mock symbols explicitly which hava C implement, redirected to mocker when linking
+class BluetoothCommonn {
 public:
-    virtual bool EnableBle();
-    virtual bool DisableBle();
-    virtual bool IsBleEnabled();
-    virtual bool GetLocalAddr(unsigned char *mac, unsigned int len);
-    virtual bool SetLocalName(unsigned char *localName, unsigned char length);
-    virtual int GapRegisterCallbacks(BtGapCallBacks *func);
-    virtual bool PairRequestReply(const BdAddr *bdAddr, int transport, bool accept);
-    virtual bool SetDevicePairingConfirmation(const BdAddr *bdAddr, int transport, bool accept);
+    virtual bool EnableBle() = 0;
+    virtual bool DisableBle() = 0;
+    virtual bool IsBleEnabled() = 0;
+    virtual bool GetLocalAddr(unsigned char *mac, unsigned int len) = 0;
+    virtual bool SetLocalName(unsigned char *localName, unsigned char length) = 0;
+    virtual int GapRegisterCallbacks(BtGapCallBacks *func) = 0;
+    virtual bool PairRequestReply(const BdAddr *bdAddr, int transport, bool accept) = 0;
+    virtual bool SetDevicePairingConfirmation(const BdAddr *bdAddr, int transport, bool accept) = 0;
 };
 
-class MockBluetoothCommonn : public BluetoothCommonn
-{
+struct BtStateChangedCtx {
+    int calledCnt;
+    int listenerId;
+    int state;
+};
+
+struct AclStateChangedCtx {
+    int calledCnt;
+    int listenerId;
+    // change addr's type from pointer to value on purpose, as it will not require to manage memory
+    SoftBusBtAddr addrVal;
+    int aclState;
+};
+
+class MockBluetoothCommonn : public BluetoothCommonn {
 public:
+    static MockBluetoothCommonn *targetMocker;
+    static BtGapCallBacks btGapCallback;
+    static BtStateChangedCtx btCtx;
+    static AclStateChangedCtx aclCtx;
+
+    static SoftBusBtStateListener *GetMockBtStateListener();
+    static BtGapCallBacks *GetBtGapCallBacks();
+    // helper functions for assert callback situation
+    static testing::AssertionResult ExpectOnBtStateChanged(int listenerId, int state);
+    static testing::AssertionResult ExpectOnBtAclStateChanged(int listenerId, SoftBusBtAddr &addr, int aclState);
+
+    MockBluetoothCommonn();
+    ~MockBluetoothCommonn();
+
     MOCK_METHOD(bool, EnableBle, (), (override));
     MOCK_METHOD(bool, DisableBle, (), (override));
     MOCK_METHOD(bool, IsBleEnabled, (), (override));
@@ -46,26 +73,5 @@ public:
     MOCK_METHOD(bool, PairRequestReply, (const BdAddr *bdAddr, int transport, bool accept), (override));
     MOCK_METHOD(bool, SetDevicePairingConfirmation, (const BdAddr *bdAddr, int transport, bool accept), (override));
 };
-
-// mock symbols, which should be redirected to mocker when linking
-extern "C" {
-    bool EnableBle(void);
-    bool DisableBle(void);
-    bool IsBleEnabled(void);
-    bool GetLocalAddr(unsigned char *mac, unsigned int len);
-    bool SetLocalName(unsigned char *localName, unsigned char length);
-    int GapRegisterCallbacks(BtGapCallBacks *func);
-    bool PairRequestReply(const BdAddr *bdAddr, int transport, bool accept);
-    bool SetDevicePairingConfirmation(const BdAddr *bdAddr, int transport, bool accept);
-}
-
-void InjectMocker(MockBluetoothCommonn *mocker);
-BtGapCallBacks *GetBtGapCallBacks();
-SoftBusBtStateListener *GetMockBtStateListener();
-void CleanupMockState();
-
-// helper functions for assert callback situation
-testing::AssertionResult ExpectOnBtStateChanged(int listenerId, int state);
-testing::AssertionResult ExpectOnBtAclStateChanged(int listenerId, SoftBusBtAddr &addr, int aclState);
 
 #endif
