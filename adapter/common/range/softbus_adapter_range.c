@@ -16,7 +16,7 @@
 #include "softbus_adapter_range.h"
 #include <math.h>
 #include <stdlib.h>
-
+#include "softbus_error_code.h"
 #define MOCK_POWER (-17)
 #define DB_BASE (10.0)
 #define DB_COEFFICIENT (20.0)
@@ -24,15 +24,18 @@
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range)
 {
     if (param == NULL || range == NULL) {
-        return -1;
+        return SOFTBUS_ERR;
     }
     
     *range = (int32_t)pow(DB_BASE, param->rssi * -1 / DB_COEFFICIENT);
-    return 0;
+    return SOFTBUS_OK;
 }
 
 int SoftBusGetBlePower(int8_t *power)
 {
+    if (power == NULL) {
+        return SOFTBUS_ERR;
+    }
     *power = MOCK_POWER;
-    return 0;
+    return SOFTBUS_OK;
 }
