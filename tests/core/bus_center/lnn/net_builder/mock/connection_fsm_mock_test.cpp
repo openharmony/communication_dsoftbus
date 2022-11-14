@@ -166,7 +166,4 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_004, TestSize.Level1)
     SoftBusSleepMs(500);
     LnnDestroyConnectionFsm(connFsm);
 }
-
-
-
 } // namespace OHOS
