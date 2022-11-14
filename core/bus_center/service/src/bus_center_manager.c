@@ -67,7 +67,7 @@ typedef struct {
 static void WatchdogProcess(void)
 {
     if (GetWatchdogFlag()) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "softbus net_builder thread is online.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "softbus net_builder thread running normally.");
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "softbus net_builder thread exception.");
