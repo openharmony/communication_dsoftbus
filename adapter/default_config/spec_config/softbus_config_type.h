@@ -50,6 +50,8 @@ typedef enum {
     SOFTBUS_INT_AUTO_NETWORKING_SWITCH, /* support auto networking: true, not support: false */
     SOFTBUS_BOOL_SUPPORT_TOPO, /* support: true, not support: false */
     SOFTBUS_INT_DISC_FREQ, /* the default val is 5s 12 times */
+    SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH, /* 4K */
+    SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH, /* 1K */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 
