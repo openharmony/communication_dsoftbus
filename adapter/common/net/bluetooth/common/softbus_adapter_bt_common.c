@@ -166,7 +166,7 @@ static int RegisterListenerCallback(void)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int SoftBusAddBtStateListener(SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_ERR;
@@ -177,7 +177,7 @@ int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
     for (int index = 0; index < STATE_LISTENER_MAX_NUM; index++) {
         if (!g_stateListener[index].isUsed) {
             g_stateListener[index].isUsed = true;
-            g_stateListener[index].listener = (SoftBusBtStateListener *)listener;
+            g_stateListener[index].listener = listener;
             return index;
         }
     }
@@ -207,7 +207,7 @@ int SoftBusDisableBt(void)
     if (DisableBle()) {
         return SOFTBUS_OK;
     }
-    return SOFTBUS_OK;
+    return SOFTBUS_ERR;
 }
 
 int SoftBusGetBtState(void)
@@ -220,6 +220,10 @@ int SoftBusGetBtState(void)
 
 int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
+    if (mac == NULL) {
+        return SOFTBUS_ERR;
+    }
+
     if (!GetLocalAddr(mac->addr, BT_ADDR_LEN)) {
         return SOFTBUS_ERR;
     }

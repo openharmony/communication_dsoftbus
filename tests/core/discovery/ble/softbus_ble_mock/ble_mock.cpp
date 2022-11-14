@@ -30,7 +30,7 @@ int BleGattLockInit()
     return BleMock::GetMock()->BleGattLockInit();
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int SoftBusAddBtStateListener(SoftBusBtStateListener *listener)
 {
     return BleMock::GetMock()->SoftBusAddBtStateListener(listener);
 }
@@ -40,7 +40,7 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener)
     return BleMock::GetMock()->SoftBusAddScanListener(listener);
 }
 
-int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
+int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
     return BleMock::GetMock()->SoftBusSetScanFilter(listenerId, filter, filterSize);
 }
