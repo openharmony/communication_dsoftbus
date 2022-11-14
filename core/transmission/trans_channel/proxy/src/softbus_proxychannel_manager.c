@@ -148,6 +148,26 @@ static int32_t ResetChanIsEqual(int status, ProxyChannelInfo *a, ProxyChannelInf
     return SOFTBUS_ERR;
 }
 
+int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity)
+{
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+
+    AppType appType;
+    ProxyChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if ((item->myId == myId) && (strcmp(item->identity, identity) == 0)) {
+            appType = item->appInfo.appType;
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            return appType;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    return SOFTBUS_ERR;
+}
+
 static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
 {
     if (g_proxyChannelList == NULL || info == NULL) {
@@ -652,6 +672,12 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
         if (TransProxyGetPkgName(chan->appInfo.myData.sessionName,
                 chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName)) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get pkg name fail");
+            return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
+        }
+        
+        if (TransProxyGetUidAndPidBySessionName(chan->appInfo.myData.sessionName,
+                &chan->appInfo.myData.uid, &chan->appInfo.myData.pid) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proc handshake get uid pid fail");
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
     }

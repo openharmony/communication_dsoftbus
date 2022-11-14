@@ -56,3 +56,7 @@ int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t le
     return g_channelCb.GetPkgNameBySessionName(sessionName, pkgName, len);
 }
 
+int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    return g_channelCb.GetUidAndPidBySessionName(sessionName, uid, pid);
+}
