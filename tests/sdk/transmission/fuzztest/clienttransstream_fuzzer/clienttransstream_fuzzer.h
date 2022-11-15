@@ -19,4 +19,3 @@
 #define FUZZ_PROJECT_NAME "clienttransstream_fuzzer"
 
 #endif
-

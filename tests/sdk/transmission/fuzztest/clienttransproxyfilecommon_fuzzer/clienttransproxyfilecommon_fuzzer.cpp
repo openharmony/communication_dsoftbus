@@ -33,7 +33,6 @@
 #include "softbus_log.h"
 #include "softbus_type_def.h"
 
-
 namespace OHOS {
 void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
 {
@@ -69,7 +68,7 @@ void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
 
     FileUnLock(fd);
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -78,4 +77,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::ClientTransProxyFileCommonTest(data, size);
     return 0;
 }
-
