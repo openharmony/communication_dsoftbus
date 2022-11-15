@@ -29,13 +29,13 @@
 class BleInterface {
 public:
     virtual int BleGattLockInit() = 0;
-    virtual int SoftBusAddBtStateListener(SoftBusBtStateListener *listener) = 0;
+    virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual int SoftBusRemoveBtStateListener(int listenerId) = 0;
 
     virtual int SoftBusAddScanListener(const SoftBusScanListener *listener) = 0;
     virtual int SoftBusRemoveScanListener(int listenerId) = 0;
 
-    virtual int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize) = 0;
+    virtual int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize) = 0;
 
     virtual int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback) = 0;
     virtual int SoftBusReleaseAdvChannel(int advId) = 0;
@@ -65,13 +65,13 @@ public:
 
     MOCK_METHOD(int, BleGattLockInit, (), (override));
 
-    MOCK_METHOD(int, SoftBusAddBtStateListener, (SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int listenerId), (override));
 
     MOCK_METHOD(int, SoftBusAddScanListener, (const SoftBusScanListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveScanListener, (int listenerId), (override));
 
-    MOCK_METHOD(int, SoftBusSetScanFilter, (int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize),
+    MOCK_METHOD(int, SoftBusSetScanFilter, (int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize),
                 (override));
 
     MOCK_METHOD(int, SoftBusGetAdvChannel, (const SoftBusAdvCallback *callback), (override));

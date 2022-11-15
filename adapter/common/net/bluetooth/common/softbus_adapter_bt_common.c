@@ -166,7 +166,7 @@ static int RegisterListenerCallback(void)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(SoftBusBtStateListener *listener)
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_ERR;
@@ -177,7 +177,7 @@ int SoftBusAddBtStateListener(SoftBusBtStateListener *listener)
     for (int index = 0; index < STATE_LISTENER_MAX_NUM; index++) {
         if (!g_stateListener[index].isUsed) {
             g_stateListener[index].isUsed = true;
-            g_stateListener[index].listener = listener;
+            g_stateListener[index].listener = (SoftBusBtStateListener *)listener;
             return index;
         }
     }
