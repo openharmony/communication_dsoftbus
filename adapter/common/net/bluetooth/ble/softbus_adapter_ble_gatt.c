@@ -870,7 +870,7 @@ static bool CheckNeedStopScan(int listenerId)
     return true;
 }
 
-int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize)
+int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
     if (filter == NULL || filterSize == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -884,7 +884,7 @@ int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t f
         return SOFTBUS_ERR;
     }
     FreeScanFilter(listenerId);
-    g_scanListener[listenerId].filter = filter;
+    g_scanListener[listenerId].filter = (SoftBusBleScanFilter *)filter;
     g_scanListener[listenerId].filterSize = filterSize;
     g_scanListener[listenerId].isNeedReset = true;
     SoftBusMutexUnlock(&g_scanerLock);
