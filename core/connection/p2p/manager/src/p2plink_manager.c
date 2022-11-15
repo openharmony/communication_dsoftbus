@@ -405,7 +405,7 @@ static void P2pLinkNegoSuccess(int32_t requestId, const P2pLinkNegoConnResult *c
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "update ip %s ret %d", conn->peerIp, ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkNegoSuccess ret %d", ret);
         connedItem->chanId.inAuthId = conningItem->connInfo.authId;
     } else {
         if (P2pLinkNegoSuccessAddConnedItem(conn, conningItem) != SOFTBUS_OK) {

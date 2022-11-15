@@ -94,7 +94,7 @@ static void ParseServiceData(const cJSON *data, DeviceInfo *device)
     char port[AUTH_PORT_LEN] = {0};
     ParseItemDataFromServiceData(serviceData, SERVICE_DATA_PORT, port, sizeof(port));
     int authPort = atoi(port);
-    if (authPort == 0) {
+    if (authPort > UINT16_MAX || authPort <= 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "not find auth port.");
         return;
     }

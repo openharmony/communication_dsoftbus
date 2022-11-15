@@ -191,7 +191,7 @@ static int32_t GenerateFrequency(const P2pLink5GList *channelList, const P2pLink
     const P2pLink5GList *gcScoreList)
 {
     (void)gcScoreList;
-    if (channelList == NULL || channelList->num == 0) {
+    if (channelList == NULL || channelList->num <= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "local 5g channel list is null.");
         return FREQUENCY_INVALID;
     }

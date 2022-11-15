@@ -133,6 +133,7 @@ static void DelayInitFunction(void *para)
     g_driverCtrl.softbusService = HdfIoServiceBind(DRIVER_SERVICE_NAME);
     if (g_driverCtrl.softbusService == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get hdf dsoftbus service fail(%d)", retry);
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayInitFunction, NULL, BIND_HDF_DELAY);
         ++retry;
         return;
     }
