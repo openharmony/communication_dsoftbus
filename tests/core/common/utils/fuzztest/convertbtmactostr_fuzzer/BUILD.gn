@@ -18,7 +18,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 module_output_path = "dsoftbus/common"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("ConvertBtMacToStrFuzztest") {
+ohos_fuzztest("ConvertBtMacToStrFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/core/common/utils/fuzztest/convertbtmactostr_fuzzer"
   include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
