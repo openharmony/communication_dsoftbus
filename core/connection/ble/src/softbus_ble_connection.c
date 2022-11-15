@@ -483,7 +483,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
     head.seq = 1;
     head.flag = 0;
     head.len = strlen(data) + 1;
-    if (memcpy_s(buf, dataLen, (void *)&head, headSize)) {
+    if (memcpy_s(buf, dataLen, (void *)&head, headSize) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s head error");
         cJSON_free(data);
         SoftBusFree(buf);
@@ -876,7 +876,10 @@ static void BleDisconnectCallback(int32_t halConnId, int32_t isServer)
         if (itemNode->halConnId == halConnId && itemNode->info.isServer == isServer) {
             bleNode = itemNode;
             itemNode->state = BLE_CONNECTION_STATE_CLOSED;
-            (void)memcpy_s(&connectionInfo, sizeof(ConnectionInfo), &(itemNode->info), sizeof(ConnectionInfo));
+            if (memcpy_s(&connectionInfo, sizeof(ConnectionInfo), &(itemNode->info), sizeof(ConnectionInfo)) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDisconnectCallback memcpy_s fail");
+                return;
+            }
             connectionId = itemNode->connId;
             connectionInfo.isAvailable = 0;
             LIST_FOR_EACH_SAFE(item, itemNext, &itemNode->requestList) {

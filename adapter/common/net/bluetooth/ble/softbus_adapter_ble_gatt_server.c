@@ -155,7 +155,10 @@ int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
         return SOFTBUS_ERR;
     }
     BdAddr addr;
-    (void)memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN);
+    if (memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattsDisconnect memcpy fail");
+        return SOFTBUS_ERR;
+    }
     if (BleGattsDisconnect(g_halServerId, addr, connId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }

@@ -38,7 +38,7 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
     P2pLinkUpdateDeviceByMagicGroups(group);
     if (P2pLinkGetGoPort() <= 0) {
         ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my ip %s, ret %d", p2pIp, ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my ip, ret %d", ret);
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
             listenInfo.type = AUTH_LINK_TYPE_P2P;
@@ -64,7 +64,7 @@ static void UpdateP2pGcGroup(void)
 
     if (P2pLinkGetDhcpState() == true) {
         ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get dhcp ip %s, ret %d", p2pIp, ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get dhcp ip, ret %d", ret);
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
         }
