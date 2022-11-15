@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-int SetTimer(const char *name, unsigned int timeout, void(*func)(void*), void *args)
+int32_t SoftBusSetWatchdogTimer(const char *name, uint32_t timeout, void(*func)(void*), void *args)
 {
     (void)name;
     (void)timeout;
@@ -26,13 +26,13 @@ int SetTimer(const char *name, unsigned int timeout, void(*func)(void*), void *a
     return -1;
 }
 
-void CancelTimer(int id)
+void SoftBusCancelWatchdogTimer(int32_t id)
 {
     (void)id;
     return;
 }
 
-void RunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
+void SoftBusRunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
 {
     (void)name;
     (void)task;
@@ -40,7 +40,7 @@ void RunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
     return;
 }
 
-void RunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay)
+void SoftBusRunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay)
 {
     (void)name;
     (void)task;

@@ -36,7 +36,7 @@ extern "C" {
 * @since 1.0
 * @version 1.0
 */
-int SoftBusSetWatchdogTimer(const char *name, unsigned int timeout, void(*func)(void*), void *args);
+int32_t SoftBusSetWatchdogTimer(const char *name, uint32_t timeout, void(*func)(void*), void *args);
 
 /**
 * @brief Called when cancel timer of service watchdog.
@@ -45,7 +45,7 @@ int SoftBusSetWatchdogTimer(const char *name, unsigned int timeout, void(*func)(
 * @since 1.0
 * @version 1.0
 */
-void SoftBusCancelWatchdogTimer(int id);
+void SoftBusCancelWatchdogTimer(int32_t id);
 
 /**
 * @brief Called when run a onshot task in shared watchdog thread, the submitted task should never be time consuming.
@@ -56,7 +56,7 @@ void SoftBusCancelWatchdogTimer(int id);
 * @since 1.0
 * @version 1.0
 */
-void SoftBusRunShotWatchdogTask(const char *name, void(*task)(void), uint64_t delay);
+void SoftBusRunOneShotTask(const char *name, void(*task)(void), uint64_t delay);
 
 /**
 * @brief Called when run a periodical task in shared watchdog thread.
@@ -68,7 +68,7 @@ void SoftBusRunShotWatchdogTask(const char *name, void(*task)(void), uint64_t de
 * @since 1.0
 * @version 1.0
 */
-void SoftBusRunPeriodicalWatchdogTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay);
+void SoftBusRunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay);
 
 #ifdef __cplusplus
 #if __cplusplus
