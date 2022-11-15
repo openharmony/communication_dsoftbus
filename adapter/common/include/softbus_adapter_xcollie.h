@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef XCOLLIE_HELPER_H
-#define XCOLLIE_HELPER_H
+#ifndef SOFTBUS_ADAPTER_XCOLLIE_H
+#define SOFTBUS_ADAPTER_XCOLLIE_H
+
 #include <stdint.h>
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -27,18 +29,14 @@ extern "C" {
 * @param name Indicates the point to the name of the timer.
 * @param timeout Indicates the timeout.
 * @param func Indicates the point to the callback function.
-* @param args Indicates the point to the timer timeout operation.The value can be
-		XCOLLIE_FLAG_DEFAULT : do all callback function.
-		XCOLLIE_FLAG_NOOP : do nothing but the caller defined function.
-		XCOLLIE_FLAG_LOG : generate log file.
-		XCOLLIE_FLAG_RECOVERY : die when timeout.
+* @param args Indicates the point to the timer timeout operation.
 *
 * @return Return the timer id.
 * 
 * @since 1.0
 * @version 1.0
 */
-int SetTimer(const char *name, unsigned int timeout, void(*func)(void*), void *args);
+int SoftBusSetWatchdogTimer(const char *name, unsigned int timeout, void(*func)(void*), void *args);
 
 /**
 * @brief Called when cancel timer of service watchdog.
@@ -47,7 +45,7 @@ int SetTimer(const char *name, unsigned int timeout, void(*func)(void*), void *a
 * @since 1.0
 * @version 1.0
 */
-void CancelTimer(int id);
+void SoftBusCancelWatchdogTimer(int id);
 
 /**
 * @brief Called when run a onshot task in shared watchdog thread, the submitted task should never be time consuming.
@@ -58,7 +56,7 @@ void CancelTimer(int id);
 * @since 1.0
 * @version 1.0
 */
-void RunOneShotTask(const char *name, void(*task)(void), uint64_t delay);
+void SoftBusRunShotWatchdogTask(const char *name, void(*task)(void), uint64_t delay);
 
 /**
 * @brief Called when run a periodical task in shared watchdog thread.
@@ -70,7 +68,7 @@ void RunOneShotTask(const char *name, void(*task)(void), uint64_t delay);
 * @since 1.0
 * @version 1.0
 */
-void RunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay);
+void SoftBusRunPeriodicalWatchdogTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay);
 
 #ifdef __cplusplus
 #if __cplusplus
