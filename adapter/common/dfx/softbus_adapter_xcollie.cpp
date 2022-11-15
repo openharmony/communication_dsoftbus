@@ -34,7 +34,7 @@ int32_t SoftBusSetWatchdogTimer(const char *name, uint32_t timeout, void(*func)(
 
 void SoftBusCancelWatchdogTimer(int32_t id)
 {
-    return OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
+    OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
 }
 
 void SoftBusRunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
@@ -43,7 +43,7 @@ void SoftBusRunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBus Run Shot Watchdog Task param is invalid.");
         return;
     }
-    return OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(name, task, delay);
+    OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(name, task, delay);
 }
 
 void SoftBusRunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay)
@@ -52,5 +52,5 @@ void SoftBusRunPeriodicalTask(const char *name, void(*task)(void), uint64_t inte
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBus Run Periodical Watchdog Task param is invalid");
         return;
     }
-    return OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask(name, task, interval, delay);
+    OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask(name, task, interval, delay);
 }

@@ -32,7 +32,7 @@ extern "C" {
 * @param args Indicates the point to the timer timeout operation.
 *
 * @return Return the timer id.
-* 
+*
 * @since 1.0
 * @version 1.0
 */
