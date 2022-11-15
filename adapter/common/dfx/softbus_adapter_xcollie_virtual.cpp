@@ -12,30 +12,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "xcollie_helper.h"
-#include <cstdint>
-#include "softbus_log.h"
 
-#include "xcollie/watchdog.h"
-#include "xcollie/xcollie.h"
+#include "softbus_adapter_xcollie.h"
+
+#include <cstdint>
 
 int SetTimer(const char *name, unsigned int timeout, void(*func)(void*), void *args)
 {
-    return OHOS::HiviewDFX::XCollie::GetInstance().SetTimer(name, timeout, func,
-        args, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG);
+    (void)name;
+    (void)timeout;
+    (void)func;
+    (void)args;
+    return -1;
 }
 
 void CancelTimer(int id)
 {
-    return OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
+    (void)id;
+    return;
 }
 
 void RunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
 {
-    return OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(name, task, delay);
+    (void)name;
+    (void)task;
+    (void)delay;
+    return;
 }
 
 void RunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay)
 {
-    return OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask(name, task, interval, delay);
+    (void)name;
+    (void)task;
+    (void)interval;
+    (void)delay;
+    return;
 }
