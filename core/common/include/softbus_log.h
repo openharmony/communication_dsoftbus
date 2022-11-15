@@ -77,6 +77,88 @@ static inline const char *AnonymizesMac(const char *input)
     return Anonymizes(input, MACADDR_ANONYMIZED_LENGTH);
 }
 
+// discovery log print macro
+#define DLOGD(fmt, ...) SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_DBG, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define DLOGI(fmt, ...) SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define DLOGW(fmt, ...) SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_WARN, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define DLOGE(fmt, ...) SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+
+// connection log print macro
+#define CLOGD(fmt, ...) SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define CLOGI(fmt, ...) SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define CLOGW(fmt, ...) SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define CLOGE(fmt, ...) SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+
+// bus center lnn log print macro
+#define LLOGD(fmt, ...) SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define LLOGI(fmt, ...) SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define LLOGW(fmt, ...) SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define LLOGE(fmt, ...) SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+
+// transmission log print macro
+#define TLOGD(fmt, ...) SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define TLOGI(fmt, ...) SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define TLOGW(fmt, ...) SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define TLOGE(fmt, ...) SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+
+// authority log print macro
+#define ALOGD(fmt, ...) SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define ALOGI(fmt, ...) SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define ALOGW(fmt, ...) SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define ALOGE(fmt, ...) SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+
+// common log print macro
+#define MLOGD(fmt, ...) SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define MLOGI(fmt, ...) SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define MLOGW(fmt, ...) SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define MLOGE(fmt, ...) SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+
+#define CHECK_AND_RETURN_RET_LOG(cond, ret, log, fmt, ...)  \
+    do {                                                    \
+        if (!(cond)) {                                      \
+            log(fmt, ##__VA_ARGS__);                        \
+            return ret;                                     \
+        }                                                   \
+    } while (0)
+
+#define CHECK_AND_RETURN_LOG(cond, log, fmt, ...)           \
+    do {                                                    \
+        if (!(cond)) {                                      \
+            log(fmt, ##__VA_ARGS__);                        \
+            return;                                         \
+        }                                                   \
+    } while (0)
+
+#define DISC_CHECK_AND_RETURN_RET_LOG(cond, ret, fmt, ...)             \
+    CHECK_AND_RETURN_RET_LOG(cond, ret, DLOGE, fmt, ##__VA_ARGS__)
+#define DISC_CHECK_AND_RETURN_LOG(cond, fmt, ...)                      \
+    CHECK_AND_RETURN_LOG(cond, DLOGE, fmt, ##__VA_ARGS__)
+
+#define CONN_CHECK_AND_RETURN_RET_LOG(cond, ret, fmt, ...)             \
+    CHECK_AND_RETURN_RET_LOG(cond, ret, CLOGE, fmt, ##__VA_ARGS__)
+#define CONN_CHECK_AND_RETURN_LOG(cond, fmt, ...)                      \
+    CHECK_AND_RETURN_LOG(cond, CLOGE, fmt, ##__VA_ARGS__)
+
+#define LNN_CHECK_AND_RETURN_RET_LOG(cond, ret, fmt, ...)              \
+    CHECK_AND_RETURN_RET_LOG(cond, ret, LLOGE, fmt, ##__VA_ARGS__)
+#define LNN_CHECK_AND_RETURN_LOG(cond, fmt, ...)                       \
+    CHECK_AND_RETURN_LOG(cond, LLOGE, fmt, ##__VA_ARGS__)
+
+#define TRAN_CHECK_AND_RETURN_RET_LOG(cond, ret, fmt, ...)             \
+    CHECK_AND_RETURN_RET_LOG(cond, ret, TLOGE, fmt, ##__VA_ARGS__)
+#define TRAN_CHECK_AND_RETURN_LOG(cond, fmt, ...)                      \
+    CHECK_AND_RETURN_LOG(cond, TLOGE, fmt, ##__VA_ARGS__)
+
+#define AUTH_CHECK_AND_RETURN_RET_LOG(cond, ret, fmt, ...)             \
+    CHECK_AND_RETURN_RET_LOG(cond, ret, ALOGE, fmt, ##__VA_ARGS__)
+#define AUTH_CHECK_AND_RETURN_LOG(cond, fmt, ...)                      \
+    CHECK_AND_RETURN_LOG(cond, ALOGE, fmt, ##__VA_ARGS__)
+
+#define COMM_CHECK_AND_RETURN_RET_LOG(cond, ret, fmt, ...)             \
+    CHECK_AND_RETURN_RET_LOG(cond, ret, MLOGE, fmt, ##__VA_ARGS__)
+#define COMM_CHECK_AND_RETURN_LOG(cond, fmt, ...)                      \
+    CHECK_AND_RETURN_LOG(cond, MLOGE, fmt, ##__VA_ARGS__)
+
 #ifdef __cplusplus
 #if __cplusplus
 }
