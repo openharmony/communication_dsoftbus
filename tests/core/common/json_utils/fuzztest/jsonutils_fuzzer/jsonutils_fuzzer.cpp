@@ -57,8 +57,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    char buffer[OHOS::MSG_BUFF_MAX_LEN + 1] = { 0 };
-    if (memcpy_s(buffer, OHOS::MSG_BUFF_MAX_LEN, data, size) != EOK) {
+    char buffer[OHOS::MSG_BUFF_MAX_LEN] = { 0 };
+    if (memcpy_s(buffer, sizeof(buffer) - 1, data, size) != EOK) {
         return 0;
     }
     OHOS::DoJsonUtilsFuzz(buffer);
