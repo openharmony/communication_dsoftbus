@@ -65,7 +65,8 @@ bus_center_server_external_deps = []
 
 if (defined(global_parts_info) &&
     defined(global_parts_info.hiviewdfx_hicollie_native)) {
-  bus_center_server_src += [ "$softbus_adapter_common/dfx/softbus_adapter_xcollie.cpp" ]
+  bus_center_server_src +=
+      [ "$softbus_adapter_common/dfx/softbus_adapter_xcollie.cpp" ]
   bus_center_server_external_deps += [ "hicollie_native:libhicollie" ]
 } else {
   bus_center_server_src +=
