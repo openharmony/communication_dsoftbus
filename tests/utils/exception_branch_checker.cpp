@@ -22,7 +22,8 @@ static const char *g_logName[SOFTBUS_LOG_MODULE_MAX] = {
     "AUTH", "TRAN", "CONN", "LNN", "DISC", "COMM"
 };
 
-void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...)
+void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
+    int lineNo, const char *fmt, ...)
 {
     if (module >= SOFTBUS_LOG_MODULE_MAX) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM] log module exceed max");
@@ -31,7 +32,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
 
     char buffer[LOG_BUF_LEN];
 
-    int usedLen = sprintf_s(buffer, LOG_BUF_LEN, "[%s] ", g_logName[module]);
+    int usedLen = sprintf_s(buffer, LOG_BUF_LEN, "[%s][%s:%d] ", g_logName[module], funcName, lineNo);
     if (usedLen < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM] sprintf_s log error");
         return;
