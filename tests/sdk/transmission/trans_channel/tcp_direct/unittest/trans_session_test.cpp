@@ -268,7 +268,7 @@ HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level0)
     ISessionListener listener;
     (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &listener);
     (void)ClientAddSession(&param, &sessionId, &isEnabled);
-    
+
     int32_t ret = SendFile(sessionId, sFileList, NULL, 1);
     EXPECT_NE(SOFTBUS_OK, ret);
 }

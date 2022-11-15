@@ -28,7 +28,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-
 namespace OHOS {
 void ClientTransChannelCallbackTest(const uint8_t* data, size_t size)
 {
@@ -57,7 +56,7 @@ void ClientTransChannelCallbackTest(const uint8_t* data, size_t size)
 
     TransOnChannelQosEvent(channelId, channelType, eventId, tvCount, &tvList);
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -66,4 +65,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::ClientTransChannelCallbackTest(data, size);
     return 0;
 }
-
