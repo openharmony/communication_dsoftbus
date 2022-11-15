@@ -23,7 +23,7 @@
 namespace OHOS {
 #define TEST_JSON "{\"errcode\":1}"
 static constexpr int MSG_BUFF_MAX_LEN = 100;
-static void DoJsonUtilsFuzz(const char *data, size_t size)
+static void DoJsonUtilsFuzz(const char *data)
 {
     char buffer[MSG_BUFF_MAX_LEN] = TEST_JSON;
    
@@ -61,6 +61,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (memcpy_s(buffer, OHOS::MSG_BUFF_MAX_LEN, data, size) != EOK) {
         return 0;
     }
-    OHOS::DoJsonUtilsFuzz(buffer, OHOS::MSG_BUFF_MAX_LEN);
+    OHOS::DoJsonUtilsFuzz(buffer);
     return 0;
 }

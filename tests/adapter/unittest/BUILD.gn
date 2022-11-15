@@ -28,6 +28,7 @@ if (defined(ohos_lite)) {
         "dsoftbus_other_test.cpp",
         "softbus_socket_test.cpp",
         "softbus_thread_test.cpp",
+        "softbus_adapter_range_test.cpp",
       ]
       include_dirs = [
         "$dsoftbus_root_path/adapter/common/include",
@@ -54,6 +55,7 @@ if (defined(ohos_lite)) {
       "softbus_dfx_test.cpp",
       "softbus_socket_test.cpp",
       "softbus_thread_test.cpp",
+      "softbus_adapter_range_test.cpp",
     ]
     include_dirs = [
       "$dsoftbus_root_path/adapter/common/include",
