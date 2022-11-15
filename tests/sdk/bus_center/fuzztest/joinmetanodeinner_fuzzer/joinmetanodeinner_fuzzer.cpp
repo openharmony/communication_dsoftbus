@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "joinmetanodelnner_fuzzer.h"
+#include "joinmetanodeinner_fuzzer.h"
 #include <cstddef>
 #include <cstring>
 #include <securec.h>
