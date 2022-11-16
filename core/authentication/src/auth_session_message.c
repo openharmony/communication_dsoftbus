@@ -382,7 +382,8 @@ int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint3
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
-    CHECK_EXPRESSION_RETURN_VALUE((len == 0 || strnlen(data, len) >= len), SOFTBUS_INVALID_PARAM);
+    CHECK_EXPRESSION_RETURN_VALUE((len == 0 || strnlen((const char *)data, len) >= len),
+        SOFTBUS_INVALID_PARAM);
     return UnpackDeviceIdMessage((const char *)data, info);
 }
 
