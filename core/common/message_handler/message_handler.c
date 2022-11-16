@@ -170,8 +170,8 @@ static void *LoopTask(void *arg)
         }
         if (looper->dumpable) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
-                "LoopTask[%s], after HandleMessage message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64,
-                context->name, msg->handler->name, msg->what, msg->arg1);
+                "LoopTask[%s], after HandleMessage message. what=%" PRId32 ",arg1=%" PRIu64,
+                context->name, msg->what, msg->arg1);
         }
         (void)SoftBusMutexLock(&context->lock);
         FreeSoftBusMsg(msg);
