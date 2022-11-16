@@ -63,11 +63,11 @@ typedef enum {
 } ListenerMode;
 
 typedef struct LnnProtocolManager {
-    int32_t (*Init)(struct LnnProtocolManager *self);
-    void (*Deinit)(struct LnnProtocolManager *self);
-    int32_t (*Enable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
-    int32_t (*Disable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
-    ListenerModule (*GetListenerModule)(ListenerMode mode);
+    int32_t (*init)(struct LnnProtocolManager *self);
+    void (*deinit)(struct LnnProtocolManager *self);
+    int32_t (*enable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
+    int32_t (*disable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
+    ListenerModule (*getListenerModule)(ListenerMode mode);
     ProtocolType id;
     LnnNetIfType supportedNetif;
     uint16_t pri;
