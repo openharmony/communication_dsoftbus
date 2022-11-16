@@ -26,6 +26,7 @@
 #include "softbus_hisysevt_connreporter.h"
 #include "softbus_adapter_hisysevent.h"
 #include "softbus_hisysevt_common.h"
+#include "softbus_hisysevt_discreporter.c"
 
 using namespace std;
 using namespace testing::ext;
@@ -241,17 +242,17 @@ HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest003, TestSize.Level0)
  */
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportConnFaultEvt_001, TestSize.Level1)
 {
-    int ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
+    int ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_INIT_FAIL);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
+    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_P2P, SOFTBUS_NOT_FIND);
+    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_LOCK_ERR);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_P2P, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -345,6 +346,10 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_001, TestSize.Level1)
     uint32_t errCode = SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT;
     ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    errCode = SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL;
+    ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, errCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -357,6 +362,11 @@ HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_002, TestSize.Level1)
 {
     int32_t errCode = SOFTBUS_DISCOVER_NOT_INIT;
     int ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, errCode);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    int32_t convertErrCode = ErrCodeConvert(errCode);
+    EXPECT_EQ(SOFTBUS_HISYSEVT_DISCOVER_NOT_INIT, convertErrCode);
+    ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, convertErrCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
