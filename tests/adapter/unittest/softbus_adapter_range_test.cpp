@@ -56,13 +56,13 @@ HWTEST_F(SoftbusAdapterRangeTest, SoftBusBleRange001, TestSize.Level0)
         .identity = {"test"}
     };
     int32_t ret = SoftBusBleRange(NULL, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(-1, ret);
     ret = SoftBusBleRange(NULL, &range);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(-1, ret);
     ret = SoftBusBleRange(&param, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(-1, ret);
     ret = SoftBusBleRange(&param, &range);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, ret);
 }
 
 /*
@@ -75,8 +75,8 @@ HWTEST_F(SoftbusAdapterRangeTest, SoftBusGetBlePower001, TestSize.Level0)
 {
     int8_t power = 0;
     int ret = SoftBusGetBlePower(NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(-1, ret);
     ret = SoftBusGetBlePower(&power);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, ret);
 }
 }
