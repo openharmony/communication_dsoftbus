@@ -53,5 +53,6 @@ group("fuzztest") {
     "streamdepacketizer_fuzzer:fuzztest",
     "streammsgmanager_fuzzer:fuzztest",
     "transserverproxyextern_fuzzer:fuzztest",
+    "vtpstreamsocket_fuzzer:fuzztest",
   ]
 }
