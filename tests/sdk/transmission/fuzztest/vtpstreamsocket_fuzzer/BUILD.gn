@@ -1,0 +1,84 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+##############################fuzztest##########################################
+ohos_fuzztest("VtpStreamSocketFuzzTest") {
+  module_out_path = "dsoftbus/transmission"
+  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/vtpstreamsocket_fuzzer"
+  include_dirs = [
+    "//foundation/communication/dsoftbus/core/common/inner_communication",
+    "//foundation/communication/dsoftbus/adapter/common/include",
+    "//foundation/communication/dsoftbus/core/common/include",
+    "//foundation/communication/dsoftbus/interfaces/kits/common",
+    "//foundation/communication/dsoftbus/interfaces/kits/transport",
+    "//foundation/communication/dsoftbus/interfaces/inner_kits/transport",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/common/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_core/dfile/interface/",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_util/interface",
+    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/session/cpp/src",
+    "//foundation/communication/dsoftbus/components/nstackx/fillp/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/include",
+    "//foundation/communication/dsoftbus/core/transmission/common/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "//commonlibrary/c_utils/base/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
+    "-DFILLP_LINUX",
+  ]
+  sources = [ "vtpstreamsocket_fuzzer.cpp" ]
+  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+
+  external_deps = [ "c_utils:utils" ]
+
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+}
+
+###############################################################################
+group("fuzztest") {
+  if (dsoftbus_feature_trans_udp == true) {
+    if (dsoftbus_feature_trans_udp_stream == true) {
+      if (!defined(ohos_lite)) {
+        testonly = true
+        deps = []
+        deps += [
+          # deps file
+          ":VtpStreamSocketFuzzTest",
+        ]
+      }
+    }
+  } else {
+    testonly = true
+    deps = []
+  }
+}
+###############################################################################

@@ -23,7 +23,6 @@ ohos_fuzztest("ClientTransFileFuzzTest") {
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransfile_fuzzer"
   include_dirs = [
     "//foundation/communication/dsoftbus/core/common/inner_communication",
-    "//foundation/communication/dsoftbus/core/common/inner_communication",
     "//foundation/communication/dsoftbus/adapter/common/include",
     "//foundation/communication/dsoftbus/core/common/include",
     "//foundation/communication/dsoftbus/interfaces/kits/common",
@@ -37,6 +36,7 @@ ohos_fuzztest("ClientTransFileFuzzTest") {
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
+
   cflags = [
     "-g",
     "-O0",

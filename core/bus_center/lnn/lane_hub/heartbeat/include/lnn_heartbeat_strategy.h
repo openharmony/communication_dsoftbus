@@ -40,7 +40,7 @@ int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatTy
 
 int32_t LnnStartNewHbStrategyFsm(void);
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay);
-int32_t LnnStartHeartbeat(void);
+int32_t LnnStartHeartbeat(uint64_t delayMillis);
 int32_t LnnStopHeartbeatByType(LnnHeartbeatType type);
 int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);

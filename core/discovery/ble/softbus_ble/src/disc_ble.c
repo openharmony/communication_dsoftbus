@@ -368,7 +368,7 @@ static void ProcessDisConPacket(const unsigned char *advData, uint32_t advLen, D
     }
 }
 
-static bool ProcessHwHashAccout(DeviceInfo *foundInfo)
+static bool ProcessHashAccout(DeviceInfo *foundInfo)
 {
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (!CheckCapBitMapExist(CAPABILITY_NUM, foundInfo->capabilityBitmap, pos)) {
@@ -470,7 +470,7 @@ static void ProcessDisNonPacket(const unsigned char *advData, uint32_t advLen, c
     };
 
     unsigned int tempCap = 0;
-    if (ProcessHwHashAccout(foundInfo)) {
+    if (ProcessHashAccout(foundInfo)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "same account");
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         if (tempCap == 0) {

@@ -207,7 +207,7 @@ int SoftBusDisableBt(void)
     if (DisableBle()) {
         return SOFTBUS_OK;
     }
-    return SOFTBUS_OK;
+    return SOFTBUS_ERR;
 }
 
 int SoftBusGetBtState(void)
@@ -220,6 +220,10 @@ int SoftBusGetBtState(void)
 
 int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
+    if (mac == NULL) {
+        return SOFTBUS_ERR;
+    }
+
     if (!GetLocalAddr(mac->addr, BT_ADDR_LEN)) {
         return SOFTBUS_ERR;
     }

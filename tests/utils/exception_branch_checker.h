@@ -12,9 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TEST_FUZZTEST_JOINMETANODELNNER_FUZZER_H
-#define TEST_FUZZTEST_JOINMETANODELNNER_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "joinmetanodelnner_fuzzer"
+#ifndef EXCEPTION_BRANCH_CHECKER_H
+#define EXCEPTION_BRANCH_CHECKER_H
 
-#endif /* TEST_FUZZTEST_JOINMETANODELNNER_FUZZER_H */
+#include <string>
+#include <atomic>
+
+class ExceptionBranchChecker {
+public:
+    explicit ExceptionBranchChecker(const std::string& branch);
+
+    ~ExceptionBranchChecker();
+
+    void WriteLog(const std::string& log);
+
+    bool GetResult() const;
+
+    static ExceptionBranchChecker* GetCurrentInstance();
+
+private:
+    static inline std::atomic<ExceptionBranchChecker*> instance_ = nullptr;
+    std::atomic_bool isMatched_;
+    std::string matchBranch_;
+};
+#endif

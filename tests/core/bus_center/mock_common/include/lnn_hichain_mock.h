@@ -45,6 +45,10 @@ public:
     static int32_t InvokeAuthDevice(int32_t osAccountId, int64_t authReqId, const char *authParams,
         const DeviceAuthCallback *gaCallback);
     static int32_t InvokeDataChangeListener(const char *appId, const DataChangeListener *listener);
+    static int32_t InvokeGetJoinedGroups1(int32_t osAccountId, const char *appId, int groupType,
+        char **returnGroupVec, uint32_t *groupNum);
+    static int32_t InvokeGetJoinedGroups2(int32_t osAccountId, const char *appId, int groupType,
+        char **returnGroupVec, uint32_t *groupNum);
 };
 
 } // namespace OHOS

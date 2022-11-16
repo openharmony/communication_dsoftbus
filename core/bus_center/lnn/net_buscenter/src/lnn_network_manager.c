@@ -323,12 +323,14 @@ static void RestartCoapDiscovery(void)
     SetCallLnnStatus(true);
 }
 
-static void OnGroupCreated(const char *groupId)
+static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
     RestartCoapDiscovery();
-    LnnOnOhosAccountChanged();
-    LnnHbOnAuthGroupCreated();
+    if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
+        LnnOnOhosAccountChanged();
+    }
+    LnnHbOnAuthGroupCreated(groupType);
 }
 
 static void OnGroupDeleted(const char *groupId)

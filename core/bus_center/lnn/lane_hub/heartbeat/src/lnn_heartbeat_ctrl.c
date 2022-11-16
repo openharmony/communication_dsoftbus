@@ -18,10 +18,8 @@
 #include <string.h>
 
 #include "auth_interface.h"
-#include "auth_manager.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "device_auth.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_ohos_account.h"
@@ -42,9 +40,6 @@
 #endif
 
 #define HB_LOOPBACK_IP "127.0.0.1"
-
-#define HB_SAME_AUTH_GROUP_INDEX 1
-#define HB_POINT_TO_POINT_INDEX 256
 
 static void HbIpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
@@ -169,46 +164,6 @@ static void HbToRecoveryNetwork(void)
     }
 }
 
-#ifdef HB_CONDITION_HAS_TRUSTED_RELATION
-static void HbFreeAccountGroups(char *accountGroups)
-{
-    if (accountGroups != NULL) {
-        SoftBusFree(accountGroups);
-    }
-}
-
-static bool HbHasTrustedDeviceRelation(void)
-{
-    uint32_t sameGroupCnt, pointGroupCnt;
-    char *accountGroups = NULL;
-
-    /* device auth service inited by auth_manager.c */
-    DeviceGroupManager *gmInstance = GetGmInstance();
-    if (gmInstance == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB GetGmInstance fail");
-        return false;
-    }
-    if (gmInstance->getJoinedGroups(0, AUTH_APPID, HB_SAME_AUTH_GROUP_INDEX, &accountGroups, &sameGroupCnt) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB getJoinedGroups sameGroupCnt fail");
-        HbFreeAccountGroups(accountGroups);
-        return false;
-    }
-    if (gmInstance->getJoinedGroups(0, AUTH_APPID, HB_POINT_TO_POINT_INDEX, &accountGroups, &pointGroupCnt) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB getJoinedGroups pointGroupCnt fail");
-        HbFreeAccountGroups(accountGroups);
-        return false;
-    }
-    HbFreeAccountGroups(accountGroups);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB ctrl get sameGroupCnt: %u and pointGroupCnt: %u",
-        sameGroupCnt, pointGroupCnt);
-    if (LnnIsDefaultOhosAccount() && sameGroupCnt == 0 && pointGroupCnt == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB no login account, no trusted relationship");
-        return false;
-    }
-    return true;
-}
-#endif
-
 int32_t LnnStartHeartbeatFrameDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) FSM start.");
@@ -222,12 +177,12 @@ int32_t LnnStartHeartbeatFrameDelay(void)
         return SOFTBUS_ERR;
     }
 #ifdef HB_CONDITION_HAS_TRUSTED_RELATION
-    if (!HbHasTrustedDeviceRelation()) {
+    if (LnnIsDefaultOhosAccount() && !AuthHasTrustedRelation()) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "no trusted relation, heartbeat(HB) process start later.");
         return SOFTBUS_OK;
     }
 #endif
-    return LnnStartHeartbeat();
+    return LnnStartHeartbeat(0);
 }
 
 int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
@@ -284,17 +239,22 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
     LnnUpdateSendInfoStrategy(type);
 }
 
-void LnnHbOnAuthGroupCreated(void)
+void LnnHbOnAuthGroupCreated(int32_t groupType)
 {
     int32_t ret;
 
 #ifdef HB_CONDITION_HAS_TRUSTED_RELATION
-    ret = LnnStartHeartbeat();
+    /* If it is a peer-to-peer group, delay initialization to give BR networking priority. */
+    ret = LnnStartHeartbeat(groupType == AUTH_PEER_TO_PEER_GROUP ? HB_START_DELAY_LEN : 0);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB account group created start heartbeat fail, ret=%d", ret);
         return;
     }
 #endif
+    if (groupType != AUTH_IDENTICAL_ACCOUNT_GROUP) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB not get same account group created.");
+        return;
+    }
     ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB account group created send ble heartbeat fail, ret=%d", ret);
@@ -306,7 +266,7 @@ void LnnHbOnAuthGroupCreated(void)
 void LnnHbOnAuthGroupDeleted(void)
 {
 #ifdef HB_CONDITION_HAS_TRUSTED_RELATION
-    if (!HbHasTrustedDeviceRelation()) {
+    if (LnnIsDefaultOhosAccount() && !AuthHasTrustedRelation()) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "no trusted relation, heartbeat(HB) process stop.");
         LnnStopHeartbeatByType(HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 |
             HEARTBEAT_TYPE_TCP_FLUSH);

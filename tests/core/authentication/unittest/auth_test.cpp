@@ -968,6 +968,11 @@ HWTEST_F(AuthTest, REG_GROUP_CHANGE_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t ret = RegGroupChangeListener(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    const GroupChangeListener listener = {0};
+    ret = RegGroupChangeListener(&listener);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    UnregGroupChangeListener();
 }
 
 /*

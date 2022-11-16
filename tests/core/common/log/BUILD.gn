@@ -15,3 +15,8 @@ group("fuzztest") {
   testonly = true
   deps = [ "fuzztest/softbuslog_fuzzer:fuzztest" ]
 }
+
+group("unittest") {
+  testonly = true
+  deps = [ "unittest:SoftBusLogTest" ]
+}
