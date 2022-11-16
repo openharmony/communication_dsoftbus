@@ -1282,6 +1282,7 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
     }
     if (InitDataQueue() != SOFTBUS_OK) {
         DestroyBrPendingPacket();
+        BrInnerQueueDeinit();
         return NULL;
     }
     if (BrConnLooperInit() != SOFTBUS_OK) {
@@ -1292,6 +1293,7 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
     if (SppRegisterConnCallback() != SOFTBUS_OK) {
         BrInnerQueueDeinit();
         DestroyBrPendingPacket();
+        DestroyLooper(g_brAsyncHandler.looper);
         return NULL;
     }
     pthread_mutex_init(&g_brConnLock, NULL);
