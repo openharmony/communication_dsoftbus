@@ -23,3 +23,7 @@ int32_t LnnInitEventMonitor(void)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual event monitor");
     return SOFTBUS_OK;
 }
+
+void LnnDeinitEventMonitor(void)
+{
+}

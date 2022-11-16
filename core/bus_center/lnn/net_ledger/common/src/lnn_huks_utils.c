@@ -285,11 +285,13 @@ int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     struct HksBlob cipherText = {LNN_HUKS_AES_COMMON_SIZE, cipher};
     if (UpdateLoopFinishByHuks(&handleEncrypt, g_encryptParamSet, inData, &cipherText) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "huks encrypt data update and finish fail");
+        (void)memset_s(cipher, sizeof(cipher), 0x0, sizeof(cipher));
         return SOFTBUS_ERR;
     }
     outData->size = cipherText.size;
     if (memcpy_s(outData->data, cipherText.size, cipherText.data, cipherText.size) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "huks memcpy_s encrypt data fail");
+        (void)memset_s(cipher, sizeof(cipher), 0x0, sizeof(cipher));
         return SOFTBUS_MEM_ERR;
     }
     (void)memset_s(cipher, sizeof(cipher), 0x0, sizeof(cipher));
@@ -313,11 +315,13 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     struct HksBlob plainText = {LNN_HUKS_AES_COMMON_SIZE, plain};
     if (UpdateLoopFinishByHuks(&handleDecrypt, g_decryptParamSet, inData, &plainText) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "huks decrypt data update and finish fail");
+        (void)memset_s(plain, sizeof(plain), 0x0, sizeof(plain));
         return SOFTBUS_ERR;
     }
     outData->size = plainText.size;
     if (memcpy_s(outData->data, plainText.size, plainText.data, plainText.size) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "huks memcpy_s decrypt data fail");
+        (void)memset_s(plain, sizeof(plain), 0x0, sizeof(plain));
         return SOFTBUS_MEM_ERR;
     }
     (void)memset_s(plain, sizeof(plain), 0x0, sizeof(plain));
