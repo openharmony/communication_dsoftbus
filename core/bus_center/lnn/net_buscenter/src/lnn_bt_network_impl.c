@@ -58,6 +58,9 @@ static int32_t GetAvailableBtMac(char *macStr, uint32_t len)
     int32_t ret;
     SoftBusBtAddr mac;
 
+    if (len != BT_MAC_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     ret = SoftBusGetBtMacAddr(&mac);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac addr fail");
@@ -148,7 +151,7 @@ static BtSubnetManagerEvent GetBtRegistEvent(void)
 
     if (!SoftBusGetBtState()) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "bluetooth is not enabled yet");
-        return BT_SUBNET_MANAGER_EVENT_MAX;
+        return BT_SUBNET_MANAGER_EVENT_IF_DOWN;
     }
     return GetAvailableBtMac(macStr, sizeof(macStr)) == SOFTBUS_OK ?
         BT_SUBNET_MANAGER_EVENT_IF_READY : BT_SUBNET_MANAGER_EVENT_IF_DOWN;
