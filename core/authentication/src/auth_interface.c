@@ -51,8 +51,7 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthTrans: invalid listener.");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t i;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
+    for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].module == module) {
             g_moduleListener[i].listener.onDataReceived = listener->onDataReceived;
             g_moduleListener[i].listener.onDisconnected = listener->onDisconnected;
@@ -66,8 +65,7 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
 void UnregAuthTransListener(int32_t module)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: remove listener, module=%d.", module);
-    uint32_t i;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
+    for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].module == module) {
             g_moduleListener[i].listener.onDataReceived = NULL;
             g_moduleListener[i].listener.onDisconnected = NULL;
@@ -79,9 +77,8 @@ void UnregAuthTransListener(int32_t module)
 static void NotifyTransDataReceived(int64_t authId,
     const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
-    uint32_t i;
     AuthTransListener *listener = NULL;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
+    for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].module == head->module) {
             listener = &(g_moduleListener[i].listener);
             break;
@@ -103,8 +100,7 @@ static void NotifyTransDataReceived(int64_t authId,
 
 static void NotifyTransDisconnected(int64_t authId)
 {
-    uint32_t i;
-    for (i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
+    for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].listener.onDisconnected != NULL) {
             g_moduleListener[i].listener.onDisconnected(authId);
         }
