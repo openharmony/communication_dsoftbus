@@ -109,7 +109,8 @@ void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format
     return;
 }
 
-void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt, ...)
+void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
+    int lineNo, const char *fmt, ...)
 {
     uint32_t ulPos;
     char szStr[LOG_PRINT_MAX_LEN] = {0};
@@ -126,7 +127,7 @@ void SoftBusLog(SoftBusLogModule module, SoftBusLogLevel level, const char *fmt,
         return;
     }
 
-    ret = sprintf_s(szStr, sizeof(szStr), "[%s]", g_logInfo[module].name);
+    ret = sprintf_s(szStr, sizeof(szStr), "[%s][%s:%d]", g_logInfo[module].name, funcName, lineNo);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM]softbus log error");
         return;

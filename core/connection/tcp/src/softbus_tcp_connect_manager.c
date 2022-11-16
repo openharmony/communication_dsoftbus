@@ -397,7 +397,7 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "malloc TcpConnInfoNode failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    
+
     if (strcpy_s(tcpConnInfoNode->info.socketInfo.addr, sizeof(tcpConnInfoNode->info.socketInfo.addr),
             option->socketOption.addr) != EOK ||
         memcpy_s(&tcpConnInfoNode->result, sizeof(ConnectResult), result, sizeof(ConnectResult)) != EOK) {
@@ -448,7 +448,7 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const 
         }
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set keepalive successfully, fd: %d", fd);
     }
-    
+
     uint32_t connectionId = CalTcpConnectionId(fd);
     if (WrapperAddTcpConnInfo(option, result, connectionId, requestId, fd) != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
@@ -507,7 +507,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_OK;
 }
 
-int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
+int32_t TcpPostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
 {
     (void)pid;
     TcpConnInfoNode *item = NULL;
@@ -515,13 +515,13 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_tcpConnInfoList == NULL) {
-        SoftBusFree((void*)data);
+        SoftBusFree(data);
         return SOFTBUS_ERR;
     }
     int32_t fd = -1;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
-        SoftBusFree((void*)data);
+        SoftBusFree(data);
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
@@ -532,13 +532,13 @@ int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32
     }
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     if (fd == -1) {
-        SoftBusFree((void*)data);
+        SoftBusFree(data);
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
             "TcpPostBytes failed, connectionId:%08x not found.", connectionId);
         return SOFTBUS_ERR;
     }
     int32_t bytes = ConnSendSocketData(fd, data, len, flag);
-    SoftBusFree((void*)data);
+    SoftBusFree(data);
     if (bytes != len) {
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }

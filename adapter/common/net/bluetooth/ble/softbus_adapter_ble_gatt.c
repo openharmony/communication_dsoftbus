@@ -884,7 +884,7 @@ int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uin
         return SOFTBUS_ERR;
     }
     FreeScanFilter(listenerId);
-    g_scanListener[listenerId].filter = filter;
+    g_scanListener[listenerId].filter = (SoftBusBleScanFilter *)filter;
     g_scanListener[listenerId].filterSize = filterSize;
     g_scanListener[listenerId].isNeedReset = true;
     SoftBusMutexUnlock(&g_scanerLock);
