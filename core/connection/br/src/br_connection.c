@@ -1140,11 +1140,15 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
 
 static void BrRecvDataHandle(uint32_t connectionId, const char *buf, int32_t len)
 {
+    if (len - (int32_t)sizeof(ConnPktHead) <= 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br recv data illegal data size: %d", len);
+        return;
+    }
     ConnPktHead *head = (ConnPktHead *)buf;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrRecvDataHandle module: %d", head->module);
     if (head->module == MODULE_CONNECTION) {
         cJSON *data = NULL;
-        data = cJSON_Parse((char *)(buf + sizeof(ConnPktHead)));
+        data = cJSON_ParseWithLength(buf + sizeof(ConnPktHead), len - (int32_t)sizeof(ConnPktHead));
         if (data == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br recv data invalid");
             return;
