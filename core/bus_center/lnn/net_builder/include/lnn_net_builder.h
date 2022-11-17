@@ -57,6 +57,8 @@ int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId);
 int32_t LnnUpdateNodeAddr(const char *addr);
 AuthVerifyCallback *LnnGetVerifyCallback(void);
 AuthVerifyCallback *LnnGetMetaVerifyCallback(void);
+void SetWatchdogFlag(bool flag);
+bool GetWatchdogFlag(void);
 
 #ifdef __cplusplus
 }
