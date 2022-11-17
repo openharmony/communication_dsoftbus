@@ -41,6 +41,8 @@ int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t channelId,
 
 int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t len);
 
+int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

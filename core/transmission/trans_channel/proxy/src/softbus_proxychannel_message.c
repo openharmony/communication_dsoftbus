@@ -432,13 +432,27 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
-        !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
-        !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack handshake ack old version");
-        appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
-        appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
-        appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+    appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
+    appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+    appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+    int32_t appType = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity);
+    if (appType == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to get app type");
+        cJSON_Delete(root);
+        return SOFTBUS_ERR;
+    }
+    appInfo->appType = (AppType)appType;
+    if (appInfo->appType == APP_TYPE_NORMAL) {
+        if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &appInfo->peerData.uid) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_PID, &appInfo->peerData.pid) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
+            !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack handshake ack old version");
+            appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
+            appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+            appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+        }
     }
     
     if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
