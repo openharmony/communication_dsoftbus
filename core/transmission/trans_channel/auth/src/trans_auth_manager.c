@@ -355,7 +355,7 @@ static void AuthOnCloseChannel(int64_t authId)
 {
     AuthChannelInfo dstInfo;
     if (GetChannelInfoByAuthId(authId, &dstInfo) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel already removed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth=%d channel already removed", authId);
         return;
     }
     DelAuthChannelInfoByChanId(dstInfo.appInfo.myData.channelId);
@@ -373,7 +373,7 @@ static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *a
     if (sessionName == NULL || appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    appInfo->appType = APP_TYPE_NOT_CARE; // 存疑
+    appInfo->appType = APP_TYPE_NOT_CARE; // doubt
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = channelId;
     appInfo->myData.apiVersion = API_V2;
@@ -569,12 +569,11 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
         goto EXIT_ERR;
     }
     info->appInfo.myData.channelId = GenerateAuthChannelId();
+    SoftBusMutexUnlock(&g_authChannelList->lock);
     if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo) != SOFTBUS_OK) {
-        SoftBusMutexUnlock(&g_authChannelList->lock);
         goto EXIT_ERR;
     }
     info->isConnOptValid = false;
-    SoftBusMutexUnlock(&g_authChannelList->lock);
     return info;
 EXIT_ERR:
     SoftBusFree(info);
@@ -636,6 +635,7 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         }
         ListDelete(&channel->node);
         g_authChannelList->cnt--;
+        AuthCloseChannel(channel->authId);
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channelId);
         SoftBusFree(channel);
         SoftBusMutexUnlock(&g_authChannelList->lock);

@@ -549,11 +549,10 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 
 static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId)
 {
-    int32_t ret;
     AuthConnInfo auth = {0};
     AuthConnCallback cb = {0};
 
-    ret = AuthGetPreferConnInfo(peerUdid, &auth);
+    int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOpenAuthConn get info fail: ret=%d", ret);
         return ret;

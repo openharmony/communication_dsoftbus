@@ -98,14 +98,12 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *indata, const StreamD
 
 int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam *param, const IStreamListener *callback)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartChannelServer...");
-    int32_t ret;
-
     if (channelId < 0 || param == nullptr || param->pkgName == nullptr || callback == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channelId or pkgName");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartVtpStreamChannelServer invalid channelId or pkgName");
         return SOFTBUS_ERR;
     }
-
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d Start Channel Server.", channelId);
+    int32_t ret = SOFTBUS_ERR;
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "adaptor already existed!");
@@ -144,14 +142,12 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
 
 int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam *param, const IStreamListener *callback)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartChannelClient");
-    int32_t ret;
-
     if (channelId < 0 || param == nullptr || param->pkgName == nullptr || callback == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channelId or pkgName");
         return SOFTBUS_ERR;
     }
 
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartChannelClient cId=%d.", channelId);
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "adaptor already existed!");
@@ -182,8 +178,8 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     peerIpPort.ip = param->peerIp;
     peerIpPort.port = param->peerPort;
 
-    ret = newAdaptor->GetStreamManager()->CreateStreamClientChannel(ipPort, peerIpPort, Communication::SoftBus::VTP,
-        param->type, param->sessionKey);
+    int32_t ret = newAdaptor->GetStreamManager()->CreateStreamClientChannel(ipPort, peerIpPort,
+        Communication::SoftBus::VTP, param->type, param->sessionKey);
     if (ret > 0) {
         newAdaptor->SetAliveState(true);
     } else {
@@ -196,7 +192,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
 
 int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channelid=%d", channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close stream channelid=%d", channelId);
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
 
     if (channelId < 0 || pkgName == nullptr) {

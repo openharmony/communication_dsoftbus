@@ -129,9 +129,11 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pendind list not exist");
         return SOFTBUS_ERR;
     }
-
+    if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set pendind lock failed.");
+        return SOFTBUS_ERR;
+    }
     PendingPktInfo *item = NULL;
-    SoftBusMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->seq == seqNum && item->channelId == channelId) {
             item->finded = true;
@@ -154,9 +156,11 @@ int32_t DelPendingPacket(int32_t channelId, int type)
     if (pendingList == NULL) {
         return SOFTBUS_ERR;
     }
-
+    if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pendind lock failed.");
+        return SOFTBUS_ERR;
+    }
     PendingPktInfo *item = NULL;
-    SoftBusMutexLock(&pendingList->lock);
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node) {
         if (item->channelId == channelId) {
             SoftBusCondSignal(&item->cond);

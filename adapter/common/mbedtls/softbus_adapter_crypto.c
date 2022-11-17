@@ -70,7 +70,7 @@ static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigne
         return SOFTBUS_ENCRYPT_ERR;
     }
 
-    if (memcpy_s(cipherText, cipherTextLen, cipherkey->iv, GCM_IV_LEN) != 0) {
+    if (memcpy_s(cipherText, cipherTextLen, cipherkey->iv, GCM_IV_LEN) != EOK) {
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_ENCRYPT_ERR;
     }
