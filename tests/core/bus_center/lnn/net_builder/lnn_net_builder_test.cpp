@@ -29,6 +29,7 @@ constexpr char OLD_NETWORKID[] = "ABCDEFG";
 constexpr char MASTER_UDID[] = "0123456";
 constexpr uint16_t CONN_FSM_ID = 1;
 constexpr int32_t MASTER_WEIGHT = 1;
+constexpr uint32_t TYPE_LEN = 1;
 constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";
 constexpr uint16_t PORT = 1000;
 constexpr char PEERUID[MAX_ACCOUNT_HASH_LEN] = "021315ASD";
@@ -94,8 +95,8 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnRequestLeaveByAddrType(&type, CONNECTION_ADDR_MAX);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnRequestLeaveByAddrType(&type, TYPE_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
