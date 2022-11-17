@@ -89,6 +89,9 @@ static void GattcRegisterNotificationCallback(int clientId, int status)
 static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, int status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GattcNotificationCallback, id=%d, status=%d", clientId, status);
+    if (notifyData == NULL) {
+        return;
+    }
     SoftBusGattcNotify notify;
     notify.dataLen = notifyData->dataLen;
     notify.charaUuid.uuidLen = notifyData->attribute.characteristic.characteristicUuid.uuidLen;

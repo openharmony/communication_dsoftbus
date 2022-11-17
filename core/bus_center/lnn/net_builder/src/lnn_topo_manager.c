@@ -45,7 +45,6 @@
 
 #define LNN_RELATION_JOIN_THREAD 1
 #define RELATION_CHANGED_MSG_DELAY (5 * 1000)
-#define STR_OFFSET 20
 
 #define TOPO_HASH_TABLE_SIZE 16
 
@@ -201,8 +200,8 @@ static void ClearTopoTable(void)
     for (i = 0; i < TOPO_HASH_TABLE_SIZE; ++i) {
         LIST_FOR_EACH_ENTRY_SAFE(item, itemNext, &g_topoTable.table[i], TopoTableItem, node) {
             LIST_FOR_EACH_ENTRY_SAFE(info, infoNext, &item->joinList, TopoInfo, node) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "delete topo info: ***%s/***%s",
-                    item->udid + STR_OFFSET, info->peerUdid + STR_OFFSET);
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "delete topo info, local:%s, peer:%s",
+                    AnonymizesUDID(item->udid), AnonymizesUDID(info->peerUdid));
                 ListDelete(&info->node);
                 SoftBusFree(info);
             }
@@ -394,8 +393,8 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add topo info fail");
             return SOFTBUS_MEM_ERR;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "add topo info: ***%s/***%s", udid + STR_OFFSET,
-            peerUdid + STR_OFFSET);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "add topo info: local:%s peer:%s",
+            AnonymizesUDID(udid), AnonymizesUDID(peerUdid));
     } else {
         if (IsSameRelation(topoInfo->relation, relation, len)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "relation are same");
@@ -406,8 +405,8 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
             return SOFTBUS_MEM_ERR;
         }
         if (!hasRelation) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "delete topo info: ***%s/***%s",
-                topoItem->udid + STR_OFFSET, topoInfo->peerUdid + STR_OFFSET);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "delete topo info: local:%s peer:%s",
+                AnonymizesUDID(topoItem->udid), AnonymizesUDID(topoInfo->peerUdid));
             ListDelete(&topoInfo->node);
             SoftBusFree(topoInfo);
             topoItem->count--;

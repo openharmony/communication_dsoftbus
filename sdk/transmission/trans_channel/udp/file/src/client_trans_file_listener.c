@@ -188,6 +188,10 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
 
 void TransDeleteFileListener(const char *sessionName)
 {
+    if (sessionName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client]%s invalid param.", __func__);
+        return;
+    }
     if (g_fileListener == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file listener hasn't initialized.");
         return;

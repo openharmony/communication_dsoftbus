@@ -37,8 +37,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    int ret = clientProxy->OnChannelOpened(sessionName, channel);
-    return ret;
+    return clientProxy->OnChannelOpened(sessionName, channel);
 }
 
 int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType)

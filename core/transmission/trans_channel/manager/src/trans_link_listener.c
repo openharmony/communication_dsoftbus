@@ -61,7 +61,6 @@ static int32_t GetNetworkIdByP2pMac(const char *peerMac, char *networkId, int32_
                 FreeMem(info);
                 return SOFTBUS_MEM_ERR;
             }
-
             FreeMem(info);
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac end");
             return SOFTBUS_OK;

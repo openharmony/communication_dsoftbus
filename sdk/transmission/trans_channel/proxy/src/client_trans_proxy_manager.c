@@ -56,6 +56,7 @@ static void ProxyFileTransTimerProc(void);
 int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb)
 {
     if (cb == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClinetTransProxyInit cb param is null!");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -105,12 +106,13 @@ void ClientTransProxyDeinit(void)
 int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransProxyOnChannelOpened invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret = g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_MESSAGE);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session open fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session open fail, sessionName=[%s].", sessionName);
         return ret;
     }
 
@@ -121,7 +123,7 @@ int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session closed err[%d], cId[%d].", ret, channelId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -131,7 +133,7 @@ int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_PROXY);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail cId[%d].", channelId);
         return ret;
     }
 
@@ -142,11 +144,13 @@ int32_t ClientTransProxyOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type)
 {
     if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "ClientTransProxyOnDataReceived cId[%d] data null.", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
     int ret = g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, type);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify data recv err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify data recv err, cId[%d].", channelId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -156,7 +160,7 @@ void ClientTransProxyCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseProxyChannel, channelId [%d]", channelId);
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_PROXY) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server close channel[%d] err.", channelId);
     }
 }
 

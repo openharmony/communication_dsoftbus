@@ -48,7 +48,7 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
 
     switch (status) {
         case STREAM_CONNECTED:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream connected.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d dstream connected.", channelId);
             if (g_udpChannelMgrCb->OnUdpChannelOpened == NULL) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback on udp channel opened is null.");
                 return;
@@ -56,22 +56,22 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
             g_udpChannelMgrCb->OnUdpChannelOpened(channelId);
             break;
         case STREAM_CLOSED:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream closed.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d dstream closed.", channelId);
             break;
         case STREAM_INIT:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream init.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d dstream init.", channelId);
             break;
         case STREAM_OPENING:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream opening.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d dstream opening.", channelId);
             break;
         case STREAM_CONNECTING:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream connecting.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d dstream connecting.", channelId);
             break;
         case STREAM_CLOSING:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "dstream closing.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d dstream closing.", channelId);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport stream status.");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cId=%d unsupport stream status=%d.", channelId, status);
             break;
     }
 }

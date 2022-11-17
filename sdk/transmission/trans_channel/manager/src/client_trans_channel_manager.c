@@ -56,7 +56,7 @@ void ClientTransChannelDeinit(void)
 int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
 {
     if (channelId < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransCloseChannel Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
@@ -75,7 +75,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
             ClientTransAuthCloseChannel(channelId);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid type");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransCloseChannel Invalid type");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     return ret;
@@ -84,7 +84,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
 int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void *data, uint32_t len)
 {
     if ((data == NULL) || (len == 0)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransChannelSendBytes Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -100,7 +100,7 @@ int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void 
             ret = TransTdcSendBytes(channelId, data, len);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid type");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransChannelSendBytes Invalid type");
             return SOFTBUS_ERR;
     }
     return ret;
@@ -109,7 +109,7 @@ int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void 
 int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const void *data, uint32_t len)
 {
     if ((data == NULL) || (len == 0)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransChannelSendMessage Invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -135,7 +135,7 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const Stre
     const StreamData *ext, const StreamFrameInfo *param)
 {
     if ((data == NULL) || (ext == NULL) || (param == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransChannelSendStream Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -145,7 +145,7 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const Stre
             ret = TransUdpChannelSendStream(channelId, data, ext, param);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unsupport channel type");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransChannelSendStream unsupport ctype[%d].", type);
             return SOFTBUS_ERR;
     }
     return ret;

@@ -303,8 +303,7 @@ void P2pLinkConningCallback(const ConnectingNode *item, int32_t ret, int32_t fai
         }
     } else {
         if (devInfo->cb.onConnected != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify OK reqid %d, peerip %s myip %s",
-                       devInfo->requestId, item->peerIp, item->myIp);
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify OK reqid %d", devInfo->requestId);
             devInfo->cb.onConnected(devInfo->requestId, item->myIp, item->peerIp);
         }
     }

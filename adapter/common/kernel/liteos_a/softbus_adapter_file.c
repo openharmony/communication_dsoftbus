@@ -114,7 +114,7 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = write(fd, writeBuf, len);
-    if (ret != (int32_t)len) {
+    if (len > INT32_MAX || ret != (int32_t)len) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteFile write fail");
         close(fd);
         return SOFTBUS_FILE_ERR;

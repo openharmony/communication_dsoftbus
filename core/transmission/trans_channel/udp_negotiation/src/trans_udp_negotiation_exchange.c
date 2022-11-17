@@ -67,7 +67,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     int32_t ret = SoftBusBase64Decode((unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
         (unsigned char*)encodeSessionKey, strlen((char*)encodeSessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls base64 decode failed.");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls decode failed.");
         return SOFTBUS_ERR;
     }
 

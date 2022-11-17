@@ -103,7 +103,6 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
         SoftBusFree(newNode);
         if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server is already created");
-            return SOFTBUS_SERVER_NAME_REPEATED;
         }
         return ret;
     }

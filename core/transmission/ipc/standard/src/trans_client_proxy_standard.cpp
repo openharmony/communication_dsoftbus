@@ -319,58 +319,86 @@ int32_t TransClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelTy
 
 void TransClientProxy::OnDeviceFound(const DeviceInfo *device)
 {
+    (void)device;
 }
 
 void TransClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
 {
+    (void)subscribeId;
+    (void)failReason;
 }
 
 void TransClientProxy::OnDiscoverySuccess(int subscribeId)
 {
+    (void)subscribeId;
 }
 
 void TransClientProxy::OnPublishSuccess(int publishId)
 {
+    (void)publishId;
 }
 
 void TransClientProxy::OnPublishFail(int publishId, int reason)
 {
+    (void)publishId;
+    (void)reason;
 }
 
 int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
+    (void)addr;
+    (void)addrTypeLen;
+    (void)networkId;
+    (void)retCode;
     return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnLeaveLNNResult(const char *networkId, int retCode)
 {
+    (void)networkId;
+    (void)retCode;
     return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
+    (void)isOnline;
+    (void)info;
+    (void)infoTypeLen;
     return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
+    (void)info;
+    (void)infoTypeLen;
+    (void)type;
     return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
+    (void)info;
+    (void)infoTypeLen;
+    (void)retCode;
     return SOFTBUS_OK;
 }
 
 void TransClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
 {
+    (void)publishId;
+    (void)reason;
 }
 
 void TransClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
 {
+    (void)refreshId;
+    (void)reason;
 }
 
 void TransClientProxy::OnRefreshDeviceFound(const void *device, uint32_t deviceLen)
 {
+    (void)device;
+    (void)deviceLen;
 }
 } // namespace OHOS

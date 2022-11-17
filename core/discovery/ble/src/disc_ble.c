@@ -191,7 +191,7 @@ static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums
             SoftbusBitmapSet(dstCap, g_bleTransCapabilityMap[i]);
         }
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "old= %d,new= %d", *srcCap, *dstCap);
+    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "old= %u,new= %u", *srcCap, *dstCap);
 }
 
 static void ResetInfoUpdate(int adv)
@@ -219,7 +219,7 @@ static int32_t GetNeedUpdateAdvertiser(int32_t adv)
 
 static void BleAdvEnableCallback(int advId, int status)
 {
-    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS) {
+    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS || advId < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BleAdvEnableCallback failed");
         return;
     }
@@ -239,7 +239,7 @@ static void BleAdvDisableCallback(int advId, int status)
 
 static void BleAdvDataCallback(int advId, int status)
 {
-    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS) {
+    if (advId >= NUM_ADVERTISER || status != SOFTBUS_BT_STATUS_SUCCESS || advId < 0) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "BleAdvDataCallback failed");
         return;
     }
@@ -583,6 +583,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Boardcast
     if (advData->scanRspData == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "malloc failed");
         SoftBusFree(advData->advData);
+        advData->advData = NULL;
         return SOFTBUS_MALLOC_ERR;
     }
     unsigned short advLength = (boardcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : boardcastData->dataLen;
@@ -799,7 +800,7 @@ static int32_t InitScanner(void)
 
 static int32_t GetScannerParam(int32_t freq, SoftBusBleScanParams *scanParam)
 {
-    if (freq >= FREQ_BUTT) {
+    if (freq >= FREQ_BUTT || freq < 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     scanParam->scanInterval = (uint16_t)g_scanTable[freq].scanInterval;
@@ -909,6 +910,7 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             }
         }
         if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+            SoftBusFree(info->capabilityData[pos]);
             return SOFTBUS_MEM_ERR;
         }
         info->capDataLen[pos] = custDataLen;

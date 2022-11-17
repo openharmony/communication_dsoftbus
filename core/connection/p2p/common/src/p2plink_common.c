@@ -93,7 +93,7 @@ void P2pLinkSetGoIp(const char *ip)
     if (ret != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go ip %s", g_goIp);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go ip");
 }
 
 void P2pLinkSetGoMac(const char *mac)
