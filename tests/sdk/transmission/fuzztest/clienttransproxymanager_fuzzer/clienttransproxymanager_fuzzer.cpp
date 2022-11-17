@@ -39,7 +39,6 @@
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 
-
 namespace OHOS {
 void ClientTransProxyManagerTest(const uint8_t* data, size_t size)
 {
@@ -74,7 +73,7 @@ void ClientTransProxyManagerTest(const uint8_t* data, size_t size)
 
     ProcessFileFrameData(sessionId, channelId, charData, len, type);
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -83,4 +82,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::ClientTransProxyManagerTest(data, size);
     return 0;
 }
-

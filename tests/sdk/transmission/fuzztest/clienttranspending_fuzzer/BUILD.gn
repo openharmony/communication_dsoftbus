@@ -30,7 +30,6 @@ ohos_fuzztest("ClientTransPendingFuzzTest") {
     "//foundation/communication/dsoftbus/adapter/common/include",
     "//third_party/bounds_checking_function/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest",
   ]
 
   cflags = [

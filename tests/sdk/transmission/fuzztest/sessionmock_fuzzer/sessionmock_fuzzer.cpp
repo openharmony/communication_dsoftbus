@@ -46,7 +46,7 @@ namespace OHOS {
         if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
         }
-        
+
         int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
         char *tmp = const_cast<char*>(reinterpret_cast<const char*>(data));
         GetPeerSessionNameInner(sessionId, tmp, size);
@@ -143,7 +143,7 @@ namespace OHOS {
         char mySessionName[SESSION_NAME_SIZE_MAX] = "ohos.fuzz.dms.test";
         RemoveSessionServerInner(nullptr, mySessionName);
     }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
@@ -163,4 +163,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::RemoveSessionServerInnerTest(data, size);
     return 0;
 }
-
