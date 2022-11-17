@@ -502,43 +502,63 @@ static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
     SoftBusGattsSendResponse(&response);
 }
 
-static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
+static void BleSendGattRsp(SoftBusGattWriteRequest *request)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RequestWriteCallback halconnId=%d, transId=%d, attrHandle=%d\n",
-        writeCbPara.connId, writeCbPara.transId, writeCbPara.attrHandle);
-    if (writeCbPara.attrHandle != g_gattService.bleConnCharaId &&
-        writeCbPara.attrHandle != g_gattService.bleNetCharaId) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived not support handle :%d expect:%d",
-            writeCbPara.attrHandle, g_gattService.bleConnCharaId);
+    if (!request->needRsp) {
         return;
     }
-    if (writeCbPara.needRsp) {
-        SoftBusGattsResponse response = {
-            .connectId = writeCbPara.connId,
-            .status = SOFTBUS_BT_STATUS_SUCCESS,
-            .attrHandle = writeCbPara.transId,
-            .valueLen = writeCbPara.length,
-            .value = (char *)writeCbPara.value
-        };
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRequestWriteCallback sendresponse");
-        SoftBusGattsSendResponse(&response);
-    }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-        "BLEINFOPRTINT:BleRequestWriteCallback valuelen:%d", writeCbPara.length);
-    uint32_t len;
+    SoftBusGattsResponse response = {
+        .connectId = request->connId,
+        .status = SOFTBUS_BT_STATUS_SUCCESS,
+        .attrHandle = request->transId,
+        .valueLen = request->length,
+        .value = (char *)request->value
+    };
+    int ret = SoftBusGattsSendResponse(&response);
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "send gatt response, handle: %d, ret: %d", request->attrHandle, ret);
+}
+
+static void BleRequestCharacteristicWriteCallback(SoftBusGattWriteRequest *request)
+{
+    BleSendGattRsp(request);
+
+    uint32_t len = 0;
     int32_t index = -1;
-    BleHalConnInfo halConnInfo;
-    halConnInfo.halConnId = writeCbPara.connId;
-    halConnInfo.isServer = BLE_SERVER_TYPE;
-    char *value = BleTransRecv(halConnInfo, (char *)writeCbPara.value,
-        (uint32_t)writeCbPara.length, &len, &index);
+    BleHalConnInfo halConnInfo = {
+        .halConnId = request->connId,
+        .isServer = BLE_SERVER_TYPE
+    };
+    char *value = BleTransRecv(halConnInfo, (char *)request->value, (uint32_t)request->length, &len, &index);
     if (value == NULL) {
         return;
     }
-    SoftBusGattServerOnDataReceived(writeCbPara.attrHandle, writeCbPara.connId, len, (const char *)value);
+    SoftBusGattServerOnDataReceived(request->attrHandle, request->connId, len, (const char *)value);
     if (index != -1) {
         BleTransCacheFree(halConnInfo, index);
     }
+}
+
+static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
+        "RequestWriteCallback halconnId: %d, transId: %d, attrHandle: %d, value length: %d, need rsp: %d",
+        writeCbPara.connId, writeCbPara.transId, writeCbPara.attrHandle, writeCbPara.length, writeCbPara.needRsp);
+
+    if (writeCbPara.attrHandle == g_gattService.bleConnDesId ||
+        writeCbPara.attrHandle == g_gattService.bleNetDesId) {
+        BleSendGattRsp(&writeCbPara);
+        return;
+    }
+    if (writeCbPara.attrHandle == g_gattService.bleConnCharaId ||
+        writeCbPara.attrHandle == g_gattService.bleNetCharaId) {
+        BleRequestCharacteristicWriteCallback(&writeCbPara);
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN,
+        "BleRequestWriteCallback receive unexpectedly notify, handle: %d, expect: [%d, %d, %d, %d]",
+        writeCbPara.attrHandle, g_gattService.bleConnDesId, g_gattService.bleNetDesId,
+        g_gattService.bleConnCharaId, g_gattService.bleNetCharaId);
 }
 
 static void BleResponseConfirmationCallback(int status, int handle)
