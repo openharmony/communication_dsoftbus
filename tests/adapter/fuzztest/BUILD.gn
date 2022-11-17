@@ -16,6 +16,6 @@ group("fuzztest") {
   deps = [
     "softbusadapterhisysevent_fuzzer:fuzztest",
     "softbusadapterrange_fuzzer:fuzztest",
-    "softbusdecryptdata_fuzzer:SoftBusDecryptDataTest",
+    "softbusdecryptdata_fuzzer:SoftBusDecryptDataFuzzTest",
   ]
 }
