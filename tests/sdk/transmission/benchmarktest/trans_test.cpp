@@ -24,7 +24,6 @@
 #include "softbus_common.h"
 #include "token_setproc.h"
 
-
 namespace OHOS {
 const char *g_pkgName = "dms";
 char g_sessionName[] = "ohos.distributedschedule.dms.test";

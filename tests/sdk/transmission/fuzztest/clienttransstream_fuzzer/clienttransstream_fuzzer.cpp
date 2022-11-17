@@ -20,7 +20,6 @@
 #include "session.h"
 #include "softbus_def.h"
 
-
 namespace OHOS {
     void TransOnstreamChannelOpenedTest(const uint8_t* data, size_t size)
     {
@@ -52,7 +51,7 @@ namespace OHOS {
 
         TransCloseStreamChannel(size);
     }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

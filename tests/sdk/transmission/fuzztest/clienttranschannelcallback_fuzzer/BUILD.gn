@@ -37,7 +37,6 @@ ohos_fuzztest("ClientTransChannelCallbackFuzzTest") {
     "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
     "//foundation/communication/dsoftbus/core/transmission/common/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest",
   ]
 
   cflags = [

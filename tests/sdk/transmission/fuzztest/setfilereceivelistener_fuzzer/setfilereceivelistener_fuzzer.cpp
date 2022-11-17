@@ -23,7 +23,6 @@
 #include "softbus_utils.h"
 
 namespace OHOS {
-
 void SetFileReceiveListenerTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
