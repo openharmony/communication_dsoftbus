@@ -167,6 +167,8 @@ static void *LoopTask(void *arg)
             msg->handler->HandleMessage(msg);
         }
         if (looper->dumpable) {
+            // Don`t print msg->handler, msg->handler->HandleMessage() may remove handler,
+            // so msg->handler maybe invalid pointer
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
                 "LoopTask[%s], after HandleMessage message. what=%d",
                 context->name, msg->what);
