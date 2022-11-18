@@ -157,7 +157,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
     }
     int32_t fileSession;
 
-    uint32_t capabilityValue = channel->isUdpFile? NSTACKX_WLAN_CAT_DIRECT : NSTACKX_WLAN_CAT_TCP;
+    uint32_t capabilityValue = channel->isUdpFile ? NSTACKX_WLAN_CAT_DIRECT : NSTACKX_WLAN_CAT_TCP;
     (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, capabilityValue);
     if (channel->isServer) {
         FileListener fileListener;
@@ -235,10 +235,10 @@ void RegisterFileCb(const UdpChannelMgrCb *fileCb)
     g_udpChannelMgrCb = fileCb;
 }
 
-int32_t TransSendFile(int32_t sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+int32_t TransSendFile(int32_t dfileId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     if (dFileList == NULL) {
-        return NSTACKX_DFileSendFiles(sessionId, sFileList, fileCnt, NULL);
+        return NSTACKX_DFileSendFiles(dfileId, sFileList, fileCnt, NULL);
     }
-    return NSTACKX_DFileSendFilesWithRemotePath(sessionId, sFileList, dFileList, fileCnt, NULL);
+    return NSTACKX_DFileSendFilesWithRemotePath(dfileId, sFileList, dFileList, fileCnt, NULL);
 }

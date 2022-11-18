@@ -75,14 +75,14 @@ static int OpenTcpServer(const char *ip, int port)
     return fd;
 }
 
-int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
+int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort)
 {
-    if (myIP == NULL || filePort == NULL) {
+    if (myIp == NULL || filePort == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
-    int fd = OpenTcpServer(myIP, 0);
+    int fd = OpenTcpServer(myIp, 0);
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to start tcp server for getting port");
         return SOFTBUS_ERR;
@@ -104,7 +104,7 @@ int32_t StartNStackXDFileServer(const char *myIP, const uint8_t *key,
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
     localAddr.sin_family = AF_INET;
     localAddr.sin_port = (uint16_t)port;
-    localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(myIP));
+    localAddr.sin_addr.s_addr = SoftBusNtoHl(SoftBusInetAddr(myIp));
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
     int sessionId = NSTACKX_DFileServer(&localAddr, addrLen, key, keyLen, msgReceiver);

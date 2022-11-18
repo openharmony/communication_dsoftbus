@@ -651,9 +651,9 @@ int32_t TransCloseAuthChannel(int32_t channelId)
     return SOFTBUS_ERR;
 }
 
-int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
+int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len)
 {
-    if (data == NULL || len <= 0) {
+    if (msg == NULL || len <= 0) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -668,7 +668,7 @@ int32_t TransSendAuthMsg(int32_t channelId, const char *data, int32_t len)
         .flag = 0,
         .seq = 0,
         .len = (uint32_t)len,
-        .data = (const uint8_t *)data,
+        .data = (const uint8_t *)msg,
     };
     if (AuthPostChannelData(authId, &channelData) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth post channel data fail");
