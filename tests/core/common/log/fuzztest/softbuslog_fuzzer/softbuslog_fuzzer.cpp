@@ -59,7 +59,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 
     OHOS::NstackxLogTest(buffer);
     OHOS::AnonymizesTest(buffer);
-    OHOS::AnonyPacketPrintoutTest(buffer, OHOS::MAX_BUFFER_LEN);
+    OHOS::AnonyPacketPrintoutTest(buffer, OHOS::MAX_BUFFER_LEN - 1);
     OHOS::AnonyDevIdTest(buffer);
     return 0;
 }
