@@ -142,10 +142,6 @@ static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct s
 
 static int32_t SysAddrToSoftBusAddr(const struct sockaddr *sysAddr, SoftBusSockAddr *softbusAddr)
 {
-    if ((sysAddr == NULL) || (softbusAddr == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:invalid input", __func__);
-        return SOFTBUS_ADAPTER_ERR;
-    }
     if (memset_s(softbusAddr, sizeof(SoftBusSockAddr), 0, sizeof(SoftBusSockAddr)) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:memset fail", __func__);
         return SOFTBUS_ADAPTER_ERR;
@@ -161,6 +157,10 @@ static int32_t SysAddrToSoftBusAddr(const struct sockaddr *sysAddr, SoftBusSockA
 
 int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen)
 {
+    if (addr == NULL || addrLen == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "get local name invalid input");
+        return SOFTBUS_ADAPTER_ERR;
+    }
     struct sockaddr sysAddr;
     if (memset_s(&sysAddr, sizeof(struct sockaddr), 0, sizeof(struct sockaddr)) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "get local name memset fail");
@@ -180,6 +180,10 @@ int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr, int32
 
 int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen)
 {
+    if (addr == NULL || addrLen == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "get peer name invalid input");
+        return SOFTBUS_ADAPTER_ERR;
+    }
     struct sockaddr sysAddr;
     if (memset_s(&sysAddr, sizeof(struct sockaddr), 0, sizeof(struct sockaddr)) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "get peer name memset fail");
@@ -227,8 +231,8 @@ int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog)
 
 int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen, int32_t *acceptFd)
 {
-    if (acceptFd == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "acceptFd is null");
+    if (addr == NULL || addrLen == NULL || acceptFd == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "socket accept invalid input");
         return SOFTBUS_ADAPTER_INVALID_PARAM;
     }
     struct sockaddr sysAddr;
