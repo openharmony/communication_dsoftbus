@@ -28,8 +28,8 @@ class StreamAdaptorListener : public IStreamManagerListener {
 public:
     StreamAdaptorListener() = default;
     explicit StreamAdaptorListener(std::shared_ptr<StreamAdaptor> adaptor) : adaptor_(adaptor) {}
-    virtual ~StreamAdaptorListener() = default;
-    void OnStreamReceived(std::unique_ptr<IStream> stream)
+    virtual ~StreamAdaptorListener() override = default;
+    void OnStreamReceived(std::unique_ptr<IStream> stream) override
     {
         if (adaptor_ == nullptr || adaptor_->GetListenerCallback() == nullptr ||
             adaptor_->GetListenerCallback()->OnStreamReceived == nullptr) {
@@ -79,7 +79,7 @@ public:
             &retStreamData, &extStreamData, &tmpf);
     }
 
-    void OnStreamStatus(int status)
+    void OnStreamStatus(int status) override
     {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnStreamStatus(%d) in.", status);
 
@@ -89,7 +89,7 @@ public:
         }
     }
 
-    void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList)
+    void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnQosEvent for channelId = %" PRId64,
@@ -101,7 +101,7 @@ public:
         }
     }
 
-    void OnFrameStats(const StreamSendStats *data)
+    void OnFrameStats(const StreamSendStats *data) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnFrameStats != nullptr) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
@@ -113,7 +113,7 @@ public:
         }
     }
 
-    void OnRippleStats(const TrafficStats *data)
+    void OnRippleStats(const TrafficStats *data) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnRippleStats != nullptr) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,

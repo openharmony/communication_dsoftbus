@@ -22,7 +22,7 @@
 
 int32_t NotifyNetworkingChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer);
 
-void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *NetworkId);
+void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId);
 
 void NotifyNetworkingChannelClosed(int32_t channelId);
 

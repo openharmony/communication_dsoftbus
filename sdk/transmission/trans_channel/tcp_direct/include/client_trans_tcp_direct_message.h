@@ -47,7 +47,7 @@ typedef struct {
     uint32_t dataLen;
 } __attribute__((packed)) TcpDataPacketHead;
 
-int32_t TransTdcRecvData(int32_t fd);
+int32_t TransTdcRecvData(int32_t channelId);
 
 int32_t TransDataListInit(void);
 void TransDataListDeinit(void);

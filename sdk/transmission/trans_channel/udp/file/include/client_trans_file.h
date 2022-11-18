@@ -44,7 +44,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
 
 void TransCloseFileChannel(int32_t dfileId);
 
-int32_t TransSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
+int32_t TransSendFile(int32_t dfileId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
 int32_t TransFileSchemaInit(void);
 

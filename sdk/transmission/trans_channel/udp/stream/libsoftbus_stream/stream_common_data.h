@@ -32,7 +32,7 @@ public:
     StreamCommonData() = default;
     StreamCommonData(uint32_t streamId, uint16_t seq, const StreamFrameInfo& frameInfo);
 
-    virtual ~StreamCommonData() = default;
+    virtual ~StreamCommonData() override = default;
 
     // 应用调用生成流数据。
     int InitStreamData(std::unique_ptr<char[]> inputBuf, ssize_t bufSize, std::unique_ptr<char[]> inputExt,

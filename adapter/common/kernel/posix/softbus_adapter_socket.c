@@ -200,7 +200,7 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr, int32_
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen)
 {
     struct sockaddr sysAddr;
-    int32_t len = (sizeof(SoftBusSockAddr) > addrLen) ? addrLen : sizeof(SoftBusSockAddr);
+    int32_t len = (addrLen >= sizeof(SoftBusSockAddr)) ? sizeof(SoftBusSockAddr) : addrLen;
     if (SoftBusAddrToSysAddr(addr, &sysAddr, len) != SOFTBUS_ADAPTER_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "socket bind sys addr to softbus addr failed");
         return SOFTBUS_ADAPTER_ERR;
