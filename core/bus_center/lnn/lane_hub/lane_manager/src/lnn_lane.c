@@ -277,7 +277,8 @@ int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const 
         return SOFTBUS_ERR;
     }
     int32_t result;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "laneRequest, laneId %u, lane type %d", laneId, request->type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "laneRequest, laneId %u, lane type %d, trans type is %d",
+        laneId, request->type, request->requestInfo.trans.transType);
     result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
     if (result != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "alloc lane fail, result:%d", result);
