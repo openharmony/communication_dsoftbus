@@ -29,7 +29,6 @@ group("unittest") {
   if (dsoftbus_feature_disc_ble) {
     deps += [
       "ble/dispatcher:unittest",
-      "ble/softbus_ble:unittest",
       "ble/softbus_ble_mock:unittest",
     ]
   }
