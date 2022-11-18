@@ -16,6 +16,7 @@
 #include "softbus_adapter_range.h"
 #include <math.h>
 #include <stdlib.h>
+#include "softbus_adapter_log.h"
 
 #define MOCK_POWER (-17)
 #define DB_BASE (10.0)
@@ -24,15 +25,20 @@
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range)
 {
     if (param == NULL || range == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusBleRange param is null.");
         return -1;
     }
-    
+
     *range = (int32_t)pow(DB_BASE, param->rssi * -1 / DB_COEFFICIENT);
     return 0;
 }
 
 int SoftBusGetBlePower(int8_t *power)
 {
+    if (power == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusGetBlePower param is null.");
+        return -1;
+    }
     *power = MOCK_POWER;
     return 0;
 }

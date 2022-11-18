@@ -26,11 +26,15 @@
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
+#include "softbus_adapter_xcollie.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
+#define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
+#define WATCHDOG_INTERVAL_TIME 10000
+#define WATCHDOG_DELAY_TIME 5000
 #define DEFAULT_DELAY_LEN 1000
 #define RETRY_MAX 10
 
@@ -59,6 +63,15 @@ typedef struct {
     InitDelayImpl initDelayImpl[INIT_DELAY_MAX_TYPE];
     int32_t delayLen;
 } LnnLocalConfigInit;
+
+static void WatchdogProcess(void)
+{
+    if (GetWatchdogFlag()) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "softbus net_builder thread running normally.");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "softbus net_builder thread exception.");
+}
 
 static LnnLocalConfigInit g_lnnLocalConfigInit = {
     .initDelayImpl = {
@@ -164,6 +177,7 @@ int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init net builder fail!");
         return SOFTBUS_ERR;
     }
+    SoftBusRunPeriodicalTask(WATCHDOG_TASK_NAME, WatchdogProcess, WATCHDOG_INTERVAL_TIME, WATCHDOG_DELAY_TIME);
     if (LnnInitLaneHub() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane hub fail!");
         return SOFTBUS_ERR;
