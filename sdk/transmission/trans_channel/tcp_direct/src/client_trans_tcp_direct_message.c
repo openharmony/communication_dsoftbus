@@ -472,12 +472,12 @@ static int32_t TransTdcProcAllData(int32_t channelId)
             return SOFTBUS_ERR;
         }
 
-        uint32_t pkgLen = pktHead->dataLen + DC_DATA_HEAD_SIZE;
-        if (pkgLen > g_dataBufferMaxLen) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "out of recv data buf size[%d]", pkgLen);
+        if ((pktHead->dataLen > g_dataBufferMaxLen - DC_DATA_HEAD_SIZE) || (pktHead->dataLen <= OVERHEAD_LEN)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "illegal data size[%d]", pktHead->dataLen);
             SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_ERR;
         }
+        uint32_t pkgLen = pktHead->dataLen + DC_DATA_HEAD_SIZE;
 
         if (pkgLen > node->size && pkgLen <= g_dataBufferMaxLen) {
             int32_t ret = TransResizeDataBuffer(node, pkgLen);
