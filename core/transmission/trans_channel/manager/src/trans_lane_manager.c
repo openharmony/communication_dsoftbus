@@ -99,7 +99,7 @@ int32_t TransLaneMgrInit(void)
 {
     if (g_channelLaneList != NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans lane info manager hasn't initialized.");
-        return SOFTBUS_OK;
+        return SOFTBUS_OK; 
     }
     g_channelLaneList = CreateSoftBusList();
     if (g_channelLaneList == NULL) {
