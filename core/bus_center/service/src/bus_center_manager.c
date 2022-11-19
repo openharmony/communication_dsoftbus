@@ -200,6 +200,7 @@ void BusCenterServerDeinit(void)
     LnnDeinitLaneHub();
     LnnDeinitNetBuilder();
     LnnDeinitNetworkManager();
+    LnnDeinitEventMonitor();
     LnnDeinitBusCenterEvent();
     LnnDeinitNetLedger();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
