@@ -78,6 +78,10 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
     channel->channelType = CHANNEL_TYPE_UDP;
     ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, sessionName, channel);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    if (channel != NULL) {
+        SoftBusFree(channel);
+    }
 }
 
 /**

@@ -30,13 +30,13 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     const ChannelInfo *channel)
 {
     if (pkgName == NULL || sessionName == NULL || channel == NULL) {
-        return SOFTBUS_INVALID_PARAM; 
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (channel->isServer == false && channel->channelType == CHANNEL_TYPE_UDP &&
         NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "NotifyQosChannelOpened failed.");
-        return SOFTBUS_ERR; 
+        return SOFTBUS_ERR;
     }
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
 }
