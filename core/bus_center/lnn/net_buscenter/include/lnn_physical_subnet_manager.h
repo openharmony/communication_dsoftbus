@@ -29,8 +29,8 @@ extern "C" {
 typedef enum {
     LNN_SUBNET_IDLE, // can be enable
     LNN_SUBNET_RUNNING,
-    LNN_SUBNET_SHUTDOWN, // will not be auto Enable
-    LNN_SUBNET_RESETTING, // Will be auto Enable in high pri
+    LNN_SUBNET_SHUTDOWN, // will not be auto enable
+    LNN_SUBNET_RESETTING, // Will be auto enable in high pri
     LNN_SUBNET_STATUS_MAX
 } LnnPhysicalSubnetStatus;
 
@@ -38,9 +38,9 @@ typedef struct LnnPhysicalSubnet {
     char ifName[NET_IF_NAME_LEN];
     const LnnProtocolManager *protocol;
     LnnPhysicalSubnetStatus status;
-    void (*Destroy)(struct LnnPhysicalSubnet *);
-    void (*OnNetifStatusChanged)(struct LnnPhysicalSubnet *);
-    void (*OnSoftbusNetworkDisconnected)(struct LnnPhysicalSubnet *);
+    void (*destroy)(struct LnnPhysicalSubnet *);
+    void (*onNetifStatusChanged)(struct LnnPhysicalSubnet *);
+    void (*onSoftbusNetworkDisconnected)(struct LnnPhysicalSubnet *);
 } LnnPhysicalSubnet;
 
 typedef int16_t PhysicalSubnetId;

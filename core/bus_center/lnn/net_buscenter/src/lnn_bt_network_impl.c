@@ -53,31 +53,39 @@ static void TransactBtSubnetState(LnnPhysicalSubnet *subnet, BtSubnetManagerEven
         lastStatus, subnet->status);
 }
 
-static int32_t EnableBrSubnet(LnnPhysicalSubnet *subnet)
+static int32_t GetAvailableBtMac(char *macStr, uint32_t len)
 {
     int32_t ret;
     SoftBusBtAddr mac;
-    char macStr[BT_MAC_LEN] = {0};
 
-    if (subnet->status == LNN_SUBNET_RUNNING) {
-        return SOFTBUS_OK;
+    if (len != BT_MAC_LEN) {
+        return SOFTBUS_INVALID_PARAM;
     }
     ret = SoftBusGetBtMacAddr(&mac);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac addr fail");
         return ret;
     }
-    ret = ConvertBtMacToStr(macStr, sizeof(macStr), mac.addr, sizeof(mac.addr));
+    ret = ConvertBtMacToStr(macStr, len, mac.addr, sizeof(mac.addr));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bt mac to str fail");
         return ret;
     }
-    ret = LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set bt mac to local ledger fail");
-        return ret;
-    }
     return SOFTBUS_OK;
+}
+
+static int32_t EnableBrSubnet(LnnPhysicalSubnet *subnet)
+{
+    char macStr[BT_MAC_LEN] = {0};
+
+    if (subnet->status == LNN_SUBNET_RUNNING) {
+        return SOFTBUS_OK;
+    }
+    if (GetAvailableBtMac(macStr, sizeof(macStr)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get available bt mac fail");
+        return SOFTBUS_ERR;
+    }
+    return LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr);
 }
 
 static int32_t EnableBleSubnet(LnnPhysicalSubnet *subnet)
@@ -137,6 +145,46 @@ static void DestroyBtSubnetManager(LnnPhysicalSubnet *subnet)
     SoftBusFree(subnet);
 }
 
+static BtSubnetManagerEvent GetBtRegistEvent(void)
+{
+    char macStr[BT_MAC_LEN] = {0};
+
+    if (!SoftBusGetBtState()) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "bluetooth is not enabled yet");
+        return BT_SUBNET_MANAGER_EVENT_IF_DOWN;
+    }
+    return GetAvailableBtMac(macStr, sizeof(macStr)) == SOFTBUS_OK ?
+        BT_SUBNET_MANAGER_EVENT_IF_READY : BT_SUBNET_MANAGER_EVENT_IF_DOWN;
+}
+
+static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet)
+{
+    /* Only used for initialization process to obtain bt subnet status */
+    if (subnet->status == LNN_SUBNET_RUNNING) {
+        return;
+    }
+    BtSubnetManagerEvent event = GetBtRegistEvent();
+    if (event != BT_SUBNET_MANAGER_EVENT_IF_READY) {
+        return;
+    }
+
+    int32_t ret;
+    LnnNetIfType type;
+    LnnGetNetIfTypeByName(subnet->ifName, &type);
+    switch (type) {
+        case LNN_NETIF_TYPE_BR:
+            ret = EnableBrSubnet(subnet);
+            break;
+        case LNN_NETIF_TYPE_BLE:
+            ret = EnableBleSubnet(subnet);
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "discard unexpected type %d", type);
+            return;
+    }
+    TransactBtSubnetState(subnet, event, (ret == SOFTBUS_OK));
+}
+
 static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self, const char *ifName)
 {
     LnnNetIfType type;
@@ -148,11 +196,11 @@ static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self,
     }
 
     do {
-        subnet->Destroy = DestroyBtSubnetManager;
+        subnet->destroy = DestroyBtSubnetManager;
         subnet->protocol = self;
         subnet->status = LNN_SUBNET_IDLE;
-        subnet->OnNetifStatusChanged = NULL;
-        subnet->OnSoftbusNetworkDisconnected = NULL;
+        subnet->onNetifStatusChanged = OnBtNetifStatusChanged;
+        subnet->onSoftbusNetworkDisconnected = NULL;
 
         int32_t ret = strcpy_s(subnet->ifName, sizeof(subnet->ifName), ifName);
         if (ret != EOK) {
@@ -162,7 +210,7 @@ static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self,
         return subnet;
     } while (false);
 
-    subnet->Destroy(subnet);
+    subnet->destroy(subnet);
     return NULL;
 }
 
@@ -288,7 +336,7 @@ int32_t LnnEnableBtProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:regist subnet manager failed! ret=%d", __func__, ret);
-        manager->Destroy(manager);
+        manager->destroy(manager);
         return ret;
     }
     return SOFTBUS_OK;
@@ -312,11 +360,11 @@ static LnnProtocolManager g_btProtocol = {
     .id = LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE,
     .pri = LNN_BT_PROTOCOL_PRI,
     .supportedNetif = LNN_NETIF_TYPE_BR | LNN_NETIF_TYPE_BLE,
-    .Init = LnnInitBtProtocol,
-    .Deinit = LnnDeinitBtNetwork,
-    .Enable = LnnEnableBtProtocol,
-    .Disable = NULL,
-    .GetListenerModule = LnnGetBtListenerModule,
+    .init = LnnInitBtProtocol,
+    .deinit = LnnDeinitBtNetwork,
+    .enable = LnnEnableBtProtocol,
+    .disable = NULL,
+    .getListenerModule = LnnGetBtListenerModule,
 };
 
 int32_t RegistBtProtocolManager(void)
