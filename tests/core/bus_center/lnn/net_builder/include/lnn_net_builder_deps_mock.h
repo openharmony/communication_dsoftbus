@@ -23,13 +23,15 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_bus_center.h"
+#include "lnn_state_machine.h"
+#include "message_handler.h"
+#include "lnn_async_callback_utils.h"
 
 namespace OHOS {
 class NetBuilderDepsInterface {
 public:
     NetBuilderDepsInterface() {};
     virtual ~NetBuilderDepsInterface() {};
-
     virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
     virtual int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
@@ -38,6 +40,9 @@ public:
     virtual int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId) = 0;
     virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
         uint32_t requestId, const AuthVerifyCallback *callBack) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+        void *para, uint64_t delayMillis) = 0;
+    virtual uint32_t AuthGenRequestId(void) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -51,6 +56,8 @@ public:
     MOCK_METHOD3(TransGetConnByChanId, int32_t (int32_t, int32_t, int32_t *));
     MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
         uint32_t, uint32_t, const AuthVerifyCallback *));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD0(AuthGenRequestId, uint32_t ());
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H

@@ -22,11 +22,15 @@ ohos_unittest("LNNTest") {
     "ipc/bus_center_client_proxy_standard_test.cpp",
     "ipc/bus_center_client_proxy_test.cpp",
     "ipc/lnn_bus_center_ipc_test.cpp",
-    "net_builder/lnn_connection_fsm_test.cpp",
-    "net_builder/lnn_network_info_test.cpp",
-    "net_builder/lnn_node_weight_test.cpp",
-    "net_builder/lnn_sync_info_manager_test.cpp",
-    "net_builder/lnn_topo_manager_test.cpp",
+    "net_builder/src/lnn_auth_mock.cpp",
+    "net_builder/src/lnn_connection_fsm_test.cpp",
+    "net_builder/src/lnn_net_builder_deps_mock.cpp",
+    "net_builder/src/lnn_net_ledger_mock.cpp",
+    "net_builder/src/lnn_network_info_test.cpp",
+    "net_builder/src/lnn_node_weight_test.cpp",
+    "net_builder/src/lnn_service_mock.cpp",
+    "net_builder/src/lnn_sync_info_manager_test.cpp",
+    "net_builder/src/lnn_topo_manager_test.cpp",
     "unittest/lane_test.cpp",
     "unittest/ledger_lane_hub_test.cpp",
     "unittest/lnn_huks_test.cpp",
@@ -75,6 +79,7 @@ ohos_unittest("LNNTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
   ]
 
   deps = [
@@ -83,6 +88,7 @@ ohos_unittest("LNNTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//base/security/device_auth/services:deviceauth_sdk",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
+    "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -102,7 +108,13 @@ ohos_unittest("LNNTest") {
 
 ohos_unittest("LNNNetBuilderTest") {
   module_out_path = module_output_path
-  sources = [ "net_builder/lnn_net_builder_test.cpp" ]
+  sources = [
+    "net_builder/src/lnn_auth_mock.cpp",
+    "net_builder/src/lnn_net_builder_deps_mock.cpp",
+    "net_builder/src/lnn_net_builder_test.cpp",
+    "net_builder/src/lnn_net_ledger_mock.cpp",
+    "net_builder/src/lnn_service_mock.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -131,6 +143,7 @@ ohos_unittest("LNNNetBuilderTest") {
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
   ]
 
   deps = [
@@ -159,9 +172,21 @@ ohos_unittest("LNNNetBuilderTest") {
 ohos_unittest("LNNTestMock") {
   module_out_path = module_output_path
   sources = [
-    "net_builder/lnn_devicename_info_test.cpp",
-    "net_builder/lnn_net_builder_deps_mock.cpp",
-    "net_builder/lnn_net_builder_mock_test.cpp",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+    "net_builder/src/lnn_auth_mock.cpp",
+    "net_builder/src/lnn_connection_fsm_test.cpp",
+    "net_builder/src/lnn_devicename_info_test.cpp",
+
+    #"net_builder/src/lnn_topo_manager_test.cpp",
+    #"net_builder/src/lnn_net_builder_mock_test.cpp",
+    "net_builder/src/lnn_net_builder_deps_mock.cpp",
+    "net_builder/src/lnn_net_ledger_mock.cpp",
+
+    #"net_builder/src/lnn_net_builder_test.cpp",
+    #"net_builder/src/lnn_network_info_test.cpp",
+    "net_builder/src/lnn_node_weight_test.cpp",
+    "net_builder/src/lnn_service_mock.cpp",
+    "net_builder/src/lnn_sync_info_manager_test.cpp",
   ]
 
   include_dirs = [
@@ -196,6 +221,7 @@ ohos_unittest("LNNTestMock") {
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
   ]
 
   deps = [

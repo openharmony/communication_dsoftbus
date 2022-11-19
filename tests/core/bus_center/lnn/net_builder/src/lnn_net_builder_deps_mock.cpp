@@ -71,5 +71,10 @@ int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t 
 {
     return GetNetBuilderDepsInterface()->AuthMetaStartVerify(connectionId, key, keyLen, requestId, callBack);
 }
+
+uint32_t AuthGenRequestId(void)
+{
+    return GetNetBuilderDepsInterface()->AuthGenRequestId();
+}
 }
 }
