@@ -690,6 +690,14 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+static inline int32_t CheckAppTypeAndMsgHead(const ProxyMessageHead *msgHead, const AppInfo *appInfo)
+{
+    if (((msgHead->cipher & ENCRYPTED) == 0) && (appInfo->appType != APP_TYPE_AUTH)) {
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    }
+    return SOFTBUS_OK;
+}
+
 static inline void ConstructProxyChannelInfo(ProxyChannelInfo *chan, const ProxyMessage *msg, int16_t newChanId,
     ConnectType type)
 {
@@ -714,6 +722,11 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         (!CheckSessionNameValidOnAuthChannel(chan->appInfo.myData.sessionName))) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy auth check sessionname valid.");
         return SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED;
+    }
+
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &chan->appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
     ConnectionInfo info;
@@ -811,6 +824,11 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         return;
     }
 
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &info->appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
+        return;
+    }
+
     if (info->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
     } else {
@@ -900,6 +918,11 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
             "data recv get info fail mid %d pid %d", msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
+        return;
+    }
+
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &info->appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
         return;
     }
 

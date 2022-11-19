@@ -45,7 +45,7 @@ int32_t ClientGetSessionKey(int32_t channelId, char *key, unsigned int len);
 
 int32_t ClientGetHandle(int32_t channelId, int *handle);
 
-int32_t ClientDisableSessionListener(int32_t handle);
+int32_t ClientDisableSessionListener(int32_t channelId);
 #ifdef __cplusplus
 }
 #endif

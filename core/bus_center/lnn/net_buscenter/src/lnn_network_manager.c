@@ -223,8 +223,8 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
 {
     int32_t ret = SOFTBUS_OK;
 
-    if (protocolMgr == NULL || protocolMgr->GetListenerModule == NULL || protocolMgr->Init == NULL ||
-        protocolMgr->Enable == NULL) {
+    if (protocolMgr == NULL || protocolMgr->getListenerModule == NULL || protocolMgr->init == NULL ||
+        protocolMgr->enable == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad input protocol!", __func__);
         return SOFTBUS_ERR;
     }
@@ -233,8 +233,8 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
         if (g_networkProtocols[i] != NULL) {
             continue;
         }
-        if (protocolMgr->Init != NULL) {
-            ret = protocolMgr->Init(protocolMgr);
+        if (protocolMgr->init != NULL) {
+            ret = protocolMgr->init(protocolMgr);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init network protocol failed! ret=%d", ret);
                 break;
@@ -260,8 +260,8 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
         if (g_networkProtocols[i] == protocolMgr) {
             g_networkProtocols[i] = NULL;
-            if (protocolMgr->Deinit != NULL) {
-                protocolMgr->Deinit(protocolMgr);
+            if (protocolMgr->deinit != NULL) {
+                protocolMgr->deinit(protocolMgr);
             }
             return SOFTBUS_OK;
         }
@@ -435,7 +435,7 @@ int32_t LnnInitNetworkManagerDelay(void)
                 continue;
             }
             if ((g_networkProtocols[i]->supportedNetif & item->type) != 0) {
-                int32_t ret = g_networkProtocols[i]->Enable(g_networkProtocols[i], item);
+                int32_t ret = g_networkProtocols[i]->enable(g_networkProtocols[i], item);
                 if (ret != SOFTBUS_OK) {
                     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "enable protocol (%d) for netif %s failed", i,
                         item->ifName);
@@ -469,10 +469,10 @@ void LnnDeinitNetworkManager(void)
     LnnDeinitPhysicalSubnetManager();
 
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
-        if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->Deinit == NULL) {
+        if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->deinit == NULL) {
             continue;
         }
-        g_networkProtocols[i]->Deinit(g_networkProtocols[i]);
+        g_networkProtocols[i]->deinit(g_networkProtocols[i]);
         g_networkProtocols[i] = NULL;
     }
 }
@@ -546,10 +546,10 @@ ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: not such protocol! protocolId=%d", __func__, protocol);
         return UNUSE_BUTT;
     }
-    if (request.manager == NULL || request.manager->GetListenerModule == NULL) {
+    if (request.manager == NULL || request.manager->getListenerModule == NULL) {
         SoftBusLog(
             SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol manager is null! protocolId=%d", __func__, protocol);
         return UNUSE_BUTT;
     }
-    return request.manager->GetListenerModule(mode);
+    return request.manager->getListenerModule(mode);
 }

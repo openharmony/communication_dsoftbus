@@ -29,9 +29,11 @@
 
 #define LOOP_NAME_LEN 16
 #define TIME_THOUSANDS_MULTIPLIER 1000LL
+#define MAX_LOOPER_CNT 30U
 
 static int8_t g_isNeedDestroy = 0;
 static int8_t g_isThreadStarted = 0;
+static uint32_t g_looperCnt = 0;
 
 typedef struct {
     SoftBusMessage *msg;
@@ -169,9 +171,11 @@ static void *LoopTask(void *arg)
             msg->handler->HandleMessage(msg);
         }
         if (looper->dumpable) {
+            // Don`t print msg->handler, msg->handler->HandleMessage() may remove handler,
+            // so msg->handler maybe invalid pointer
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
-                "LoopTask[%s], after HandleMessage message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64,
-                context->name, msg->handler->name, msg->what, msg->arg1);
+                "LoopTask[%s], after HandleMessage message. what=%" PRId32 ",arg1=%" PRIu64,
+                context->name, msg->what, msg->arg1);
         }
         (void)SoftBusMutexLock(&context->lock);
         FreeSoftBusMsg(msg);
@@ -372,6 +376,10 @@ void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
 
 SoftBusLooper *CreateNewLooper(const char *name)
 {
+    if (g_looperCnt >= MAX_LOOPER_CNT) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Looper count:%u, exceeds the maximum", g_looperCnt);
+        return NULL;
+    }
     SoftBusLooper *looper = (SoftBusLooper *)SoftBusCalloc(sizeof(SoftBusLooper));
     if (looper == NULL) {
         return NULL;
@@ -406,7 +414,7 @@ SoftBusLooper *CreateNewLooper(const char *name)
         SoftBusFree(context);
         return NULL;
     }
-
+    g_looperCnt++;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]wait looper start ok", context->name);
     return looper;
 }
@@ -501,6 +509,9 @@ void DestroyLooper(SoftBusLooper *looper)
     }
     ReleaseLooper(looper);
     SoftBusFree(looper);
+    if (g_looperCnt != 0) {
+        g_looperCnt--;
+    }
 }
 
 int LooperInit(void)
