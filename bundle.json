@@ -166,7 +166,8 @@
           "//foundation/communication/dsoftbus/tests/sdk/transmission/benchmarktest:TransTest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/benchmarktest:DiscoveryTest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel:unittest",
-          "//foundation/communication/dsoftbus/tests/core/transmission/common:unittest"
+          "//foundation/communication/dsoftbus/tests/core/transmission/common:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/manager:unittest"
         ]
       }
     }
