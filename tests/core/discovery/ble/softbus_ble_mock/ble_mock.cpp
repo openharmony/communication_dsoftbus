@@ -50,9 +50,9 @@ int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
     return BleMock::GetMock()->SoftBusGetAdvChannel(callback);
 }
 
-int SoftBusReleaseAdvChannel(int advId)
+int SoftBusReleaseAdvChannel(int channel)
 {
-    return BleMock::GetMock()->SoftBusReleaseAdvChannel(advId);
+    return BleMock::GetMock()->SoftBusReleaseAdvChannel(channel);
 }
 
 int SoftBusStopScan(int listenerId)
@@ -70,14 +70,14 @@ int SoftBusRemoveScanListener(int listenerId)
     return BleMock::GetMock()->SoftBusRemoveScanListener(listenerId);
 }
 
-int SoftBusStopAdv(int advId)
+int SoftBusStopAdv(int channel)
 {
-    return BleMock::GetMock()->SoftBusStopAdv(advId);
+    return BleMock::GetMock()->SoftBusStopAdv(channel);
 }
 
-int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param)
+int SoftBusUpdateAdv(int channel, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param)
 {
-    return BleMock::GetMock()->SoftBusUpdateAdv(advId, data, param);
+    return BleMock::GetMock()->SoftBusUpdateAdv(channel, data, param);
 }
 
 int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
@@ -85,14 +85,14 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
     return BleMock::GetMock()->SoftBusStartScan(listenerId, param);
 }
 
-int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
+int SoftBusSetAdvData(int channel, const SoftBusBleAdvData *data)
 {
-    return BleMock::GetMock()->SoftBusSetAdvData(advId, data);
+    return BleMock::GetMock()->SoftBusSetAdvData(channel, data);
 }
 
-int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
+int SoftBusStartAdv(int channel, const SoftBusBleAdvParams *param)
 {
-    return BleMock::GetMock()->SoftBusStartAdv(advId, param);
+    return BleMock::GetMock()->SoftBusStartAdv(channel, param);
 }
 
 int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
@@ -148,18 +148,18 @@ int32_t BleMock::ActionOfRemoveScanListener(int listenerId)
 
 int32_t BleMock::ActionOfSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "listenerId=%d filterSize=%d", listenerId, filterSize);
+    DLOGI("listenerId=%d filterSize=%d", listenerId, filterSize);
     return SOFTBUS_OK;
 }
 
 int32_t BleMock::ActionOfGetAdvChannel(const SoftBusAdvCallback *callback)
 {
-    static int32_t advertiseId = 0;
+    static int32_t advChannel = 0;
     advCallback = callback;
-    return advertiseId++;
+    return advChannel++;
 }
 
-int32_t BleMock::ActionOfReleaseAdvChannel(int advId)
+int32_t BleMock::ActionOfReleaseAdvChannel(int channel)
 {
     advCallback = nullptr;
     return SOFTBUS_OK;
@@ -170,9 +170,12 @@ int32_t BleMock::ActionOfStartScan(int listenerId, const SoftBusBleScanParams *p
     if (listenerId != SCAN_LISTENER_ID) {
         return SOFTBUS_ERR;
     }
+
+    isScanning = true;
     if (scanListener && scanListener->OnScanStart) {
         scanListener->OnScanStart(SCAN_LISTENER_ID, SOFTBUS_BT_STATUS_SUCCESS);
     }
+    GetMock()->UpdateScanStateDone();
     return SOFTBUS_OK;
 }
 
@@ -181,13 +184,16 @@ int32_t BleMock::ActionOfStopScan(int listenerId)
     if (listenerId != SCAN_LISTENER_ID) {
         return SOFTBUS_ERR;
     }
+
+    isScanning = false;
     if (scanListener && scanListener->OnScanStop) {
         scanListener->OnScanStop(SCAN_LISTENER_ID, SOFTBUS_BT_STATUS_SUCCESS);
     }
+    GetMock()->UpdateScanStateDone();
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfStartAdv(int advId, const SoftBusBleAdvParams *param)
+int32_t BleMock::ActionOfStartAdv(int channel, const SoftBusBleAdvParams *param)
 {
     if (isAdvertising) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "already in advertising");
@@ -195,16 +201,19 @@ int32_t BleMock::ActionOfStartAdv(int advId, const SoftBusBleAdvParams *param)
     }
     isAdvertising = !isAdvertising;
     if (advCallback) {
-        advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_SUCCESS);
+        advCallback->AdvEnableCallback(channel, SOFTBUS_BT_STATUS_SUCCESS);
     }
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfStopAdv(int advId)
+int32_t BleMock::ActionOfStopAdv(int channel)
 {
     if (!isAdvertising) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "already has stopped");
         return SOFTBUS_ERR;
+    }
+    if (advCallback) {
+        advCallback->AdvDisableCallback(channel, SOFTBUS_BT_STATUS_SUCCESS);
     }
     isAdvertising = !isAdvertising;
     return SOFTBUS_OK;
@@ -217,23 +226,21 @@ void BleMock::HexDump(const uint8_t *data, uint32_t len)
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(BYTE_DUMP_LEN)
             << static_cast<uint32_t>(data[i]) << " ";
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "%s", ss.str().c_str());
+    DLOGI("%s", ss.str().c_str());
 }
 
-int32_t BleMock::ActionOfSetAdvDataForActiveDiscovery(int advId, const SoftBusBleAdvData *data)
+void BleMock::ShowAdvData(int channel, const SoftBusBleAdvData *data)
 {
-    if (advId != CON_ADV_ID && advId != NON_ADV_ID) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advId=%d invalid", advId);
-        isAsyncAdvertiseSuccess = false;
-        return SOFTBUS_ERR;
-    }
-
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "set advertise data: advId=%s_ADV_ID advLen=%d rspLen=%d",
-               advId == CON_ADV_ID ? "CON" : "NON", data->advLength, data->scanRspLength);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "adv data:");
+    DLOGI("channel=%d advLen=%d rspLen=%d", channel, data->advLength, data->scanRspLength);
+    DLOGI("adv data:");
     HexDump(reinterpret_cast<const uint8_t *>(data->advData), data->advLength);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "rsp data:");
+    DLOGI("rsp data:");
     HexDump(reinterpret_cast<const uint8_t *>(data->scanRspData), data->scanRspLength);
+}
+
+int32_t BleMock::ActionOfSetAdvDataForActiveDiscovery(int channel, const SoftBusBleAdvData *data)
+{
+    ShowAdvData(channel, data);
 
     if (data->advLength != sizeof(activeDiscoveryAdvData) ||
         data->scanRspLength != sizeof(activeDiscoveryRspData) ||
@@ -243,24 +250,17 @@ int32_t BleMock::ActionOfSetAdvDataForActiveDiscovery(int advId, const SoftBusBl
         GetMock()->AsyncAdvertiseDone();
         return SOFTBUS_ERR;
     }
+    if (advCallback) {
+        advCallback->AdvDataCallback(channel, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfSetAdvDataForActivePublish(int advId, const SoftBusBleAdvData *data)
+int32_t BleMock::ActionOfSetAdvDataForActivePublish(int channel, const SoftBusBleAdvData *data)
 {
-    if (advId != CON_ADV_ID && advId != NON_ADV_ID) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advId=%d invalid", advId);
-        isAsyncAdvertiseSuccess = false;
-        return SOFTBUS_ERR;
-    }
-
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "set advertise data: advId=%s_ADV_ID advLen=%d rspLen=%d",
-               advId == CON_ADV_ID ? "CON" : "NON", data->advLength, data->scanRspLength);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "adv data:");
-    HexDump(reinterpret_cast<const uint8_t *>(data->advData), data->advLength);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "rsp data:");
-    HexDump(reinterpret_cast<const uint8_t *>(data->scanRspData), data->scanRspLength);
+    ShowAdvData(channel, data);
 
     if (data->advLength != sizeof(activePublishAdvData) ||
         data->scanRspLength != sizeof(activePublishRspData) ||
@@ -270,25 +270,17 @@ int32_t BleMock::ActionOfSetAdvDataForActivePublish(int advId, const SoftBusBleA
         GetMock()->AsyncAdvertiseDone();
         return SOFTBUS_ERR;
     }
+    if (advCallback) {
+        advCallback->AdvDataCallback(channel, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfUpdateAdvForPassivePublish(int advId, const SoftBusBleAdvData *data,
-                                                    const SoftBusBleAdvParams *param)
+int32_t BleMock::ActionOfSetAdvDataForPassivePublish(int channel, const SoftBusBleAdvData *data)
 {
-    if (advId != CON_ADV_ID && advId != NON_ADV_ID) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "advId=%d invalid", advId);
-        isAsyncAdvertiseSuccess = false;
-        return SOFTBUS_ERR;
-    }
-
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "update advertise data: advId=%s_ADV_ID advLen=%d rspLen=%d",
-               advId == CON_ADV_ID ? "CON" : "NON", data->advLength, data->scanRspLength);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "adv data:");
-    HexDump(reinterpret_cast<const uint8_t *>(data->advData), data->advLength);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "rsp data:");
-    HexDump(reinterpret_cast<const uint8_t *>(data->scanRspData), data->scanRspLength);
+    ShowAdvData(channel, data);
 
     if (data->advLength != sizeof(passivePublishAdvData) ||
         data->scanRspLength != sizeof(passivePublishRspData) ||
@@ -298,6 +290,55 @@ int32_t BleMock::ActionOfUpdateAdvForPassivePublish(int advId, const SoftBusBleA
         GetMock()->AsyncAdvertiseDone();
         return SOFTBUS_ERR;
     }
+
+    if (advCallback) {
+        advCallback->AdvDataCallback(channel, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+
+    GetMock()->AsyncAdvertiseDone();
+    return SOFTBUS_OK;
+}
+
+int32_t BleMock::ActionOfUpdateAdvForActiveDiscovery(int channel, const SoftBusBleAdvData *data,
+                                                     const SoftBusBleAdvParams *param)
+{
+    ShowAdvData(channel, data);
+
+    if (data->advLength != sizeof(activeDiscoveryAdvData2) ||
+        data->scanRspLength != sizeof(activeDiscoveryRspData) ||
+        memcmp(data->advData, activeDiscoveryAdvData2, data->advLength) != 0 ||
+        memcmp(data->scanRspData, activeDiscoveryRspData, data->scanRspLength) != 0) {
+        isAsyncAdvertiseSuccess = false;
+        GetMock()->AsyncAdvertiseDone();
+        return SOFTBUS_ERR;
+    }
+
+    if (advCallback) {
+        advCallback->AdvUpdateCallback(channel, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+
+    GetMock()->AsyncAdvertiseDone();
+    return SOFTBUS_OK;
+}
+
+int32_t BleMock::ActionOfUpdateAdvForPassivePublish(int channel, const SoftBusBleAdvData *data,
+                                                    const SoftBusBleAdvParams *param)
+{
+    ShowAdvData(channel, data);
+
+    if (data->advLength != sizeof(passivePublishAdvData) ||
+        data->scanRspLength != sizeof(passivePublishRspData) ||
+        memcmp(data->advData, passivePublishAdvData, data->advLength) != 0 ||
+        memcmp(data->scanRspData, passivePublishRspData, data->scanRspLength) != 0) {
+        isAsyncAdvertiseSuccess = false;
+        GetMock()->AsyncAdvertiseDone();
+        return SOFTBUS_ERR;
+    }
+
+    if (advCallback) {
+        advCallback->AdvUpdateCallback(channel, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -312,7 +353,7 @@ int32_t BleMock::ActionOfGetBtMacAddr(SoftBusBtAddr *mac)
 
 int32_t BleMock::ActionOfGetBtState()
 {
-    return BLE_ENABLE;
+    return btState ? BLE_ENABLE : BLE_DISABLE;
 }
 
 void BleMock::InjectPassiveNonPacket()
@@ -375,6 +416,38 @@ void BleMock::InjectActiveConPacket()
     }
 }
 
+void BleMock::TurnOnBt()
+{
+    DLOGI("enter");
+    btState = true;
+    if (btStateListener) {
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_ON);
+    }
+}
+
+void BleMock::TurnOffBt()
+{
+    DLOGI("enter");
+    btState = false;
+    if (btStateListener) {
+        btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_OFF);
+    }
+}
+
+bool BleMock::IsScanning()
+{
+    std::unique_lock lock(scanMutex_);
+    if (scanCv_.wait_for(lock, std::chrono::seconds(WAIT_ASYNC_TIMEOUT)) == std::cv_status::timeout) {
+        return false;
+    }
+    return isScanning;
+}
+
+void BleMock::WaitRecvMessageObsolete()
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(BLE_MSG_TIME_OUT_MS));
+}
+
 bool BleMock::IsDeInitSuccess()
 {
     return advCallback == nullptr;
@@ -403,10 +476,16 @@ void BleMock::AsyncAdvertiseDone()
     cv_.notify_all();
 }
 
+void BleMock::UpdateScanStateDone()
+{
+    scanCv_.notify_all();
+}
+
 bool BleMock::GetAsyncAdvertiseResult()
 {
     std::unique_lock lock(mutex_);
     if (cv_.wait_for(lock, std::chrono::seconds(WAIT_ASYNC_TIMEOUT)) == std::cv_status::timeout) {
+        DLOGE("time out");
         return false;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOOPER_DONE_MS));

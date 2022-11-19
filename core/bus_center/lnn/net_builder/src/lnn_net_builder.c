@@ -152,6 +152,17 @@ typedef struct {
 } MetaAuthInfo;
 
 static NetBuilder g_netBuilder;
+static bool g_watchdogFlag = true;
+
+void SetWatchdogFlag(bool flag)
+{
+    g_watchdogFlag = flag;
+}
+
+bool GetWatchdogFlag(void)
+{
+    return g_watchdogFlag;
+}
 
 static void NetBuilderConfigInit(void)
 {

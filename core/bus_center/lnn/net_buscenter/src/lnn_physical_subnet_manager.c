@@ -57,8 +57,8 @@ static void ClearSubnetManager(void)
 {
     for (uint8_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] != NULL) {
-            if (g_physicalSubnets[i]->Destroy != NULL) {
-                g_physicalSubnets[i]->Destroy(g_physicalSubnets[i]);
+            if (g_physicalSubnets[i]->destroy != NULL) {
+                g_physicalSubnets[i]->destroy(g_physicalSubnets[i]);
             }
             g_physicalSubnets[i] = NULL;
         }
@@ -80,8 +80,8 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
             continue;
         }
         g_physicalSubnets[i] = subnet;
-        if (g_physicalSubnets[i]->OnNetifStatusChanged != NULL) {
-            g_physicalSubnets[i]->OnNetifStatusChanged(g_physicalSubnets[i]);
+        if (g_physicalSubnets[i]->onNetifStatusChanged != NULL) {
+            g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i]);
         }
         return SOFTBUS_OK;
     }
@@ -104,8 +104,8 @@ static int32_t DoUnregistSubnetByType(ProtocolType type)
 {
     for (uint8_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] != NULL && g_physicalSubnets[i]->protocol->id == type) {
-            if (g_physicalSubnets[i]->Destroy != NULL) {
-                g_physicalSubnets[i]->Destroy(g_physicalSubnets[i]);
+            if (g_physicalSubnets[i]->destroy != NULL) {
+                g_physicalSubnets[i]->destroy(g_physicalSubnets[i]);
             }
             g_physicalSubnets[i] = NULL;
         }
@@ -132,8 +132,8 @@ void DoNotifyAddressChange(const char *ifName, ProtocolType protocolType)
             continue;
         }
 
-        if (g_physicalSubnets[i]->OnNetifStatusChanged != NULL) {
-            g_physicalSubnets[i]->OnNetifStatusChanged(g_physicalSubnets[i]);
+        if (g_physicalSubnets[i]->onNetifStatusChanged != NULL) {
+            g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i]);
         }
     }
 }
@@ -149,8 +149,8 @@ static void EnableResetingSubnetByType(ProtocolType protocolType)
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
             continue;
         }
-        if (g_physicalSubnets[i]->OnSoftbusNetworkDisconnected != NULL) {
-            g_physicalSubnets[i]->OnSoftbusNetworkDisconnected(g_physicalSubnets[i]);
+        if (g_physicalSubnets[i]->onSoftbusNetworkDisconnected != NULL) {
+            g_physicalSubnets[i]->onSoftbusNetworkDisconnected(g_physicalSubnets[i]);
         }
     }
 }

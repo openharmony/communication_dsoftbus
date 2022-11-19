@@ -295,7 +295,7 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
     }
 
     if (RequestMainPort(subnet->ifName, address)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "request main port failed!ifName=%s", subnet->ifName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "request main port failed! ifName=%s", subnet->ifName);
         return SOFTBUS_ERR;
     }
 
@@ -371,7 +371,7 @@ static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, IpSubnetManagerEven
         subnet->protocol->id, subnet->status);
 }
 
-static IpSubnetManagerEvent GetEventInOther(LnnPhysicalSubnet *subnet)
+static IpSubnetManagerEvent GetIpEventInOther(LnnPhysicalSubnet *subnet)
 {
     char currentIfAddress[IP_LEN] = {0};
     int32_t ret = GetAvailableIpAddr(subnet->ifName, currentIfAddress, sizeof(currentIfAddress));
@@ -382,7 +382,7 @@ static IpSubnetManagerEvent GetEventInOther(LnnPhysicalSubnet *subnet)
     }
 }
 
-static IpSubnetManagerEvent GetEventInRunning(LnnPhysicalSubnet *subnet)
+static IpSubnetManagerEvent GetIpEventInRunning(LnnPhysicalSubnet *subnet)
 {
     char currentIfAddress[IP_LEN] = {0};
     int32_t ret = GetAvailableIpAddr(subnet->ifName, currentIfAddress, sizeof(currentIfAddress));
@@ -416,14 +416,14 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
     }
 }
 
-static void OnNetifStatusChanged(LnnPhysicalSubnet *subnet)
+static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet)
 {
     IpSubnetManagerEvent event = SUBNET_MANAGER_EVENT_MAX;
 
     if (subnet->status == LNN_SUBNET_RUNNING) {
-        event = GetEventInRunning(subnet);
+        event = GetIpEventInRunning(subnet);
     } else {
-        event = GetEventInOther(subnet);
+        event = GetIpEventInOther(subnet);
     }
 
     int32_t ret = SOFTBUS_ERR;
@@ -458,21 +458,21 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const struct LnnProtocolManager 
     }
 
     do {
-        subnet->Destroy = DestroyIpSubnetManager;
+        subnet->destroy = DestroyIpSubnetManager;
         subnet->protocol = self;
         subnet->status = LNN_SUBNET_IDLE;
-        subnet->OnNetifStatusChanged = OnNetifStatusChanged;
-        subnet->OnSoftbusNetworkDisconnected = OnSoftbusIpNetworkDisconnected;
+        subnet->onNetifStatusChanged = OnIpNetifStatusChanged;
+        subnet->onSoftbusNetworkDisconnected = OnSoftbusIpNetworkDisconnected;
 
         int32_t ret = strcpy_s(subnet->ifName, sizeof(subnet->ifName), ifName);
         if (ret != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:copy ifName failed!ret=%d", __func__, ret);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:copy ifName failed! ret=%d", __func__, ret);
             break;
         }
         return subnet;
     } while (false);
 
-    subnet->Destroy((LnnPhysicalSubnet *)subnet);
+    subnet->destroy((LnnPhysicalSubnet *)subnet);
     return NULL;
 }
 
@@ -548,8 +548,8 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
 
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:regist subnet manager failed!ret=%d", __func__, ret);
-        manager->Destroy(manager);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:regist subnet manager failed! ret=%d", __func__, ret);
+        manager->destroy(manager);
         return ret;
     }
     return SOFTBUS_OK;
@@ -579,11 +579,11 @@ static LnnProtocolManager g_ipProtocol = {
     .id = LNN_PROTOCOL_IP,
     .pri = 10,
     .supportedNetif = LNN_NETIF_TYPE_ETH | LNN_NETIF_TYPE_WLAN,
-    .Init = LnnInitIpProtocol,
-    .Deinit = LnnDeinitIpNetwork,
-    .Enable = LnnEnableIpProtocol,
-    .Disable = NULL,
-    .GetListenerModule = LnnGetIpListenerModule
+    .init = LnnInitIpProtocol,
+    .deinit = LnnDeinitIpNetwork,
+    .enable = LnnEnableIpProtocol,
+    .disable = NULL,
+    .getListenerModule = LnnGetIpListenerModule
 };
 
 int32_t RegistIPProtocolManager(void)

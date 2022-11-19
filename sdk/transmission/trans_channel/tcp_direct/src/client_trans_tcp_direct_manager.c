@@ -232,14 +232,14 @@ EXIT_ERR:
     return SOFTBUS_ERR;
 }
 
-int32_t TransTdcManagerInit(const IClientSessionCallBack *cb)
+int32_t TransTdcManagerInit(const IClientSessionCallBack *callback)
 {
     g_tcpDirectChannelInfoList = CreateSoftBusList();
     if (g_tcpDirectChannelInfoList == NULL || TransDataListInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init tcp direct channel fail.");
         return SOFTBUS_ERR;
     }
-    if (ClientTransTdcSetCallBack(cb) != SOFTBUS_OK) {
+    if (ClientTransTdcSetCallBack(callback) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransTdcSetCallBack fail.");
         return SOFTBUS_ERR;
     }

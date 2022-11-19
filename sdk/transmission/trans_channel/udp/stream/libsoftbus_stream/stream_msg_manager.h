@@ -27,7 +27,7 @@ namespace SoftBus {
 class StreamMsgManager : public std::enable_shared_from_this<StreamMsgManager>, public IStreamMsgManager {
 public:
     StreamMsgManager() = default;
-    virtual ~StreamMsgManager() = default;
+    virtual ~StreamMsgManager() override= default;
 
     bool Send(const HistoryStats &stats);
     void Recv(const HistoryStats &stats);

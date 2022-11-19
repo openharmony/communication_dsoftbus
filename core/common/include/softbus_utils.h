@@ -87,7 +87,7 @@ bool GetSignalingMsgSwitch(void);
  * @param[in] dataLen Length of the signaling message.
  * @param[in] module softbus log module.
  */
-void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module);
+void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module);
 
 void DataMasking(const char *data, uint32_t length, char delimiter, char *container);
 int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len, unsigned char *hashStr,

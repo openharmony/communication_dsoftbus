@@ -21,33 +21,32 @@
 #include "softbus_json_utils.h"
 
 namespace OHOS {
-static constexpr int MSG_NAME_MAX_LEN = 32;
-void DoJsonUtilsFuzz(const uint8_t *data, size_t size)
+#define TEST_JSON "{\"errcode\":1}"
+static constexpr int MSG_BUFF_MAX_LEN = 100;
+static void DoJsonUtilsFuzz(const char *data)
 {
-    char buffer[MSG_NAME_MAX_LEN] = { 0 };
-    if (memcpy_s(buffer, MSG_NAME_MAX_LEN, data, size) != 0) {
-        return;
-    }
-
+    char buffer[MSG_BUFF_MAX_LEN] = TEST_JSON;
+   
     cJSON *object = cJSON_Parse(buffer);
-    char name[MSG_NAME_MAX_LEN];
+    char name[MSG_BUFF_MAX_LEN];
     uint16_t ageU16 = 0;
     int32_t ageS32 = 0;
     int64_t ageS64 = 0;
     double weight = 0.0;
     bool healthy = false;
 
-    GetJsonObjectStringItem(object, "name", name, sizeof(name));
-    GetJsonObjectNumber16Item(object, "age", &ageU16);
-    GetJsonObjectNumberItem(object, "age", &ageS32);
-    GetJsonObjectInt32Item(object, "age", &ageS32);
-    GetJsonObjectNumber64Item(object, "age", &ageS64);
-    GetJsonObjectSignedNumber64Item(object, "age", &ageS64);
-    GetJsonObjectDoubleItem(object, "weight", &weight);
-    GetJsonObjectBoolItem(object, "healthy", &healthy);
+    GetJsonObjectStringItem(object, data, name, sizeof(name));
+    GetJsonObjectNumber16Item(object, data, &ageU16);
+    GetJsonObjectNumberItem(object, data, &ageS32);
+    GetJsonObjectInt32Item(object, data, &ageS32);
+    GetJsonObjectNumber64Item(object, data, &ageS64);
+    GetJsonObjectSignedNumber64Item(object, data, &ageS64);
+    GetJsonObjectDoubleItem(object, data, &weight);
+    GetJsonObjectBoolItem(object, data, &healthy);
 
-    AddStringToJsonObject(object, "country", "China");
-    AddNumberToJsonObject(object, "phone", 12345);
+    AddStringToJsonObject(object, "name", data);
+    int32_t age = *(reinterpret_cast<const int32_t *>(data));
+    AddNumberToJsonObject(object, "age", age);
 }
 } // namespace OHOS
 
@@ -57,6 +56,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return 0;
     }
-    OHOS::DoJsonUtilsFuzz(data, size);
+
+    char buffer[OHOS::MSG_BUFF_MAX_LEN] = { 0 };
+    if (memcpy_s(buffer, sizeof(buffer) - 1, data, size) != EOK) {
+        return 0;
+    }
+    OHOS::DoJsonUtilsFuzz(buffer);
     return 0;
 }

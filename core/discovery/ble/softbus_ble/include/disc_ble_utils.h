@@ -29,18 +29,18 @@ extern "C" {
 
 #define ADV_DATA_MAX_LEN 24
 #define RESP_DATA_MAX_LEN 26
-#define BOARDCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
+#define BROADCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
 
 typedef struct {
     union {
-        unsigned char data[BOARDCAST_MAX_LEN];
+        unsigned char data[BROADCAST_MAX_LEN];
         struct {
             unsigned char advData[ADV_DATA_MAX_LEN];
             unsigned char rspData[RESP_DATA_MAX_LEN];
         };
     } data;
     unsigned short dataLen;
-} BoardcastData;
+} BroadcastData;
 
 typedef struct {
     DeviceInfo *info;
@@ -52,13 +52,12 @@ bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint3
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 
-int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len);
 int32_t DiscBleGetDeviceName(char *deviceName);
 uint16_t DiscBleGetDeviceType(void);
 int32_t DiscBleGetDeviceIdHash(unsigned char *hashStr);
 int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len);
 
-int32_t AssembleTLV(BoardcastData *boardcastData, unsigned char dataType, const void *data, uint32_t dataLen);
+int32_t AssembleTLV(BroadcastData *broadcastData, unsigned char dataType, const void *data, uint32_t dataLen);
 int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *info, const unsigned char *data, uint32_t dataLen);
 
 #ifdef __cplusplus

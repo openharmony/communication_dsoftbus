@@ -24,15 +24,15 @@
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
-void RegisterStreamCb(const UdpChannelMgrCb *cb)
+void RegisterStreamCb(const UdpChannelMgrCb *streamCb)
 {
-    if (cb == NULL || cb->OnUdpChannelOpened == NULL ||
-        cb->OnUdpChannelClosed == NULL || cb->OnStreamReceived == NULL) {
+    if (streamCb == NULL || streamCb->OnUdpChannelOpened == NULL ||
+        streamCb->OnUdpChannelClosed == NULL || streamCb->OnStreamReceived == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel callback is invalid");
         return;
     }
 
-    g_udpChannelMgrCb = cb;
+    g_udpChannelMgrCb = streamCb;
 }
 
 void UnregisterStreamCb(void)

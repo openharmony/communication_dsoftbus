@@ -218,7 +218,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     ReportCategory report;
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
-
+    SetWatchdogFlag(true);
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
     if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_AUTO) != 0) { // only report auto network
         ReportLnnDfx(connFsm, retCode);
@@ -495,6 +495,9 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         return true;
     }
     if (connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH && connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN) {
+        return false;
+    }
+    if (oldNodeInfo->connectInfo.deviceIp[0] == '\0') {
         return false;
     }
     if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
@@ -832,6 +835,7 @@ int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    SetWatchdogFlag(false);
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, NULL);
 }
 

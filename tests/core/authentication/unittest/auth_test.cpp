@@ -44,8 +44,9 @@ namespace OHOS {
 using namespace testing::ext;
 constexpr uint32_t TEST_DATA_LEN = 10;
 constexpr uint32_t CRYPT_DATA_LEN = 200;
-constexpr uint32_t P2P_MAC_LEN = 6;
 constexpr uint32_t ENCRYPT_OVER_HEAD_LEN_TEST = 32;
+constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
+constexpr char P2P_MAC2[BT_MAC_LEN] = {0};
 
 class AuthTest : public testing::Test {
 public:
@@ -831,18 +832,14 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
 */
 HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
 {
-    char p2pMac[P2P_MAC_LEN] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
     AuthLinkType type = AUTH_LINK_TYPE_WIFI;
     bool isServer = true;
     int64_t ret;
-
     ret = AuthDeviceGetIdByP2pMac(nullptr, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    p2pMac[0] = '\0';
-    ret = AuthDeviceGetIdByP2pMac(const_cast<const char *>(p2pMac), type, isServer);
+    ret = AuthDeviceGetIdByP2pMac(P2P_MAC2, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    p2pMac[0] = '1';
-    ret = AuthDeviceGetIdByP2pMac(const_cast<const char *>(p2pMac), type, isServer);
+    ret = AuthDeviceGetIdByP2pMac(P2P_MAC, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -1019,7 +1016,6 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
 */
 HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
 {
-    char p2pMac[P2P_MAC_LEN] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
     AuthLinkType type;
     int64_t ret;
 
@@ -1028,14 +1024,13 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     ret = AuthGetIdByP2pMac(nullptr, type, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, false);
+    ret = AuthGetIdByP2pMac(P2P_MAC, type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, true);
+    ret = AuthGetIdByP2pMac(P2P_MAC, type, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    p2pMac[0] = '\0';
-    ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, false);
+    ret = AuthGetIdByP2pMac(P2P_MAC2, type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetIdByP2pMac(const_cast<const char *>(p2pMac), type, true, true);
+    ret = AuthGetIdByP2pMac(P2P_MAC2, type, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -1105,16 +1100,14 @@ HWTEST_F(AuthTest, AUTH_DECRYPT_Test_001, TestSize.Level1)
 */
 HWTEST_F(AuthTest, AUTH_SET_P2P_MAC_Test_001, TestSize.Level1)
 {
-    char p2pMac[P2P_MAC_LEN] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
     int64_t authId = 0;
     int32_t ret;
 
     ret = AuthSetP2pMac(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthSetP2pMac(authId, const_cast<const char *>(p2pMac));
+    ret = AuthSetP2pMac(authId, P2P_MAC);
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
-    p2pMac[0] = '\0';
-    ret = AuthSetP2pMac(authId, const_cast<const char *>(p2pMac));
+    ret = AuthSetP2pMac(authId, P2P_MAC2);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

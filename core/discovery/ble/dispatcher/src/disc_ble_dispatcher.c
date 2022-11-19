@@ -161,20 +161,20 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleFrameInit");
     g_dispatcherSize = 0;
-    DiscoveryBleDispatcherInterface *softbusInterface = DiscSoftbusBleInit(discInnerCb);
+    DiscoveryBleDispatcherInterface *softbusInterface = DiscSoftBusBleInit(discInnerCb);
     if (softbusInterface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscSoftbusBleInit err");
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscSoftBusBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = softbusInterface;
-    
+
     DiscoveryBleDispatcherInterface *shareInterface = DiscShareBleInit(discInnerCb);
     if (shareInterface == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscShareBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = shareInterface;
-    
+
     return &g_discBleFrameFuncInterface;
 }
 
@@ -194,6 +194,6 @@ void DiscBleDeinit(void)
         g_dispatchers[i] = NULL;
     }
     g_dispatcherSize = 0;
-    DiscSoftbusBleDeinit();
+    DiscSoftBusBleDeinit();
     DiscShareBleDeinit();
 }
