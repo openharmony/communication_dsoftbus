@@ -26,6 +26,7 @@ if (defined(ohos_lite)) {
       sources = [
         "dsoftbus_crypto_test.cpp",
         "dsoftbus_other_test.cpp",
+        "softbus_adapter_range_test.cpp",
         "softbus_socket_test.cpp",
         "softbus_thread_test.cpp",
       ]
@@ -51,6 +52,7 @@ if (defined(ohos_lite)) {
     sources = [
       "dsoftbus_crypto_test.cpp",
       "dsoftbus_other_test.cpp",
+      "softbus_adapter_range_test.cpp",
       "softbus_dfx_test.cpp",
       "softbus_socket_test.cpp",
       "softbus_thread_test.cpp",
