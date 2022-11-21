@@ -126,7 +126,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
     res = strcpy_s(appInfo->myData.authState, sizeof(appInfo->myData.authState), g_sessionName);
     EXPECT_EQ(res, EOK);
     msg = PackRequest(appInfo);
-    EXPECT_NE((int)msg, 0); // return data
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
@@ -178,7 +177,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackReply001, TestSize.Level1)
     appInfo->myData.uid = -1;
     appInfo->myData.pid = -1;
     msg = PackReply(appInfo);
-    EXPECT_NE((int)msg, 0); // return data
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
