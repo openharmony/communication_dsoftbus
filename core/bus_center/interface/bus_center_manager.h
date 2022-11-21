@@ -20,26 +20,11 @@
 
 #include "bus_center_info_key.h"
 #include "disc_manager.h"
-#include "lnn_lane_info.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    LNN_MESSAGE_LANE = 1,
-    LNN_BYTES_LANE,
-    LNN_FILE_LANE,
-    LNN_STREAM_LANE,
-    LNN_LANE_PROPERTY_BUTT,
-} LnnLaneProperty;
-
-typedef struct {
-    LnnLaneProperty prop;
-    uint32_t laneNum;
-    int32_t laneId[0];
-} LnnLanesObject;
 
 typedef union  {
     IServerDiscInnerCallback serverCb;
@@ -81,13 +66,6 @@ int32_t LnnServerJoin(ConnectionAddr *addr);
 int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData);
 int32_t LnnServerLeave(const char *networkId);
 int32_t MetaNodeServerLeave(const char *networkId);
-
-LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
-    const LnnPreferredLinkList *list, uint32_t laneNum);
-void LnnReleaseLanesObject(LnnLanesObject *lanesObject);
-int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num);
-const LnnLaneInfo *LnnGetLaneInfo(int32_t laneId);
-
 int32_t BusCenterServerInit(void);
 void BusCenterServerDeinit(void);
 
