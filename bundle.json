@@ -97,7 +97,7 @@
           "//foundation/communication/dsoftbus/tests/core/connection:unittest",
           "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
-          "//foundation/communication/dsoftbus/tests/core/transmission:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/ipc:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest:fuzztest",
