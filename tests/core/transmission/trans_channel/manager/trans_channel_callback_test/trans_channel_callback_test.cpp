@@ -85,34 +85,6 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
 }
 
 /**
- * @tc.name: TransServerOnChannelClosed001
- * @tc.desc: TransServerOnChannelClosed001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelCallbackTest, TransServerOnChannelClosed001, TestSize.Level1)
-{
-    const char *pkgName = TEST_PKG_NAME;
-    int32_t pid = 2112;
-    int32_t channelId = 12;
-    int32_t channelType = 21;
-
-    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, pid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    pid = -1;
-    channelId = -1;
-    channelType = -1;
-    ret = TransServerGetChannelCb()->OnChannelClosed(pkgName, pid, channelId, channelType);
-    ret = TransServerGetChannelCb()->OnChannelClosed(pkgName, pid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    pid = 2;
-    ret = TransServerGetChannelCb()->OnChannelClosed(pkgName, pid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
  * @tc.name: TransServerOnChannelOpenFailed001
  * @tc.desc: TransServerOnChannelOpenFailed001, use the wrong parameter.
  * @tc.type: FUNC

@@ -193,29 +193,6 @@ HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransNotifyAuthSuccess001
- * @tc.desc: TransNotifyAuthSuccess001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
-{
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
-
-    int32_t ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    channelType = CHANNEL_TYPE_AUTH;
-    ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
  * @tc.name: TransCloseChannel001
  * @tc.desc: TransCloseChannel001, use the wrong parameter.
  * @tc.type: FUNC
@@ -243,35 +220,7 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
 
     channelType = CHANNEL_TYPE_AUTH;
     ret = TransCloseChannel(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);///////////////////////////
-}
-
-/**
- * @tc.name: TransSendMsg001
- * @tc.desc: TransSendMsg001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
-{
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
-    int32_t msgType = 75;
-
-    void *data = malloc(MAX_MALLOC_SIZE - 1);
-
-    uint32_t len = 1;
-
-    int32_t ret = TransSendMsg(channelId, channelType, data, len, msgType);
-    EXPECT_EQ(SOFTBUS_TRANS_STREAM_ONLY_UDP_CHANNEL, ret);
-
-    channelType = CHANNEL_TYPE_AUTH;
-    ret = TransSendMsg(channelId, channelType, data, len, msgType);
-    EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
-
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransSendMsg(channelId, channelType, data, len, msgType);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVOKE_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /**
