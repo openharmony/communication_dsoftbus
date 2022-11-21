@@ -25,7 +25,7 @@ namespace OHOS {
 static constexpr size_t MAX_BUFFER_LEN = 100;
 static void NstackxLogTest(const char *buffer)
 {
-    NstackxLog(buffer, SOFTBUS_LOG_INFO, buffer);
+    NstackxLog("nstackx", SOFTBUS_LOG_DBG, "nstackx log is test.");
 }
 
 static void AnonymizesTest(const char *buffer)
@@ -53,13 +53,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     char buffer[OHOS::MAX_BUFFER_LEN] = { 0 };
-    if (memcpy_s(buffer, OHOS::MAX_BUFFER_LEN, data, size) != EOK) {
+    if (memcpy_s(buffer, sizeof(buffer) - 1, data, size) != EOK) {
         return 0;
     }
 
     OHOS::NstackxLogTest(buffer);
     OHOS::AnonymizesTest(buffer);
-    OHOS::AnonyPacketPrintoutTest(buffer, OHOS::MAX_BUFFER_LEN);
+    OHOS::AnonyPacketPrintoutTest(buffer, OHOS::MAX_BUFFER_LEN - 1);
     OHOS::AnonyDevIdTest(buffer);
     return 0;
 }
