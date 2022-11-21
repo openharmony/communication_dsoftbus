@@ -76,7 +76,7 @@ HWTEST_F(TransChannelManagerTest, TransChannelInit001, TestSize.Level1)
 {
     InitSoftBusServer();
     bool ret = GetServerIsInit();
-    EXPECT_EQ(true, ret);//wyb
+    EXPECT_EQ(true, ret);
 }
 
 /**
@@ -90,7 +90,6 @@ HWTEST_F(TransChannelManagerTest, TransChannelDeinit001, TestSize.Level1)
     TransServerDeinit();
     bool ret = GetServerIsInit();
     EXPECT_EQ(true, ret);
-
 }
 
 /**
@@ -118,7 +117,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel001, TestSize.Level1)
     sessionServer->pid = TRANS_TEST_INVALID_PID;
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    TransDelItemByPackageName(g_pkgName,TRANS_TEST_INVALID_PID);
+    TransDelItemByPackageName(g_pkgName, TRANS_TEST_INVALID_PID);
     TransSessionMgrDeinit();
 }
 
