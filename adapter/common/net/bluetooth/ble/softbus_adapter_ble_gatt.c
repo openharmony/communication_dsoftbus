@@ -51,12 +51,18 @@ typedef struct {
 
 static AdvChannel g_advChannel[ADV_MAX_NUM];
 static ScanListener g_scanListener[SCAN_MAX_NUM];
+
+static volatile bool g_lockInit = false;
 static SoftBusMutex g_advLock = {0};
 static SoftBusMutex g_scanerLock = {0};
+
 static bool g_isRegCb = false;
 
 int BleGattLockInit(void)
 {
+    if (g_lockInit) {
+        return SOFTBUS_OK;
+    }
     if (SoftBusMutexInit(&g_advLock, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "g_advLock init failed");
         return SOFTBUS_ERR;
@@ -65,6 +71,7 @@ int BleGattLockInit(void)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "g_scanerLock init failed");
         return SOFTBUS_ERR;
     }
+    g_lockInit = true;
     return SOFTBUS_OK;
 }
 

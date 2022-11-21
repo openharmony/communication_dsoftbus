@@ -20,6 +20,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
+#include "adapter_bt_utils.h"
 
 #include "ohos_bt_def.h"
 #include "ohos_bt_gatt_client.h"
@@ -38,6 +39,7 @@ static void GattcConnectionStateChangedCallback(int clientId, int connectionStat
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GattcConnectionStateChangedCallback ignore");
         return;
     }
+    
     g_softBusGattcCallback->ConnectionStateCallback(clientId, connectionState, status);
 }
 
@@ -134,11 +136,6 @@ int32_t SoftbusGattcRegister(void)
 
 int32_t SoftbusGattcUnRegister(int32_t clientId)
 {
-    if (clientId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcUnRegister invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
     if (BleGattcUnRegister(clientId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcUnRegister error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
@@ -148,28 +145,23 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
 
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
-    if (clientId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     BdAddr bdAddr;
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect memcpy error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (BleGattcConnect(clientId, &g_btGattClientCallbacks, &bdAddr, false, OHOS_BT_TRANSPORT_TYPE_LE) != SOFTBUS_OK) {
+    int status = BleOhosStatusToSoftBus(
+        BleGattcConnect(clientId, &g_btGattClientCallbacks, &bdAddr, false, OHOS_BT_TRANSPORT_TYPE_LE));
+    if (status != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcConnect error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
+    
     return SOFTBUS_OK;
 }
 
 int32_t SoftbusBleGattcDisconnect(int32_t clientId)
 {
-    if (clientId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusBleGattcDisconnect invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (BleGattcDisconnect(clientId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcDisconnect error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
@@ -180,13 +172,9 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId)
 int32_t SoftbusGattcSearchServices(int32_t clientId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftbusGattcSearchServices %d", clientId);
-    if (clientId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcSearchServices invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t ret = BleGattcSearchServices(clientId);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcSearchServices error, ret = %d", ret);
+    int status = BleOhosStatusToSoftBus(BleGattcSearchServices(clientId));
+    if (status != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcSearchServices error, status = %d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -201,7 +189,7 @@ int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
     BtUuid btUuid;
     btUuid.uuid = serverUuid->uuid;
     btUuid.uuidLen = serverUuid->uuidLen;
-    if (BleGattcGetService(clientId, btUuid) == false) {
+    if (!BleGattcGetService(clientId, btUuid)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcGetService error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
@@ -210,16 +198,13 @@ int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
 
 int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid)
 {
-    if (clientId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcRegisterNotification invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     BtGattCharacteristic btCharaUuid;
     btCharaUuid.serviceUuid.uuid = serverUuid->uuid;
     btCharaUuid.serviceUuid.uuidLen = serverUuid->uuidLen;
     btCharaUuid.characteristicUuid.uuid = charaUuid->uuid;
     btCharaUuid.characteristicUuid.uuidLen = charaUuid->uuidLen;
-    if (BleGattcRegisterNotification(clientId, btCharaUuid, true) != SOFTBUS_OK) {
+    int status = BleOhosStatusToSoftBus(BleGattcRegisterNotification(clientId, btCharaUuid, true));
+    if (status != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcRegisterNotification error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
@@ -228,10 +213,6 @@ int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *server
 
 int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
 {
-    if (clientId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConfigureMtuSize invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (BleGattcConfigureMtuSize(clientId, mtuSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcConfigureMtuSize error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;

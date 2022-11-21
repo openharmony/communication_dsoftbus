@@ -25,6 +25,9 @@ ohos_unittest("BluetoothAdapterTest") {
   sources = [
     "adapter_bt_utils_test.cpp",
     "bluetooth_mock.cpp",
+    "softbus_adapter_ble_gatt_client_test.cpp",
+    "softbus_adapter_ble_gatt_server_test.cpp",
+    "softbus_adapter_ble_gatt_test.cpp",
     "softbus_adapter_bt_common_test.cpp",
   ]
 
