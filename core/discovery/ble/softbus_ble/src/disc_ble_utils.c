@@ -316,7 +316,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const unsigned char *
     uint32_t scanRspPtr = 0;
     uint32_t scanRspTlvLen = 0;
     uint32_t nextAdsPtr = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
-    while (nextAdsPtr < dataLen) {
+    while (nextAdsPtr + 1 < dataLen) {
         if (data[nextAdsPtr + 1] == RSP_TYPE) {
             scanRspPtr = nextAdsPtr;
             scanRspTlvLen = data[scanRspPtr] - RSP_HEAD_LEN + 1;
