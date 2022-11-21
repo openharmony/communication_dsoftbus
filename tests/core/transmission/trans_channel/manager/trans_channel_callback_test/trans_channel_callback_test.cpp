@@ -205,7 +205,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnQosEvent001, TestSize.Level1)
     param->tvCount = 1;
     param->pid = 1;
     ret = TransServerGetChannelCb()->OnQosEvent(pkgName, param);
-    EXPECT_EQ(SOFTBUS_OK , ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     if (param != NULL) {
         SoftBusFree(param);
     }
