@@ -446,6 +446,10 @@ int32_t CreateBusCenterFaultEvt(SoftBusEvtReportMsg *msg, int32_t errorCode, Con
 
 int32_t ReportBusCenterFaultEvt(SoftBusEvtReportMsg *msg)
 {
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "msg is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (strcmp(msg->evtName, FAULT_EVT_BUS_CENTER) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not match msg name!!!");
         return SOFTBUS_ERR;

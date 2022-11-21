@@ -280,6 +280,12 @@ static int32_t SoftBusCreateConnFaultMsg(SoftBusEvtReportMsg *msg, uint8_t mediu
 
 int32_t SoftBusReportConnFaultEvt(uint8_t medium, int32_t errCode)
 {
+    if (medium >= SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT || errCode < SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT ||
+        errCode >= SOFTBUS_HISYSEVT_CONN_ERRCODE_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "param is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Alloc EvtReport Msg Fail!");
@@ -297,6 +303,10 @@ int32_t SoftBusReportConnFaultEvt(uint8_t medium, int32_t errCode)
 
 int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t time)
 {
+    if (medium >= SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "param is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&g_connSuccRate[medium].lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record conn info fail");
         return SOFTBUS_ERR;
