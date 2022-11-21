@@ -21,20 +21,33 @@
 
 #include "client_trans_proxy_file_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
+
+#define TEST_FILE_LENGTH 10
+#define TEST_INDEX 5
+#define TEST_FRAME_NUMBER 3
+#define TEST_FRAME_NUMBER_SECOND 10
+#define TEST_BUFFER_SIZE 1024
+#define TEST_FD -1
+#define TEST_RETRY_TIMES 2
 
 using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
+const char *g_filePath = "data/...ss/";
+const char *g_testFileName = "test.txt";
 const char *g_fileSet1[] = {
-    "/dev/path/to",
+    "/data/data/test.txt",
     "/path/max/length/512/"
     "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
     "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
     "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
     "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
-    "111111111111111111111111111111111111111111111111111"
+    "111111111111111111111111111111111111111111111111111",
+    "ss",
+    "/data/ss",
 };
 
 class ClientTransProxyFileCommonTest : public testing::Test {
@@ -109,5 +122,147 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput5, TestSize
     const char *fileSet[] = {"/dev/path/to", ""};
     FileListBuffer bufferInfo = {0};
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, FileListToBuffer(fileSet, sizeof(fileSet) / sizeof(const char *), &bufferInfo));
+}
+
+/**
+ * @tc.name: ClinetTransProxyFilePathTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.Level0)
+{
+    bool result = IsPathValid(nullptr);
+    EXPECT_EQ(false, result);
+
+    char filePath[TEST_FILE_LENGTH] = {0};
+    result = IsPathValid(filePath);
+    EXPECT_EQ(false, result);
+
+    result = IsPathValid(const_cast<char*>(g_fileSet1[1]));
+    EXPECT_EQ(false, result);
+
+    result = IsPathValid(const_cast<char*>(g_filePath));
+    EXPECT_EQ(false, result);
+
+    result = IsPathValid(const_cast<char*>(g_fileSet1[0]));
+    EXPECT_EQ(true, result);
+
+    int ret = GetAndCheckRealPath(nullptr, const_cast<char*>(g_fileSet1[0]));
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    char absPath[PATH_MAX] = {0};
+    ret = GetAndCheckRealPath(g_fileSet1[0], absPath);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = GetAndCheckRealPath(g_fileSet1[2], absPath);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    result = CheckDestFilePathValid(nullptr);
+    EXPECT_EQ(false, result);
+
+    result = CheckDestFilePathValid(filePath);
+    EXPECT_EQ(false, result);
+
+    result = CheckDestFilePathValid(g_fileSet1[1]);
+    EXPECT_EQ(false, result);
+
+    result = CheckDestFilePathValid(g_filePath);
+    EXPECT_EQ(false, result);
+
+    result = CheckDestFilePathValid(g_fileSet1[2]);
+    EXPECT_EQ(true, result);
+
+    ret = FrameIndexToType(FRAME_NUM_0, FRAME_NUM_1);
+    EXPECT_EQ(TRANS_SESSION_FILE_FIRST_FRAME, ret);
+
+    ret = FrameIndexToType(FRAME_NUM_1,FRAME_NUM_2);
+    EXPECT_EQ(TRANS_SESSION_FILE_ONLYONE_FRAME, ret);
+
+    ret = FrameIndexToType(FRAME_NUM_2,TEST_FRAME_NUMBER);
+    EXPECT_EQ(TRANS_SESSION_FILE_LAST_FRAME, ret);
+
+    ret = FrameIndexToType(FRAME_NUM_2,TEST_FRAME_NUMBER_SECOND);
+    EXPECT_EQ(TRANS_SESSION_FILE_ONGOINE_FRAME, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyFileNameTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFileNameTest, TestSize.Level0)
+{
+    const char *resultFirst = TransGetFileName(nullptr);
+    EXPECT_STREQ(nullptr, resultFirst);
+
+    const char fileName[TEST_FILE_LENGTH] = {0};
+    const char *resultSecond = TransGetFileName(fileName);
+    EXPECT_STREQ(nullptr, resultSecond);
+
+    const char *resultThird = TransGetFileName(g_filePath);
+    EXPECT_STREQ(nullptr, resultThird);
+
+    const char *resultFourth = TransGetFileName(g_testFileName);
+    EXPECT_STREQ(g_testFileName, resultFourth);
+
+    const char *resultFifth = TransGetFileName(g_fileSet1[0]);
+    EXPECT_STREQ(g_testFileName, resultFifth);
+}
+
+/**
+ * @tc.name: BufferToFileListTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileCommonTest, BufferToFileListTest, TestSize.Level0)
+{
+    int32_t fileCount = 0;
+    char *result = BufferToFileList(nullptr, TEST_BUFFER_SIZE, &fileCount);
+    EXPECT_STREQ(nullptr, result);
+
+    uint8_t buffer[] = {0};
+    result = BufferToFileList(buffer, 0, &fileCount);
+    EXPECT_STREQ(nullptr, result);
+
+    result = BufferToFileList(buffer, TEST_BUFFER_SIZE, nullptr);
+    EXPECT_STREQ(nullptr, result);
+
+    result = BufferToFileList(buffer, TEST_BUFFER_SIZE, &fileCount);
+    EXPECT_STREQ(nullptr, result);
+}
+
+/**
+ * @tc.name: FileLockTest001
+ * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level0)
+{
+    int fd = 1;
+    int ret = TryFileLock(fd, SOFTBUS_F_RDLCK, 0);
+    EXPECT_EQ(SOFTBUS_FILE_BUSY, ret);
+
+    ret = TryFileLock(TEST_FD, SOFTBUS_F_RDLCK, TEST_RETRY_TIMES);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TryFileLock(fd, SOFTBUS_F_RDLCK, TEST_RETRY_TIMES);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = FileLock(fd, SOFTBUS_F_RDLCK, false);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = FileLock(fd, SOFTBUS_F_RDLCK, true);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = FileUnLock(TEST_FD);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = FileUnLock(fd);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
 }
 } // namespace OHOS
