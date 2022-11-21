@@ -921,11 +921,6 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
         return;
     }
 
-    if (CheckAppTypeAndMsgHead(&msg->msgHead, &info->appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
-        return;
-    }
-
     OnProxyChannelMsgReceived(info->channelId, &(info->appInfo), msg->data, msg->dateLen);
     SoftBusFree(info);
 }
