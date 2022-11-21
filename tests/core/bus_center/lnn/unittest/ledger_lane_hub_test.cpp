@@ -88,14 +88,6 @@ public:
 
 void LedgerLaneHubTest::SetUpTestCase()
 {
-}
-
-void LedgerLaneHubTest::TearDownTestCase()
-{
-}
-
-void LedgerLaneHubTest::SetUp()
-{
     int32_t ret = LooperInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitDistributedLedger();
@@ -104,6 +96,18 @@ void LedgerLaneHubTest::SetUp()
     EXPECT_TRUE(ret == SOFTBUS_OK);
     (void)LnnInitLaneManager();
     GTEST_LOG_(INFO) << "LaneHubTest start.";
+}
+
+void LedgerLaneHubTest::TearDownTestCase()
+{
+    LnnDeinitLocalLedger();
+    LnnDeinitDistributedLedger();
+    LooperDeinit();
+    GTEST_LOG_(INFO) << "LaneHubTest end.";
+}
+
+void LedgerLaneHubTest::SetUp()
+{
 }
 
 void LedgerLaneHubTest::TearDown()
