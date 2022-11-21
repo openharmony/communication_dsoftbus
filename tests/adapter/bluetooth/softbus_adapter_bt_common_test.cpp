@@ -13,21 +13,33 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
+#include "assert_helper.h"
 #include "bluetooth_mock.h"
 
 using namespace testing::ext;
-using ::testing::Return;
 using ::testing::_;
 using ::testing::AtMost;
+using ::testing::Return;
 
 namespace OHOS {
+static SoftBusBtStateListener *GetMockBtStateListener();
+
+static BtGapCallBacks *g_btGapCallback = NULL;
+static StRecordCtx g_btStateChangedCtx("OnBtStateChanged");
+static BtAddrRecordCtx g_btAclStateChangedCtx("OnBtAclStateChanged");
+
+static int ActionGapRegisterCallbacks(BtGapCallBacks *func)
+{
+    g_btGapCallback = func;
+    return OHOS_BT_STATUS_SUCCESS;
+}
 
 /**
  * @tc.name: AdapterBtCommonTest_ConvertStatus
@@ -37,11 +49,8 @@ namespace OHOS {
  */
 HWTEST(AdapterBtCommonTest, SoftBusEnableBt, TestSize.Level3)
 {
-    MockBluetoothCommonn mocker;
-    EXPECT_CALL(mocker, EnableBle())
-        .Times(2)
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
+    MockBluetooth mocker;
+    EXPECT_CALL(mocker, EnableBle()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusEnableBt(), SOFTBUS_OK);
     EXPECT_EQ(SoftBusEnableBt(), SOFTBUS_ERR);
 }
@@ -54,11 +63,8 @@ HWTEST(AdapterBtCommonTest, SoftBusEnableBt, TestSize.Level3)
  */
 HWTEST(AdapterBtCommonTest, SoftBusDisableBt, TestSize.Level3)
 {
-    MockBluetoothCommonn mocker;
-    EXPECT_CALL(mocker, DisableBle())
-        .Times(2)
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
+    MockBluetooth mocker;
+    EXPECT_CALL(mocker, DisableBle()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusDisableBt(), SOFTBUS_OK);
     EXPECT_EQ(SoftBusDisableBt(), SOFTBUS_ERR);
 }
@@ -71,11 +77,8 @@ HWTEST(AdapterBtCommonTest, SoftBusDisableBt, TestSize.Level3)
  */
 HWTEST(AdapterBtCommonTest, SoftBusGetBtState, TestSize.Level3)
 {
-    MockBluetoothCommonn mocker;
-    EXPECT_CALL(mocker, IsBleEnabled())
-        .Times(2)
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
+    MockBluetooth mocker;
+    EXPECT_CALL(mocker, IsBleEnabled()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusGetBtState(), BLE_ENABLE);
     EXPECT_EQ(SoftBusGetBtState(), BLE_DISABLE);
 }
@@ -89,12 +92,9 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtState, TestSize.Level3)
 HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr, TestSize.Level3)
 {
     EXPECT_EQ(SoftBusGetBtMacAddr(NULL), SOFTBUS_ERR);
-    MockBluetoothCommonn mocker;
+    MockBluetooth mocker;
     SoftBusBtAddr mac = {0};
-    EXPECT_CALL(mocker, GetLocalAddr(mac.addr, BT_ADDR_LEN))
-        .Times(2)
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
+    EXPECT_CALL(mocker, GetLocalAddr(mac.addr, BT_ADDR_LEN)).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_OK);
     EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_ERR);
 }
@@ -107,7 +107,7 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr, TestSize.Level3)
  */
 HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
 {
-    MockBluetoothCommonn mocker;
+    MockBluetooth mocker;
     const char *name = "awesome";
     EXPECT_CALL(mocker, SetLocalName((unsigned char *)name, (unsigned char)strlen(name)))
         .Times(2)
@@ -117,22 +117,17 @@ HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
     EXPECT_EQ(SoftBusSetBtName(name), SOFTBUS_ERR);
 }
 
-static testing::AssertionResult PrepareBtStateListener(
-    MockBluetoothCommonn &mocker, int *outlistenerId, BtGapCallBacks **outcallback)
+static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, int *outlistenerId)
 {
-    EXPECT_CALL(mocker, GapRegisterCallbacks(_))
-        .Times(AtMost(1))
-        .WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
-    auto listenerId = SoftBusAddBtStateListener(MockBluetoothCommonn::GetMockBtStateListener());
+    EXPECT_CALL(mocker, GapRegisterCallbacks).Times(AtMost(1)).WillOnce(ActionGapRegisterCallbacks);
+    auto listenerId = SoftBusAddBtStateListener(GetMockBtStateListener());
     if (listenerId == SOFTBUS_ERR) {
         return testing::AssertionFailure() << "SoftBusAddBtStateListener failed";
     }
-    auto callback = MockBluetoothCommonn::GetBtGapCallBacks();
-    if (callback == nullptr) {
-        return testing::AssertionFailure() << "GetBtGapCallBacks failed";
+    if (g_btGapCallback == nullptr) {
+        return testing::AssertionFailure() << "GapRegisterCallback is not invoke";
     }
     *outlistenerId = listenerId;
-    *outcallback = callback;
     return testing::AssertionSuccess();
 }
 
@@ -144,26 +139,24 @@ static testing::AssertionResult PrepareBtStateListener(
  */
 HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener, TestSize.Level3)
 {
-    BtGapCallBacks *callback = nullptr;
-    int registeredListenerId = -1;
-    MockBluetoothCommonn mocker;
-    auto prepareResult = PrepareBtStateListener(mocker, &registeredListenerId, &callback);
+    int listenerId = -1;
+    MockBluetooth mocker;
+    auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
-    callback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_ON);
-    auto btStateResult = MockBluetoothCommonn::ExpectOnBtStateChanged(registeredListenerId,
-        SOFTBUS_BR_STATE_TURNING_ON);
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_ON);
+    auto btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_ON);
     EXPECT_TRUE(btStateResult);
 
     BdAddr bdAddr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
-    callback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_CONNECTED, 0);
+    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_CONNECTED, 0);
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
-    auto aclStateResult = MockBluetoothCommonn::ExpectOnBtAclStateChanged(registeredListenerId, addr,
-        SOFTBUS_ACL_STATE_CONNECTED);
+    auto aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_CONNECTED);
     EXPECT_TRUE(aclStateResult);
+    EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
 /**
@@ -177,19 +170,36 @@ HWTEST(AdapterBtCommonTest, BluetoothPair, TestSize.Level3)
     BdAddr bdAddr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
-    MockBluetoothCommonn mocker;
-    EXPECT_CALL(mocker, PairRequestReply(&bdAddr, OHOS_BT_TRANSPORT_LE, true))
-        .Times(1)
-        .WillOnce(Return(true));
+    MockBluetooth mocker;
+    EXPECT_CALL(mocker, PairRequestReply(&bdAddr, OHOS_BT_TRANSPORT_LE, true)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(mocker, SetDevicePairingConfirmation(&bdAddr, OHOS_BT_TRANSPORT_LE, true))
         .Times(1)
         .WillOnce(Return(true));
-    BtGapCallBacks *callback = nullptr;
-    int ignore = -1;
-    auto prepareResult = PrepareBtStateListener(mocker, &ignore, &callback);
+    int listenerId = -1;
+    auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
-    callback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
-    callback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
+    g_btGapCallback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
+    g_btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
+    EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
+static void StubOnBtStateChanged(int listenerId, int state)
+{
+    g_btStateChangedCtx.Update(listenerId, state);
 }
+
+static void StubOnBtAclStateChanged(int listenerId, const SoftBusBtAddr *addr, int aclState)
+{
+    g_btAclStateChangedCtx.Update(listenerId, addr, aclState);
+}
+
+static SoftBusBtStateListener *GetMockBtStateListener()
+{
+    static SoftBusBtStateListener listener = {
+        .OnBtStateChanged = StubOnBtStateChanged,
+        .OnBtAclStateChanged = StubOnBtAclStateChanged,
+    };
+    return &listener;
+}
+
+} // namespace OHOS
