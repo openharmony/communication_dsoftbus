@@ -380,9 +380,10 @@ int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
-    (void)len;
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
+    CHECK_EXPRESSION_RETURN_VALUE((len == 0 || strnlen((const char *)data, len) >= len),
+        SOFTBUS_INVALID_PARAM);
     return UnpackDeviceIdMessage((const char *)data, info);
 }
 
