@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"

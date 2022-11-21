@@ -93,6 +93,12 @@ void NetBusCenterTest::SetUpTestCase()
 
 void NetBusCenterTest::TearDownTestCase()
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    LnnDeinitLocalLedger();
+    LnnDeinitDistributedLedger();
+    LnnDeinitEventMonitor();
+    LnnDeinitNetworkManager();
 }
 
 void NetBusCenterTest::SetUp()
