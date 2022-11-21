@@ -21,6 +21,7 @@
 #include "softbus_log.h"
 
 namespace OHOS {
+using namespace testing;
 using namespace testing::ext;
 
 constexpr char UDID1[] = "123456789AB";
@@ -59,7 +60,7 @@ void LnnNodeWeightTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level0)
+HWTEST_F(LnnNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 {
     char *masterUdid = nullptr;
     int32_t ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT2, UDID2);
