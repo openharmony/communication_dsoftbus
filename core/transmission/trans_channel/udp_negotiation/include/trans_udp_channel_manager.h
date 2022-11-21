@@ -19,6 +19,10 @@
 #include <stdint.h>
 #include "softbus_app_info.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     UDP_CHANNEL_STATUS_INIT = 0,
     UDP_CHANNEL_STATUS_OPEN_AUTH,
@@ -63,5 +67,9 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo);
 UdpChannelInfo *TransGetChannelObj(int32_t channelId);
 
 int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // !TRANS_UDP_CHANNEL_MANAGER_H
