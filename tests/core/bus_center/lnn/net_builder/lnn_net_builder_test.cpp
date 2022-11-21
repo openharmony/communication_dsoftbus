@@ -90,12 +90,12 @@ HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
 */
 HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Level0)
 {
-    bool type = true;
-    int32_t ret = LnnRequestLeaveByAddrType(&type, CONNECTION_ADDR_MAX);
+    const bool type[CONNECTION_ADDR_MAX] = {true, true, true, true, true};
+    int32_t ret = LnnRequestLeaveByAddrType(type, CONNECTION_ADDR_MAX);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnRequestLeaveByAddrType(&type, TYPE_LEN);
+    ret = LnnRequestLeaveByAddrType(type, TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
