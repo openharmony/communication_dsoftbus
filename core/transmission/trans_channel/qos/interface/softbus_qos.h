@@ -20,7 +20,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 int32_t NotifyQosChannelOpened(const ChannelInfo *chanInfo);
 void NotifyQosChannelClosed(int32_t channelId, int32_t channelType);
@@ -30,5 +30,5 @@ int32_t InitQos(void);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif

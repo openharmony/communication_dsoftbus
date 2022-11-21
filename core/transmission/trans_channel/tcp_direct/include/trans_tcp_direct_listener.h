@@ -19,7 +19,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer);
 
@@ -29,6 +29,6 @@ int32_t TransTdcStopSessionListener(ListenerModule module);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 #endif

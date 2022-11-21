@@ -24,8 +24,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #define CODE_VERIFY_P2P 3
 
 int32_t P2pDirectChannelInit(void);
@@ -37,6 +37,6 @@ void StopP2pSessionListener(void);
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

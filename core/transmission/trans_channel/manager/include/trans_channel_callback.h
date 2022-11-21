@@ -25,8 +25,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 typedef struct {
     int32_t (*OnChannelOpened)(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel);
