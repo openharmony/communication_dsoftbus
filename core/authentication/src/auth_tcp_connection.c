@@ -105,7 +105,6 @@ static int32_t UnpackSocketPkt(const uint8_t *data, uint32_t len, SocketPktHead 
     head->flag = (int32_t)SoftBusLtoHl(*(uint32_t *)(data + offset));
     offset += sizeof(uint32_t);
     head->len = SoftBusLtoHl(*(uint32_t *)(data + offset));
-    offset += sizeof(uint32_t);
     return SOFTBUS_OK;
 }
 
