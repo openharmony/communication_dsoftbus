@@ -17,7 +17,7 @@
 #define LNN_LANE_LINK_H
 
 #include <stdint.h>
-#include "lnn_lane_info.h"
+#include "lnn_lane_def.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -19,17 +19,12 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane.h"
 #include "lnn_lane_qos.h"
-#include "lnn_lane_manager.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
 int32_t LnnInitLaneHub(void)
 {
-    if (LnnInitLaneManager() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane manager fail");
-        return SOFTBUS_ERR;
-    }
     if (InitLane() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane fail");
         return SOFTBUS_ERR;

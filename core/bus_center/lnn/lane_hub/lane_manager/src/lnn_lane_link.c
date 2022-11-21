@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_net_capability.h"
+#include "lnn_lane_def.h"
 #include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
