@@ -190,7 +190,8 @@ int32_t TransDelUdpChannel(int32_t channelId)
     }
 
     UdpChannelInfo *udpChannelNode = NULL;
-    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+    UdpChannelInfo *udpChannelNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(udpChannelNode, udpChannelNext, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.myData.channelId == channelId) {
             ReleaseUdpChannelId((int32_t)(udpChannelNode->info.myData.channelId));
             ListDelete(&(udpChannelNode->node));
