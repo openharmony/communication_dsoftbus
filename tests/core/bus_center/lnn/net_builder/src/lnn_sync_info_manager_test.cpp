@@ -21,6 +21,7 @@
 #include "softbus_log.h"
 
 namespace OHOS {
+using namespace testing;
 using namespace testing::ext;
 
 constexpr char NETWORLID[65] = "abcdefg";
@@ -70,7 +71,7 @@ void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, u
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level0)
+HWTEST_F(LnnSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_COUNT, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -84,7 +85,7 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Le
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level0)
+HWTEST_F(LnnSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_COUNT, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -100,7 +101,7 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level0)
+HWTEST_F(LnnSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_COUNT, NETWORLID, MSG, LEN, Complete);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);

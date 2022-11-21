@@ -22,10 +22,18 @@
 #include "message_handler.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
+#include "bus_center_info_key.h"
+#include "lnn_net_ledger_mock.h"
+#include "lnn_node_info.h"
+
+NodeInfo *info = {0};
+constexpr char *DEVICE_NAME1 = nullptr;
+constexpr char DEVICE_NAME2[] = "ABCDEFG";
 
 namespace OHOS {
-using namespace testing::ext;
 using namespace testing;
+using namespace testing::ext;
+
 class LnnDeviceNameInfoTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -58,9 +66,17 @@ void LnnDeviceNameInfoTest::TearDown()
 */
 HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
-    NetBuilderDepsInterfaceMock deviceNameMock;
-    EXPECT_CALL(deviceNameMock, LnnGetSettingDeviceName(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    NetBuilderDepsInterfaceMock netbuilderMock;
+    LnnNetLedgertInterfaceMock ledgerMock;
+    char name[DEVICE_NAME_BUF_LEN] = {0};
     LooperInit();
+    EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netbuilderMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netbuilderMock, LnnGetAllOnlineAndMetaNodeInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo()).WillRepeatedly(Return(info));
+    EXPECT_CALL(ledgerMock, LnnGetDeviceName(_)).WillRepeatedly(Return(DEVICE_NAME1));
+    EXPECT_CALL(ledgerMock, LnnGetDeviceName(_)).WillRepeatedly(Return(DEVICE_NAME2));
     UpdateDeviceName(nullptr);
     LooperDeinit();
 }
@@ -73,8 +89,8 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
 */
 HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_003, TestSize.Level1)
 {
-    NetBuilderDepsInterfaceMock deviceNameMock;
-    EXPECT_CALL(deviceNameMock, LnnGetSettingDeviceName(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    NetBuilderDepsInterfaceMock netbuilderMock;
+    EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     UpdateDeviceName(nullptr);
 }
 
@@ -87,7 +103,7 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_003, TestSize.Level1
 HWTEST_F(LnnDeviceNameInfoTest, LNN_P2P_INFO_TEST_001, TestSize.Level1)
 {
     NetBuilderDepsInterfaceMock deviceNameMock;
-    EXPECT_CALL(deviceNameMock, LnnGetAllOnlineAndMetaNodeInfo(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(deviceNameMock, LnnGetAllOnlineAndMetaNodeInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     ProcessSyncP2pInfo(nullptr);
 }
 
