@@ -371,6 +371,10 @@ int32_t SoftBusReportDiscStartupEvt(const char *packageName)
 
 int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time)
 {
+    if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "medium is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&g_firstDiscTime[medium].lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record first disc time lock fail");
         return SOFTBUS_ERR;
@@ -394,6 +398,10 @@ int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time)
 
 int32_t SoftbusRecordDiscScanTimes(uint8_t medium)
 {
+    if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "medium is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&g_scanTimes[medium].lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record disc scan lock fail");
         return SOFTBUS_ERR;
@@ -431,6 +439,10 @@ static int32_t ErrCodeConvert(int32_t errCode)
 
 int32_t SoftbusRecordDiscFault(uint8_t medium, int32_t errCode)
 {
+    if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "medium is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&g_discFault[medium].lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "record disc fault lock fail");
         return SOFTBUS_ERR;
