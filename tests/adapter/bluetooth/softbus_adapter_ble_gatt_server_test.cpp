@@ -35,25 +35,23 @@ using ::testing::Return;
 namespace OHOS {
 
 class BtUuidRecordCtx : public StRecordCtx {
-private:
-    SoftBusBtUuid uuid;
-    void Reset();
-
 public:
     explicit BtUuidRecordCtx(const char *identifier);
     ~BtUuidRecordCtx();
     bool Update(int id, int st, SoftBusBtUuid *param);
     testing::AssertionResult Expect(int id, int st, SoftBusBtUuid *param);
+private:
+    SoftBusBtUuid uuid;
+    void Reset();
 };
 
 class BtGattRecordCtx : public BtUuidRecordCtx {
-private:
-    int handle;
-
 public:
     explicit BtGattRecordCtx(const char *identifier);
     bool Update(int id, int st, int handle, SoftBusBtUuid *param);
     testing::AssertionResult Expect(int id, int st, int handle, SoftBusBtUuid *param);
+private:
+    int handle;
 };
 
 class AdapterBleGattServerTest : public testing::Test {

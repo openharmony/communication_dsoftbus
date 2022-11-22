@@ -32,7 +32,7 @@ namespace OHOS {
  */
 HWTEST(AdapterBtUtilsTest, ConvertStatus, TestSize.Level3)
 {
-    int status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_SUCCESS);
+    auto status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_SUCCESS);
     EXPECT_EQ(status, SOFTBUS_BT_STATUS_SUCCESS);
 
     status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_FAIL);

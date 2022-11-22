@@ -24,182 +24,189 @@
 
 MockBluetooth *MockBluetooth::targetMocker = nullptr;
 
+MockBluetooth *MockBluetooth::GetMocker()
+{
+    return targetMocker;
+}
+
 MockBluetooth::MockBluetooth()
 {
     MockBluetooth::targetMocker = this;
 }
 
-MockBluetooth::~MockBluetooth() {}
+MockBluetooth::~MockBluetooth() {
+    MockBluetooth::targetMocker = nullptr;
+}
 
 bool EnableBle(void)
 {
-    return MockBluetooth::targetMocker->EnableBle();
+    return MockBluetooth::GetMocker()->EnableBle();
 }
 
 bool DisableBle(void)
 {
-    return MockBluetooth::targetMocker->DisableBle();
+    return MockBluetooth::GetMocker()->DisableBle();
 }
 
 bool IsBleEnabled()
 {
-    return MockBluetooth::targetMocker->IsBleEnabled();
+    return MockBluetooth::GetMocker()->IsBleEnabled();
 }
 
 bool GetLocalAddr(unsigned char *mac, unsigned int len)
 {
-    return MockBluetooth::targetMocker->GetLocalAddr(mac, len);
+    return MockBluetooth::GetMocker()->GetLocalAddr(mac, len);
 }
 
 bool SetLocalName(unsigned char *localName, unsigned char length)
 {
-    return MockBluetooth::targetMocker->SetLocalName(localName, length);
+    return MockBluetooth::GetMocker()->SetLocalName(localName, length);
 }
 
 int GapRegisterCallbacks(BtGapCallBacks *func)
 {
-    return MockBluetooth::targetMocker->GapRegisterCallbacks(func);
+    return MockBluetooth::GetMocker()->GapRegisterCallbacks(func);
 }
 
 bool PairRequestReply(const BdAddr *bdAddr, int transport, bool accept)
 {
-    return MockBluetooth::targetMocker->PairRequestReply(bdAddr, transport, accept);
+    return MockBluetooth::GetMocker()->PairRequestReply(bdAddr, transport, accept);
 }
 
 bool SetDevicePairingConfirmation(const BdAddr *bdAddr, int transport, bool accept)
 {
-    return MockBluetooth::targetMocker->SetDevicePairingConfirmation(bdAddr, transport, accept);
+    return MockBluetooth::GetMocker()->SetDevicePairingConfirmation(bdAddr, transport, accept);
 }
 
 int BleGattRegisterCallbacks(BtGattCallbacks *func)
 {
-    return MockBluetooth::targetMocker->BleGattRegisterCallbacks(func);
+    return MockBluetooth::GetMocker()->BleGattRegisterCallbacks(func);
 }
 
 int BleStartScanEx(BleScanConfigs *configs, BleScanNativeFilter *filter, unsigned int filterSize)
 {
-    return MockBluetooth::targetMocker->BleStartScanEx(configs, filter, filterSize);
+    return MockBluetooth::GetMocker()->BleStartScanEx(configs, filter, filterSize);
 }
 
 int BleStopScan(void)
 {
-    return MockBluetooth::targetMocker->BleStopScan();
+    return MockBluetooth::GetMocker()->BleStopScan();
 }
 
 int BleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam)
 {
-    return MockBluetooth::targetMocker->BleStartAdvEx(advId, rawData, advParam);
+    return MockBluetooth::GetMocker()->BleStartAdvEx(advId, rawData, advParam);
 }
 
 int BleStopAdv(int advId)
 {
-    return MockBluetooth::targetMocker->BleStopAdv(advId);
+    return MockBluetooth::GetMocker()->BleStopAdv(advId);
 }
 
 int BleGattcRegister(BtUuid appUuid)
 {
-    return MockBluetooth::targetMocker->BleGattcRegister(appUuid);
+    return MockBluetooth::GetMocker()->BleGattcRegister(appUuid);
 }
 
 int BleGattcConnect(
     int clientId, BtGattClientCallbacks *func, const BdAddr *bdAddr, bool isAutoConnect, BtTransportType transport)
 {
-    return MockBluetooth::targetMocker->BleGattcConnect(clientId, func, bdAddr, isAutoConnect, transport);
+    return MockBluetooth::GetMocker()->BleGattcConnect(clientId, func, bdAddr, isAutoConnect, transport);
 }
 
 int BleGattcDisconnect(int clientId)
 {
-    return MockBluetooth::targetMocker->BleGattcDisconnect(clientId);
+    return MockBluetooth::GetMocker()->BleGattcDisconnect(clientId);
 }
 
 int BleGattcSearchServices(int clientId)
 {
-    return MockBluetooth::targetMocker->BleGattcSearchServices(clientId);
+    return MockBluetooth::GetMocker()->BleGattcSearchServices(clientId);
 }
 
 bool BleGattcGetService(int clientId, BtUuid serviceUuid)
 {
-    return MockBluetooth::targetMocker->BleGattcGetService(clientId, serviceUuid);
+    return MockBluetooth::GetMocker()->BleGattcGetService(clientId, serviceUuid);
 }
 
 int BleGattcRegisterNotification(int clientId, BtGattCharacteristic characteristic, bool enable)
 {
-    return MockBluetooth::targetMocker->BleGattcRegisterNotification(clientId, characteristic, enable);
+    return MockBluetooth::GetMocker()->BleGattcRegisterNotification(clientId, characteristic, enable);
 }
 
 int BleGattcConfigureMtuSize(int clientId, int mtuSize)
 {
-    return MockBluetooth::targetMocker->BleGattcConfigureMtuSize(clientId, mtuSize);
+    return MockBluetooth::GetMocker()->BleGattcConfigureMtuSize(clientId, mtuSize);
 }
 
 int BleGattcWriteCharacteristic(
     int clientId, BtGattCharacteristic characteristic, BtGattWriteType writeType, int len, const char *value)
 {
-    return MockBluetooth::targetMocker->BleGattcWriteCharacteristic(clientId, characteristic, writeType, len, value);
+    return MockBluetooth::GetMocker()->BleGattcWriteCharacteristic(clientId, characteristic, writeType, len, value);
 }
 
 int BleGattcUnRegister(int clientId)
 {
-    return MockBluetooth::targetMocker->BleGattcUnRegister(clientId);
+    return MockBluetooth::GetMocker()->BleGattcUnRegister(clientId);
 }
 
 int BleGattsRegisterCallbacks(BtGattServerCallbacks *func)
 {
-    return MockBluetooth::targetMocker->BleGattsRegisterCallbacks(func);
+    return MockBluetooth::GetMocker()->BleGattsRegisterCallbacks(func);
 }
 
 int BleGattsRegister(BtUuid appUuid)
 {
-    return MockBluetooth::targetMocker->BleGattsRegister(appUuid);
+    return MockBluetooth::GetMocker()->BleGattsRegister(appUuid);
 }
 
 int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number)
 {
-    return MockBluetooth::targetMocker->BleGattsAddService(serverId, srvcUuid, isPrimary, number);
+    return MockBluetooth::GetMocker()->BleGattsAddService(serverId, srvcUuid, isPrimary, number);
 }
 
 int BleGattsUnRegister(int serverId)
 {
-    return MockBluetooth::targetMocker->BleGattsUnRegister(serverId);
+    return MockBluetooth::GetMocker()->BleGattsUnRegister(serverId);
 }
 
 int BleGattsAddCharacteristic(int serverId, int srvcHandle, BtUuid characUuid, int properties, int permissions)
 {
-    return MockBluetooth::targetMocker->BleGattsAddCharacteristic(
+    return MockBluetooth::GetMocker()->BleGattsAddCharacteristic(
         serverId, srvcHandle, characUuid, properties, permissions);
 }
 
 int BleGattsAddDescriptor(int serverId, int srvcHandle, BtUuid descUuid, int permissions)
 {
-    return MockBluetooth::targetMocker->BleGattsAddDescriptor(serverId, srvcHandle, descUuid, permissions);
+    return MockBluetooth::GetMocker()->BleGattsAddDescriptor(serverId, srvcHandle, descUuid, permissions);
 }
 
 int BleGattsStartService(int serverId, int srvcHandle)
 {
-    return MockBluetooth::targetMocker->BleGattsStartService(serverId, srvcHandle);
+    return MockBluetooth::GetMocker()->BleGattsStartService(serverId, srvcHandle);
 }
 
 int BleGattsStopService(int serverId, int srvcHandle)
 {
-    return MockBluetooth::targetMocker->BleGattsStopService(serverId, srvcHandle);
+    return MockBluetooth::GetMocker()->BleGattsStopService(serverId, srvcHandle);
 }
 
 int BleGattsDeleteService(int serverId, int srvcHandle)
 {
-    return MockBluetooth::targetMocker->BleGattsDeleteService(serverId, srvcHandle);
+    return MockBluetooth::GetMocker()->BleGattsDeleteService(serverId, srvcHandle);
 }
 
 int BleGattsDisconnect(int serverId, BdAddr bdAddr, int connId)
 {
-    return MockBluetooth::targetMocker->BleGattsDisconnect(serverId, bdAddr, connId);
+    return MockBluetooth::GetMocker()->BleGattsDisconnect(serverId, bdAddr, connId);
 }
 
 int BleGattsSendResponse(int serverId, GattsSendRspParam *param)
 {
-    return MockBluetooth::targetMocker->BleGattsSendResponse(serverId, param);
+    return MockBluetooth::GetMocker()->BleGattsSendResponse(serverId, param);
 }
 
 int BleGattsSendIndication(int serverId, GattsSendIndParam *param)
 {
-    return MockBluetooth::targetMocker->BleGattsSendIndication(serverId, param);
+    return MockBluetooth::GetMocker()->BleGattsSendIndication(serverId, param);
 }

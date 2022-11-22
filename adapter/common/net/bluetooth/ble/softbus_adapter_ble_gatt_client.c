@@ -150,7 +150,7 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect memcpy error");
         return SOFTBUS_INVALID_PARAM;
     }
-    int status = BleOhosStatusToSoftBus(
+    int32_t status = BleOhosStatusToSoftBus(
         BleGattcConnect(clientId, &g_btGattClientCallbacks, &bdAddr, false, OHOS_BT_TRANSPORT_TYPE_LE));
     if (status != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcConnect error");
@@ -172,7 +172,7 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId)
 int32_t SoftbusGattcSearchServices(int32_t clientId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftbusGattcSearchServices %d", clientId);
-    int status = BleOhosStatusToSoftBus(BleGattcSearchServices(clientId));
+    int32_t status = BleOhosStatusToSoftBus(BleGattcSearchServices(clientId));
     if (status != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcSearchServices error, status = %d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
@@ -203,7 +203,7 @@ int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *server
     btCharaUuid.serviceUuid.uuidLen = serverUuid->uuidLen;
     btCharaUuid.characteristicUuid.uuid = charaUuid->uuid;
     btCharaUuid.characteristicUuid.uuidLen = charaUuid->uuidLen;
-    int status = BleOhosStatusToSoftBus(BleGattcRegisterNotification(clientId, btCharaUuid, true));
+    int32_t status = BleOhosStatusToSoftBus(BleGattcRegisterNotification(clientId, btCharaUuid, true));
     if (status != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcRegisterNotification error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;

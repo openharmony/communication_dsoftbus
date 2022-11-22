@@ -31,15 +31,14 @@ using ::testing::Return;
 namespace OHOS {
 
 class ScanResultCtx : public RecordCtx {
-private:
-    SoftBusBleScanResult scanResult;
-    void Reset();
-
 public:
     explicit ScanResultCtx(const char *identifier);
     ~ScanResultCtx();
     bool Update(int id, const SoftBusBleScanResult *scanResult);
     testing::AssertionResult Expect(int id, const SoftBusBleScanResult *scanResult);
+private:
+    SoftBusBleScanResult scanResult;
+    void Reset();
 };
 
 class AdapterBleGattTest : public testing::Test {
@@ -303,7 +302,7 @@ HWTEST_F(AdapterBleGattTest, AdvertiseLifecycle, TestSize.Level3)
     ASSERT_TRUE(advDisableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
     // 模拟蓝牙广播成功回调, 广播成功会被再次回调, adapter状态才能恢复正常
     btGattCallback->advEnableCb(btInnerAdvId, SOFTBUS_BT_STATUS_SUCCESS);
-    ASSERT_TRUE(advDisableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
+    ASSERT_TRUE(advEnableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
 
     ret = SoftBusStopAdv(advId);
     ASSERT_EQ(ret, SOFTBUS_OK);
