@@ -72,7 +72,6 @@ static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, u
     *(uint16_t *)(buf + offset) = SoftBusHtoLs((uint16_t)msgHead->peerId);
     offset += sizeof(uint16_t);
     *(uint16_t *)(buf + offset) = SoftBusHtoLs((uint16_t)msgHead->reserved);
-    offset += sizeof(uint16_t);
 }
 
 static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
