@@ -218,7 +218,7 @@ HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_003, TestSize.Level1)
     requestOption.requestInfo.trans.expectedLink.linkTypeNum = 1;
     requestOption.requestInfo.trans.expectedLink.linkType[0] = LANE_P2P;
     int32_t ret = LnnRequestLane(laneId, &requestOption, &listener);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusSleepMs(500);
 }
 
