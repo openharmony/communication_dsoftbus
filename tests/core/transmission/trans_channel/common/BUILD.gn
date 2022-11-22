@@ -52,9 +52,6 @@ ohos_unittest("TransLanePendingTest") {
     "$dsoftbus_root_path/sdk:softbus_client",
     "//third_party/googletest:gtest_main",
   ]
-  cflags = ["--coverage"]
-  ldflags = ["--coverage"]
-
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
