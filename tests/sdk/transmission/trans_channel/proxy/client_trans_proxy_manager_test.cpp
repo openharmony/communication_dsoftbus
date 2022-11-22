@@ -131,8 +131,8 @@ static ISessionListener g_sessionlistener = {
 };
 
 /**
- * @tc.name: ClinetTransProxyInitTestTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClinetTransProxyInitTest
+ * @tc.desc: client trans proxy init test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -155,8 +155,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClinetTransProxyInitTest, TestSize.Level0)
 }
 
 /**
- * @tc.name: ClientTransProxyOnChannelOpenedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClientTransProxyOnChannelOpenedTest
+ * @tc.desc: client trans proxy on channel opened test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -180,8 +180,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
 }
 
 /**
- * @tc.name: ClientTransProxyOnChannelOpenFailedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClientTransProxyOnChannelClosedTest
+ * @tc.desc: client trans proxy on channel closed test, use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -202,8 +202,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelClosedTest, TestS
 }
 
 /**
- * @tc.name: ClientTransProxyOnChannelClosedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClientTransProxyOnChannelOpenFailedTest
+ * @tc.desc: client trans proxy on channel open failed test, use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -224,8 +224,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenFailedTest, T
 }
 
 /**
- * @tc.name: ClientTransProxyOnDataReceivedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClientTransProxyOnDataReceivedTest
+ * @tc.desc: client trans proxy on data received test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -249,8 +249,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
 }
 
 /**
- * @tc.name: ClientTransProxyCloseChannelTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClientTransProxyCloseChannelTest
+ * @tc.desc: client trans proxy close channel test, use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -269,8 +269,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize
 }
 
 /**
- * @tc.name: TransProxyChannelSendFileTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: TransProxyChannelSendFileTest
+ * @tc.desc: trans proxy channel send file test, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
