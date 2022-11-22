@@ -51,12 +51,18 @@ typedef struct {
 
 static AdvChannel g_advChannel[ADV_MAX_NUM];
 static ScanListener g_scanListener[SCAN_MAX_NUM];
+
+static volatile bool g_lockInit = false;
 static SoftBusMutex g_advLock = {0};
 static SoftBusMutex g_scanerLock = {0};
+
 static bool g_isRegCb = false;
 
 int BleGattLockInit(void)
 {
+    if (g_lockInit) {
+        return SOFTBUS_OK;
+    }
     if (SoftBusMutexInit(&g_advLock, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "g_advLock init failed");
         return SOFTBUS_ERR;
@@ -65,6 +71,7 @@ int BleGattLockInit(void)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "g_scanerLock init failed");
         return SOFTBUS_ERR;
     }
+    g_lockInit = true;
     return SOFTBUS_OK;
 }
 
@@ -397,7 +404,7 @@ static void ConvertAdvParam(const SoftBusBleAdvParams *src, BleAdvParams *dst)
 
 static void WrapperAdvEnableCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -419,7 +426,7 @@ static void WrapperAdvEnableCallback(int advId, int status)
 
 static void WrapperAdvDisableCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -442,7 +449,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
 
 static void WrapperAdvDataCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -460,7 +467,7 @@ static void WrapperAdvDataCallback(int advId, int status)
 
 static void WrapperAdvUpdateCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -742,9 +749,6 @@ int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleA
     if (param == NULL || data == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!CheckAdvChannelInUsed(advId)) {
-        return SOFTBUS_ERR;
-    }
     int ret = SoftBusStopAdv(advId);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -906,7 +910,7 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
     }
     BleScanConfigs scanConfig;
     SetAndGetSuitableScanConfig(listenerId, param, &scanConfig);
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
+    int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
     if (CheckNeedReStartScan()) {
         uint8_t filterSize = 0;
         BleScanNativeFilter *nativeFilter = NULL;
@@ -944,7 +948,7 @@ int SoftBusStopScan(int listenerId)
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_OK;
     }
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
+    int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
     if (CheckNeedStopScan(listenerId)) {
         status = BleOhosStatusToSoftBus(BleStopScan());
     }
