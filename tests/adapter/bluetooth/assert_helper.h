@@ -29,13 +29,6 @@
 #include "softbus_utils.h"
 
 class RecordCtx {
-private:
-    int id;
-
-protected:
-    // static c string
-    const char *identifier;
-
 public:
     explicit RecordCtx(const char *identifier) : id(-1)
     {
@@ -58,12 +51,14 @@ public:
         }
         return result;
     }
+protected:
+    // static c string
+    const char *identifier;
+private:
+    int id;
 };
 
 class StRecordCtx : public RecordCtx {
-private:
-    int st;
-
 public:
     explicit StRecordCtx(const char *identifier) : RecordCtx(identifier), st(-1) {}
 
@@ -92,16 +87,11 @@ public:
         this->st = -1;
         return result;
     }
+private:
+    int st;
 };
 
 class BtAddrRecordCtx : public StRecordCtx {
-private:
-    SoftBusBtAddr addrVal;
-    void Reset()
-    {
-        memset_s(&addrVal, sizeof(SoftBusBtAddr), 0, sizeof(SoftBusBtAddr));
-    }
-
 public:
     explicit BtAddrRecordCtx(const char *identifier) : StRecordCtx(identifier)
     {
@@ -132,12 +122,15 @@ public:
         Reset();
         return result;
     }
+private:
+    SoftBusBtAddr addrVal;
+    void Reset()
+    {
+        memset_s(&addrVal, sizeof(SoftBusBtAddr), 0, sizeof(SoftBusBtAddr));
+    }
 };
 
 class IntRecordCtx : public StRecordCtx {
-private:
-    int val;
-
 public:
     explicit IntRecordCtx(const char *identifier) : StRecordCtx(identifier), val(-1) {}
 
@@ -166,6 +159,8 @@ public:
         this->val = -1;
         return result;
     }
+private:
+    int val;
 };
 
 #endif

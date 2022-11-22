@@ -76,8 +76,6 @@ public:
 
 class MockBluetooth : public BluetoothInterface {
 public:
-    static MockBluetooth *targetMocker;
-
     MockBluetooth();
     ~MockBluetooth();
 
@@ -86,11 +84,11 @@ public:
     MOCK_METHOD(bool, IsBleEnabled, (), (override));
     MOCK_METHOD(bool, GetLocalAddr, (unsigned char *mac, unsigned int len), (override));
     MOCK_METHOD(bool, SetLocalName, (unsigned char *localName, unsigned char length), (override));
-    MOCK_METHOD(int, GapRegisterCallbacks, (BtGapCallBacks * func), (override));
+    MOCK_METHOD(int, GapRegisterCallbacks, (BtGapCallBacks *func), (override));
     MOCK_METHOD(bool, PairRequestReply, (const BdAddr *bdAddr, int transport, bool accept), (override));
     MOCK_METHOD(bool, SetDevicePairingConfirmation, (const BdAddr *bdAddr, int transport, bool accept), (override));
 
-    MOCK_METHOD(int, BleGattRegisterCallbacks, (BtGattCallbacks * func), (override));
+    MOCK_METHOD(int, BleGattRegisterCallbacks, (BtGattCallbacks *func), (override));
     MOCK_METHOD(int, BleStartScanEx, (BleScanConfigs * configs, BleScanNativeFilter *filter, unsigned int filterSize),
         (override));
     MOCK_METHOD(int, BleStopScan, (), (override));
@@ -113,7 +111,7 @@ public:
         (override));
     MOCK_METHOD(int, BleGattcUnRegister, (int clientId), (override));
 
-    MOCK_METHOD(int, BleGattsRegisterCallbacks, (BtGattServerCallbacks * func), (override));
+    MOCK_METHOD(int, BleGattsRegisterCallbacks, (BtGattServerCallbacks *func), (override));
     MOCK_METHOD(int, BleGattsRegister, (BtUuid appUuid), (override));
     MOCK_METHOD(int, BleGattsAddService, (int serverId, BtUuid srvcUuid, bool isPrimary, int number), (override));
     MOCK_METHOD(int, BleGattsUnRegister, (int serverId), (override));
@@ -127,6 +125,10 @@ public:
     MOCK_METHOD(int, BleGattsDisconnect, (int serverId, BdAddr bdAddr, int connId), (override));
     MOCK_METHOD(int, BleGattsSendResponse, (int serverId, GattsSendRspParam *param), (override));
     MOCK_METHOD(int, BleGattsSendIndication, (int serverId, GattsSendIndParam *param), (override));
+
+    static MockBluetooth *GetMocker();
+private:
+    static MockBluetooth *targetMocker;
 };
 
 #endif

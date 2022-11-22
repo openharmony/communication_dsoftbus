@@ -15,9 +15,9 @@
 
 #include "adapter_bt_utils.h"
 
-int BleOhosStatusToSoftBus(BtStatus btStatus)
+int32_t BleOhosStatusToSoftBus(BtStatus btStatus)
 {
-    int status;
+    int32_t status;
     switch (btStatus) {
         case OHOS_BT_STATUS_SUCCESS:
             status = SOFTBUS_BT_STATUS_SUCCESS;

@@ -30,10 +30,6 @@ namespace OHOS {
 
 // 调用上下文存储辅助对象
 class GattcNotifyRecordCtx : public StRecordCtx {
-private:
-    SoftBusGattcNotify notify;
-    void Reset();
-
 public:
     explicit GattcNotifyRecordCtx(const char *identifier) : StRecordCtx(identifier)
     {
@@ -46,6 +42,9 @@ public:
 
     bool Update(int id, int st, SoftBusGattcNotify *param);
     testing::AssertionResult Expect(int id, int st, SoftBusGattcNotify *param);
+private:
+    SoftBusGattcNotify notify;
+    void Reset();
 };
 
 class AdapterBleGattClientTest : public testing::Test {

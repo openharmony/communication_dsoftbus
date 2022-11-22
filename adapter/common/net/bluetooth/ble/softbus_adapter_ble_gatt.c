@@ -404,7 +404,7 @@ static void ConvertAdvParam(const SoftBusBleAdvParams *src, BleAdvParams *dst)
 
 static void WrapperAdvEnableCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -426,7 +426,7 @@ static void WrapperAdvEnableCallback(int advId, int status)
 
 static void WrapperAdvDisableCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -449,7 +449,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
 
 static void WrapperAdvDataCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -467,7 +467,7 @@ static void WrapperAdvDataCallback(int advId, int status)
 
 static void WrapperAdvUpdateCallback(int advId, int status)
 {
-    int st = BleOhosStatusToSoftBus((BtStatus)status);
+    int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
         if (advChannel->advId != advId ||
@@ -749,9 +749,6 @@ int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleA
     if (param == NULL || data == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!CheckAdvChannelInUsed(advId)) {
-        return SOFTBUS_ERR;
-    }
     int ret = SoftBusStopAdv(advId);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -913,7 +910,7 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
     }
     BleScanConfigs scanConfig;
     SetAndGetSuitableScanConfig(listenerId, param, &scanConfig);
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
+    int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
     if (CheckNeedReStartScan()) {
         uint8_t filterSize = 0;
         BleScanNativeFilter *nativeFilter = NULL;
@@ -951,7 +948,7 @@ int SoftBusStopScan(int listenerId)
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_OK;
     }
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
+    int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
     if (CheckNeedStopScan(listenerId)) {
         status = BleOhosStatusToSoftBus(BleStopScan());
     }
