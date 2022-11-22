@@ -63,6 +63,12 @@ public:
 void ClientTransProxyFileCommonTest::SetUpTestCase(void) {}
 void ClientTransProxyFileCommonTest::TearDownTestCase(void) {}
 
+/**
+ * @tc.name: FileListToBufferTest
+ * @tc.desc: file list to buffer test, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTest, TestSize.Level0)
 {
     FileListBuffer bufferInfo = {0};
@@ -79,6 +85,12 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTest, TestSize.Level0)
     SoftBusFree(bufferInfo.buffer);
 }
 
+/**
+ * @tc.name: FileListToBufferTestBadInput1
+ * @tc.desc: file list to buffer test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput1, TestSize.Level0)
 {
     FileListBuffer bufferInfo = {0};
@@ -88,6 +100,12 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput1, TestSize
     EXPECT_EQ(bufferInfo.bufferSize, 0);
 }
 
+/**
+ * @tc.name: FileListToBufferTestBadInput2
+ * @tc.desc: file list to buffer test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput2, TestSize.Level0)
 {
     FileListBuffer bufferInfo = {0};
@@ -97,11 +115,23 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput2, TestSize
     EXPECT_EQ(bufferInfo.bufferSize, 0);
 }
 
+/**
+ * @tc.name: FileListToBufferTestBadInput3
+ * @tc.desc: file list to buffer test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput3, TestSize.Level0)
 {
     EXPECT_NE(0, FileListToBuffer(g_fileSet1, sizeof(g_fileSet1) / sizeof(const char *), nullptr));
 }
 
+/**
+ * @tc.name: FileListToBufferTestBadInput4
+ * @tc.desc: file list to buffer test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput4, TestSize.Level0)
 {
     const char *fileSet[] = {
@@ -117,6 +147,12 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput4, TestSize
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, FileListToBuffer(fileSet, sizeof(fileSet) / sizeof(const char *), &bufferInfo));
 }
 
+/**
+ * @tc.name: FileListToBufferTestBadInput5
+ * @tc.desc: file list to buffer test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput5, TestSize.Level0)
 {
     const char *fileSet[] = {"/dev/path/to", ""};
@@ -125,8 +161,8 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput5, TestSize
 }
 
 /**
- * @tc.name: ClinetTransProxyFilePathTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClinetTransProxyFilePathTest
+ * @tc.desc: client trans proxy file path test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,8 +223,8 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.
 }
 
 /**
- * @tc.name: ClinetTransProxyFileNameTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: ClinetTransProxyFileNameTest
+ * @tc.desc: client trans proxy file name test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -212,8 +248,8 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFileNameTest, TestSize.
 }
 
 /**
- * @tc.name: BufferToFileListTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: BufferToFileListTest
+ * @tc.desc: buffer to file list test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -235,8 +271,8 @@ HWTEST_F(ClientTransProxyFileCommonTest, BufferToFileListTest, TestSize.Level0)
 }
 
 /**
- * @tc.name: FileLockTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.name: FileLockTest
+ * @tc.desc: file lock test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
