@@ -95,7 +95,7 @@ static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
     } while (false);
     (void)memset_s(decryptData.data, decryptData.size, 0x0, decryptData.size);
     SoftBusFree(decryptData.data);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
