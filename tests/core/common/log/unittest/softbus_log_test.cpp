@@ -93,7 +93,7 @@ HWTEST_F(SoftBusLogTest, AnonymizesTest001, TestSize.Level1)
 {
     const char *target = nullptr;
     uint8_t expectAnonymizedLength = 0;
-    const char *expected = "nullptr";
+    const char *expected = "NULL";
     const char *actual = Anonymizes(target, expectAnonymizedLength);
     EXPECT_STREQ(expected, actual);
 
@@ -194,7 +194,7 @@ HWTEST_F(SoftBusLogTest, AnonyDevIdTest001, TestSize.Level1)
 {
     char *outName = nullptr;
     const char *inName = nullptr;
-    const char *expected = "nullptr";
+    const char *expected = "null";
     const char *actual = AnonyDevId(&outName, inName);
     EXPECT_STREQ(expected, actual);
 
