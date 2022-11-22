@@ -65,7 +65,7 @@ void TransClientProxyTest::TearDownTestCase(void) {}
 
 /**
  * @tc.name: InformPermissionChangeTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: infomation permission change test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -93,7 +93,7 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
 
 /**
  * @tc.name: ClientIpcOnChannelOpenedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel opened test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -143,7 +143,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
 
 /**
  * @tc.name: ClientIpcOnChannelOpenFailedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel open failed test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -169,7 +169,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
 
 /**
  * @tc.name: ClientIpcOnChannelLinkDownTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel link down test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -196,7 +196,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
 
 /**
  * @tc.name: ClientIpcOnChannelClosedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel closed test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -222,7 +222,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
 
 /**
  * @tc.name: ClientIpcOnChannelMsgReceivedTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel msg received test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -254,7 +254,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
 
 /**
  * @tc.name: ClientIpcOnChannelQosEventTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel qos event test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
