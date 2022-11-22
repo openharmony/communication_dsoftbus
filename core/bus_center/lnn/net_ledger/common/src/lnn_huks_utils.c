@@ -137,13 +137,11 @@ static int32_t UpdateLoopFinishByHuks(const struct HksBlob *handle, const struct
     uint8_t *cur = outData->data;
     outData->size = 0;
     inDataSeg.size = LNN_HUKS_MAX_UPDATE_SIZE;
-    bool isFinished = false;
 
     while (inDataSeg.data <= lastPtr) {
         if (inDataSeg.data + LNN_HUKS_MAX_UPDATE_SIZE <= lastPtr) {
             outDataSeg.size = LNN_HUKS_MAX_OUTDATA_SIZE;
         } else {
-            isFinished = true;
             inDataSeg.size = lastPtr - inDataSeg.data + 1;
             break;
         }
@@ -162,10 +160,6 @@ static int32_t UpdateLoopFinishByHuks(const struct HksBlob *handle, const struct
         cur += outDataSeg.size;
         outData->size += outDataSeg.size;
         SoftBusFree(outDataSeg.data);
-        if ((isFinished == false) && (inDataSeg.data + LNN_HUKS_MAX_UPDATE_SIZE > lastPtr)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "data has exceeded max size before the process finished");
-            return SOFTBUS_ERR;
-        }
         inDataSeg.data += LNN_HUKS_MAX_UPDATE_SIZE;
     }
 
