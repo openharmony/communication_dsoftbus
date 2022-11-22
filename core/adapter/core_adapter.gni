@@ -67,9 +67,10 @@ if (defined(ohos_lite)) {
       "${ability_base_path}:zuri",
       "${ability_runtime_inner_api_path}/dataobs_manager:dataobs_manager",
       "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-      "${ability_runtime_path}/frameworks/native/ability/native:data_ability_helper",
       "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
       "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
+      "//foundation/distributeddatamgr/data_share/interfaces/inner_api:datashare_consumer",
+      "//foundation/distributeddatamgr/data_share/interfaces/inner_api/common:datashare_common",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability:native_dataability",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
     ]
