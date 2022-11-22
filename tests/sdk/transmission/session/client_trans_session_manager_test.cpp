@@ -270,7 +270,6 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest05, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest06, TestSize.Level1)
 {
     int32_t ret = 0;
-    EXPECT_EQ(ret,  SOFTBUS_OK);
     for (int i = 0; i < MAX_SESSION_SERVER_NUMBER; ++i) {
         char sessionNme[SESSION_NAME_SIZE_MAX] = {0};
         char pkgName[PKG_NAME_SIZE_MAX] = {0};
