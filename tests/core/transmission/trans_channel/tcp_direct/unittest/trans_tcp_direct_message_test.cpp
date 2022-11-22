@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <securec.h>
@@ -69,11 +69,10 @@ namespace OHOS {
 #define INVALID_VALUE (-1)
 #define EOK 0
 
-//static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
 static const char *g_ip = "192.168.8.1";
 static int32_t g_port = 6000;
-//static SessionConn *g_conn = NULL;
+static const g_netWorkId = 123456;
 
 class TransTcpDirectTest : public testing::Test {
 public:
@@ -110,7 +109,7 @@ SessionConn *TestSetSessionConn()
     conn->requestId = 1;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;
-    conn->appInfo.fd = 123456;
+    conn->appInfo.fd = g_netWorkId;
     (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
     return conn;
 }
@@ -287,7 +286,7 @@ HWTEST_F(TransTcpDirectTest, CreateNewSessinConnTest006, TestSize.Level1)
 
 HWTEST_F(TransTcpDirectTest, GetSessionConnByFdTest007, TestSize.Level1)
 {
-    int32_t fd = 123456;
+    int32_t fd = g_netWorkId;
     SessionConn *conn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
 
