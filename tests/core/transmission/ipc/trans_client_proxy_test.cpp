@@ -97,7 +97,6 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
 {
     int32_t ret;
@@ -147,7 +146,6 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Level0)
 {
     int32_t ret;
@@ -173,7 +171,6 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level0)
 {
     int32_t ret;
@@ -200,7 +197,6 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
 {
     int32_t ret;
@@ -226,7 +222,6 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Level0)
 {
     int32_t ret;
@@ -251,14 +246,12 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-
 /**
  * @tc.name: ClientIpcOnChannelQosEventTest001
  * @tc.desc: client ipc on channel qos event test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level0)
 {
     int32_t ret;
