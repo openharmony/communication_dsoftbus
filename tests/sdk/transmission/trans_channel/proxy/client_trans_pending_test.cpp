@@ -46,7 +46,7 @@ void ClientTransProxyTest::TearDownTestCase(void) {}
 
 /**
  * @tc.name: TransPendingTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: client trans pending test,use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
