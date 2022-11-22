@@ -16,6 +16,8 @@
 #ifndef ADAPTER_BT_UTILS_H
 #define ADAPTER_BT_UTILS_H
 
+#include <stdint.h>
+
 #include "ohos_bt_def.h"
 #include "ohos_bt_gap.h"
 #include "ohos_bt_gatt.h"
@@ -28,7 +30,7 @@ extern "C" {
 #endif
 #endif
 
-int BleOhosStatusToSoftBus(BtStatus status);
+int32_t BleOhosStatusToSoftBus(BtStatus status);
 
 #ifdef __cplusplus
 #if __cplusplus
