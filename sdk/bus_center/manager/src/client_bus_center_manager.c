@@ -419,7 +419,6 @@ static int32_t ConvertSubscribeInfoToVoid(const SubscribeInfo *subInfo, void **i
             return SOFTBUS_ERR;
         }
         *infoLen += subInfo->dataLen + 1;
-        buf += subInfo->dataLen + 1;
     }
     return SOFTBUS_OK;
 }
@@ -518,7 +517,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join lnn cb list in join");
     }
-    rc = SOFTBUS_ERR;
+
     do {
         if (FindJoinLNNCbItem(target, cb) != NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join request already exist");
@@ -549,7 +548,7 @@ int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomDat
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join MetaNode cb list in join");
     }
-    rc = SOFTBUS_ERR;
+
     do {
         if (FindJoinMetaNodeCbItem(target, cb) != NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join request already exist");
