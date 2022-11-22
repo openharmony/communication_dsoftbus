@@ -49,7 +49,7 @@ void TransClientProxyStandardTest::TearDownTestCase(void) {}
 
 /**
  * @tc.name: InformPermissionChangeTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: trans client proxy standard test, use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
