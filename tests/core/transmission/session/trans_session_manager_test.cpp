@@ -162,8 +162,22 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest06, TestSize.Level1)
 HWTEST_F(TransSessionManagerTest, TransSessionManagerTest07, TestSize.Level1)
 {
     int32_t ret = TransSessionMgrInit();
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SessionServer *sessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
+    EXPECT_TRUE(sessionServer != NULL);
+    memset_s(sessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
+    ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s(sessionServer->pkgName, sizeof(sessionServer->pkgName), g_pkgName);
+    EXPECT_EQ(ret, EOK);
+    sessionServer->pid = TRANS_TEST_INVALID_PID;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool res = TransSessionServerIsExist(g_sessionName);
+    EXPECT_TRUE(res);
     TransDelItemByPackageName(NULL, TRANS_TEST_INVALID_PID);
+    res = TransSessionServerIsExist(g_sessionName);
+    EXPECT_TRUE(res);
     TransSessionMgrDeinit();
     TransDelItemByPackageName(g_pkgName, TRANS_TEST_INVALID_PID);
 }
