@@ -18,8 +18,10 @@ module_output_path = "dsoftbus/transmission"
 
 ohos_unittest("TransClientProxyTest") {
   module_out_path = module_output_path
-  sources = [ "trans_client_proxy_test.cpp",
-    "trans_client_proxy_standard_test.cpp"]
+  sources = [
+    "trans_client_proxy_standard_test.cpp",
+    "trans_client_proxy_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -41,8 +43,8 @@ ohos_unittest("TransClientProxyTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
+    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -62,5 +64,5 @@ ohos_unittest("TransClientProxyTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":TransClientProxyTest"]
+  deps = [ ":TransClientProxyTest" ]
 }
