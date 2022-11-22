@@ -13,29 +13,30 @@
  * limitations under the License.
  */
 
+#include <cstring>
 #include <securec.h>
-#include "gtest/gtest.h"
-#include "auth_interface.h"
-#include "trans_channel_manager.h"
 #include <unistd.h>
-#include<string.h>
+
+#include "auth_interface.h"
+#include "gtest/gtest.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_lane.h"
+#include "lnn_lane_interface.h"
+#include "session.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
+#include "softbus_server_frame.h"
+#include "softbus_trans_def.h"
+#include "trans_channel_limit.h"
+#include "trans_channel_manager.h"
 #include "trans_lane_pending_ctl.c"
 #include "trans_session_manager.h"
-#include "lnn_lane_interface.h"
-#include "softbus_adapter_mem.h"
-#include "session.h"
-#include "softbus_trans_def.h"
-#include "softbus_server_frame.h"
-#include<iostream>
-#include "lnn_lane.h"
-#include "lnn_distributed_net_ledger.h"
-#include "softbus_error_code.h"
-#include "trans_channel_limit.h"
 
 using namespace testing::ext;
-using namespace std;
+
 namespace OHOS {
 
+#define MAX_COUNT (4)
 static int32_t g_count = 0;
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
@@ -80,18 +81,18 @@ void TransLanePendingTest::TearDownTestCase(void)
     TransReqLanePendingDeinit();
 }
 
-SessionParam* GenerateCommParam()
+SessionParam* GenerateCommParamTest()
 {
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
-        return NULL;
+        return nullptr;
     }
     sessionParam->sessionName = g_sessionName;
     sessionParam->peerSessionName = g_sessionName;
     sessionParam->peerDeviceId = g_deviceId;
     sessionParam->groupId = g_groupId;
     sessionParam->attr = &g_sessionAttr[g_count];
-    if(g_count > 4) {
+    if(g_count > MAX_COUNT) {
         g_count = 0;
     }
     g_count++;
@@ -102,7 +103,7 @@ SessionParam* AddParamTest(SessionAttribute *sessionAttr)
 {
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
-        return NULL;
+        return nullptr;
     }
     sessionParam->sessionName = g_sessionName;
     sessionParam->peerSessionName = g_sessionName;
@@ -116,7 +117,7 @@ SessionParam* AddInvalidParamTest(SessionAttribute *sessionAttr)
 {
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
-        return NULL;
+        return nullptr;
     }
     sessionParam->sessionName = g_invalidName;
     sessionParam->peerSessionName = g_sessionName;
@@ -345,27 +346,27 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest008, TestSize.Level1)
     int32_t ret = TransGetLaneTransTypeBySession(NULL);
     EXPECT_TRUE(ret == LANE_T_BUTT);
 
-    SessionParam* sessionParam = GenerateCommParam();
+    SessionParam* sessionParam = GenerateCommParamTest();
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_MSG);
     SoftBusFree(sessionParam);
 
-    sessionParam = GenerateCommParam();
+    sessionParam = GenerateCommParamTest();
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_BYTE);
     SoftBusFree(sessionParam);
 
-    sessionParam = GenerateCommParam();
+    sessionParam = GenerateCommParamTest();
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_FILE);
     SoftBusFree(sessionParam);
 
-    sessionParam = GenerateCommParam();
+    sessionParam = GenerateCommParamTest();
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_RAW_STREAM);
     SoftBusFree(sessionParam);
 
-    sessionParam = GenerateCommParam();
+    sessionParam = GenerateCommParamTest();
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_BUTT);
     SoftBusFree(sessionParam);
@@ -437,7 +438,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest011, TestSize.Level1)
     SoftBusCond *cond = 0;
     SoftBusMutex *mutex = 0;
     uint32_t timeMillis = 0;
-    int32_t ret = TransSoftBusCondWait(NULL, NULL , NULL);
+    int32_t ret = TransSoftBusCondWait(NULL, NULL, timeMillis);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     timeMillis = 1;
@@ -496,7 +497,10 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest013, TestSize.Level1)
         .pid = 1,
         .expectedLink = {
             .linkTypeNum = 2,
-            .linkType = {LANE_WLAN_2P4G,LANE_P2P},
+            .linkType = {
+                LANE_WLAN_2P4G,
+                LANE_P2P
+            },
         },
     };
     uint32_t laneId = 1;
@@ -577,10 +581,11 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest015, TestSize.Level1)
         .connInfo.p2p.peerIp = {"peer Ip"},
     };
     SessionServer *node = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
-    if (node == NULL ) {
+    if (node == NULL) {
         return;
     }
-    (void)memcpy_s((void *)node->sessionName, SESSION_NAME_SIZE_MAX, "normal sessionName", strlen("normal sessionName") + 1);
+    (void)memcpy_s((void *)node->sessionName, SESSION_NAME_SIZE_MAX,
+        "normal sessionName", strlen("normal sessionName") + 1);
     int32_t ret = TransSessionServerAddItem(node);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
@@ -703,7 +708,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest020, TestSize.Level1)
  */
 HWTEST_F(TransLanePendingTest, TransLanePendingTest021, TestSize.Level1)
 {
-    const char *emptyName  = NULL;
+    const char *emptyName  = nullptr;
     const char *invalidName  = "invalid name";
     const char *sessionName  = "ohos.distributedhardware.devicemanager.resident";
     bool ret = CheckSessionNameValidOnAuthChannel(emptyName);
@@ -711,6 +716,6 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest021, TestSize.Level1)
     ret = CheckSessionNameValidOnAuthChannel(invalidName);
     EXPECT_TRUE(ret == false);
     ret = CheckSessionNameValidOnAuthChannel(sessionName);
-    EXPECT_TRUE(ret == true);  
+    EXPECT_TRUE(ret == true);
 }
 } // namespace OHOS
