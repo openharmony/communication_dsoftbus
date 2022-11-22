@@ -461,7 +461,7 @@ static int32_t TransProxyGetRecvMsgChanInfo(int16_t myId, int16_t peerId, ProxyC
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->myId == myId || item->peerId == peerId) {
+        if ((item->myId == myId) && (item->peerId == peerId)) {
             if (item->status == PROXY_CHANNEL_STATUS_COMPLETED) {
                 item->timeout = 0;
             }
