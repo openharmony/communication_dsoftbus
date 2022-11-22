@@ -1173,7 +1173,6 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     do {
         if (node->info.fdCount > MAX_LISTEN_EVENTS) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot AddTrigger any more");
-            ret = SOFTBUS_ERR;
             break;
         }
 
@@ -1191,7 +1190,6 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 
         if (AddNewFdNode(&node->info, fd) != SOFTBUS_OK) {
             (void)DelTriggerFromSet(fd, triggerType);
-            ret = SOFTBUS_ERR;
             break;
         }
     } while (false);

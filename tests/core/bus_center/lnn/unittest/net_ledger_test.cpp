@@ -57,11 +57,17 @@ void NetLedgerTest::TearDownTestCase()
 
 void NetLedgerTest::SetUp()
 {
+    int32_t ret = LnnInitLocalLedger();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnInitDistributedLedger();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     LOG_INFO("NetLedgerTest start.");
 }
 
 void NetLedgerTest::TearDown()
 {
+    LnnDeinitLocalLedger();
+    LnnDeinitDistributedLedger();
 }
 
 /*
