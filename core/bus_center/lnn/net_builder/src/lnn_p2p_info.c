@@ -132,6 +132,10 @@ static void OnReceiveP2pSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     if (msg == NULL || len == 0) {
         return;
     }
+    if (strnlen((char *)msg, len) == len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnReceiveP2pSyncInfoMsg msg invalid");
+        return;
+    }
     P2pInfo p2pInfo = {0};
     if (LnnParseP2pInfoMsg((const char *)msg, &p2pInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse p2p info fail");
