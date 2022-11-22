@@ -82,6 +82,7 @@ char *TestGetMsgPack()
     }
     char *data = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
+
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
@@ -120,12 +121,19 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
     EXPECT_EQ(NULL, msg);
 
     int res = strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), g_sessionName);
-    EXPECT_EQ(res, EOK);
+    EXPECT_EQ(EOK, res);
     res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
-    EXPECT_EQ(res, EOK);
+    EXPECT_EQ(EOK, res);
     res = strcpy_s(appInfo->myData.authState, sizeof(appInfo->myData.authState), g_sessionName);
-    EXPECT_EQ(res, EOK);
+    EXPECT_EQ(EOK, res);
     msg = PackRequest(appInfo);
+    // return data
+    bool ret = false;
+    if (msg != NULL) {
+        ret = true;
+    }
+    EXPECT_TRUE(ret == true);
+
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
@@ -152,9 +160,10 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     int res = strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), g_groupid);
-    EXPECT_EQ(res, EOK);
+    EXPECT_EQ(EOK, res);
     ret = UnpackRequest(json, appInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
@@ -177,6 +186,13 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackReply001, TestSize.Level1)
     appInfo->myData.uid = -1;
     appInfo->myData.pid = -1;
     msg = PackReply(appInfo);
+    // return data
+    bool ret = false;
+    if (msg != NULL) {
+        ret = true;
+    }
+    EXPECT_TRUE(ret == true);
+
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }
@@ -205,6 +221,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReply001, TestSize.Level1)
 
     ret = UnpackReply(json, appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
     }

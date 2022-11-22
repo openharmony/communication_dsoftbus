@@ -128,7 +128,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     channelId = -1;
     channelType = 9999999;
     ret = TransLaneMgrDelLane(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);// wyb
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransLaneMgrDelLane001 end");
 }
 
@@ -145,19 +145,10 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDeathCallback001, TestSize.Level1)
 
     TransLaneMgrDeinit();
     TransLaneMgrDeathCallback(pkgName, pid);
+
     int32_t ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransLaneMgrDeinit();
-
-    ret = TransLaneMgrInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
     pid = -1;
-    TransLaneMgrDeathCallback(pkgName, pid);
-    TransLaneMgrDeinit();
-
-    ret = TransLaneMgrInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    pid = 2;
     TransLaneMgrDeathCallback(pkgName, pid);
     TransLaneMgrDeinit();
 }
