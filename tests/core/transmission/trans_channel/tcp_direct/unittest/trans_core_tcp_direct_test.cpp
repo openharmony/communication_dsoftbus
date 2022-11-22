@@ -332,8 +332,8 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
 {
     char peerIp[IP_LEN] = {0};
     int32_t peerPort;
-    string *mag = TestGetMsgPack();
-    cJSON *json = cJSON_Parse(mag.c_str());
+    string *msg = TestGetMsgPack();
+    cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
     char *pack = VerifyP2pPack(g_ip, g_port);
