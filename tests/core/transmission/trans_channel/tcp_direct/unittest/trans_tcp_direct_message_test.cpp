@@ -72,7 +72,7 @@ namespace OHOS {
 static const char *g_pkgName = "dms";
 static const char *g_ip = "192.168.8.1";
 static int32_t g_port = 6000;
-static const g_netWorkId = 123456;
+static const int32_t g_netWorkId = 123456;
 
 class TransTcpDirectTest : public testing::Test {
 public:
