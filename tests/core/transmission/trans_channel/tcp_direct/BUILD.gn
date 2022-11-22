@@ -31,6 +31,8 @@ ohos_unittest("TransTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/transmission/ipc/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
