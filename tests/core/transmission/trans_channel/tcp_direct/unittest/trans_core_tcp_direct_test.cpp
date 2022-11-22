@@ -119,7 +119,7 @@ SessionConn *TestSetSessionConn()
     return conn;
 }
 
-string *TestGetMsgPack()
+string TestGetMsgPack()
 {
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
@@ -139,7 +139,7 @@ string *TestGetMsgPack()
         cJSON_Delete(msg);
         return nullptr;
     }
-    string *data = cJSON_PrintUnformatted(msg);
+    string data = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
     return data;
 }
@@ -332,7 +332,7 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
 {
     char peerIp[IP_LEN] = {0};
     int32_t peerPort;
-    string *msg = TestGetMsgPack();
+    string msg = TestGetMsgPack();
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
