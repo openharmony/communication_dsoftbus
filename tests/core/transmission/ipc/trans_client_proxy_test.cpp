@@ -34,7 +34,7 @@ using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
-#define TEST_ERR_PID -1
+#define TEST_ERR_PID (-1)
 #define TEST_LEN 10
 #define TEST_DATA_TYPE 0
 #define TEST_PID 2
@@ -48,8 +48,7 @@ namespace OHOS {
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
-
-const char *g_errPkgName = "abc"; 
+const char *g_errPkgName = "abc";
 
 class TransClientProxyTest : public testing::Test {
 public:
@@ -102,7 +101,7 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
 {
     int32_t ret;
-    ChannelInfo channel; 
+    ChannelInfo channel;
     char strTmp[] = "ABCDEFG";
     channel.channelId = TEST_CHANNELID;
     channel.channelType = TEST_CHANNELTYPE;
