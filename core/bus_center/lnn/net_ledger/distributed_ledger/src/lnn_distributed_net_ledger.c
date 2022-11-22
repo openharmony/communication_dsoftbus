@@ -23,9 +23,9 @@
 
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
-#include "lnn_lane_info.h"
 #include "lnn_map.h"
 #include "lnn_node_info.h"
+#include "lnn_lane_def.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"

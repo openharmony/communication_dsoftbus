@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#define LNN_LANE_P2P_MAX_NUM 4
+
 typedef enum {
     LANE_BW_RANDOM = 0x0,
     LANE_BW_20M,
@@ -62,6 +64,20 @@ typedef struct {
     uint16_t baseProfileNum;
     uint32_t maxSpeed;
 } LaneProfile;
+
+typedef struct {
+    char localIp[IP_LEN];
+    char peerIp[IP_LEN];
+} LnnLaneP2pInfo;
+
+typedef enum {
+    LNN_LINK_TYPE_WLAN_5G = 0x0,
+    LNN_LINK_TYPE_WLAN_2P4G,
+    LNN_LINK_TYPE_BR,
+    LNN_LINK_TYPE_P2P,
+    LNN_LINK_TYPE_P2P_MAX = LNN_LINK_TYPE_P2P + LNN_LANE_P2P_MAX_NUM,
+    LNN_LINK_TYPE_BUTT,
+} LnnLaneLinkType;
 
 #ifdef __cplusplus
 }
