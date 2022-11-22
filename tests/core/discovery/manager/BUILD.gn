@@ -54,49 +54,7 @@ ohos_unittest("DiscManagerTest") {
   }
 }
 
-ohos_unittest("DiscserverTest") {
-  module_out_path = module_output_path
-  sources = [ "unittest/softbus_discserver_test.cpp" ]
-
-  include_dirs = [
-    "$softbus_adapter_common/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/coap/include",
-    "$dsoftbus_root_path/core/discovery/ipc/include",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "//commonlibrary/c_utils/base/include",
-    "unittest/common/",
-    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
-  ]
-
-  deps = [
-    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
-}
-
 group("unittest") {
   testonly = true
-  deps = [
-    ":DiscManagerTest",
-    ":DiscserverTest",
-  ]
+  deps = [ ":DiscManagerTest" ]
 }
