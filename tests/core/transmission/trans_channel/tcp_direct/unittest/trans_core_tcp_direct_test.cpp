@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <securec.h>
@@ -119,12 +119,12 @@ SessionConn *TestSetSessionConn()
     return conn;
 }
 
-char *TestGetMsgPack()
+string *TestGetMsgPack()
 {
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
         cJSON_Delete(msg);
-        return NULL;
+        return nullptr;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
 
@@ -137,9 +137,9 @@ char *TestGetMsgPack()
     (void)memcpy_s(appInfo->myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
     if (TransAuthChannelMsgPack(msg, appInfo) != SOFTBUS_OK) {
         cJSON_Delete(msg);
-        return NULL;
+        return nullptr;
     }
-    char *data = cJSON_PrintUnformatted(msg);
+    string *data = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
     return data;
 }
@@ -332,8 +332,8 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
 {
     char peerIp[IP_LEN] = {0};
     int32_t peerPort;
-    char *mag = TestGetMsgPack();
-    cJSON *json = cJSON_Parse(mag);
+    string *mag = TestGetMsgPack();
+    cJSON *json = cJSON_Parse(mag.c_str());
     EXPECT_TRUE(json != nullptr);
 
     char *pack = VerifyP2pPack(g_ip, g_port);
