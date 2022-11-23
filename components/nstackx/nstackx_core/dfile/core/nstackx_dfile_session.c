@@ -460,14 +460,13 @@ void DFileSessionSendSetting(PeerInfo *peerInfo)
         settingFramePara.deviceBits = DFileGetDeviceBits();
     }
     EncodeSettingFrame(buf, NSTACKX_DEFAULT_FRAME_SIZE, &frameLen, &settingFramePara);
-    int32_t ret = DFileWriteHandle(buf, frameLen, peerInfo);
-    if (ret != (int32_t)frameLen && ret != NSTACKX_EAGAIN) {
-        data.errorCode = NSTACKX_EFAILED;
-        NotifyMsgRecver(peerInfo->session, DFILE_ON_CONNECT_FAIL, &data);
-        return;
-    }
 
     if (peerInfo->settingTimer != NULL) {
+        int32_t ret = DFileWriteHandle(buf, frameLen, peerInfo);
+        if (ret != (int32_t)frameLen && ret != NSTACKX_EAGAIN) {
+            data.errorCode = NSTACKX_EFAILED;
+            NotifyMsgRecver(peerInfo->session, DFILE_ON_CONNECT_FAIL, &data);
+        }
         return;
     }
 
@@ -478,6 +477,7 @@ void DFileSessionSendSetting(PeerInfo *peerInfo)
             LOGE(TAG, "setting timmer creat fail");
             data.errorCode = NSTACKX_EFAILED;
             NotifyMsgRecver(peerInfo->session, DFILE_ON_CONNECT_FAIL, &data);
+            return;
         }
     } else {
         peerInfo->settingTimer = TimerStart(peerInfo->session->epollfd, MAX_SERVER_NEGOTIATE_VALID_TIMEOUT,
@@ -485,6 +485,11 @@ void DFileSessionSendSetting(PeerInfo *peerInfo)
         if (peerInfo->settingTimer == NULL) {
             return;
         }
+    }
+    int32_t ret = DFileWriteHandle(buf, frameLen, peerInfo);
+    if (ret != (int32_t)frameLen && ret != NSTACKX_EAGAIN) {
+        data.errorCode = NSTACKX_EFAILED;
+        NotifyMsgRecver(peerInfo->session, DFILE_ON_CONNECT_FAIL, &data);
     }
 }
 
