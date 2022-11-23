@@ -29,7 +29,7 @@
 #define TEST_FRAME_NUMBER 3
 #define TEST_FRAME_NUMBER_SECOND 10
 #define TEST_BUFFER_SIZE 1024
-#define TEST_FD -1
+#define TEST_FD (-1)
 #define TEST_RETRY_TIMES 2
 
 using namespace std;
