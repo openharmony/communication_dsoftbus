@@ -481,8 +481,8 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest015, TestSize.Level1)
     UdpChannelInfo *Channel = GetPackTest();
     ret = TransAddUdpChannel(Channel);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName,sessionName,
-    PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName, sessionName,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TransUdpChannelMgrDeinit();
 }
