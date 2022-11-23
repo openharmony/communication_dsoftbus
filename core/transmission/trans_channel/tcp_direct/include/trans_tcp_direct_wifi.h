@@ -24,14 +24,14 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

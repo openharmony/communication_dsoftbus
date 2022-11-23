@@ -25,7 +25,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 int32_t TransReqLanePendingInit(void);
 void TransReqLanePendingDeinit(void);
@@ -38,6 +38,6 @@ bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif
 
