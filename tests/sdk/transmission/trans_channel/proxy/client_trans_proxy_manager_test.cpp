@@ -23,8 +23,8 @@
 #include "softbus_access_token_test.h"
 #include "client_trans_proxy_file_manager.h"
 
-#define TEST_CHANNEL_ID -10
-#define TEST_ERR_CODE -1
+#define TEST_CHANNEL_ID (-10)
+#define TEST_ERR_CODE (-1)
 #define TEST_DATA "testdata"
 #define TEST_DATA_LENGTH 9
 #define TEST_FILE_CNT 4
