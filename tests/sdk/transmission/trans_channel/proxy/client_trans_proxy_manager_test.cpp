@@ -84,7 +84,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t TransOnBytesReceived(int32_t channelId, int32_t channelType, 
+int32_t TransOnBytesReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
     return SOFTBUS_OK;
