@@ -66,7 +66,7 @@ namespace OHOS {
 
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
-static char *g_ip = "192.168.8.1";
+static const char *g_ip = "192.168.8.1";
 static int32_t g_port = 6000;
 
 class TransTcpDirectTest : public testing::Test {
@@ -333,6 +333,7 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     char peerIp[IP_LEN] = {0};
     int32_t peerPort;
     string msg = TestGetMsgPack();
+    char *ip = "192.168.8.1";
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
@@ -342,10 +343,10 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = VerifyP2pUnPack(json, g_ip, IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(json, ip, IP_LEN, &g_port);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = VerifyP2pUnPack(NULL, g_ip, IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(NULL, ip, IP_LEN, &g_port);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     cJSON_Delete(json);
 }
