@@ -235,7 +235,6 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
 
 int32_t LnnInitNetworkInfo(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn init network info sync enter");
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network info register bt state change fail");
         return SOFTBUS_ERR;
@@ -247,7 +246,7 @@ int32_t LnnInitNetworkInfo(void)
     if (LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn init network info sync exit");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn init network info sync done");
     return SOFTBUS_OK;
 }
 

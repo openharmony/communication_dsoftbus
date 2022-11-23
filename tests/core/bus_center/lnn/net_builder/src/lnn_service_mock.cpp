@@ -14,7 +14,7 @@
  */
 
 #include "lnn_service_mock.h"
-
+#include "softbus_error_code.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -105,6 +105,15 @@ void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type,
 void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight)
 {
     return GetServiceInterface()->LnnNotifyMasterNodeChanged(isMaster, masterNodeUdid, weight);
+}
+
+int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_lnnEventHandlers.emplace(event, handler);
+    return SOFTBUS_OK;
 }
 }
 }

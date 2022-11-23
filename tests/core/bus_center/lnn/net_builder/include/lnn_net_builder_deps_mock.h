@@ -33,7 +33,6 @@ public:
     NetBuilderDepsInterface() {};
     virtual ~NetBuilderDepsInterface() {};
     virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
-    virtual int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type) = 0;
@@ -49,7 +48,6 @@ public:
     NetBuilderDepsInterfaceMock();
     ~NetBuilderDepsInterfaceMock() override;
     MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
-    MOCK_METHOD2(LnnGetAllOnlineAndMetaNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo * (const char *, IdCategory));
     MOCK_METHOD2(LnnDeleteMetaInfo, int32_t (const char *, ConnectionAddrType));
