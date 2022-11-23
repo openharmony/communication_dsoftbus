@@ -31,6 +31,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+const uint32_t g_keyLen = 10;
 char g_mySessionName[] = {"my sessionName"};
 char g_peerSessionName[] = {"peer sessionName"};
 char g_peerDeviceId[] = {"127.0.0.4"};
@@ -75,7 +76,7 @@ ChannelInfo *TransAddChannleInfoTest()
     channelInfo->peerUid = 1;
     channelInfo->peerPid = 1;
     channelInfo->groupId = g_groupId;
-    channelInfo->keyLen = 10;
+    channelInfo->keyLen = g_keyLen;
     channelInfo->sessionKey = g_sessionKey;
     channelInfo->peerSessionName = g_peerSessionName;
     channelInfo->peerDeviceId = g_peerDeviceId;
@@ -123,41 +124,41 @@ void TransSdkFileTest::TearDownTestCase(void)
 
 void OnFileTransErrorTest(int sessionId)
 {
-    cout << "OnFileTransError sessionId = %d\n" << sessionId << endl;
+    std::cout << "OnFileTransError sessionId = %d\n" << sessionId << std::endl;
 }
 
 int OnReceiveFileStartedTest(int sessionId, const char *files, int fileCnt)
 {
-    cout << "File receive start sessionId = %d" << sessionId << endl;
+    std::cout << "File receive start sessionId = %d" << sessionId << std::endl;
     return 0;
 }
 
 void OnReceiveFileFinishedTest(int sessionId, const char *files, int fileCnt)
 {
-    cout << "File receive finished sessionId = %d\n" << sessionId << endl;
+    std::cout << "File receive finished sessionId = %d\n" << sessionId << std::endl;
 }
 
 int OnReceiveFileProcessTest(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    cout << "File receive process sessionId = %d\n" << sessionId << endl;
+    std::cout << "File receive process sessionId = %d\n" << sessionId << std::endl;
     return 0;
 }
 
 int OnSendFileProcessTest(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    cout << "send process id = " << sessionId << " upload = " << bytesUpload << ", total = " << bytesTotal << endl;
+    std::cout << "send process id = " << sessionId << " upload = " << bytesUpload << ", total = " << bytesTotal << std::endl;
     return 0;
 }
 
 int OnSendFileFinishedTest(int sessionId, const char *firstFile)
 {
-    cout << "send finished id = %d," << sessionId << "first file = %s." << firstFile << endl;
+    std::cout << "send finished id = %d," << sessionId << "first file = %s." << firstFile << std::endl;
     return 0;
 }
 
 void DFileMsgReceiverTest(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msg)
 {
-    cout << "file receiver id = %d" << sessionId << endl;
+    std::cout << "file receiver id = %d" << sessionId << std::endl;
     return;
 }
 
