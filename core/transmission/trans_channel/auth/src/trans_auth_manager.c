@@ -304,7 +304,8 @@ EXIT_ERR:
 
 static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
 {
-    if (data == NULL || data->data == NULL) {
+    if (data == NULL || data->data == NULL || data->len < 1 || data->data[data->len - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
 

@@ -92,7 +92,8 @@ void TestAddTestSessionConn(void)
 
 void TestDelSessionConn(void)
 {
-    TransDelSessionConnById(g_conn->channelId);
+    int32_t channelId = 1;
+    TransDelSessionConnById(channelId);
 }
 
 void TransTcpDirectTest::SetUpTestCase(void)
@@ -577,7 +578,10 @@ HWTEST_F(TransTcpDirectTest, TransDelSessionConnByIdTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectTest, OnSessionOpenFailProcTest001, TestSize.Level1)
 {
-    OnSessionOpenFailProc(g_conn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+    SessionConn sessionConn = {
+        .channelId = 1,
+    };
+    OnSessionOpenFailProc(&sessionConn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
 }
 
 /**

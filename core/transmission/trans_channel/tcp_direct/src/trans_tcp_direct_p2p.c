@@ -414,7 +414,8 @@ static void OnAuthMsgProc(int64_t authId, int32_t flags, int64_t seq, const cJSO
 
 static void OnAuthDataRecv(int64_t authId, const AuthTransData *data)
 {
-    if (data == NULL || data->data == NULL || data->len == 0) {
+    if (data == NULL || data->data == NULL || data->len < 1 || data->data[data->len - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
