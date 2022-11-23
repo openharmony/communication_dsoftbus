@@ -82,7 +82,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
     value.it_value.tv_sec = tickets / MS_PER_SECOND;
     value.it_value.tv_nsec = 0;
     if (g_timerType == TIMER_TYPE_ONCE) {
-        value.it_interval.tv_sec = tickets = 0;
+        value.it_interval.tv_sec = 0;
         value.it_interval.tv_nsec = 0;
     } else {
         value.it_interval.tv_sec = tickets / MS_PER_SECOND;
