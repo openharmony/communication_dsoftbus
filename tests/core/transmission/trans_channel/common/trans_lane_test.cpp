@@ -92,7 +92,7 @@ SessionParam* GenerateCommParamTest()
     sessionParam->peerDeviceId = g_deviceId;
     sessionParam->groupId = g_groupId;
     sessionParam->attr = &g_sessionAttr[g_count];
-    if(g_count > MAX_COUNT) {
+    if (g_count > MAX_COUNT) {
         g_count = 0;
     }
     g_count++;
