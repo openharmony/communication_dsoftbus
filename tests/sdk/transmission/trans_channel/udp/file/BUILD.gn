@@ -11,7 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+module_output_path = "dsoftbus/transmission"
 
 if (defined(ohos_lite)) {
   executable("dsoftbus_app_dfile") {
@@ -74,14 +77,11 @@ ohos_unittest("TransSdkFileTest") {
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/src",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
     "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/core",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
-    
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
     "$dsoftbus_root_path/core/common/include",
-
     "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/src",
     "$dsoftbus_root_path/adapter/common/include",
@@ -96,9 +96,9 @@ ohos_unittest("TransSdkFileTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "$dsoftbus_root_path/sdk:softbus_client",
     "//third_party/googletest:gtest_main",
+    "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
   ]
   if (is_standard_system) {
     external_deps = [
