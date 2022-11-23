@@ -146,7 +146,8 @@ int OnReceiveFileProcessTest(int sessionId, const char *firstFile, uint64_t byte
 
 int OnSendFileProcessTest(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    std::cout << "send process id = " << sessionId << " upload = " << bytesUpload << ", total = " << bytesTotal << std::endl;
+    std::cout << "send process id = " << sessionId << " upload = "
+        << bytesUpload << ", total = " << bytesTotal << std::endl;
     return 0;
 }
 
