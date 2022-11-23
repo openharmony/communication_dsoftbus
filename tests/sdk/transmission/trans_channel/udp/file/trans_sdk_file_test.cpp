@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#include <securec.h>
+#include <cstring>
 #include <gtest/gtest.h>
-#include <iostream>
+#include <securec.h>
+
 #include "client_trans_file.c"
-#include "client_trans_session_callback.h"
 #include "client_trans_file_listener.c"
-#include "file_adapter.c"
-#include "session.h"
-#include "softbus_adapter_mem.h"
+#include "client_trans_session_callback.h"
 #include "client_trans_stream.h"
 #include "client_trans_udp_manager.h"
 #include "client_trans_udp_manager.c"
-#include <cstring>
+#include "file_adapter.c"
+#include "session.h"
+#include "softbus_adapter_mem.h"
 
 using namespace testing::ext;
-using namespace std;
+
 namespace OHOS {
 
 char g_mySessionName[] = {"my sessionName"};
@@ -42,8 +42,8 @@ char g_myIp[] = {"coms.132465"};
 UdpChannel *TransAddChannelTest()
 {
     UdpChannel *channel = (UdpChannel *)SoftBusCalloc(sizeof(UdpChannel));
-    if (channel == nullptr) {
-        return NULL;
+    if (channel == NULL) {
+        return nullptr;
     }
     channel->channelId = 1;
     channel->dfileId = -1;
@@ -54,17 +54,17 @@ UdpChannel *TransAddChannelTest()
     channel->info.isServer = 0;
     channel->info.peerUid = 0;
     channel->info.peerPid = 0;
-    (void)strcpy_s(channel->info.mySessionName, strlen("my sessionName")+1,"my sessionName");
-    (void)strcpy_s(channel->info.peerSessionName, strlen("peer sessionName")+1,"peer sessionName");
-    (void)strcpy_s(channel->info.peerDeviceId, strlen("127.0.0.4")+1,"127.0.0.4");
-    (void)strcpy_s(channel->info.groupId, strlen("12345")+1,"12345");
+    (void)strcpy_s(channel->info.mySessionName, strlen("my sessionName")+1, "my sessionName");
+    (void)strcpy_s(channel->info.peerSessionName, strlen("peer sessionName")+1, "peer sessionName");
+    (void)strcpy_s(channel->info.peerDeviceId, strlen("127.0.0.4")+1, "127.0.0.4");
+    (void)strcpy_s(channel->info.groupId, strlen("12345")+1, "12345");
     return channel;
 }
 ChannelInfo *TransAddChannleInfoTest()
 {
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
-    if (channelInfo == nullptr) {
-        return NULL;
+    if (channelInfo == NULL) {
+        return nullptr;
     }
     channelInfo->channelId = 1;
     channelInfo->channelType = 1;
@@ -179,7 +179,7 @@ static IFileReceiveListener g_fileRecvListener = {
  * @tc.name: TransFileListenerTest001
  * @tc.desc: trans file listener init.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileListenerTest001, TestSize.Level0)
 {
@@ -199,7 +199,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest001, TestSize.Level0)
  * @tc.name: TransFileListenerTest002
  * @tc.desc: trans set file receive listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileListenerTest002, TestSize.Level0)
 {
@@ -226,7 +226,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest002, TestSize.Level0)
  * @tc.name: TransFileListenerTest003
  * @tc.desc: trans delete file listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileListenerTest003, TestSize.Level0)
 {
@@ -252,7 +252,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest003, TestSize.Level0)
  * @tc.name: TransFileListenerTest004
  * @tc.desc: trans set file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileListenerTest004, TestSize.Level0)
 {
@@ -276,7 +276,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest004, TestSize.Level0)
  * @tc.name: TransFileListenerTest005
  * @tc.desc: trans get file listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
 {
@@ -312,7 +312,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
  * @tc.name: TransFileTest001
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level0)
 {
@@ -331,10 +331,10 @@ HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level0)
  * @tc.name: TransFileTest002
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
-{  
+{
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -349,7 +349,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
     int32_t filePort = 22;
 
     ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);  
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -376,7 +376,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
  * @tc.name: TransFileTest003
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
 {
@@ -396,7 +396,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
     int32_t ret = ClientTransAddUdpChannel(channel);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransSetFileSendListener(g_mySessionName,sendListener);
+    ret = TransSetFileSendListener(g_mySessionName, sendListener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
@@ -411,7 +411,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
  * @tc.name: TransFileTest004
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
 {
@@ -443,7 +443,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
  * @tc.name: TransFileTest005
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
 {
@@ -493,7 +493,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
  * @tc.name: TransFileTest006
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
 {
@@ -538,7 +538,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
  * @tc.name: TransFileTest007
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
 {
@@ -557,7 +557,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
     int32_t filePort = 22;
 
     ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);  
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, sendListener);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -584,7 +584,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
  * @tc.name: TransFileTest008
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
 {
@@ -605,7 +605,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
     int32_t ret = ClientTransAddUdpChannel(channel);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransSetFileSendListener(g_mySessionName,sendListener);
+    ret = TransSetFileSendListener(g_mySessionName, sendListener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
@@ -622,13 +622,13 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
  * @tc.name: TransFileTest009
  * @tc.desc: trans file send listener by sessionName.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
 {
     int32_t sessionId = 0;
-    const char *sFileList = NULL;
-    const char *dFileList = NULL;
+    const char *sFileList = nullptr;
+    const char *dFileList = nullptr;
     const char *fileList = "/file not null list/";
     uint32_t fileCnt = 0;
     int32_t ret = TransSendFile(sessionId, &sFileList, &dFileList, fileCnt);
@@ -636,30 +636,5 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
 
     ret = TransSendFile(sessionId, &fileList, &dFileList, fileCnt);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: TransFileTest010
- * @tc.desc: trans file send listener by sessionName.
- * @tc.type: FUNC
- * @tc.require: 
- */
-HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
-{
-    int32_t ret = TransFileSchemaInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    FileSchema fileSchema = {};
-    const char *sFileList = NULL;
-    uint32_t fileCnt = 1;
-    int32_t sessionId = 1;
-    FileSchemaListener fileSchemaListener = {};
-
-    ret = CheckFileSchema(sessionId, &fileSchemaListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = SetSchemaCallback(fileSchema, &sFileList, fileCnt);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    TransFileSchemaDeinit();
 }
 }
