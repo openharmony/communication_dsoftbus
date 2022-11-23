@@ -299,6 +299,5 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level0)
 
     ret = FileUnLock(fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
 }
 } // namespace OHOS
