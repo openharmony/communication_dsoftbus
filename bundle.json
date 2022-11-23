@@ -107,9 +107,6 @@
           "//foundation/communication/dsoftbus/tests/sdk/transmission/integration_test:integration_test",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/benchmarktest:BusCenterTest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/benchmarktest:DiscoveryTest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel:unittest",
-          "//foundation/communication/dsoftbus/tests/core/transmission/common:unittest",
-          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/manager:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission/benchmarktest:TransTest"
         ]
       }
