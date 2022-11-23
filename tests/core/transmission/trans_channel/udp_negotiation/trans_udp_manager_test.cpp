@@ -172,30 +172,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpManagerTest004
- * @tc.desc: close trans UdpChannel by netWorkId.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpManagerTest, TransUdpManagerTest004, TestSize.Level1)
-{
-    int32_t ret = TransUdpChannelMgrInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    const char* netWorkId = "invalid netWorld";
-    UdpChannelInfo *newChannel = GetPackTest();
-    newChannel->info.myData.channelId = TestGetChannelId();
-    ret = TransAddUdpChannel(newChannel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    TransCloseUdpChannelByNetWorkId(netWorkId);
-    TransCloseUdpChannelByNetWorkId(newChannel->info.peerNetWorkId);
-    ret = TransDelUdpChannel(newChannel->info.myData.channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-    TransUdpChannelMgrDeinit();
-    TransCloseUdpChannelByNetWorkId(NULL);
-    TransUdpChannelMgrDeinit();
-}
-
-/**
  * @tc.name: TransUdpManagerTest005
  * @tc.desc: get UdpChannelInfo by seq, use normal param.
  * @tc.type: FUNC
@@ -529,25 +505,25 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest016, TestSize.Level1)
     ret = TransAddUdpChannel(Channel);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName,NULL,
-    PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName, NULL,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransUdpGetNameByChanId(channelId, NULL,sessionName,
-    PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    ret = TransUdpGetNameByChanId(channelId, NULL, sessionName,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransUdpGetNameByChanId(channelId, pkgName,sessionName,
-    PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    ret = TransUdpGetNameByChanId(channelId, pkgName, sessionName,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName,sessionName,
-    PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName, sessionName,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     TransUdpChannelMgrDeinit();
-    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName,sessionName,
-    PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+    ret = TransUdpGetNameByChanId(Channel->info.myData.channelId, pkgName, sessionName,
+        PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
