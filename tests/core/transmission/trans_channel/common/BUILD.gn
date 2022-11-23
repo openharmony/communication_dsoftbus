@@ -29,7 +29,7 @@ ohos_unittest("TransLanePendingTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/common/include",
-    
+
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -48,8 +48,8 @@ ohos_unittest("TransLanePendingTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "//third_party/googletest:gtest_main",
   ]
   if (is_standard_system) {
