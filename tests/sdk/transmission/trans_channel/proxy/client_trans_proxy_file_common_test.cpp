@@ -212,13 +212,13 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.
     ret = FrameIndexToType(FRAME_NUM_0, FRAME_NUM_1);
     EXPECT_EQ(TRANS_SESSION_FILE_FIRST_FRAME, ret);
 
-    ret = FrameIndexToType(FRAME_NUM_1,FRAME_NUM_2);
+    ret = FrameIndexToType(FRAME_NUM_1, FRAME_NUM_2);
     EXPECT_EQ(TRANS_SESSION_FILE_ONLYONE_FRAME, ret);
 
-    ret = FrameIndexToType(FRAME_NUM_2,TEST_FRAME_NUMBER);
+    ret = FrameIndexToType(FRAME_NUM_2, TEST_FRAME_NUMBER);
     EXPECT_EQ(TRANS_SESSION_FILE_LAST_FRAME, ret);
 
-    ret = FrameIndexToType(FRAME_NUM_2,TEST_FRAME_NUMBER_SECOND);
+    ret = FrameIndexToType(FRAME_NUM_2, TEST_FRAME_NUMBER_SECOND);
     EXPECT_EQ(TRANS_SESSION_FILE_ONGOINE_FRAME, ret);
 }
 
