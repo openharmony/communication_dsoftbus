@@ -51,13 +51,10 @@ void SoftBusHiDumperFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i <MAX_ARGV_NUM; i++) {
+    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
         tmpData[i] = tmpArgvString;
     }
-    int32_t tmpValue;
-    if (memcpy_s(&tmpValue, sizeof(int32_t), data, size) != EOK) {
-        return;
-    }
+    int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
     SoftBusDumpDispatch(tmpValue, tmpValue, tmpData);
 }
 
@@ -77,7 +74,7 @@ void SoftBusHiDumperBusCenterFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i <MAX_ARGV_NUM; i++) {
+    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
         tmpData[i] = tmpArgvString;
     }
     int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
@@ -100,7 +97,7 @@ void SoftBusHiDumperConnFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i <MAX_ARGV_NUM; i++) {
+    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
         tmpData[i] = tmpArgvString;
     }
     int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
@@ -123,7 +120,7 @@ void SoftBusHiDumperDiscFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i <MAX_ARGV_NUM; i++) {
+    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
         tmpData[i] = tmpArgvString;
     }
     int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
@@ -137,7 +134,7 @@ void SoftBusHiDumperInterfaceFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     const char *tmpData[MAX_ARGV_NUM] = {nullptr};
-    for (int32_t i = 0; i <MAX_ARGV_NUM; i++) {
+    for (int32_t i = 0; i < MAX_ARGV_NUM; i++) {
         tmpData[i] = tmpArgvString;
     }
     int32_t tmpValue = *(reinterpret_cast<const int32_t *>(data));
