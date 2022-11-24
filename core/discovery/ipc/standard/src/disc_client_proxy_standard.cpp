@@ -14,213 +14,80 @@
  */
 
 #include "disc_client_proxy_standard.h"
-
-#include "discovery_service.h"
-#include "message_parcel.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
 namespace OHOS {
-int32_t DiscClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
+DiscClientProxy::DiscClientProxy(const sptr<IRemoteObject> &impl)
+    : IRemoteProxy<ISoftBusClient>(impl)
 {
-    return SOFTBUS_OK;
+    DLOGI("construct");
 }
 
-int32_t DiscClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+DiscClientProxy::~DiscClientProxy()
 {
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnChannelLinkDown(const char *networkId, int32_t routeType)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *dataInfo,
-    uint32_t len, int32_t type)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
-    const QosTv *tvList)
-{
-    return SOFTBUS_OK;
+    DLOGI("destroy");
 }
 
 void DiscClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
-        return;
-    }
-
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDeviceFound write InterfaceToken failed!");
-        return;
-    }
-    data.WriteBuffer(deviceInfo, sizeof(DeviceInfo));
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
+    DISC_CHECK_AND_RETURN_LOG(data.WriteBuffer(deviceInfo, sizeof(DeviceInfo)), "write device info failed");
 
     MessageParcel reply;
-    MessageOption option;
-    int32_t err = remote->SendRequest(CLIENT_DISCOVERY_DEVICE_FOUND, data, reply, option);
-    if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDeviceFound send request failed");
-        return;
-    }
+    MessageOption option { MessageOption::TF_ASYNC };
+    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_DISCOVERY_DEVICE_FOUND, data, reply, option) == ERR_OK,
+                              "send request failed");
 }
 
-void DiscClientProxy::OnDiscoverFailed(int subscribeId, int failReason)
+void DiscClientProxy::OnDiscoverFailed(int subscribeId, int reason)
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
-        return;
-    }
-
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed write InterfaceToken failed!");
-        return;
-    }
-    data.WriteInt32(subscribeId);
-    data.WriteInt32(failReason);
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(subscribeId), "write subscribe id failed");
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(reason), "write reason failed");
 
     MessageParcel reply;
-    MessageOption option;
-    int32_t err = remote->SendRequest(CLIENT_DISCOVERY_FAIL, data, reply, option);
-    if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed send request failed");
-        return;
-    }
+    MessageOption option { MessageOption::TF_ASYNC };
+    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_DISCOVERY_FAIL, data, reply, option) == ERR_OK,
+                              "send request failed");
 }
 
 void DiscClientProxy::OnDiscoverySuccess(int subscribeId)
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
-        return;
-    }
-
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess write InterfaceToken failed!");
-        return;
-    }
-    data.WriteInt32(subscribeId);
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(subscribeId), "write subscribe id failed");
 
     MessageParcel reply;
-    MessageOption option;
-    int32_t err = remote->SendRequest(CLIENT_DISCOVERY_SUCC, data, reply, option);
-    if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess send request failed");
-        return;
-    }
+    MessageOption option { MessageOption::TF_ASYNC };
+    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_DISCOVERY_SUCC, data, reply, option) == ERR_OK,
+                              "send request failed");
 }
 
 void DiscClientProxy::OnPublishSuccess(int publishId)
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
-        return;
-    }
-
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishSuccess write InterfaceToken failed!");
-        return;
-    }
-    data.WriteInt32(publishId);
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(publishId), "write publish id failed");
 
     MessageParcel reply;
-    MessageOption option;
-    int32_t err = remote->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option);
-    if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishSuccess send request failed");
-        return;
-    }
+    MessageOption option { MessageOption::TF_ASYNC };
+    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option) == ERR_OK,
+                              "send request failed");
 }
 
 void DiscClientProxy::OnPublishFail(int publishId, int reason)
 {
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr");
-        return;
-    }
-
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishFail write InterfaceToken failed!");
-        return;
-    }
-    data.WriteInt32(publishId);
-    data.WriteInt32(reason);
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(publishId), "write publish id failed");
+    DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(reason), "write reason failed");
 
     MessageParcel reply;
-    MessageOption option;
-    int32_t err = remote->SendRequest(CLIENT_PUBLISH_FAIL, data, reply, option);
-    if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishFail send request failed");
-        return;
-    }
+    MessageOption option{MessageOption::TF_ASYNC};
+    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_PUBLISH_FAIL, data, reply, option) == ERR_OK,
+                              "send request failed");
 }
-
-int32_t DiscClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
-{
-    (void)addr;
-    (void)addrTypeLen;
-    (void)networkId;
-    (void)retCode;
-    return SOFTBUS_OK;
 }
-
-int32_t DiscClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
-{
-    (void)addr;
-    (void)addrTypeLen;
-    (void)networkId;
-    (void)retCode;
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnLeaveLNNResult(const char *networkId, int retCode)
-{
-    (void)networkId;
-    (void)retCode;
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnLeaveMetaNodeResult(const char *networkId, int retCode)
-{
-    (void)networkId;
-    (void)retCode;
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t DiscClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)
-{
-    return SOFTBUS_OK;
-}
-} // namespace OHOS
