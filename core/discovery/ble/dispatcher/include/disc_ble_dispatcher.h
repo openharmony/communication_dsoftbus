@@ -31,7 +31,8 @@ typedef struct {
 
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb);
 // for test
-DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *a, DiscoveryBleDispatcherInterface *b);
+DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
+    DiscoveryBleDispatcherInterface *interfaceB);
 void DiscBleDeinit(void);
 
 #ifdef __cplusplus
