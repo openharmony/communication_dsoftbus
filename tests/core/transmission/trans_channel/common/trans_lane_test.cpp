@@ -429,7 +429,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest010, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest011
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans softbus condwait.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -448,7 +448,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest011, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest012
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans req lane pending init.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -484,7 +484,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest012, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest013
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans add laneReq to pending and waitting.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -530,7 +530,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest013, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest014
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans get lane info by option.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -565,7 +565,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest014, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest015
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans add session server item.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -607,7 +607,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest015, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest016
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans set wlan connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -621,7 +621,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest016, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest017
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans set br connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -635,7 +635,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest017, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest018
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans set ble connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -649,7 +649,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest018, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest019
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans get connect opt by connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -685,7 +685,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest019, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest020
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans get auth type by network id.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -702,7 +702,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest020, TestSize.Level1)
 
 /**
  * @tc.name: TransLanePendingTest021
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: trans check session name invalid on auth channel.
  * @tc.type: FUNC
  * @tc.require:
  */
