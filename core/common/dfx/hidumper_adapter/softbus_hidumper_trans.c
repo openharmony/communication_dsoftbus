@@ -148,6 +148,10 @@ static TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {
 
 int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 {
+    if (fd < 0 || argc < 0 || argv == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid");
+        return SOFTBUS_ERR;
+    }
     if ((argc != HIDUMPER_TRANS_ARG_NUM) || (strcmp(argv[0], "-l") != 0)) {
         ShowTransDumpHelperInfo(fd);
         return SOFTBUS_OK;
