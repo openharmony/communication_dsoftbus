@@ -29,6 +29,7 @@ trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
   "$dsoftbus_root_path/sdk/transmission/session/include",
+  "$dsoftbus_root_path/core/frame/common/include",
 ]
 trans_sdk_test_common_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
@@ -64,10 +65,14 @@ if (defined(ohos_lite)) {
   trans_sdk_proxy_test_src = [
     "proxy/client_trans_proxy_file_common_test.cpp",
     "udp/stream/trans_sdk_comm_stream_test.cpp",
+    "proxy/client_trans_pending_test.cpp",
+    "proxy/client_trans_proxy_manager_test.cpp",
   ]
 
-  trans_sdk_proxy_test_inc =
-      [ "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include" ]
+  trans_sdk_proxy_test_inc = [
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+  ]
 
   trans_sdk_proxy_test_deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
