@@ -1,0 +1,68 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("//foundation/communication/dsoftbus/tests/utils/utils.gni")
+
+module_output_path = "dsoftbus/discovery"
+
+ohos_unittest("DiscClientProxyTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_core_path/discovery/ipc/standard/src/disc_client_proxy.cpp",
+    "$dsoftbus_core_path/discovery/ipc/standard/src/disc_client_proxy_standard.cpp",
+    "$dsoftbus_root_path/sdk/frame/standard/src/if_softbus_client.cpp",
+    "client_info_manager_mock.cpp",
+    "disc_client_proxy_test.cpp",
+    "remote_object_mock.cpp",
+  ]
+  sources += test_utils_src
+
+  include_dirs = [
+    "$dsoftbus_core_path/discovery/ipc/include",
+    "$dsoftbus_core_path/discovery/ipc/standard/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/sdk/frame/standard/include/",
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_core_path/frame/standard/client_manager/include",
+    "$softbus_adapter_common/include",
+  ]
+  include_dirs += test_utils_inc
+
+  deps = [
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+  external_deps += [ "ipc:ipc_core" ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":DiscClientProxyTest" ]
+}

@@ -86,7 +86,7 @@ void DiscMgrDeathCallback(const char *pkgName);
  * @ingroup softbus_disc_manager
  * @brief Set the discovery callback and set the discovery client environment.
  * @param[in] moduleId Mouble Id. For details, see {@link DiscModule}.
- * @param[in] cb Indicates a pointer to the discovery internal callback.
+ * @param[in] callback Indicates a pointer to the discovery internal callback.
  * For details, see {@link DiscInnerCallback}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> if the Intelligent Soft Bus server fails to be initialized.
@@ -97,7 +97,7 @@ void DiscMgrDeathCallback(const char *pkgName);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE</b> if item node create failed.
  * @return <b>SOFTBUS_OK</b> if the set discovery callback is successful.
  */
-int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *cb);
+int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *callback);
 
 /**
  * @ingroup softbus_disc_manager

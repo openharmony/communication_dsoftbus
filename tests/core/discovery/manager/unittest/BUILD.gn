@@ -15,12 +15,13 @@ import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("//foundation/communication/dsoftbus/tests/utils/utils.gni")
 
 module_output_path = "dsoftbus/discovery"
 
 ohos_unittest("DiscManagerTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/disc_manager_test.cpp" ]
+  sources = [ "disc_manager_test.cpp" ]
 
   include_dirs = [
     "$softbus_adapter_common/include",
@@ -54,7 +55,56 @@ ohos_unittest("DiscManagerTest") {
   }
 }
 
+ohos_unittest("DiscManagerMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
+    "$dsoftbus_core_path/discovery/manager/src/softbus_disc_server.c",
+    "ble_mock.cpp",
+    "coap_mock.cpp",
+    "disc_manager_mock_test.cpp",
+  ]
+  sources += test_utils_src
+
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_core_path/common/include",
+    "$dsoftbus_core_path/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_core_path/common/dfx/hidumper_adapter/include",
+    "$softbus_adapter_common/include",
+    "$dsoftbus_core_path/discovery/interface",
+    "$dsoftbus_core_path/discovery/ipc/include",
+    "$dsoftbus_core_path/discovery/manager/include",
+    "$dsoftbus_core_path/discovery/ble/dispatcher/include",
+    "$dsoftbus_core_path/discovery/coap/include",
+  ]
+  include_dirs += test_utils_inc
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
-  deps = [ ":DiscManagerTest" ]
+  deps = [
+    ":DiscManagerMockTest",
+    ":DiscManagerTest",
+  ]
 }
