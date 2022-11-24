@@ -167,11 +167,11 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
     return true;
 }
 
-void VtpInstance::WaitForDestroy(const int &delayTimes, const int &count)
+void VtpInstance::WaitForDestroy(const int &delayTimes)
 {
     sleep(delayTimes);
     std::lock_guard<std::mutex> guard(vtpLock_);
-    if (count == initVtpCount_ && !isDestroyed_) {
+    if (!isDestroyed_) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "call WaitForDestroy");
         FtDestroyNonblock();
         isDestroyed_ = true;
@@ -189,6 +189,10 @@ void VtpInstance::DestroyVtp(const std::string &pkgName)
         return;
     }
 
+    initVtpCount_--;
+    if (initVtpCount_ > 0) {
+        return;
+    }
     for (unsigned long i = 0; i < packetNameArray_.size(); i++) {
         if (!strcmp(packetNameArray_[i].c_str(), pkgName.c_str())) {
             packetNameArray_.erase(packetNameArray_.begin() + i);
@@ -204,7 +208,7 @@ void VtpInstance::DestroyVtp(const std::string &pkgName)
     if (socketStreamCount_) {
         // 起线程等待30s，调用FtDestroyNonblock()
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "some socket is not destroyed, wait 30s and destroy vtp.");
-        std::thread delay(WaitForDestroy, DESTROY_TIMEOUT_SECOND, initVtpCount_);
+        std::thread delay(WaitForDestroy, DESTROY_TIMEOUT_SECOND);
         delay.detach();
         return;
     }
