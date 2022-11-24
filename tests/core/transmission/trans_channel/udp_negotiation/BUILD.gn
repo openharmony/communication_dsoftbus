@@ -230,9 +230,9 @@ ohos_unittest("TransUdpManagerTest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":TransUdpManagerTest",
     ":TransUdpNegoTest",
     ":TransUdpNegotiationExTest",
     ":TransUdpNegotiationTest",
-    ":TransUdpManagerTest",
   ]
 }
