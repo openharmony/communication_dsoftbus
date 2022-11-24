@@ -219,7 +219,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest002, TestSize.Level0)
     TransFileDeinit();
 
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT);
     
     TransFileDeinit();
 }
@@ -312,7 +312,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest001
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans register file callback.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -331,7 +331,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest002
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans open file channel.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -376,7 +376,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest003
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans open file channel use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -411,7 +411,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest004
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans get udp channel.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -443,7 +443,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest005
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans file receive listener use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -493,7 +493,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest006
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans file receive listener.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -538,7 +538,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest007
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans file channel open use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -584,7 +584,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest008
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans file channel use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -622,7 +622,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest009
- * @tc.desc: trans file send listener by sessionName.
+ * @tc.desc: trans file send use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
