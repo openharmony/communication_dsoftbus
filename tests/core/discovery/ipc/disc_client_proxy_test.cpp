@@ -107,7 +107,8 @@ HWTEST_F(DiscClientProxyTest, OnDiscoverFailed001, TestSize.Level1)
 
         EXPECT_EQ(ClientIpcOnDiscoverFailed(pkgName.c_str(), SUBSCRIBE_ID, DISCOVERY_FAIL_REASON_NOT_SUPPORT_MEDIUM),
                   SOFTBUS_OK);
-        EXPECT_EQ(objectMock->GetResult(CLIENT_DISCOVERY_FAIL, nullptr, 0, SUBSCRIBE_ID, SOFTBUS_INVALID_PARAM), true);
+        EXPECT_EQ(objectMock->GetResult(CLIENT_DISCOVERY_FAIL, nullptr, 0, SUBSCRIBE_ID,
+                                        DISCOVERY_FAIL_REASON_NOT_SUPPORT_MEDIUM), true);
     }
 
     RemoteObjectMock::Destroy();
@@ -211,7 +212,8 @@ HWTEST_F(DiscClientProxyTest, OnPublishFail001, TestSize.Level1)
 
         EXPECT_EQ(ClientIpcOnPublishFail(pkgName.c_str(), PUBLISH_ID, PUBLISH_FAIL_REASON_NOT_SUPPORT_MEDIUM),
                   SOFTBUS_OK);
-        EXPECT_EQ(objectMock->GetResult(CLIENT_PUBLISH_FAIL, nullptr, PUBLISH_ID, 0, SOFTBUS_INVALID_PARAM), true);
+        EXPECT_EQ(objectMock->GetResult(CLIENT_PUBLISH_FAIL, nullptr, PUBLISH_ID, 0,
+                                        PUBLISH_FAIL_REASON_NOT_SUPPORT_MEDIUM), true);
     }
 
     RemoteObjectMock::Destroy();
