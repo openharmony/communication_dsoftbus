@@ -652,6 +652,10 @@ static int32_t SyncOffline(const LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "just br need send offline");
         return SOFTBUS_ERR;
     }
+    if (!((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_LEAVE_REQUEST) != 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "just leave lnn request need send offline");
+        return SOFTBUS_ERR;
+    }
     (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
     code = LnnGetCnnCode(uuid, DISCOVERY_TYPE_BR);
     if (code == INVALID_CONNECTION_CODE_VALUE) {
