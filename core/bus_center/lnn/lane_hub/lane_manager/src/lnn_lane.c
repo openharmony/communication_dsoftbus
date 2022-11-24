@@ -24,6 +24,7 @@
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_link_proc.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_score.h"
@@ -356,6 +357,10 @@ int32_t InitLane(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]laneDelayInit fail");
         return SOFTBUS_ERR;
     }
+    if (LnnLanePendingInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]LnnLanePendingInit fail");
+        return SOFTBUS_ERR;
+    }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -373,6 +378,7 @@ int32_t InitLane(void)
 
 void DeinitLane(void)
 {
+    LnnLanePendingDeinit();
     DeinitLaneModel();
     DeinitLaneLink();
     LnnDeinitScore();
