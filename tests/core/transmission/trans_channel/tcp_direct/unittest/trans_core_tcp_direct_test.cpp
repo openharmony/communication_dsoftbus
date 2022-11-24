@@ -333,7 +333,6 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     char peerIp[IP_LEN] = {0};
     int32_t peerPort;
     string msg = TestGetMsgPack();
-    string ip = "192.168.8.1";
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
@@ -343,10 +342,10 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = VerifyP2pUnPack(json, ip.c_str(), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = VerifyP2pUnPack(NULL, ip.c_str(), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(NULL, const_cast<char *>(g_ip), IP_LEN, &g_port);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     cJSON_Delete(json);
 }
