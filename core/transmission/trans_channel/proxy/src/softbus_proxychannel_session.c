@@ -596,7 +596,7 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t channelId, ProxyPac
 
 int32_t TransProxySessionDataLenCheck(uint32_t dataLen, ProxyPacketType type)
 {
-#define PROXY_MAX_BYTES_LEN (4 * 1024)
+#define PROXY_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define PROXY_MAX_MESSAGE_LEN (1 * 1024)
     switch (type) {
         case PROXY_FLAG_MESSAGE:
