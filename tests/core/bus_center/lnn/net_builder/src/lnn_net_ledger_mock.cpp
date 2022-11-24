@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <securec.h>
 #include "lnn_net_ledger_mock.h"
-
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+#include "softbus_adapter_mem.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -31,9 +33,9 @@ LnnNetLedgertInterfaceMock::~LnnNetLedgertInterfaceMock()
     g_netLedgerinterface = nullptr;
 }
 
-static LnnNetLedgertInterfaceMock *GetNetLedgerInterface()
+static LnnNetLedgerInterface *GetNetLedgerInterface()
 {
-    return reinterpret_cast<LnnNetLedgertInterfaceMock *>(g_netLedgerinterface);
+    return reinterpret_cast<LnnNetLedgerInterface *>(g_netLedgerinterface);
 }
 
 extern "C" {
@@ -107,6 +109,13 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return GetNetLedgerInterface()->LnnGetLocalNumInfo(key, info);
 }
 
+int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+    char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    return GetNetLedgerInterface()->LnnConvertDlId(srcId, srcIdType,
+        dstIdType, dstIdBuf, dstIdBufLen);
+}
+
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 {
     return GetNetLedgerInterface()->LnnSetNetCapability(capability, type);
@@ -115,6 +124,48 @@ int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
 {
     return GetNetLedgerInterface()->LnnClearNetCapability(capability, type);
+}
+
+int32_t LnnSetP2pRole(NodeInfo *info, int32_t role)
+{
+    return GetNetLedgerInterface()->LnnSetP2pRole(info, role);
+}
+
+int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
+{
+    return GetNetLedgerInterface()->LnnSetP2pMac(info, p2pMac);
+}
+
+int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
+{
+    return GetNetLedgerInterface()->LnnSetP2pGoMac(info, goMac);
+}
+
+int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    return GetNetLedgerInterface()->LnnGetAllOnlineAndMetaNodeInfo(info, infoNum);
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
+{
+    *infoNum = 1;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n", *infoNum);
+    *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy networkId fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType,
+    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    if (memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy dstIdBuf fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 }
 }
