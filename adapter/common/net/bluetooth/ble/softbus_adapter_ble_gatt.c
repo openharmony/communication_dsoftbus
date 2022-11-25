@@ -967,3 +967,33 @@ int SoftBusStopScan(int listenerId)
     }
     return SOFTBUS_ERR;
 }
+
+int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_advLock) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!CheckAdvChannelInUsed(advId)) {
+        return SOFTBUS_ERR;
+    }
+    if (!g_advChannel[advId].isAdvertising) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "SoftBusReplaceAdvertisingAdv failed: adv %d is not advertising", advId);
+        return SOFTBUS_LOG_ERROR;
+    }
+    int btAdvId = g_advChannel[advId].advId;
+    int ret = SetAdvData(advId, data);
+    SoftBusMutexUnlock(&g_advLock);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "SoftBusReplaceAdvertisingAdv failed: SetAdvData failed, advId: %d, btadvId: %d", advId, btAdvId);
+        return SOFTBUS_LOG_ERROR;
+    }
+    StartAdvRawData advData = {0};
+    ConvertAdvData(data, &advData);
+    ret = BleOhosStatusToSoftBus(BleSetAdvData(btAdvId, advData));
+    return ret;
+}
