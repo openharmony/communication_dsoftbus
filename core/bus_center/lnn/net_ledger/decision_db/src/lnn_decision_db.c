@@ -51,6 +51,7 @@ static int32_t EncryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
     plainData.data = dbKey;
     if (LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt dbKey by huks fail");
+        (void)memset_s(plainData.data, len, 0x0, len);
         SoftBusFree(encryptData.data);
         return SOFTBUS_ERR;
     }
@@ -67,6 +68,7 @@ static int32_t EncryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
 
 static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
 {
+    int32_t ret;
     struct HksBlob encryptData = {0};
     struct HksBlob decryptData = {0};
 
@@ -77,12 +79,23 @@ static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
     }
     encryptData.size = len;
     encryptData.data = dbKey;
-    if (LnnDecryptDataByHuks(&g_keyAlias, &encryptData, &decryptData) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "decrypt dbKey by huks fail");
-        return SOFTBUS_ERR;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "decrypt dbKey log for audit");
-    return SOFTBUS_OK;
+    do {
+        if (LnnDecryptDataByHuks(&g_keyAlias, &encryptData, &decryptData) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "decrypt dbKey by huks fail");
+            ret = SOFTBUS_ERR;
+            break;
+        }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "decrypt dbKey log for audit");
+        if (memcpy_s(dbKey, len, decryptData.data, decryptData.size) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s dbKey fail");
+            ret = SOFTBUS_MEM_ERR;
+            break;
+        }
+        ret = SOFTBUS_OK;
+    } while (false);
+    (void)memset_s(decryptData.data, decryptData.size, 0x0, decryptData.size);
+    SoftBusFree(decryptData.data);
+    return ret;
 }
 
 static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
@@ -128,10 +141,12 @@ static int32_t EncryptDecisionDb(DbContext *ctx)
 
     if (GetDecisionDbKey(dbKey, sizeof(dbKey), false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get decision dbKey fail");
+        (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
         return SOFTBUS_ERR;
     }
     if (EncryptedDb(ctx, dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt decision db fail");
+        (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
         return SOFTBUS_ERR;
     }
     (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
@@ -149,10 +164,12 @@ static int32_t UpdateDecisionDbKey(DbContext *ctx)
     }
     if (GetDecisionDbKey(dbKey, sizeof(dbKey), true) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get decision dbKey fail");
+        (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
         return SOFTBUS_ERR;
     }
     if (UpdateDbPassword(ctx, dbKey, sizeof(dbKey)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt decision db fail");
+        (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "update dbKey log for audit");
@@ -351,6 +368,9 @@ static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHas
     if (QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash,
         (uint8_t **)udidArray, *num) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "query udidArray failed.");
+        SoftBusFree(*udidArray);
+        *udidArray = NULL;
+        *num = 0;
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -378,12 +398,14 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
         return SOFTBUS_ERR;
     }
     int32_t rc = GetTrustedDevInfoRecord(ctx, accountHexHash, udidArray, num);
-    if (rc != SOFTBUS_OK && *udidArray != NULL) {
-        SoftBusFree(*udidArray);
-        *udidArray = NULL;
+    if (rc != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get trusted dev info failed.");
     }
     if (CloseDatabase(ctx) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "close database failed.");
+        SoftBusFree(*udidArray);
+        *udidArray = NULL;
+        *num = 0;
         return SOFTBUS_ERR;
     }
     return rc;
