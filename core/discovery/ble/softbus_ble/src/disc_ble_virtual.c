@@ -16,13 +16,13 @@
 #include "disc_ble.h"
 #include "stddef.h"
 
-DiscoveryBleDispatcherInterface *DiscSoftbusBleInit(DiscInnerCallback *discInnerCb)
+DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 {
-    (void)discInnerCb;
+    (void)callback;
     return NULL;
 }
 
-void DiscSoftbusBleDeinit(void)
+void DiscSoftBusBleDeinit(void)
 {
     return;
 }

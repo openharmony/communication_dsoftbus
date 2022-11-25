@@ -16,7 +16,7 @@
 #ifndef DISC_CLIENT_PROXY_H
 
 #include <stdint.h>
-#include "discovery_service.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
