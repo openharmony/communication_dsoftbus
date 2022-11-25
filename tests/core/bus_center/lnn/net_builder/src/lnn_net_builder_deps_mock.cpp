@@ -41,11 +41,6 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     return GetNetBuilderDepsInterface()->LnnGetSettingDeviceName(deviceName, len);
 }
 
-int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
-{
-    return GetNetBuilderDepsInterface()->LnnGetAllOnlineAndMetaNodeInfo(info, infoNum);
-}
-
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return GetNetBuilderDepsInterface()->AuthGetDeviceUuid(authId, uuid, size);

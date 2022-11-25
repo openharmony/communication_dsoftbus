@@ -497,7 +497,9 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
     if (connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH && connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN) {
         return false;
     }
-    if (oldNodeInfo->connectInfo.deviceIp[0] == '\0') {
+    if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]oldNodeInfo not have wifi, discoveryType = %u",
+            connFsm->id, oldNodeInfo->discoveryType);
         return false;
     }
     if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
@@ -650,6 +652,10 @@ static int32_t SyncOffline(const LnnConnectionFsm *connFsm)
 
     if (connFsm->connInfo.addr.type != CONNECTION_ADDR_BR) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "just br need send offline");
+        return SOFTBUS_ERR;
+    }
+    if (!((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_LEAVE_REQUEST) != 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "just leave lnn request need send offline");
         return SOFTBUS_ERR;
     }
     (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
