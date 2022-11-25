@@ -196,7 +196,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkRegPeerDevStateChange001, TestSize.Level1)
 HWTEST_F(P2pInterfaceMockTest, P2pLinkGetLocalIp001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetLocalIp001, Start");
-    char localIpTest[P2P_MAC_LEN];
+    char localIpTest[P2P_MAC_LEN] = {0};
     int32_t localIpLenTest = P2P_MAC_LEN;
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
@@ -231,7 +231,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict001, TestSize.Level1)
 
     roleIsConflictInfoTest.expectedRole = ROLE_AUTO;
     ret =P2pLinkIsRoleConflict(&roleIsConflictInfoTest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict001, End");
 }
@@ -299,8 +299,8 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict004, TestSize.Level1)
 HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, Start");
-    char peerIp[P2P_IP_LEN];
-    char peerMac[P2P_MAC_LEN];
+    char peerIp[P2P_IP_LEN] = {0};
+    char peerMac[P2P_MAC_LEN] = {0};
     int32_t macLen = P2P_MAC_LEN;
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
@@ -327,8 +327,8 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, TestSize.Level1)
 HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, Start");
-    char peerIp[P2P_IP_LEN];
-    char peerMac[P2P_MAC_LEN];
+    char peerIp[P2P_IP_LEN] = {0};
+    char peerMac[P2P_MAC_LEN] = {0};
     int32_t macLen = P2P_MAC_LEN;
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
@@ -358,7 +358,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, TestSize.Level1)
 HWTEST_F(P2pInterfaceMockTest, P2pLinkQueryDevIsOnline001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkQueryDevIsOnline001, Start");
-    char peerMac[P2P_MAC_LEN];
+    char peerMac[P2P_MAC_LEN] = {0};
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
     int32_t ret = P2pLinkQueryDevIsOnline(peerMac);
