@@ -138,7 +138,7 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetMyIp001, TestSize.Level1)
 HWTEST_F(P2pCommonMockTest, P2pLinkSetGoIp001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoIp001, Start");
-    char goIpTest[P2P_IP_LEN];
+    char goIpTest[P2P_IP_LEN] = {0};
     goIpTest[0] = 't';
     goIpTest[1] = '\0';
     P2pLinkCommonInit();
@@ -163,7 +163,7 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetGoIp001, TestSize.Level1)
 HWTEST_F(P2pCommonMockTest, P2pLinkSetGoMac001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoMac001, Start");
-    char goMacTest[P2P_MAC_LEN];
+    char goMacTest[P2P_MAC_LEN] = {0};
     goMacTest[0] = 't';
     goMacTest[1] = '\0';
     P2pLinkCommonInit();
