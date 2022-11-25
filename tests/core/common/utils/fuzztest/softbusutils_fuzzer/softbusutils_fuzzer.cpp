@@ -52,7 +52,8 @@ namespace OHOS {
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
                 char outBuf[SHA_256_HASH_LEN] = { 0 };
-                ConvertBytesToHexString(outBuf, SHA_256_HASH_LEN - 1, reinterpret_cast<const unsigned char *>(tmp), OHOS::MAX_BUFFER_LEN - 1);
+                ConvertBytesToHexString(outBuf, SHA_256_HASH_LEN - 1,
+                    reinterpret_cast<const unsigned char *>(tmp), OHOS::MAX_BUFFER_LEN - 1);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
