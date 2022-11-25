@@ -76,7 +76,7 @@ typedef struct {
 #define ENCRYPTED 0x1
 #define AUTH_SERVER_SIDE 0x2
 #define USE_BLE_CIPHER 0x4
-#define PROXY_BYTES_LENGTH_MAX (4 * 1024)
+#define PROXY_BYTES_LENGTH_MAX (4 * 1024 * 1024)
 #define PROXY_MESSAGE_LENGTH_MAX 1024
 
 #define IDENTITY_LEN 32
