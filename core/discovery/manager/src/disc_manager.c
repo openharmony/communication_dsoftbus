@@ -228,10 +228,13 @@ static void FreeDiscInfo(DiscInfo *info, const ServiceType type)
 static bool IsInnerModule(const DiscInfo *infoNode)
 {
     for (uint32_t i = 0; i < MODULE_MAX; i++) {
+        DLOGI("%s", infoNode->item->packageName);
         if (strcmp(infoNode->item->packageName, g_discModuleMap[i]) == 0) {
+            DLOGI("true");
             return true;
         }
     }
+    DLOGI("false");
     return false;
 }
 
@@ -578,8 +581,9 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
                                    const ServiceType type)
 {
     InnerCallback callback;
+    callback.serverCb.OnServerDeviceFound = NULL;
     if (cb != NULL) {
-        callback.serverCb = *cb;
+        callback.serverCb.OnServerDeviceFound = cb->OnServerDeviceFound;
     }
 
     int32_t ret = AddDiscInfoToDiscoveryList(packageName, &callback, info, type);
