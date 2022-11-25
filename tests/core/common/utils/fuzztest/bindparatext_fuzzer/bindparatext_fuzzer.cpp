@@ -29,7 +29,7 @@ namespace OHOS {
 
         DbContext *ctx = nullptr;
         int32_t idx = 0;
-        BindParaText(ctx, idx, (const char *)data, size);
+        BindParaText(ctx, idx, reinterpret_cast<const char*>(data), size);
 
         return true;
     }
