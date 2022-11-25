@@ -39,7 +39,7 @@ typedef struct LnnPhysicalSubnet {
     const LnnProtocolManager *protocol;
     LnnPhysicalSubnetStatus status;
     void (*destroy)(struct LnnPhysicalSubnet *);
-    void (*onNetifStatusChanged)(struct LnnPhysicalSubnet *);
+    void (*onNetifStatusChanged)(struct LnnPhysicalSubnet *, void *status);
     void (*onSoftbusNetworkDisconnected)(struct LnnPhysicalSubnet *);
 } LnnPhysicalSubnet;
 
@@ -54,7 +54,7 @@ int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager);
 
 int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type);
 
-void LnnNotifyPhysicalSubnetAddressChanged(const char *ifName, ProtocolType type);
+void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType type, void *status);
 
 typedef VisitNextChoice (*LnnVisitPhysicalSubnetCallback)(const LnnPhysicalSubnet *, void *);
 bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data);
