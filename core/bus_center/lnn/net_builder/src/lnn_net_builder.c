@@ -739,6 +739,7 @@ static int32_t ProcessVerifyResult(const void *para)
         if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send auth result to connection fsm[id=%u] failed",
                 connFsm->id);
+            connFsm->connInfo.nodeInfo = NULL;
             rc = SOFTBUS_ERR;
             break;
         }
@@ -767,6 +768,7 @@ static int32_t CreatePassiveConnectionFsm(const DeviceVerifyPassMsgPara *msgPara
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
         "[id=%u]start a passive connection fsm, authId=%" PRId64, connFsm->id, msgPara->authId);
     if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
+        connFsm->connInfo.nodeInfo = NULL;
         StopConnectionFsm(connFsm);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
             "[id=%u]post auth result to connection fsm fail: %" PRId64, connFsm->id, msgPara->authId);
