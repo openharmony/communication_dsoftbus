@@ -59,7 +59,6 @@ ohos_unittest("DiscManagerMockTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
-    "$dsoftbus_core_path/discovery/manager/src/softbus_disc_server.c",
     "ble_mock.cpp",
     "coap_mock.cpp",
     "disc_manager_mock_test.cpp",
