@@ -42,7 +42,7 @@ namespace OHOS {
 
     static void SoftbusUtilsSwitch(uint32_t cmd, const uint8_t *rawData, size_t size)
     {
-        char *tmp = (char *)malloc(size);
+        char *tmp = new char[size];
         if (tmp == nullptr) {
             return;
         }
