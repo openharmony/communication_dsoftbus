@@ -55,6 +55,8 @@ public:
     MOCK_METHOD(void, LinkStatusChanged, (LinkStatus status), (override));
     MOCK_METHOD(void, UpdateLocalDeviceInfo, (InfoTypeChanged type), (override));
 
+    static inline bool callLnnStatus = false;
+
 private:
     static int32_t BlePublish(const PublishOption *option);
     static int32_t BleStartScan(const PublishOption *option);

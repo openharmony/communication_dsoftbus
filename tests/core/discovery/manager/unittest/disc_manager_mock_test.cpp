@@ -778,6 +778,7 @@ HWTEST_F(DiscManagerMockTest, DiscMgrDeathCallback001, TestSize.Level1)
         EXPECT_EQ(DiscStartDiscovery(packageName1_, &info, &serverCallback_), SOFTBUS_OK);
         EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_OK);
         EXPECT_EQ(DiscSetDiscoverCallback(MODULE_LNN, &innerCallback_), SOFTBUS_OK);
+        SetCallLnnStatus(true);
         DiscMgrDeathCallback(packageName1_);
 
         DeviceInfo deviceInfo;
