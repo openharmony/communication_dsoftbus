@@ -673,10 +673,14 @@ static void OnLnnRelationChangedDelay(void *para)
     int32_t rc;
     RelationChangedMsg *msg = (RelationChangedMsg *)para;
 
-    if (msg == NULL || msg->type == CONNECTION_ADDR_MAX) {
+    if (msg == NULL) {
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLnnRelationChangedDelay: %d", msg->type);
+    if (msg->type == CONNECTION_ADDR_MAX) {
+        SoftBusFree(msg);
+        return;
+    }
     rc = LnnGetLnnRelation(msg->udid, CATEGORY_UDID, newRelation, CONNECTION_ADDR_MAX);
     if (rc != SOFTBUS_OK && rc != SOFTBUS_NOT_FIND) { // NOT_FIND means node is offline
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new lnn relation fail");
