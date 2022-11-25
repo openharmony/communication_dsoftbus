@@ -44,7 +44,7 @@ public:
     static void UpdateSocketStreamCount(bool add);
     static bool InitVtp(const std::string &pkgName);
     static void DestroyVtp(const std::string &pkgName);
-    static void WaitForDestroy(const int &delayTimes, const int &count);
+    static void WaitForDestroy(const int &delayTimes);
 
 private:
     static constexpr int MAX_DEFAULT_SOCKET_NUM = 100;
