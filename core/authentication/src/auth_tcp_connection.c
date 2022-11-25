@@ -224,7 +224,7 @@ static int32_t ProcessSocketInEvent(int32_t fd)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "RecvSocketData: fd=%d, module=%d, seq=%" PRId64 ", flag=%d, len=%u.",
         fd, head.module, head.seq, head.flag, head.len);
-    if (head.len > AUTH_SOCKET_MAX_DATA_LEN) {
+    if (head.len == 0 || head.len > AUTH_SOCKET_MAX_DATA_LEN) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "data is out of size, abandon it.");
         return SOFTBUS_ERR;
     }
