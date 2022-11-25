@@ -211,6 +211,75 @@ EXIT:
 }
 
 /**
+ * @tc.name: AdapterBleGattTest_SoftBusAddScanListener
+ * @tc.desc: test add scan listener
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattTest, SoftBusAddScanListener, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).Times(AtMost(1)).WillOnce(ActionBleGattRegisterCallbacks);
+
+    ASSERT_EQ(SoftBusAddScanListener(nullptr), SOFTBUS_ERR);
+
+    int scanListerIds[SCAN_MAX_NUM];
+    for (size_t i = 0; i < SCAN_MAX_NUM; i++) {
+        scanListerIds[i] = SoftBusAddScanListener(GetStubScanListener());
+        ASSERT_NE(scanListerIds[i], SOFTBUS_ERR);
+    }
+
+    ASSERT_EQ(SoftBusAddScanListener(GetStubScanListener()), SOFTBUS_ERR);
+
+    for (size_t i = 0; i < SCAN_MAX_NUM; i++) {
+        ASSERT_EQ(SoftBusRemoveScanListener(scanListerIds[i]), SOFTBUS_OK);
+    }
+}
+
+/**
+ * @tc.name: AdapterBleGattTest_SoftBusRemoveScanListener
+ * @tc.desc: test remove scan listener
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattTest, SoftBusRemoveScanListener, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    int listenerId = -1;
+    auto result = PrepareScanListener(mocker, &listenerId);
+    ASSERT_TRUE(result);
+
+    ASSERT_EQ(SoftBusRemoveScanListener(-1), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftBusRemoveScanListener(SCAN_MAX_NUM), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftBusRemoveScanListener(listenerId), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: AdapterBleGattTest_SoftBusSetScanFilter
+ * @tc.desc: test set scan filter
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattTest, SoftBusSetScanFilter, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    int listenerId = -1;
+    auto result = PrepareScanListener(mocker, &listenerId);
+    ASSERT_TRUE(result);
+
+    auto filter = CreateScanFilter();
+    ASSERT_NE(filter, nullptr);
+
+    ASSERT_EQ(SoftBusSetScanFilter(listenerId, nullptr, 0), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftBusSetScanFilter(listenerId, filter, 0), SOFTBUS_INVALID_PARAM);
+
+    // not exist scaner
+    ASSERT_EQ(SoftBusSetScanFilter(SCAN_MAX_NUM - 1, filter, 1), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusSetScanFilter(listenerId, filter, 1), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRemoveScanListener(listenerId), SOFTBUS_OK);
+}
+
+/**
  * @tc.name: AdapterBleGattTest_ScanLifecycle
  * @tc.desc: test complete scan life cycle
  * @tc.type: FUNC
@@ -259,9 +328,128 @@ HWTEST_F(AdapterBleGattTest, ScanLifecycle, TestSize.Level3)
     ASSERT_EQ(ret, SOFTBUS_OK);
     ASSERT_TRUE(scanStopCtx.Expect(listenerId, SOFTBUS_BT_STATUS_SUCCESS));
 
-    ret = SoftBusRemoveScanListener(listenerId);
-    ASSERT_EQ(ret, SOFTBUS_OK);
     ASSERT_EQ(SoftBusRemoveScanListener(listenerId), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: AdapterBleGattTest_ScanResultCb
+ * @tc.desc: test scan result callback
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattTest, ScanResultCb, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    int listenerId = -1;
+    auto result = PrepareScanListener(mocker, &listenerId);
+    ASSERT_TRUE(result);
+
+    auto filter = CreateScanFilter();
+    ASSERT_NE(filter, nullptr);
+    auto ret = SoftBusSetScanFilter(listenerId, filter, 1);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusBleScanParams scanParam = {
+        .scanInterval = 60,
+        .scanWindow = 600,
+        .scanType = 1,
+        .scanPhy = 1,
+        .scanFilterPolicy = 0,
+    };
+    EXPECT_CALL(mocker, BleStartScanEx).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
+    ASSERT_EQ(SoftBusStartScan(listenerId, nullptr), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftBusStartScan(listenerId, &scanParam), SOFTBUS_OK);
+    ASSERT_TRUE(scanStartCtx.Expect(listenerId, SOFTBUS_BT_STATUS_SUCCESS));
+
+    const unsigned char scanDataExample[] = {0x02, 0x01, 0x02, 0x15, 0x16, 0xEE, 0xFD, 0x04, 0x05, 0x90, 0x00, 0x00,
+        0x04, 0x00, 0x18, 0x33, 0x39, 0x36, 0x62, 0x33, 0x61, 0x33, 0x31, 0x21, 0x00, 0x02, 0x0A, 0xEF, 0x03, 0xFF,
+        0x7D, 0x02};
+    SoftBusBleScanResult expectScanResult = {0};
+    expectScanResult.advLen = sizeof(scanDataExample);
+    expectScanResult.advData = (unsigned char *)scanDataExample;
+    BtScanResultData mockScanResult = {0};
+    mockScanResult.advLen = sizeof(scanDataExample);
+    mockScanResult.advData = (unsigned char *)scanDataExample;
+
+    mockScanResult.eventType = OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE;
+    mockScanResult.dataStatus = OHOS_BLE_DATA_COMPLETE;
+    mockScanResult.addrType = OHOS_BLE_PUBLIC_DEVICE_ADDRESS;
+    mockScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_NO_PACKET;
+    mockScanResult.secondaryPhy = OHOS_BLE_SCAN_PHY_NO_PACKET;
+    mockScanResult.directAddrType = OHOS_BLE_PUBLIC_DEVICE_ADDRESS;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED;
+    mockScanResult.dataStatus = OHOS_BLE_DATA_INCOMPLETE_MORE_TO_COME;
+    mockScanResult.addrType = OHOS_BLE_RANDOM_DEVICE_ADDRESS;
+    mockScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_1M;
+    mockScanResult.secondaryPhy = OHOS_BLE_SCAN_PHY_1M;
+    mockScanResult.directAddrType = OHOS_BLE_RANDOM_DEVICE_ADDRESS;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_CONNECTABLE;
+    mockScanResult.dataStatus = OHOS_BLE_DATA_INCOMPLETE_TRUNCATED;
+    mockScanResult.addrType = OHOS_BLE_PUBLIC_IDENTITY_ADDRESS;
+    mockScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_2M;
+    mockScanResult.secondaryPhy = OHOS_BLE_SCAN_PHY_2M;
+    mockScanResult.directAddrType = OHOS_BLE_PUBLIC_IDENTITY_ADDRESS;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_CONNECTABLE_DIRECTED;
+    mockScanResult.dataStatus = UINT8_MAX;
+    mockScanResult.addrType = OHOS_BLE_RANDOM_STATIC_IDENTITY_ADDRESS;
+    mockScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_CODED;
+    mockScanResult.secondaryPhy = OHOS_BLE_SCAN_PHY_CODED;
+    mockScanResult.directAddrType = OHOS_BLE_RANDOM_STATIC_IDENTITY_ADDRESS;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_SCANNABLE;
+    mockScanResult.addrType = OHOS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS;
+    mockScanResult.primaryPhy = UINT8_MAX;
+    mockScanResult.secondaryPhy = UINT8_MAX;
+    mockScanResult.directAddrType = OHOS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_SCANNABLE_DIRECTED;
+    mockScanResult.addrType = OHOS_BLE_NO_ADDRESS;
+    mockScanResult.directAddrType = OHOS_BLE_NO_ADDRESS;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_NON_CONNECTABLE;
+    mockScanResult.addrType = UINT8_MAX;
+    mockScanResult.directAddrType = UINT8_MAX;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCANNABLE;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_CONNECTABLE;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_CONNECTABLE_DIRECTED;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    mockScanResult.eventType = UINT8_MAX;
+    btGattCallback->scanResultCb(&mockScanResult);
+    ASSERT_TRUE(scanResultCtx.Expect(listenerId, &expectScanResult));
 }
 
 /**
@@ -284,32 +472,63 @@ HWTEST_F(AdapterBleGattTest, AdvertiseLifecycle, TestSize.Level3)
         .advData = (char *)advDataExample,
         .scanRspLength = sizeof(scanRspDataExample),
         .scanRspData = (char *)scanRspDataExample};
-    auto ret = SoftBusSetAdvData(advId, &data);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(SoftBusSetAdvData(advId, &data), SOFTBUS_OK);
     ASSERT_TRUE(advDataCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
 
     SoftBusBleAdvParams params = {0};
-    ret = SoftBusStartAdv(advId, &params);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(SoftBusStartAdv(advId, &params), SOFTBUS_OK);
     ASSERT_TRUE(advEnableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
     // 模拟蓝牙广播成功回调, 广播成功会被再次回调, adapter状态才能恢复正常
     btGattCallback->advEnableCb(btInnerAdvId, SOFTBUS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advEnableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
 
-    ret = SoftBusUpdateAdv(advId, &data, &params);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    btGattCallback->advDataCb(btInnerAdvId, SOFTBUS_BT_STATUS_SUCCESS);
+    ASSERT_TRUE(advDataCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
+
+    ASSERT_EQ(SoftBusUpdateAdv(advId, nullptr, &params), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftBusUpdateAdv(advId, &data, nullptr), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftBusUpdateAdv(advId, &data, &params), SOFTBUS_OK);
     ASSERT_TRUE(advEnableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
     ASSERT_TRUE(advDisableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
     // 模拟蓝牙广播成功回调, 广播成功会被再次回调, adapter状态才能恢复正常
     btGattCallback->advEnableCb(btInnerAdvId, SOFTBUS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advEnableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
 
-    ret = SoftBusStopAdv(advId);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    btGattCallback->advUpdateCb(btInnerAdvId, SOFTBUS_BT_STATUS_SUCCESS);
+    ASSERT_TRUE(advUpdateCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
+
+    btGattCallback->securityRespondCb(nullptr);
+    btGattCallback->scanParamSetCb(btInnerAdvId, SOFTBUS_BT_STATUS_SUCCESS);
+
+    ASSERT_EQ(SoftBusStopAdv(advId), SOFTBUS_OK);
     ASSERT_TRUE(advDisableCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
 
-    ret = SoftBusReleaseAdvChannel(advId);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(SoftBusReleaseAdvChannel(advId), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusReleaseAdvChannel(advId), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusReleaseAdvChannel(-1), SOFTBUS_ERR);
+    ASSERT_EQ(SoftBusReleaseAdvChannel(ADV_MAX_NUM), SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: AdapterBleGattTest_SoftBusGetAdvChannel
+ * @tc.desc: test get adv channel
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattTest, SoftBusGetAdvChannel, TestSize.Level3)
+{
+    ASSERT_EQ(SoftBusGetAdvChannel(nullptr), SOFTBUS_INVALID_PARAM);
+    MockBluetooth mocker;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).Times(AtMost(1)).WillOnce(ActionBleGattRegisterCallbacks);
+    int advIds[ADV_MAX_NUM];
+    for (size_t i = 0; i < ADV_MAX_NUM; i++) {
+        advIds[i] = SoftBusGetAdvChannel(GetStubAdvCallback());
+        ASSERT_NE(advIds[i], SOFTBUS_ERR);
+    }
+    ASSERT_EQ(SoftBusGetAdvChannel(GetStubAdvCallback()), SOFTBUS_ERR);
+    for (size_t i = 0; i < ADV_MAX_NUM; i++) {
+        ASSERT_EQ(SoftBusReleaseAdvChannel(advIds[i]), SOFTBUS_OK);
+    }
 }
 
 ScanResultCtx::ScanResultCtx(const char *identifier) : RecordCtx(identifier)
