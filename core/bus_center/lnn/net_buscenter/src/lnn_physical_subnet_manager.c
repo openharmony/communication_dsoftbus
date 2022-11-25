@@ -81,7 +81,7 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
         }
         g_physicalSubnets[i] = subnet;
         if (g_physicalSubnets[i]->onNetifStatusChanged != NULL) {
-            g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i]);
+            g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i], NULL);
         }
         return SOFTBUS_OK;
     }
@@ -120,7 +120,7 @@ int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
     return ret;
 }
 
-void DoNotifyAddressChange(const char *ifName, ProtocolType protocolType)
+void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *status)
 {
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
@@ -133,14 +133,14 @@ void DoNotifyAddressChange(const char *ifName, ProtocolType protocolType)
         }
 
         if (g_physicalSubnets[i]->onNetifStatusChanged != NULL) {
-            g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i]);
+            g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i], status);
         }
     }
 }
 
-void LnnNotifyPhysicalSubnetAddressChanged(const char *ifName, ProtocolType protocolType)
+void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status)
 {
-    CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyAddressChange(ifName, protocolType));
+    CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyStatusChange(ifName, protocolType, status));
 }
 
 static void EnableResetingSubnetByType(ProtocolType protocolType)

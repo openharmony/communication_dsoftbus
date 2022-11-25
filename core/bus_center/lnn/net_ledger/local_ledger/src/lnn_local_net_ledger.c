@@ -765,7 +765,7 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     }
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (key == g_localKeyTable[i].key) {
@@ -796,7 +796,7 @@ static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
     }
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (key == g_localKeyTable[i].key) {
@@ -831,7 +831,7 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
     }
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (key == g_localKeyTable[i].key) {
@@ -861,7 +861,7 @@ static int32_t LnnSetLocalInfo(InfoKey key, void* info)
     }
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     for (i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (key == g_localKeyTable[i].key) {
