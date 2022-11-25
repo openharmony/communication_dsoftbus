@@ -18,7 +18,7 @@
 
 #include "lnn_devicename_info.h"
 #include "lnn_net_builder_deps_mock.h"
-#include "lnn_p2p_info.c"
+#include "lnn_p2p_info.h"
 #include "message_handler.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
@@ -71,9 +71,8 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
     char name[DEVICE_NAME_BUF_LEN] = {0};
     LooperInit();
     EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netbuilderMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netbuilderMock, LnnGetAllOnlineAndMetaNodeInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineAndMetaNodeInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo()).WillRepeatedly(Return(info));
     EXPECT_CALL(ledgerMock, LnnGetDeviceName(_)).WillRepeatedly(Return(DEVICE_NAME1));
     EXPECT_CALL(ledgerMock, LnnGetDeviceName(_)).WillRepeatedly(Return(DEVICE_NAME2));
@@ -82,42 +81,15 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
 }
 
 /*
-* @tc.name: LNN_UPDATE_DEVICE_NAME_TEST_001
+* @tc.name: LNN_UPDATE_DEVICE_NAME_TEST_002
 * @tc.desc: looper is null
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_003, TestSize.Level1)
+HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_002, TestSize.Level1)
 {
     NetBuilderDepsInterfaceMock netbuilderMock;
     EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     UpdateDeviceName(nullptr);
 }
-
-/*
-* @tc.name: LNN_P2P_INFO_TEST_001
-* @tc.desc: GetAllOnlineAndMetaNode success
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LnnDeviceNameInfoTest, LNN_P2P_INFO_TEST_001, TestSize.Level1)
-{
-    NetBuilderDepsInterfaceMock deviceNameMock;
-    EXPECT_CALL(deviceNameMock, LnnGetAllOnlineAndMetaNodeInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    ProcessSyncP2pInfo(nullptr);
-}
-
-/*
-* @tc.name: LNN_P2P_INFO_TEST_001
-* @tc.desc: GetAllOnlineAndMetaNode fail
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LnnDeviceNameInfoTest, LNN_P2P_INFO_TEST_002, TestSize.Level1)
-{
-    NetBuilderDepsInterfaceMock deviceNameMock;
-    EXPECT_CALL(deviceNameMock, LnnGetAllOnlineAndMetaNodeInfo(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
-    ProcessSyncP2pInfo(nullptr);
-}
-
 } // namespace OHOS
