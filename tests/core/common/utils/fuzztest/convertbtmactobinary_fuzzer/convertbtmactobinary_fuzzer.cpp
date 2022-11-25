@@ -32,7 +32,7 @@ namespace OHOS {
             return false;
         }
         uint8_t *binMac = nullptr;
-        ConvertBtMacToBinary((const char *)rawData, size, binMac, size);
+        ConvertBtMacToBinary(reinterpret_cast<const char*>(rawData), size, binMac, size);
         return true;
     }
 }
