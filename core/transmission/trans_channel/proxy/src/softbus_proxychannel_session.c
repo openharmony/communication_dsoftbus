@@ -174,8 +174,10 @@ static int32_t TransProxyEncryptPacketData(int32_t channelId, int32_t seq, Proxy
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s key error.");
         return SOFTBUS_ERR;
     }
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, dataInfo->inData, dataInfo->inLen,
         dataInfo->outData, &(dataInfo->outLen), seq);
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || dataInfo->outLen != checkLen) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Trans Proxy encrypt error. %d ", ret);
         return SOFTBUS_ENCRYPT_ERR;
