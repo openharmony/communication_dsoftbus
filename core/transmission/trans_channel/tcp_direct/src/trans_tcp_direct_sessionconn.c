@@ -224,7 +224,7 @@ void TransDelSessionConnById(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
-            if (item->authId > 0) {
+            if (item->listenMod == DIRECT_CHANNEL_SERVER_P2P && item->authId != AUTH_INVALID_ID && !item->serverSide) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close auth conn: authId=%lld", item->authId);
                 AuthCloseConn(item->authId);
             }
