@@ -398,7 +398,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode)
 {
     cJSON *root = cJSON_Parse(msg);
-    if ((root == NULL) && (errCode == NULL)) {
+    if ((root == NULL) || (errCode == NULL)) {
         return SOFTBUS_ERR;
     }
 

@@ -61,9 +61,66 @@ void TransProxyChannelTest::TearDownTestCase(void)
 {
 }
 
+
+int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
+{
+    (void)pkgName;
+    (void)sessionName;
+    (void)channel;
+    (void)pid;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelOpened enter.");
+    return SOFTBUS_OK;
+}
+
+int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelClosed enter.");
+    return SOFTBUS_OK;
+}
+
+int32_t TestOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
+    int32_t channelType, int32_t errCode)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    (void)errCode;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelOpenFailed enter.");
+    return SOFTBUS_OK;
+}
+
+int32_t TestOnQosEvent(const char *pkgName, const QosParam *param)
+{
+    (void)pkgName;
+    (void)param;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnQosEvent enter.");
+    return SOFTBUS_OK;
+}
+
+int32_t TestGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    (void)sessionName;
+    (void)uid;
+    (void)pid;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestGetUidAndPidBySessionName enter.");
+    return SOFTBUS_OK;
+}
+
 void TestAddTestProxyChannel(int32_t authId = AUTH_INVALID_ID)
 {
     IServerChannelCallBack callBack;
+    callBack.OnChannelOpened = TestOnChannelOpened;
+    callBack.OnChannelClosed = TestOnChannelClosed;
+    callBack.OnChannelOpenFailed = TestOnChannelOpenFailed;
+    callBack.OnDataReceived = NULL;
+    callBack.OnQosEvent = TestOnQosEvent;
+    callBack.GetPkgNameBySessionName = NULL;
+    callBack.GetUidAndPidBySessionName = TestGetUidAndPidBySessionName;
     TransProxyManagerInitInner(&callBack);
 
     m_testProxyChannelId = 1;
@@ -534,6 +591,27 @@ HWTEST_F(TransProxyChannelTest, TransProxyDestroyChannelListTest001, TestSize.Le
     ListNode destroyList;
     ListInit(&destroyList);
     TransProxyDestroyChannelList(&destroyList);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TransProxyDeathCallbackTest001
+ * @tc.desc: TransProxyDeathCallbackTest001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
+{
+    int32_t pid = 1;
+    const char *pkgName = "com.test.trans.proxy.channel.demo";
+
+    IServerChannelCallBack callBack;
+    TransProxyManagerInitInner(&callBack);
+
+    TransProxyDeathCallback(NULL, pid);
+    TransProxyDeathCallback(pkgName, pid);
+
+    TransProxyManagerDeinitInner();
     EXPECT_TRUE(true);
 }
 
