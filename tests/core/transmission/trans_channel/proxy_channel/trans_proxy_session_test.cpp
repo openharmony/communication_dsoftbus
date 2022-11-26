@@ -37,6 +37,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_CHANNEL_IDENTITY_LEN 33
+
 typedef struct {
     int32_t priority;
     int32_t sliceNum;
@@ -59,7 +61,7 @@ public:
 };
 
 int32_t TestSessionDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
-        TransReceiveData* receiveData)
+    TransReceiveData* receiveData)
 {
     (void)pkgName;
     (void)pid;
@@ -91,7 +93,7 @@ void TransProxySessionTest::TearDownTestCase(void)
 }
 
 void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus status)
-{   
+{
     TransCommInterfaceMock commMock;
     TransAuthInterfaceMock authMock;
     EXPECT_CALL(commMock, GenerateRandomStr)
@@ -111,7 +113,7 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
     chan->reqId = channelId;
     chan->channelId = channelId;
     chan->seq = channelId;
-    (void)strcpy_s(chan->identity, 33, std::to_string(channelId).c_str());
+    (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, std::to_string(channelId).c_str());
     chan->status = status;
     appInfo.appType = appType;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
