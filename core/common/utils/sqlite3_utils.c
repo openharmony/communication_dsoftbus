@@ -128,7 +128,8 @@ static int32_t BindSelectTrustedDevInfoCb(DbContext *ctx, int32_t paraNum, uint8
     return BindParaText(ctx, idx, (char *)data, strlen((char *)data));
 }
 
-NO_SANITIZE("cfi") static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
+NO_SANITIZE("cfi") static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb,
+    uint8_t *data)
 {
     int32_t paraNum;
     int32_t rc;
@@ -170,7 +171,7 @@ NO_SANITIZE("cfi") static int32_t ExecuteSql(DbContext *ctx, const char *sql, ui
     return rc;
 }
 
-NO_SANITIZE("cfi") static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
+("cfi") static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
 {
     int32_t rc;
 
@@ -432,7 +433,8 @@ int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data)
     return num;
 }
 
-NO_SANITIZE("cfi") int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo, int infoNum)
+NO_SANITIZE("cfi") int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
+    uint8_t **replyInfo, int infoNum)
 {
     int32_t rc;
     int32_t num = 0;

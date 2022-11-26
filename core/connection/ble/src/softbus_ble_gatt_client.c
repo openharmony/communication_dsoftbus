@@ -107,7 +107,8 @@ static void FreeBleClientMessage(SoftBusMessage *msg)
     SoftBusFree(msg);
 }
 
-NO_SANITIZE("cfi") static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode, int32_t time)
+NO_SANITIZE("cfi") static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode,
+    int32_t time)
 {
     BleCilentErrCode *bleErrCode = SoftBusCalloc(sizeof(BleCilentErrCode));
     if (bleErrCode == NULL) {

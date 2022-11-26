@@ -197,7 +197,8 @@ static void FsmStateMsgHandler(SoftBusMessage *msg)
     }
 }
 
-NO_SANITIZE("cfi") static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg1, uint64_t arg2, void *obj)
+NO_SANITIZE("cfi") static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg1,
+    uint64_t arg2, void *obj)
 {
     SoftBusMessage *msg = NULL;
 
