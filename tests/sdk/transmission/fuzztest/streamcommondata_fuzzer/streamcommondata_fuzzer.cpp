@@ -33,20 +33,24 @@ namespace OHOS {
         char *buf = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
         if (buf == nullptr) {
             return;
+            delete []buf;
         }
         std::unique_ptr<char[]> inputbuf (buf);
         if (memcpy_s(buf, Communication::SoftBus::MAX_STREAM_LEN + 1,
             data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
             return;
+            delete []buf;
         }
         char *ext = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
         if (ext == nullptr) {
             return;
+            delete []ext;
         }
         std::unique_ptr<char[]> inputext (ext);
         if (memcpy_s(ext, Communication::SoftBus::MAX_STREAM_LEN + 1,
             data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
             return;
+            delete []ext;
         }
 
         Communication::SoftBus::StreamCommonData streamcommondata;
