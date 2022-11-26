@@ -94,7 +94,13 @@ ohos_unittest("TransProxyChannelCoreTest") {
 ohos_unittest("TransProxyChannelCoreMockTest") {
   module_out_path = module_output_path
   sources = trans_comm_mock_src
-  sources += [ "trans_proxy_manager_test.cpp" ]
+  sources += [
+    "trans_proxy_manager_test.cpp",
+    "trans_proxy_message_test.cpp",
+    "trans_proxy_network_test.cpp",
+    "trans_proxy_session_test.cpp",
+    "trans_proxy_transceiver_test.cpp",
+  ]
 
   include_dirs = trans_comm_mock_inc
   include_dirs += [
