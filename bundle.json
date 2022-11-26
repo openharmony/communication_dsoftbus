@@ -97,6 +97,7 @@
           "//foundation/communication/dsoftbus/tests/core/connection:unittest",
           "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel/udp/file:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/common:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/ipc:unittest",
