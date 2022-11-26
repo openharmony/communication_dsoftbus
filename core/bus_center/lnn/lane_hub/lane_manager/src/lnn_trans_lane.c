@@ -30,6 +30,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,

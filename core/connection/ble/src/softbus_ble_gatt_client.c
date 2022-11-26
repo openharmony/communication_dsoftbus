@@ -33,6 +33,7 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hisysevt_connreporter.h"
+#include "softbus_def.h"
 
 #define INVALID_GATTC_ID (-1)
 #define DEFAULT_MTU_SIZE 512

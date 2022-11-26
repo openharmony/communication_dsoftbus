@@ -23,7 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
-
+#include "softbus_def.h"
 
 static int SetReuseAddr(int fd, int on)
 {

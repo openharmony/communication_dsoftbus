@@ -14,6 +14,7 @@
  */
 
 #include "softbus_config_adapter.h"
+#include "softbus_def.h"
 
 #define MAX_BYTES_LENGTH 4194304
 

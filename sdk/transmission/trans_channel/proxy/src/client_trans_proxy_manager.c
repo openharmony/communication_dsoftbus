@@ -35,6 +35,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
+#include "softbus_def.h"
 
 static IClientSessionCallBack g_sessionCb;
 static uint32_t g_authMaxByteBufSize;

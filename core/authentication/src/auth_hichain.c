@@ -24,6 +24,8 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
+#include "softbus_def.h"
+
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65

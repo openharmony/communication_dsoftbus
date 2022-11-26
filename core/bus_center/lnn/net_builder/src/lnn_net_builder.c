@@ -45,6 +45,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "softbus_def.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN 8
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10

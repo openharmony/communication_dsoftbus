@@ -19,6 +19,7 @@
 #include "cmsis_os2.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
+#include "softbus_def.h"
 
 #define MS_PER_SECOND 1000
 

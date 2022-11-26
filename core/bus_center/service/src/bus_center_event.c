@@ -25,6 +25,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_qos.h"
+#include "softbus_def.h"
 
 typedef struct {
     ListNode node;
