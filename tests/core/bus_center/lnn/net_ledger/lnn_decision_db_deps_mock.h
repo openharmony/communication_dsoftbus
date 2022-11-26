@@ -17,7 +17,6 @@
 #define LNN_DECISION_DB_DEPS_MOCK_H
 
 #include <gmock/gmock.h>
-#include <mutex>
 
 #include <securec.h>
 #include "bus_center_manager.h"
