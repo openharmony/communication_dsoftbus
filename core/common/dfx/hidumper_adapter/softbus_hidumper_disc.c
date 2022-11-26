@@ -34,7 +34,7 @@ int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
 }
 
-int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
+static int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDiscDumpHander invalid param");

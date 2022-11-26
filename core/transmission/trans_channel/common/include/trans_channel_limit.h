@@ -21,12 +21,12 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 bool CheckSessionNameValidOnAuthChannel(const char *sessionName);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif
 

@@ -276,7 +276,7 @@ static void BleAdvDisableCallback(int channel, int status)
     if (status == SOFTBUS_BT_STATUS_SUCCESS) {
         for (int32_t i = 0; i < NUM_ADVERTISER; i++) {
             if (g_bleAdvertiser[i].channel == channel) {
-                g_bleAdvertiser[i].isAdvertising = true;
+                g_bleAdvertiser[i].isAdvertising = false;
                 DLOGI("disable ble advertiser adv=%d", i);
             }
         }

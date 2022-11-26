@@ -32,18 +32,18 @@ namespace OHOS {
  */
 HWTEST(AdapterBtUtilsTest, ConvertStatus, TestSize.Level3)
 {
-    int status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_SUCCESS);
+    auto status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_SUCCESS);
     EXPECT_EQ(status, SOFTBUS_BT_STATUS_SUCCESS);
 
     status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_FAIL);
     EXPECT_EQ(status, SOFTBUS_BT_STATUS_FAIL);
-    
+
     status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_NOT_READY);
     EXPECT_EQ(status, SOFTBUS_BT_STATUS_NOT_READY);
-    
+
     status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_NOMEM);
     EXPECT_EQ(status, SOFTBUS_BT_STATUS_NOMEM);
-    
+
     status = BleOhosStatusToSoftBus(OHOS_BT_STATUS_BUSY);
     EXPECT_EQ(status, SOFTBUS_BT_STATUS_BUSY);
 
@@ -72,4 +72,4 @@ HWTEST(AdapterBtUtilsTest, ConvertStatus, TestSize.Level3)
     EXPECT_EQ(status, SOFTBUS_BT_STATUS_FAIL);
 }
 
-}
+} // namespace OHOS

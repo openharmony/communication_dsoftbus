@@ -26,6 +26,8 @@
 #include "softbus_hisysevt_transreporter.h"
 
 namespace OHOS {
+static constexpr int TEST_PKG_NAME_MAX_LEN = 65;
+static constexpr int TEST_STRING_MAX_LEN = 100;
 int32_t ReportStatisticEvt()
 {
     return 0;
@@ -33,17 +35,16 @@ int32_t ReportStatisticEvt()
 
 void SoftBusHiSysEvtBusCenterFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
     InitBusCenterDfx();
 
-    LnnStatisticData statisticData = { 0 };
-    statisticData.retCode = size;
+    LnnStatisticData statisticData = {0};
+    statisticData.retCode = *(reinterpret_cast<const int32_t *>(data));
     AddStatisticDuration(&statisticData);
     AddStatisticRateOfSuccess(&statisticData);
-
-    char *tmpString = reinterpret_cast<char *>(const_cast<uint8_t *>(data));
+    char tmpString[TEST_STRING_MAX_LEN] = {0};
+    if (memcpy_s(tmpString, sizeof(tmpString) - 1, data, size) != EOK) {
+        return;
+    }
     int32_t tmpErrCode = *(reinterpret_cast<const int32_t *>(data));
     int32_t ret = CreateBusCenterFaultEvt(reinterpret_cast<SoftBusEvtReportMsg *>(tmpString),
         tmpErrCode, reinterpret_cast<ConnectionAddr *>(tmpString));
@@ -54,9 +55,6 @@ void SoftBusHiSysEvtBusCenterFuzzTest(const uint8_t* data, size_t size)
 
 void SoftBusHiSysEvtCommonFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
     StatisticEvtType evtType = *(reinterpret_cast<const StatisticEvtType *>(data));
     SetStatisticEvtReportFunc(evtType, ReportStatisticEvt);
     GetStatisticEvtReportFunc(evtType);
@@ -64,9 +62,6 @@ void SoftBusHiSysEvtCommonFuzzTest(const uint8_t* data, size_t size)
 
 void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
     InitConnStatisticSysEvt();
     SoftBusConnMedium connMedium = *(reinterpret_cast<const SoftBusConnMedium *>(data));
     SoftBusConnErrCode errCode = *(reinterpret_cast<const SoftBusConnErrCode *>(data));
@@ -78,24 +73,23 @@ void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t* data, size_t size)
 
 void SoftBusHiSysEvtDiscReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-
     InitDiscStatisticSysEvt();
     uint8_t discMedium = *(reinterpret_cast<const uint8_t *>(data));
-    uint32_t discParam = (uint32_t)size;
+    uint32_t discParam = *(reinterpret_cast<const uint32_t *>(data));
+    char tmpPkgName[TEST_PKG_NAME_MAX_LEN] = {0};
+    if (memcpy_s(tmpPkgName, sizeof(tmpPkgName) - 1, data, size) != EOK) {
+        return;
+    }
     SoftbusRecordDiscScanTimes(discMedium);
     SoftbusRecordFirstDiscTime(discMedium, discParam);
     SoftbusRecordDiscFault(discMedium, discParam);
-    SoftBusReportDiscStartupEvt(reinterpret_cast<const char *>(data));
+    SoftBusReportDiscStartupEvt(tmpPkgName);
 }
 
 void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
+    (void)data;
+    (void)size;
     InitTransStatisticSysEvt();
     GetSoftbusRecordTimeMillis();
     SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);

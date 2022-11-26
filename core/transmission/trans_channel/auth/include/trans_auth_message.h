@@ -22,8 +22,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #define ERR_MSG_MAX_LEN 128
 
