@@ -106,6 +106,8 @@ if (dsoftbus_feature_lnn_heartbeat) {
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/common/include",
   ]
 }
 
@@ -134,7 +136,7 @@ if (defined(ohos_lite)) {
     }
   }
   if (ohos_build_type == "debug") {
-    unittest("ClientBusCenterMngTest") {
+    unittest("ClientBusCenterMgrTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = client_bus_center_manager_test_src
@@ -277,7 +279,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("ClientBusCenterMngTest") {
+  ohos_unittest("ClientBusCenterMgrTest") {
     module_out_path = module_output_path
     sources = client_bus_center_manager_test_src
     include_dirs = client_bus_center_manager_test_inc
@@ -309,7 +311,7 @@ if (defined(ohos_lite)) {
       ":BusCenterHeartbeatSdkTest",
       ":BusCenterMetaNodeSdkTest",
       ":BusCenterSdkTest",
-      ":ClientBusCenterMngTest",
+      ":ClientBusCenterMgrTest",
       ":ClientBusMangerTest",
       ":SetDataChangeTest",
     ]

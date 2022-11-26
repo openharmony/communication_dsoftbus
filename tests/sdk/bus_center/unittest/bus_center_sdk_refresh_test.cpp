@@ -20,11 +20,10 @@
 #include <unistd.h>
 
 #include "discovery_service.h"
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 
 using namespace testing::ext;
-
-#define TEST_ERRO_MOUDULE       ((MODULE_LNN) + 3)
 
 namespace OHOS {
 static int g_subscribeId = 0;
@@ -49,7 +48,9 @@ public:
 };
 
 void BusCenterSdkRefresh::SetUpTestCase(void)
-{}
+{
+    SetAceessTokenPermission("busCenterTest");
+}
 
 void BusCenterSdkRefresh::TearDownTestCase(void)
 {}
@@ -117,7 +118,7 @@ static IRefreshCallback g_refreshCb2 = {
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -145,7 +146,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -173,7 +174,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
 {
     int ret;
     g_sInfo2.subscribeId = GetSubscribeId();
@@ -294,7 +295,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -351,7 +352,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -408,7 +409,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -436,7 +437,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -464,7 +465,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest010, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest010, TestSize.Level1)
 {
     int ret;
 
@@ -586,7 +587,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest013, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest013, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -643,7 +644,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest013, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest014, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest014, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -700,7 +701,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest014, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN and StopRefershLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest015, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest015, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -734,7 +735,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest015, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN and StopRefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest016, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest016, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -768,7 +769,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest016, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The StopRefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest017, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest017, TestSize.Level1)
 {
     int ret;
     int tmpId = GetSubscribeId();
@@ -789,7 +790,7 @@ HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest017, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The StopRefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest018, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest018, TestSize.Level1)
 {
     int ret;
     int tmpId = GetSubscribeId();
@@ -894,7 +895,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest021, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest022, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest022, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -922,7 +923,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest022, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest023, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest023, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -950,7 +951,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest023, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest024, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest024, TestSize.Level1)
 {
     int ret;
 
@@ -1064,7 +1065,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest026, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest027, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest027, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1121,7 +1122,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest027, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest028, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest028, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1178,7 +1179,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest028, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The RefreshLNN and StopRefershLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest029, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest029, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1210,7 +1211,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest029, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The StopRefreshLNN operates normally.
  */
-HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest001, TestSize.Level0)
+HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest001, TestSize.Level1)
 {
     int ret;
     int tmpId = GetSubscribeId();
