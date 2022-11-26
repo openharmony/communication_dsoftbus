@@ -63,7 +63,6 @@ void TransProxyTransceiverTest::SetUpTestCase(void)
     TransConnInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnSetConnectCallback).WillRepeatedly(Return(SOFTBUS_OK));
     ASSERT_EQ(SOFTBUS_OK, TransProxyManagerInit(&callBack));
-
 }
 
 void TransProxyTransceiverTest::TearDownTestCase(void)
@@ -160,7 +159,7 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize.L
         .WillRepeatedly(Return(12));
 
     EXPECT_CALL(commMock, GenerateRandomStr)
-        .WillRepeatedly( Return(SOFTBUS_OK));
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnGetHeadSize)
         .WillRepeatedly(Return(24));
     EXPECT_CALL(connMock, ConnPostBytes)

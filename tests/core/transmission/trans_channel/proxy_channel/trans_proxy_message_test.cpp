@@ -37,6 +37,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_CHANNEL_IDENTITY_LEN 33
+
 class TransProxyMessageTest : public testing::Test {
 public:
     TransProxyMessageTest()
@@ -64,7 +66,6 @@ void TransProxyMessageTest::SetUpTestCase(void)
     TransConnInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnSetConnectCallback).WillRepeatedly(Return(SOFTBUS_OK));
     ASSERT_EQ(SOFTBUS_OK, TransProxyManagerInit(&callBack));
-
 }
 
 void TransProxyMessageTest::TearDownTestCase(void)
@@ -73,7 +74,7 @@ void TransProxyMessageTest::TearDownTestCase(void)
 }
 
 void TestMessageAddProxyChannel(int32_t channelId, AppType appType, const char *identity, ProxyChannelStatus status)
-{   
+{
     TransCommInterfaceMock commMock;
     TransAuthInterfaceMock authMock;
     EXPECT_CALL(commMock, GenerateRandomStr)
@@ -93,7 +94,7 @@ void TestMessageAddProxyChannel(int32_t channelId, AppType appType, const char *
     chan->reqId = channelId;
     chan->channelId = channelId;
     chan->seq = channelId;
-    (void)strcpy_s(chan->identity, 33, identity);
+    (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, identity);
     chan->status = status;
     appInfo.appType = appType;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
@@ -140,7 +141,6 @@ void TestCallbackFail(void)
  */
 HWTEST_F(TransProxyMessageTest, TransProxyHandshakeErrMsgTest001, TestSize.Level1)
 {
-
     char* msg = TransProxyPackHandshakeErrMsg(SOFTBUS_ERR);
     ASSERT_TRUE(NULL != msg);
 
@@ -188,9 +188,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     ASSERT_TRUE(NULL != msg);
     outChannel.myId = chan.channelId;
 
-    printf("todo check why not ok?\n");
     ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel);
-    //EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
