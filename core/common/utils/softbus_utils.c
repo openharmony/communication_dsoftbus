@@ -330,7 +330,7 @@ bool GetSignalingMsgSwitch(void)
     return g_signalingMsgSwitch;
 }
 
-void SignalingMsgPrint(unsigned char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module)
+void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned char dataLen, uint32_t module)
 {
     int ret = 0;
     char signalingMsgBuf[BUF_HEX_LEN] = {0};
@@ -366,7 +366,7 @@ void MacInstead(char *data, uint32_t length, char delimiter)
         return;
     }
     int delimiterCnt = 0;
-    
+
     for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == MAC_DELIMITER_FOURTH) {
             break;
