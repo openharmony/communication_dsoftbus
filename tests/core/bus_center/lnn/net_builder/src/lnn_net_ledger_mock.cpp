@@ -79,11 +79,6 @@ char *LnnConvertIdToDeviceType(uint16_t typeId)
     return GetNetLedgerInterface()->LnnConvertIdToDeviceType(typeId);
 }
 
-const char *LnnGetDeviceUdid(const NodeInfo *info)
-{
-    return GetNetLedgerInterface()->LnnGetDeviceUdid(info);
-}
-
 int32_t LnnGetP2pRole(const NodeInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetP2pRole(info);
@@ -146,26 +141,52 @@ int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     return GetNetLedgerInterface()->LnnGetAllOnlineAndMetaNodeInfo(info, infoNum);
 }
 
+int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    return GetNetLedgerInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
+}
+
+NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
+{
+    return GetNetLedgerInterface()->LnnGetNodeInfoById(id, type);
+}
+
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
 {
     *infoNum = 1;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n", *infoNum);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n",*infoNum);
+    *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+    (void)memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc")+1);
+    return SOFTBUS_OK; 
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline1(NodeBasicInfo **info, int32_t *infoNum)
+{
+    *infoNum = 1;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n",*infoNum);
+    *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+    (void)memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc")+1);
+    return SOFTBUS_ERR;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+    char *dstIdBuf, uint32_t dstIdBufLen)
+{   
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfLnnConvertDlId enter");
+    (void)memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc")+1);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    *infoNum = 1;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n",*infoNum);
     *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
     if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy networkId fail");
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType,
-    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
-{
-    if (memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc") + 1) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy dstIdBuf fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
+    return SOFTBUS_ERR; 
 }
 }
 }

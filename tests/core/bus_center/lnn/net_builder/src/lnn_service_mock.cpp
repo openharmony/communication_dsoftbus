@@ -30,9 +30,9 @@ LnnServicetInterfaceMock::~LnnServicetInterfaceMock()
     g_serviceInterface = nullptr;
 }
 
-static LnnServicetInterfaceMock *GetServiceInterface()
+static LnnServiceInterface *GetServiceInterface()
 {
-    return reinterpret_cast<LnnServicetInterfaceMock *>(g_serviceInterface);
+    return reinterpret_cast<LnnServiceInterface *>(g_serviceInterface);
 }
 
 extern "C" {
@@ -51,29 +51,14 @@ int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
     return GetServiceInterface()->LnnRegisterEventHandler(event, handler);
 }
 
-void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
-{
-    return GetServiceInterface()->LnnUnregisterEventHandler(event, handler);
-}
-
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     return GetServiceInterface()->LnnNotifyJoinResult(addr, networkId, retCode);
 }
 
-void MetaNodeNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
-{
-    return GetServiceInterface()->MetaNodeNotifyJoinResult(addr, networkId, retCode);
-}
-
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     return GetServiceInterface()->LnnNotifyLeaveResult(networkId, retCode);
-}
-
-void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode)
-{
-    return GetServiceInterface()->MetaNodeNotifyLeaveResult(networkId, retCode);
 }
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)

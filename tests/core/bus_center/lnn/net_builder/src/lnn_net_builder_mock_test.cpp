@@ -27,6 +27,11 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_net_ledger_mock.h"
+#include "lnn_trans_mock.h"
+#include "lnn_service_mock.h"
+
+constexpr int32_t REQUESTID = 0;
 
 namespace OHOS {
 using namespace testing::ext;
@@ -42,11 +47,20 @@ public:
 void LnnNetBuilderMockTest::SetUpTestCase()
 {
     LooperInit();
+    NiceMock<LnnTransInterfaceMock> transMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener).WillRepeatedly(
+        DoAll(LnnTransInterfaceMock::ActionOfTransRegister, Return(SOFTBUS_OK)));
+    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault
+        (LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
+    int32_t ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK); 
 }
 
 void LnnNetBuilderMockTest::TearDownTestCase()
 {
     LooperDeinit();
+    LnnDeinitNetBuilder();
 }
 
 void LnnNetBuilderMockTest::SetUp()
@@ -65,13 +79,10 @@ void LnnNetBuilderMockTest::TearDown()
 */
 HWTEST_F(LnnNetBuilderMockTest, META_AUTH_META_VERIFY_TEST_001, TestSize.Level1)
 {
-    int32_t ret = LnnInitNetBuilder();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     uint32_t requestId = 1;
     int64_t authMetaId = 1;
     NodeInfo info;
     OnAuthMetaVerifyPassed(requestId, authMetaId, &info);
-    LnnDeinitNetBuilder();
 }
 
 /*
@@ -82,8 +93,6 @@ HWTEST_F(LnnNetBuilderMockTest, META_AUTH_META_VERIFY_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LnnNetBuilderMockTest, META_AUTH_META_VERIFY_TEST_002, TestSize.Level1)
 {
-    int32_t ret = LnnInitNetBuilder();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     uint32_t requestId = 1;
     int64_t authMetaId = 1;
     NodeInfo info;
@@ -92,7 +101,6 @@ HWTEST_F(LnnNetBuilderMockTest, META_AUTH_META_VERIFY_TEST_002, TestSize.Level1)
     MetaJoinRequestNode *node = TryJoinRequestMetaNode(&addr, true);
     EXPECT_TRUE(node != nullptr);
     OnAuthMetaVerifyPassed(requestId, authMetaId, &info);
-    LnnDeinitNetBuilder();
 }
 
 /*
@@ -131,9 +139,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_FILL_NODE_INFO_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_NODE_TEST_001, TestSize.Level1)
 {
-    int32_t ret = LnnInitNetBuilder();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = ProcessLeaveMetaNodeRequest(nullptr);
+    int32_t ret = ProcessLeaveMetaNodeRequest(nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ConnectionAddr addr;
     addr.type = CONNECTION_ADDR_BR;
@@ -143,7 +149,6 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_NODE_TEST_001, TestSize.Level1)
     networkId[0] = 'x';
     ret = ProcessLeaveMetaNodeRequest(networkId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    LnnDeinitNetBuilder();
 }
 
 /*
@@ -154,18 +159,19 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_NODE_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_TO_LEDGER_TEST_001, TestSize.Level1)
 {
-    NetBuilderDepsInterfaceMock netLedgerMock;
+    LnnNetLedgertInterfaceMock netLedgerMock;
+    NetBuilderDepsInterfaceMock netBuilderMock;
     NodeInfo info;
     EXPECT_CALL(netLedgerMock, LnnGetNodeInfoById(_,_)).WillRepeatedly(Return(nullptr));
     MetaJoinRequestNode metaInfo;
     LeaveMetaInfoToLedger(&metaInfo, nullptr);
 
     EXPECT_CALL(netLedgerMock, LnnGetNodeInfoById(_,_)).WillRepeatedly(Return(&info));
-    EXPECT_CALL(netLedgerMock, LnnDeleteMetaInfo(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netBuilderMock, LnnDeleteMetaInfo(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     LeaveMetaInfoToLedger(&metaInfo, nullptr);
 
     EXPECT_CALL(netLedgerMock, LnnGetNodeInfoById(_,_)).WillRepeatedly(Return(&info));
-    EXPECT_CALL(netLedgerMock, LnnDeleteMetaInfo(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netBuilderMock, LnnDeleteMetaInfo(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
     LeaveMetaInfoToLedger(&metaInfo, nullptr);
 }
 
@@ -177,9 +183,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_TO_LEDGER_TEST_001, TestSize.Leve
 */
 HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_001, TestSize.Level1)
 {
-    int32_t ret = LnnInitNetBuilder();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = TrySendJoinMetaNodeRequest(nullptr, true);
+    int32_t ret = TrySendJoinMetaNodeRequest(nullptr, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ConnectionAddrKey *addrKey = (ConnectionAddrKey *)SoftBusCalloc(sizeof(ConnectionAddrKey));
@@ -196,7 +200,6 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_001, TestSize.Level1)
     (void)memcpy_s(addrKey->addr.info.br.brMac, BT_MAC_LEN, "11:22:33:44:55:66", BT_MAC_LEN);
     ret = TrySendJoinMetaNodeRequest(addrKey, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDeinitNetBuilder();
 }
 
 /*
@@ -212,14 +215,13 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_002, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
     CustomData customData;
     metaJoinNode.addr.type = CONNECTION_ADDR_SESSION;
-    NetBuilderDepsInterfaceMock mock;
+    NiceMock<NetBuilderDepsInterfaceMock> mock;
     EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGenRequestId).WillRepeatedly(Return(REQUESTID));
     EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
