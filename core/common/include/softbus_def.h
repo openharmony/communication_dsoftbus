@@ -27,7 +27,7 @@ extern "C" {
 #endif
 #endif
 
-#ifndef 
+#ifndef NO_SANITIZE
 #ifdef __has_attribute
 #if __has_attribute(no_sanitize)
 #define NO_SANITIZE(type) __attribute__((no_sanitize(type)))
