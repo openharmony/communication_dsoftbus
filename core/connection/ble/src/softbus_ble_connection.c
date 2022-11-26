@@ -1047,7 +1047,7 @@ static void BleNetReceived(BleConnectionInfo *targetNode, uint32_t len, const ch
     g_connectCallback->OnDataReceived(targetNode->connId, MODULE_BLE_NET, 0, (char *)value, len);
 }
 
-static void BleOnDataReceived(bool isBleConn, int32_t halConnInfo, uint32_t len, const char *value)
+static void BleOnDataReceived(bool isBleConn, int32_t halConnId, uint32_t len, const char *value)
 {
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
