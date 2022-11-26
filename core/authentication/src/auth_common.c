@@ -24,6 +24,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_feature_config.h"
+#include "softbus_def.h"
 
 #define TIME_SEC_TO_MSEC 1000L
 #define TIME_MSEC_TO_USEC 1000L

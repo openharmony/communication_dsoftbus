@@ -22,6 +22,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_def.h"
 
 static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
 {

@@ -29,6 +29,7 @@
 #include "softbus_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 #define MAX_LISTEN_EVENTS 1024
 #define TIMEOUT           10000
