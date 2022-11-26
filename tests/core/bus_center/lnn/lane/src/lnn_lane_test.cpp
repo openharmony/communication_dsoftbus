@@ -46,6 +46,7 @@ constexpr uint32_t WLAN_5G_BAND = 0;
 constexpr uint32_t WLAN_2PG_FREQUENCY = 2642;
 constexpr uint32_t WLAN_5G_FREQUENCY = 5188;
 constexpr uint32_t DEFAULT_PID = 0;
+constexpr uint32_t DEFAULT_SELECT_NUM = 4;
 constexpr SoftBusCond *g_cond = nullptr;
 
 static SoftBusMutex g_lock = 0;
@@ -582,7 +583,7 @@ HWTEST_F(LNNLaneTestMock, LNN_SELECT_LANE_002, TestSize.Level1)
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
-    selectParam.list.linkTypeNum = 4;
+    selectParam.list.linkTypeNum = DEFAULT_SELECT_NUM;
     selectParam.list.linkType[0] = LANE_BLE;
     selectParam.list.linkType[1] = LANE_WLAN_2P4G;
     selectParam.list.linkType[2] = LANE_WLAN_5G;
