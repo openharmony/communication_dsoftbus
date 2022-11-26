@@ -24,8 +24,8 @@ extern "C" {
 #endif
 #endif
 
-DiscoveryBleDispatcherInterface *DiscSoftbusBleInit(DiscInnerCallback *discInnerCb);
-void DiscSoftbusBleDeinit(void);
+DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback);
+void DiscSoftBusBleDeinit(void);
 
 // TEST FUNCTION
 void PrintBleInfo(int32_t index);

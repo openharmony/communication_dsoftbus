@@ -30,7 +30,7 @@ extern "C" {
 typedef struct {
     int32_t freq;
     uint32_t capabilityBitmap[CAPABILITY_NUM];
-    unsigned char *capabilityData;
+    uint8_t *capabilityData;
     uint32_t dataLen;
     bool ranging;
 } PublishOption;
@@ -40,7 +40,7 @@ typedef struct {
     bool isSameAccount;
     bool isWakeRemote;
     uint32_t capabilityBitmap[CAPABILITY_NUM];
-    unsigned char *capabilityData;
+    uint8_t *capabilityData;
     uint32_t dataLen;
 } SubscribeOption;
 
@@ -66,7 +66,7 @@ typedef struct {
 
 typedef struct {
     int32_t (*OnServerDeviceFound)(const char *packageName, const DeviceInfo *device,
-        const InnerDeviceInfoAddtions *addtions);
+                                   const InnerDeviceInfoAddtions *additions);
 } IServerDiscInnerCallback;
 
 /**
