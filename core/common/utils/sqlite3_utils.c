@@ -171,7 +171,7 @@ NO_SANITIZE("cfi") static int32_t ExecuteSql(DbContext *ctx, const char *sql, ui
     return rc;
 }
 
-("cfi") static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
+NO_SANITIZE("cfi") static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
 {
     int32_t rc;
 
