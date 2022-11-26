@@ -50,7 +50,6 @@ constexpr SoftBusCond *g_cond = nullptr;
 
 static SoftBusMutex g_lock = 0;
 
-using namespace testing;
 class LNNLaneTestMock : public testing::Test {
 public:
     static void SetUpTestCase();
