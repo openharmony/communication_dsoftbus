@@ -393,7 +393,7 @@ HWTEST_F(ClientBusCentManagerTest, PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
     info.ranging = false;
     LnnOnPublishLNNResult(LNN_PUBLISH_ID, RESULT_REASON);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, ServerIpcPublishLNN(_, _, _))
+    EXPECT_CALL(busCentManagerMock, ServerIpcPublishLNN(_, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(PublishLNNInner(nullptr, &info, &cb) == SOFTBUS_ERR);
@@ -455,7 +455,7 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
     LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
     LnnOnRefreshDeviceFound(nullptr);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, ServerIpcRefreshLNN(_, _, _))
+    EXPECT_CALL(busCentManagerMock, ServerIpcRefreshLNN(_, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(RefreshLNNInner(nullptr, &info, &cb) == SOFTBUS_ERR);

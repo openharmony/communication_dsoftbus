@@ -16,24 +16,24 @@
 #include <cstdio>
 #include <ctime>
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <sys/time.h>
 #include <unistd.h>
 
 #include "discovery_service.h"
+#include "softbus_access_token_test.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
-
-#define TEST_ERRO_MOUDULE ((MODULE_LNN) + 3)
-#define TEST_ERRO_BUSINESSDATALEN 301
 
 namespace OHOS {
 static int g_publishId = 0;
 static const char *g_pkgName = "com.softbus.test";
 static const char *g_pkgName1 = "com.softbus.test1";
-static const char *g_erroPkgName1 = "ErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroErroEErroE";
-
-const int32_t ERRO_CAPDATA_LEN = 514;
+static const char *g_erroPkgName1 = "ErroErroErroErroErroErroErroErroErroErroErroErroErro_Lager_Than_PKG_NAME_SIZE_MAX";
 
 class BusCenterSdkPublish : public testing::Test {
 public:
@@ -50,7 +50,9 @@ public:
 };
 
 void BusCenterSdkPublish::SetUpTestCase(void)
-{}
+{
+    SetAceessTokenPermission("busCenterTest");
+}
 
 void BusCenterSdkPublish::TearDownTestCase(void)
 {}
@@ -78,8 +80,8 @@ static PublishInfo g_newpInfo1 = {
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata2",
-    .dataLen = sizeof("capdata2"),
+    .capabilityData = (unsigned char *)"capdata4",
+    .dataLen = sizeof("capdata4"),
     .ranging = false
 };
 
@@ -101,7 +103,7 @@ static const IPublishCb g_publishCb = {
  * @tc.type: FUNC
  * @tc.require: The PublishLNN operates normally.
  */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level0)
+HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -116,104 +118,38 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level0)
     };
 
     ret = PublishLNN(NULL, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = PublishLNN(g_pkgName, NULL, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = PublishLNN(g_pkgName, &testInfo, NULL);
-    EXPECT_TRUE(ret != 0);
-
-    testInfo.medium = (ExchangeMedium)(COAP + 1);
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.medium = COAP;
-
-    testInfo.mode = (DiscoverMode)(DISCOVER_MODE_ACTIVE + 1);
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.mode = DISCOVER_MODE_ACTIVE;
-
-    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.freq = LOW;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     testInfo.capabilityData = NULL;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.capabilityData = (unsigned char *)"capdata1";
 
-    testInfo.dataLen = ERRO_CAPDATA_LEN;
+    testInfo.capability = NULL;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    testInfo.capability = "dvKit";
+
+    testInfo.dataLen = MAX_CAPABILITYDATA_LEN + 1;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
  * @tc.name: PublishLNNTest002
- * @tc.desc: Use new Publish interface, test Invoke PublishID multiple times, use different PublishID.
+ * @tc.desc: Test active publish use new Publish interface, use parameters outside the given range in COAP.
  * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
+ * @tc.out: NonZero
  * @tc.type: FUNC
  * @tc.require: The PublishLNN operates normally.
  */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level0)
-{
-    int ret;
-    
-    g_newpInfo.publishId = GetPublishId();
-    ret = PublishLNN(g_pkgName, &g_newpInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, g_newpInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    g_newpInfo1.publishId = GetPublishId();
-    ret = PublishLNN(g_pkgName, &g_newpInfo1, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, g_newpInfo1.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    g_newpInfo1.publishId = GetPublishId();
-    ret = PublishLNN(g_pkgName1, &g_newpInfo1, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName1, g_newpInfo1.publishId);
-    EXPECT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: PublishLNNTest003
- * @tc.desc: Use new Publish interface, verify startdiscovery again, Use the same and correct parameters.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest003, TestSize.Level0)
-{
-    int ret;
-
-    g_newpInfo.publishId = GetPublishId();
-    ret = PublishLNN(g_pkgName, &g_newpInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, g_newpInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    g_newpInfo.publishId = GetPublishId();
-    ret = PublishLNN(g_pkgName, &g_newpInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, g_newpInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: PublishLNNTest004
- * @tc.desc: Test active publish use new Publish interface, use different freq under the COAP.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN and UnPublishService operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
+HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -227,45 +163,48 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
         .ranging = false
     };
 
+    testInfo.medium = (ExchangeMedium)(COAP + 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    testInfo.freq = MID;
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    testInfo.medium = COAP;
 
-    testInfo.freq = HIGH;
+    testInfo.mode = (DiscoverMode)(DISCOVER_MODE_ACTIVE + 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    testInfo.freq = SUPER_HIGH;
+    testInfo.mode = (DiscoverMode)(DISCOVER_MODE_PASSIVE - 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    testInfo.mode = DISCOVER_MODE_ACTIVE;
+
+    testInfo.freq = (ExchangeFreq)(SUPER_HIGH + 1);
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
- * @tc.name: PublishLNNTest005
- * @tc.desc: Test passive publish use new Publish interface, use different freq under the COAP.
+ * @tc.name: PublishLNNTest003
+ * @tc.desc: Test passive publish use new Publish interface, use wrong capa.
  * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
+ * @tc.out: NonZero
  * @tc.type: FUNC
- * @tc.require: The PublishLNN and UnPublishService operates normally.
+ * @tc.require: The PublishLNN operates normally.
  */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
+HWTEST_F(BusCenterSdkPublish, PublishLNNTest003, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
-        .medium = COAP,
+        .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
@@ -273,37 +212,143 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
         .ranging = false
     };
 
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    ret = PublishLNN(g_erroPkgName1, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
+    ret = StopPublishLNN(g_erroPkgName1, testInfo.publishId);
 
-    testInfo.freq = MID;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    uint8_t *g_erroPkgName2 = (uint8_t *)SoftBusCalloc(PKG_NAME_SIZE_MAX);
+    ASSERT_NE(g_erroPkgName2, nullptr);
+    (void)memset_s(g_erroPkgName2, PKG_NAME_SIZE_MAX, 1, PKG_NAME_SIZE_MAX);
+    ret = PublishLNN((const char *)g_erroPkgName2, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
+    SoftBusFree(g_erroPkgName2);
 
-    testInfo.freq = HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    g_erroPkgName2 = (uint8_t *)SoftBusCalloc(PKG_NAME_SIZE_MAX + 1);
+    ASSERT_NE(g_erroPkgName2, nullptr);
+    (void)memset_s(g_erroPkgName2, PKG_NAME_SIZE_MAX + 1, 1, PKG_NAME_SIZE_MAX + 1);
+    ret = PublishLNN((const char *)g_erroPkgName2, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
+    SoftBusFree(g_erroPkgName2);
 
-    testInfo.freq = SUPER_HIGH;
+    g_erroPkgName2 = (uint8_t *)SoftBusCalloc(PKG_NAME_SIZE_MAX + 1);
+    ASSERT_NE(g_erroPkgName2, nullptr);
+    (void)memset_s(g_erroPkgName2, PKG_NAME_SIZE_MAX, 1, PKG_NAME_SIZE_MAX);
+    ret = PublishLNN((const char *)g_erroPkgName2, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
+    SoftBusFree(g_erroPkgName2);
+
+    testInfo.medium = BLE;
+    ret = PublishLNN(g_erroPkgName1, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
+
+    testInfo.medium = COAP;
+    ret = PublishLNN(g_erroPkgName1, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
+}
+
+/**
+ * @tc.name: PublishLNNTest004
+ * @tc.desc: Test passive publish use new Publish interface, use different capabilityData.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The PublishLNN operates normally.
+ */
+HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = BLE,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata1",
+        .dataLen = sizeof("capdata1"),
+        .ranging = false
+    };
+
+    testInfo.publishId = GetPublishId();
+    testInfo.capabilityData = NULL;
+    testInfo.dataLen = sizeof("capdata1");
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    testInfo.publishId = GetPublishId();
+    testInfo.capabilityData = (unsigned char *)"";
+    testInfo.dataLen = sizeof("capdata1");
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+
+    testInfo.publishId = GetPublishId();
+    testInfo.capabilityData = NULL;
+    testInfo.dataLen = 0;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    testInfo.publishId = GetPublishId();
+    testInfo.capabilityData = (unsigned char *)"";
+    testInfo.dataLen = 0;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    testInfo.publishId = GetPublishId();
+    testInfo.capabilityData = (unsigned char *)"capdata1";
+    testInfo.dataLen = 0;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    testInfo.capabilityData = (unsigned char *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN);
+    ASSERT_NE(testInfo.capabilityData, nullptr);
+    (void)memset_s(testInfo.capabilityData, MAX_CAPABILITYDATA_LEN, 1, MAX_CAPABILITYDATA_LEN);
+    testInfo.dataLen = MAX_CAPABILITYDATA_LEN;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(testInfo.capabilityData);
+}
+
+/**
+ * @tc.name: PublishLNNTest005
+ * @tc.desc: Use new Publish interface, test Invoke PublishID multiple times, use different PublishID.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The PublishLNN operates normally.
+ */
+HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
+{
+    int ret;
+    
+    g_newpInfo.publishId = GetPublishId();
+    ret = PublishLNN(g_pkgName, &g_newpInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, g_newpInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_newpInfo1.publishId = GetPublishId();
+    ret = PublishLNN(g_pkgName, &g_newpInfo1, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, g_newpInfo1.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_newpInfo1.publishId = GetPublishId();
+    ret = PublishLNN(g_pkgName1, &g_newpInfo1, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName1, g_newpInfo1.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest006
- * @tc.desc: Test active publish use new Publish interface, use different freq under the AUTO.
+ * @tc.desc: Test active publish use new Publish interface, use different freq under the COAP.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
+ * @tc.require: The PublishLNN and UnPublishService operates normally.
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
 {
@@ -311,7 +356,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_ACTIVE,
-        .medium = AUTO,
+        .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
@@ -320,36 +365,36 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
     };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = MID;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = HIGH;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = SUPER_HIGH;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest007
- * @tc.desc: Test passive publish use new Publish interface, use different freq under the AUTO.
+ * @tc.desc: Test passive publish use new Publish interface, use different freq under the COAP.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
+ * @tc.require: The PublishLNN and UnPublishService operates normally.
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
 {
@@ -357,7 +402,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
-        .medium = AUTO,
+        .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
@@ -366,101 +411,126 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
     };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = MID;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = HIGH;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.freq = SUPER_HIGH;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest008
- * @tc.desc: Test passive publish use new Publish interface, use wrong PkgName.
+ * @tc.desc: Test active publish use new Publish interface, use different freq under the AUTO.
  * @tc.in: Test module, Test number, Test levels.
- * @tc.out: NonZero
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally.
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest008, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_PASSIVE,
-        .medium = COAP,
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = sizeof("capdata2"),
         .ranging = false
     };
 
-    ret = PublishLNN(g_erroPkgName1, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-    testInfo.medium = BLE;
-    ret = PublishLNN(g_erroPkgName1, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
+    testInfo.freq = MID;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-    testInfo.medium = AUTO;
-    ret = PublishLNN(g_erroPkgName1, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
+    testInfo.freq = HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest009
- * @tc.desc: Test active publish use new Publish interface, use parameters outside the given range in COAP.
+ * @tc.desc: Test passive publish use new Publish interface, use different freq under the AUTO.
  * @tc.in: Test module, Test number, Test levels.
- * @tc.out: NonZero
+ * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally.
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest009, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = COAP,
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = AUTO,
         .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
+        .capability = "ddmpCapability",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = sizeof("capdata3"),
         .ranging = false
     };
 
-    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.medium = COAP;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    testInfo.freq = MID;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.freq = LOW;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testInfo.freq = HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest010
- * @tc.desc: Test passive publish use new Publish interface, use parameters outside the given range in COAP.
+ * @tc.desc: Test new Publish interface, enable the ranging function in COAP.
  * @tc.in: Test module, Test number, Test levels.
- * @tc.out: NonZero
+ * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The PublishLNN operates normally.
  */
@@ -475,25 +545,27 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest010, TestSize.Level1)
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
+        .ranging = true
     };
 
-    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.medium = COAP;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    testInfo.publishId = GetPublishId();
+    testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.freq = LOW;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest011
- * @tc.desc: Test active publish use new Publish interface, use parameters outside the given range in AUTO.
+ * @tc.desc: Test new Publish interface, disabling the ranging function in COAP.
  * @tc.in: Test module, Test number, Test levels.
- * @tc.out: NonZero
+ * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The PublishLNN operates normally.
  */
@@ -502,8 +574,8 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest011, TestSize.Level1)
     int ret;
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = AUTO,
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = COAP,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
@@ -511,22 +583,24 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest011, TestSize.Level1)
         .ranging = false
     };
 
-    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.medium = AUTO;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    testInfo.publishId = GetPublishId();
+    testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.freq = LOW;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest012
- * @tc.desc: Test passive publish use new Publish interface, use parameters outside the given range in AUTO.
+ * @tc.desc: Test new Publish interface, enable the ranging function in AUTO.
  * @tc.in: Test module, Test number, Test levels.
- * @tc.out: NonZero
+ * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The PublishLNN operates normally.
  */
@@ -541,23 +615,25 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest012, TestSize.Level1)
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = false
+        .ranging = true
     };
 
-    testInfo.medium = (ExchangeMedium)(AUTO - 1);
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.medium = AUTO;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    testInfo.publishId = GetPublishId();
+    testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.freq = LOW;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
  * @tc.name: PublishLNNTest013
- * @tc.desc: Test new Publish interface, enable the ranging function in COAP.
+ * @tc.desc: Test new Publish interface, disabling the ranging function in AUTO.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -569,42 +645,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest013, TestSize.Level1)
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
-        .medium = COAP,
-        .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
-        .ranging = true
-    };
-
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    testInfo.publishId = GetPublishId();
-    testInfo.mode = DISCOVER_MODE_ACTIVE;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: PublishLNNTest014
- * @tc.desc: Test new Publish interface, disabling the ranging function in COAP.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
-{
-    int ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_PASSIVE,
-        .medium = COAP,
+        .medium = AUTO,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
@@ -613,25 +654,67 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
     };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     testInfo.publishId = GetPublishId();
     testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: PublishLNNTest014
+ * @tc.desc: Test active publish use new Publish interface, use different freq under the BLE.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally.
+ */
+HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = BLE,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata1",
+        .dataLen = sizeof("capdata1"),
+        .ranging = false
+    };
+
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    testInfo.freq = MID;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    testInfo.freq = HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
 /**
  * @tc.name: PublishLNNTest015
- * @tc.desc: Test new Publish interface, enable the ranging function in AUTO.
+ * @tc.desc: Test passive publish use new Publish interface, use different freq under the BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally.
  */
 HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
 {
@@ -639,30 +722,37 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
-        .medium = AUTO,
+        .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata1",
         .dataLen = sizeof("capdata1"),
-        .ranging = true
+        .ranging = false
     };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
 
-    testInfo.publishId = GetPublishId();
-    testInfo.mode = DISCOVER_MODE_ACTIVE;
+    testInfo.freq = MID;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+
+    testInfo.freq = HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    testInfo.freq = SUPER_HIGH;
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
 /**
  * @tc.name: PublishLNNTest016
- * @tc.desc: Test new Publish interface, disabling the ranging function in AUTO.
+ * @tc.desc: Test new Publish interface , enable the ranging function in BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -674,191 +764,6 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest016, TestSize.Level1)
     PublishInfo testInfo = {
         .publishId = GetPublishId(),
         .mode = DISCOVER_MODE_PASSIVE,
-        .medium = AUTO,
-        .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
-
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-
-    testInfo.publishId = GetPublishId();
-    testInfo.mode = DISCOVER_MODE_ACTIVE;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: PublishLNNTest017
- * @tc.desc: Test active publish use new Publish interface, use different freq under the BLE.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest017, TestSize.Level1)
-{
-    int ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = BLE,
-        .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
-
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = MID;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = SUPER_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-}
-
-/**
- * @tc.name: PublishLNNTest018
- * @tc.desc: Test passive publish use new Publish interface, use different freq under the BLE.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest018, TestSize.Level1)
-{
-    int ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_PASSIVE,
-        .medium = BLE,
-        .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
-
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = MID;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-
-    testInfo.freq = SUPER_HIGH;
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
-    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-}
-
-/**
- * @tc.name: PublishLNNTest019
- * @tc.desc: Test active publish use new Publish interface, use parameters outside the given range in BLE.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest019, TestSize.Level1)
-{
-    int ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = BLE,
-        .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
-
-    testInfo.medium = (ExchangeMedium)(AUTO - 1);
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.medium = AUTO;
-
-    testInfo.freq = (ExchangeFreq)(LOW - 1);
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.freq = LOW;
-}
-
-/**
- * @tc.name: PublishLNNTest020
- * @tc.desc: Test passive publish use new Publish interface, use parameters outside the given range in BLE.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: NonZero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest020, TestSize.Level1)
-{
-    int ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_PASSIVE,
-        .medium = BLE,
-        .freq = LOW,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata1",
-        .dataLen = sizeof("capdata1"),
-        .ranging = false
-    };
-
-    testInfo.medium = (ExchangeMedium)(AUTO - 1);
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.medium = AUTO;
-
-    testInfo.freq = (ExchangeFreq)(LOW - 1);
-    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret != 0);
-    testInfo.freq = LOW;
-}
-
-/**
- * @tc.name: PublishLNNTest021
- * @tc.desc: Test new Publish interface , enable the ranging function in BLE.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The PublishLNN operates normally.
- */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest021, TestSize.Level1)
-{
-    int ret;
-    PublishInfo testInfo = {
-        .publishId = GetPublishId(),
-        .mode = DISCOVER_MODE_PASSIVE,
         .medium = BLE,
         .freq = LOW,
         .capability = "dvKit",
@@ -868,25 +773,25 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest021, TestSize.Level1)
     };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
     
     testInfo.publishId = GetPublishId();
     testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
 /**
- * @tc.name: PublishLNNTest022
+ * @tc.name: PublishLNNTest017
  * @tc.desc: Test new Publish interface, disabling the ranging function in BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The PublishLNN operates normally.
  */
-HWTEST_F(BusCenterSdkPublish, PublishLNNTest022, TestSize.Level1)
+HWTEST_F(BusCenterSdkPublish, PublishLNNTest017, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -901,13 +806,13 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest022, TestSize.Level1)
     };
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 
     testInfo.publishId = GetPublishId();
     testInfo.mode = DISCOVER_MODE_ACTIVE;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
@@ -919,7 +824,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest022, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishLNN and StopPublishLNN operates normally.
  */
-HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level0)
+HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -948,7 +853,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The PublishLNN and StopPublishLNN operates normally.
  */
-HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level0)
+HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -968,9 +873,9 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level0)
     PublishLNN(g_pkgName, &testInfo, &g_publishCb);
 
     ret = StopPublishLNN(g_pkgName, testID);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -981,7 +886,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: The PublishLNN and StopPublishLNN operates normally.
  */
-HWTEST_F(BusCenterSdkPublish, StopPublishLNN003, TestSize.Level0)
+HWTEST_F(BusCenterSdkPublish, StopPublishLNN003, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
