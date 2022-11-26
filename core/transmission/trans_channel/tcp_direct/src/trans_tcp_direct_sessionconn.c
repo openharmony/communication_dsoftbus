@@ -271,7 +271,7 @@ void TransDelSessionConnById(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
-            if (item->listenMod == DIRECT_CHANNEL_SERVER_P2P && item->authId != AUTH_INVALID_ID) {
+            if (item->listenMod == DIRECT_CHANNEL_SERVER_P2P && item->authId != AUTH_INVALID_ID && !item->serverSide) {
                 AuthCloseConn(item->authId);
             }
             ListDelete(&item->node);

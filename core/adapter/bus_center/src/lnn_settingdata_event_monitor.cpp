@@ -17,10 +17,10 @@
 
 #include <securec.h>
 
-#include "abs_shared_result_set.h"
-#include "data_ability_helper.h"
-#include "data_ability_predicates.h"
 #include "data_ability_observer_stub.h"
+#include "datashare_helper.h"
+#include "datashare_predicates.h"
+#include "datashare_result_set.h"
 #include "lnn_devicename_info.h"
 #include "lnn_async_callback_utils.h"
 #include "iservice_registry.h"
@@ -28,19 +28,19 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "system_ability_definition.h"
+#include "uri.h"
 
 static const int32_t DELAY_LEN = 7000;
 static LnnDeviceNameHandler g_eventHandler = nullptr;
 
 namespace OHOS {
 namespace BusCenter {
-static const std::string SETTINGS_DATA_BASE_URI = "dataability:///com.ohos.settingsdata.DataAbility";
+static const std::string SETTINGS_DATA_BASE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 static const std::string SETTINGS_DATA_FIELD_KEYWORD = "KEYWORD";
 static const std::string SETTINGS_DATA_FIELD_VALUE = "VALUE";
 static const std::string PREDICATES_STRING = "settings.general.device_name";
-static const std::string SETTINGS_DATA_DEVICE_NAME_URI =
-    "dataability:///com.ohos.settingsdata.DataAbility/settings.general.device_name";
-std::shared_ptr<AppExecFwk::DataAbilityHelper> g_dataAbilityHelper;
+std::shared_ptr<DataShare::DataShareHelper> g_dataShareHelper;
 static const uint32_t SOFTBUS_SA_ID = 4700;
 
 class LnnSettingDataEventMonitor : public AAFwk::DataAbilityObserverStub {
@@ -55,83 +55,81 @@ void LnnSettingDataEventMonitor::OnChange()
     }
 }
 
-static void CreateDataAbilityHelperInstance(void)
+static void CreateDataShareHelperInstance(void)
 {
-    if (g_dataAbilityHelper != nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataAbilityHelperInstance already inited.");
+    if (g_dataShareHelper != nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance already inited.");
         return;
     }
 
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataAbilityHelperInstance saManager NULL");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance saManager NULL");
         return;
     }
 
     sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
     if (remoteObject == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataAbilityHelperInstance remoteObject NULL");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance remoteObject NULL");
         return;
     }
-    g_dataAbilityHelper = AppExecFwk::DataAbilityHelper::Creator(remoteObject);
-    if (g_dataAbilityHelper == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataAbilityHelperInstance create fail.");
+    g_dataShareHelper =  DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI);
+    if (g_dataShareHelper == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance create fail.");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "CreateDataAbilityHelperInstance exit success.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "CreateDataShareHelperInstance exit success.");
 }
 
-static int32_t GetDeviceNameFromDataAbilityHelper(char *deviceName, uint32_t len)
+static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
 {
-    if (g_dataAbilityHelper == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataAbilityHelper NULL.");
+    if (g_dataShareHelper == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper NULL.");
         return SOFTBUS_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataAbilityHelper enter.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataShareHelper enter.");
     int32_t numRows = 0;
     std::string val;
 
     std::shared_ptr<Uri> uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI);
     std::vector<std::string> columns;
     columns.emplace_back(SETTINGS_DATA_FIELD_VALUE);
-    NativeRdb::DataAbilityPredicates predicates;
+    DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTINGS_DATA_FIELD_KEYWORD, PREDICATES_STRING);
 
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultset =
-        g_dataAbilityHelper->Query(*uri, columns, predicates);
-    if (resultset == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataAbilityHelper query fail.");
+    auto resultSet = g_dataShareHelper->Query(*uri, predicates, columns);
+    if (resultSet == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper query fail.");
         return SOFTBUS_ERR;
     }
-    resultset->GetRowCount(numRows);
+    resultSet->GetRowCount(numRows);
     if (numRows <= 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataAbilityHelper row zero.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper row zero.");
         return SOFTBUS_ERR;
     }
 
     int columnIndex;
-    resultset->GoToFirstRow();
-    resultset->GetColumnIndex(SETTINGS_DATA_FIELD_VALUE, columnIndex);
-    resultset->GetString(columnIndex, val);
-    resultset->Close();
+    resultSet->GoToFirstRow();
+    resultSet->GetColumnIndex(SETTINGS_DATA_FIELD_VALUE, columnIndex);
+    resultSet->GetString(columnIndex, val);
     if (strncpy_s(deviceName, len, val.c_str(), strlen(val.c_str())) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s fail.");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataAbilityHelper, deviceName=%s.", deviceName);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataShareHelper, deviceName=%s.", deviceName);
     return SOFTBUS_OK;
 }
 
 static void RegisterNameMonitorHelper(void)
 {
-    if (g_dataAbilityHelper == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RegisterNameMonitorHelper g_dataAbilityHelper == NULL.");
+    if (g_dataShareHelper == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RegisterNameMonitorHelper g_dataShareHelper == NULL.");
         return;
     }
-    auto uri = std::make_shared<Uri>(SETTINGS_DATA_DEVICE_NAME_URI);
+    auto uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
     sptr<LnnSettingDataEventMonitor> settingDataObserver = std::make_unique<LnnSettingDataEventMonitor>().release();
-    g_dataAbilityHelper->RegisterObserver(*uri, settingDataObserver);
+    g_dataShareHelper->RegisterObserver(*uri, settingDataObserver);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "RegisterNameMonitorHelper success");
 }
 }
@@ -143,7 +141,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
         return SOFTBUS_ERR;
     }
-    if (OHOS::BusCenter::GetDeviceNameFromDataAbilityHelper(deviceName, len) != SOFTBUS_OK) {
+    if (OHOS::BusCenter::GetDeviceNameFromDataShareHelper(deviceName, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetSettingDeviceName fail");
         return SOFTBUS_ERR;
     }
@@ -157,7 +155,7 @@ int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
         return SOFTBUS_ERR;
     }
     g_eventHandler = handler;
-    OHOS::BusCenter::CreateDataAbilityHelperInstance();
+    OHOS::BusCenter::CreateDataShareHelperInstance();
     return SOFTBUS_OK;
 }
 

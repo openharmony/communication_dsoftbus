@@ -26,35 +26,54 @@
 namespace OHOS {
 class ISoftBusClient : public IRemoteBroker {
 public:
-    virtual ~ISoftBusClient() = default;
+    ~ISoftBusClient() override = default;
 
-    virtual void OnDeviceFound(const DeviceInfo *device) = 0;
-    virtual void OnDiscoverFailed(int subscribeId, int failReason) = 0;
-    virtual void OnDiscoverySuccess(int subscribeId) = 0;
-    virtual void OnPublishSuccess(int publishId) = 0;
-    virtual void OnPublishFail(int publishId, int reason) = 0;
-    virtual int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) = 0;
-    virtual int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode) = 0;
-    virtual int32_t OnChannelLinkDown(const char *networkId, int32_t routeType) = 0;
+    virtual void OnDeviceFound(const DeviceInfo *device);
+
+    virtual void OnDiscoverFailed(int subscribeId, int failReason);
+
+    virtual void OnDiscoverySuccess(int subscribeId);
+
+    virtual void OnPublishSuccess(int publishId);
+
+    virtual void OnPublishFail(int publishId, int reason);
+
+    virtual int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+
+    virtual int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode);
+
+    virtual int32_t OnChannelLinkDown(const char *networkId, int32_t routeType);
+
     virtual int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
-        uint32_t len, int32_t type) = 0;
-    virtual int32_t OnChannelClosed(int32_t channelId, int32_t channelType) = 0;
+                                         uint32_t len, int32_t type);
+
+    virtual int32_t OnChannelClosed(int32_t channelId, int32_t channelType);
+
     virtual int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
-        const QosTv *tvList) = 0;
-    virtual int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) = 0;
-    virtual int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) = 0;
-    virtual int32_t OnLeaveLNNResult(const char *networkId, int retCode) = 0;
-    virtual int32_t OnLeaveMetaNodeResult(const char *networkId, int retCode) = 0;
-    virtual int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) = 0;
-    virtual int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) = 0;
-    virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) = 0;
+                                      const QosTv *tvList);
+
+    virtual int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode);
+
+    virtual int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode);
+
+    virtual int32_t OnLeaveLNNResult(const char *networkId, int retCode);
+
+    virtual int32_t OnLeaveMetaNodeResult(const char *networkId, int retCode);
+
+    virtual int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);
+
+    virtual int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
+
+    virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode);
+
     virtual void OnPublishLNNResult(int32_t publishId, int32_t reason);
+
     virtual void OnRefreshLNNResult(int32_t refreshId, int32_t reason);
+
     virtual void OnRefreshDeviceFound(const void *device, uint32_t deviceLen);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");
 };
-} // namespace OHOS
-
-#endif // !defined(INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_ )
+}
+#endif

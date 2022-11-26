@@ -25,8 +25,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 typedef enum {
     TCP_DIRECT_CHANNEL_STATUS_INIT,
@@ -93,6 +93,6 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo);
 #ifdef __cplusplus
 #if __cplusplus
 }
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 #endif

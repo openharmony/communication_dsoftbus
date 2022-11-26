@@ -19,7 +19,7 @@
 
 int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
 {
-    if (fd < 0 || argv == NULL) {
+    if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
         return SOFTBUS_ERR;
     }

@@ -25,6 +25,7 @@
 #include "bus_center_info_key.h"
 #include "lnn_device_info.h"
 #include "softbus_bus_center.h"
+#include "bus_center_event.h"
 
 namespace OHOS {
 class LnnNetLedgerInterface {
@@ -53,6 +54,11 @@ public:
     virtual int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen) = 0;
     virtual bool LnnSetDLDeviceInfoName(const char *udid, const char *name) = 0;
+    virtual bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info) = 0;
+    virtual int32_t LnnSetP2pRole(NodeInfo *info, int32_t role) = 0;
+    virtual int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac) = 0;
+    virtual int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac) = 0;
+    virtual int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -78,6 +84,14 @@ public:
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
     MOCK_METHOD5(LnnConvertDlId, int32_t (const char *, IdCategory, IdCategory, char *, uint32_t));
     MOCK_METHOD2(LnnSetDLDeviceInfoName, bool (const char *, const char *));
+    MOCK_METHOD2(LnnSetDLP2pInfo, bool (const char *, const P2pInfo *));
+    MOCK_METHOD2(LnnSetP2pRole, int32_t (NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnSetP2pMac, int32_t (NodeInfo *, const char *));
+    MOCK_METHOD2(LnnSetP2pGoMac, int32_t (NodeInfo *, const char *));
+    MOCK_METHOD2(LnnGetAllOnlineAndMetaNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
+    static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
+    static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+        char *dstIdBuf, uint32_t dstIdBufLen);
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_MOCK_H

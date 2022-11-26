@@ -46,7 +46,8 @@ public:
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
     virtual void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type,
         uint8_t relation, bool isJoin) = 0;
-    virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight) = 0;
+    virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid,
+        int32_t weight) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -67,6 +68,8 @@ public:
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void (void *));
     MOCK_METHOD4(LnnNotifyLnnRelationChanged, void (const char *, ConnectionAddrType, uint8_t, bool));
     MOCK_METHOD3(LnnNotifyMasterNodeChanged, void (bool, const char*, int32_t));
+    static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
+    static inline std::map<LnnEventType, LnnEventHandler> g_lnnEventHandlers;
 };
 } // namespace OHOS
 #endif // LNN_SERVICE_MOCK_H

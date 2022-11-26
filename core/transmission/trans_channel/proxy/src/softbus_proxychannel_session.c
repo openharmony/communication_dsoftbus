@@ -174,8 +174,10 @@ static int32_t TransProxyEncryptPacketData(int32_t channelId, int32_t seq, Proxy
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s key error.");
         return SOFTBUS_ERR;
     }
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, dataInfo->inData, dataInfo->inLen,
         dataInfo->outData, &(dataInfo->outLen), seq);
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || dataInfo->outLen != checkLen) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Trans Proxy encrypt error. %d ", ret);
         return SOFTBUS_ENCRYPT_ERR;
@@ -602,7 +604,7 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t pid, int32_t channe
 
 int32_t TransProxySessionDataLenCheck(uint32_t dataLen, ProxyPacketType type)
 {
-#define PROXY_MAX_BYTES_LEN (4 * 1024)
+#define PROXY_MAX_BYTES_LEN (1024 * 1024)
 #define PROXY_MAX_MESSAGE_LEN (1 * 1024)
     switch (type) {
         case PROXY_FLAG_MESSAGE:
@@ -691,6 +693,9 @@ static int32_t TransProxyNoSubPacketProc(const char *pkgName, int32_t pid, int32
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc dataLen[%d] inputLen[%d]", head->dataLen,
         receiveData->dataLen);
+    if (head->dataLen + sizeof(PacketHead) != receiveData->dataLen) {
+        return SOFTBUS_ERR;
+    }
     int32_t ret = TransProxyProcessSessionData(pkgName, pid, channelId, head,
         ((char*)receiveData->data + sizeof(PacketHead)));
     if (ret != SOFTBUS_OK) {

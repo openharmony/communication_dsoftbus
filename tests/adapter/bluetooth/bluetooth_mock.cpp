@@ -22,188 +22,192 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-static void CleanupBtStateChangedCtx(BtStateChangedCtx &ctx);
-static void CleanupAclStateChangedCtx(AclStateChangedCtx &ctx);
-static void OnBtStateChanged(int listenerId, int state);
-static void OnBtAclStateChanged(int listenerId, const SoftBusBtAddr *addr, int aclState);
+MockBluetooth *MockBluetooth::targetMocker = nullptr;
 
-MockBluetoothCommonn *MockBluetoothCommonn::targetMocker = nullptr;
-BtGapCallBacks MockBluetoothCommonn::btGapCallback = {0};
-BtStateChangedCtx MockBluetoothCommonn::btCtx = {0};
-AclStateChangedCtx MockBluetoothCommonn::aclCtx = {0};
-
-SoftBusBtStateListener *MockBluetoothCommonn::GetMockBtStateListener()
+MockBluetooth *MockBluetooth::GetMocker()
 {
-    static SoftBusBtStateListener listener = {
-        .OnBtStateChanged = OnBtStateChanged,
-        .OnBtAclStateChanged = OnBtAclStateChanged,
-    };
-    return &listener;
+    return targetMocker;
 }
 
-BtGapCallBacks *MockBluetoothCommonn::GetBtGapCallBacks()
+MockBluetooth::MockBluetooth()
 {
-    return &btGapCallback;
+    MockBluetooth::targetMocker = this;
 }
 
-testing::AssertionResult MockBluetoothCommonn::ExpectOnBtStateChanged(int listenerId, int state)
+MockBluetooth::~MockBluetooth()
 {
-    if (btCtx.calledCnt != 1) {
-        return testing::AssertionFailure() << "OnBtStateChanged is not called only once: " << btCtx.calledCnt <<
-            ", see log for more details";
-    }
-    if (btCtx.listenerId != listenerId) {
-        return testing::AssertionFailure() << "OnBtStateChanged is call by unexpectedly listenerId," <<
-            "want: " << listenerId << ", actual: "<< btCtx.listenerId;
-    }
-    if (btCtx.state != state) {
-        return testing::AssertionFailure() << "OnBtStateChanged is call by unexpectedly state," <<
-            "want: " << state << ", actual: "<< btCtx.state;
-    }
-    return testing::AssertionSuccess();
-}
-
-testing::AssertionResult MockBluetoothCommonn::ExpectOnBtAclStateChanged(
-    int listenerId, SoftBusBtAddr &addr, int aclState)
-{
-    if (aclCtx.calledCnt != 1) {
-        return testing::AssertionFailure() << "OnBtAclStateChanged is not called only once: " << aclCtx.calledCnt <<
-            ", see log for more details";
-    }
-    if (aclCtx.listenerId != listenerId) {
-        return testing::AssertionFailure() << "OnBtAclStateChanged is call by unexpectedly listenerId," <<
-            "want: " << listenerId << ", actual: "<< aclCtx.listenerId;
-    }
-    if (memcmp(&aclCtx.addrVal, &addr, sizeof(SoftBusBtAddr)) != 0) {
-        char wantAddrStr[BT_MAC_LEN] = {0};
-        char actualAddrStr[BT_MAC_LEN] = {0};
-        if (ConvertBtMacToStr(wantAddrStr, sizeof(wantAddrStr), addr.addr, sizeof(addr.addr)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "convert want bt mac to str fail.");
-            // continue anyway
-        }
-        if (ConvertBtMacToStr(actualAddrStr, sizeof(actualAddrStr),
-            aclCtx.addrVal.addr, sizeof(aclCtx.addrVal.addr)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "convert actual bt mac to str fail.");
-            // continue anyway
-        }
-        return testing::AssertionFailure() << "OnBtAclStateChanged is call by unexpectedly addr," <<
-            "want: " << wantAddrStr << ", actual: "<< actualAddrStr;
-    }
-    if (aclCtx.aclState != aclState) {
-        return testing::AssertionFailure() << "OnBtAclStateChanged is call by unexpectedly aclState," <<
-            "want: " << aclState << ", actual: "<< aclCtx.aclState;
-    }
-    return testing::AssertionSuccess();
-}
-
-MockBluetoothCommonn::MockBluetoothCommonn()
-{
-    MockBluetoothCommonn::targetMocker = this;
-}
-
-MockBluetoothCommonn::~MockBluetoothCommonn()
-{
-    CleanupBtStateChangedCtx(MockBluetoothCommonn::btCtx);
-    CleanupAclStateChangedCtx(MockBluetoothCommonn::aclCtx);
+    MockBluetooth::targetMocker = nullptr;
 }
 
 bool EnableBle(void)
 {
-    return MockBluetoothCommonn::targetMocker->EnableBle();
+    return MockBluetooth::GetMocker()->EnableBle();
 }
 
 bool DisableBle(void)
 {
-    return MockBluetoothCommonn::targetMocker->DisableBle();
+    return MockBluetooth::GetMocker()->DisableBle();
 }
 
 bool IsBleEnabled()
 {
-    return MockBluetoothCommonn::targetMocker->IsBleEnabled();
+    return MockBluetooth::GetMocker()->IsBleEnabled();
 }
 
 bool GetLocalAddr(unsigned char *mac, unsigned int len)
 {
-    return MockBluetoothCommonn::targetMocker->GetLocalAddr(mac, len);
+    return MockBluetooth::GetMocker()->GetLocalAddr(mac, len);
 }
 
 bool SetLocalName(unsigned char *localName, unsigned char length)
 {
-    return MockBluetoothCommonn::targetMocker->SetLocalName(localName, length);
+    return MockBluetooth::GetMocker()->SetLocalName(localName, length);
 }
 
 int GapRegisterCallbacks(BtGapCallBacks *func)
 {
-    MockBluetoothCommonn::btGapCallback = *func;
-    return MockBluetoothCommonn::targetMocker->GapRegisterCallbacks(func);
+    return MockBluetooth::GetMocker()->GapRegisterCallbacks(func);
 }
 
 bool PairRequestReply(const BdAddr *bdAddr, int transport, bool accept)
 {
-    return MockBluetoothCommonn::targetMocker->PairRequestReply(bdAddr, transport, accept);
+    return MockBluetooth::GetMocker()->PairRequestReply(bdAddr, transport, accept);
 }
 
 bool SetDevicePairingConfirmation(const BdAddr *bdAddr, int transport, bool accept)
 {
-    return MockBluetoothCommonn::targetMocker->SetDevicePairingConfirmation(bdAddr, transport, accept);
+    return MockBluetooth::GetMocker()->SetDevicePairingConfirmation(bdAddr, transport, accept);
 }
 
-static void CleanupBtStateChangedCtx(BtStateChangedCtx &ctx)
+int BleGattRegisterCallbacks(BtGattCallbacks *func)
 {
-    ctx.calledCnt = 0;
-    ctx.listenerId = -1;
-    ctx.state = -1;
+    return MockBluetooth::GetMocker()->BleGattRegisterCallbacks(func);
 }
 
-static void CleanupAclStateChangedCtx(AclStateChangedCtx &ctx)
+int BleStartScanEx(BleScanConfigs *configs, BleScanNativeFilter *filter, unsigned int filterSize)
 {
-    ctx.calledCnt = 0;
-    (void)memset_s(&ctx.addrVal, sizeof(SoftBusBtAddr), 0, sizeof(SoftBusBtAddr));
-    ctx.listenerId = -1;
-    ctx.aclState = -1;
+    return MockBluetooth::GetMocker()->BleStartScanEx(configs, filter, filterSize);
 }
 
-static void OnBtStateChanged(int listenerId, int state)
+int BleStopScan(void)
 {
-    // to avoid being invoked more than once
-    if (MockBluetoothCommonn::btCtx.calledCnt++ > 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnBtStateChanged is called again unexpectedly,"
-            "first call context is listenerId: %d, state: %d;"
-            "current call context is listenerId: %d, state: %d",
-            MockBluetoothCommonn::btCtx.listenerId, MockBluetoothCommonn::btCtx.state, listenerId, state);
-        return;
-    }
-    MockBluetoothCommonn::btCtx.listenerId = listenerId;
-    MockBluetoothCommonn::btCtx.state = state;
+    return MockBluetooth::GetMocker()->BleStopScan();
 }
 
-static void OnBtAclStateChanged(int listenerId, const SoftBusBtAddr *addr, int aclState)
+int BleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam)
 {
-    // to avoid being invoked more than once
-    if (MockBluetoothCommonn::aclCtx.calledCnt++ > 0) {
-        char firstAddrStr[BT_MAC_LEN] = {0};
-        char currentAddrStr[BT_MAC_LEN] = {0};
-        if (ConvertBtMacToStr(firstAddrStr, sizeof(firstAddrStr),
-            MockBluetoothCommonn::aclCtx.addrVal.addr,
-            sizeof(MockBluetoothCommonn::aclCtx.addrVal.addr)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "convert first bt mac to str fail.");
-            // continue anyway
-        }
-        
-        if (ConvertBtMacToStr(currentAddrStr, sizeof(currentAddrStr), addr->addr, sizeof(addr->addr)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "convert current bt mac to str fail.");
-            // continue anyway
-        }
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnBtAclStateChanged is called again unexpectedly,"
-            "first call context is listenerId: %d, addr: %s, aclState: %d;"
-            "current call context is listenerId: %d, addr: %s, aclState: %d",
-            MockBluetoothCommonn::aclCtx.listenerId, firstAddrStr,
-            MockBluetoothCommonn::aclCtx.aclState, listenerId, currentAddrStr, aclState);
-        return;
-    }
-    MockBluetoothCommonn::aclCtx.listenerId = listenerId;
-    MockBluetoothCommonn::aclCtx.addrVal = *addr;
-    MockBluetoothCommonn::aclCtx.aclState = aclState;
+    return MockBluetooth::GetMocker()->BleStartAdvEx(advId, rawData, advParam);
+}
+
+int BleStopAdv(int advId)
+{
+    return MockBluetooth::GetMocker()->BleStopAdv(advId);
+}
+
+int BleGattcRegister(BtUuid appUuid)
+{
+    return MockBluetooth::GetMocker()->BleGattcRegister(appUuid);
+}
+
+int BleGattcConnect(
+    int clientId, BtGattClientCallbacks *func, const BdAddr *bdAddr, bool isAutoConnect, BtTransportType transport)
+{
+    return MockBluetooth::GetMocker()->BleGattcConnect(clientId, func, bdAddr, isAutoConnect, transport);
+}
+
+int BleGattcDisconnect(int clientId)
+{
+    return MockBluetooth::GetMocker()->BleGattcDisconnect(clientId);
+}
+
+int BleGattcSearchServices(int clientId)
+{
+    return MockBluetooth::GetMocker()->BleGattcSearchServices(clientId);
+}
+
+bool BleGattcGetService(int clientId, BtUuid serviceUuid)
+{
+    return MockBluetooth::GetMocker()->BleGattcGetService(clientId, serviceUuid);
+}
+
+int BleGattcRegisterNotification(int clientId, BtGattCharacteristic characteristic, bool enable)
+{
+    return MockBluetooth::GetMocker()->BleGattcRegisterNotification(clientId, characteristic, enable);
+}
+
+int BleGattcConfigureMtuSize(int clientId, int mtuSize)
+{
+    return MockBluetooth::GetMocker()->BleGattcConfigureMtuSize(clientId, mtuSize);
+}
+
+int BleGattcWriteCharacteristic(
+    int clientId, BtGattCharacteristic characteristic, BtGattWriteType writeType, int len, const char *value)
+{
+    return MockBluetooth::GetMocker()->BleGattcWriteCharacteristic(clientId, characteristic, writeType, len, value);
+}
+
+int BleGattcUnRegister(int clientId)
+{
+    return MockBluetooth::GetMocker()->BleGattcUnRegister(clientId);
+}
+
+int BleGattsRegisterCallbacks(BtGattServerCallbacks *func)
+{
+    return MockBluetooth::GetMocker()->BleGattsRegisterCallbacks(func);
+}
+
+int BleGattsRegister(BtUuid appUuid)
+{
+    return MockBluetooth::GetMocker()->BleGattsRegister(appUuid);
+}
+
+int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number)
+{
+    return MockBluetooth::GetMocker()->BleGattsAddService(serverId, srvcUuid, isPrimary, number);
+}
+
+int BleGattsUnRegister(int serverId)
+{
+    return MockBluetooth::GetMocker()->BleGattsUnRegister(serverId);
+}
+
+int BleGattsAddCharacteristic(int serverId, int srvcHandle, BtUuid characUuid, int properties, int permissions)
+{
+    return MockBluetooth::GetMocker()->BleGattsAddCharacteristic(
+        serverId, srvcHandle, characUuid, properties, permissions);
+}
+
+int BleGattsAddDescriptor(int serverId, int srvcHandle, BtUuid descUuid, int permissions)
+{
+    return MockBluetooth::GetMocker()->BleGattsAddDescriptor(serverId, srvcHandle, descUuid, permissions);
+}
+
+int BleGattsStartService(int serverId, int srvcHandle)
+{
+    return MockBluetooth::GetMocker()->BleGattsStartService(serverId, srvcHandle);
+}
+
+int BleGattsStopService(int serverId, int srvcHandle)
+{
+    return MockBluetooth::GetMocker()->BleGattsStopService(serverId, srvcHandle);
+}
+
+int BleGattsDeleteService(int serverId, int srvcHandle)
+{
+    return MockBluetooth::GetMocker()->BleGattsDeleteService(serverId, srvcHandle);
+}
+
+int BleGattsDisconnect(int serverId, BdAddr bdAddr, int connId)
+{
+    return MockBluetooth::GetMocker()->BleGattsDisconnect(serverId, bdAddr, connId);
+}
+
+int BleGattsSendResponse(int serverId, GattsSendRspParam *param)
+{
+    return MockBluetooth::GetMocker()->BleGattsSendResponse(serverId, param);
+}
+
+int BleGattsSendIndication(int serverId, GattsSendIndParam *param)
+{
+    return MockBluetooth::GetMocker()->BleGattsSendIndication(serverId, param);
 }

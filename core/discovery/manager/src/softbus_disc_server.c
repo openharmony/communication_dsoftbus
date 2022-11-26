@@ -16,9 +16,8 @@
 #include "softbus_disc_server.h"
 
 #include "disc_client_proxy.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_log.h"
-#include "softbus_permission.h"
 #include "softbus_hisysevt_discreporter.h"
 
 static IServerDiscInnerCallback g_discInnerCb = {

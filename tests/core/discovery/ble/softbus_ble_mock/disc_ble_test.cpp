@@ -446,8 +446,8 @@ HWTEST_F(DiscBleMockTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
     DLOGI("ReceiveActiveDiscoveryPacket001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
-    EXPECT_CALL(bleMock, SoftBusUpdateAdv(_, NotNull(), NotNull()))
-        .WillRepeatedly(BleMock::ActionOfUpdateAdvForPassivePublish);
+    EXPECT_CALL(bleMock, SoftBusSetAdvData(_, NotNull()))
+        .WillRepeatedly(BleMock::ActionOfSetAdvDataForPassivePublish);
 
     BusCenterMock busMock;
     busMock.SetupSuccessStub();
