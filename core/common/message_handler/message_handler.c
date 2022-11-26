@@ -350,8 +350,8 @@ static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHa
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
         if (msg->handler == handler && customFunc(msg, args) == 0) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]LooperRemoveMessage. handler=%s, what=%d,arg1=%" PRIu64,
-                context->name, handler->name, msg->what, msg->arg1);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]LooperRemoveMessage. handler=%s, what=%d,arg1=%" PRIu64
+                ",time=%" PRId64, context->name, handler->name, msg->what, msg->arg1, msg->time);
             FreeSoftBusMsg(msg);
             ListDelete(&itemNode->node);
             SoftBusFree(itemNode);

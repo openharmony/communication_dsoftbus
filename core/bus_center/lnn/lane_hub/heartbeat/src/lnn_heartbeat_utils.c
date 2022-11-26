@@ -26,6 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_conn_interface.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
 {
@@ -200,4 +201,26 @@ bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstTyp
         return false;
     }
     return LnnVisitHbTypeSet(VisitCheckSupportedHbType, srcType, dstType);
+}
+
+int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len)
+{
+    int32_t ret;
+    uint8_t hashResult[SHA_256_HASH_LEN] = {0};
+
+    if (str == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB generate str hash invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB generate str hash fail, ret=%d", ret);
+        return ret;
+    }
+    ret = ConvertBytesToHexString(hashStr, len + 1, hashResult, len / HEXIFY_UNIT_LEN);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB convert bytes to str hash fail ret=%d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
