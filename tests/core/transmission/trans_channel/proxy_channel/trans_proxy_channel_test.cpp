@@ -62,31 +62,28 @@ void TransProxyChannelTest::TearDownTestCase(void)
 }
 
 
-int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
+int32_t TestOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
 {
     (void)pkgName;
     (void)sessionName;
     (void)channel;
-    (void)pid;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelOpened enter.");
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+int32_t TestOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
     (void)pkgName;
-    (void)pid;
     (void)channelId;
     (void)channelType;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelClosed enter.");
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
+int32_t TestOnChannelOpenFailed(const char *pkgName, int32_t channelId,
     int32_t channelType, int32_t errCode)
 {
     (void)pkgName;
-    (void)pid;
     (void)channelId;
     (void)channelType;
     (void)errCode;
@@ -602,14 +599,13 @@ HWTEST_F(TransProxyChannelTest, TransProxyDestroyChannelListTest001, TestSize.Le
  */
 HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
 {
-    int32_t pid = 1;
     const char *pkgName = "com.test.trans.proxy.channel.demo";
 
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
 
-    TransProxyDeathCallback(NULL, pid);
-    TransProxyDeathCallback(pkgName, pid);
+    TransProxyDeathCallback(NULL);
+    TransProxyDeathCallback(pkgName);
 
     TransProxyManagerDeinitInner();
     EXPECT_TRUE(true);
