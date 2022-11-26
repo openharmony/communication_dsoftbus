@@ -242,6 +242,8 @@ static void InsertTrustedDevInfoRecord(void *param)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt database failed.");
             break;
         }
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "insert udid:%s to trusted dev info table.", AnonymizesUDID(udid));
         if (InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
             (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
         }
@@ -251,7 +253,6 @@ static void InsertTrustedDevInfoRecord(void *param)
         SoftBusFree(udid);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "insert udid:%s to trusted dev info table.", AnonymizesUDID(udid));
     SoftBusFree(udid);
 }
 
@@ -411,7 +412,7 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     return rc;
 }
 
-static int32_t InitTrustedDevInfoTableDelay(void)
+static int32_t InitTrustedDevInfoTable(void)
 {
     bool isExist = false;
     int32_t rc = SOFTBUS_ERR;
@@ -447,11 +448,28 @@ static int32_t InitTrustedDevInfoTableDelay(void)
     return rc;
 }
 
+static int32_t TryRecoveryTrustedDevInfoTable(void)
+{
+    char dbKeyFilePath[SOFTBUS_MAX_PATH_LEN];
+
+    if (LnnGetFullStoragePath(LNN_FILE_ID_DB_KEY, dbKeyFilePath, SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get dbKey save path fail");
+        return SOFTBUS_ERR;
+    }
+    SoftBusRemoveFile(dbKeyFilePath);
+    SoftBusRemoveFile(DATABASE_NAME);
+    return InitTrustedDevInfoTable();
+}
+
 int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate decision db huks key fail");
         return SOFTBUS_ERR;
     }
-    return InitTrustedDevInfoTableDelay();
+    if (InitTrustedDevInfoTable() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "try init trusted dev info table again");
+        return TryRecoveryTrustedDevInfoTable();
+    }
+    return SOFTBUS_OK;
 }

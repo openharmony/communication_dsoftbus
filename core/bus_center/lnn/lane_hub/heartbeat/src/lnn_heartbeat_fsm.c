@@ -213,7 +213,15 @@ static int32_t RemoveCheckDevStatusMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage
     LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)ctrlMsgObj->obj;
     LnnCheckDevStatusMsgPara *delMsgPara = (LnnCheckDevStatusMsgPara *)delMsg->obj;
 
-    if (msgPara->hbType == delMsgPara->hbType &&
+    if (delMsgPara->hasNetworkId != msgPara->hasNetworkId) {
+        return 1;
+    }
+    if (!delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType) {
+        SoftBusFree(msgPara);
+        msgPara = NULL;
+        return 0;
+    }
+    if (delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType &&
         strcmp(msgPara->networkId, delMsgPara->networkId) == 0) {
         SoftBusFree(msgPara);
         msgPara = NULL;
@@ -534,6 +542,7 @@ static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
         hbFsm = TO_HEARTBEAT_FSM(fsm);
         if (*hbType == (HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1)) {
             LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS);
+            LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE);
             LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
         }
         ret = SOFTBUS_OK;
@@ -577,7 +586,7 @@ static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB try as master node get gearmode fail");
         return;
     }
-    delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_ENABLE_DELAY_LEN;
+    delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_NOTIFY_DEV_LOST_DELAY_LEN;
     if (LnnFsmPostMessageDelay(fsm, EVENT_HB_AS_MASTER_NODE, NULL, delayMillis) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB try as master node post msg fail");
         return;
@@ -624,6 +633,8 @@ static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *pa
 
 static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType addrType)
 {
+    char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost networkId is null");
         return SOFTBUS_INVALID_PARAM;
@@ -642,7 +653,10 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
         }
         return SOFTBUS_OK;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB process dev lost, networkId:%s", AnonymizesNetworkID(networkId));
+    const char *udid = LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID);
+    (void)LnnGenerateHexStringHash((const unsigned char *)udid, udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB process dev lost, udidHash:%s, networkId:%s",
+        AnonymizesUDID(udidHash), AnonymizesNetworkID(networkId));
     if (LnnRequestLeaveSpecific(networkId, addrType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost send request to NetBuilder fail");
         return SOFTBUS_ERR;

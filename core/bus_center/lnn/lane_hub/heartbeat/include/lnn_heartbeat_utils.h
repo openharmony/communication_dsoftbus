@@ -36,7 +36,7 @@ extern "C" {
 #define HB_SEND_RELAY_LEN (4 * HB_TIME_FACTOR)
 #define HB_CHECK_DELAY_LEN HB_SEND_ONCE_LEN
 #define HB_CHECK_OFFLINE_TOLERANCE_LEN HB_SEND_ONCE_LEN
-#define HB_ENABLE_DELAY_LEN (2 * HB_TIME_FACTOR + HB_SEND_ONCE_LEN)
+#define HB_NOTIFY_DEV_LOST_DELAY_LEN (2 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
 #define HB_REMOVE_REPEAD_RECV_LEN HB_SEND_ONCE_LEN
 
 #define HB_MAX_TYPE_COUNT 4
@@ -74,6 +74,7 @@ ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type);
 int32_t LnnConvertHbTypeToId(LnnHeartbeatType type);
 bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType);
 bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType);
+int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len);
 
 #ifdef __cplusplus
 }

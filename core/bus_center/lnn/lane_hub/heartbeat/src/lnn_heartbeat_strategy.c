@@ -307,8 +307,8 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, const LnnProcessS
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB send once but dont check status, hbType:%d", registedHbType);
         return SOFTBUS_OK;
     }
-    LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS);
     LnnCheckDevStatusMsgPara checkMsg = {.hbType = registedHbType, .hasNetworkId = false};
+    LnnRemoveCheckDevStatusMsg(hbFsm, &checkMsg);
     if (LnnPostCheckDevStatusMsgToHbFsm(hbFsm, &checkMsg, HB_CHECK_DELAY_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once post check msg fail, hbType:%d", registedHbType);
         return SOFTBUS_ERR;
@@ -619,7 +619,7 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
     if (LnnGetGearModeBySpecificType(&mode, msgPara.hbType) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    uint64_t delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_CHECK_DELAY_LEN;
+    uint64_t delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_NOTIFY_DEV_LOST_DELAY_LEN;
     return LnnPostCheckDevStatusMsgToHbFsm(g_hbFsm, &msgPara, delayMillis);
 }
 
@@ -636,6 +636,7 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop offline timing strcpy_s networkId fail");
         return SOFTBUS_ERR;
     }
+    msgPara.hasNetworkId = true;
     LnnRemoveCheckDevStatusMsg(g_hbFsm, &msgPara);
     return SOFTBUS_OK;
 }
