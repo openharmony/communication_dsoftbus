@@ -43,19 +43,11 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
-constexpr int32_t channelId = 0;
-constexpr int32_t channelId1 = 1;
-constexpr int32_t channelId2 = 2;
+constexpr int32_t CHANNELID = 0;
+constexpr int32_t CHANNELID1 = 1;
+constexpr int32_t CHANNELID2 = 2;
 constexpr uint32_t LEN = 65;
 constexpr char UUID[65] = "abc";
-
-typedef struct {
-    ListNode channelInfoList;
-    LnnSyncInfoMsgHandler handlers[LNN_INFO_TYPE_COUNT];
-    SoftBusMutex lock;
-} SyncInfoManager;
-
-SyncInfoManager g_syncInfoManager;
 
 static char *GetP2pInfoMsgTest(const P2pInfo *info)
 {
@@ -98,7 +90,7 @@ public:
 void LnnP2pInfoTest::SetUpTestCase()
 {
     LooperInit();
-    LnnTransInterfaceMock transMock;
+    NiceMock<LnnTransInterfaceMock> transMock;
     EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener).WillRepeatedly(
         DoAll(LnnTransInterfaceMock::ActionOfTransRegister, Return(SOFTBUS_OK)));
     LnnInitSyncInfoManager();
@@ -169,14 +161,14 @@ HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_002, TestSize.Level1)
     ON_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo).WillByDefault(
         LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
     ON_CALL(netLedgerMock, LnnGetLocalNodeInfo).WillByDefault(Return(&info));
-    ON_CALL(transMock, TransOpenNetWorkingChannel).WillByDefault(Return(channelId));
+    ON_CALL(transMock, TransOpenNetWorkingChannel).WillByDefault(Return(CHANNELID));
     ON_CALL(transMock, TransSendNetworkingMessage).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncP2pInfo();
     SoftBusSleepMs(50);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ON_CALL(netLedgerMock, LnnConvertDlId).WillByDefault(LnnNetLedgertInterfaceMock::
         ActionOfLnnConvertDlId);
-    int ret1 = LnnTransInterfaceMock::g_networkListener->onChannelOpened(channelId, UUID, false);
+    int ret1 = LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, false);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
 
     P2pInfo p2pInfo = {
@@ -192,10 +184,10 @@ HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_002, TestSize.Level1)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy sync info msg for type:");
     }
     cJSON_free(p2pMsg);
-    LnnTransInterfaceMock::g_networkListener->onChannelOpenFailed(channelId, UUID);
-    LnnTransInterfaceMock::g_networkListener->onChannelClosed(channelId);
-    LnnTransInterfaceMock::g_networkListener->onChannelOpened(channelId2, UUID, true);
-    LnnTransInterfaceMock::g_networkListener->onMessageReceived(channelId2, msg, LEN);
+    LnnTransInterfaceMock::g_networkListener->onChannelOpenFailed(CHANNELID, UUID);
+    LnnTransInterfaceMock::g_networkListener->onChannelClosed(CHANNELID);
+    LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID2, UUID, true);
+    LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID2, msg, LEN);
 }
 
 /*
@@ -214,7 +206,7 @@ HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
         .p2pInfo.goMac = "abc",
     };
     ON_CALL(netLedgerMock, LnnGetLocalNodeInfo).WillByDefault(Return(&info));
-    ON_CALL(transMock, TransOpenNetWorkingChannel).WillByDefault(Return(channelId));
+    ON_CALL(transMock, TransOpenNetWorkingChannel).WillByDefault(Return(CHANNELID));
     ON_CALL(transMock, TransSendNetworkingMessage).WillByDefault(Return(SOFTBUS_OK));
 
     EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo).WillOnce(
@@ -229,8 +221,8 @@ HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
     SoftBusSleepMs(50);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    EXPECT_CALL(transMock, TransOpenNetWorkingChannel).WillOnce(Return(channelId1))
-        .WillRepeatedly(Return(channelId));
+    EXPECT_CALL(transMock, TransOpenNetWorkingChannel).WillOnce(Return(CHANNELID1))
+        .WillRepeatedly(Return(CHANNELID));
     ret = LnnSyncP2pInfo();
     SoftBusSleepMs(50);
     EXPECT_TRUE(ret == SOFTBUS_OK);

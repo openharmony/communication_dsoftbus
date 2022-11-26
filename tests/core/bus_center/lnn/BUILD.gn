@@ -164,7 +164,6 @@ ohos_unittest("LNNTestMock") {
     "net_builder/src/lnn_devicename_info_test.cpp",
     "net_builder/src/lnn_net_builder_deps_mock.cpp",
     "net_builder/src/lnn_net_builder_mock_test.cpp",
-    "net_builder/src/lnn_net_builder_test.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_network_info_test.cpp",
     "net_builder/src/lnn_node_weight_test.cpp",
