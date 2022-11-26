@@ -31,24 +31,28 @@ namespace OHOS {
         }
         char *buf = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
         if (buf == nullptr) {
-            delete []buf;
             return;
         }
         std::unique_ptr<char[]> inputbuf (buf);
         if (memcpy_s(buf, Communication::SoftBus::MAX_STREAM_LEN + 1,
             data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
             delete []buf;
+            buf = nullptr;
             return;
         }
         char *ext = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
         if (ext == nullptr) {
-            delete []ext;
+            delete []buf;
+            ext = nullptr;
             return;
         }
         std::unique_ptr<char[]> inputext (ext);
         if (memcpy_s(ext, Communication::SoftBus::MAX_STREAM_LEN + 1,
             data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
             delete []ext;
+            delete []buf;
+            buf = nullptr;
+            ext = nullptr;
             return;
         }
 
