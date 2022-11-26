@@ -151,6 +151,7 @@ if (defined(ohos_lite)) {
       ":TransSdkTest",
       "monitor_permission_test:MonitorPermission",
       "permission:DynamicPermissionTest",
+      "udp/distributed_stream:distributed_stream_test",
     ]
   }
 }
