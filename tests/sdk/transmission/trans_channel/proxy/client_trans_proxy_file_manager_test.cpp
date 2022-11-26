@@ -651,11 +651,11 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, T
     len = PackReadFileRetransData(&fileFrame, seq, readLength, fileOffset, &info);
     EXPECT_EQ(SOFTBUS_ERR, len);
 
-    uint32_t dataTest = 5;
+    uint32_t dataTest = TEST_DATA_LENGTH;
     fileFrame.data = (uint8_t *)&dataTest;
-    fileFrame.fileData = (uint8_t *)dataTest;
+    fileFrame.fileData = (uint8_t *)&dataTest;
     len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
-    EXPECT_EQ(SOFTBUS_ERR, len);
+    EXPECT_NE(SOFTBUS_ERR, len);
 
     len = PackReadFileRetransData(&fileFrame, seq, readLength, fileOffset, &info);
     EXPECT_EQ(SOFTBUS_ERR, len);
