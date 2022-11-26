@@ -16,12 +16,11 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 group("unittest") {
   testonly = true
+
   deps = [
-    "common:unittest",
-    "trans_channel/auth_channel:unittest",
-    "trans_channel/manager:unittest",
-    "trans_channel/proxy_channel:unittest",
-    "trans_channel/tcp_direct:unittest",
-    "trans_channel/udp_negotiation:unittest",
+    "trans_channel_callback_test:unittest",
+    "trans_channel_manager_test:unittest",
+    "trans_lane_manager_test:unittest",
+    "trans_link_listener_test:unittest",
   ]
 }
