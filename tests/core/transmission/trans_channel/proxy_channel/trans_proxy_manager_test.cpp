@@ -73,34 +73,33 @@ public:
     {}
 };
 
-int32_t TestOnDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
-    TransReceiveData* receiveData)
+int32_t TestOnDataReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+    const void *data, uint32_t len, int32_t type)
 {
     (void)pkgName;
-    (void)pid;
     (void)channelId;
     (void)channelType;
-    (void)receiveData;
+    (void)data;
+    (void)len;
+    (void)type;
     g_testProxyChannelReceiveFlag = true;
     printf("TestOnDataReceived enter.\n");
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
+int32_t TestOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel)
 {
     (void)pkgName;
     (void)sessionName;
     (void)channel;
-    (void)pid;
     printf("TestOnChannelOpened enter.\n");
     g_testProxyChannelOpenSuccessFlag = true;
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+int32_t TestOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType)
 {
     (void)pkgName;
-    (void)pid;
     (void)channelId;
     (void)channelType;
     g_testProxyChannelClosedFlag = true;
@@ -108,11 +107,9 @@ int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId,
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
-    int32_t channelType, int32_t errCode)
+int32_t TestOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t errCode)
 {
     (void)pkgName;
-    (void)pid;
     (void)channelId;
     (void)channelType;
     (void)errCode;
@@ -936,7 +933,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyDeathCallbackTest001, TestSize.Level1)
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    TransProxyDeathCallback("com.test.pkgname", 14);
+    TransProxyDeathCallback("com.test.pkgname");
 
     ret = TransProxyGetSendMsgChanInfo(chan->channelId, chan);
     EXPECT_NE(SOFTBUS_OK, ret);
