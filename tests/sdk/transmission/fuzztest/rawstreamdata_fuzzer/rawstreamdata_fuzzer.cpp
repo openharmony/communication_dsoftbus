@@ -30,17 +30,31 @@ namespace OHOS {
             return;
         }
         char *buf = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
-        if (memcpy_s(buf, Communication::SoftBus::MAX_STREAM_LEN + 1,
-            data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
-            return;
-        }
-        char *ext = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
-        if (memcpy_s(ext, Communication::SoftBus::MAX_STREAM_LEN + 1,
-            data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
+        if (buf == nullptr) {
             return;
         }
         std::unique_ptr<char[]> inputbuf (buf);
+        if (memcpy_s(buf, Communication::SoftBus::MAX_STREAM_LEN + 1,
+            data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
+            delete []buf;
+            buf = nullptr;
+            return;
+        }
+        char *ext = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
+        if (ext == nullptr) {
+            delete []buf;
+            ext = nullptr;
+            return;
+        }
         std::unique_ptr<char[]> inputext (ext);
+        if (memcpy_s(ext, Communication::SoftBus::MAX_STREAM_LEN + 1,
+            data, Communication::SoftBus::MAX_STREAM_LEN) != EOK) {
+            delete []ext;
+            delete []buf;
+            buf = nullptr;
+            ext = nullptr;
+            return;
+        }
 
         Communication::SoftBus::RawStreamData rawstreamdata;
         rawstreamdata.InitStreamData(std::move(inputbuf), Communication::SoftBus::MAX_STREAM_LEN + 1,

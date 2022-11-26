@@ -173,7 +173,8 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendFile no permission, ret = %d", ret);
         return ret;
     }
-    FileSchemaListener fileSchemaListener = {0};
+    FileSchemaListener fileSchemaListener;
+    (void)memset_s(&fileSchemaListener, sizeof(FileSchemaListener), 0, sizeof(FileSchemaListener));
     if (CheckFileSchema(sessionId, &fileSchemaListener) == SOFTBUS_OK) {
         if (SetSchemaCallback(fileSchemaListener.schema, sFileList, fileCnt) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set schema callback failed");
