@@ -34,7 +34,8 @@ MockBluetooth::MockBluetooth()
     MockBluetooth::targetMocker = this;
 }
 
-MockBluetooth::~MockBluetooth() {
+MockBluetooth::~MockBluetooth()
+{
     MockBluetooth::targetMocker = nullptr;
 }
 

@@ -20,7 +20,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/adapter"
 
-ohos_unittest("BluetoothAdapterTest") {
+ohos_unittest("AdapterBluetoothTest") {
   module_out_path = module_output_path
   sources = [
     "adapter_bt_utils_test.cpp",
@@ -55,5 +55,5 @@ ohos_unittest("BluetoothAdapterTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":BluetoothAdapterTest" ]
+  deps = [ ":AdapterBluetoothTest" ]
 }

@@ -25,6 +25,7 @@
 
 using namespace testing::ext;
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::AtMost;
 using ::testing::Return;
 
@@ -132,53 +133,148 @@ static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, in
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_SoftBusAddBtStateListener
- * @tc.desc: test set bt name
+ * @tc.name: AdapterBtCommonTest_StateChangeCallback
+ * @tc.desc: test bt state listener callback stateChangeCallback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
 {
     int listenerId = -1;
     MockBluetooth mocker;
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
+
     g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_ON);
     auto btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_ON);
     EXPECT_TRUE(btStateResult);
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_ON);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURNING_ON);
+    EXPECT_TRUE(btStateResult);
+
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_ON);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURN_ON);
+    EXPECT_TRUE(btStateResult);
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_ON);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURN_ON);
+    EXPECT_TRUE(btStateResult);
+
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_OFF);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_OFF);
+    EXPECT_TRUE(btStateResult);
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_OFF);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURNING_OFF);
+    EXPECT_TRUE(btStateResult);
+
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_OFF);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURN_OFF);
+    EXPECT_TRUE(btStateResult);
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_OFF);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURN_OFF);
+    EXPECT_TRUE(btStateResult);
+
+    // invalid status
+    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, -1);
+    btStateResult = g_btStateChangedCtx.Expect(listenerId, -1);
+    EXPECT_TRUE(btStateResult);
+
+    EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: AdapterBtCommonTest_StateChangeCallback
+ * @tc.desc: test bt state listener callback aclStateChangedCallbak
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
+{
+    int listenerId = -1;
+    MockBluetooth mocker;
+    auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
+    ASSERT_TRUE(prepareResult);
+
+    g_btGapCallback->aclStateChangedCallbak(nullptr, (GapAclState)-1, 0);
 
     BdAddr bdAddr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
-    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_CONNECTED, 0);
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
+    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_CONNECTED, 0);
     auto aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_CONNECTED);
     EXPECT_TRUE(aclStateResult);
+
+    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_DISCONNECTED, 0);
+    aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_DISCONNECTED);
+    EXPECT_TRUE(aclStateResult);
+
+    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_LE_CONNECTED, 0);
+    aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_LE_CONNECTED);
+    EXPECT_TRUE(aclStateResult);
+
+    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_LE_DISCONNECTED, 0);
+    aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_LE_DISCONNECTED);
+    EXPECT_TRUE(aclStateResult);
+
+    // invalid GapAclState
+    g_btGapCallback->aclStateChangedCallbak(&bdAddr, (GapAclState)-1, 0);
+    aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, -1);
+    EXPECT_TRUE(aclStateResult);
+
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
 /**
  * @tc.name: AdapterBtCommonTest_BluetoothPair
- * @tc.desc: test br pair
+ * @tc.desc: test bt state listener callback pairRequestedCallback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, BluetoothPair, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, PairRequestedCallback, TestSize.Level3)
 {
     BdAddr bdAddr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
     MockBluetooth mocker;
-    EXPECT_CALL(mocker, PairRequestReply(&bdAddr, OHOS_BT_TRANSPORT_LE, true)).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(mocker, SetDevicePairingConfirmation(&bdAddr, OHOS_BT_TRANSPORT_LE, true))
-        .Times(1)
+    EXPECT_CALL(mocker, PairRequestReply(&bdAddr, OHOS_BT_TRANSPORT_LE, true))
+        .Times(2)
+        .WillOnce(Return(false))
         .WillOnce(Return(true));
+
     int listenerId = -1;
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
+
+    g_btGapCallback->pairRequestedCallback(nullptr, OHOS_BT_TRANSPORT_INVALID);
     g_btGapCallback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
+    g_btGapCallback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
+    EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: AdapterBtCommonTest_PairConfiremedCallback
+ * @tc.desc: test bt state listener callback pairConfiremedCallback
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
+{
+    BdAddr bdAddr = {
+        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
+    };
+    MockBluetooth mocker;
+    EXPECT_CALL(mocker, SetDevicePairingConfirmation(&bdAddr, OHOS_BT_TRANSPORT_LE, true))
+        .Times(AtLeast(2))
+        .WillOnce(Return(false))
+        .WillRepeatedly(Return(true));
+    int listenerId = -1;
+    auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
+    ASSERT_TRUE(prepareResult);
+
+    g_btGapCallback->pairConfiremedCallback(nullptr, OHOS_BT_TRANSPORT_INVALID, 0, 0);
+    g_btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
     g_btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
