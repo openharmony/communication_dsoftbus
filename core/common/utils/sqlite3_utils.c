@@ -127,7 +127,7 @@ static int32_t BindSelectTrustedDevInfoCb(DbContext *ctx, int32_t paraNum, uint8
     return BindParaText(ctx, idx, (char *)data, strlen((char *)data));
 }
 
-static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
+NO_SANITIZE("cfi") static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
 {
     int32_t paraNum;
     int32_t rc;
@@ -169,7 +169,7 @@ static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindPar
     return rc;
 }
 
-static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
+NO_SANITIZE("cfi") static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
 {
     int32_t rc;
 
@@ -184,7 +184,7 @@ static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindPara
     return rc;
 }
 
-static int32_t QueryDataNext(DbContext *ctx)
+NO_SANITIZE("cfi") static int32_t QueryDataNext(DbContext *ctx)
 {
     int32_t rc;
 
@@ -224,7 +224,7 @@ static bool CheckBindOrQueryParam(const DbContext *ctx)
     return true;
 }
 
-int32_t OpenDatabase(DbContext **ctx)
+NO_SANITIZE("cfi") int32_t OpenDatabase(DbContext **ctx)
 {
     int32_t rc;
     sqlite3 *sqlite = NULL;
@@ -251,7 +251,7 @@ int32_t OpenDatabase(DbContext **ctx)
     return SOFTBUS_OK;
 }
 
-int32_t CloseDatabase(DbContext *ctx)
+NO_SANITIZE("cfi") int32_t CloseDatabase(DbContext *ctx)
 {
     if (!CheckDbContextParam(ctx)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
@@ -284,7 +284,7 @@ int32_t CreateTable(DbContext *ctx, TableNameID id)
     return rc == SQLITE_OK ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
-int32_t DeleteTable(DbContext *ctx, TableNameID id)
+NO_SANITIZE("cfi") int32_t DeleteTable(DbContext *ctx, TableNameID id)
 {
     int32_t rc;
     char sql[SQL_DEFAULT_LEN] = {0};
@@ -310,7 +310,7 @@ int32_t DeleteTable(DbContext *ctx, TableNameID id)
     return rc;
 }
 
-int32_t CheckTableExist(DbContext *ctx, TableNameID id, bool *isExist)
+NO_SANITIZE("cfi") int32_t CheckTableExist(DbContext *ctx, TableNameID id, bool *isExist)
 {
     int32_t rc;
     char sql[SQL_DEFAULT_LEN] = {0};
@@ -334,7 +334,7 @@ int32_t CheckTableExist(DbContext *ctx, TableNameID id, bool *isExist)
     return SOFTBUS_OK;
 }
 
-int32_t InsertRecord(DbContext *ctx, TableNameID id, uint8_t *data)
+NO_SANITIZE("cfi") int32_t InsertRecord(DbContext *ctx, TableNameID id, uint8_t *data)
 {
     int32_t rc;
 
@@ -356,7 +356,7 @@ int32_t InsertRecord(DbContext *ctx, TableNameID id, uint8_t *data)
     return rc;
 }
 
-int32_t RemoveRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data)
+NO_SANITIZE("cfi") int32_t RemoveRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data)
 {
     int32_t rc;
 
@@ -378,7 +378,7 @@ int32_t RemoveRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data)
     return rc;
 }
 
-int32_t RemoveAllRecord(DbContext *ctx, TableNameID id)
+NO_SANITIZE("cfi") int32_t RemoveAllRecord(DbContext *ctx, TableNameID id)
 {
     int32_t rc;
     char sql[SQL_DEFAULT_LEN] = {0};
@@ -431,7 +431,7 @@ int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data)
     return num;
 }
 
-int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo, int infoNum)
+NO_SANITIZE("cfi") int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo, int infoNum)
 {
     int32_t rc;
     int32_t num = 0;
@@ -464,7 +464,7 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t 
     return SOFTBUS_OK;
 }
 
-int32_t OpenTransaction(DbContext *ctx)
+NO_SANITIZE("cfi") int32_t OpenTransaction(DbContext *ctx)
 {
     int32_t rc;
 
@@ -518,7 +518,7 @@ int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
     return rc;
 }
 
-int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
+NO_SANITIZE("cfi") int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
 {
     int32_t rc;
 
@@ -534,7 +534,7 @@ int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
+NO_SANITIZE("cfi") int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
 {
     int32_t rc;
 
@@ -550,7 +550,7 @@ int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t BindParaInt(DbContext *ctx, int32_t idx, int32_t value)
+NO_SANITIZE("cfi") int32_t BindParaInt(DbContext *ctx, int32_t idx, int32_t value)
 {
     int32_t rc;
 
@@ -565,7 +565,7 @@ int32_t BindParaInt(DbContext *ctx, int32_t idx, int32_t value)
     return rc;
 }
 
-int32_t BindParaInt64(DbContext *ctx, int32_t idx, int64_t value)
+NO_SANITIZE("cfi") int32_t BindParaInt64(DbContext *ctx, int32_t idx, int64_t value)
 {
     int32_t rc;
 
@@ -580,7 +580,7 @@ int32_t BindParaInt64(DbContext *ctx, int32_t idx, int64_t value)
     return rc;
 }
 
-int32_t BindParaText(DbContext *ctx, int32_t idx, const char *value, uint32_t valueLen)
+NO_SANITIZE("cfi") int32_t BindParaText(DbContext *ctx, int32_t idx, const char *value, uint32_t valueLen)
 {
     int32_t rc;
 
@@ -595,7 +595,7 @@ int32_t BindParaText(DbContext *ctx, int32_t idx, const char *value, uint32_t va
     return rc;
 }
 
-int32_t BindParaDouble(DbContext *ctx, int32_t idx, double value)
+NO_SANITIZE("cfi") int32_t BindParaDouble(DbContext *ctx, int32_t idx, double value)
 {
     int32_t rc;
 
@@ -610,7 +610,7 @@ int32_t BindParaDouble(DbContext *ctx, int32_t idx, double value)
     return rc;
 }
 
-int32_t GetQueryResultColCount(DbContext *ctx, int32_t *count)
+NO_SANITIZE("cfi") int32_t GetQueryResultColCount(DbContext *ctx, int32_t *count)
 {
     if (!CheckBindOrQueryParam(ctx)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
@@ -624,7 +624,7 @@ int32_t GetQueryResultColCount(DbContext *ctx, int32_t *count)
     return SOFTBUS_OK;
 }
 
-int32_t GetQueryResultColText(DbContext *ctx, int32_t iCol, char *text, uint32_t len)
+NO_SANITIZE("cfi") int32_t GetQueryResultColText(DbContext *ctx, int32_t iCol, char *text, uint32_t len)
 {
     const unsigned char *result;
 
@@ -648,7 +648,7 @@ int32_t GetQueryResultColText(DbContext *ctx, int32_t iCol, char *text, uint32_t
     return SOFTBUS_OK;
 }
 
-int32_t GetQueryResultColInt(DbContext *ctx, int32_t iCol, int32_t *value)
+NO_SANITIZE("cfi") int32_t GetQueryResultColInt(DbContext *ctx, int32_t iCol, int32_t *value)
 {
     if (!CheckBindOrQueryParam(ctx) || iCol < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
@@ -666,7 +666,7 @@ int32_t GetQueryResultColInt(DbContext *ctx, int32_t iCol, int32_t *value)
     return SOFTBUS_OK;
 }
 
-int32_t GetQueryResultColInt64(DbContext *ctx, int32_t iCol, int64_t *value)
+NO_SANITIZE("cfi") int32_t GetQueryResultColInt64(DbContext *ctx, int32_t iCol, int64_t *value)
 {
     if (!CheckBindOrQueryParam(ctx) || iCol < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
@@ -684,7 +684,7 @@ int32_t GetQueryResultColInt64(DbContext *ctx, int32_t iCol, int64_t *value)
     return SOFTBUS_OK;
 }
 
-int32_t GetQueryResultColDouble(DbContext *ctx, int32_t iCol, double *value)
+NO_SANITIZE("cfi") int32_t GetQueryResultColDouble(DbContext *ctx, int32_t iCol, double *value)
 {
     if (!CheckBindOrQueryParam(ctx) || iCol < 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");

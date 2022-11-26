@@ -95,7 +95,7 @@ static int32_t GetUdpChannel(int32_t dfileId, UdpChannel *udpChannel)
     return SOFTBUS_OK;
 }
 
-static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
+NO_SANITIZE("cfi") static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {

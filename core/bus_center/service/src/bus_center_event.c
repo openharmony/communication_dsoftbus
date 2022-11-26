@@ -44,7 +44,7 @@ typedef enum {
 static BusCenterEventCtrl g_eventCtrl;
 static SoftBusHandler g_notifyHandler = {"NotifyHandler", NULL, NULL};
 
-static int32_t PostMessageToHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static int32_t PostMessageToHandler(SoftBusMessage *msg)
 {
     if (g_notifyHandler.looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "NotifyHandler not initialized.");

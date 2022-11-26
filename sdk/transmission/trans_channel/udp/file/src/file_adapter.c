@@ -75,7 +75,7 @@ static int OpenTcpServer(const char *ip, int port)
     return fd;
 }
 
-int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
+NO_SANITIZE("cfi") int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort)
 {
     if (myIp == NULL || filePort == NULL) {

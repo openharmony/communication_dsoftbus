@@ -299,7 +299,7 @@ int32_t ConnGetSocketError(int32_t fd)
     return SoftBusSocketGetError(fd);
 }
 
-int32_t ConnGetLocalSocketPort(int32_t fd)
+NO_SANITIZE("cfi") int32_t ConnGetLocalSocketPort(int32_t fd)
 {
     const SocketInterface *socketInterface = GetSocketInterface(LNN_PROTOCOL_IP);
     if (socketInterface == NULL) {
