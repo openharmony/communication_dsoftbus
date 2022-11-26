@@ -161,7 +161,9 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
             (map->bucketSize << HDF_ENLARGE_FACTOR);
         MapResize(map, size);
     }
-
+    if (map->nodes == NULL) {
+        return SOFTBUS_ERR;
+    }
     node = MapCreateNode(key, hash, value, valueSize);
     if (node == NULL) {
         return SOFTBUS_INVALID_PARAM;
