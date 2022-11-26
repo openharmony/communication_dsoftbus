@@ -91,7 +91,6 @@ public:
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **info, int32_t *infoNum));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *id, IdCategory type));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
-    static int32_t ActionOfLnnGetAllOnline1(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
     static inline std::map<LnnEventType, LnnEventHandler> g_lnnevent_handlers;

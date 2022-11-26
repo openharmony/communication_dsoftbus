@@ -42,8 +42,8 @@ public:
 void LnnTopoManagerTest::SetUpTestCase()
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault
-        (LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
+    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault(
+        LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
     LnnInitTopoManager();
 }
 

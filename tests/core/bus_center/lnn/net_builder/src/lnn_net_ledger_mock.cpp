@@ -154,39 +154,33 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
 {
     *infoNum = 1;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n",*infoNum);
     *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
-    (void)memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc")+1);
-    return SOFTBUS_OK; 
+    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy networkId fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline1(NodeBasicInfo **info, int32_t *infoNum)
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType,
+    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
-    *infoNum = 1;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n",*infoNum);
-    *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
-    (void)memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc")+1);
-    return SOFTBUS_ERR;
-}
-
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
-    char *dstIdBuf, uint32_t dstIdBufLen)
-{   
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfLnnConvertDlId enter");
-    (void)memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc")+1);
+    if (memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy dstIdBuf fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
     *infoNum = 1;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "info_num :%d\n",*infoNum);
     *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
     if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy networkId fail");
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_ERR; 
+    return SOFTBUS_OK;
 }
 }
 }
