@@ -47,6 +47,7 @@ namespace OHOS {
 #define TEST_PKG_NAME "com.trans.proxy.test.pkgname"
 #define TEST_BUF_LEN 32
 #define TEST_INVALID_LARGE_SIZE (100 * 1024)
+#define TEST_CHANNEL_IDENTITY_LEN 33
 
 static int32_t m_testProxyAuthChannelId = -1;
 static int32_t m_testProxyNormalChannelId = -1;
@@ -129,6 +130,7 @@ int32_t TestGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int
     return SOFTBUS_OK;
 }
 
+extern "C" {
 int32_t TestGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
 {
     (void)sessionName;
@@ -136,6 +138,7 @@ int32_t TestGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint
     (void)len;
     printf("TestGetPkgNameBySessionName enter.\n");
     return SOFTBUS_OK;
+}
 }
 
 void TestOnNetworkingChannelOpenFailed(int32_t channelId, const char *uuid)
@@ -172,7 +175,7 @@ void TransProxyManagerTest::TearDownTestCase(void)
 }
 
 void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, ProxyChannelStatus status)
-{   
+{
     TransCommInterfaceMock commMock;
     EXPECT_CALL(commMock, GenerateRandomStr)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -187,7 +190,7 @@ void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, Proxy
     chan->reqId = channelId;
     chan->channelId = channelId;
     chan->seq = channelId;
-    (void)strcpy_s(chan->identity, 33, identity);
+    (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, identity);
     chan->status = status;
     appInfo.appType = APP_TYPE_AUTH;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
@@ -195,7 +198,7 @@ void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, Proxy
 }
 
 void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, ProxyChannelStatus status)
-{   
+{
     TransCommInterfaceMock commMock;
     TransAuthInterfaceMock authMock;
     EXPECT_CALL(commMock, GenerateRandomStr)
@@ -215,7 +218,7 @@ void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, Pro
     chan->reqId = channelId;
     chan->channelId = channelId;
     chan->seq = channelId;
-    (void)strcpy_s(chan->identity, 33, identity);
+    (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, identity);
     chan->status = status;
     appInfo.appType = APP_TYPE_NORMAL;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
