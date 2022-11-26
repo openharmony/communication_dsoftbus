@@ -50,12 +50,10 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ifName %s link not ready", ifName);
         return SOFTBUS_ERR;
     }
-
     if (GetNetworkIpByIfName(ifName, ip, NULL, size) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get network IP by ifName failed!", __func__);
         return SOFTBUS_ERR;
     }
-
     if (strcmp(ip, LNN_LOOPBACK_IP) == 0) {
         return SOFTBUS_ERR;
     }
@@ -126,13 +124,12 @@ static void OpenProxyPort(void)
             .moduleId = PROXY
         }
     };
-    int32_t ret =
-        LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr, sizeof(listenerInfo.socketOption.addr));
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr,
+        sizeof(listenerInfo.socketOption.addr));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
         return;
     }
-
     int32_t port = ConnStartLocalListening(&listenerInfo);
     if (port < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open proxy server failed");
@@ -218,7 +215,6 @@ static void LeaveOldIpNetwork(const char *ifCurrentName)
             SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:LnnGetAddrTypeByIfName failed! ifName=%s", __func__, ifCurrentName);
         return;
     }
-
     if (type == CONNECTION_ADDR_MAX) {
         addrType[CONNECTION_ADDR_WLAN] = true;
         addrType[CONNECTION_ADDR_ETH] = true;
@@ -239,13 +235,11 @@ static int32_t ReleaseMainPort(const char *ifName)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get local ifName error!", __func__);
             break;
         }
-
         if (strcmp(ifName, oldMainIf) != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ifName %s is not main port!", ifName);
             return SOFTBUS_ERR;
         }
     } while (false);
-
     if (SetLocalIpInfo(LNN_LOOPBACK_IP, LNN_LOOPBACK_IFNAME) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:set local ip info failed", __func__);
         return SOFTBUS_ERR;
@@ -263,23 +257,19 @@ static int32_t RequestMainPort(const char *ifName, const char *address)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "loopback ip not allowed!");
         return SOFTBUS_ERR;
     }
-
     char oldMainIf[NET_IF_NAME_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, oldMainIf, sizeof(oldMainIf)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifName error!");
         return SOFTBUS_ERR;
     }
-
     if (strcmp(oldMainIf, ifName) != 0 && strcmp(oldMainIf, LNN_LOOPBACK_IFNAME) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Only 1 local subnet is allowed!");
         return SOFTBUS_ERR;
     }
-
     if (SetLocalIpInfo(address, ifName) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip info failed");
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
@@ -293,12 +283,10 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
             SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get available Ip failed!ifName=%s, ret=%d", subnet->ifName, ret);
         return ret;
     }
-
     if (RequestMainPort(subnet->ifName, address)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "request main port failed! ifName=%s", subnet->ifName);
         return SOFTBUS_ERR;
     }
-
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open ip link and start discovery");
     if (OpenIpLink() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed");
@@ -347,26 +335,26 @@ static void DestroyIpSubnetManager(LnnPhysicalSubnet *subnet)
 }
 
 typedef enum {
-    SUBNET_MANAGER_EVENT_IF_READY,
-    SUBNET_MANAGER_EVENT_IF_DOWN,    // addr change from avaliable to
-    SUBNET_MANAGER_EVENT_IF_CHANGED, // addr changed
-    SUBNET_MANAGER_EVENT_MAX
+    IP_SUBNET_MANAGER_EVENT_IF_READY,
+    IP_SUBNET_MANAGER_EVENT_IF_DOWN,    // addr change from avaliable to
+    IP_SUBNET_MANAGER_EVENT_IF_CHANGED, // addr changed
+    IP_SUBNET_MANAGER_EVENT_MAX
 } IpSubnetManagerEvent;
 
 typedef enum {
-    EVENT_RESULT_ACCEPTED = 0,
-    EVENT_RESULT_REJECTED,
-    EVENT_RESULT_OPTION_COUNT
+    IP_EVENT_RESULT_ACCEPTED = 0,
+    IP_EVENT_RESULT_REJECTED,
+    IP_EVENT_RESULT_OPTION_COUNT
 } IpSubnetManagerEventResultOptions;
 
 static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, IpSubnetManagerEvent event, bool isAccepted)
 {
-    LnnPhysicalSubnetStatus transactMap[][EVENT_RESULT_OPTION_COUNT] = {
-        [SUBNET_MANAGER_EVENT_IF_READY] = {LNN_SUBNET_RUNNING, LNN_SUBNET_IDLE},
-        [SUBNET_MANAGER_EVENT_IF_DOWN] = {LNN_SUBNET_SHUTDOWN, subnet->status},
-        [SUBNET_MANAGER_EVENT_IF_CHANGED] = {LNN_SUBNET_RESETTING, subnet->status}
+    LnnPhysicalSubnetStatus transactMap[][IP_EVENT_RESULT_OPTION_COUNT] = {
+        [IP_SUBNET_MANAGER_EVENT_IF_READY] = {LNN_SUBNET_RUNNING, LNN_SUBNET_IDLE},
+        [IP_SUBNET_MANAGER_EVENT_IF_DOWN] = {LNN_SUBNET_SHUTDOWN, subnet->status},
+        [IP_SUBNET_MANAGER_EVENT_IF_CHANGED] = {LNN_SUBNET_RESETTING, subnet->status}
     };
-    subnet->status = transactMap[event][isAccepted ? EVENT_RESULT_ACCEPTED : EVENT_RESULT_REJECTED];
+    subnet->status = transactMap[event][isAccepted ? IP_EVENT_RESULT_ACCEPTED : IP_EVENT_RESULT_REJECTED];
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "subnet [%s, %u] state change to %d", subnet->ifName,
         subnet->protocol->id, subnet->status);
 }
@@ -376,9 +364,9 @@ static IpSubnetManagerEvent GetIpEventInOther(LnnPhysicalSubnet *subnet)
     char currentIfAddress[IP_LEN] = {0};
     int32_t ret = GetAvailableIpAddr(subnet->ifName, currentIfAddress, sizeof(currentIfAddress));
     if (ret == SOFTBUS_OK) {
-        return SUBNET_MANAGER_EVENT_IF_READY;
+        return IP_SUBNET_MANAGER_EVENT_IF_READY;
     } else {
-        return subnet->status != LNN_SUBNET_SHUTDOWN ? SUBNET_MANAGER_EVENT_IF_DOWN : SUBNET_MANAGER_EVENT_MAX;
+        return subnet->status != LNN_SUBNET_SHUTDOWN ? IP_SUBNET_MANAGER_EVENT_IF_DOWN : IP_SUBNET_MANAGER_EVENT_MAX;
     }
 }
 
@@ -387,24 +375,22 @@ static IpSubnetManagerEvent GetIpEventInRunning(LnnPhysicalSubnet *subnet)
     char currentIfAddress[IP_LEN] = {0};
     int32_t ret = GetAvailableIpAddr(subnet->ifName, currentIfAddress, sizeof(currentIfAddress));
     if (ret != SOFTBUS_OK) {
-        return SUBNET_MANAGER_EVENT_IF_DOWN;
+        return IP_SUBNET_MANAGER_EVENT_IF_DOWN;
     }
 
     char localIpAddr[IP_LEN] = {0};
     char localNetifName[NET_IF_NAME_LEN] = {0};
     if (GetLocalIpInfo(localIpAddr, sizeof(localIpAddr), localNetifName, sizeof(localNetifName)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get main ip info failed");
-        return SUBNET_MANAGER_EVENT_IF_READY;
+        return IP_SUBNET_MANAGER_EVENT_IF_READY;
     }
-
     if (strcmp(localNetifName, subnet->ifName) != 0) {
-        return SUBNET_MANAGER_EVENT_IF_READY;
+        return IP_SUBNET_MANAGER_EVENT_IF_READY;
     }
-
     if (strcmp(localIpAddr, currentIfAddress) == 0) {
-        return SUBNET_MANAGER_EVENT_MAX;
+        return IP_SUBNET_MANAGER_EVENT_MAX;
     } else {
-        return SUBNET_MANAGER_EVENT_IF_CHANGED;
+        return IP_SUBNET_MANAGER_EVENT_IF_CHANGED;
     }
 }
 
@@ -412,13 +398,14 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 {
     if (subnet->status == LNN_SUBNET_RESETTING || subnet->status == LNN_SUBNET_IDLE) {
         int32_t ret = EnableIpSubnet(subnet);
-        TransactIpSubnetState(subnet, SUBNET_MANAGER_EVENT_IF_READY, (ret == SOFTBUS_OK));
+        TransactIpSubnetState(subnet, IP_SUBNET_MANAGER_EVENT_IF_READY, (ret == SOFTBUS_OK));
     }
 }
 
-static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet)
+static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
-    IpSubnetManagerEvent event = SUBNET_MANAGER_EVENT_MAX;
+    (void)status;
+    IpSubnetManagerEvent event = IP_SUBNET_MANAGER_EVENT_MAX;
 
     if (subnet->status == LNN_SUBNET_RUNNING) {
         event = GetIpEventInRunning(subnet);
@@ -428,19 +415,18 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet)
 
     int32_t ret = SOFTBUS_ERR;
     switch (event) {
-        case SUBNET_MANAGER_EVENT_IF_READY: {
+        case IP_SUBNET_MANAGER_EVENT_IF_READY: {
             ret = EnableIpSubnet(subnet);
             break;
         }
-        case SUBNET_MANAGER_EVENT_IF_DOWN: {
+        case IP_SUBNET_MANAGER_EVENT_IF_DOWN: {
             ret = DisableIpSubnet(subnet);
             break;
         }
-        case SUBNET_MANAGER_EVENT_IF_CHANGED: {
+        case IP_SUBNET_MANAGER_EVENT_IF_CHANGED: {
             ret = ChangeIpSubnetAddress(subnet);
             break;
         }
-
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "discard unexpected event %d", event);
             return;
@@ -480,7 +466,7 @@ static VisitNextChoice NotifyIpAddressChanged(const LnnPhysicalSubnet *subnet, v
 {
     (void)data;
     if (subnet->protocol->id == LNN_PROTOCOL_IP) {
-        LnnNotifyPhysicalSubnetAddressChanged(subnet->ifName, LNN_PROTOCOL_IP);
+        LnnNotifyPhysicalSubnetStatusChanged(subnet->ifName, LNN_PROTOCOL_IP, NULL);
     }
     return CHOICE_VISIT_NEXT;
 }
@@ -493,7 +479,7 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorAddressChangedEvent *event = (const LnnMonitorAddressChangedEvent *)info;
     if (strlen(event->ifName) != 0) {
-        LnnNotifyPhysicalSubnetAddressChanged(event->ifName, LNN_PROTOCOL_IP);
+        LnnNotifyPhysicalSubnetStatusChanged(event->ifName, LNN_PROTOCOL_IP, NULL);
     } else {
         (void)LnnVisitPhysicalSubnet(NotifyIpAddressChanged, NULL);
     }
@@ -503,7 +489,7 @@ static VisitNextChoice NotifyWlanAddressChanged(const LnnNetIfMgr *netifManager,
 {
     (void)data;
     if (netifManager->type == LNN_NETIF_TYPE_WLAN) {
-        LnnNotifyPhysicalSubnetAddressChanged(netifManager->ifName, LNN_PROTOCOL_IP);
+        LnnNotifyPhysicalSubnetStatusChanged(netifManager->ifName, LNN_PROTOCOL_IP, NULL);
     }
     return CHOICE_VISIT_NEXT;
 }
@@ -545,7 +531,6 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:oom!", __func__);
         return SOFTBUS_ERR;
     }
-
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:regist subnet manager failed! ret=%d", __func__, ret);
