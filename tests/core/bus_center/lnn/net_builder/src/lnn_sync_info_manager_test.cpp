@@ -19,6 +19,8 @@
 #include "lnn_sync_info_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_trans_mock.h"
+#include "message_handler.h"
 
 namespace OHOS {
 using namespace testing;
@@ -27,7 +29,6 @@ using namespace testing::ext;
 constexpr char NETWORLID[65] = "abcdefg";
 constexpr uint8_t MSG[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 constexpr uint32_t LEN = 10;
-constexpr uint32_t LEN2 = 4096;
 
 class LnnSyncInfoManagerTest : public testing::Test {
 public:
@@ -39,12 +40,17 @@ public:
 
 void LnnSyncInfoManagerTest::SetUpTestCase()
 {
+    LooperInit();
+    NiceMock<LnnTransInterfaceMock> transMock;
+    EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener).WillRepeatedly(
+        DoAll(LnnTransInterfaceMock::ActionOfTransRegister, Return(SOFTBUS_OK)));
     int32_t ret = LnnInitSyncInfoManager();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 void LnnSyncInfoManagerTest::TearDownTestCase()
 {
+    LooperDeinit();
     LnnDeinitSyncInfoManager();
 }
 
@@ -64,7 +70,6 @@ void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, u
 {
 }
 
-
 /*
 * @tc.name: LNN_REG_SYNC_INFO_HANDLER_TEST_001
 * @tc.desc: invalid parameter
@@ -77,6 +82,8 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -89,8 +96,11 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
 {
     int32_t ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_COUNT, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    
     ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_OFFLINE, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    LnnRegSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
     ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -105,9 +115,5 @@ HWTEST_F(LnnSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level
 {
     int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_COUNT, NETWORLID, MSG, LEN, Complete);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_NODE_ADDR_DETECTION, NETWORLID, MSG, LEN2, Complete);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_NODE_ADDR_DETECTION, NETWORLID, MSG, LEN, Complete);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS
