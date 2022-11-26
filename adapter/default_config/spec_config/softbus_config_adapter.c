@@ -17,7 +17,7 @@
 
 #define MAX_BYTES_LENGTH 4194304
 
-void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
+NO_SANITIZE("cfi") void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
 {
     int32_t val;
     val = MAX_BYTES_LENGTH;

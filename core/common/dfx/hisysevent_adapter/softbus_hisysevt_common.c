@@ -115,7 +115,7 @@ static SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc ca
     return msg;
 }
 
-static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc callback, uint64_t delayMillis)
+NO_SANITIZE("cfi") static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc callback, uint64_t delayMillis)
 {
     if ((looper == NULL) || (callback == NULL)) {
         return SOFTBUS_INVALID_PARAM;

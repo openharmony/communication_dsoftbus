@@ -254,7 +254,7 @@ static void ResetGattService(SoftBusGattService *service)
     (void)SoftBusMutexUnlock(&g_serviceStateLock);
 }
 
-static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle)
+NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceAddCallback srvcHandle=%d\n", srvcHandle);
     if ((uuid == NULL) || (uuid->uuid == NULL)) {
@@ -311,7 +311,7 @@ static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandl
     }
 }
 
-static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle,
+NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle,
     int characteristicHandle)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
@@ -676,7 +676,7 @@ static int BleConnLooperInit(void)
     return SOFTBUS_OK;
 }
 
-void SoftBusGattServerOnBtStateChanged(int state)
+NO_SANITIZE("cfi") void SoftBusGattServerOnBtStateChanged(int state)
 {
     if (state != SOFTBUS_BT_STATE_TURN_ON && state != SOFTBUS_BT_STATE_TURN_OFF) {
         return;

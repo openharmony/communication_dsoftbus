@@ -71,7 +71,7 @@ void ClientTransProxyDeinit(void)
     ClinetTransProxyFileManagerDeinit();
 }
 
-int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+NO_SANITIZE("cfi") int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransProxyOnChannelOpened invalid param.");
@@ -87,7 +87,7 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
+NO_SANITIZE("cfi") int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY);
     if (ret != SOFTBUS_OK) {

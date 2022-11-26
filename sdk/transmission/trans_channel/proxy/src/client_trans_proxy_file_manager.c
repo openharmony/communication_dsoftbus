@@ -1565,7 +1565,7 @@ static FileRecipientInfo *GetRecipientInProcessRef(int32_t sessionId)
     return recipient;
 }
 
-static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const FileFrame *fileFrame)
+NO_SANITIZE("cfi") static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const FileFrame *fileFrame)
 {
     FileRecipientInfo *recipient = GetRecipientInCreateFileRef(sessionId, channelId);
     if (recipient == NULL) {
@@ -1712,7 +1712,7 @@ static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int
     return SOFTBUS_OK;
 }
 
-static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
+NO_SANITIZE("cfi") static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
 {
     FileRecipientInfo *recipient = GetRecipientInProcessRef(sessionId);
     if (recipient == NULL) {
@@ -1761,7 +1761,7 @@ EXIT_ERR:
     return SOFTBUS_ERR;
 }
 
-static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
+NO_SANITIZE("cfi") static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
 {
     FileRecipientInfo *recipient = GetRecipientInProcessRef(sessionId);
     if (recipient == NULL) {

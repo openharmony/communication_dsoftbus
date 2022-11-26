@@ -412,7 +412,7 @@ static SoftBusMessage *CreateTimeSyncMessage(int32_t msgType, void *para)
     return msg;
 }
 
-static int32_t PostMessageToHandler(int32_t msgType, void *para)
+NO_SANITIZE("cfi") static int32_t PostMessageToHandler(int32_t msgType, void *para)
 {
     SoftBusMessage *msg = CreateTimeSyncMessage(msgType, para);
     if (msg == NULL) {
