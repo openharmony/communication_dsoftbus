@@ -24,6 +24,7 @@
 #include "softbus_log.h"
 
 namespace OHOS {
+    static constexpr size_t MAX_BUFFER_LEN = 100;
     bool InsertRecordFuzzTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size == 0) {
@@ -31,8 +32,12 @@ namespace OHOS {
         }
 
         DbContext *ctx = nullptr;
-        InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)data);
-        InsertRecord(ctx, TABLE_NAME_ID_MAX, (uint8_t *)data);
+        uint8_t buff[OHOS::MAX_BUFFER_LEN] = { 0 };
+        if (memcpy_s(buff, sizeof(buff) - 1, data, size) != EOK) {
+            return false;
+        }
+        InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, buff);
+        InsertRecord(ctx, TABLE_NAME_ID_MAX, buff);
 
         return true;
     }
