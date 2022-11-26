@@ -11,7 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
+
+module_output_path = "dsoftbus/transmission"
 
 if (defined(ohos_lite)) {
   executable("dsoftbus_app_dfile") {
@@ -58,5 +61,60 @@ if (defined(ohos_lite)) {
       part_name = "dsoftbus"
     }
     subsystem_name = "communication"
+  }
+
+  ohos_unittest("TransSdkFileTest") {
+    module_out_path = module_output_path
+    sources = [ "trans_sdk_file_test.cpp" ]
+
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+      "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/src",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/core",
+      "//commonlibrary/c_utils/base/include",
+      "//third_party/bounds_checking_function/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/src",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/core",
+    ]
+
+    deps = [
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+      "$dsoftbus_root_path/sdk:softbus_client",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
+  group("unittest") {
+    testonly = true
+    deps = [ ":TransSdkFileTest" ]
   }
 }

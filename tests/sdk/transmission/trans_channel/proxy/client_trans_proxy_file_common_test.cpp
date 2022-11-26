@@ -31,6 +31,8 @@
 #define TEST_BUFFER_SIZE 1024
 #define TEST_FD (-1)
 #define TEST_RETRY_TIMES 2
+#define TEST_DATA 26559
+#define TEST_NORMAL_FD 128
 
 using namespace std;
 using namespace testing::ext;
@@ -230,6 +232,11 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.
  */
 HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFileNameTest, TestSize.Level0)
 {
+    uint16_t usDataLen = 1;
+    const unsigned char strTmp[] = "test";
+    uint16_t ret = RTU_CRC(strTmp, usDataLen);
+    EXPECT_EQ(TEST_DATA, ret);
+    
     const char *resultFirst = TransGetFileName(nullptr);
     EXPECT_STREQ(nullptr, resultFirst);
 
@@ -278,7 +285,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, BufferToFileListTest, TestSize.Level0)
  */
 HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level0)
 {
-    int fd = 1;
+    int fd = TEST_NORMAL_FD;
     int ret = TryFileLock(fd, SOFTBUS_F_RDLCK, 0);
     EXPECT_EQ(SOFTBUS_FILE_BUSY, ret);
 
@@ -286,10 +293,10 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TryFileLock(fd, SOFTBUS_F_RDLCK, TEST_RETRY_TIMES);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = FileLock(fd, SOFTBUS_F_RDLCK, false);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = FileLock(fd, SOFTBUS_F_RDLCK, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -298,6 +305,6 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = FileUnLock(fd);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
