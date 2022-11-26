@@ -38,6 +38,16 @@ static DecisionDbDepsInterfaceMock *GetDecisionDbDepsInterface()
     return reinterpret_cast<DecisionDbDepsInterfaceMock *>(g_decisionDbDepsInterface);
 }
 
+int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(SoftBusLooper *looper,
+    LnnAsyncCallbackFunc callback, void *para)
+{
+    if (callback != NULL) {
+        callback(para);
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
+}
+
 extern "C" {
 int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
 {
@@ -145,16 +155,6 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen,
     const unsigned char *inBuf, uint32_t inLen)
 {
     return GetDecisionDbDepsInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
-}
-
-int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(SoftBusLooper *looper,
-    LnnAsyncCallbackFunc callback, void *para)
-{
-    if (callback != NULL) {
-        callback(para);
-        return SOFTBUS_OK;
-    }
-    return SOFTBUS_ERR;
 }
 } // extern "C"
 } // namespace OHOS
