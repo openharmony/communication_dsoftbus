@@ -60,14 +60,15 @@ public:
     {}
 };
 
-int32_t TestSessionDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
-    TransReceiveData* receiveData)
+int32_t TestSessionDataReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+    const void *data, uint32_t len, int32_t type)
 {
     (void)pkgName;
-    (void)pid;
     (void)channelId;
     (void)channelType;
-    (void)receiveData;
+    (void)data;
+    (void)len;
+    (void)type;
     return SOFTBUS_OK;
 }
 
@@ -219,30 +220,29 @@ HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest003, TestSize.Level
 HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest001, TestSize.Level1)
 {
     const char *pkgName = "com.test.trans.proxysession";
-    int32_t pid = 0;
     int32_t channelId = -1;
     char buf[100] = {0};
     TestSliceHead head;
     uint32_t len = 10;
-    int32_t ret = TransOnNormalMsgReceived(pkgName, pid, channelId, NULL, len);
+    int32_t ret = TransOnNormalMsgReceived(pkgName, channelId, NULL, len);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
+    ret = TransOnNormalMsgReceived(pkgName, channelId, buf, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     head.priority  = -1;
     len += 50;
     (void)memcpy_s(buf, 100, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
+    ret = TransOnNormalMsgReceived(pkgName, channelId, buf, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     head.priority  = 3;
     (void)memcpy_s(buf, 100, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
+    ret = TransOnNormalMsgReceived(pkgName, channelId, buf, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     head.priority  = 2;
     head.sliceNum = 2;
     head.sliceSeq = 2;
     (void)memcpy_s(buf, 100, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
+    ret = TransOnNormalMsgReceived(pkgName, channelId, buf, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -255,17 +255,16 @@ HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest001, TestSize.Level1
 HWTEST_F(TransProxySessionTest, TransOnAuthMsgReceivedTest001, TestSize.Level1)
 {
     const char *pkgName = "com.test.trans.proxysession";
-    int32_t pid = 0;
     int32_t channelId = -1;
     const char * data = "test data";
-    int32_t ret = TransOnAuthMsgReceived(pkgName, pid, channelId, NULL, 0);
+    int32_t ret = TransOnAuthMsgReceived(pkgName, channelId, NULL, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     uint32_t len = 70 * 1024;
-    ret = TransOnAuthMsgReceived(pkgName, pid, channelId, data, len);
+    ret = TransOnAuthMsgReceived(pkgName, channelId, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     len = 20;
-    ret = TransOnAuthMsgReceived(pkgName, pid, channelId, data, len);
+    ret = TransOnAuthMsgReceived(pkgName, channelId, data, len);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
