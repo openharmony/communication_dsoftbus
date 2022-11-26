@@ -203,7 +203,7 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr, int32_
 
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen)
 {
-    if (addrLen < 0 ) {
+    if (addrLen < 0) {
         return SOFTBUS_ADAPTER_ERR;
     }
     struct sockaddr sysAddr;
