@@ -66,8 +66,8 @@ void LnnDeviceNameInfoTest::TearDown()
 */
 HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
-    NetBuilderDepsInterfaceMock netbuilderMock;
-    LnnNetLedgertInterfaceMock ledgerMock;
+    NiceMock<NetBuilderDepsInterfaceMock> netbuilderMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     char name[DEVICE_NAME_BUF_LEN] = {0};
     LooperInit();
     EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -88,7 +88,7 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
 */
 HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_002, TestSize.Level1)
 {
-    NetBuilderDepsInterfaceMock netbuilderMock;
+    NiceMock<NetBuilderDepsInterfaceMock> netbuilderMock;
     EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     UpdateDeviceName(nullptr);
 }
