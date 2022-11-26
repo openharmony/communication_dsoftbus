@@ -15,10 +15,15 @@
 
 #ifndef SOFTBUS_PROXYCHANNEL_TRANSCEIVER_H
 #define SOFTBUS_PROXYCHANNEL_TRANSCEIVER_H
+
 #include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_proxychannel_message.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
     ListNode node;
@@ -44,5 +49,9 @@ void TransCreateConnByConnId(uint32_t connId);
 int32_t TransDecConnRefByConnId(uint32_t connId);
 int32_t TransAddConnRefByConnId(uint32_t connId);
 int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
