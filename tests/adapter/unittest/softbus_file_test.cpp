@@ -123,8 +123,6 @@ HWTEST_F(DsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
 {
     int32_t ret = SoftBusMakeDir(NULL, DEFAULT_NEW_PATH_AUTHORITY);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    ret = SoftBusMakeDir("/vendor/test", DEFAULT_NEW_PATH_AUTHORITY);
-    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
 
 /**
