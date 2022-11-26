@@ -51,16 +51,16 @@ void LnnNetBuilderMockTest::SetUpTestCase()
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener).WillRepeatedly(
         DoAll(LnnTransInterfaceMock::ActionOfTransRegister, Return(SOFTBUS_OK)));
-    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault
-        (LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
+    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault(
+        LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
     int32_t ret = LnnInitNetBuilder();
-    EXPECT_TRUE(ret == SOFTBUS_OK); 
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 void LnnNetBuilderMockTest::TearDownTestCase()
 {
-    LooperDeinit();
     LnnDeinitNetBuilder();
+    LooperDeinit();
 }
 
 void LnnNetBuilderMockTest::SetUp()
