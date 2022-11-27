@@ -580,7 +580,7 @@ int32_t BusCenterServerProxy::StopTimeSync(const char *pkgName, const char *targ
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t BusCenterServerProxy::PublishLNN(const char *pkgName, const PublishInfo *info)
 {
     if (pkgName == nullptr || info == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -600,12 +600,21 @@ int32_t BusCenterServerProxy::PublishLNN(const char *pkgName, const void *info, 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write client name failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write info type length failed!");
+    if (!data.WriteInt32(info->publishId) || !data.WriteInt32(info->mode) || !data.WriteInt32(info->medium) ||
+        !data.WriteInt32(info->freq) || !data.WriteCString(info->capability)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write publish common info failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteRawData(info, infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write info failed!");
+    if (!data.WriteUint32(info->dataLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write capabilityData length failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (info->dataLen != 0 && !data.WriteRawData(info->capabilityData, info->dataLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write capabilityData failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteBool(info->ranging)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write ranging failed!");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
@@ -660,7 +669,7 @@ int32_t BusCenterServerProxy::StopPublishLNN(const char *pkgName, int32_t publis
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
     if (pkgName == nullptr || info == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -680,12 +689,22 @@ int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const void *info, 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write client name failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write info type length failed!");
+    if (!data.WriteInt32(info->subscribeId) || !data.WriteInt32(info->mode) || !data.WriteInt32(info->medium) ||
+        !data.WriteInt32(info->freq)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write subscribe common info failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteRawData(info, infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write info failed!");
+    if (!data.WriteBool(info->isSameAccount) || !data.WriteBool(info->isWakeRemote) ||
+        !data.WriteCString(info->capability)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write flag and capability failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteUint32(info->dataLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write capabilityData length failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (info->dataLen != 0 && !data.WriteRawData(info->capabilityData, info->dataLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write capabilityData failed!");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
