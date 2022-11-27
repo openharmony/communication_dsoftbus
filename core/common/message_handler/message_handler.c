@@ -63,7 +63,7 @@ static int64_t UptimeMicros(void)
     return when;
 }
 
-static void FreeSoftBusMsg(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void FreeSoftBusMsg(SoftBusMessage *msg)
 {
     if (msg->FreeMessage == NULL) {
         SoftBusFree(msg);
@@ -90,7 +90,7 @@ void FreeMessage(SoftBusMessage *msg)
     }
 }
 
-static void *LoopTask(void *arg)
+NO_SANITIZE("cfi") static void *LoopTask(void *arg)
 {
     SoftBusLooper *looper = arg;
     SoftBusLooperContext *context = looper->context;
@@ -332,7 +332,7 @@ static int WhatRemoveFunc(const SoftBusMessage *msg, void *args)
     return 1;
 }
 
-static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
+NO_SANITIZE("cfi") static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
     int (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
     SoftBusLooperContext *context = looper->context;

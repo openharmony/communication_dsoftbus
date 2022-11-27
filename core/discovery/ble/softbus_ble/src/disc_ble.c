@@ -1341,7 +1341,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
     return SOFTBUS_OK;
 }
 
-static void StartTimeout(const char *key)
+NO_SANITIZE("cfi") static void StartTimeout(const char *key)
 {
     DLOGI("enter");
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
