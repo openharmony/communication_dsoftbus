@@ -570,7 +570,7 @@ HWTEST_F(BusCenterSdkTest, META_NODE_ON_JOIN_RESULT_Test001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ConnectionAddr connAddr;
     (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    addr = (void*)&connAddr;
+    addr = (void *)&connAddr;
     ret = MetaNodeOnJoinResult(addr, networkId, retCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

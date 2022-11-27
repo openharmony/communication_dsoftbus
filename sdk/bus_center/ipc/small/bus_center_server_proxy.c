@@ -150,7 +150,7 @@ void BusCenterServerProxyDeInit(void)
     g_serverProxy = NULL;
 }
 
-int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
+int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     if (info == NULL || infoNum == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
@@ -528,7 +528,6 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 

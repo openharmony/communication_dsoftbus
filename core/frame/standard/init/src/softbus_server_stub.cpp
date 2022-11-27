@@ -41,7 +41,7 @@ namespace OHOS {
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    if ((param == NULL) ||
+    if ((param == nullptr) ||
         (TransGetPkgNameBySessionName(param->sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession TransGetPkgNameBySessionName failed");
         return SOFTBUS_INVALID_PARAM;
@@ -243,7 +243,7 @@ int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParce
     if (subInfo.dataLen != 0) {
         subInfo.capabilityData = (unsigned char *)data.ReadCString();
     } else {
-        subInfo.capabilityData = NULL;
+        subInfo.capabilityData = nullptr;
     }
     int32_t retReply = StartDiscovery(pkgName, &subInfo);
     if (!reply.WriteInt32(retReply)) {
@@ -277,13 +277,11 @@ int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParce
     pubInfo.freq = (ExchangeFreq)data.ReadInt32();
     pubInfo.capability = data.ReadCString();
     pubInfo.dataLen = data.ReadUint32();
-
     if (pubInfo.dataLen != 0) {
         pubInfo.capabilityData = (unsigned char *)data.ReadCString();
     } else {
-        pubInfo.capabilityData = NULL;
+        pubInfo.capabilityData = nullptr;
     }
-
     int32_t retReply = PublishService(pkgName, &pubInfo);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PublishServiceInner write reply failed!");
@@ -568,7 +566,7 @@ int32_t SoftBusServerStub::JoinMetaNodeInner(MessageParcel &data, MessageParcel 
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner read addr failed!");
         return SOFTBUS_IPC_ERR;
     }
-    CustomData *customData = NULL;
+    CustomData *customData = nullptr;
     customData = (CustomData *)data.ReadRawData(sizeof(CustomData));
     if (customData == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner read customData failed!");
@@ -700,13 +698,9 @@ int32_t SoftBusServerStub::GetNodeKeyInfoLen(int32_t key)
 int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *clientName = data.ReadCString();
-    if (clientName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read clientName failed!");
-        return SOFTBUS_IPC_ERR;
-    }
     const char *networkId = data.ReadCString();
-    if (networkId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read networkId failed!");
+    if (clientName == nullptr || networkId == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read clientName or networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
     int32_t key;
@@ -724,7 +718,8 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         return SOFTBUS_IPC_ERR;
     }
     if (len < infoLen) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read len is invalid param!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "GetNodeKeyInfoInner read len is invalid param, len:%d, infoLen:%d", len, infoLen);
         return SOFTBUS_INVALID_PARAM;
     }
     void *buf = SoftBusCalloc(infoLen);
@@ -1103,9 +1098,8 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
 
 int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t retReply;
-    const char *targetNetworkId = NULL;
-    const GearMode *mode = NULL;
+    const char *targetNetworkId = nullptr;
+    const GearMode *mode = nullptr;
 
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
@@ -1119,7 +1113,7 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     }
     if (!data.ReadBool()) {
         targetNetworkId = data.ReadCString();
-        if (targetNetworkId == NULL || strnlen(targetNetworkId, NETWORK_ID_BUF_LEN) != NETWORK_ID_BUF_LEN - 1) {
+        if (targetNetworkId == nullptr || strnlen(targetNetworkId, NETWORK_ID_BUF_LEN) != NETWORK_ID_BUF_LEN - 1) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read targetNetworkId failed!");
             return SOFTBUS_ERR;
         }
@@ -1129,7 +1123,7 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read mode failed!");
         return SOFTBUS_ERR;
     }
-    retReply = ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
+    int32_t retReply = ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner write reply failed!");
         return SOFTBUS_ERR;

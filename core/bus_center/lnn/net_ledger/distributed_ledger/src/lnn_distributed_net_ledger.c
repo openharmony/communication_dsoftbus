@@ -67,7 +67,7 @@ typedef struct {
 typedef struct {
     DoubleHashMap distributedInfo;
     ConnectionCode cnnCode;
-    int countMax;
+    int32_t countMax;
     SoftBusMutex lock;
     DistributedLedgerStatus status;
     int32_t laneCount[LNN_LINK_TYPE_BUTT];
@@ -1298,16 +1298,15 @@ NO_SANITIZE("cfi") int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey 
 
 static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum, bool isNeedMeta)
 {
-    int ret = SOFTBUS_ERR;
-
     if (info == NULL || infoNum == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "key params are null");
-        return ret;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return ret;
+        return SOFTBUS_LOCK_ERR;
     }
+    int32_t ret = SOFTBUS_ERR;
     do {
         *info = NULL;
         if (GetDLOnlineNodeNumLocked(infoNum, isNeedMeta) != SOFTBUS_OK) {
@@ -1333,9 +1332,7 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
         SoftBusFree(*info);
         *info = NULL;
     }
-    if (SoftBusMutexUnlock(&g_distributedNetLedger.lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unlock mutex fail!");
-    }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return ret;
 }
 
@@ -1560,7 +1557,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, con
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    int ret = strcpy_s(nodeInfo->nodeAddress, sizeof(nodeInfo->nodeAddress), addr);
+    int32_t ret = strcpy_s(nodeInfo->nodeAddress, sizeof(nodeInfo->nodeAddress), addr);
     if (ret != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set node addr failed!ret=%d", ret);
     }
@@ -1568,7 +1565,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, con
     return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
-int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
+int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int32_t fd)
 {
     SOFTBUS_DPRINTF(fd, "-----RemoteDeviceInfo-----\n");
     NodeBasicInfo *remoteNodeInfo = NULL;
@@ -1578,7 +1575,7 @@ int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int fd)
         return SOFTBUS_ERR;
     }
     SOFTBUS_DPRINTF(fd, "remote device num = %d\n", infoNum);
-    for (int i = 0; i < infoNum; i++) {
+    for (int32_t i = 0; i < infoNum; i++) {
         SOFTBUS_DPRINTF(fd, "\n[NO.%d]\n", i + 1);
         SoftBusDumpBusCenterPrintInfo(fd, remoteNodeInfo + i);
     }

@@ -73,7 +73,6 @@ NO_SANITIZE("cfi") SoftBusList *CreateSoftBusList(void)
         SoftBusFree(list);
         return NULL;
     }
-
     ListInit(&list->list);
     return list;
 }
@@ -92,11 +91,9 @@ int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
         timerFunId < SOFTBUS_CONN_TIMER_FUN) {
         return SOFTBUS_ERR;
     }
-
     if (g_timerFunList[timerFunId] != NULL) {
         return SOFTBUS_OK;
     }
-
     g_timerFunList[timerFunId] = callback;
     return SOFTBUS_OK;
 }
@@ -139,7 +136,6 @@ NO_SANITIZE("cfi") int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32
     uint32_t inLen)
 {
     (void)outBufLen;
-
     if ((outBuf == NULL) || (inBuf == NULL) || (inLen % HEXIFY_UNIT_LEN != 0)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_ERR;
@@ -159,7 +155,6 @@ NO_SANITIZE("cfi") int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HexToString Error! %c", c);
             return SOFTBUS_ERR;
         }
-
         unsigned char c2 = *inBuf++;
         if ((c2 >= '0') && (c2 <= '9')) {
             c2 -= '0';
@@ -171,7 +166,6 @@ NO_SANITIZE("cfi") int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HexToString Error! %c2", c2);
             return SOFTBUS_ERR;
         }
-
         *outBuf++ = (c << HEX_MAX_BIT_NUM) | c2;
         i++;
     }
@@ -188,19 +182,16 @@ NO_SANITIZE("cfi") int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBuf
     while (inLen > 0) {
         unsigned char h = *inBuf / HEX_MAX_NUM;
         unsigned char l = *inBuf % HEX_MAX_NUM;
-
         if (h < DEC_MAX_NUM) {
             *outBuf++ = '0' + h;
         } else {
             *outBuf++ = 'a' + h - DEC_MAX_NUM;
         }
-
         if (l < DEC_MAX_NUM) {
             *outBuf++ = '0' + l;
         } else {
             *outBuf++ = 'a' + l - DEC_MAX_NUM;
         }
-
         ++inBuf;
         inLen--;
     }
@@ -219,17 +210,14 @@ NO_SANITIZE("cfi") int32_t GenerateRandomStr(char *str, uint32_t len)
         return SOFTBUS_MEM_ERR;
     }
     (void)memset_s(hexAuthId, hexLen, 0, hexLen);
-
     if (SoftBusGenerateRandomArray(hexAuthId, hexLen) != SOFTBUS_OK) {
         SoftBusFree(hexAuthId);
         return SOFTBUS_ERR;
     }
-
     if (ConvertBytesToHexString(str, len, hexAuthId, hexLen) != SOFTBUS_OK) {
         SoftBusFree(hexAuthId);
         return SOFTBUS_ERR;
     }
-
     SoftBusFree(hexAuthId);
     return SOFTBUS_OK;
 }
@@ -239,12 +227,10 @@ bool IsValidString(const char *input, uint32_t maxLen)
     if (input == NULL) {
         return false;
     }
-
     uint32_t len = strlen(input);
     if (len >= maxLen) {
         return false;
     }
-
     return true;
 }
 
@@ -342,18 +328,15 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
     if (!GetSignalingMsgSwitch()) {
         return;
     }
-
     if (dataLen >= BUF_BYTE_LEN) {
         ret = ConvertBytesToHexString(signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, BUF_BYTE_LEN);
     } else {
         ret = ConvertBytesToHexString(signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, dataLen);
     }
-
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "intercept signaling msg faile");
         return;
     }
-
     if (module == SOFTBUS_LOG_DISC) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
                    distinguish, dataLen, signalingMsgBuf);
@@ -370,7 +353,6 @@ void MacInstead(char *data, uint32_t length, char delimiter)
         return;
     }
     int delimiterCnt = 0;
-
     for (uint32_t i = 0; i < length; i++) {
         if (delimiterCnt == MAC_DELIMITER_FOURTH) {
             break;

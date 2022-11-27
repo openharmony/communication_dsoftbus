@@ -51,7 +51,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
     const char *pkgName = (const char*)ReadString(req, &len);
     uint32_t addrTypeLen;
     ReadUint32(req, &addrTypeLen);
-    void *addr = (void*)ReadBuffer(req, addrTypeLen);
+    void *addr = (void *)ReadBuffer(req, addrTypeLen);
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerJoinLNN read addr is null.");
         return SOFTBUS_ERR;
@@ -156,7 +156,7 @@ int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply)
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo malloc info type length failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     int32_t ret = LnnIpcGetLocalDeviceInfo(pkgName, nodeInfo, infoTypeLen);
     if (ret != SOFTBUS_OK) {
@@ -175,6 +175,11 @@ int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply)
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerGetNodeKeyInfo ipc server pop.");
     size_t length;
     const char *pkgName = (const char*)ReadString(req, &length);
+    int32_t callingUid = GetCallingUid();
+    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
     const char *networkId = (const char*)ReadString(req, &length);
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read networkId failed!");
@@ -184,24 +189,20 @@ int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply)
     ReadInt32(req, &key);
     int32_t infoLen  = LnnIpcGetNodeKeyInfoLen(key);
     if (infoLen == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner get infoLen failed!");
         return SOFTBUS_ERR;
     }
     int32_t len;
     ReadInt32(req, &len);
     if (len < infoLen) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read len is invalid param!");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "GetNodeKeyInfoInner read len is invalid param, len:%d, infoLen:%d", len, infoLen);
         return SOFTBUS_ERR;
     }
     void *buf = SoftBusCalloc(infoLen);
     if (buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo malloc buffer failed!");
-        return SOFTBUS_ERR;
-    }
-    int32_t callingUid = GetCallingUid();
-    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo no permission.");
-        SoftBusFree(buf);
-        return SOFTBUS_PERMISSION_DENIED;
+        return SOFTBUS_MEM_ERR;
     }
     int32_t ret = LnnIpcGetNodeKeyInfo(pkgName, networkId, key, (unsigned char *)buf, infoLen);
     if (ret != SOFTBUS_OK) {

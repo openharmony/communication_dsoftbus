@@ -82,13 +82,11 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
-    int ret = data.WriteRemoteObject(clientStub);
-    if (!ret) {
+    if (!data.WriteRemoteObject(clientStub)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write remote object failed!");
         return SOFTBUS_ERR;
     }
-    ret = data.WriteCString(clientPkgName);
-    if (!ret) {
+    if (!data.WriteCString(clientPkgName)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write clientPkgName failed!");
         return SOFTBUS_ERR;
     }
@@ -101,8 +99,7 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
-    ret = reply.ReadInt32(serverRet);
-    if (!ret) {
+    if (!reply.ReadInt32(serverRet)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService read serverRet failed!");
         return SOFTBUS_ERR;
     }
