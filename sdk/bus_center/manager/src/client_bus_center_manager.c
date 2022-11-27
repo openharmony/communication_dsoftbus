@@ -291,6 +291,39 @@ static void ClearLeaveLNNList(void)
     }
 }
 
+static void ClearJoinMetaNodeList(void)
+{
+    JoinMetaNodeCbListItem *item = NULL;
+    JoinMetaNodeCbListItem *next = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_busCenterClient.joinMetaNodeCbList, JoinMetaNodeCbListItem, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+}
+
+static void ClearLeaveMetaNodeList(void)
+{
+    LeaveMetaNodeCbListItem *item = NULL;
+    LeaveMetaNodeCbListItem *next = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_busCenterClient.leaveMetaNodeCbList, LeaveMetaNodeCbListItem, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+}
+
+static void ClearTimeSyncList(ListNode *list)
+{
+    TimeSyncCallbackItem *item = NULL;
+    TimeSyncCallbackItem *next = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, list, TimeSyncCallbackItem, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+}
+
 static void ClearNodeStateCbList(ListNode *list)
 {
     NodeStateCallbackItem *item = NULL;
@@ -351,6 +384,9 @@ void BusCenterClientDeinit(void)
     }
     ClearJoinLNNList();
     ClearLeaveLNNList();
+    ClearJoinMetaNodeList();
+    ClearLeaveMetaNodeList();
+    ClearTimeSyncList(&g_busCenterClient.timeSyncCbList);
     ClearNodeStateCbList(&g_busCenterClient.nodeStateCbList);
     g_busCenterClient.nodeStateCbListCnt = 0;
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
@@ -370,7 +406,6 @@ int BusCenterClientInit(void)
 
     if (SoftBusMutexInit(&g_busCenterClient.lock, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "g_busCenterClient.lock init failed.");
-        BusCenterClientDeinit();
         return SOFTBUS_ERR;
     }
 
@@ -564,6 +599,10 @@ static bool IsSameNodeStateCb(const INodeStateCb *callback1, const INodeStateCb 
     }
     if ((callback1->events & EVENT_NODE_STATE_INFO_CHANGED) &&
         callback1->onNodeBasicInfoChanged != callback2->onNodeBasicInfoChanged) {
+        return false;
+    }
+    if ((callback1->events & EVENT_NODE_STATUS_CHANGED) &&
+        callback1->onNodeStatusChanged != callback2->onNodeStatusChanged) {
         return false;
     }
     return true;
@@ -991,6 +1030,7 @@ NO_SANITIZE("cfi") int32_t LnnOnTimeSyncResult(const void *info, int retCode)
             item->cb.onTimeSyncResult((TimeSyncResultInfo *)info, retCode);
         }
     }
+    ClearTimeSyncList(&dupList);
     return SOFTBUS_OK;
 }
 

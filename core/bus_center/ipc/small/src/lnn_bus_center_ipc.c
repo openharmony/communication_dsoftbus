@@ -188,9 +188,12 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uin
 {
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
 
-    (void)addrTypeLen;
     if (pkgName == NULL || connAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {

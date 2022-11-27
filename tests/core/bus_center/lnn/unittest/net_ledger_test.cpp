@@ -29,6 +29,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_conn_interface.h"
 #include "softbus_log.h"
@@ -214,8 +215,11 @@ HWTEST_F(NetLedgerTest, GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001, TestSize.Lev
     (void)memset_s(info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(&info, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(&info, &infoNum) == SOFTBUS_OK);
+    SoftBusFree(info);
+    info = nullptr;
     infoNum = DEFAULT_SIZE;
     EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(&info, &infoNum) == SOFTBUS_OK);
+    SoftBusFree(info);
 }
 
 /*

@@ -25,6 +25,7 @@
 #include "message_parcel.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
@@ -338,8 +339,10 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo read infoNum failed!");
         return SOFTBUS_IPC_ERR;
     }
+    uint32_t maxConnCount = UINT32_MAX;
+    (void)SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, (unsigned char *)&maxConnCount, sizeof(maxConnCount));
     *info = nullptr;
-    if ((*infoNum) > 0) {
+    if ((*infoNum) > 0 && (uint32_t)(*infoNum) <= maxConnCount) {
         uint32_t infoSize = (uint32_t)(*infoNum) * infoTypeLen;
         void *nodeInfo = const_cast<void *>(reply.ReadRawData(infoSize));
         if (nodeInfo == nullptr) {
@@ -354,6 +357,7 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
         if (memcpy_s(*info, infoSize, nodeInfo, infoSize) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo copy node info failed!");
             SoftBusFree(*info);
+            *info = nullptr;
             return SOFTBUS_MEM_ERR;
         }
     }
@@ -435,7 +439,9 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
         return SOFTBUS_IPC_ERR;
     }
     int32_t infoLen;
-    if (!reply.ReadInt32(infoLen)) {
+    if (!reply.ReadInt32(infoLen) || infoLen <= 0 || (uint32_t)infoLen > len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+            "GetNodeKeyInfo read infoLen failed, len:%d, infoLen:%d", len, infoLen);
         return SOFTBUS_IPC_ERR;
     }
     void *retBuf = const_cast<void *>(reply.ReadRawData(infoLen));
@@ -490,7 +496,7 @@ int32_t BusCenterServerProxy::SetNodeDataChangeFlag(const char *pkgName, const c
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag read serverRet failed!");
         return SOFTBUS_IPC_ERR;
     }
-    return SOFTBUS_OK;
+    return serverRet;
 }
 
 int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
