@@ -50,8 +50,8 @@ void LnnSyncInfoManagerTest::SetUpTestCase()
 
 void LnnSyncInfoManagerTest::TearDownTestCase()
 {
-    LooperDeinit();
     LnnDeinitSyncInfoManager();
+    LooperDeinit();
 }
 
 void LnnSyncInfoManagerTest::SetUp()
