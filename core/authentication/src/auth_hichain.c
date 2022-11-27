@@ -235,7 +235,7 @@ static const GroupAuthManager *InitHichain(void)
     return gaIns;
 }
 
-int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
+NO_SANITIZE("cfi") int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
