@@ -34,7 +34,7 @@ typedef struct {
     SoftBusBtStateListener *listener;
 } StateListener;
 
-static int ConvertBtState(const int transport, int state)
+static int ConvertBtState(int transport, int state)
 {
     switch (state) {
         case OHOS_GAP_STATE_TURNING_ON:
@@ -71,7 +71,7 @@ static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
 {
     SoftBusBtAddr btAddr = {0};
     if (memcpy_s(btAddr.addr, sizeof(btAddr.addr), bdAddr->addr, sizeof(bdAddr->addr)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy bdAddr fail");
+        CLOGE("copy bdAddr fail");
     }
     return btAddr;
 }
@@ -81,10 +81,9 @@ static bool g_isRegCb = false;
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WrapperStateChangeCallback, transport=%d, status=%d",
-        transport, status);
+    CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
     int listenerId;
-    int st = ConvertBtState(transport, (BtStatus)status);
+    int st = ConvertBtState(transport, status);
     for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
         if (g_stateListener[listenerId].isUsed &&
             g_stateListener[listenerId].listener != NULL &&
@@ -97,12 +96,11 @@ static void WrapperStateChangeCallback(const int transport, const int status)
 static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state, unsigned int reason)
 {
     if (bdAddr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperAclStateChangedCallback addr is null");
+        CLOGE("WrapperAclStateChangedCallback addr is null");
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u\n",
+    CLOGI("WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], state, reason);
     int listenerId;
     int aclState = ConvertAclState(state);
@@ -119,31 +117,29 @@ static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState sta
 static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
 {
     if (bdAddr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperPairRequestedCallback addr is null");
+        CLOGE("WrapperPairRequestedCallback addr is null");
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d\n",
+    CLOGI("WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], transport);
-    if (PairRequestReply(bdAddr, transport, true) != true) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PairRequestReply error");
+    if (!PairRequestReply(bdAddr, transport, true)) {
+        CLOGE("PairRequestReply error");
     }
 }
 
 static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, int reqType, int number)
 {
     if (bdAddr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "WrapperPairConfirmedCallback addr is null");
+        CLOGE("WrapperPairConfirmedCallback addr is null");
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "WrapperPairConfirmedCallback, addr=%02X:%02X:***%02X, transport=%d, reqType:%d, number:%d\n",
+    CLOGI("WrapperPairConfirmedCallback, addr=%02X:%02X:***%02X, transport=%d, reqType:%d, number:%d",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX],
         transport, reqType, number);
-    if (SetDevicePairingConfirmation(bdAddr, transport, true) != true) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetDevicePairingConfirmation error");
+    if (!SetDevicePairingConfirmation(bdAddr, transport, true)) {
+        CLOGE("SetDevicePairingConfirmation error");
     }
 }
 

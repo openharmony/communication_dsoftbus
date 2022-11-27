@@ -23,8 +23,8 @@
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb);
 

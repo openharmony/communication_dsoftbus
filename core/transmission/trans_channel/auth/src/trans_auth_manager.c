@@ -287,7 +287,6 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
 EXIT_ERR:
     DelAuthChannelInfoByAuthId(authId);
     AuthCloseChannel(authId);
-    return;
 }
 
 static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len)
@@ -316,12 +315,12 @@ EXIT_ERR:
     DelAuthChannelInfoByChanId(info.appInfo.myData.channelId);
     (void)NotifyOpenAuthChannelFailed(info.appInfo.myData.pkgName, info.appInfo.myData.pid,
         info.appInfo.myData.channelId, ret);
-    return;
 }
 
 static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
 {
-    if (data == NULL || data->data == NULL) {
+    if (data == NULL || data->data == NULL || data->len < 1 || data->data[data->len - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
 
@@ -420,7 +419,8 @@ static void DelAuthChannelInfoByChanId(int32_t channelId)
         return;
     }
     AuthChannelInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
+    AuthChannelInfo *tmp = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, tmp, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->appInfo.myData.channelId == channelId) {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -440,7 +440,8 @@ static void DelAuthChannelInfoByAuthId(int32_t authId)
         return;
     }
     AuthChannelInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
+    AuthChannelInfo *tmp = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, tmp, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->authId == authId) {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -632,10 +633,11 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
 int32_t TransCloseAuthChannel(int32_t channelId)
 {
     AuthChannelInfo *channel = NULL;
+    AuthChannelInfo *tmp = NULL;
     if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    LIST_FOR_EACH_ENTRY(channel, &g_authChannelList->list, AuthChannelInfo, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(channel, tmp, &g_authChannelList->list, AuthChannelInfo, node) {
         if (channel->appInfo.myData.channelId != channelId) {
             continue;
         }

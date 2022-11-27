@@ -33,7 +33,7 @@ namespace OHOS {
             return false;
         }
         unsigned char *outBuf = nullptr;
-        ConvertHexStringToBytes(outBuf, size, (const char *)rawData, size);
+        ConvertHexStringToBytes(outBuf, size, reinterpret_cast<const char*>(rawData), size);
         return true;
     }
 }

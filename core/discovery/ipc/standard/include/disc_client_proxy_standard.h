@@ -17,39 +17,22 @@
 #define INTERFACES_INNERKITS_DISC_CLIENT_PROXY_STANDARD_H_
 
 #include "if_softbus_client.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 class DiscClientProxy : public IRemoteProxy<ISoftBusClient> {
 public:
-    explicit DiscClientProxy(const sptr<IRemoteObject> &impl)
-        : IRemoteProxy<ISoftBusClient>(impl) {}
-    virtual ~DiscClientProxy() = default;
+    explicit DiscClientProxy(const sptr<IRemoteObject> &impl);
+    ~DiscClientProxy() override;
 
     void OnDeviceFound(const DeviceInfo *device) override;
     void OnDiscoverFailed(int subscribeId, int failReason) override;
     void OnDiscoverySuccess(int subscribeId) override;
     void OnPublishSuccess(int publishId) override;
     void OnPublishFail(int publishId, int reason) override;
-    int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *channel) override;
-    int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode) override;
-    int32_t OnChannelLinkDown(const char *networkId, int32_t routeType) override;
-    int32_t OnChannelClosed(int32_t channelId, int32_t channelType) override;
-    int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
-        uint32_t len, int32_t type) override;
-    int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
-        const QosTv *tvList) override;
-
-    int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
-    int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
-    int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
-    int32_t OnLeaveMetaNodeResult(const char *networkId, int retCode) override;
-    int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) override;
-    int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) override;
-    int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
 
 private:
     static inline BrokerDelegator<DiscClientProxy> delegator_;
 };
-} // namespace OHOS
-
-#endif // !defined(INTERFACES_INNERKITS_DISC_CLIENT_PROXY_STANDARD_H_)
+}
+#endif

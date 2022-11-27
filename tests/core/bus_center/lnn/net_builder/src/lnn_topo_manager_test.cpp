@@ -20,9 +20,11 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_service_mock.h"
 
 namespace OHOS {
 using namespace testing::ext;
+using namespace testing;
 
 constexpr char UDID[] = "123456789";
 constexpr char PEER1_UDID[] = "123456789";
@@ -39,6 +41,9 @@ public:
 
 void LnnTopoManagerTest::SetUpTestCase()
 {
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault(
+        LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
     LnnInitTopoManager();
 }
 

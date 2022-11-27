@@ -25,7 +25,7 @@ namespace OHOS {
 static constexpr size_t MAX_BUFFER_LEN = 100;
 static void NstackxLogTest(const char *buffer)
 {
-    NstackxLog(buffer, SOFTBUS_LOG_INFO, buffer);
+    NstackxLog("nstackx", SOFTBUS_LOG_DBG, "nstackx log is test.");
 }
 
 static void AnonymizesTest(const char *buffer)

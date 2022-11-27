@@ -29,6 +29,7 @@ trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
   "$dsoftbus_root_path/sdk/transmission/session/include",
+  "$dsoftbus_root_path/core/frame/common/include",
 ]
 trans_sdk_test_common_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
@@ -64,10 +65,14 @@ if (defined(ohos_lite)) {
   trans_sdk_proxy_test_src = [
     "proxy/client_trans_proxy_file_common_test.cpp",
     "udp/stream/trans_sdk_comm_stream_test.cpp",
+    "proxy/client_trans_pending_test.cpp",
+    "proxy/client_trans_proxy_manager_test.cpp",
   ]
 
-  trans_sdk_proxy_test_inc =
-      [ "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include" ]
+  trans_sdk_proxy_test_inc = [
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+  ]
 
   trans_sdk_proxy_test_deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
 
@@ -86,12 +91,68 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
   }
+  module_output_path = "dsoftbus/transmission"
+  ohos_unittest("TransSdkProxyFileManagerTest") {
+    module_out_path = module_output_path
+    sources = [ "proxy/client_trans_proxy_file_manager_test.cpp" ]
+    include_dirs = trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/sdk/bus_center/manager/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/session/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+    ]
+    deps = trans_sdk_test_common_deps
+    deps += trans_sdk_proxy_test_deps
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+  }
+
+  module_output_path = "dsoftbus/transmission"
+  ohos_unittest("TransSdkChannelManagerTest") {
+    module_out_path = module_output_path
+    sources = [
+      "manager/client_trans_channel_callback_test.cpp",
+      "manager/client_trans_channel_manager_test.cpp",
+      "manager/client_trans_session_impl_test.cpp",
+    ]
+    include_dirs = trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/src",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/auth/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    ]
+    deps = trans_sdk_test_common_deps
+    deps += trans_sdk_proxy_test_deps
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+  }
   group("unittest") {
     testonly = true
     deps = [
+      ":TransSdkChannelManagerTest",
+      ":TransSdkProxyFileManagerTest",
       ":TransSdkTest",
       "monitor_permission_test:MonitorPermission",
       "permission:DynamicPermissionTest",
+      "udp/distributed_stream:distributed_stream_test",
+      "udp/file:unittest",
     ]
   }
 }

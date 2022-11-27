@@ -27,6 +27,7 @@
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
 #include "softbus_hisysevt_nstack.h"
+#include "softbus_def.h"
 
 #define MS_OF_DAY (24 * 3600 * 1000)
 #define MSG_STATISTIC_EVT_REPORT 0
@@ -59,7 +60,7 @@ static void InitStatisticEvtReportFunc(void)
     }
 }
 
-static void ReportStatisticEvent(SoftBusMessage* param)
+NO_SANITIZE("cfi") static void ReportStatisticEvent(SoftBusMessage* param)
 {
     (void)param;
 
@@ -115,7 +116,8 @@ static SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc ca
     return msg;
 }
 
-static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc callback, uint64_t delayMillis)
+NO_SANITIZE("cfi") static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc callback,
+    uint64_t delayMillis)
 {
     if ((looper == NULL) || (callback == NULL)) {
         return SOFTBUS_INVALID_PARAM;

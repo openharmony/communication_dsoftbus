@@ -276,7 +276,7 @@ static void BleAdvDisableCallback(int channel, int status)
     if (status == SOFTBUS_BT_STATUS_SUCCESS) {
         for (int32_t i = 0; i < NUM_ADVERTISER; i++) {
             if (g_bleAdvertiser[i].channel == channel) {
-                g_bleAdvertiser[i].isAdvertising = true;
+                g_bleAdvertiser[i].isAdvertising = false;
                 DLOGI("disable ble advertiser adv=%d", i);
             }
         }
@@ -1341,7 +1341,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
     return SOFTBUS_OK;
 }
 
-static void StartTimeout(const char *key)
+NO_SANITIZE("cfi") static void StartTimeout(const char *key)
 {
     DLOGI("enter");
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {

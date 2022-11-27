@@ -24,6 +24,7 @@
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_link_proc.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_score.h"
@@ -266,7 +267,8 @@ uint32_t ApplyLaneId(LaneType type)
     return AllocLaneId(type);
 }
 
-int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
+NO_SANITIZE("cfi") int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
+    const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane requestInfo invalid");
@@ -277,7 +279,8 @@ int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const 
         return SOFTBUS_ERR;
     }
     int32_t result;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "laneRequest, laneId %u, lane type %d", laneId, request->type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "laneRequest, laneId %u, lane type %d, trans type is %d",
+        laneId, request->type, request->requestInfo.trans.transType);
     result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
     if (result != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "alloc lane fail, result:%d", result);
@@ -355,6 +358,10 @@ int32_t InitLane(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]laneDelayInit fail");
         return SOFTBUS_ERR;
     }
+    if (LnnLanePendingInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]LnnLanePendingInit fail");
+        return SOFTBUS_ERR;
+    }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -372,6 +379,7 @@ int32_t InitLane(void)
 
 void DeinitLane(void)
 {
+    LnnLanePendingDeinit();
     DeinitLaneModel();
     DeinitLaneLink();
     LnnDeinitScore();

@@ -209,15 +209,66 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("AdapterTimeTest") {
+    module_out_path = module_output_path
+    sources = [ "softbus_time_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/core/common/include/",
+    ]
+    deps = [
+      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+  ohos_unittest("AdapterFileTest") {
+    module_out_path = module_output_path
+    sources = [ "softbus_file_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/core/common/include/",
+    ]
+    deps = [
+      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
   group("unittest") {
     testonly = true
     deps = [
       ":AdapterCryptTest",
       ":AdapterDfxTest",
+      ":AdapterFileTest",
       ":AdapterOtherTest",
       ":AdapterRangeTest",
       ":AdapterSocketTest",
       ":AdapterThreadTest",
+      ":AdapterTimeTest",
     ]
   }
 }

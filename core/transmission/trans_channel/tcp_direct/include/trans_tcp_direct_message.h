@@ -24,7 +24,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 int32_t TransSrvDataListInit(void);
 void TransSrvDataListDeinit(void);
@@ -38,5 +38,5 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif // SOFTBUS_SESSION_CONNECT_H

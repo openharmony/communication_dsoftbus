@@ -25,7 +25,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 #define DC_MSG_PACKET_HEAD_SIZE 24
 #define SESSION_KEY_INDEX_SIZE 4
@@ -62,6 +62,6 @@ void TransTdcStopSessionProc(ListenerModule listenMod);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 #endif

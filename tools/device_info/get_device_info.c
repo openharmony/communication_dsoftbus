@@ -89,7 +89,7 @@ static void PrintNodePropertyNum(const NodeBasicInfo *nodeInfo)
     }
 }
 
-int main(void)
+int main(int argc __attribute__((unused)), char **argv __attribute__((unused)))
 {
     NodeBasicInfo localNodeinfo;
     NodeBasicInfo *remoteNodeInfo = NULL;

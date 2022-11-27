@@ -20,6 +20,10 @@
 
 #include "softbus_app_info.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int32_t NotifyNetworkingChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer);
 
 void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId);
@@ -28,5 +32,8 @@ void NotifyNetworkingChannelClosed(int32_t channelId);
 
 void NotifyNetworkingMsgReceived(int32_t channelId, const char *data, uint32_t len);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif

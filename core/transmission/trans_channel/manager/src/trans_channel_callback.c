@@ -21,7 +21,6 @@
 #include "trans_client_proxy.h"
 #include "trans_lane_manager.h"
 #include "trans_session_manager.h"
-
 #include "softbus_qos.h"
 
 static IServerChannelCallBack g_channelCallBack;
@@ -33,7 +32,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (channel->isServer == false && channel->channelType == CHANNEL_TYPE_UDP &&
+    if (!channel->isServer && channel->channelType == CHANNEL_TYPE_UDP &&
         NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "NotifyQosChannelOpened failed.");
         return SOFTBUS_ERR;

@@ -175,7 +175,7 @@ static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, co
     return destroyNode;
 }
 
-static void ClientDestroySession(const ListNode *destroyList)
+NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList)
 {
     if (IsListEmpty(destroyList)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destroyList is empty fail.");
@@ -267,7 +267,7 @@ static bool SessionServerIsExist(const char *sessionName)
 static ClientSessionServer *GetNewSessionServer(SoftBusSecType type, const char *sessionName,
     const char *pkgName, const ISessionListener *listener)
 {
-    ClientSessionServer *server = SoftBusCalloc(sizeof(ClientSessionServer));
+    ClientSessionServer *server = (ClientSessionServer *)SoftBusCalloc(sizeof(ClientSessionServer));
     if (server == NULL) {
         return NULL;
     }
@@ -514,7 +514,7 @@ static SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
         return NULL;
     }
-    SessionInfo *session = SoftBusCalloc(sizeof(SessionInfo));
+    SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
     if (session == NULL) {
         return NULL;
     }

@@ -23,6 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -413,7 +414,7 @@ static void ClearListenerFdList(const ListNode *cfdList)
     SoftBusMutexUnlock(&g_fdSetLock);
 }
 
-static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *info)
+NO_SANITIZE("cfi") static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *info)
 {
     if (node == NULL || info == NULL || info->socketOption.port < 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -469,7 +470,7 @@ static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *
     return ret;
 }
 
-static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
+NO_SANITIZE("cfi") static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
 {
     if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "event lock failed");
@@ -1173,7 +1174,6 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     do {
         if (node->info.fdCount > MAX_LISTEN_EVENTS) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot AddTrigger any more");
-            ret = SOFTBUS_ERR;
             break;
         }
 
@@ -1191,7 +1191,6 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 
         if (AddNewFdNode(&node->info, fd) != SOFTBUS_OK) {
             (void)DelTriggerFromSet(fd, triggerType);
-            ret = SOFTBUS_ERR;
             break;
         }
     } while (false);

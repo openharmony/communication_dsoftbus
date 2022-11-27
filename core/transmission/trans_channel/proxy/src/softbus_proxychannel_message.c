@@ -73,7 +73,6 @@ static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, u
     *(uint16_t *)(buf + offset) = SoftBusHtoLs((uint16_t)msgHead->peerId);
     offset += sizeof(uint16_t);
     *(uint16_t *)(buf + offset) = SoftBusHtoLs((uint16_t)msgHead->reserved);
-    offset += sizeof(uint16_t);
 }
 
 static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
@@ -400,7 +399,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode)
 {
     cJSON *root = cJSON_Parse(msg);
-    if ((root == NULL) && (errCode == NULL)) {
+    if ((root == NULL) || (errCode == NULL)) {
         return SOFTBUS_ERR;
     }
 
@@ -531,12 +530,6 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
         return SOFTBUS_ERR;
     }
 
-    if (appInfo->appType != APP_TYPE_INNER) {
-        if (TransProxyGetUidAndPidBySessionName(appInfo->myData.sessionName, &appInfo->myData.uid,
-            &appInfo->myData.pid) != SOFTBUS_OK) {
-            goto ERR_EXIT;
-        }
-    }
     if (appInfo->appType == APP_TYPE_NORMAL) {
         if (UnpackHandshakeMsgForNormal(root, appInfo, sessionKey, BASE64KEY) != SOFTBUS_OK) {
             goto ERR_EXIT;

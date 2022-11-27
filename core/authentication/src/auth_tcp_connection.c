@@ -105,7 +105,6 @@ static int32_t UnpackSocketPkt(const uint8_t *data, uint32_t len, SocketPktHead 
     head->flag = (int32_t)SoftBusLtoHl(*(uint32_t *)(data + offset));
     offset += sizeof(uint32_t);
     head->len = SoftBusLtoHl(*(uint32_t *)(data + offset));
-    offset += sizeof(uint32_t);
     return SOFTBUS_OK;
 }
 
@@ -225,7 +224,7 @@ static int32_t ProcessSocketInEvent(int32_t fd)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "RecvSocketData: fd=%d, module=%d, seq=%" PRId64 ", flag=%d, len=%u.",
         fd, head.module, head.seq, head.flag, head.len);
-    if (head.len > AUTH_SOCKET_MAX_DATA_LEN) {
+    if (head.len == 0 || head.len > AUTH_SOCKET_MAX_DATA_LEN) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "data is out of size, abandon it.");
         return SOFTBUS_ERR;
     }

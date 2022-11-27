@@ -17,6 +17,7 @@
 
 #include "p2plink_loop.h"
 #include "securec.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -121,7 +122,7 @@ void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *state)
     }
 }
 
-void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t msgType, void *param)
+NO_SANITIZE("cfi") void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t msgType, void *param)
 {
     if (fsm->currentState == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "current state is null");

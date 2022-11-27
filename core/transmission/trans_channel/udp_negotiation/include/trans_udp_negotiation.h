@@ -23,7 +23,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 int32_t TransUdpChannelInit(IServerChannelCallBack *callback);
 void TransUdpChannelDeinit(void);
@@ -40,5 +40,5 @@ void ReleaseUdpChannelId(int32_t channelId);
 void TransUdpDeathCallback(const char *pkgName, int32_t pid);
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif
