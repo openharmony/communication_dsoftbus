@@ -157,7 +157,7 @@ static void DestroyAuthFsm(AuthFsm *authFsm)
     SoftBusFree(authFsm);
 }
 
-static void AuthFsmDeinitCallback(FsmStateMachine *fsm)
+NO_SANITIZE("cfi") static void AuthFsmDeinitCallback(FsmStateMachine *fsm)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth fsm deinit callback enter");
     if (fsm == NULL) {

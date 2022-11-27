@@ -591,7 +591,7 @@ static void DisconnectedMsgHandler(int32_t clientId, int status)
     (void)g_softBusBleConnCb->BleDisconnectCallback(halConnInfo, SOFTBUS_BLECONNECTION_CLIENT_RECV_DISCONNECT_MSG);
 }
 
-static void MtuSettedMsgHandler(int32_t clientId, int32_t mtuSize)
+NO_SANITIZE("cfi") static void MtuSettedMsgHandler(int32_t clientId, int32_t mtuSize)
 {
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
         &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);

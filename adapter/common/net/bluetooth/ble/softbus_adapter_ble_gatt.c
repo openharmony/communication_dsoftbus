@@ -338,7 +338,7 @@ static void ConvertAdvParam(const SoftBusBleAdvParams *src, BleAdvParams *dst)
     dst->duration = src->duration;
 }
 
-static void WrapperAdvEnableCallback(int advId, int status)
+NO_SANITIZE("cfi") static void WrapperAdvEnableCallback(int advId, int status)
 {
     int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
@@ -360,7 +360,7 @@ static void WrapperAdvEnableCallback(int advId, int status)
     }
 }
 
-static void WrapperAdvDisableCallback(int advId, int status)
+NO_SANITIZE("cfi") static void WrapperAdvDisableCallback(int advId, int status)
 {
     int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
@@ -383,7 +383,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
     }
 }
 
-static void WrapperAdvDataCallback(int advId, int status)
+NO_SANITIZE("cfi") static void WrapperAdvDataCallback(int advId, int status)
 {
     int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
@@ -401,7 +401,7 @@ static void WrapperAdvDataCallback(int advId, int status)
     }
 }
 
-static void WrapperAdvUpdateCallback(int advId, int status)
+NO_SANITIZE("cfi") static void WrapperAdvUpdateCallback(int advId, int status)
 {
     int32_t st = BleOhosStatusToSoftBus((BtStatus)status);
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
@@ -592,7 +592,7 @@ int SoftBusReleaseAdvChannel(int advId)
     return SOFTBUS_OK;
 }
 
-int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
+NO_SANITIZE("cfi") int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -614,7 +614,7 @@ int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
     return ret;
 }
 
-int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
+NO_SANITIZE("cfi") int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
 {
     if (param == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -649,7 +649,7 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
     return SOFTBUS_OK;
 }
 
-int SoftBusStopAdv(int advId)
+NO_SANITIZE("cfi") int SoftBusStopAdv(int advId)
 {
     if (SoftBusMutexLock(&g_advLock) != 0) {
         return SOFTBUS_LOCK_ERR;

@@ -821,7 +821,7 @@ static int32_t InitDataQueue(void)
     return SOFTBUS_OK;
 }
 
-void *ConnBrAccept(void *arg)
+NO_SANITIZE("cfi") void *ConnBrAccept(void *arg)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br server thread start");
     static const char *name = "SOFTBUS_BR_SERVER";

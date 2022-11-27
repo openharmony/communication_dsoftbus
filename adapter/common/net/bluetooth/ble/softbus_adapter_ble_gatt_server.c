@@ -264,7 +264,7 @@ static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandl
     CLOGI("IncludeServiceAddCallback srvcHandle=%d,includeSrvcHandle=%d\n", srvcHandle, includeSrvcHandle);
 }
 
-static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle,
+NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle,
     int characteristicHandle)
 {
     CLOGI("CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle, characteristicHandle);
