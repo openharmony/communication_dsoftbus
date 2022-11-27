@@ -18,17 +18,17 @@
 
 #include "bus_center_event.h"
 #include "lnn_devicename_info.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_info.h"
-#include "lnn_local_net_ledger.h"
+#include "lnn_net_ledger_mock.h"
+#include "lnn_service_mock.h"
+#include "lnn_sync_info_manager.h"
+#include "lnn_trans_mock.h"
 #include "message_handler.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "lnn_sync_info_manager.h"
-#include "lnn_service_mock.h"
-#include "lnn_net_ledger_mock.h"
-#include "lnn_trans_mock.h"
 
 static NodeInfo info;
 namespace OHOS {
@@ -36,6 +36,7 @@ using namespace testing::ext;
 using namespace testing;
 
 constexpr int32_t CHANNELID = 2;
+constexpr int32_t MSG = 6;
 constexpr uint32_t LEN = 10;
 constexpr char UUID[65] = "abc";
 
@@ -57,9 +58,9 @@ void LnnNetworkInfoTest::SetUpTestCase()
 }
 
 void LnnNetworkInfoTest::TearDownTestCase()
-{   
-    LooperDeinit();
+{
     LnnDeinitSyncInfoManager();
+    LooperDeinit();
 }
 
 void LnnNetworkInfoTest::SetUp()
@@ -82,10 +83,9 @@ bool GetEventHandler(LnnEventType event, LnnEventHandler &handler)
 
 void InitMock(LnnNetLedgertInterfaceMock &netLedgerMock, LnnServicetInterfaceMock &serviceMock)
 {
-    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault
-        (LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
-    ON_CALL(netLedgerMock, LnnGetLocalNumInfo).
-        WillByDefault(Return(SOFTBUS_OK)); 
+    ON_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillByDefault(
+        LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler);
+    ON_CALL(netLedgerMock, LnnGetLocalNumInfo).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(netLedgerMock, LnnSetLocalNumInfo).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(
         LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo);
@@ -127,7 +127,7 @@ HWTEST_F(LnnNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level
     handler((LnnEventBasicInfo *)&btEvent1);
 
     char msg[65] = {0};
-    *(int32_t *)msg = 6;
+    *(int32_t *)msg = MSG;
     if (memcpy_s(msg + sizeof(int32_t), LEN - sizeof(int32_t), "abc", strlen("abc") + 1) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy sync info msg fail");
     }
