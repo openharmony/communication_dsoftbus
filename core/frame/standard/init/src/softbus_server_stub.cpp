@@ -232,6 +232,10 @@ int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParce
     SubscribeInfo subInfo;
     (void)memset_s(&subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
     const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartDiscoveryInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
     subInfo.subscribeId = data.ReadInt32();
     subInfo.mode = (DiscoverMode)data.ReadInt32();
     subInfo.medium = (ExchangeMedium)data.ReadInt32();
@@ -239,11 +243,20 @@ int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParce
     subInfo.isSameAccount = data.ReadBool();
     subInfo.isWakeRemote = data.ReadBool();
     subInfo.capability = data.ReadCString();
+    if (subInfo.capability == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartDiscoveryInner read capability failed!");
+        return SOFTBUS_ERR;
+    }
     subInfo.dataLen = data.ReadUint32();
-    if (subInfo.dataLen != 0) {
+    if (subInfo.dataLen > 0 && subInfo.dataLen < MAX_CAPABILITYDATA_LEN) {
         subInfo.capabilityData = (unsigned char *)data.ReadCString();
+        if (subInfo.capabilityData == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartDiscoveryInner read capabilityData failed!");
+            return SOFTBUS_ERR;
+        }
     } else {
         subInfo.capabilityData = nullptr;
+        subInfo.dataLen = 0;
     }
     int32_t retReply = StartDiscovery(pkgName, &subInfo);
     if (!reply.WriteInt32(retReply)) {
@@ -256,6 +269,10 @@ int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParce
 int32_t SoftBusServerStub::StopDiscoveryInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopDiscoveryInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
     int32_t subscribeId = data.ReadInt32();
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "StopDiscoveryInner %s, %d!\n", pkgName, subscribeId);
     int32_t retReply = StopDiscovery(pkgName, subscribeId);
@@ -271,16 +288,29 @@ int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParce
     PublishInfo pubInfo;
     (void)memset_s(&pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PublishServiceInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
     pubInfo.publishId = data.ReadInt32();
     pubInfo.mode = (DiscoverMode)data.ReadInt32();
     pubInfo.medium = (ExchangeMedium)data.ReadInt32();
     pubInfo.freq = (ExchangeFreq)data.ReadInt32();
     pubInfo.capability = data.ReadCString();
+    if (pubInfo.capability == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PublishServiceInner read capability failed!");
+        return SOFTBUS_ERR;
+    }
     pubInfo.dataLen = data.ReadUint32();
-    if (pubInfo.dataLen != 0) {
+    if (pubInfo.dataLen > 0 && pubInfo.dataLen < MAX_CAPABILITYDATA_LEN) {
         pubInfo.capabilityData = (unsigned char *)data.ReadCString();
+        if (pubInfo.capabilityData == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PublishServiceInner read capabilityData failed!");
+            return SOFTBUS_ERR;
+        }
     } else {
         pubInfo.capabilityData = nullptr;
+        pubInfo.dataLen = 0;
     }
     int32_t retReply = PublishService(pkgName, &pubInfo);
     if (!reply.WriteInt32(retReply)) {
@@ -293,6 +323,10 @@ int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParce
 int32_t SoftBusServerStub::UnPublishServiceInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "UnPublishServiceInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
     int32_t publishId = data.ReadInt32();
     int32_t retReply = UnPublishService(pkgName, publishId);
     if (!reply.WriteInt32(retReply)) {
@@ -532,8 +566,9 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
         return SOFTBUS_IPC_ERR;
     }
     uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner read addr type length failed!");
+    if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "SoftbusJoinLNNInner read addr type length:%d failed!", addrTypeLen);
         return SOFTBUS_IPC_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
@@ -557,8 +592,9 @@ int32_t SoftBusServerStub::JoinMetaNodeInner(MessageParcel &data, MessageParcel 
         return SOFTBUS_IPC_ERR;
     }
     uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner read addr type length failed!");
+    if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "SoftbusJoinMetaNodeInner read addr type length:%d failed!", addrTypeLen);
         return SOFTBUS_IPC_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);

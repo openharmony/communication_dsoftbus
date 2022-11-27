@@ -1328,9 +1328,12 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
         }
         ret = SOFTBUS_OK;
     } while (false);
-    if (ret != SOFTBUS_OK && (*info != NULL)) {
-        SoftBusFree(*info);
-        *info = NULL;
+    if (ret != SOFTBUS_OK) {
+        if (*info != NULL) {
+            SoftBusFree(*info);
+            *info = NULL;
+        }
+        *infoNum = 0;
     }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return ret;

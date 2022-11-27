@@ -51,6 +51,10 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
     const char *pkgName = (const char*)ReadString(req, &len);
     uint32_t addrTypeLen;
     ReadUint32(req, &addrTypeLen);
+    if (addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerJoinLNN read addrTypeLen:%d failed!", addrTypeLen);
+        return SOFTBUS_ERR;
+    }
     void *addr = (void *)ReadBuffer(req, addrTypeLen);
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerJoinLNN read addr is null.");
@@ -435,7 +439,6 @@ int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply)
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = LnnIpcStopRefreshLNN(pkgName, refreshId);
-    WriteInt32(reply, ret);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopRefreshLNN failed.");
         return SOFTBUS_ERR;

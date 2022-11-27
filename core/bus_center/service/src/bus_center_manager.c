@@ -203,6 +203,7 @@ NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
     LnnDeinitNetworkManager();
     LnnDeinitEventMonitor();
     LnnDeinitBusCenterEvent();
+    DeinitNodeAddrAllocator();
     LnnDeinitNetLedger();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

@@ -25,6 +25,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
@@ -174,8 +175,10 @@ int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
+    uint32_t maxConnCount = UINT32_MAX;
+    (void)SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, (unsigned char *)&maxConnCount, sizeof(maxConnCount));
     *infoNum = reply.arg1;
-    if (*infoNum < 0) {
+    if (*infoNum < 0 || (uint32_t)(*infoNum) > maxConnCount) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo invoke failed[%d].", *infoNum);
         return SOFTBUS_ERR;
     }
@@ -263,8 +266,9 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
-    if (reply.data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo read retBuf failed!");
+    if (reply.data == NULL || reply.dataLen > len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+            "GetNodeKeyInfo read retBuf failed, len:%d, reply.dataLen:%d", len, reply.dataLen);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(buf, len, reply.data, reply.dataLen) != EOK) {
@@ -291,10 +295,7 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
     WriteString(&request, pkgName);
     WriteString(&request, networkId);
     WriteInt16(&request, dataChangeFlag);
-    Reply reply = {0};
-    reply.id = GET_NODE_KEY_INFO;
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_NODE_DATA_CHANGE_FLAG, &request, &reply,
-        ClientBusCenterResultCb);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_NODE_DATA_CHANGE_FLAG, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag invoke failed[%d].", ans);
         return SOFTBUS_ERR;
@@ -451,7 +452,7 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
     }
     WriteBool(&request, info->ranging);
     /* asynchronous invocation */
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, &reply, NULL);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, &reply, ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "publish Lnn invoke failed[%d, %d].", ans, reply.retCode);
         return SOFTBUS_ERR;

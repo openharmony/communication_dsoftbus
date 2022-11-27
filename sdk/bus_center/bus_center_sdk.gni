@@ -38,6 +38,7 @@ if (defined(ohos_lite)) {
     bus_center_manager_sdk_inc += [
       "$dsoftbus_root_path/sdk/bus_center/ipc/include",
       "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/common/include",
     ]
     bus_center_manager_sdk_src += [
       "$dsoftbus_root_path/sdk/bus_center/ipc/small/bus_center_server_proxy.c",
@@ -53,6 +54,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/sdk/bus_center/ipc/include",
     "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/include",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/discovery",
