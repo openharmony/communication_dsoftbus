@@ -144,7 +144,7 @@ static int32_t P2pRemoveMessageFunc(const SoftBusMessage *msg, void *para)
     return SOFTBUS_ERR;
 }
 
-int32_t P2pLoopProcDelayDel(P2pLoopProcessFunc callback, P2pLoopMsg msgType)
+NO_SANITIZE("cfi") int32_t P2pLoopProcDelayDel(P2pLoopProcessFunc callback, P2pLoopMsg msgType)
 {
     P2pCallbackInfo cbinfo = {0};
 

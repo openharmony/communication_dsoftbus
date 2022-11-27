@@ -111,7 +111,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
     }
 }
 
-static void ProcessDataMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void ProcessDataMessage(SoftBusMessage *msg)
 {
     FsmCtrlMsgObj *ctrlMsgObj = msg->obj;
     FsmStateMachine *fsm = NULL;
@@ -153,7 +153,7 @@ static void ProcessStopMessage(SoftBusMessage *msg)
     fsm->flag &= ~FSM_FLAG_RUNNING;
 }
 
-static void ProcessDeinitMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void ProcessDeinitMessage(SoftBusMessage *msg)
 {
     FsmCtrlMsgObj *ctrlMsgObj = msg->obj;
     FsmStateMachine *fsm = NULL;
@@ -322,7 +322,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msg
     return SOFTBUS_OK;
 }
 
-int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
+NO_SANITIZE("cfi") int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
     int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
     if (fsm == NULL || fsm->looper == NULL) {

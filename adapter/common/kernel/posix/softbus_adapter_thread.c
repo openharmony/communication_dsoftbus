@@ -281,8 +281,8 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *),
-    void *arg)
+NO_SANITIZE("cfi") int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr,
+    void *(*threadEntry) (void *), void *arg)
 {
     if (thread == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is null");

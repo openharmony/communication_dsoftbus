@@ -414,7 +414,7 @@ static void HbNoneStateEnter(FsmStateMachine *fsm)
     LnnFsmRemoveMessage(fsm, EVENT_HB_PROCESS_SEND_ONCE);
 }
 
-static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
+NO_SANITIZE("cfi") static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
     int32_t ret = SOFTBUS_ERR;

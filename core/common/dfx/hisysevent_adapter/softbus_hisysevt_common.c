@@ -60,7 +60,7 @@ static void InitStatisticEvtReportFunc(void)
     }
 }
 
-static void ReportStatisticEvent(SoftBusMessage* param)
+NO_SANITIZE("cfi") static void ReportStatisticEvent(SoftBusMessage* param)
 {
     (void)param;
 
