@@ -171,7 +171,7 @@ static int32_t PostBytesInner(uint32_t connectionId, int32_t module, const char 
     return SOFTBUS_OK;
 }
 
-static int32_t PostClosingTimeoutEvent(uint32_t connectionId)
+NO_SANITIZE("cfi") static int32_t PostClosingTimeoutEvent(uint32_t connectionId)
 {
     SoftBusMessage *msg = BrConnCreateLoopMsg(ADD_CONN_BR_CLOSING_TIMEOUT_MSG, (uint64_t)connectionId, 0, NULL);
     if (msg == NULL) {

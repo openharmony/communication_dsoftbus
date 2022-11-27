@@ -103,7 +103,8 @@ int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, P2pLoopMsg msgType)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *para, uint64_t delayMillis, P2pLoopMsg msgType)
+NO_SANITIZE("cfi") int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *para, uint64_t delayMillis,
+    P2pLoopMsg msgType)
 {
     P2pCallbackInfo *cbinfo = SoftBusCalloc(sizeof(P2pCallbackInfo));
     if (cbinfo == NULL) {

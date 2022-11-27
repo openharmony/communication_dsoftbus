@@ -29,6 +29,7 @@
 #include "softbus_socket.h"
 #include "softbus_thread_pool.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 #define MAX_LISTEN_EVENTS 1024
 #define TIMEOUT           10000
@@ -413,7 +414,7 @@ static void ClearListenerFdList(const ListNode *cfdList)
     SoftBusMutexUnlock(&g_fdSetLock);
 }
 
-static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *info)
+NO_SANITIZE("cfi") static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *info)
 {
     if (node == NULL || info == NULL || info->socketOption.port < 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -469,7 +470,7 @@ static int32_t InitListenFd(SoftbusListenerNode* node, const LocalListenerInfo *
     return ret;
 }
 
-static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
+NO_SANITIZE("cfi") static int32_t OnEvent(SoftbusListenerNode *node, int32_t fd, uint32_t events)
 {
     if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "event lock failed");

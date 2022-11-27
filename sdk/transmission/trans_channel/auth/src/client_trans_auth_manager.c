@@ -18,6 +18,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_server_proxy.h"
+#include "softbus_def.h"
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -31,7 +32,7 @@ int32_t ClientTransAuthInit(const IClientSessionCallBack *cb)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransAuthOnChannelOpened param invalid.");
@@ -47,7 +48,7 @@ int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInf
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
+NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_AUTH);
     if (ret != SOFTBUS_OK) {

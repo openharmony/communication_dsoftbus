@@ -597,7 +597,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
     return;
 }
 
-static void PackRequest(int32_t delta, uint32_t connectionId)
+NO_SANITIZE("cfi") static void PackRequest(int32_t delta, uint32_t connectionId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "[onNotifyRequest: delta=%d, connectionIds=%u", delta, connectionId);

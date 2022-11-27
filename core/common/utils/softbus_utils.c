@@ -101,7 +101,7 @@ int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
     return SOFTBUS_OK;
 }
 
-static void HandleTimeoutFun(void)
+NO_SANITIZE("cfi") static void HandleTimeoutFun(void)
 {
     int32_t i;
     for (i = 0; i < SOFTBUS_MAX_TIMER_FUN_NUM; i++) {
