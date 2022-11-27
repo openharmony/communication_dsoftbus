@@ -267,7 +267,8 @@ uint32_t ApplyLaneId(LaneType type)
     return AllocLaneId(type);
 }
 
-int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
+NO_SANITIZE("cfi") int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
+    const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane requestInfo invalid");

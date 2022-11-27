@@ -439,7 +439,7 @@ static void BleServiceDeleteCallback(int status, int srvcHandle)
     SoftBusUnRegisterGattsCallbacks();
 }
 
-static void BleConnectServerCallback(int halConnId, const SoftBusBtAddr *btAddr)
+NO_SANITIZE("cfi") static void BleConnectServerCallback(int halConnId, const SoftBusBtAddr *btAddr)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectServerCallback is coming, halConnId=%d\n", halConnId);
     if (btAddr == NULL) {
