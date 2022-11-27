@@ -33,6 +33,7 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hisysevt_connreporter.h"
+#include "softbus_def.h"
 
 #define INVALID_GATTC_ID (-1)
 #define DEFAULT_MTU_SIZE 512
@@ -106,7 +107,8 @@ static void FreeBleClientMessage(SoftBusMessage *msg)
     SoftBusFree(msg);
 }
 
-static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode, int32_t time)
+NO_SANITIZE("cfi") static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode,
+    int32_t time)
 {
     BleCilentErrCode *bleErrCode = SoftBusCalloc(sizeof(BleCilentErrCode));
     if (bleErrCode == NULL) {
@@ -682,7 +684,7 @@ static void BleGattcMsgHandler(SoftBusMessage *msg)
     }
 }
 
-static void BleGattcConnStateCallback(int32_t clientId, int32_t state, int32_t status)
+NO_SANITIZE("cfi") static void BleGattcConnStateCallback(int32_t clientId, int32_t state, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnStateCallback ble gattc id=%d,state=%d,status=%d\n",
         clientId, state, status);
@@ -702,7 +704,7 @@ static void BleGattcConnStateCallback(int32_t clientId, int32_t state, int32_t s
     }
 }
 
-static void BleGattcSearchServiceCallback(int32_t clientId, int32_t status)
+NO_SANITIZE("cfi") static void BleGattcSearchServiceCallback(int32_t clientId, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattcSearchServiceCallback id=%d,status=%d\n",
         clientId, status);
@@ -713,7 +715,7 @@ static void BleGattcSearchServiceCallback(int32_t clientId, int32_t status)
     g_bleClientAsyncHandler.looper->PostMessage(g_bleClientAsyncHandler.looper, msg);
 }
 
-static void BleGattcRegisterNotificationCallback(int32_t clientId, int32_t status)
+NO_SANITIZE("cfi") static void BleGattcRegisterNotificationCallback(int32_t clientId, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattcRegisterNotificationCallback id=%d,status=%d\n",
         clientId, status);
@@ -724,7 +726,7 @@ static void BleGattcRegisterNotificationCallback(int32_t clientId, int32_t statu
     g_bleClientAsyncHandler.looper->PostMessage(g_bleClientAsyncHandler.looper, msg);
 }
 
-static void BleGattcConfigureMtuSizeCallback(int32_t clientId, int32_t mtuSize, int32_t status)
+NO_SANITIZE("cfi") static void BleGattcConfigureMtuSizeCallback(int32_t clientId, int32_t mtuSize, int32_t status)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleGattcConfigureMtuSizeCallback id=%d,status=%d\n",
         clientId, status);

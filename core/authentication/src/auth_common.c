@@ -24,6 +24,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_feature_config.h"
+#include "softbus_def.h"
 
 #define TIME_SEC_TO_MSEC 1000L
 #define TIME_MSEC_TO_USEC 1000L
@@ -102,7 +103,7 @@ static void HandleAuthMessage(SoftBusMessage *msg)
     handler(msg->obj);
 }
 
-int32_t PostAuthEvent(EventType event, EventHandler handler,
+NO_SANITIZE("cfi") int32_t PostAuthEvent(EventType event, EventHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs)
 {
     if (!IsAuthHandlerInit()) {
