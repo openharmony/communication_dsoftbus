@@ -203,7 +203,7 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
     }
 
     int32_t dataLen = 0;
-    char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_REQUEST, delta, refCount, &dataLen);
+    char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_REQUEST, connectionId, delta, refCount, &dataLen);
     if (buf != NULL) {
         (void)PostBytesInner(connectionId, METHOD_NOTIFY_REQUEST, buf, dataLen);
     }
@@ -698,7 +698,7 @@ static int32_t DisconnectDeviceNow(const ConnectOption *option)
 static int32_t SendAck(const BrConnectionInfo *brConnInfo, uint32_t windows, uint64_t seq)
 {
     int32_t dataLen = 0;
-    char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_ACK, (int32_t)windows, seq, &dataLen);
+    char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_ACK, brConnInfo->connectionId, (int32_t)windows, seq, &dataLen);
     if (buf == NULL) {
         return SOFTBUS_ERR;
     }
@@ -1068,7 +1068,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
         return;
     }
     int32_t outLen = INVALID_LENGTH;
-    char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_RESPONSE, delta, myRefCount, &outLen);
+    char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_RESPONSE, connectionId, delta, myRefCount, &outLen);
     if (buf == NULL) {
         return;
     }
@@ -1079,7 +1079,7 @@ static int32_t OnAck(uint32_t connectionId, uint32_t localWindows, uint64_t remo
 {
     int32_t dataLen = 0;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send ack seq: %" PRIu64 " respone", remoteSeq);
-    char *buf = BrPackRequestOrResponse(METHOD_ACK_RESPONSE, (int32_t)localWindows, remoteSeq, &dataLen);
+    char *buf = BrPackRequestOrResponse(METHOD_ACK_RESPONSE, connectionId, (int32_t)localWindows, remoteSeq, &dataLen);
     if (buf != NULL) {
         return PostBytesInner(connectionId, METHOD_ACK_RESPONSE, buf, dataLen);
     }
@@ -1091,10 +1091,18 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
     int32_t keyMethod = 0;
     int32_t keyDelta = 0;
     int32_t keyReferenceNum = 0;
+    int64_t peerConnectionId = 0;
 
     if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod)) {
         return;
     }
+
+    if (!GetJsonObjectNumber64Item(data, KEY_TRACE_IDENTIFIER, &peerConnectionId)) {
+        CLOGW("parse br connection binding relation failed, maybe it is old version, method: %d", keyMethod);
+    } else {
+        CLOGI("br connection binding relation, local: %u, peer: %d", connectionId, peerConnectionId);
+    }
+
     if (keyMethod == METHOD_NOTIFY_REQUEST) {
         if (!GetJsonObjectSignedNumberItem(data, KEY_DELTA, &keyDelta) ||
             !GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyReferenceNum)) {
