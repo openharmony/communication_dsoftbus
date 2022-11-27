@@ -15,10 +15,7 @@ import("//build/lite/config/component/lite_component.gni")
 
 lite_component("softbus_test_core_common") {
   features = [
-    "common/message_handler/unittest:softbus_test_message_handler",
-
     "authentication/auth_test:softbus_auth_test",
-
-    # "iothardware:led_example",
+    "common/message_handler/unittest:softbus_test_message_handler",
   ]
 }
