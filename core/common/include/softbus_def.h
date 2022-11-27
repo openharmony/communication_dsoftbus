@@ -27,6 +27,18 @@ extern "C" {
 #endif
 #endif
 
+#ifndef NO_SANITIZE
+#ifdef __has_attribute
+#if __has_attribute(no_sanitize)
+#define NO_SANITIZE(type) __attribute__((no_sanitize(type)))
+#endif
+#endif
+#endif
+
+#ifndef NO_SANITIZE
+#define NO_SANITIZE(type)
+#endif
+
 #define INVALID_SESSION_ID (-1)
 #define INVALID_CHANNEL_ID (-1)
 #define INVALID_SEQ_ID (0x7fffffff)

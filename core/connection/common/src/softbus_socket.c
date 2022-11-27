@@ -25,6 +25,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_def.h"
 
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE 0x200000  // 2M
@@ -299,7 +300,7 @@ int32_t ConnGetSocketError(int32_t fd)
     return SoftBusSocketGetError(fd);
 }
 
-int32_t ConnGetLocalSocketPort(int32_t fd)
+NO_SANITIZE("cfi") int32_t ConnGetLocalSocketPort(int32_t fd)
 {
     const SocketInterface *socketInterface = GetSocketInterface(LNN_PROTOCOL_IP);
     if (socketInterface == NULL) {
