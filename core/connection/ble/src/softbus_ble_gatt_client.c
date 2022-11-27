@@ -352,7 +352,7 @@ static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, u
     return msg;
 }
 
-static void ConnectedMsgHandler(int32_t clientId, int status)
+NO_SANITIZE("cfi") static void ConnectedMsgHandler(int32_t clientId, int status)
 {
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
         &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
@@ -562,7 +562,7 @@ EXIT:
     (void)SoftbusBleGattcDisconnect(clientId);
 }
 
-static void DisconnectedMsgHandler(int32_t clientId, int status)
+NO_SANITIZE("cfi") static void DisconnectedMsgHandler(int32_t clientId, int status)
 {
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
         &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
@@ -622,7 +622,7 @@ NO_SANITIZE("cfi") static void MtuSettedMsgHandler(int32_t clientId, int32_t mtu
     g_softBusBleConnCb->BleConnectCallback(clientId, bleStrMac, &(infoNode->peerAddr));
 }
 
-static void TimeOutMsgHandler(int32_t clientId, int32_t errCode)
+NO_SANITIZE("cfi") static void TimeOutMsgHandler(int32_t clientId, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ble connect timeout, errcode:%d", errCode);
     BleGattcInfo *infoNode = NULL;

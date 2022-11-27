@@ -494,7 +494,7 @@ int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatType *type)
     return SOFTBUS_OK;
 }
 
-static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
+NO_SANITIZE("cfi") static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
 {
     (void)typeSet;
     (void)data;
@@ -600,7 +600,7 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
     return true;
 }
 
-int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
+NO_SANITIZE("cfi") int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
     if (mgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist manager get invalid param");
