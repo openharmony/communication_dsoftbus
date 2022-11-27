@@ -30,12 +30,14 @@ extern "C" {
 #define KEY_REFERENCE_NUM "KEY_REFERENCE_NUM"
 #define KEY_WINDOWS "KEY_WINDOWS"
 #define KEY_ACK_SEQ_NUM "KEY_ACK_SEQ_NUM"
+#define KEY_TRACE_IDENTIFIER "KEY_TRACE_IDENTIFIER"
 
 int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDriver, int32_t clientId, char **outBuf);
 int32_t BrTransSend(const BrConnectionInfo *brConnInfo, const SppSocketDriver *sppDriver,
     int32_t brSendPeerLen, const char *data, uint32_t len);
 
-char *BrPackRequestOrResponse(int32_t requestOrResponse, int32_t delta, uint64_t count, int32_t *outLen);
+char *BrPackRequestOrResponse(int32_t requestOrResponse, uint32_t connectionId, int32_t delta,
+    uint64_t count, int32_t *outLen);
 #ifdef __cplusplus
 #if __cplusplus
 }
