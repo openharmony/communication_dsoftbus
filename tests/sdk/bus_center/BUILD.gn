@@ -14,17 +14,17 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+group("benchmarktest") {
+  testonly = true
+  deps = [ "benchmarktest:benchmarktest" ]
+}
+
+group("fuzztest") {
+  testonly = true
+  deps = [ "fuzztest:fuzztest" ]
+}
+
 group("unittest") {
   testonly = true
-  deps = [
-    "common:unittest",
-    "ipc:unittest",
-    "session:unittest",
-    "trans_channel/auth_channel:unittest",
-    "trans_channel/common:unittest",
-    "trans_channel/manager:unittest",
-    "trans_channel/proxy_channel:unittest",
-    "trans_channel/tcp_direct:unittest",
-    "trans_channel/udp_negotiation:unittest",
-  ]
+  deps = [ "unittest:unittest" ]
 }
