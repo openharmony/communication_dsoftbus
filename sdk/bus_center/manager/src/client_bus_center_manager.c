@@ -769,7 +769,6 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
             SoftBusFree(item);
         }
     }
-
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock time sync cb list");
     }
@@ -799,7 +798,6 @@ int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server StopPublishLNNInner failed, ret = %d", ret);
     }
-
     return ret;
 }
 
@@ -826,7 +824,6 @@ int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId)
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server StopRefreshLNNInner failed, ret = %d", ret);
     }
-
     return ret;
 }
 
