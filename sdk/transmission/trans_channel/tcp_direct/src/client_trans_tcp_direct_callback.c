@@ -34,12 +34,12 @@ int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel)
+NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel)
 {
     return g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_BYTES);
 }
 
-int32_t ClientTransTdcOnSessionClosed(int32_t channelId)
+NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionClosed(int32_t channelId)
 {
     return g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT);
 }

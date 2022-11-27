@@ -14,7 +14,7 @@
  */
 
 #include "lnn_service_mock.h"
-
+#include "softbus_error_code.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -30,9 +30,9 @@ LnnServicetInterfaceMock::~LnnServicetInterfaceMock()
     g_serviceInterface = nullptr;
 }
 
-static LnnServicetInterfaceMock *GetServiceInterface()
+static LnnServiceInterface *GetServiceInterface()
 {
-    return reinterpret_cast<LnnServicetInterfaceMock *>(g_serviceInterface);
+    return reinterpret_cast<LnnServiceInterface *>(g_serviceInterface);
 }
 
 extern "C" {
@@ -51,29 +51,14 @@ int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
     return GetServiceInterface()->LnnRegisterEventHandler(event, handler);
 }
 
-void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
-{
-    return GetServiceInterface()->LnnUnregisterEventHandler(event, handler);
-}
-
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     return GetServiceInterface()->LnnNotifyJoinResult(addr, networkId, retCode);
 }
 
-void MetaNodeNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
-{
-    return GetServiceInterface()->MetaNodeNotifyJoinResult(addr, networkId, retCode);
-}
-
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     return GetServiceInterface()->LnnNotifyLeaveResult(networkId, retCode);
-}
-
-void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode)
-{
-    return GetServiceInterface()->MetaNodeNotifyLeaveResult(networkId, retCode);
 }
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
@@ -105,6 +90,15 @@ void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type,
 void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight)
 {
     return GetServiceInterface()->LnnNotifyMasterNodeChanged(isMaster, masterNodeUdid, weight);
+}
+
+int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_lnnEventHandlers.emplace(event, handler);
+    return SOFTBUS_OK;
 }
 }
 }

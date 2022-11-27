@@ -24,6 +24,8 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
+#include "softbus_def.h"
+
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -233,7 +235,7 @@ static const GroupAuthManager *InitHichain(void)
     return gaIns;
 }
 
-int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
+NO_SANITIZE("cfi") int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -325,7 +327,7 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
     return SOFTBUS_ERR;
 }
 
-int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;

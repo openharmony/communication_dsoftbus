@@ -20,6 +20,7 @@
 #include "softbus_thread_pool.h"
 
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -42,7 +43,7 @@ static ThreadPool* CreateThreadPool(int32_t threadNum, int32_t queueMaxNum);
 static void JobCheck(ThreadPool *pool, Job *job);
 static void ThreadPoolWorker(void *arg);
 
-static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, uint32_t *threadId)
+NO_SANITIZE("cfi") static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, uint32_t *threadId)
 {
     SoftBusThreadAttr threadAttrInfo;
     SoftBusThreadAttrInit(&threadAttrInfo);
@@ -96,7 +97,7 @@ static ThreadPool* CreateThreadPool(int32_t threadNum, int32_t queueMaxNum)
     return pool;
 }
 
-ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
+NO_SANITIZE("cfi") ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMaxNum)
 {
     if (threadNum <= 0 || queueMaxNum <= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid para.");
@@ -173,7 +174,7 @@ static void JobCheck(ThreadPool *pool, Job *job)
     }
 }
 
-static void ThreadPoolWorker(void *arg)
+NO_SANITIZE("cfi") static void ThreadPoolWorker(void *arg)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ThreadPoolWorker Start");
     if (arg == NULL) {

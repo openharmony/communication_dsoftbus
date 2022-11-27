@@ -25,6 +25,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
+#include "softbus_def.h"
 
 static SoftBusList *g_udpChannelMgr = NULL;
 static IClientSessionCallBack *g_sessionCb = NULL;
@@ -142,7 +143,7 @@ static int32_t TransSetUdpChannelEnable(int32_t channelId, bool isEnable)
     return SOFTBUS_ERR;
 }
 
-static void OnUdpChannelOpened(int32_t channelId)
+NO_SANITIZE("cfi") static void OnUdpChannelOpened(int32_t channelId)
 {
     UdpChannel channel;
     if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
@@ -310,7 +311,7 @@ static int32_t ClosePeerUdpChannel(int32_t channelId)
     return ServerIpcCloseChannel(channelId, CHANNEL_TYPE_UDP);
 }
 
-static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
+NO_SANITIZE("cfi") static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
 {
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -379,7 +380,7 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     return TransSendStream(channelId, data, ext, param);
 }
 
-static void OnUdpChannelClosed(int32_t channelId)
+NO_SANITIZE("cfi") static void OnUdpChannelClosed(int32_t channelId)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnSessionClosed == NULL)) {
         return;
@@ -416,11 +417,11 @@ static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvL
 }
 
 static UdpChannelMgrCb g_udpChannelCb = {
-    .OnUdpChannelOpened = OnUdpChannelOpened,
-    .OnUdpChannelClosed = OnUdpChannelClosed,
+    .OnStreamReceived = OnStreamReceived,
     .OnFileGetSessionId = OnFileGetSessionId,
     .OnMessageReceived = NULL,
-    .OnStreamReceived = OnStreamReceived,
+    .OnUdpChannelOpened = OnUdpChannelOpened,
+    .OnUdpChannelClosed = OnUdpChannelClosed,
     .OnQosEvent = OnQosEvent,
 };
 

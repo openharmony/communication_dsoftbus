@@ -368,15 +368,15 @@ static int32_t TransWaitingRequestCallback(uint32_t laneId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    bool bFound = false;
+    bool isFound = false;
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
         if (item->laneId == laneId) {
-            bFound = true;
+            isFound = true;
             break;
         }
     }
-    if (!bFound) {
+    if (!isFound) {
         (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not found lane[%u] in pending.", laneId);
         return SOFTBUS_ERR;

@@ -94,7 +94,7 @@ static bool IsConnected(int32_t clientFd)
     return IsSppConnected(clientFd);
 }
 
-static int32_t Accept(int32_t serverFd)
+NO_SANITIZE("cfi") static int32_t Accept(int32_t serverFd)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[Accept remote device to connect, and serverFd = %d]", serverFd);
     int32_t ret = SppServerAccept(serverFd);

@@ -132,7 +132,6 @@ void SoftBusReleaseDumpVar(ListNode *varList)
         ListDelete(&varNode->node);;
         SoftBusFree(varNode);
     }
-    SoftBusFree(varList);
 }
 
 static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
@@ -167,7 +166,6 @@ void SoftBusHiDumperReleaseHandler(void)
         ListDelete(&handlerNode->node);;
         SoftBusFree(handlerNode);
     }
-    SoftBusFree(&g_hidumperhander_list);
 }
 
 int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
@@ -187,9 +185,9 @@ int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerF
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
+NO_SANITIZE("cfi") int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 {
-    if (fd < 0 || argv == NULL) {
+    if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
         return SOFTBUS_ERR;
     }

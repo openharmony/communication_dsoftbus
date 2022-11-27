@@ -99,7 +99,6 @@ static int32_t RegistNetIfMgr(LnnNetIfNameType type, LnnNetIfManagerBuilder buil
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:type too big!", __func__);
         return SOFTBUS_ERR;
     }
-
     if (g_netifBuilders[type] != NULL && g_netifBuilders[type] != builder) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:type already registed!", __func__);
         return SOFTBUS_ERR;
@@ -164,21 +163,18 @@ static int32_t SetIfNameDefaultVal(void)
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-
     netIfMgr = NetifMgrFactory(LNN_WLAN_TYPE, LNN_DEFAULT_IF_NAME_WLAN);
     if (netIfMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default ETH port failed!");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-
     netIfMgr = NetifMgrFactory(LNN_BR_TYPE, LNN_DEFAULT_IF_NAME_BR);
     if (netIfMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default BR netIfMgr failed!");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-
     netIfMgr = NetifMgrFactory(LNN_BLE_TYPE, LNN_DEFAULT_IF_NAME_BLE);
     if (netIfMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default BLE netIfMgr failed!");
@@ -228,7 +224,6 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad input protocol!", __func__);
         return SOFTBUS_ERR;
     }
-
     for (uint8_t i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
         if (g_networkProtocols[i] != NULL) {
             continue;
@@ -256,7 +251,6 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
         return SOFTBUS_ERR;
     }
-
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
         if (g_networkProtocols[i] == protocolMgr) {
             g_networkProtocols[i] = NULL;
@@ -368,7 +362,6 @@ int32_t LnnInitNetworkManager(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Read net config failed!ret=%d", ret);
         return ret;
     }
-
     // Regist default protocols
     ret = RegistIPProtocolManager();
     if (ret != SOFTBUS_OK) {
@@ -376,38 +369,32 @@ int32_t LnnInitNetworkManager(void)
         return ret;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "IP protocol registed.");
-
     ret = RegistBtProtocolManager();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist bt protocol manager failed,ret=%d", ret);
         return ret;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BT protocol registed.");
-
     ret = RegistNewIPProtocolManager();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist newip protocol manager failed,ret=%d\n", ret);
         return ret;
     }
-
     ret = RegGroupChangeListener(&g_groupChangeListener);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register group change listener fail");
         return ret;
     }
-
     ret = LnnInitPhysicalSubnetManager();
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init subnet manager failed!,ret=%d", ret);
         return ret;
     }
-
     ProtocolType type = 0;
     if (!LnnVisitProtocol(GetAllProtocols, &type)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get all protocol failed!");
         return SOFTBUS_ERR;
     }
-
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set supported protocol to %lld.", type);
     ret = LnnSetLocalNum64Info(NUM_KEY_TRANS_PROTOCOLS, (int64_t)type);
     if (ret != SOFTBUS_OK) {
@@ -427,7 +414,6 @@ int32_t LnnInitNetworkManagerDelay(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!");
         return SOFTBUS_ERR;
     }
-
     LnnNetIfMgr *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node) {
         for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
@@ -465,9 +451,7 @@ void LnnDeinitNetworkManager(void)
     if (LnnClearNetConfigList() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deinit network manager failed");
     }
-
     LnnDeinitPhysicalSubnetManager();
-
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
         if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->deinit == NULL) {
             continue;

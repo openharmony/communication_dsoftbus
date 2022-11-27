@@ -222,12 +222,16 @@ static char *ParseCoapRequestData(const char *reqData, size_t dataLen)
         DFINDER_LOGE(TAG, "illegal coap request data");
         return NULL;
     }
-    char *dupReqData = (char *)malloc(dataLen);
+    char *dupReqData = (char *)calloc(dataLen + 1, sizeof(char));
     if (dupReqData == NULL) {
         DFINDER_LOGE(TAG, "malloc for duplicate request data failed");
         return NULL;
     }
-    (void)memcpy_s(dupReqData, dataLen, reqData, dataLen);
+    if (memcpy_s(dupReqData, dataLen + 1, reqData, dataLen) != EOK) {
+        DFINDER_LOGE(TAG, "memcpy for duplicate request data failed");
+        free(dupReqData);
+        return NULL;
+    }
     char *formatString = NULL;
     cJSON *data = cJSON_Parse(dupReqData);
     if (data == NULL) {

@@ -488,7 +488,8 @@ int32_t ConnTypeIsSupport(ConnectType type)
     return ConnTypeCheck(type);
 }
 
-int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const ConnectResult *result)
+NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId,
+    const ConnectResult *result)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -704,7 +705,7 @@ void ConnServerDeinit(void)
     g_isInited = false;
 }
 
-bool CheckActiveConnection(const ConnectOption *info)
+NO_SANITIZE("cfi") bool CheckActiveConnection(const ConnectOption *info)
 {
     if (info == NULL) {
         return false;

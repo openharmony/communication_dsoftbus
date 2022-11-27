@@ -22,6 +22,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_def.h"
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -86,7 +87,7 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
     if ((sessionName == NULL) || (channel == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
@@ -126,7 +127,7 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpenFailed: channelId=%d, channelType=%d",
         channelId, channelType);
@@ -143,7 +144,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
+NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionClosed: channelId=%d, channelType=%d",
         channelId, channelType);
@@ -182,7 +183,7 @@ static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, con
     return SOFTBUS_OK;
 }
 
-int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
+NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
     int32_t sessionId;

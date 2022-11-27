@@ -99,7 +99,7 @@ if (defined(ohos_lite)) {
       defines = [ "SOFTBUS_MINI_SYSTEM" ]
       defines += [ "__STDC_FORMAT_MACROS" ]
     } else {
-      defines = [ "DEFAULT_STORAGE_PATH=\"/usr\"" ]
+      defines = [ "DEFAULT_STORAGE_PATH=\"/storage/data\"" ]
       defines += [ "__STDC_FORMAT_MACROS" ]
       defines += [ "SOFTBUS_SMALL_SYSTEM" ]
     }
@@ -130,6 +130,10 @@ if (defined(ohos_lite)) {
     include_dirs += conn_common_inc + trans_common_inc
   }
   ohos_shared_library("softbus_utils") {
+    sanitize = {
+      cfi = true
+      debug = true
+    }
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/bus_center/utils/include",

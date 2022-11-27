@@ -204,7 +204,12 @@ static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
 static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "process udp channel open state[as server].");
-    appInfo->myData.channelId = GenerateUdpChannelId();
+    int32_t udpChannelId = GenerateUdpChannelId();
+    if (udpChannelId == INVALID_ID) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udp channel id failed.");
+        return SOFTBUS_ERR;
+    }
+    appInfo->myData.channelId = udpChannelId;
     int32_t udpPort = NotifyUdpChannelOpened(appInfo, true);
     if (udpPort <= 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp listen port failed[port = %d].", udpPort);
@@ -594,7 +599,6 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, true);
     SoftBusFree(channel);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpenFailed end");
-    return;
 }
 
 static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta)
@@ -759,7 +763,7 @@ int32_t TransCloseUdpChannel(int32_t channelId)
 
 static void UdpModuleCb(int64_t authId, const AuthTransData *data)
 {
-    if (data == NULL || data->data == NULL || data->len == 0) {
+    if (data == NULL || data->data == NULL || data->len < 1 || data->data[data->len - 1] != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }

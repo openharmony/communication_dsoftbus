@@ -30,6 +30,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
@@ -78,7 +79,7 @@ static void Unlock(void)
     (void)SoftBusMutexUnlock(&g_transLaneMutex);
 }
 
-static int32_t PostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2, void *obj)
+NO_SANITIZE("cfi") static int32_t PostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2, void *obj)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {

@@ -119,6 +119,7 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
 static bool FilterUnsupportedCase(LaneTransType transType, LaneLinkType linkType)
 {
     if ((transType == LANE_T_MSG) && (linkType == LANE_P2P)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Not support p2p-msg");
         return true;
     }
     return false;
@@ -185,8 +186,10 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     uint32_t resNum = 0;
     (void)memset_s(resList, sizeof(resList), -1, sizeof(resList));
     if ((request->list.linkTypeNum > 0) && (request->list.linkTypeNum <= LANE_LINK_TYPE_BUTT)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Select lane by preferred linklist");
         SelectByPreferredLink(networkId, request, resList, &resNum);
     } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Select lane by default linklist");
         SelectByDefaultLink(networkId, request, resList, &resNum);
     }
     if (resNum == 0) {

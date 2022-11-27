@@ -17,6 +17,7 @@
 
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_log.h"
 #include "softbus_hidumper_disc.h"
 
@@ -34,7 +35,7 @@ int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
 }
 
-int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
+NO_SANITIZE("cfi") static int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDiscDumpHander invalid param");

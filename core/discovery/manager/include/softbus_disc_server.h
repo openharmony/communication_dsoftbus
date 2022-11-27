@@ -21,6 +21,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 int32_t DiscServerInit(void);
 void DiscServerDeinit(void);
 void DiscServerDeathCallback(const char *pkgName);

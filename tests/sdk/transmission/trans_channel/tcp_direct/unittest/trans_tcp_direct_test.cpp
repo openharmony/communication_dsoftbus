@@ -328,24 +328,24 @@ HWTEST_F(TransTcpDirectTest, TransClientGetTdcDataBufByChannelTest001, TestSize.
     int ret;
     int channelId = 0;
     int fd = TEST_FD;
-    int len = BUF_LEN;
+    size_t len = BUF_LEN;
 
     ret = TransClientGetTdcDataBufByChannel(channelId, NULL, NULL);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, (size_t *)&len);
+    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransDataListInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, (size_t *)&len);
+    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransAddDataBufNode(channelId, fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, (size_t *)&len);
+    ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransDelDataBufNode(channelId);

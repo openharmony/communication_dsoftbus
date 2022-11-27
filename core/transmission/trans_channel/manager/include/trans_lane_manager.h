@@ -17,13 +17,12 @@
 #define TRANS_LANE_MANAGER_H
 
 #include <stdint.h>
-#include "lnn_lane_manager.h"
 #include "lnn_lane_interface.h"
 #include "softbus_app_info.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 int32_t TransLaneMgrInit(void);
 
@@ -42,5 +41,5 @@ int32_t TransGetChannelInfoByLaneId(uint32_t laneId, int32_t *channelId, int32_t
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 #endif
