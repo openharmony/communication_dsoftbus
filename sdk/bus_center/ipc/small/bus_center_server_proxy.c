@@ -423,7 +423,7 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen)
+int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "publish Lnn ipc client push.");
     if (info == NULL || pkgName == NULL) {
@@ -440,8 +440,16 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t info
     reply.id = START_PUBLISH_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
-    WriteUint32(&request, infoLen);
-    WriteBuffer(&request, info, infoLen);
+    WriteInt32(&request, info->publishId);
+    WriteInt32(&request, info->mode);
+    WriteInt32(&request, info->medium);
+    WriteInt32(&request, info->freq);
+    WriteString(&request, info->capability);
+    WriteUint32(&request, info->dataLen);
+    if (info->dataLen != 0) {
+        WriteBuffer(&request, info->capabilityData, info->dataLen);
+    }
+    WriteBool(&request, info->ranging);
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, &reply, NULL);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
@@ -477,7 +485,7 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "refresh Lnn ipc client push.");
     if (info == NULL || pkgName == NULL) {
@@ -494,8 +502,17 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t info
     reply.id = START_REFRESH_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
-    WriteUint32(&request, infoTypeLen);
-    WriteBuffer(&request, info, infoTypeLen);
+    WriteInt32(&request, info->subscribeId);
+    WriteInt32(&request, info->mode);
+    WriteInt32(&request, info->medium);
+    WriteInt32(&request, info->freq);
+    WriteBool(&request, info->isSameAccount);
+    WriteBool(&request, info->isWakeRemote);
+    WriteString(&request, info->capability);
+    WriteUint32(&request, info->dataLen);
+    if (info->dataLen != 0) {
+        WriteBuffer(&request, info->capabilityData, info->dataLen);
+    }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REFRESH_LNN, &request, &reply, ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
