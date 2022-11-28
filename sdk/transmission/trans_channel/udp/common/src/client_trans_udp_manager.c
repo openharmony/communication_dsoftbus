@@ -470,6 +470,7 @@ void ClientTransUdpMgrDeinit(void)
     DestroySoftBusList(g_udpChannelMgr);
     g_udpChannelMgr = NULL;
     TransFileDeinit();
+    TransFileSchemaDeinit();
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans udp channel manager deinit success.");
 }
 
