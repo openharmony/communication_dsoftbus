@@ -455,7 +455,7 @@ NO_SANITIZE("cfi") static void BleConnectServerCallback(int halConnId, const Sof
     g_softBusBleConnCb->BleConnectCallback(halConnId, bleStrMac, btAddr);
 }
 
-static void BleDisconnectServerCallback(int halConnId, const SoftBusBtAddr *btAddr)
+NO_SANITIZE("cfi") static void BleDisconnectServerCallback(int halConnId, const SoftBusBtAddr *btAddr)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "DisconnectServerCallback is coming, halconnId=%d", halConnId);
     if (btAddr == NULL) {

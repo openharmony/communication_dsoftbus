@@ -17,8 +17,9 @@
 #include "disc_manager.h"
 #include "disc_ble.h"
 #include "disc_share_ble.h"
-#include "softbus_log.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 
 #define DISPATCHER_SIZE 2
 
@@ -38,7 +39,8 @@ static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
     return NULL;
 }
 
-static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode, InterfaceFuncType type)
+NO_SANITIZE("cfi") static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
+    InterfaceFuncType type)
 {
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
@@ -59,7 +61,8 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
     }
 }
 
-static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode, InterfaceFuncType type)
+NO_SANITIZE("cfi") static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
+    InterfaceFuncType type)
 {
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
@@ -120,7 +123,7 @@ static int32_t BleDispatchStopPassiveDiscovery(const SubscribeOption *option)
     return BleDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 
-static void BleDispatchLinkStatusChanged(LinkStatus status)
+NO_SANITIZE("cfi") static void BleDispatchLinkStatusChanged(LinkStatus status)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_dispatchers[i] != NULL && g_dispatchers[i]->mediumInterface != NULL &&
@@ -130,7 +133,7 @@ static void BleDispatchLinkStatusChanged(LinkStatus status)
     }
 }
 
-static void BleDispatchUpdateLocalDeviceInfo(InfoTypeChanged type)
+NO_SANITIZE("cfi") static void BleDispatchUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_dispatchers[i] != NULL && g_dispatchers[i]->mediumInterface != NULL &&

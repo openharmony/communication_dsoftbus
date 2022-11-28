@@ -508,7 +508,7 @@ NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
 
-int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
+NO_SANITIZE("cfi") int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
 {
     uint32_t type;
     ConnPktHead *head = NULL;
@@ -544,7 +544,7 @@ int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
     return g_connManager[type]->PostBytes(connectionId, data->buf, (int32_t)(data->len), data->pid, data->flag);
 }
 
-int32_t ConnDisconnectDevice(uint32_t connectionId)
+NO_SANITIZE("cfi") int32_t ConnDisconnectDevice(uint32_t connectionId)
 {
     uint32_t type = (connectionId >> CONNECT_TYPE_SHIFT);
     if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
@@ -557,7 +557,7 @@ int32_t ConnDisconnectDevice(uint32_t connectionId)
     return g_connManager[type]->DisconnectDevice(connectionId);
 }
 
-int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
+NO_SANITIZE("cfi") int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
 {
     if (option == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -573,7 +573,7 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
     return g_connManager[option->type]->DisconnectDeviceNow(option);
 }
 
-int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
+NO_SANITIZE("cfi") int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
     uint32_t type = (connectionId >> CONNECT_TYPE_SHIFT);
     if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
@@ -587,7 +587,7 @@ int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     return g_connManager[type]->GetConnectionInfo(connectionId, info);
 }
 
-int32_t ConnStartLocalListening(const LocalListenerInfo *info)
+NO_SANITIZE("cfi") int32_t ConnStartLocalListening(const LocalListenerInfo *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -604,7 +604,7 @@ int32_t ConnStartLocalListening(const LocalListenerInfo *info)
     return g_connManager[info->type]->StartLocalListening(info);
 }
 
-int32_t ConnStopLocalListening(const LocalListenerInfo *info)
+NO_SANITIZE("cfi") int32_t ConnStopLocalListening(const LocalListenerInfo *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
