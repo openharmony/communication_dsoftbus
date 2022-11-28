@@ -30,7 +30,7 @@ int32_t ClientOnJoinLNNResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg)
 
     uint32_t addrSize;
     void *addr = (void *)IpcIoPopFlatObj(reply, &addrSize);
-    if (addr == NULL) {
+    if (addr == NULL || addrSize != sizeof(ConnectionAddr)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnJoinLNNResult read addr failed!");
         FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_ERR;
@@ -91,7 +91,7 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *reply, const IpcContext *ctx, void
     bool isOnline = IpcIoPopBool(reply);
     uint32_t infoSize;
     void *info = (void *)IpcIoPopFlatObj(reply, &infoSize);
-    if (info == NULL) {
+    if (info == NULL || infoSize != sizeof(NodeBasicInfo)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeOnlineStateChanged read basic info failed!");
         FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_ERR;
@@ -118,6 +118,11 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *reply, const IpcContext *ctx, void *
     int32_t type = IpcIoPopInt32(reply);
     uint32_t infoSize;
     void *info = (void *)IpcIoPopFlatObj(reply, &infoSize);
+    if (info == NULL || infoSize != sizeof(NodeBasicInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeBasicInfoChanged read infoSize:%d failed!", infoSize);
+        return SOFTBUS_ERR;
+    }
     int32_t retReply = LnnOnNodeBasicInfoChanged(info, type);
     if (retReply != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
@@ -139,7 +144,7 @@ int32_t ClientOnTimeSyncResult(IpcIo *reply, const IpcContext *ctx, void *ipcMsg
 
     uint32_t infoSize;
     void *info = (void *)IpcIoPopFlatObj(reply, &infoSize);
-    if (info == NULL) {
+    if (info == NULL || infoSize != sizeof(TimeSyncResultInfo)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult read info failed!");
         FreeBuffer(ctx, ipcMsg);
         return SOFTBUS_ERR;
