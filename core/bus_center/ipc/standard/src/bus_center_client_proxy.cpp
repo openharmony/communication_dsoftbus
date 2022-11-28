@@ -111,7 +111,8 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t inf
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen,
+    int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");

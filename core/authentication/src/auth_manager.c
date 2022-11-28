@@ -396,7 +396,8 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
     return authId;
 }
 
-NO_SANITIZE("cfi") int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, const SessionKey *sessionKey)
+NO_SANITIZE("cfi") int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
+    const SessionKey *sessionKey)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(sessionKey, SOFTBUS_INVALID_PARAM);
@@ -436,7 +437,8 @@ NO_SANITIZE("cfi") int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthS
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey)
+NO_SANITIZE("cfi") int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
+    SessionKey *sessionKey)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(sessionKey, SOFTBUS_INVALID_PARAM);
@@ -916,7 +918,8 @@ uint32_t AuthGenRequestId(void)
     return ConnGetNewRequestId(MODULE_DEVICE_AUTH);
 }
 
-NO_SANITIZE("cfi") int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback)
+NO_SANITIZE("cfi") int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+    const AuthVerifyCallback *callback)
 {
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1020,7 +1023,8 @@ NO_SANITIZE("cfi") int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthCon
     return TryGetBrConnInfo(uuid, connInfo);
 }
 
-NO_SANITIZE("cfi") int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
+NO_SANITIZE("cfi") int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId,
+    const AuthConnCallback *callback)
 {
     if (info == NULL || !CheckAuthConnCallback(callback)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1203,7 +1207,8 @@ NO_SANITIZE("cfi") uint32_t AuthGetDecryptSize(uint32_t inLen)
     return inLen - OVERHEAD_LEN;
 }
 
-NO_SANITIZE("cfi") int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+NO_SANITIZE("cfi") int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen)
 {
     if (inData == NULL || inLen == 0 || outData == NULL || outLen == NULL || *outLen < AuthGetEncryptSize(inLen)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1222,7 +1227,8 @@ NO_SANITIZE("cfi") int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inDa
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+NO_SANITIZE("cfi") int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen)
 {
     if (inData == NULL || inLen == 0 || outData == NULL || outLen == NULL || *outLen < AuthGetDecryptSize(inLen)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);

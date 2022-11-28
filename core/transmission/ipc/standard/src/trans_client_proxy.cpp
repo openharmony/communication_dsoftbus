@@ -45,7 +45,8 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
     return clientProxy->OnClientPermissonChange(pkgName, state);
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
+    const ChannelInfo *channel, int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -67,7 +68,8 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType,
+    int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -78,7 +80,8 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
+    int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {

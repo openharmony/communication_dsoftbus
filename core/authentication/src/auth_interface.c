@@ -108,7 +108,8 @@ static void NotifyTransDisconnected(int64_t authId)
     }
 }
 
-NO_SANITIZE("cfi") int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)
+NO_SANITIZE("cfi") int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
+    bool isMeta)
 {
     if (isMeta) {
         return AuthMetaOpenConn(info, requestId, callback);
@@ -170,7 +171,8 @@ NO_SANITIZE("cfi") int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType ty
     return AuthDeviceGetIdByP2pMac(p2pMac, type, isServer);
 }
 
-NO_SANITIZE("cfi") int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+NO_SANITIZE("cfi") int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -180,7 +182,8 @@ NO_SANITIZE("cfi") int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, ui
     return AuthMetaEncrypt(authId, inData, inLen, outData, outLen);
 }
 
-NO_SANITIZE("cfi") int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+NO_SANITIZE("cfi") int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {

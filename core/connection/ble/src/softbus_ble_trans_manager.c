@@ -85,7 +85,8 @@ static int32_t FindAvailableCacheIndex(BleConnectionInfo *targetNode, const BleT
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, uint32_t len, uint32_t *outLen, int32_t *index)
+NO_SANITIZE("cfi") char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, uint32_t len, uint32_t *outLen,
+    int32_t *index)
 {
     if (value == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleTransRecv invalid data");
@@ -156,7 +157,8 @@ static int32_t BleHalSend(const BleConnectionInfo *connInfo, const char *data, i
     }
 }
 
-NO_SANITIZE("cfi") int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len, int32_t seq, int32_t module)
+NO_SANITIZE("cfi") int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len, int32_t seq,
+    int32_t module)
 {
 #define BLE_SEND_PACKET_DELAY_LEN 10 // ms
     uint32_t tempLen = len;

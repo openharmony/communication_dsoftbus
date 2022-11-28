@@ -49,12 +49,12 @@ int32_t InitBrPendingPacket(void)
     return SOFTBUS_OK;
 }
 
-void DestroyBrPendingPacket(void)
+NO_SANITIZE("cfi") void DestroyBrPendingPacket(void)
 {
     (void)SoftBusMutexDestroy(&g_pendingLock);
 }
 
-int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
+NO_SANITIZE("cfi") int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -92,7 +92,7 @@ int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
     return SOFTBUS_OK;
 }
 
-void DelBrPendingPacket(uint32_t id, uint64_t seq)
+NO_SANITIZE("cfi") void DelBrPendingPacket(uint32_t id, uint64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
         return;
