@@ -1163,6 +1163,11 @@ static int32_t ProcessMasterElect(const void *para)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer node(%u) is already offline", connFsm->id);
             break;
         }
+        if (!IsSupportMasterNodeElect(connFsm->connInfo.version)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer not support master node elect", connFsm->id);
+            rc = SOFTBUS_OK;
+            break;
+        }
         if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, localMasterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
             LnnGetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, &localMasterWeight) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local master node(%u) info from ledger failed",
@@ -1610,7 +1615,7 @@ void OnAuthMetaVerifyPassed(uint32_t requestId, int64_t authMetaId, const NodeIn
     meta->metaJoinNode = metaNode;
     meta->info = *info;
     if (PostMessageToHandler(MSG_TYPE_JOIN_METANODE_AUTH_PASS, meta) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post join metanode authpass message failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post join metanode auth pass message failed");
         SoftBusFree(meta);
         return;
     }

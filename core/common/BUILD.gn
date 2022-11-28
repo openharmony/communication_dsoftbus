@@ -36,18 +36,14 @@ common_utils_src = [
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    hilog_lite_include_path =
-        "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
     diff_deps = [
-      "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite",
+      "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_static",
     ]
     build_type = "static_library"
   } else {
-    hilog_lite_include_path =
-        "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits"
     diff_deps = [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_shared",
     ]
     build_type = "shared_library"

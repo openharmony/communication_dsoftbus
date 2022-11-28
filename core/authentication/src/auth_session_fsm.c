@@ -236,6 +236,10 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
         return;
     }
     AuthFsm *authFsm = TO_AUTH_FSM(fsm);
+    if (authFsm == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "authFsm is null");
+        return;
+    }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "SyncDevIdState: auth fsm[%"PRId64"] enter", authFsm->authSeq);
     if (!authFsm->info.isServer) {
@@ -557,7 +561,12 @@ static int32_t PostMessageToAuthFsm(int32_t msgType, int64_t authSeq, const uint
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }
-    LnnFsmPostMessage(&authFsm->fsm, msgType, para);
+    if (LnnFsmPostMessage(&authFsm->fsm, msgType, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "post message to auth fsm fail.");
+        ReleaseAuthLock();
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
     ReleaseAuthLock();
     return SOFTBUS_OK;
 }
@@ -579,7 +588,12 @@ static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bo
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }
-    LnnFsmPostMessage(&authFsm->fsm, msgType, para);
+    if (LnnFsmPostMessage(&authFsm->fsm, msgType, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "post message to auth fsm by connId fail.");
+        ReleaseAuthLock();
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
     ReleaseAuthLock();
     return SOFTBUS_OK;
 }

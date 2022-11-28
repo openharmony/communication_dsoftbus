@@ -411,7 +411,7 @@ static void BleServiceStartCallback(int status, int srvcHandle)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStartCallback start failed");
     }
     UpdateGattService(&g_gattService, status);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStartCallback start success");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleServiceStartCallback start success");
 }
 
 static void BleServiceStopCallback(int status, int srvcHandle)
