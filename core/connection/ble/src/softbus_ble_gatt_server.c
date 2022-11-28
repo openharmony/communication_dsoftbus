@@ -411,7 +411,7 @@ NO_SANITIZE("cfi") static void BleServiceStartCallback(int status, int srvcHandl
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStartCallback start failed");
     }
     UpdateGattService(&g_gattService, status);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStartCallback start success");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleServiceStartCallback start success");
 }
 
 NO_SANITIZE("cfi") static void BleServiceStopCallback(int status, int srvcHandle)

@@ -21,3 +21,7 @@ int32_t LnnInitProductMonitorImpl(void)
 {
     return SOFTBUS_OK;
 }
+
+void LnnDeinitProductMonitorImpl(void)
+{
+}

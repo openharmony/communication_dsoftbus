@@ -94,7 +94,7 @@ static SoftBusMessage *NewAuthMessage(const uint8_t *obj, uint32_t size)
 static void HandleAuthMessage(SoftBusMessage *msg)
 {
     CHECK_NULL_PTR_RETURN_VOID(msg);
-    EventHandler handler = (EventHandler)msg->arg1;
+    EventHandler handler = (EventHandler)(uintptr_t)msg->arg1;
     if (handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
             "invalid event handler, event: %d", msg->what);
@@ -115,7 +115,7 @@ NO_SANITIZE("cfi") int32_t PostAuthEvent(EventType event, EventHandler handler,
         return SOFTBUS_MALLOC_ERR;
     }
     msg->what = (int32_t)event;
-    msg->arg1 = (uint64_t)handler;
+    msg->arg1 = (uint64_t)(uintptr_t)handler;
     if (delayMs == 0) {
         g_authHandler.looper->PostMessage(g_authHandler.looper, msg);
     } else {

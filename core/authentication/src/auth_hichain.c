@@ -306,11 +306,10 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "generate auth param fail.");
         return SOFTBUS_ERR;
     }
-    int32_t ret;
-    for (int i = 0; i < RETRY_TIMES; i++) {
-        ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authSeq, authParams, &g_hichainCallback);
+    for (int32_t i = 0; i < RETRY_TIMES; i++) {
+        int32_t ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authSeq, authParams, &g_hichainCallback);
         if (ret == HC_SUCCESS) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain authDevice sucess, time = %d", i + 1);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain call authDevice sucess, time = %d", i + 1);
             cJSON_free(authParams);
             return SOFTBUS_OK;
         }
@@ -319,10 +318,10 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
                 "hichain authDevice need to retry, current retry time = %d, err = %d", i + 1, ret);
             (void)SoftBusSleepMs(RETRY_MILLSECONDS);
         } else {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain authDevice fail, err = %d", ret);
             break;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain authDevice fail, err = %d", ret);
     cJSON_free(authParams);
     return SOFTBUS_ERR;
 }

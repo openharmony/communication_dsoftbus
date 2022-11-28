@@ -295,6 +295,7 @@ uint32_t SoftBusCryptoRand(void)
     int32_t len = SoftBusReadFile(fd, &value, sizeof(uint32_t));
     if (len < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "CryptoRand read file fail");
+        SoftBusCloseFile(fd);
         return 0;
     }
     SoftBusCloseFile(fd);
