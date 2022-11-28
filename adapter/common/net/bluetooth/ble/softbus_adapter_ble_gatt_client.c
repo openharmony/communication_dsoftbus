@@ -31,7 +31,7 @@
 static BtGattClientCallbacks g_btGattClientCallbacks = {0};
 static SoftBusGattcCallback *g_softBusGattcCallback = NULL;
 
-static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
+NO_SANITIZE("cfi") static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
 {
     CLOGI("StateChangedCallback id=%d, state=%d, status=%d",
         clientId, connectionState, status);
@@ -48,7 +48,7 @@ static void GattcConnectParaUpdateCallback(int clientId, int interval, int laten
     CLOGI("ParaUpdateCallback");
 }
 
-static void GattcSearchServiceCompleteCallback(int clientId, int status)
+NO_SANITIZE("cfi") static void GattcSearchServiceCompleteCallback(int clientId, int status)
 {
     CLOGI("SearchServiceCompleteCallback, id=%d, status=%d",
         clientId, status);
@@ -75,14 +75,14 @@ static void GattcWriteDescriptorCallback(int clientId, BtGattDescriptor *descrip
     CLOGI("WriteDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
-static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
+NO_SANITIZE("cfi") static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
 {
     CLOGI("ConfigureMtuSizeCallback, id=%d, mtusize=%d, status=%d",
         clientId, mtuSize, status);
     g_softBusGattcCallback->ConfigureMtuSizeCallback(clientId, mtuSize, status);
 }
 
-static void GattcRegisterNotificationCallback(int clientId, int status)
+NO_SANITIZE("cfi") static void GattcRegisterNotificationCallback(int clientId, int status)
 {
     CLOGI("RegisterNotificationCallback, id=%d, status=%d", clientId, status);
     g_softBusGattcCallback->RegistNotificationCallback(clientId, status);

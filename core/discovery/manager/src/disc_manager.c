@@ -102,8 +102,8 @@ static bool IsBitmapSet(const uint32_t *bitMap, uint32_t pos)
     return ((1U << pos) & (*bitMap)) ? true : false;
 }
 
-static int32_t CallSpecificInterfaceFunc(const InnerOption *option, const DiscoveryFuncInterface *interface,
-                                         const DiscoverMode mode, InterfaceFuncType type)
+NO_SANITIZE("cfi") static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
+    const DiscoveryFuncInterface *interface, const DiscoverMode mode, InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL,
                                   "interface is null");
@@ -238,7 +238,7 @@ static bool IsInnerModule(const DiscInfo *infoNode)
     return false;
 }
 
-static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device,
+NO_SANITIZE("cfi") static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device,
                              const InnerDeviceInfoAddtions *additions)
 {
     if (IsInnerModule(infoNode) == false) {
@@ -813,7 +813,7 @@ void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
     }
 }
 
-void DiscDeviceInfoChanged(InfoTypeChanged type)
+NO_SANITIZE("cfi") void DiscDeviceInfoChanged(InfoTypeChanged type)
 {
     DLOGI("type=%d", type);
     if (g_discBleInterface != NULL && g_discBleInterface->UpdateLocalDeviceInfo != NULL) {

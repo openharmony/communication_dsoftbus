@@ -215,7 +215,7 @@ int32_t LnnClearNetConfigList(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
+NO_SANITIZE("cfi") int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
 {
     int32_t ret = SOFTBUS_OK;
 

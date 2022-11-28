@@ -23,6 +23,7 @@
 
 #include "securec.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -79,7 +80,7 @@ static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
 static StateListener g_stateListener[STATE_LISTENER_MAX_NUM];
 static bool g_isRegCb = false;
 
-static void WrapperStateChangeCallback(const int transport, const int status)
+NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, const int status)
 {
     CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
     int listenerId;
