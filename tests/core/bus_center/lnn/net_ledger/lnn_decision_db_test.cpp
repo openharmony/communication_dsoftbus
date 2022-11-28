@@ -196,8 +196,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_008, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock,
-        LnnGetFullStoragePath(_,_,_)).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(decisionDbMock, LnnGenerateRandomByHuks(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -216,8 +215,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_009, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock,
-        LnnGetFullStoragePath(_,_,_)).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnGenerateRandomByHuks(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(decisionDbMock, LnnEncryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -237,8 +235,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_010, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock,
-        LnnGetFullStoragePath(_,_,_)).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnGenerateRandomByHuks(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnEncryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -259,8 +256,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_011, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock,
-        LnnGetFullStoragePath(_,_,_)).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusReadFullFile(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnDecryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -281,8 +277,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock,
-        LnnGetFullStoragePath(_,_,_)).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusReadFullFile(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnDecryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -304,10 +299,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_013, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusReadFullFile(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnDecryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -333,10 +325,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_014, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusReadFullFile(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnDecryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -363,10 +352,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_015, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusReadFullFile(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnDecryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -394,10 +380,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusAccessFile(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, SoftBusReadFullFile(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnDecryptDataByHuks(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -411,7 +394,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
     EXPECT_CALL(decisionDbMock, CreateTable(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitDecisionDbDelay();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -712,7 +695,7 @@ HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
     EXPECT_CALL(decisionDbMock, GetRecordNumByKey(_,_,_)).WillRepeatedly(Return(0));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnGetTrustedDevInfoFromDb(&udid, &num);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
