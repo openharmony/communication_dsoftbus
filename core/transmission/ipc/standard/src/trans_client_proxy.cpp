@@ -20,6 +20,7 @@
 #include "softbus_log.h"
 #include "softbus_trans_def.h"
 #include "trans_client_proxy_standard.h"
+#include "softbus_def.h"
 
 using namespace OHOS;
 
@@ -44,7 +45,7 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
     return clientProxy->OnClientPermissonChange(pkgName, state);
 }
 
-int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -54,7 +55,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     return clientProxy->OnChannelOpened(sessionName, channel);
 }
 
-int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
     int32_t errCode, int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
@@ -66,7 +67,7 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType, int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -77,7 +78,7 @@ int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, i
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -88,7 +89,7 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
     TransReceiveData *receiveData, int32_t pid)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
@@ -101,7 +102,7 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
 {
     sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, param->pid);
     if (clientProxy == nullptr) {

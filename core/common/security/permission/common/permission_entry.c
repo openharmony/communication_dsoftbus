@@ -425,7 +425,7 @@ int32_t LoadPermissionJson(const char *fileName)
     return SOFTBUS_OK;
 }
 
-void ClearAppInfo(const ListNode *appInfo)
+NO_SANITIZE("cfi") void ClearAppInfo(const ListNode *appInfo)
 {
     if (appInfo == NULL) {
         return;
@@ -437,7 +437,7 @@ void ClearAppInfo(const ListNode *appInfo)
     }
 }
 
-void DeinitPermissionJson(void)
+NO_SANITIZE("cfi") void DeinitPermissionJson(void)
 {
     if (g_permissionEntryList == NULL) {
         return;
@@ -453,7 +453,7 @@ void DeinitPermissionJson(void)
     DestroySoftBusList(g_permissionEntryList);
 }
 
-SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
+NO_SANITIZE("cfi") SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
     const char *pkgName, uint32_t actions)
 {
     SoftBusPermissionItem *pItem = SoftBusCalloc(sizeof(SoftBusPermissionItem));
@@ -468,7 +468,7 @@ SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32
     return pItem;
 }
 
-int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
+NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
 {
     if (sessionName == NULL || pItem == NULL || g_permissionEntryList == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -596,7 +596,7 @@ static int32_t NewDynamicPermissionEntry(SoftBusPermissionEntry *permissionEntry
     return SOFTBUS_OK;
 }
 
-int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
+NO_SANITIZE("cfi") int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
 {
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     if (g_dynamicPermissionList->cnt >= DYNAMIC_PERMISSION_MAX_SIZE) {
@@ -628,7 +628,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
     return SOFTBUS_OK;
 }
 
-int32_t DeleteDynamicPermission(const char *sessionName)
+NO_SANITIZE("cfi") int32_t DeleteDynamicPermission(const char *sessionName)
 {
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     SoftBusPermissionEntry *pe = NULL;

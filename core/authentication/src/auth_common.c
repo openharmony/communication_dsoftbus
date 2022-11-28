@@ -248,7 +248,7 @@ const char *GetAuthSideStr(bool isServer)
     return isServer ? "server" : "client";
 }
 
-bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2)
+NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info1, false);
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
@@ -284,7 +284,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2)
     return false;
 }
 
-int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option)
+NO_SANITIZE("cfi") int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(option, SOFTBUS_INVALID_PARAM);
@@ -324,7 +324,7 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
     return SOFTBUS_OK;
 }
 
-int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
+NO_SANITIZE("cfi") int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -364,7 +364,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
     return SOFTBUS_OK;
 }
 
-int32_t AuthCommonInit(void)
+NO_SANITIZE("cfi") int32_t AuthCommonInit(void)
 {
     g_authHandler.name = "AuthHandler";
     g_authHandler.HandleMessage = HandleAuthMessage;
@@ -377,7 +377,7 @@ int32_t AuthCommonInit(void)
     return SOFTBUS_OK;
 }
 
-void AuthCommonDeinit(void)
+NO_SANITIZE("cfi") void AuthCommonDeinit(void)
 {
     g_authHandler.looper = NULL;
     g_authHandler.HandleMessage = NULL;

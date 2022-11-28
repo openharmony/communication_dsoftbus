@@ -485,7 +485,7 @@ static void RemoveLeaveRequestInfoByPkgName(const char *pkgName)
     }
 }
 
-void BusCenterServerDeathCallback(const char *pkgName)
+NO_SANITIZE("cfi") void BusCenterServerDeathCallback(const char *pkgName)
 {
     if (pkgName == nullptr) {
         return;

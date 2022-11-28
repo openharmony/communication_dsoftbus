@@ -55,7 +55,7 @@ static LnnDiscoveryImplCallback g_discoveryCallback = {
     .OnDeviceFound = DeviceFound,
 };
 
-static void DeviceFound(const ConnectionAddr *addr)
+NO_SANITIZE("cfi") static void DeviceFound(const ConnectionAddr *addr)
 {
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device addr is null\n");

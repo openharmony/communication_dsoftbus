@@ -101,7 +101,7 @@ static int GetPriority(int32_t flag)
     }
 }
 
-int BleEnqueueNonBlock(const void *msg)
+NO_SANITIZE("cfi") int BleEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
         return SOFTBUS_ERR;
@@ -145,7 +145,7 @@ static int GetMsg(BleQueue *queue, void **msg)
     return SOFTBUS_ERR;
 }
 
-int BleDequeueNonBlock(void **msg)
+NO_SANITIZE("cfi") int BleDequeueNonBlock(void **msg)
 {
     if (msg == NULL) {
         return SOFTBUS_ERR;
@@ -173,7 +173,7 @@ int BleDequeueNonBlock(void **msg)
     return SOFTBUS_ERR;
 }
 
-int BleInnerQueueInit(void)
+NO_SANITIZE("cfi") int BleInnerQueueInit(void)
 {
     if (SoftBusMutexInit(&g_bleQueueLock, NULL) != 0) {
         return SOFTBUS_ERR;
@@ -187,7 +187,7 @@ int BleInnerQueueInit(void)
     return SOFTBUS_OK;
 }
 
-void BleInnerQueueDeinit(void)
+NO_SANITIZE("cfi") void BleInnerQueueDeinit(void)
 {
     SoftBusMutexDestroy(&g_bleQueueLock);
     DestroyBleQueue(g_innerQueue);

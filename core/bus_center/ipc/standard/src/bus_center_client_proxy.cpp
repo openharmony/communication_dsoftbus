@@ -20,6 +20,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_permission.h"
+#include "softbus_def.h"
 
 using namespace OHOS;
 
@@ -30,7 +31,7 @@ static sptr<BusCenterClientProxy> GetClientProxy(const char *pkgName)
     return clientProxy;
 }
 
-int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
@@ -45,7 +46,7 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     return clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
 }
 
-int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
@@ -60,7 +61,7 @@ int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t add
     return clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
 }
 
-int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
@@ -74,7 +75,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32
     return clientProxy->OnLeaveLNNResult(networkId, retCode);
 }
 
-int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
@@ -88,7 +89,7 @@ int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, 
     return clientProxy->OnLeaveMetaNodeResult(networkId, retCode);
 }
 
-int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
+NO_SANITIZE("cfi") int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
@@ -99,7 +100,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     return SOFTBUS_OK;
 }
 
-int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
@@ -110,7 +111,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
@@ -124,7 +125,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t i
     return clientProxy->OnTimeSyncResult(info, infoTypeLen, retCode);
 }
 
-int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason)
+NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
@@ -139,7 +140,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason)
+NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
@@ -154,7 +155,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen)
+NO_SANITIZE("cfi") int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");

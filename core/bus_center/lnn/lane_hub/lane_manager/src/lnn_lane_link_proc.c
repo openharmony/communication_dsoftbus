@@ -35,6 +35,7 @@
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
 #include "wifi_device.h"
+#include "softbus_def.h"
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
 
@@ -60,7 +61,7 @@ static int32_t IsLinkRequestValid(const LinkRequest *reqInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+NO_SANITIZE("cfi") static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -202,7 +203,7 @@ static void FillWlanLinkInfo(
     wlan->connInfo.port = port;
 }
 
-static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+NO_SANITIZE("cfi") static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -269,7 +270,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_WLAN_2P4G] = LaneLinkOfWlan,
 };
 
-int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
+NO_SANITIZE("cfi") int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
 {
     if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK || LinkTypeCheck(reqInfo->linkType) == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "the reqInfo or type is invalid.");
@@ -288,7 +289,7 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     return SOFTBUS_OK;
 }
 
-void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid, const char *networkId)
+NO_SANITIZE("cfi") void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid, const char *networkId)
 {
     (void)reqId;
     if (networkId == NULL) {

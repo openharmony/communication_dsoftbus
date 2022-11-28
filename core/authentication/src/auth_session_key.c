@@ -24,6 +24,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_def.h"
 
 #define SESSION_KEY_MAX_NUM 10
 #define LAST_USE_THRESHOLD_MS (30 * 1000L) /* 30s */
@@ -76,7 +77,7 @@ int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList
     return SOFTBUS_OK;
 }
 
-void DestroySessionKeyList(SessionKeyList *list)
+NO_SANITIZE("cfi") void DestroySessionKeyList(SessionKeyList *list)
 {
     CHECK_NULL_PTR_RETURN_VOID(list);
     SessionKeyItem *item = NULL;
@@ -94,7 +95,7 @@ bool HasSessionKey(const SessionKeyList *list)
     return !IsListEmpty(list);
 }
 
-int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key)
+NO_SANITIZE("cfi") int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key)
 {
     CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
@@ -193,7 +194,7 @@ int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
     return SOFTBUS_OK;
 }
 
-int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+NO_SANITIZE("cfi") int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || outData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN ||
@@ -248,7 +249,7 @@ int32_t EncryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t
     return SOFTBUS_OK;
 }
 
-int32_t DecryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+NO_SANITIZE("cfi") int32_t DecryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
     uint8_t **outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN || outData == NULL || outLen == NULL) {
