@@ -31,6 +31,10 @@ int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 
     uint32_t addrSize;
     ReadUint32(data, &addrSize);
+    if (addrSize != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnJoinLNNResult read addrSize:%d failed!", addrSize);
+        return SOFTBUS_ERR;
+    }
     void *addr = (void *)ReadBuffer(data, addrSize);
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnJoinLNNResult read addr failed!");
@@ -101,6 +105,11 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
     ReadBool(data, &isOnline);
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
+    if (infoSize != sizeof(NodeBasicInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeOnlineStateChanged read infoSize:%d failed!", infoSize);
+        return SOFTBUS_ERR;
+    }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeOnlineStateChanged read basic info failed!");
@@ -126,7 +135,16 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
     ReadInt32(data, &type);
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
+    if (infoSize != sizeof(NodeBasicInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeBasicInfoChanged read infoSize:%d failed!", infoSize);
+        return SOFTBUS_ERR;
+    }
     void *info = (void *)ReadBuffer(data, infoSize);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeBasicInfoChanged read basic info failed!");
+        return SOFTBUS_ERR;
+    }
     int32_t retReply = LnnOnNodeBasicInfoChanged(info, type);
     if (retReply != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
@@ -145,6 +163,10 @@ int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
+    if (infoSize != sizeof(TimeSyncResultInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult read infoSize:%d failed!", infoSize);
+        return SOFTBUS_ERR;
+    }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult read info failed!");
@@ -195,6 +217,15 @@ void ClientOnRefreshDeviceFound(IpcIo *data, IpcIo *reply)
     }
     uint32_t infoSize;
     ReadUint32(data, &infoSize);
+    if (infoSize != sizeof(DeviceInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnRefreshDeviceFound read infoSize:%d failed!", infoSize);
+        return;
+    }
     void *info = (void *)ReadBuffer(data, infoSize);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound read info failed!");
+        return;
+    }
     LnnOnRefreshDeviceFound(info);
 }
