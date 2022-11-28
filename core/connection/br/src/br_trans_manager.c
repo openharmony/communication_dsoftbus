@@ -213,7 +213,8 @@ static char *BrAddNumToJson(int32_t method, uint32_t connectionId, int32_t delta
     return data;
 }
 
-NO_SANITIZE("cfi") char *BrPackRequestOrResponse(int32_t requestOrResponse, uint32_t connectionId, int32_t delta, uint64_t count,
+NO_SANITIZE("cfi") char *BrPackRequestOrResponse(int32_t requestOrResponse, uint32_t connectionId, int32_t delta,
+    uint64_t count,
     int32_t *outLen)
 {
     char *data = BrAddNumToJson(requestOrResponse, connectionId, delta, count);
