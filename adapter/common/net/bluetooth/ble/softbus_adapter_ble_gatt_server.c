@@ -257,7 +257,8 @@ NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, int serverId, B
     g_gattsCallback->ServiceAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle);
 }
 
-NO_SANITIZE("cfi") static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandle, int includeSrvcHandle)
+NO_SANITIZE("cfi") static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandle,
+    int includeSrvcHandle)
 {
     (void)serverId;
     (void)srvcHandle;
