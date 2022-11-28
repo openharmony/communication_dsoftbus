@@ -332,8 +332,9 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
 int32_t SoftBusClientStub::OnJoinLNNResultInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinLNNResultInner read addr type length failed!");
+    if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "OnJoinLNNResultInner read addr type length:%d failed!", addrTypeLen);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
@@ -390,8 +391,9 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
         return SOFTBUS_ERR;
     }
     uint32_t infoTypeLen;
-    if (!data.ReadUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChangedInner read info type length failed!");
+    if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "OnNodeOnlineStateChangedInner read info type length:%d failed!", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
@@ -416,8 +418,9 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
     }
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner type %d", type);
     uint32_t infoTypeLen;
-    if (!data.ReadUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner read info type length failed!");
+    if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "OnNodeBasicInfoChangedInner read info type length:%d failed!", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
@@ -436,8 +439,9 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
 int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t infoTypeLen;
-    if (!data.ReadUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner read info length failed!");
+    if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(TimeSyncResultInfo)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "OnTimeSyncResultInner read info length:%d failed!", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
