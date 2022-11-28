@@ -63,7 +63,7 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, co
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason)
+NO_SANITIZE("cfi") int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "on discovery failed callback ipc server push.");
     IpcIo io;
@@ -110,7 +110,7 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
+NO_SANITIZE("cfi") int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "on publish success callback ipc server push.");
     IpcIo io;
@@ -133,7 +133,7 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
+NO_SANITIZE("cfi") int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "on publish failed ipc server push.");
     IpcIo io;

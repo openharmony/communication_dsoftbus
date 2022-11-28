@@ -70,7 +70,7 @@ static RefMacItem *FindMacItem(const ListNode *macList, const char *peerMac)
     return NULL;
 }
 
-void AddNewMacItem(ListNode *macList, const char *mac)
+NO_SANITIZE("cfi") void AddNewMacItem(ListNode *macList, const char *mac)
 {
     RefMacItem *mItem = (RefMacItem *)SoftBusMalloc(sizeof(RefMacItem));
     if (mItem == NULL) {
@@ -86,7 +86,7 @@ void AddNewMacItem(ListNode *macList, const char *mac)
     ListAdd(macList, &mItem->node);
 }
 
-void AddNewPidItem(int32_t pid, const char* mac)
+NO_SANITIZE("cfi") void AddNewPidItem(int32_t pid, const char* mac)
 {
     RefPidItem *pItem = (RefPidItem *)SoftBusMalloc(sizeof(RefPidItem));
     if (pItem == NULL) {

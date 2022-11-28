@@ -16,8 +16,9 @@
 #include "lnn_ipc_utils.h"
 
 #include <string.h>
+#include "softbus_def.h"
 
-void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
+NO_SANITIZE("cfi") void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
 {
     if (info == NULL || pubInfo == NULL) {
         return;
@@ -42,7 +43,7 @@ void ConvertVoidToPublishInfo(const void *info, PublishInfo *pubInfo)
     pubInfo->ranging = *(bool *)info1;
 }
 
-void ConvertVoidToSubscribeInfo(const void *info, SubscribeInfo *subInfo)
+NO_SANITIZE("cfi") void ConvertVoidToSubscribeInfo(const void *info, SubscribeInfo *subInfo)
 {
     if (info == NULL || subInfo == NULL) {
         return;

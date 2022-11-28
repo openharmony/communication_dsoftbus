@@ -19,6 +19,7 @@
 #include "auth_hichain.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
+#include "softbus_def.h"
 
 typedef struct {
     int32_t module;
@@ -107,7 +108,7 @@ static void NotifyTransDisconnected(int64_t authId)
     }
 }
 
-int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)
+NO_SANITIZE("cfi") int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)
 {
     if (isMeta) {
         return AuthMetaOpenConn(info, requestId, callback);
@@ -115,7 +116,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return AuthDeviceOpenConn(info, requestId, callback);
 }
 
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+NO_SANITIZE("cfi") int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -125,7 +126,7 @@ int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
     return AuthMetaPostTransData(authId, dataInfo);
 }
 
-void AuthCloseConn(int64_t authId)
+NO_SANITIZE("cfi") void AuthCloseConn(int64_t authId)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -136,7 +137,7 @@ void AuthCloseConn(int64_t authId)
     AuthMetaCloseConn(authId);
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+NO_SANITIZE("cfi") int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
         return AuthMetaGetPreferConnInfo(uuid, connInfo);
@@ -145,7 +146,7 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
 }
 
 /* for ProxyChannel & P2P TcpDirectchannel */
-int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
+NO_SANITIZE("cfi") int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
 {
     if (isMeta) {
         return AUTH_INVALID_ID;
@@ -153,7 +154,7 @@ int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta
     return AuthDeviceGetLatestIdByUuid(uuid, isIpConnection);
 }
 
-int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
+NO_SANITIZE("cfi") int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
 {
     if (isMeta) {
         return AuthMetaGetIdByConnInfo(connInfo, isServer);
@@ -161,7 +162,7 @@ int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool is
     return AuthDeviceGetIdByConnInfo(connInfo, isServer);
 }
 
-int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta)
+NO_SANITIZE("cfi") int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta)
 {
     if (isMeta) {
         return AuthMetaGetIdByP2pMac(p2pMac, type, isServer);
@@ -169,7 +170,7 @@ int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, 
     return AuthDeviceGetIdByP2pMac(p2pMac, type, isServer);
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+NO_SANITIZE("cfi") int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -179,7 +180,7 @@ int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8
     return AuthMetaEncrypt(authId, inData, inLen, outData, outLen);
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+NO_SANITIZE("cfi") int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -189,7 +190,7 @@ int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8
     return AuthMetaDecrypt(authId, inData, inLen, outData, outLen);
 }
 
-int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
+NO_SANITIZE("cfi") int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -199,7 +200,7 @@ int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
     return AuthMetaSetP2pMac(authId, p2pMac);
 }
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+NO_SANITIZE("cfi") int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -209,7 +210,7 @@ int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
     return AuthMetaGetConnInfo(authId, connInfo);
 }
 
-int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
+NO_SANITIZE("cfi") int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -224,7 +225,7 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
     return AuthDeviceGetVersion(authId, version);
 }
 
-int32_t AuthGetServerSide(int64_t authId, bool *isServer)
+NO_SANITIZE("cfi") int32_t AuthGetServerSide(int64_t authId, bool *isServer)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
@@ -234,7 +235,7 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer)
     return AuthMetaGetServerSide(authId, isServer);
 }
 
-int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
+NO_SANITIZE("cfi") int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
 {
     if (isMetaAuth == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
@@ -250,7 +251,7 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
     return SOFTBUS_OK;
 }
 
-bool AuthHasTrustedRelation(void)
+NO_SANITIZE("cfi") bool AuthHasTrustedRelation(void)
 {
     uint32_t sameGroupCnt = HichainGetJoinedGroups(AUTH_IDENTICAL_ACCOUNT_GROUP);
     uint32_t pointGroupCnt = HichainGetJoinedGroups(AUTH_PEER_TO_PEER_GROUP);
@@ -259,7 +260,7 @@ bool AuthHasTrustedRelation(void)
     return sameGroupCnt != 0 || pointGroupCnt != 0;
 }
 
-int32_t AuthInit(void)
+NO_SANITIZE("cfi") int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {
         .OnDataReceived = NotifyTransDataReceived,
@@ -273,7 +274,7 @@ int32_t AuthInit(void)
     return AuthMetaInit(&callBack);
 }
 
-void AuthDeinit(void)
+NO_SANITIZE("cfi") void AuthDeinit(void)
 {
     AuthDeviceDeinit();
     AuthMetaDeinit();

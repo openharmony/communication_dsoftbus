@@ -26,7 +26,7 @@
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
 
-static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
+NO_SANITIZE("cfi") static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_dispatchers[i] == NULL) {
@@ -190,7 +190,7 @@ DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *inte
     return &g_discBleFrameFuncInterface;
 }
 
-void DiscBleDeinit(void)
+NO_SANITIZE("cfi") void DiscBleDeinit(void)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "deinit DiscBleFrameDeinit");
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {

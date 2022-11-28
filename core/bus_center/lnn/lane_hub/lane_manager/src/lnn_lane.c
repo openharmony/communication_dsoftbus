@@ -36,6 +36,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 #define ID_SHIFT_STEP 5
 #define ID_CALC_MASK 0x1F
@@ -262,7 +263,7 @@ static bool RequestInfoCheck(const LaneRequestOption *request, const ILaneListen
 }
 
 /* return laneId if the operation is successful, return 0 otherwise. */
-uint32_t ApplyLaneId(LaneType type)
+NO_SANITIZE("cfi") uint32_t ApplyLaneId(LaneType type)
 {
     return AllocLaneId(type);
 }
@@ -377,7 +378,7 @@ int32_t InitLane(void)
     return SOFTBUS_OK;
 }
 
-void DeinitLane(void)
+NO_SANITIZE("cfi") void DeinitLane(void)
 {
     LnnLanePendingDeinit();
     DeinitLaneModel();
