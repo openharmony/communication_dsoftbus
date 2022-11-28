@@ -100,13 +100,13 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
         return strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
     }
     if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
-        return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0)
+        return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0)
             && (addr1->info.ip.port == addr2->info.ip.port);
     }
     if (addr1->type == CONNECTION_ADDR_SESSION) {
         return ((addr1->info.session.sessionId == addr2->info.session.sessionId) &&
             (addr1->info.session.channelId == addr2->info.session.channelId) &&
-            (addr1->type == addr2->type));
+            (addr1->info.session.type == addr2->info.session.type));
     }
     return false;
 }

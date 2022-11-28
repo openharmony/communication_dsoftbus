@@ -71,7 +71,7 @@ typedef struct {
     int uid;
     int pid;
     char authState[AUTH_STATE_SIZE_MAX];
-    char addr[MAX_SOCKET_ADDR_LEN];
+    char addr[IP_LEN];
     int port;
     int64_t channelId;
 } AppInfoData;

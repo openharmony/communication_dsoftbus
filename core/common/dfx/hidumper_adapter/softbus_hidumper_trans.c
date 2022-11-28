@@ -126,12 +126,12 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     }
 
     char deviceId[DEVICE_ID_SIZE_MAX] = {0};
-    char srcAddr[MAX_SOCKET_ADDR_LEN] = {0};
-    char dstAddr[MAX_SOCKET_ADDR_LEN] = {0};
+    char srcAddr[IP_LEN] = {0};
+    char dstAddr[IP_LEN] = {0};
 
     DataMasking(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, ID_DELIMITER, deviceId);
-    DataMasking(appInfo->myData.addr, MAX_SOCKET_ADDR_LEN, IP_DELIMITER, srcAddr);
-    DataMasking(appInfo->peerData.addr, MAX_SOCKET_ADDR_LEN, IP_DELIMITER, dstAddr);
+    DataMasking(appInfo->myData.addr, IP_LEN, IP_DELIMITER, srcAddr);
+    DataMasking(appInfo->peerData.addr, IP_LEN, IP_DELIMITER, dstAddr);
     SOFTBUS_DPRINTF(fd, "LocalSessionName      : %s\n", appInfo->myData.sessionName);
     SOFTBUS_DPRINTF(fd, "RemoteSessionName     : %s\n", appInfo->peerData.sessionName);
     SOFTBUS_DPRINTF(fd, "PeerDeviceId          : %s\n", deviceId);

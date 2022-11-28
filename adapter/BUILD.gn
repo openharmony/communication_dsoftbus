@@ -15,13 +15,6 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
-  if (ohos_kernel_type == "liteos_m") {
-    hilog_lite_include_path =
-        "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
-  } else {
-    hilog_lite_include_path =
-        "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits"
-  }
   config("dsoftbus_adapter_common_interface") {
     include_dirs = [
       "$softbus_adapter_common/include",
@@ -92,7 +85,7 @@ if (defined(ohos_lite)) {
         ]
       }
 
-      deps = [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+      deps = [ "$hilog_lite_deps_path" ]
 
       if (dsoftbus_feature_encrypt == 0) {
         sources +=
@@ -129,7 +122,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = [
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+        "$hilog_lite_deps_path",
         "//base/startup/init/interfaces/innerkits:libbegetutil",
         "//third_party/bounds_checking_function:libsec_shared",
       ]

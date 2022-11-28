@@ -80,7 +80,7 @@ struct BleInfo {
     char deviceIdHash[UDID_HASH_LEN];
 };
 struct SocketInfo {
-    char addr[MAX_SOCKET_ADDR_LEN];
+    char addr[IP_LEN];
     ProtocolType protocol;
     int32_t port;
     int32_t fd;
@@ -142,7 +142,7 @@ struct BleOption {
 };
 
 struct SocketOption {
-    char addr[MAX_SOCKET_ADDR_LEN];
+    char addr[IP_LEN];
     int32_t port;
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
@@ -159,7 +159,7 @@ typedef struct {
 } ConnectOption;
 
 struct ListenerSocketOption {
-    char addr[MAX_SOCKET_ADDR_LEN];
+    char addr[IP_LEN];
     int32_t port;
     ListenerModule moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
