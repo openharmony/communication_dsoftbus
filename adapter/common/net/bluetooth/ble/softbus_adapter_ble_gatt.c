@@ -25,6 +25,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 typedef struct {
     int advId;
@@ -54,7 +55,7 @@ static SoftBusMutex g_scanerLock = {0};
 
 static bool g_isRegCb = false;
 
-int BleGattLockInit(void)
+NO_SANITIZE("cfi") int BleGattLockInit(void)
 {
     if (g_lockInit) {
         return SOFTBUS_OK;

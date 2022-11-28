@@ -23,7 +23,8 @@
 
 static INetworkingListener g_netChanlistener = {0};
 
-int32_t NotifyNetworkingChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
+NO_SANITIZE("cfi") int32_t NotifyNetworkingChannelOpened(int32_t channelId, const AppInfo *appInfo,
+    unsigned char isServer)
 {
     if (g_netChanlistener.onChannelOpened == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelOpened is null");
@@ -47,7 +48,7 @@ void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId)
     g_netChanlistener.onChannelOpenFailed(channelId, networkId);
 }
 
-void NotifyNetworkingChannelClosed(int32_t channelId)
+NO_SANITIZE("cfi") void NotifyNetworkingChannelClosed(int32_t channelId)
 {
     if (g_netChanlistener.onChannelClosed == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelClosed is null");

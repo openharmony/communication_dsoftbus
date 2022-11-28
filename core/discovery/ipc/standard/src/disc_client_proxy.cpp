@@ -19,6 +19,7 @@
 #include "softbus_client_info_manager.h"
 #include "softbus_error_code.h"
 #include "softbus_log.h"
+#include "softbus_def.h"
 
 using namespace OHOS;
 
@@ -38,7 +39,7 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, co
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason)
+NO_SANITIZE("cfi") int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");
@@ -47,7 +48,7 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
+NO_SANITIZE("cfi") int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");
@@ -56,7 +57,7 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
+NO_SANITIZE("cfi") int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");
@@ -65,7 +66,7 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
+NO_SANITIZE("cfi") int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");

@@ -264,7 +264,7 @@ NO_SANITIZE("cfi") int32_t CloseDatabase(DbContext *ctx)
     return SOFTBUS_OK;
 }
 
-int32_t CreateTable(DbContext *ctx, TableNameID id)
+NO_SANITIZE("cfi") int32_t CreateTable(DbContext *ctx, TableNameID id)
 {
     int32_t rc;
     char *errMsg = NULL;
@@ -492,7 +492,7 @@ NO_SANITIZE("cfi") int32_t OpenTransaction(DbContext *ctx)
     return rc;
 }
 
-int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
+NO_SANITIZE("cfi") int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
 {
     int32_t rc;
     const char *sql = SQL_COMMIT_TRANSACTION;

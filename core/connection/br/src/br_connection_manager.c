@@ -205,7 +205,7 @@ static uint32_t AllocNewConnectionIdLocked(void)
     return tempId;
 }
 
-BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
+NO_SANITIZE("cfi") BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
 {
     BrConnectionInfo *newConnInfo = (BrConnectionInfo *)SoftBusCalloc(sizeof(BrConnectionInfo));
     if (newConnInfo == NULL) {
@@ -357,7 +357,7 @@ uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state, int32_t *perState
     return connId;
 }
 
-int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
+NO_SANITIZE("cfi") int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -375,7 +375,7 @@ int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
     return SOFTBUS_OK;
 }
 
-int32_t AddPendingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
+NO_SANITIZE("cfi") int32_t AddPendingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -401,7 +401,7 @@ int32_t AddPendingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
     return SOFTBUS_OK;
 }
 
-int32_t AddConnectionList(BrConnectionInfo *newConnInfo)
+NO_SANITIZE("cfi") int32_t AddConnectionList(BrConnectionInfo *newConnInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
@@ -640,7 +640,7 @@ int32_t GetBrConnStateByConnectionId(uint32_t connId)
     return state;
 }
 
-int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, int32_t *sideType)
+NO_SANITIZE("cfi") int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, int32_t *sideType)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClosingByConnOption mutex failed");

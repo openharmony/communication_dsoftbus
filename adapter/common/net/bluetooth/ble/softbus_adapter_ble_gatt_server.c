@@ -38,7 +38,7 @@ static BtGattServerCallbacks g_bleGattsHalCallback = {0};
 static volatile int g_halServerId = -1;
 static volatile int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 
-int CheckGattsStatus(void)
+NO_SANITIZE("cfi") int CheckGattsStatus(void)
 {
     if (g_gattsCallback == NULL) {
         return SOFTBUS_ERR;
@@ -205,7 +205,7 @@ int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
     return SOFTBUS_OK;
 }
 
-static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
+NO_SANITIZE("cfi") static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
 {
     CLOGI("BleRegisterServerCallback status=%d severId=%d", status, serverId);
     if ((appUuid == NULL) || (appUuid->uuid == NULL)) {
@@ -257,7 +257,8 @@ NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, int serverId, B
     g_gattsCallback->ServiceAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle);
 }
 
-static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandle, int includeSrvcHandle)
+NO_SANITIZE("cfi") static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandle,
+    int includeSrvcHandle)
 {
     (void)serverId;
     (void)srvcHandle;
@@ -329,7 +330,7 @@ NO_SANITIZE("cfi") static void BleRequestReadCallback(BtReqReadCbPara readCbPara
     g_gattsCallback->RequestReadCallback(req);
 }
 
-static void BleRequestWriteCallback(BtReqWriteCbPara writeCbPara)
+NO_SANITIZE("cfi") static void BleRequestWriteCallback(BtReqWriteCbPara writeCbPara)
 {
     CLOGI("RequestWriteCallback transId=%d, attrHandle=%d\n", writeCbPara.transId, writeCbPara.attrHandle);
     SoftBusGattWriteRequest req = {

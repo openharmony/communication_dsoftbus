@@ -61,7 +61,7 @@ int32_t GenerateTdcChannelId(void)
     return channelId;
 }
 
-int32_t CreatSessionConnList(void)
+NO_SANITIZE("cfi") int32_t CreatSessionConnList(void)
 {
     if (g_sessionConnList == NULL) {
         g_sessionConnList = CreateSoftBusList();
@@ -132,7 +132,7 @@ SessionConn *GetSessionConnByReq(int64_t req)
     return NULL;
 }
 
-SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
+NO_SANITIZE("cfi") SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
