@@ -534,8 +534,9 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
         return SOFTBUS_IPC_ERR;
     }
     uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner read addr type length failed!");
+    if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "SoftbusJoinLNNInner read addr type length:%d failed!", addrTypeLen);
         return SOFTBUS_IPC_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
@@ -559,8 +560,9 @@ int32_t SoftBusServerStub::JoinMetaNodeInner(MessageParcel &data, MessageParcel 
         return SOFTBUS_IPC_ERR;
     }
     uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinMetaNodeInner read addr type length failed!");
+    if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "SoftbusJoinMetaNodeInner read addr type length:%d failed!", addrTypeLen);
         return SOFTBUS_IPC_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
