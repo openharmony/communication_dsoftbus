@@ -682,7 +682,7 @@ NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitTcp(const ConnectCallback *call
 
 static int TcpConnectInfoDump(int fd)
 {
-    char addr[MAX_SOCKET_ADDR_LEN] = {0};
+    char addr[IP_LEN] = {0};
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
@@ -696,7 +696,7 @@ static int TcpConnectInfoDump(int fd)
         SOFTBUS_DPRINTF(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
         SOFTBUS_DPRINTF(fd, "Connection Info type              : %d\n", itemNode->info.type);
         SOFTBUS_DPRINTF(fd, "SocketInfo                        :\n");
-        DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER, addr);
+        DataMasking(itemNode->info.socketInfo.addr, IP_LEN, MAC_DELIMITER, addr);
         SOFTBUS_DPRINTF(fd, "SocketInfo addr                   : %s\n", addr);
         SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
         SOFTBUS_DPRINTF(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);

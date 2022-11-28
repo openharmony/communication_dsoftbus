@@ -198,13 +198,13 @@ static char *GetBleAttrUuid(int32_t module)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBleAttrUuid %d", module);
     if (module == MODULE_BLE_NET) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleAttrUuid1");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "GetBleAttrUuid1");
         return SOFTBUS_CHARA_BLENET_UUID;
     } else if (module == MODULE_BLE_CONN) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleAttrUuid2");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "GetBleAttrUuid2");
         return SOFTBUS_CHARA_BLECONN_UUID;
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetBleAttrUuid3");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "GetBleAttrUuid3");
         return SOFTBUS_CHARA_BLECONN_UUID;
     }
 }

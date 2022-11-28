@@ -240,7 +240,7 @@ static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delM
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)ctrlMsgObj->obj;
     LnnProcessSendOnceMsgPara *delMsgPara = (LnnProcessSendOnceMsgPara *)delMsg->obj;
 
-    if (((msgPara->hbType & delMsgPara->hbType) == delMsgPara->hbType)  &&
+    if (((msgPara->hbType & delMsgPara->hbType) == delMsgPara->hbType) &&
         msgPara->strategyType == delMsgPara->strategyType) {
         SoftBusFree(msgPara);
         msgPara = NULL;

@@ -195,7 +195,7 @@ typedef enum {
     CONNECTION_ADDR_BR,       /**< BR */
     CONNECTION_ADDR_BLE,      /**< BLE */
     CONNECTION_ADDR_ETH,      /**< Ethernet */
-    CONNECTION_ADDR_SESSION,     /**< SESSION */
+    CONNECTION_ADDR_SESSION,  /**< SESSION */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 /**

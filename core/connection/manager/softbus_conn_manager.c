@@ -390,8 +390,7 @@ static void RecordStartTime(const ConnectOption *info)
             }
             break;
         case CONNECT_TCP:
-            if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr,
-                MAX_SOCKET_ADDR_LEN) != EOK) {
+            if (memcpy_s(&conInfo.socketInfo.addr, IP_LEN, info->socketOption.addr, IP_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:addr memcpy failed");
                 return;
             }

@@ -76,7 +76,9 @@ static void ExcuteChannelMeas(void)
     if (g_channelList.measNum >= g_channelList.num) {
         WlanChannelInfo *info = g_channelInfoList.buff;
         uint32_t num = g_channelInfoList.num;
-        g_wlanChannelInfoCb->onChannelInfoAvailable(info, num);
+        if (g_wlanChannelInfoCb->onChannelInfoAvailable != NULL) {
+            g_wlanChannelInfoCb->onChannelInfoAvailable(info, num);
+        }
         ReleaseMeasResources();
         return;
     }
@@ -86,7 +88,9 @@ static void ExcuteChannelMeas(void)
     measChannelParam.measTime = MEAS_TIME_PER_CHAN_MS;
     int32_t rc = g_wlanObj->StartChannelMeas(g_wlanObj, WLAN_IFNAME, &measChannelParam);
     if (rc != HDF_SUCCESS) {
-        g_wlanChannelInfoCb->onFail(rc);
+        if (g_wlanChannelInfoCb->onFail != NULL) {
+            g_wlanChannelInfoCb->onFail(rc);
+        }
         ReleaseMeasResources();
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus StartChannelMeas fail.");
         return;
@@ -153,7 +157,9 @@ static void GetOneChannelMeasResult(void *para)
     struct MeasChannelResult measChannelResult = {0};
     int32_t rc = g_wlanObj->GetChannelMeasResult(g_wlanObj, WLAN_IFNAME, &measChannelResult);
     if (rc != HDF_SUCCESS) {
-        g_wlanChannelInfoCb->onFail(rc);
+        if (g_wlanChannelInfoCb->onFail != NULL) {
+            g_wlanChannelInfoCb->onFail(rc);
+        }
         ReleaseMeasResources();
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus GetChannelMeasResult failed.");
         return;
