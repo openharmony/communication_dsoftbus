@@ -61,7 +61,6 @@ static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
 NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel, int32_t pid)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel opened ipc server push");
     (void)pid;
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
@@ -168,7 +167,8 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
+    int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
     (void)pid;
