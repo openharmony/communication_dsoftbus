@@ -451,8 +451,9 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
         return SOFTBUS_ERR;
     }
     uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusJoinLNNInner read addr type length failed!");
+    if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "SoftbusJoinLNNInner read addr type length:%d failed!", addrTypeLen);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
