@@ -487,6 +487,18 @@ static bool CheckAdvChannelInUsed(int advId)
     return true;
 }
 
+static bool CheckScanChannelInUsed(int listenerId)
+{
+    if (listenerId < 0 || listenerId >= SCAN_MAX_NUM) {
+        return false;
+    }
+    if (!g_scanListener[listenerId].isUsed) {
+        CLOGE("listenerId %d is ready released", listenerId);
+        return false;
+    }
+    return true;
+}
+
 static int SetAdvData(int advId, const SoftBusBleAdvData *data)
 {
     g_advChannel[advId].advData.advLength = data->advLength;
@@ -790,7 +802,7 @@ int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uin
     if (SoftBusMutexLock(&g_scanerLock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    if (!g_scanListener[listenerId].isUsed) {
+    if (!CheckScanChannelInUsed(listenerId)) {
         CLOGE("ScanListener id:%d is not in use", listenerId);
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
@@ -811,7 +823,7 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
     if (SoftBusMutexLock(&g_scanerLock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    if (!g_scanListener[listenerId].isUsed) {
+    if (!CheckScanChannelInUsed(listenerId)) {
         CLOGE("ScanListener id:%d is not in use", listenerId);
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
@@ -848,7 +860,7 @@ int SoftBusStopScan(int listenerId)
     if (SoftBusMutexLock(&g_scanerLock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    if (!g_scanListener[listenerId].isUsed) {
+    if (!CheckScanChannelInUsed(listenerId)) {
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
     }
@@ -885,20 +897,20 @@ int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data)
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckAdvChannelInUsed(advId)) {
+        SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_ERR;
     }
     if (!g_advChannel[advId].isAdvertising) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "SoftBusReplaceAdvertisingAdv failed: adv %d is not advertising", advId);
-        return SOFTBUS_LOG_ERROR;
+        SoftBusMutexUnlock(&g_advLock);
+        CLOGE("adv %d is not advertising", advId);
+        return SOFTBUS_ERR;
     }
     int btAdvId = g_advChannel[advId].advId;
     int ret = SetAdvData(advId, data);
     SoftBusMutexUnlock(&g_advLock);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "SoftBusReplaceAdvertisingAdv failed: SetAdvData failed, advId: %d, btadvId: %d", advId, btAdvId);
-        return SOFTBUS_LOG_ERROR;
+        CLOGE("SetAdvData failed, advId: %d, btadvId: %d", advId, btAdvId);
+        return SOFTBUS_ERR;
     }
     StartAdvRawData advData = {0};
     ConvertAdvData(data, &advData);
