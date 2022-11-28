@@ -619,6 +619,14 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+static inline int32_t CheckAppTypeAndMsgHead(const ProxyMessageHead *msgHead, const AppInfo *appInfo)
+{
+    if (((msgHead->chiper & ENCRYPTED) == 0) && (appInfo->appType != APP_TYPE_AUTH)) {
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    }
+    return SOFTBUS_OK;
+}
+
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
     if (msg->data[msg->dateLen - 1] != 0) {
@@ -635,6 +643,11 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     if (TransProxyUnpackHandshakeMsg(msg->data, chan) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackHandshakeMsg fail");
         SoftBusFree(chan);
+        return;
+    }
+
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &chan->appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
         return;
     }
 
@@ -699,6 +712,11 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
             "reset chan fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
+        return;
+    }
+
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &info->appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
         return;
     }
 
