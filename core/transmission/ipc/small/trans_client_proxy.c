@@ -196,6 +196,10 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
     (void)pid;
     IpcIo io;
     uint8_t *tmpData = (uint8_t *)SoftBusCalloc(receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN);
+    if (tmpData == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "tmpData is null");
+        return SOFTBUS_ERR;
+    }
     IpcIoInit(&io, tmpData, receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&io, channelId);
     WriteInt32(&io, channelType);
