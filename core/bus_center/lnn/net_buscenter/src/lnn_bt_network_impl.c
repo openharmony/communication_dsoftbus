@@ -259,7 +259,7 @@ static void BtStateChangedEvtHandler(const LnnEventBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:not interest event", __func__);
         return;
     }
-    const LnnMonitorBtStateChangedEvent *event = (const LnnMonitorBtStateChangedEvent *)info;
+    LnnMonitorBtStateChangedEvent *event = (LnnMonitorBtStateChangedEvent *)info;
     (void)LnnVisitNetif(NotifyBtStatusChanged, &event->status);
 }
 
