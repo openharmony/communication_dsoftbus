@@ -148,7 +148,8 @@ int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value, uint32_t dataLen)
+NO_SANITIZE("cfi") int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
+    uint32_t dataLen)
 {
     uint32_t len = dataLen & DATA_LENGTH_MASK;
     broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT) & DATA_TYPE_MASK;
