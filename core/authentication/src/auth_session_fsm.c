@@ -695,7 +695,8 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uin
     return PostMessageToAuthFsm(FSM_MSG_RECV_CLOSE_ACK, authSeq, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data,
+    uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -703,7 +704,8 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_DEVICE_INFO, connId, isServer, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data,
+    uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
