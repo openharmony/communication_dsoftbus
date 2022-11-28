@@ -67,11 +67,14 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
             break;
         case SOFTBUS_EVT_PARAMTYPE_STRING:
             dstParam->t = HISYSEVENT_STRING;
-            dstParam->v.s = (char *)SoftBusMalloc(sizeof(char) * strlen(srcParam->paramValue.str) + 1);
-            if (strcpy_s(dstParam->v.s, strlen(srcParam->paramValue.str) + 1,
-                srcParam->paramValue.str) != EOK) {
+            dstParam->v.s = (char *)SoftBusCalloc(sizeof(char) * SOFTBUS_HISYSEVT_PARAM_LEN);
+            if (dstParam->v.s == NULL) {
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam: SoftBusMalloc fail");
+                return SOFTBUS_ERR;
+            }
+            if (strcpy_s(dstParam->v.s, SOFTBUS_HISYSEVT_PARAM_LEN, srcParam->paramValue.str) != EOK) {
                 SoftBusFree(dstParam->v.s);
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "copy string var fail");
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam:copy string var fail");
                 return SOFTBUS_ERR;
             }
             break;
@@ -93,7 +96,10 @@ static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
             HILOG_ERROR(SOFTBUS_HILOG_ID, "copy param fail");
             return SOFTBUS_ERR;
         }
-        ConvertEventParam(&msg->paramArray[i], &g_dstParam[i]);
+        if (ConvertEventParam(&msg->paramArray[i], &g_dstParam[i]) != SOFTBUS_OK) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertMsgToHiSysEvent:convert param fail");
+            return SOFTBUS_ERR;
+        }
     }
     return SOFTBUS_OK;
 }
@@ -105,7 +111,7 @@ static void HiSysEventParamDeInit(uint32_t size)
             SoftBusFree(g_dstParam[i].v.s);
             g_dstParam[i].v.s = NULL;
         }
-     }
+    }
  }
 
 static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
