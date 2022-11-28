@@ -16,6 +16,7 @@
 #include "stoppublishlnn_fuzzer.h"
 #include <cstddef>
 #include <securec.h>
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -26,7 +27,7 @@ namespace OHOS {
             return false;
         }
 
-        char *tmp = (char *)malloc(size);
+        char *tmp = reinterpret_cast<char *>(malloc(size));
         if (tmp == nullptr) {
             return false;
         }
@@ -39,6 +40,7 @@ namespace OHOS {
             return false;
         }
 
+        SetAceessTokenPermission("busCenterTest");
         StopPublishLNN(reinterpret_cast<const char *>(tmp),
                        *const_cast<int32_t *>(reinterpret_cast<const int32_t *>(tmp)));
         free(tmp);
