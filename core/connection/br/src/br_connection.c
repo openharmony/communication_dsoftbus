@@ -695,7 +695,7 @@ static int32_t DisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_ERR;
 }
 
-static int32_t SendAck(const BrConnectionInfo *brConnInfo, uint32_t windows, uint64_t seq)
+static int32_t SendAck(BrConnectionInfo *brConnInfo, uint32_t windows, uint64_t seq)
 {
     int32_t dataLen = 0;
     char *buf = BrPackRequestOrResponse(METHOD_NOTIFY_ACK, brConnInfo->connectionId, (int32_t)windows, seq, &dataLen);

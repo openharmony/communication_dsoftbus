@@ -782,7 +782,7 @@ static bool CheckNeedStopScan(int listenerId)
     return true;
 }
 
-int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
+int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
     if (filter == NULL || filterSize == 0) {
         return SOFTBUS_INVALID_PARAM;
