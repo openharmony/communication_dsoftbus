@@ -24,6 +24,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
 #include "softbus_socket.h"
+#include "softbus_def.h"
 
 #define MAGIC_NUMBER  0xBABEFACE
 #define AUTH_PKT_HEAD_LEN 24
@@ -513,7 +514,7 @@ void UnregAuthChannelListener(int32_t module)
     }
 }
 
-int32_t AuthOpenChannel(const char *ip, int32_t port)
+NO_SANITIZE("cfi") int32_t AuthOpenChannel(const char *ip, int32_t port)
 {
     if (ip == NULL || port <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthChannel: invalid param.");
@@ -528,13 +529,13 @@ int32_t AuthOpenChannel(const char *ip, int32_t port)
     return fd;
 }
 
-void AuthCloseChannel(int32_t channelId)
+NO_SANITIZE("cfi") void AuthCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthChannel: close auth channel, id=%d.", channelId);
     SocketDisconnectDevice(channelId);
 }
 
-int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
+NO_SANITIZE("cfi") int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
 {
     if (channelId < 0 || data == NULL || data->data == NULL || data->len == 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthChannel: invalid param, channelId=%d.", channelId);

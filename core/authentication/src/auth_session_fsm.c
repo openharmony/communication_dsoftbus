@@ -22,6 +22,7 @@
 #include "auth_manager.h"
 #include "auth_session_message.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 
 #define AUTH_TIMEOUT_MS (10 * 1000)
 #define TO_AUTH_FSM(ptr) CONTAINER_OF(ptr, AuthFsm, fsm)
@@ -598,7 +599,7 @@ static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bo
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
+NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
     uint64_t connId, const AuthConnInfo *connInfo, bool isServer)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -621,7 +622,7 @@ int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -629,7 +630,7 @@ int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32
     return PostMessageToAuthFsm(FSM_MSG_RECV_DEVICE_ID, authSeq, data, len);
 }
 
-int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     AuthSessionInfo info;
     if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
@@ -641,7 +642,7 @@ int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t l
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -649,7 +650,7 @@ int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_
     return PostMessageToAuthFsm(FSM_MSG_RECV_AUTH_DATA, authSeq, data, len);
 }
 
-int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
+NO_SANITIZE("cfi") int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
 {
     if (udid == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -665,7 +666,7 @@ int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
     return SOFTBUS_OK;
 }
 
-int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
 {
     if (key == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -673,12 +674,12 @@ int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t 
     return PostMessageToAuthFsm(FSM_MSG_SAVE_SESSION_KEY, authSeq, key, len);
 }
 
-int32_t AuthSessionHandleAuthResult(int64_t authSeq, int32_t reason)
+NO_SANITIZE("cfi") int32_t AuthSessionHandleAuthResult(int64_t authSeq, int32_t reason)
 {
     return PostMessageToAuthFsm(FSM_MSG_AUTH_RESULT, authSeq, (uint8_t *)&reason, sizeof(reason));
 }
 
-int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -686,7 +687,7 @@ int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint
     return PostMessageToAuthFsm(FSM_MSG_RECV_DEVICE_INFO, authSeq, data, len);
 }
 
-int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -694,7 +695,8 @@ int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_
     return PostMessageToAuthFsm(FSM_MSG_RECV_CLOSE_ACK, authSeq, data, len);
 }
 
-int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data,
+    uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -702,7 +704,8 @@ int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, co
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_DEVICE_INFO, connId, isServer, data, len);
 }
 
-int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data,
+    uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -710,7 +713,7 @@ int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_CLOSE_ACK, connId, isServer, data, len);
 }
 
-int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
+NO_SANITIZE("cfi") int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
 {
     if (udid == NULL || udid[0] == '\0') {
         return SOFTBUS_INVALID_PARAM;
@@ -734,7 +737,7 @@ int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
     return SOFTBUS_OK;
 }
 
-void AuthSessionFsmExit(void)
+NO_SANITIZE("cfi") void AuthSessionFsmExit(void)
 {
     HichainDestroy();
     if (!RequireAuthLock()) {

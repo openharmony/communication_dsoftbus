@@ -262,7 +262,7 @@ void TransProxyPostHandshakeMsgToLoop(int32_t chanId)
     return;
 }
 
-void TransProxyPostDisConnectMsgToLoop(uint32_t connId)
+NO_SANITIZE("cfi") void TransProxyPostDisConnectMsgToLoop(uint32_t connId)
 {
     SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_DISCONNECT_MSG, 0, connId, NULL);
     if (msg == NULL) {

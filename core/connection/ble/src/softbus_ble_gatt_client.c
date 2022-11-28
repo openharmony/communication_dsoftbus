@@ -127,7 +127,7 @@ NO_SANITIZE("cfi") static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t
     return SOFTBUS_OK;
 }
 
-static int32_t BleCilentRemoveMessageFunc(const SoftBusMessage *msg, void *args)
+NO_SANITIZE("cfi") static int32_t BleCilentRemoveMessageFunc(const SoftBusMessage *msg, void *args)
 {
     if (msg == NULL || args == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleCilentRemoveMessageFunc invalid param");
@@ -648,7 +648,7 @@ NO_SANITIZE("cfi") static void TimeOutMsgHandler(int32_t clientId, int32_t errCo
     SoftbusBleGattcDisconnect(clientId);
 }
 
-static void BleGattcMsgHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void BleGattcMsgHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;

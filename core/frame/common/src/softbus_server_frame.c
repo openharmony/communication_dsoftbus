@@ -128,7 +128,7 @@ ERR_EXIT:
     return;
 }
 
-void ClientDeathCallback(const char *pkgName, int32_t pid)
+NO_SANITIZE("cfi") void ClientDeathCallback(const char *pkgName, int32_t pid)
 {
     DiscServerDeathCallback(pkgName);
     TransServerDeathCallback(pkgName, pid);

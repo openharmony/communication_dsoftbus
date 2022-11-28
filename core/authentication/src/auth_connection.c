@@ -23,6 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
+#include "softbus_def.h"
 
 #define AUTH_CONN_DATA_HEAD_SIZE 24
 #define AUTH_CONN_CONNECT_TIMEOUT_MS 10000
@@ -464,7 +465,7 @@ static int32_t PostCommData(uint32_t connectionId, bool toServer,
     return ConnPostBytes(connectionId, &connData);
 }
 
-int32_t AuthConnInit(const AuthConnListener *listener)
+NO_SANITIZE("cfi") int32_t AuthConnInit(const AuthConnListener *listener)
 {
     CHECK_NULL_PTR_RETURN_VALUE(listener, SOFTBUS_INVALID_PARAM);
     g_listener = *listener;
@@ -482,7 +483,7 @@ int32_t AuthConnInit(const AuthConnListener *listener)
     return SOFTBUS_OK;
 }
 
-void AuthConnDeinit(void)
+NO_SANITIZE("cfi") void AuthConnDeinit(void)
 {
     UnsetSocketCallback();
     ConnUnSetConnectCallback(MODULE_DEVICE_AUTH);
@@ -490,7 +491,7 @@ void AuthConnDeinit(void)
     (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
 }
 
-int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
+NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
     int32_t ret;
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -583,7 +584,7 @@ ConnSideType GetConnSideType(uint64_t connId)
     return info.isServer ? CONN_SIDE_SERVER : CONN_SIDE_CLIENT;
 }
 
-bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
+NO_SANITIZE("cfi") bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
 {
     ConnectOption connOpt;
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, false);
@@ -596,7 +597,7 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
     return CheckActiveConnection(&connOpt);
 }
 
-int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
+NO_SANITIZE("cfi") int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
 {
     if (ip == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
@@ -629,7 +630,7 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
     return SOFTBUS_INVALID_PARAM;
 }
 
-void AuthStopListening(AuthLinkType type)
+NO_SANITIZE("cfi") void AuthStopListening(AuthLinkType type)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "stop auth listening, type=%d.", type);
     switch (type) {
