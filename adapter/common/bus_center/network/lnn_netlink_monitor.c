@@ -67,6 +67,7 @@ static int32_t CreateNetlinkSocket(void)
     }
     if (memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sockaddr_nl failed");
+        SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
     nladdr.nl_family = SOFTBUS_AF_NETLINK;

@@ -512,6 +512,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
         default:
+            ret = SOFTBUS_OK;
             break;
     }
     if (ret != SOFTBUS_OK) {

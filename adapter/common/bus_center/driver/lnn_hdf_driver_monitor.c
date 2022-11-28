@@ -137,3 +137,13 @@ int32_t LnnInitDriverMonitorImpl(void)
     g_driverCtrl.eventListener.onReceive = OnReceiveDriverEvent;
     return LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayInitFunction, NULL, BIND_HDF_DELAY);
 }
+
+void LnnDeinitDriverMonitorImpl(void)
+{
+    if (g_driverCtrl.softbusService == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "hdf driver deinit enter");
+    HdfIoServiceRecycle(g_driverCtrl.softbusService);
+    g_driverCtrl.softbusService = NULL;
+}

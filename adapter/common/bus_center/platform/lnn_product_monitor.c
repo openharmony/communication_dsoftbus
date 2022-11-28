@@ -18,6 +18,7 @@
 #include "bus_center_event.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
+#include "softbus_log.h"
 #include "hdf_io_service_if.h"
 
 #define HISYSLINK_SERVICE_NAME "hisyslink_sevice"
@@ -55,4 +56,14 @@ int32_t LnnInitProductMonitorImpl(void)
     }
     HILOG_INFO(SOFTBUS_HILOG_ID, "start success...");
     return SOFTBUS_OK;
+}
+
+void LnnDeinitProductMonitorImpl(void)
+{
+    if (g_serv == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "deinit g_serv enter");
+    HdfIoServiceRecycle(g_serv);
+    g_serv = NULL;
 }

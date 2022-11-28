@@ -65,7 +65,6 @@ ohos_unittest("TransProxyChannelCoreTest") {
 
     "$dsoftbus_root_path/third_party/dfinder/include",
 
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "//base/security/device_auth/interfaces/innerkits",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
@@ -137,7 +136,6 @@ ohos_unittest("TransProxyChannelCoreMockTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
 
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "//base/security/device_auth/interfaces/innerkits",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",

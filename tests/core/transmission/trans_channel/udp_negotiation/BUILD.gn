@@ -47,7 +47,6 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
     "//base/security/device_auth/interfaces/innerkits",
