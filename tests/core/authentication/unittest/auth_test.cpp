@@ -361,21 +361,27 @@ HWTEST_F(AuthTest, ENCRYPT_INNER_Test_001, TestSize.Level1)
 
     ret = EncryptInner(nullptr, inData, inLen, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ret = EncryptInner(&list, nullptr, inLen, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ret = EncryptInner(&list, inData, inLen, nullptr, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ret = EncryptInner(&list, inData, inLen, &outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     inLen = 0;
     ret = EncryptInner(&list, inData, inLen, &outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ListInit(&list);
     ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     inLen = CRYPT_DATA_LEN;
     ret = EncryptInner(&list, inData, inLen, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    SoftBusFree(outData);
 }
 
 /*
@@ -397,21 +403,27 @@ HWTEST_F(AuthTest, DENCRYPT_INNER_Test_001, TestSize.Level1)
 
     ret = DecryptInner(nullptr, inData, inLen, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ret = DecryptInner(&list, nullptr, inLen, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ret = DecryptInner(&list, inData, inLen, nullptr, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ret = DecryptInner(&list, inData, inLen, &outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     inLen = 0;
     ret = DecryptInner(&list, inData, inLen, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(outData);
     ListInit(&list);
     ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     inLen = CRYPT_DATA_LEN;
     ret = DecryptInner(&list, inData, inLen, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
+    SoftBusFree(outData);
 }
 
 /*

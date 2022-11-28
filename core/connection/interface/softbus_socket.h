@@ -52,7 +52,7 @@ enum {
 };
 
 typedef struct {
-    char addr[MAX_SOCKET_ADDR_LEN];
+    char addr[IP_LEN];
     int32_t port;
 } SocketAddr;
 
