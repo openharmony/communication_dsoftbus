@@ -84,21 +84,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
-    int32_t ret = LnnInitLocalLedger();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = LnnInitLocalLedger();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = LnnInitLocalLedger();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnConvertDeviceTypeToId(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = LnnInitLocalLedger();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_ERR);
 }
 
 /*
@@ -134,16 +120,8 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
-    int32_t ret = LnnInitLocalLedgerDelay();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = LnnInitLocalLedgerDelay();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnInitLocalLedgerDelay();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_ERR);
 }
 
 /*
@@ -262,5 +240,85 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, P2P_ROLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_MOCK_Test_008
+* @tc.desc: local ledger init test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnConvertDeviceTypeToId(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_MOCK_Test_009
+* @tc.desc: local ledger init test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_MOCK_Test_010
+* @tc.desc: local ledger init test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_010, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnConvertDeviceTypeToId(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_MOCK_Test_011
+* @tc.desc: local ledger init test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_011, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: LOCAL_LEDGER_MOCK_Test_012
+* @tc.desc: local ledger init test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_012, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_OK);
 }
 } // namespace OHOS
