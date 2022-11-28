@@ -416,8 +416,9 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
     }
 }
 
-static void OnNetifStatusChanged(LnnPhysicalSubnet *subnet)
+static void OnNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
+    (void)status;
     IpSubnetManagerEvent event = SUBNET_MANAGER_EVENT_MAX;
 
     if (subnet->status == LNN_SUBNET_RUNNING) {
@@ -480,7 +481,7 @@ static VisitNextChoice NotifyIpAddressChanged(const LnnPhysicalSubnet *subnet, v
 {
     (void)data;
     if (subnet->protocol->id == LNN_PROTOCOL_IP) {
-        LnnNotifyPhysicalSubnetAddressChanged(subnet->ifName, LNN_PROTOCOL_IP);
+        LnnNotifyPhysicalSubnetAddressChanged(subnet->ifName, LNN_PROTOCOL_IP, NULL);
     }
     return CHOICE_VISIT_NEXT;
 }
@@ -493,7 +494,7 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorAddressChangedEvent *event = (const LnnMonitorAddressChangedEvent *)info;
     if (strlen(event->ifName) != 0) {
-        LnnNotifyPhysicalSubnetAddressChanged(event->ifName, LNN_PROTOCOL_IP);
+        LnnNotifyPhysicalSubnetAddressChanged(event->ifName, LNN_PROTOCOL_IP, NULL);
     } else {
         (void)LnnVisitPhysicalSubnet(NotifyIpAddressChanged, NULL);
     }
@@ -503,7 +504,7 @@ static VisitNextChoice NotifyWlanAddressChanged(const LnnNetIfMgr *netifManager,
 {
     (void)data;
     if (netifManager->type == LNN_NETIF_TYPE_WLAN) {
-        LnnNotifyPhysicalSubnetAddressChanged(netifManager->ifName, LNN_PROTOCOL_IP);
+        LnnNotifyPhysicalSubnetAddressChanged(netifManager->ifName, LNN_PROTOCOL_IP, NULL);
     }
     return CHOICE_VISIT_NEXT;
 }
