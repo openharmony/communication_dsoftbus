@@ -16,6 +16,7 @@
 #include "getlocalnodedeviceinfo_fuzzer.h"
 #include <cstddef>
 #include <securec.h>
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -24,14 +25,26 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
-            return true;
+            return false;
         }
+
         NodeBasicInfo localNodeinfo;
-        char tmp[65] = {0};
-        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
-            return true;
+        char *tmp = reinterpret_cast<char *>(malloc(size));
+        if (tmp == nullptr) {
+            return false;
         }
-        GetLocalNodeDeviceInfo((const char *)tmp, &localNodeinfo);
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        SetAceessTokenPermission("busCenterTest");
+        GetLocalNodeDeviceInfo(reinterpret_cast<const char *>(tmp), &localNodeinfo);
+        free(tmp);
         return true;
     }
 }

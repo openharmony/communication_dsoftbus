@@ -21,11 +21,12 @@ ohos_fuzztest("GetAllMetaNodeInfoFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/getallmetanodeinfo_fuzzer"
   include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/sdk/common/include",
     "//commonlibrary/c_utils/base/include",
-    "$dsoftbus_root_path/adapter/common/include",
   ]
   cflags = [
     "-g",
@@ -36,7 +37,10 @@ ohos_fuzztest("GetAllMetaNodeInfoFuzzTest") {
   ]
   sources = [ "getallmetanodeinfo_fuzzer.cpp" ]
 
-  deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
+  deps = [
+    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
 
   external_deps = [
     "c_utils:utils",
