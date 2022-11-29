@@ -170,7 +170,7 @@ bool IsBrQueueEmpty(void)
     return IsListEmpty(&g_brQueueList);
 }
 
-int32_t BrEnqueueNonBlock(const void *msg)
+NO_SANITIZE("cfi") int32_t BrEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
         return SOFTBUS_ERR;
@@ -247,7 +247,7 @@ static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull)
     return SOFTBUS_ERR;
 }
 
-int32_t BrDequeueNonBlock(void **msg)
+NO_SANITIZE("cfi") int32_t BrDequeueNonBlock(void **msg)
 {
 #define DEQUEUE_DELAY 1000
     if (msg == NULL) {
@@ -289,7 +289,7 @@ int32_t BrDequeueNonBlock(void **msg)
     return SOFTBUS_OK;
 }
 
-int32_t BrInnerQueueInit(void)
+NO_SANITIZE("cfi") int32_t BrInnerQueueInit(void)
 {
     if (SoftBusMutexInit(&g_brQueueLock, NULL) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -314,7 +314,7 @@ int32_t BrInnerQueueInit(void)
     return SOFTBUS_OK;
 }
 
-void BrInnerQueueDeinit(void)
+NO_SANITIZE("cfi") void BrInnerQueueDeinit(void)
 {
     (void)SoftBusMutexDestroy(&g_brQueueLock);
     (void)SoftBusCondDestroy(&g_sendWaitCond);

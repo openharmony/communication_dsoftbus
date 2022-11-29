@@ -46,6 +46,7 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hisysevt_connreporter.h"
+#include "softbus_def.h"
 
 #define SEND_QUEUE_UNIT_NUM 128
 #define CONNECT_REF_INCRESE 1
@@ -163,7 +164,7 @@ static void ReleaseBleconnectionNode(BleConnectionInfo *newConnectionInfo)
     return;
 }
 
-void DeleteBleConnectionNode(BleConnectionInfo* node)
+NO_SANITIZE("cfi") void DeleteBleConnectionNode(BleConnectionInfo* node)
 {
     if (node == NULL) {
         return;
@@ -1237,7 +1238,7 @@ static void FreeSendNode(SendQueueNode *node)
     SoftBusFree((void *)node);
 }
 
-void *BleSendTask(void *arg)
+NO_SANITIZE("cfi") void *BleSendTask(void *arg)
 {
 #define WAIT_TIME 10
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleSendTask enter");
@@ -1309,7 +1310,7 @@ static SoftBusBleTransCalback g_bleTransCallback = {
     .GetBleConnInfoByHalConnId = GetBleConnInfoByHalConnId,
 };
 
-static void BleConnectionMsgHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void BleConnectionMsgHandler(SoftBusMessage *msg)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, " 11ble gattc conn loop process msg type %d", msg->what);
     switch (msg->what) {
@@ -1341,7 +1342,7 @@ static void BleConnectionMsgHandler(SoftBusMessage *msg)
     }
 }
 
-static int32_t BleConnectionRemoveMessageFunc(const SoftBusMessage *msg, void *args)
+NO_SANITIZE("cfi") static int32_t BleConnectionRemoveMessageFunc(const SoftBusMessage *msg, void *args)
 {
     uint64_t clientId = (uint64_t)(uintptr_t)args;
     if ((msg->what == BLE_CONNECTION_DISCONNECT_OUT) && (msg->arg1 == clientId)) {
@@ -1365,7 +1366,7 @@ static int BleConnLooperInit(void)
     return SOFTBUS_OK;
 }
 
-ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
+NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[InitBle]");
     int32_t ret;

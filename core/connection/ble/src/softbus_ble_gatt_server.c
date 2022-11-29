@@ -362,7 +362,7 @@ NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, SoftBusB
     }
 }
 
-static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
+NO_SANITIZE("cfi") static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
     int srvcHandle, int descriptorHandle)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "DescriptorAddCallback srvcHandle=%d,descriptorHandle=%d\n",
@@ -401,7 +401,7 @@ static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
     }
 }
 
-static void BleServiceStartCallback(int status, int srvcHandle)
+NO_SANITIZE("cfi") static void BleServiceStartCallback(int status, int srvcHandle)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
@@ -411,10 +411,10 @@ static void BleServiceStartCallback(int status, int srvcHandle)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStartCallback start failed");
     }
     UpdateGattService(&g_gattService, status);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStartCallback start success");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleServiceStartCallback start success");
 }
 
-static void BleServiceStopCallback(int status, int srvcHandle)
+NO_SANITIZE("cfi") static void BleServiceStopCallback(int status, int srvcHandle)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceStopCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
@@ -426,7 +426,7 @@ static void BleServiceStopCallback(int status, int srvcHandle)
     UpdateGattService(&g_gattService, status);
 }
 
-static void BleServiceDeleteCallback(int status, int srvcHandle)
+NO_SANITIZE("cfi") static void BleServiceDeleteCallback(int status, int srvcHandle)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceDeleteCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
@@ -487,7 +487,7 @@ static void SoftBusGattServerOnDataReceived(int32_t handle, int32_t halConnId, u
     g_softBusBleConnCb->BleOnDataReceived(isBleConn, halConnInfo, len, value);
 }
 
-static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
+NO_SANITIZE("cfi") static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RequestReadCallback transId=%d, attrHandle=%d\n",
         readCbPara.transId, readCbPara.attrHandle);
@@ -539,7 +539,7 @@ static void BleRequestCharacteristicWriteCallback(SoftBusGattWriteRequest *reque
     }
 }
 
-static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
+NO_SANITIZE("cfi") static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "RequestWriteCallback halconnId: %d, transId: %d, attrHandle: %d, value length: %d, need rsp: %d",
@@ -561,7 +561,7 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
         g_gattService.bleConnCharaId, g_gattService.bleNetCharaId);
 }
 
-static void BleResponseConfirmationCallback(int status, int handle)
+NO_SANITIZE("cfi") static void BleResponseConfirmationCallback(int status, int handle)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
         "ResponseConfirmationCallback status=%d, handle=%d\n", status, handle);
@@ -572,7 +572,7 @@ static void BleNotifySentCallback(int connId, int status)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "IndicationSentCallback status=%d, connId=%d\n", status, connId);
 }
 
-static void BleMtuChangeCallback(int connId, int mtu)
+NO_SANITIZE("cfi") static void BleMtuChangeCallback(int connId, int mtu)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "MtuChangeCallback connId=%d, mtu=%d\n", connId, mtu);
     BleHalConnInfo halConnInfo;
@@ -628,7 +628,7 @@ static void BleConnAddSerMsgHandler(const SoftBusMessage *msg)
     }
 }
 
-static void BleConnMsgHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void BleConnMsgHandler(SoftBusMessage *msg)
 {
     SoftBusBtUuid uuid;
     int properties, permissions;

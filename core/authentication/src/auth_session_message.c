@@ -540,7 +540,9 @@ int32_t PostVerifyDeviceMessage(const AuthManager *auth)
     };
     if (PostAuthData(auth->connId, !auth->isServer, &head, data) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "post verify device msg fail.");
+        SoftBusFree(data);
         return SOFTBUS_ERR;
     }
+    SoftBusFree(data);
     return SOFTBUS_OK;
 }

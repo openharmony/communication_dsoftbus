@@ -42,6 +42,10 @@ int32_t LnnInitBtStateMonitorImpl(void);
 
 void LnnDeinitBtStateMonitorImpl(void);
 
+void LnnDeinitProductMonitorImpl(void);
+
+void LnnDeinitDriverMonitorImpl(void);
+
 #ifdef __cplusplus
 }
 #endif

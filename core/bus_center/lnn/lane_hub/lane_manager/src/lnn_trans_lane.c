@@ -335,7 +335,7 @@ static void UpdateLinkType(uint32_t laneId, LaneLinkType linkType)
     Unlock();
 }
 
-static void NotifyLaneAllocSuccess(uint32_t laneId, const LaneLinkInfo *info)
+NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const LaneLinkInfo *info)
 {
     TransReqInfo reqInfo;
     if (GetLaneReqInfo(laneId, &reqInfo) != SOFTBUS_OK) {

@@ -129,9 +129,10 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
         }
         callerId = info->callerId;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get Gearmode from list, id:%s, cycle:%d, duration:%d, "
+    if (callerId != NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get Gearmode from list, id:%s, cycle:%d, duration:%d, "
         "wakeupFlag:%d", callerId, mode->cycle, mode->duration, mode->wakeupFlag);
-    callerId = NULL;
+    }
     return SOFTBUS_OK;
 }
 
@@ -333,7 +334,6 @@ static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 
 static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
-    uint64_t loopDelayMillis;
     const LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
     if (msgPara->strategyType != STRATEGY_HB_SEND_FIXED_PERIOD) {
@@ -344,8 +344,7 @@ static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fixed period send once fail");
         return SOFTBUS_ERR;
     }
-    loopDelayMillis = (uint64_t)LOW_FREQ_CYCLE * HB_TIME_FACTOR;
-    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, msgPara, loopDelayMillis) != SOFTBUS_OK) {
+    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, msgPara, (uint64_t)LOW_FREQ_CYCLE * HB_TIME_FACTOR) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fixed period send loop msg fail");
         return SOFTBUS_ERR;
     }

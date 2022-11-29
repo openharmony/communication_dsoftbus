@@ -38,6 +38,8 @@ constexpr char NODE_DEVICE_NAME[] = "node1_test";
 constexpr char NODE_UDID[] = "123456ABCDEF";
 constexpr char META_NODE_ID[] = "235689BNHFCC";
 constexpr uint32_t ADDR_NUM = 6;
+constexpr int32_t INFO_NUM = 0;
+constexpr int32_t INVALID_INFO_NUM = -1;
 using namespace testing;
 class MetaNodeLedgerTest : public testing::Test {
 public:
@@ -99,12 +101,13 @@ HWTEST_F(MetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
 HWTEST_F(MetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Level1)
 {
     MetaNodeInfo infos[MAX_META_NODE_NUM];
-    int32_t infoNum1 = 0;
-    int32_t infoNum2 = MAX_META_NODE_NUM;
+    int32_t infoNum1 = INFO_NUM;
+    int32_t infoNum2 = INVALID_INFO_NUM;
     int32_t ret = LnnGetAllMetaNodeInfo(infos, &infoNum1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetAllMetaNodeInfo(infos, &infoNum2);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetAllMetaNodeInfo(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -117,5 +120,7 @@ HWTEST_F(MetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnDeactiveMetaNode(META_NODE_ID);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnDeactiveMetaNode(nullptr) == SOFTBUS_INVALID_PARAM);
+    LnnDeinitMetaNodeLedger();
 }
 } // namespace OHOS

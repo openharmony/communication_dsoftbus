@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstring>
 #include <securec.h>
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -37,14 +38,25 @@ namespace OHOS {
         GenMetaNodeConfig(data, size);
         char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
 
-        char tmp[65] = {0};
-        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
-            return true;
+        char *tmp = reinterpret_cast<char *>(malloc(size));
+        if (tmp == nullptr) {
+            return false;
         }
-        int ret = ActiveMetaNode((const char *)tmp, &meta, metaNodeId);
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        SetAceessTokenPermission("busCenterTest");
+        int ret = ActiveMetaNode(reinterpret_cast<const char *>(tmp), &meta, metaNodeId);
         if (ret == SOFTBUS_OK) {
-            DeactiveMetaNode((const char *)data, metaNodeId);
+            DeactiveMetaNode(reinterpret_cast<const char *>(tmp), metaNodeId);
         }
+        free(tmp);
         return true;
     }
 }

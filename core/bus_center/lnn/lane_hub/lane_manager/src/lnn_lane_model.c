@@ -134,7 +134,7 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
     return SOFTBUS_OK;
 }
 
-int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
+NO_SANITIZE("cfi") int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
 {
     if (profile == NULL) {
         return SOFTBUS_ERR;
@@ -269,7 +269,7 @@ static void ClearProfileMap(void)
     LnnMapDelete(&g_profileMap);
 }
 
-void DeinitLaneModel(void)
+NO_SANITIZE("cfi") void DeinitLaneModel(void)
 {
     ClearProfileMap();
     (void)SoftBusMutexDestroy(&g_laneModelMutex);

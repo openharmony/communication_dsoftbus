@@ -358,7 +358,8 @@ void LnnDumpHbMgrRecvList(void)
         }
         deviceType = LnnConvertIdToDeviceType((uint16_t)item->device->devType);
         if (deviceType == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get deviceType fail, devId:%s", item->device->devId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get deviceType fail, udidHash:%s",
+                AnonymizesUDID(item->device->devId));
             continue;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "DumpRecvList count:%d [i:%d, udidHash:%s, "

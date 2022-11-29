@@ -31,6 +31,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
 #define WATCHDOG_INTERVAL_TIME 10000
@@ -152,7 +153,7 @@ static int32_t StartDelayInit(void)
     return ret;
 }
 
-int32_t BusCenterServerInit(void)
+NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
 {
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -194,7 +195,7 @@ int32_t BusCenterServerInit(void)
     return SOFTBUS_OK;
 }
 
-void BusCenterServerDeinit(void)
+NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
 {
     DeinitNodeAddrAllocator();
     LnnDeinitLaneHub();
