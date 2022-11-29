@@ -155,6 +155,7 @@ HWTEST_F(TransTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    TransTcpDirectDeinit();
 
     ret = TransTcpDirectInit(NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -176,6 +177,9 @@ HWTEST_F(TransTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
+    ret = CreatSessionConnList();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
     ret = TransTdcAddSessionConn(conn);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
