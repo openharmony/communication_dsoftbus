@@ -106,7 +106,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     return SOFTBUS_OK;
 }
 
-static void DelTcpConnInfo(uint32_t connectionId)
+NO_SANITIZE("cfi") static void DelTcpConnInfo(uint32_t connectionId)
 {
     if (g_tcpConnInfoList == NULL) {
         return;
@@ -159,7 +159,8 @@ static void DelTcpConnNode(uint32_t connectionId)
     return;
 }
 
-static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t cfd, const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t cfd,
+    const ConnectOption *clientAddr)
 {
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Exception occurred");
@@ -269,7 +270,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
     return SOFTBUS_ERR;
 }
 
-int32_t TcpOnDataEventOut(int32_t fd)
+NO_SANITIZE("cfi") int32_t TcpOnDataEventOut(int32_t fd)
 {
     TcpConnInfoNode tcpInfo;
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
@@ -298,7 +299,7 @@ int32_t TcpOnDataEventOut(int32_t fd)
     return SOFTBUS_OK;
 }
 
-int32_t TcpOnDataEventIn(int32_t fd)
+NO_SANITIZE("cfi") int32_t TcpOnDataEventIn(int32_t fd)
 {
     uint32_t connectionId = CalTcpConnectionId(fd);
     ConnPktHead head;
@@ -368,14 +369,15 @@ static void DelAllConnInfo(ListenerModule moduleId)
     SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
 }
 
-uint32_t CalTcpConnectionId(int32_t fd)
+NO_SANITIZE("cfi") uint32_t CalTcpConnectionId(int32_t fd)
 {
     uint32_t connectType = (uint32_t)CONNECT_TCP;
     uint32_t connectionId = ((uint32_t)fd & 0xffff) | (connectType << CONNECT_TYPE_SHIFT);
     return connectionId;
 }
 
-int32_t TcpConnectDeviceCheckArg(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+NO_SANITIZE("cfi") int32_t TcpConnectDeviceCheckArg(const ConnectOption *option, uint32_t requestId,
+    const ConnectResult *result)
 {
     if ((result == NULL) ||
         (result->OnConnectFailed == NULL) ||
@@ -423,7 +425,8 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
     return SOFTBUS_OK;
 }
 
-int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+NO_SANITIZE("cfi") int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
+    const ConnectResult *result)
 {
     if (TcpConnectDeviceCheckArg(option, requestId, result) == SOFTBUS_ERR) {
         return SOFTBUS_INVALID_PARAM;
@@ -477,7 +480,7 @@ int32_t TcpDisconnectDevice(uint32_t connectionId)
     return SOFTBUS_OK;
 }
 
-int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
+NO_SANITIZE("cfi") int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
 {
     if (g_tcpConnInfoList == NULL || option == NULL) {
         return SOFTBUS_ERR;
@@ -652,7 +655,7 @@ static void InitTcpInterface(void)
     g_tcpInterface.CheckActiveConnection = TcpCheckActiveConnection;
 }
 
-ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
+NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     if (callback == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnectCallback is NULL.");
@@ -679,7 +682,7 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 
 static int TcpConnectInfoDump(int fd)
 {
-    char addr[MAX_SOCKET_ADDR_LEN] = {0};
+    char addr[IP_LEN] = {0};
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
         return SOFTBUS_LOCK_ERR;
@@ -693,7 +696,7 @@ static int TcpConnectInfoDump(int fd)
         SOFTBUS_DPRINTF(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
         SOFTBUS_DPRINTF(fd, "Connection Info type              : %d\n", itemNode->info.type);
         SOFTBUS_DPRINTF(fd, "SocketInfo                        :\n");
-        DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER, addr);
+        DataMasking(itemNode->info.socketInfo.addr, IP_LEN, MAC_DELIMITER, addr);
         SOFTBUS_DPRINTF(fd, "SocketInfo addr                   : %s\n", addr);
         SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
         SOFTBUS_DPRINTF(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);

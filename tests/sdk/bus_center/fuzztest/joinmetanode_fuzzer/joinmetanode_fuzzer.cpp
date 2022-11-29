@@ -14,13 +14,12 @@
  */
 
 #include "joinmetanode_fuzzer.h"
-#include "client_bus_center.h"
 #include <cstddef>
 #include <cstring>
 #include <securec.h>
-#include "softbus_def.h"
-#include "softbus_type_def.h"
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_errcode.h"
 
 namespace OHOS {
     void JoinMetaNodeCb(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -51,28 +50,31 @@ namespace OHOS {
 
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size < sizeof(CustomData)) {
+        if (data == nullptr || size == 0) {
             return false;
         }
 
-        char *pkgName = (char *)malloc(size);
-        if (pkgName == nullptr) {
+        CustomData customData;
+        char *tmp = reinterpret_cast<char *>(malloc(size));
+        if (tmp == nullptr) {
             return false;
         }
-        if (memset_s(pkgName, size, '\0', size) != EOK) {
-            free(pkgName);
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
             return false;
         }
-        if (memcpy_s(pkgName, size, data, size - 1) != EOK) {
-            free(pkgName);
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
             return false;
         }
+
+        SetAceessTokenPermission("busCenterTest");
 
         GenRandAddr(data, size);
-        JoinMetaNode(reinterpret_cast<const char *>(pkgName), &addr, (CustomData *)data, JoinMetaNodeCb);
-        LeaveMetaNode(reinterpret_cast<const char *>(pkgName),
-                      reinterpret_cast<const char *>(pkgName), LeaveMetaNodeCb);
-        free(pkgName);
+        JoinMetaNode(reinterpret_cast<const char *>(tmp), &addr, &customData, JoinMetaNodeCb);
+        LeaveMetaNode(reinterpret_cast<const char *>(tmp),
+                      reinterpret_cast<const char *>(tmp), LeaveMetaNodeCb);
+        free(tmp);
         return true;
     }
 }

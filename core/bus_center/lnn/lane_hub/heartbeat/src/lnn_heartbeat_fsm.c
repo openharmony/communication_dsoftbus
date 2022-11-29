@@ -33,6 +33,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
 
@@ -239,7 +240,7 @@ static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delM
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)ctrlMsgObj->obj;
     LnnProcessSendOnceMsgPara *delMsgPara = (LnnProcessSendOnceMsgPara *)delMsg->obj;
 
-    if (((msgPara->hbType & delMsgPara->hbType) == delMsgPara->hbType)  &&
+    if (((msgPara->hbType & delMsgPara->hbType) == delMsgPara->hbType) &&
         msgPara->strategyType == delMsgPara->strategyType) {
         SoftBusFree(msgPara);
         msgPara = NULL;
@@ -267,7 +268,7 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
     return 1;
 }
 
-static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
+NO_SANITIZE("cfi") static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
 {
     if (!CheckRemoveHbMsgParams(msg, args)) {
         return 1;

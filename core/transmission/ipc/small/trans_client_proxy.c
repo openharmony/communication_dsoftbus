@@ -24,6 +24,7 @@
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
+#include "softbus_def.h"
 
 static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 {
@@ -57,9 +58,9 @@ static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
     return udpPort;
 }
 
-int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, const ChannelInfo *channel, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
+    const ChannelInfo *channel, int32_t pid)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel opened ipc server push");
     (void)pid;
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
@@ -110,7 +111,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName, c
     return ans;
 }
 
-int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
     int32_t errCode, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel open failed ipc server push");
@@ -136,7 +137,8 @@ int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int
     return ans;
 }
 
-int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, int32_t routeType,
+    int32_t pid)
 {
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -165,7 +167,8 @@ int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, i
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
+    int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
     (void)pid;
@@ -189,13 +192,17 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
     return ans;
 }
 
-int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
                                       TransReceiveData *receiveData, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
     (void)pid;
     IpcIo io;
     uint8_t *tmpData = (uint8_t *)SoftBusCalloc(receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN);
+    if (tmpData == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "tmpData is null");
+        return SOFTBUS_ERR;
+    }
     IpcIoInit(&io, tmpData, receiveData->dataLen + MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&io, channelId);
     WriteInt32(&io, channelType);
@@ -219,7 +226,7 @@ int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, in
     return ans;
 }
 
-int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
 {
     (void)pkgName;
     (void)param;

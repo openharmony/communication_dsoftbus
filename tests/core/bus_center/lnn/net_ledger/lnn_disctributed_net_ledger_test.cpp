@@ -36,10 +36,12 @@
 
 namespace OHOS {
 using namespace testing::ext;
+constexpr char NODE1_DEVICE_NAME[] = "node1_test";
 constexpr char NODE1_UDID[] = "123456ABCDEF";
 constexpr char NODE1_NETWORK_ID[] = "235689BNHFCF";
 constexpr char NODE1_UUID[] = "235689BNHFCC";
 constexpr char NODE1_BT_MAC[] = "56789TTU";
+constexpr char NODE2_DEVICE_NAME[] = "node2_test";
 constexpr char NODE2_UDID[] = "123456ABCDEG";
 constexpr char NODE2_NETWORK_ID[] = "235689BNHFCG";
 constexpr char NODE2_UUID[] = "235689BNHFCD";
@@ -55,6 +57,7 @@ constexpr uint64_t NEW_TIME_STAMP = 6000;
 constexpr int64_t AUTH_SEQ = 1;
 constexpr char NODE_ADDRESS[] = "address";
 constexpr char RECV_UDID_HASH[] = "87654321";
+constexpr int32_t INVALID_LANE_ID = -1;
 using namespace testing;
 class DisctributedLedgerTest : public testing::Test {
 public:
@@ -136,7 +139,12 @@ HWTEST_F(DisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Level
         STRING_KEY_OFFLINE_CODE
     };
     char buf[UDID_BUF_LEN] = {0};
-    int32_t ret;
+    int32_t ret = LnnGetRemoteStrInfo(nullptr, STRING_KEY_HICE_VERSION, buf, UDID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteStrInfo(NODE1_NETWORK_ID, STRING_KEY_HICE_VERSION, nullptr, UDID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteStrInfo(NODE1_NETWORK_ID, NUM_KEY_BEGIN, buf, UDID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uint32_t i;
     for (i = 0; i < sizeof(keyStringTable) / sizeof(InfoKey); i++) {
         (void)memset_s(buf, UDID_BUF_LEN, 0, UDID_BUF_LEN);
@@ -167,12 +175,10 @@ HWTEST_F(DisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Level1
         NUM_KEY_MASTER_NODE_WEIGHT,
         NUM_KEY_P2P_ROLE
     };
-    char buf[UDID_BUF_LEN] = {0};
-    int32_t ret, len;
+    int32_t ret;
     uint32_t i;
-    len = LNN_COMMON_LEN;
+    int32_t len = LNN_COMMON_LEN;
     for (i = 0; i < sizeof(keyNumTable) / sizeof(InfoKey); i++) {
-        (void)memset_s(buf, UDID_BUF_LEN, 0, UDID_BUF_LEN);
         ret = LnnGetRemoteNumInfo(NODE1_NETWORK_ID, keyNumTable[i], &len);
         EXPECT_TRUE(ret == SOFTBUS_OK);
     }
@@ -262,6 +268,10 @@ HWTEST_F(DisctributedLedgerTest, LNN_CONVERT_DLID_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnConvertDlId(NODE2_UDID, CATEGORY_UDID, CATEGORY_UDID, buf, UDID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    ret = LnnConvertDlId(NODE2_UUID, CATEGORY_UUID, CATEGORY_UUID, buf, UDID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    ret = LnnConvertDlId(NODE2_NETWORK_ID, CATEGORY_NETWORK_ID, CATEGORY_NETWORK_ID, buf, NETWORK_ID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
 }
 
 /*
@@ -298,6 +308,8 @@ HWTEST_F(DisctributedLedgerTest, LNN_GET_NETWORKID_BYBTMAC_Test_001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetNetworkIdByBtMac(NODE1_BT_MAC, buf, NETWORK_ID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnGetNetworkIdByBtMac(NODE2_BT_MAC, buf, NETWORK_ID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -311,9 +323,9 @@ HWTEST_F(DisctributedLedgerTest, LNN_GET_NETWORKID_BY_UUID_Test_001, TestSize.Le
     char buf[UUID_BUF_LEN] = {0};
     int32_t ret = LnnGetNetworkIdByUuid(nullptr, buf, UUID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnGetNetworkIdByUuid(NODE1_BT_MAC, buf, NETWORK_ID_BUF_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnGetNetworkIdByUuid(NODE2_BT_MAC, buf, NETWORK_ID_BUF_LEN);
+    ret = LnnGetNetworkIdByUuid(NODE1_UUID, buf, NETWORK_ID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnGetNetworkIdByUuid(NODE2_UUID, buf, NETWORK_ID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -439,5 +451,78 @@ HWTEST_F(DisctributedLedgerTest, LNN_REFRESH_DEVICE_ONLINE_STATE_AND_DEVICE_INFO
     (void)strncpy_s(device.devId, DISC_MAX_DEVICE_ID_LEN, RECV_UDID_HASH, strlen(RECV_UDID_HASH));
     addtions.medium = BLE;
     LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &addtions);
+}
+
+/*
+* @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
+* @tc.desc: lnn get data change flag test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DisctributedLedgerTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
+{
+    int16_t info = 0;
+    int32_t ret = LnnGetRemoteNum16Info(NODE1_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, &info);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnGetRemoteNum16Info(NODE2_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: LNN_CONVERT_DLID_TO_UDID_Test_001
+* @tc.desc: lnn convert dlid to udid test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DisctributedLedgerTest, LNN_CONVERT_DLID_TO_UDID_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnConvertDLidToUdid(nullptr, CATEGORY_NETWORK_ID) == nullptr);
+    LnnConvertDLidToUdid(NODE1_NETWORK_ID, CATEGORY_NETWORK_ID);
+    EXPECT_TRUE(LnnConvertDLidToUdid(NODE2_NETWORK_ID, CATEGORY_NETWORK_ID) == nullptr);
+}
+
+/*
+* @tc.name: LNN_GET_LNN_RELATION_Test_001
+* @tc.desc: lnn get lnn relation test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DisctributedLedgerTest, LNN_GET_LNN_RELATION_Test_001, TestSize.Level1)
+{
+    uint8_t relation[CONNECTION_ADDR_MAX] = {0};
+    int32_t ret = LnnGetLnnRelation(nullptr, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLnnRelation(NODE1_UDID, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnGetLnnRelation(NODE2_UDID, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+}
+
+/*
+* @tc.name: LNN_SET_DL_DEVICE_INFO_NAME_Test_001
+* @tc.desc: lnn set dl device info name test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DisctributedLedgerTest, LNN_SET_DL_DEVICE_INFO_NAME_Test_001, TestSize.Level1)
+{
+    bool ret = LnnSetDLDeviceInfoName(nullptr, nullptr);
+    EXPECT_TRUE(ret == false);
+    ret = LnnSetDLDeviceInfoName(NODE1_UDID, NODE1_DEVICE_NAME);
+    EXPECT_TRUE(ret == true);
+    ret = LnnSetDLDeviceInfoName(NODE2_UDID, NODE2_DEVICE_NAME);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+* @tc.name: LNN_GET_AND_SET_LANE_COUNT_Test_001
+* @tc.desc: lnn get and set lane count test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DisctributedLedgerTest, LNN_GET_AND_SET_LANE_COUNT_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnGetLaneCount(INVALID_LANE_ID) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnSetLaneCount(INVALID_LANE_ID, AUTH_ID) == SOFTBUS_ERR);
 }
 } // namespace OHOS

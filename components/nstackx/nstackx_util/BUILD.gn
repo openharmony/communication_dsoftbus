@@ -56,7 +56,7 @@ if (defined(ohos_lite)) {
         "platform/liteos",
         "$NSTACKX_ROOT/nstackx_core/",
         "//third_party/bounds_checking_function/include/",
-        "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits/",
+        "$hilog_lite_include_path",
       ]
       sources = [
         "core/nstackx_event.c",
@@ -96,7 +96,7 @@ if (defined(ohos_lite)) {
           "platform/liteos",
           "$NSTACKX_ROOT/nstackx_core/",
           "//third_party/bounds_checking_function/include/",
-          "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits/",
+          "$hilog_lite_include_path",
         ]
         sources = [
           "core/nstackx_dev.c",
@@ -116,7 +116,7 @@ if (defined(ohos_lite)) {
           "platform/liteos/sys_util.c",
         ]
         deps = [
-          "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+          "$hilog_lite_deps_path",
           "//third_party/bounds_checking_function:libsec_shared",
           "//third_party/mbedtls",
         ]
@@ -133,7 +133,7 @@ if (defined(ohos_lite)) {
           "platform/unix",
           "$NSTACKX_ROOT/nstackx_core/",
           "//third_party/bounds_checking_function/include/",
-          "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits/",
+          "$hilog_lite_include_path",
         ]
         sources = [
           "core/nstackx_dev.c",
@@ -153,7 +153,7 @@ if (defined(ohos_lite)) {
           "platform/unix/sys_util.c",
         ]
         deps = [
-          "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+          "$hilog_lite_deps_path",
           "//third_party/mbedtls",
           "//third_party/mbedtls:mbedtls_shared",
         ]

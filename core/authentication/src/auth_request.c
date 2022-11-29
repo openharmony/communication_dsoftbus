@@ -19,6 +19,7 @@
 
 #include "auth_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 
 static ListNode g_authRequestList = {&g_authRequestList, &g_authRequestList};
 
@@ -46,7 +47,7 @@ static uint32_t GetAuthRequestWaitNum(AuthRequest *request)
     return num;
 }
 
-uint32_t AddAuthRequest(const AuthRequest *request)
+NO_SANITIZE("cfi") uint32_t AddAuthRequest(const AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(request, 0);
     AuthRequest *newRequest = SoftBusCalloc(sizeof(AuthRequest));
@@ -125,7 +126,7 @@ int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *req
     return SOFTBUS_NOT_FIND;
 }
 
-void DelAuthRequest(uint32_t requestId)
+NO_SANITIZE("cfi") void DelAuthRequest(uint32_t requestId)
 {
     if (!RequireAuthLock()) {
         return;
@@ -140,7 +141,7 @@ void DelAuthRequest(uint32_t requestId)
     ReleaseAuthLock();
 }
 
-void ClearAuthRequest(void)
+NO_SANITIZE("cfi") void ClearAuthRequest(void)
 {
     if (!RequireAuthLock()) {
         return;
@@ -155,7 +156,7 @@ void ClearAuthRequest(void)
     ReleaseAuthLock();
 }
 
-bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
+NO_SANITIZE("cfi") bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
 {
     if (verifyCb == NULL) {
         return false;

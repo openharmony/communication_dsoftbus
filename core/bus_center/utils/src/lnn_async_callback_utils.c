@@ -34,7 +34,7 @@ typedef struct {
 
 #define TO_ASYNC_CALLBACK_INFO(cb) CONTAINER_OF(cb, AsyncCallbackInfo, callback)
 
-static void AsyncCallbackHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void AsyncCallbackHandler(SoftBusMessage *msg)
 {
     AsyncCallbackInfo *info = NULL;
 

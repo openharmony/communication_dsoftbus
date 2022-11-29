@@ -311,7 +311,7 @@ uint32_t ConnGetHeadSize(void)
     return sizeof(ConnPktHead);
 }
 
-uint32_t ConnGetNewRequestId(ConnModule moduleId)
+NO_SANITIZE("cfi") uint32_t ConnGetNewRequestId(ConnModule moduleId)
 {
 #define REQID_MAX 1000000
     (void)moduleId;
@@ -321,7 +321,8 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId)
     return reqId;
 }
 
-void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
+NO_SANITIZE("cfi") void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data,
+    int32_t len)
 {
     ConnListenerNode listener;
     int32_t ret;
@@ -389,8 +390,7 @@ static void RecordStartTime(const ConnectOption *info)
             }
             break;
         case CONNECT_TCP:
-            if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr,
-                MAX_SOCKET_ADDR_LEN) != EOK) {
+            if (memcpy_s(&conInfo.socketInfo.addr, IP_LEN, info->socketOption.addr, IP_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "RecordStartTime:addr memcpy failed");
                 return;
             }
@@ -422,7 +422,7 @@ static int32_t InitTimeNodeList()
     return SOFTBUS_OK;
 }
 
-void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
+NO_SANITIZE("cfi") void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
@@ -442,7 +442,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
     return;
 }
 
-void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
+NO_SANITIZE("cfi") void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
@@ -459,7 +459,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
     return;
 }
 
-int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
+NO_SANITIZE("cfi") int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
@@ -477,13 +477,13 @@ int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callb
     return AddListener(moduleId, callback);
 }
 
-void ConnUnSetConnectCallback(ConnModule moduleId)
+NO_SANITIZE("cfi") void ConnUnSetConnectCallback(ConnModule moduleId)
 {
     DelListener(moduleId);
     return;
 }
 
-int32_t ConnTypeIsSupport(ConnectType type)
+NO_SANITIZE("cfi") int32_t ConnTypeIsSupport(ConnectType type)
 {
     return ConnTypeCheck(type);
 }
@@ -623,7 +623,7 @@ NO_SANITIZE("cfi") int32_t ConnStopLocalListening(const LocalListenerInfo *info)
 
 ConnectCallback g_connManagerCb = {0};
 
-int32_t ConnServerInit(void)
+NO_SANITIZE("cfi") int32_t ConnServerInit(void)
 {
     ConnectFuncInterface *connectObj = NULL;
 
@@ -683,7 +683,7 @@ int32_t ConnServerInit(void)
     return SOFTBUS_OK;
 }
 
-void ConnServerDeinit(void)
+NO_SANITIZE("cfi") void ConnServerDeinit(void)
 {
     if (!g_isInited) {
         return;

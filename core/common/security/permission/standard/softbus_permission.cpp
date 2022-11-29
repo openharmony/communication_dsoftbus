@@ -26,6 +26,7 @@
 #include "softbus_log.h"
 #include "system_ability_definition.h"
 #include "trans_session_manager.h"
+#include "softbus_def.h"
 
 #ifndef PERMISSION_JSON_FILE_PATH
 #define PERMISSION_JSON_FILE_PATH "/system/etc/communication/softbus/softbus_trans_permission.json"
@@ -55,7 +56,7 @@ void TransPermissionDeinit(void)
     DeinitPermissionJson();
 }
 
-int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
+NO_SANITIZE("cfi") int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     const char *pkgName, const char *sessionName, uint32_t actions)
 {
     if (sessionName == nullptr || pkgName == nullptr) {
@@ -73,7 +74,7 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
+NO_SANITIZE("cfi") int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
 {
     if (mySessionName == nullptr || peerSessionName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -90,7 +91,7 @@ int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionNam
     return SOFTBUS_OK;
 }
 
-bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
+NO_SANITIZE("cfi") bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 {
     std::string pkg = "";
     if (pkgName != nullptr) {
@@ -128,7 +129,7 @@ int32_t RemoveTransPermission(const char *sessionName)
     return DeleteDynamicPermission(sessionName);
 }
 
-int32_t CheckDynamicPermission(void)
+NO_SANITIZE("cfi") int32_t CheckDynamicPermission(void)
 {
     uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
 

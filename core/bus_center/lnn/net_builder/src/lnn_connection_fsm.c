@@ -858,7 +858,12 @@ int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode
         return SOFTBUS_MALLOC_ERR;
     }
     *para = retCode;
-    return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, para);
+    if (LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, para) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "post auth result message to connFsm fail.");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)

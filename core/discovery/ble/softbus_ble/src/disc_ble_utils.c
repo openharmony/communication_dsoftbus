@@ -28,6 +28,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F
@@ -40,7 +41,7 @@
 #define MAC_BIT_FOUR 4
 #define MAC_BIT_FIVE 5
 
-bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
+NO_SANITIZE("cfi") bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
     for (uint32_t i = 0; i < capBitMapNum; i++) {
         if (capBitMap[i] != 0x0) {
@@ -50,7 +51,7 @@ bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
     return true;
 }
 
-bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos)
+NO_SANITIZE("cfi") bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos)
 {
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {
@@ -110,7 +111,7 @@ uint16_t DiscBleGetDeviceType(void)
     return typeId;
 }
 
-int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
+NO_SANITIZE("cfi") int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
 {
     char udid[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
@@ -147,7 +148,8 @@ int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value, uint32_t dataLen)
+NO_SANITIZE("cfi") int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
+    uint32_t dataLen)
 {
     uint32_t len = dataLen & DATA_LENGTH_MASK;
     broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT) & DATA_TYPE_MASK;

@@ -88,7 +88,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     }
     int32_t pid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
     if (SoftbusClientInfoManager::GetInstance().SoftbusClientIsExist(clientPkgName, pid)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus client is exist.\n");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus client is exist.\n");
         return SOFTBUS_OK;
     }
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();

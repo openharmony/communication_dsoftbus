@@ -98,7 +98,7 @@ static SoftBusBtStateListener g_sppBrCallback;
 static bool g_startListenFlag = false;
 static volatile int32_t g_brEnable = SOFTBUS_BR_STATE_TURN_OFF;
 
-static void BrFreeMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void BrFreeMessage(SoftBusMessage *msg)
 {
     if (msg->obj != NULL) {
         SoftBusFree(msg->obj);
@@ -260,7 +260,7 @@ static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
     return SOFTBUS_OK;
 }
 
-static void ClientNoticeResultBrConnect(uint32_t connId, bool result, int32_t value)
+NO_SANITIZE("cfi") static void ClientNoticeResultBrConnect(uint32_t connId, bool result, int32_t value)
 {
     ListNode notifyList;
     ListInit(&notifyList);
@@ -400,7 +400,7 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
     }
 }
 
-int32_t ConnBrOnEvent(BrConnLoopMsgType type, int32_t socketFd, int32_t value)
+NO_SANITIZE("cfi") int32_t ConnBrOnEvent(BrConnLoopMsgType type, int32_t socketFd, int32_t value)
 {
     if (type >= ADD_CONN_BR_MAX || type <= ADD_CONN_BR_INVALID) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrOnEvent] type(%d) failed", type);
@@ -929,7 +929,7 @@ typedef struct BrReadThreadParams {
     int32_t socketFd;
 } BrReadThreadParams;
 
-void *ConnBrRead(void *arg)
+NO_SANITIZE("cfi") void *ConnBrRead(void *arg)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnBrRead start");
     if (arg == NULL) {
@@ -976,7 +976,7 @@ void *ConnBrRead(void *arg)
     return NULL;
 }
 
-void BrConnectedEventHandle(bool isClient, uint32_t value)
+NO_SANITIZE("cfi") void BrConnectedEventHandle(bool isClient, uint32_t value)
 {
     uint32_t connInfoId;
     int32_t socketFd = INVALID_SOCKET;
@@ -1170,7 +1170,7 @@ static void BrRecvDataHandle(uint32_t connectionId, const char *buf, int32_t len
     }
 }
 
-static void BrConnMsgHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void BrConnMsgHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;
@@ -1238,7 +1238,7 @@ static int32_t SppRegisterConnCallback(void)
     return SppGattsRegisterHalCallback(&g_sppBrCallback);
 }
 
-ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
+NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[InitBR]");
     if (InitProperty() != SOFTBUS_OK) {

@@ -25,6 +25,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "softbus_def.h"
 
 typedef struct {
     int advId;
@@ -54,7 +55,7 @@ static SoftBusMutex g_scanerLock = {0};
 
 static bool g_isRegCb = false;
 
-int BleGattLockInit(void)
+NO_SANITIZE("cfi") int BleGattLockInit(void)
 {
     if (g_lockInit) {
         return SOFTBUS_OK;
@@ -630,21 +631,21 @@ NO_SANITIZE("cfi") int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *par
         CLOGW("SoftBusStartAdv, wait condition inner-advId: %d", advId);
         SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock, NULL);
     }
-    int innerAdvId;
+    int btAdvId = -1;
     BleAdvParams dstParam;
     StartAdvRawData advData;
     ConvertAdvParam(param, &dstParam);
     ConvertAdvData(&g_advChannel[advId].advData, &advData);
-    int ret = BleStartAdvEx(&innerAdvId, advData, dstParam);
+    int ret = BleStartAdvEx(&btAdvId, advData, dstParam);
+    g_advChannel[advId].advId = btAdvId;
     CLOGI("BleStartAdvEx, inner-advId: %d, bt-advId: %d, "
-        "ret: %d", advId, innerAdvId, ret);
+        "ret: %d", advId, btAdvId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_ERR;
     }
     g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_SUCCESS);
-    g_advChannel[advId].advId = innerAdvId;
     SoftBusMutexUnlock(&g_advLock);
     return SOFTBUS_OK;
 }
@@ -669,7 +670,7 @@ NO_SANITIZE("cfi") int SoftBusStopAdv(int advId)
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
-        return SOFTBUS_OK;
+        return SOFTBUS_ERR;
     }
     ClearAdvData(advId);
     g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_SUCCESS);

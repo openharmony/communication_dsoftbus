@@ -155,7 +155,7 @@ static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
     if (strcmp(inputAddr, BIND_ADDR_ALL) == 0) {
         bindAddr = "0.0.0.0";
     } else {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:using specified bind addr", __func__);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "%s:using specified bind addr", __func__);
         bindAddr = inputAddr;
     }
     return BindLocalIP(fd, bindAddr, 0);

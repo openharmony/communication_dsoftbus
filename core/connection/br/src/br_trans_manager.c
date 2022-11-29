@@ -91,7 +91,8 @@ static char *BrRecvDataParse(BrConnectionInfo *conn, int32_t *outLen)
     return dataCopy;
 }
 
-int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDriver, int32_t clientId, char **outBuf)
+NO_SANITIZE("cfi") int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDriver,
+    int32_t clientId, char **outBuf)
 {
     BrConnectionInfo *conn = GetConnectionRef(connectionId);
     if (conn == NULL) {
@@ -212,7 +213,8 @@ static char *BrAddNumToJson(int32_t method, uint32_t connectionId, int32_t delta
     return data;
 }
 
-char *BrPackRequestOrResponse(int32_t requestOrResponse, uint32_t connectionId, int32_t delta, uint64_t count,
+NO_SANITIZE("cfi") char *BrPackRequestOrResponse(int32_t requestOrResponse, uint32_t connectionId, int32_t delta,
+    uint64_t count,
     int32_t *outLen)
 {
     char *data = BrAddNumToJson(requestOrResponse, connectionId, delta, count);
