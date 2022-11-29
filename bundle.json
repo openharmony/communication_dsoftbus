@@ -95,6 +95,7 @@
           "//foundation/communication/dsoftbus/tests/core/common/utils/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/common/utils:unittest",
           "//foundation/communication/dsoftbus/tests/core/common/dfx/hidumper_adapter/fuzztest:fuzztest",
+          "//foundation/communication/dsoftbus/tests/core/common/dfx/hidumper_adapter/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/core/common/dfx/hisysevent_adapter/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/common/dfx/hisysevent_adapter/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/core/common/message_handler:fuzztest",
