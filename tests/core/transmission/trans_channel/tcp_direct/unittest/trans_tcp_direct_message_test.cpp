@@ -99,6 +99,9 @@ void TransTcpDirectTest::TearDownTestCase(void)
 SessionConn *TestSetSessionConn()
 {
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == nullptr) {
+        return nullptr;
+    }
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
@@ -117,6 +120,10 @@ SessionConn *TestSetSessionConn()
 AppInfo *TestSetAppInfo()
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    if (appInfo == nullptr) {
+        return nullptr;
+    }
+    
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->appType = APP_TYPE_NORMAL;
@@ -136,7 +143,9 @@ AppInfo *TestSetAppInfo()
 HWTEST_F(TransTcpDirectTest, OpenP2pDirectChannelTest001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
     ConnectOption *connInfo = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_TRUE(connInfo != nullptr);
     int32_t channelId = 1;
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     (void)memset_s(connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
@@ -291,6 +300,7 @@ HWTEST_F(TransTcpDirectTest, GetSessionConnByFdTest007, TestSize.Level1)
 {
     int32_t fd = g_netWorkId;
     SessionConn *conn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
@@ -321,6 +331,7 @@ HWTEST_F(TransTcpDirectTest, GetSessionConnByIdTest008, TestSize.Level1)
 {
     int32_t channelId = 1;
     SessionConn *conn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
 
     SessionConn *session = GetSessionConnById(channelId, nullptr);

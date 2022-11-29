@@ -102,7 +102,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
 {
     const char *sessionName = TEST_PKG_NAME;
     ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
-
+    ASSERT_TRUE(connOpt != nullptr);
     int32_t ret = TransOpenAuthChannel(NULL, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     ret = TransOpenAuthChannel(sessionName, NULL);
@@ -126,6 +126,7 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
     int32_t channelId = 1111111;
     int32_t channelType = 222222;
     StreamSendStats *data = (StreamSendStats*)SoftBusMalloc(sizeof(StreamSendStats));
+    ASSERT_TRUE(data != nullptr);
     memset_s(data, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
 
     int32_t ret = TransRippleStats(channelId, channelType, NULL);
@@ -203,6 +204,7 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
 HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
 {
     TransInfo *info = (TransInfo*)SoftBusMalloc(sizeof(TransInfo));
+    ASSERT_TRUE(info != nullptr);
     memset_s(info, sizeof(TransInfo), 0, sizeof(TransInfo));
     char pkgName[] = "testPackage";
     char sessionName[] = "testSession";
@@ -247,6 +249,7 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
 HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     int32_t channelId = 1111111;

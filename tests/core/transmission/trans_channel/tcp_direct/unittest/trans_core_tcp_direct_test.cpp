@@ -94,6 +94,10 @@ void TransTcpDirectTest::TearDownTestCase(void)
 SessionServer *TestSetPack()
 {
     SessionServer *newNode = (SessionServer*)SoftBusCalloc(sizeof(SessionServer));
+    if (newNode == nullptr) {
+        return nullptr;
+    }
+    
     (void)memset_s(newNode, sizeof(SessionServer), 0, sizeof(SessionServer));
     (void)memcpy_s(newNode->sessionName, SESSION_NAME_MAX_LEN, g_sessionName, strlen(g_sessionName));
     (void)memcpy_s(newNode->pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, strlen(g_pkgName));
@@ -105,6 +109,10 @@ SessionServer *TestSetPack()
 SessionConn *TestSetSessionConn()
 {
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == nullptr) {
+        return nullptr;
+    }
+    
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
@@ -127,7 +135,11 @@ string TestGetMsgPack()
         return nullptr;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-
+    if (appInfo == nullptr) {
+        cJSON_Delete(msg);
+        return nullptr;
+    }
+    
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = 1;
@@ -217,6 +229,7 @@ HWTEST_F(TransTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
         .attr = &attr,
     };
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->appType = APP_TYPE_NORMAL;
     appInfo->myData.apiVersion = API_V2;
@@ -452,7 +465,8 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
 HWTEST_F(TransTcpDirectTest, TransTdcOnChannelOpenedTest0014, TestSize.Level1)
 {
     int32_t pid = 0;
-    ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));;
+    ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(info != nullptr);
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
     int32_t ret = TransTdcOnChannelOpened(nullptr, pid, g_sessionName, nullptr);
@@ -570,6 +584,7 @@ HWTEST_F(TransTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
