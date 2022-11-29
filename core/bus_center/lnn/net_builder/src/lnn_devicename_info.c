@@ -33,6 +33,7 @@
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_json_utils.h"
 #include "message_handler.h"
+#include "softbus_def.h"
 
 #define DELAY_LEN 1000
 #define MAX_TRY 10
@@ -147,7 +148,7 @@ void UpdateDeviceName(void *p)
     UpdataLocalFromSetting(p);
 }
 
-int32_t LnnInitDevicename(void)
+NO_SANITIZE("cfi") int32_t LnnInitDevicename(void)
 {
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_DEVICE_NAME, OnReceiveDeviceName);
 }

@@ -23,8 +23,8 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_feature_config.h"
 #include "softbus_def.h"
+#include "softbus_feature_config.h"
 
 #define TIME_SEC_TO_MSEC 1000L
 #define TIME_MSEC_TO_USEC 1000L
@@ -91,7 +91,7 @@ static SoftBusMessage *NewAuthMessage(const uint8_t *obj, uint32_t size)
     return msg;
 }
 
-static void HandleAuthMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void HandleAuthMessage(SoftBusMessage *msg)
 {
     CHECK_NULL_PTR_RETURN_VOID(msg);
     EventHandler handler = (EventHandler)(uintptr_t)msg->arg1;
@@ -170,7 +170,7 @@ void ReleaseAuthLock(void)
 }
 
 /* auth config */
-bool GetConfigSupportAsServer(void)
+NO_SANITIZE("cfi") bool GetConfigSupportAsServer(void)
 {
     uint32_t ability = 0;
     if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION,
@@ -182,7 +182,7 @@ bool GetConfigSupportAsServer(void)
 }
 
 /* auth common function */
-uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
+NO_SANITIZE("cfi") uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
 {
     if (buf == NULL || size == 0) {
         return NULL;
@@ -217,7 +217,7 @@ static void UpdateUniqueId(void)
     g_uniqueId = (g_uniqueId << SEQ_TIME_STAMP_BITS) | (SEQ_TIME_STAMP_MASK & timeStamp);
 }
 
-int64_t GenSeq(bool isServer)
+NO_SANITIZE("cfi") int64_t GenSeq(bool isServer)
 {
     static uint32_t integer = 0;
     if (integer >= SEQ_INTEGER_MAX) {
@@ -233,7 +233,7 @@ int64_t GenSeq(bool isServer)
     return (int64_t)seq;
 }
 
-uint64_t GetCurrentTimeMs(void)
+NO_SANITIZE("cfi") uint64_t GetCurrentTimeMs(void)
 {
     SoftBusSysTime now = {0};
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
@@ -243,7 +243,7 @@ uint64_t GetCurrentTimeMs(void)
     return (uint64_t)now.sec * TIME_SEC_TO_MSEC + (uint64_t)now.usec / TIME_MSEC_TO_USEC;
 }
 
-const char *GetAuthSideStr(bool isServer)
+NO_SANITIZE("cfi") const char *GetAuthSideStr(bool isServer)
 {
     return isServer ? "server" : "client";
 }

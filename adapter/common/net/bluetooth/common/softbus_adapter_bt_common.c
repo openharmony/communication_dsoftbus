@@ -20,7 +20,6 @@
 #include "ohos_bt_def.h"
 #include "ohos_bt_gap.h"
 #include "ohos_bt_gatt.h"
-
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_def.h"

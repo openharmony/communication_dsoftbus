@@ -22,11 +22,11 @@
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "system_ability_definition.h"
 #include "trans_session_manager.h"
-#include "softbus_def.h"
 
 #ifndef PERMISSION_JSON_FILE_PATH
 #define PERMISSION_JSON_FILE_PATH "/system/etc/communication/softbus/softbus_trans_permission.json"

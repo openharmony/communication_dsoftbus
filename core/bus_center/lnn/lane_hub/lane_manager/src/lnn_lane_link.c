@@ -26,6 +26,7 @@
 #include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -464,7 +465,7 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
+NO_SANITIZE("cfi") int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo)
 {
     if (networkId == NULL || p2pInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -477,7 +478,7 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInf
     return OpenAuthConnToConnectP2p(networkId, pid, p2pInfo);
 }
 
-int32_t LnnDisconnectP2p(const char *networkId, int32_t pid)
+NO_SANITIZE("cfi") int32_t LnnDisconnectP2p(const char *networkId, int32_t pid)
 {
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);

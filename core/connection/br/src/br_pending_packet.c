@@ -41,7 +41,7 @@ typedef struct {
 static SoftBusMutex g_pendingLock;
 static LIST_HEAD(g_pendingList);
 
-int32_t InitBrPendingPacket(void)
+NO_SANITIZE("cfi") int32_t InitBrPendingPacket(void)
 {
     if (SoftBusMutexInit(&g_pendingLock, NULL) != 0) {
         return SOFTBUS_LOCK_ERR;
@@ -111,7 +111,7 @@ NO_SANITIZE("cfi") void DelBrPendingPacket(uint32_t id, uint64_t seq)
     (void)SoftBusMutexUnlock(&g_pendingLock);
 }
 
-int32_t GetBrPendingPacket(uint32_t id, uint64_t seq, uint32_t waitMillis, void **data)
+NO_SANITIZE("cfi") int32_t GetBrPendingPacket(uint32_t id, uint64_t seq, uint32_t waitMillis, void **data)
 {
 #define USECTONSEC 1000LL
     if (data == NULL || SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {

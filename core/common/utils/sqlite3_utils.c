@@ -21,9 +21,9 @@
 #include <unistd.h>
 
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_def.h"
 
 #define SQL_DEFAULT_LEN 256
 
@@ -407,7 +407,7 @@ NO_SANITIZE("cfi") int32_t RemoveAllRecord(DbContext *ctx, TableNameID id)
     return rc;
 }
 
-int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data)
+NO_SANITIZE("cfi") int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data)
 {
     int32_t rc;
     int32_t num = 0;

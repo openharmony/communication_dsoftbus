@@ -56,7 +56,7 @@ static int32_t GetConnType(uint64_t connId)
     return (int32_t)((connId >> INT32_BIT_NUM) & MASK_UINT64_L32);
 }
 
-const char *GetConnTypeStr(uint64_t connId)
+NO_SANITIZE("cfi") const char *GetConnTypeStr(uint64_t connId)
 {
     int32_t type = GetConnType(connId);
     switch (type) {
@@ -165,7 +165,7 @@ static void NotifyDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bo
 }
 
 /* AuthData */
-uint32_t GetAuthDataSize(uint32_t len)
+NO_SANITIZE("cfi") uint32_t GetAuthDataSize(uint32_t len)
 {
     return AUTH_CONN_DATA_HEAD_SIZE + len;
 }
@@ -347,7 +347,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
     NotifyDisconnected(GenConnId(connInfo.type, connectionId), &connInfo);
 }
 
-int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
+NO_SANITIZE("cfi") int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
 {
     ConnectionInfo info = {0};
     int32_t ret = ConnGetConnectionInfo(connectionId, &info);
@@ -523,7 +523,7 @@ NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnI
     return ret;
 }
 
-void DisconnectAuthDevice(uint64_t connId)
+NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "DisconnectDevice: connType=%d, id=%u.", GetConnType(connId), GetConnId(connId));
@@ -563,7 +563,7 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
     return SOFTBUS_ERR;
 }
 
-ConnSideType GetConnSideType(uint64_t connId)
+NO_SANITIZE("cfi") ConnSideType GetConnSideType(uint64_t connId)
 {
     if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,

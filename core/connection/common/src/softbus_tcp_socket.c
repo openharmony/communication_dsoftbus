@@ -227,7 +227,7 @@ static int32_t GetTcpSockPort(int32_t fd)
     return SoftBusNtoHs(addr.sinPort);
 }
 
-int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
+NO_SANITIZE("cfi") int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 {
 #define KEEP_ALIVE_COUNT 5
     if (fd < 0) {
@@ -272,7 +272,7 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 }
 
 #ifdef TCP_USER_TIMEOUT
-int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
+NO_SANITIZE("cfi") int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnSetTcpUserTimeOut invalid param");

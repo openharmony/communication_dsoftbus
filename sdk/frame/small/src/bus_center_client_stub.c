@@ -19,9 +19,9 @@
 
 #include "client_bus_center_manager.h"
 #include "ipc_skeleton.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_def.h"
 
 NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 {
@@ -85,7 +85,7 @@ NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi")int32_t ClientOnLeaveMetaNodeResult(IpcIo *data, IpcIo *reply)
+NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(IpcIo *data, IpcIo *reply)
 {
     (void)data;
     (void)reply;

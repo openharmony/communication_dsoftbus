@@ -23,9 +23,8 @@
 #include "device_auth_defines.h"
 
 #include "softbus_adapter_mem.h"
-#include "softbus_json_utils.h"
 #include "softbus_def.h"
-
+#include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -288,7 +287,7 @@ void UnregTrustDataChangeListener(void)
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
+NO_SANITIZE("cfi") int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
 {
     if (udid == NULL || uid == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "udid/uid is invalid.");
@@ -346,7 +345,7 @@ NO_SANITIZE("cfi") int32_t HichainProcessData(int64_t authSeq, const uint8_t *da
     return SOFTBUS_OK;
 }
 
-uint32_t HichainGetJoinedGroups(int32_t groupType)
+NO_SANITIZE("cfi") uint32_t HichainGetJoinedGroups(int32_t groupType)
 {
     uint32_t groupCnt = 0;
     char *accountGroups = NULL;
@@ -366,7 +365,7 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
     return groupCnt;
 }
 
-void HichainDestroy(void)
+NO_SANITIZE("cfi") void HichainDestroy(void)
 {
     UnregTrustDataChangeListener();
     DestroyDeviceAuthService();

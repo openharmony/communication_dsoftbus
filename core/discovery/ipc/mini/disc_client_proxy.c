@@ -14,11 +14,10 @@
  */
 
 #include "disc_client_proxy.h"
-
 #include "client_disc_manager.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_def.h"
 
 int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {

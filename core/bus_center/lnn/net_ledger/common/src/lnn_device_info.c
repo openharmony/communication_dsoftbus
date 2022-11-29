@@ -19,9 +19,10 @@
 #include <string.h>
 
 #include <securec.h>
-
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+
 #define DEVICE_TYPE_MAX_LENGTH 3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH  (DEVICE_TYPE_MAX_LENGTH * 4)
 #define HEX_OF_BINARY_BITS 4
@@ -46,7 +47,7 @@ static TypeToId g_typeToIdMap[] = {
 
 static char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};
 
-const char *LnnGetDeviceName(const DeviceBasicInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceName para error.");
@@ -68,7 +69,7 @@ int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
+NO_SANITIZE("cfi") int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
 {
     if (info == NULL || typeId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceTypeId para error.");
@@ -129,7 +130,7 @@ static char *ConvertIntToHexString(uint16_t typeId)
     return g_stringTypeId;
 }
 
-int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
+NO_SANITIZE("cfi") int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
 {
     int mstRet;
     if (deviceType == NULL || typeId == NULL) {
@@ -160,7 +161,7 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
     return SOFTBUS_ERR;
 }
 
-char *LnnConvertIdToDeviceType(uint16_t typeId)
+NO_SANITIZE("cfi") char *LnnConvertIdToDeviceType(uint16_t typeId)
 {
     uint32_t count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
     for (uint32_t i = 0; i < count; i++) {

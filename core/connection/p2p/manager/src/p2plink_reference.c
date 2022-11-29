@@ -204,7 +204,7 @@ int32_t P2pLinkGetMyP2pRef(void)
     return g_myP2pRef;
 }
 
-void DisConnectByPid(int32_t pid)
+NO_SANITIZE("cfi") void DisConnectByPid(int32_t pid)
 {
     RefPidItem *pItem = NULL;
     RefMacItem *mItem = NULL;

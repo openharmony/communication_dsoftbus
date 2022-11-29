@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "softbus_def.h"
 #include "softbus_log.h"
 
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
@@ -47,7 +48,7 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
     return false;
 }
 
-bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
+NO_SANITIZE("cfi") bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
 {
     if (addr == NULL || option == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or option is null");
@@ -86,7 +87,8 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
     return false;
 }
 
-bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType)
+NO_SANITIZE("cfi") bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option,
+    ConnectionAddrType hintType)
 {
     if (addr == NULL || option == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or option is null");
@@ -128,7 +130,7 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, C
     return false;
 }
 
-DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
+NO_SANITIZE("cfi") DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 {
     if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
         return DISCOVERY_TYPE_WIFI;
@@ -143,7 +145,7 @@ DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
     }
 }
 
-ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
+NO_SANITIZE("cfi") ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
 {
     switch (type) {
         case DISCOVERY_TYPE_WIFI:
@@ -158,7 +160,7 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
     return CONNECTION_ADDR_MAX;
 }
 
-bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
+NO_SANITIZE("cfi") bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
 {
     if (addr == NULL || connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or connInfo is null");
@@ -194,7 +196,8 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
     return false;
 }
 
-bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType)
+NO_SANITIZE("cfi") bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo,
+    ConnectionAddrType hintType)
 {
     if (addr == NULL || connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or connInfo is null");

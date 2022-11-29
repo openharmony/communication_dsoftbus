@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "softbus_hisysevt_bus_center.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_log.h"
 #include "softbus_adapter_mem.h"
@@ -270,7 +271,7 @@ static SoftBusEvtReportMsg *GetStatisticSuccessRateEvtMsg(ConnectionAddrType typ
     return NULL;
 }
 
-char *ConvertErrorToErrorStr(int32_t codeError)
+NO_SANITIZE("cfi") char *ConvertErrorToErrorStr(int32_t codeError)
 {
     uint32_t count = sizeof(g_errorMap) / sizeof(BusCenterFaultError);
     for (uint32_t i = 0; i < count; i++) {
@@ -286,7 +287,7 @@ static SoftBusEvtReportMsg *GetRateOfSuccessMsg(LnnStatisticData *data)
     return GetStatisticSuccessRateEvtMsg(data->type);
 }
 
-int32_t AddStatisticRateOfSuccess(LnnStatisticData *data)
+NO_SANITIZE("cfi") int32_t AddStatisticRateOfSuccess(LnnStatisticData *data)
 {
     if (data == NULL) {
         return SOFTBUS_ERR;
@@ -312,7 +313,7 @@ static SoftBusEvtReportMsg *GetDurationMsg(LnnStatisticData *data)
     return GetStatisticDurationEvtMsg(data->type);
 }
 
-int32_t AddStatisticDuration(LnnStatisticData *data)
+NO_SANITIZE("cfi") int32_t AddStatisticDuration(LnnStatisticData *data)
 {
     if (data == NULL || data->retCode != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -420,7 +421,7 @@ static int32_t MakeFaultEvt(SoftBusEvtReportMsg *msg)
     return SOFTBUS_ERR;
 }
 
-int32_t CreateBusCenterFaultEvt(SoftBusEvtReportMsg *msg, int32_t errorCode, ConnectionAddr *addr)
+NO_SANITIZE("cfi") int32_t CreateBusCenterFaultEvt(SoftBusEvtReportMsg *msg, int32_t errorCode, ConnectionAddr *addr)
 {
     if (msg == NULL || addr == NULL) {
         return SOFTBUS_ERR;

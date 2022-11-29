@@ -33,7 +33,6 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hisysevt_connreporter.h"
-#include "softbus_def.h"
 
 #define INVALID_GATTC_ID (-1)
 #define DEFAULT_MTU_SIZE 512
@@ -754,7 +753,8 @@ static int32_t GetMouduleFlags(SoftBusBtUuid *charaUuid, bool *flag)
     return SOFTBUS_ERR;
 }
 
-static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNotify *param, int32_t status)
+NO_SANITIZE("cfi") static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNotify *param,
+    int32_t status)
 {
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
@@ -819,7 +819,7 @@ static void RegistGattcCallback(SoftBusBleConnCalback *cb)
     g_softBusBleConnCb = cb;
 }
 
-int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
+NO_SANITIZE("cfi") int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 {
     if (g_gattcIsInited == true) {
         return SOFTBUS_OK;

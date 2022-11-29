@@ -293,7 +293,7 @@ static int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthCo
 }
 
 /* Note: must call DelAuthManager(auth, false) to free. */
-AuthManager *GetAuthManagerByAuthId(int64_t authId)
+NO_SANITIZE("cfi") AuthManager *GetAuthManagerByAuthId(int64_t authId)
 {
     if (!RequireAuthLock()) {
         return NULL;

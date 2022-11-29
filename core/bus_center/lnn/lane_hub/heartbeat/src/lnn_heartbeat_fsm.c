@@ -30,10 +30,10 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
 
@@ -781,7 +781,7 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
     return ret;
 }
 
-void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
+NO_SANITIZE("cfi") void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
     if (hbFsm == NULL) {
         return;
@@ -829,7 +829,7 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     return SOFTBUS_OK;
 }
 
-LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void)
+NO_SANITIZE("cfi") LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void)
 {
     LnnHeartbeatFsm *hbFsm = NULL;
 

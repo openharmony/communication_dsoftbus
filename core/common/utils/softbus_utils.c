@@ -57,7 +57,7 @@ static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 static bool g_signalingMsgSwitch = false;
 
-SoftBusList *CreateSoftBusList(void)
+NO_SANITIZE("cfi") SoftBusList *CreateSoftBusList(void)
 {
     SoftBusList *list = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     if (list == NULL) {
@@ -78,7 +78,7 @@ SoftBusList *CreateSoftBusList(void)
     return list;
 }
 
-void DestroySoftBusList(SoftBusList *list)
+NO_SANITIZE("cfi") void DestroySoftBusList(SoftBusList *list)
 {
     ListDelInit(&list->list);
     SoftBusMutexDestroy(&list->lock);
@@ -135,7 +135,8 @@ void SoftBusTimerDeInit(void)
     }
 }
 
-int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen)
+NO_SANITIZE("cfi") int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf,
+    uint32_t inLen)
 {
     (void)outBufLen;
 
@@ -177,7 +178,8 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
     return SOFTBUS_OK;
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
+NO_SANITIZE("cfi") int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
+    uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
         return SOFTBUS_ERR;
@@ -205,7 +207,7 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     return SOFTBUS_OK;
 }
 
-int32_t GenerateRandomStr(char *str, uint32_t len)
+NO_SANITIZE("cfi") int32_t GenerateRandomStr(char *str, uint32_t len)
 {
     if ((str == NULL) ||  (len < HEXIFY_UNIT_LEN)) {
         return SOFTBUS_INVALID_PARAM;
@@ -246,7 +248,8 @@ bool IsValidString(const char *input, uint32_t maxLen)
     return true;
 }
 
-int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac, uint32_t binMacLen)
+NO_SANITIZE("cfi") int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac,
+    uint32_t binMacLen)
 {
     if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -274,7 +277,8 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
     return SOFTBUS_OK;
 }
 
-int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen)
+NO_SANITIZE("cfi") int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac,
+    uint32_t binMacLen)
 {
     int32_t ret;
 
@@ -414,7 +418,7 @@ void IdInstead(char *data, uint32_t length)
     }
 }
 
-void DataMasking(const char *data, uint32_t length, char delimiter, char *container)
+NO_SANITIZE("cfi") void DataMasking(const char *data, uint32_t length, char delimiter, char *container)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
@@ -439,8 +443,8 @@ void DataMasking(const char *data, uint32_t length, char delimiter, char *contai
     }
 }
 
-int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len, unsigned char *hashStr,
-    uint32_t hashStrLen)
+NO_SANITIZE("cfi") int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t len,
+    unsigned char *hashStr, uint32_t hashStrLen)
 {
     int32_t ret;
     unsigned char hashResult[SHA_256_HASH_LEN] = {0};

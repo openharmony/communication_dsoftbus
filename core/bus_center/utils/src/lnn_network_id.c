@@ -23,6 +23,7 @@
 #include "lnn_file_utils.h"
 #include "softbus_adapter_file.h"
 #include "softbus_bus_center.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -54,7 +55,7 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
 {
     if (networkId == NULL || len < NETWORK_ID_BUF_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -68,7 +69,7 @@ int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
 {
     static bool isGenerated = false;
     static char localUuid[UUID_BUF_LEN] = {0};

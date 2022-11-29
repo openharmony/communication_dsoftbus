@@ -18,12 +18,13 @@
 #include <string.h>
 
 #include "softbus_adapter_crypto.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
 #define MAX_WEIGHT_VALUE 1000
 
-int32_t LnnGetLocalWeight(void)
+NO_SANITIZE("cfi") int32_t LnnGetLocalWeight(void)
 {
     static int32_t weight;
     static bool isGenWeight = false;
@@ -41,7 +42,8 @@ int32_t LnnGetLocalWeight(void)
     return weight;
 }
 
-int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1, int32_t weight2, const char *masterUdid2)
+NO_SANITIZE("cfi") int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1, int32_t weight2,
+    const char *masterUdid2)
 {
     if (weight1 != weight2) {
         return weight1 - weight2;

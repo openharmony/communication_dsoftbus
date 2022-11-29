@@ -22,6 +22,7 @@
 #include "lnn_sync_info_manager.h"
 #include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 
@@ -156,7 +157,7 @@ int32_t LnnSyncP2pInfo(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitLocalP2pInfo(NodeInfo *info)
+NO_SANITIZE("cfi") int32_t LnnInitLocalP2pInfo(NodeInfo *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -173,12 +174,12 @@ int32_t LnnInitLocalP2pInfo(NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitP2p(void)
+NO_SANITIZE("cfi") int32_t LnnInitP2p(void)
 {
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }
 
-void LnnDeinitP2p(void)
+NO_SANITIZE("cfi") void LnnDeinitP2p(void)
 {
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }

@@ -146,7 +146,7 @@ void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* 
     return;
 }
 
-const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength)
+NO_SANITIZE("cfi") const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength)
 {
     if (target == NULL) {
         return "NULL";
@@ -251,7 +251,8 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
     return SOFTBUS_OK;
 }
 
-void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *packet, size_t packetLen)
+NO_SANITIZE("cfi") void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *packet,
+    size_t packetLen)
 {
     if (!GetSignalingMsgSwitch()) {
         return;
@@ -287,7 +288,7 @@ void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *p
 #endif
 }
 
-const char *AnonyDevId(char **outName, const char *inName)
+NO_SANITIZE("cfi") const char *AnonyDevId(char **outName, const char *inName)
 {
     if (inName == NULL) {
         return "null";

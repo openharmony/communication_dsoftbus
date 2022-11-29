@@ -460,7 +460,7 @@ static bool CheckTimeSyncReqInfo(const StartTimeSyncReqMsgPara *info)
     return true;
 }
 
-int32_t LnnInitTimeSync(void)
+NO_SANITIZE("cfi") int32_t LnnInitTimeSync(void)
 {
     ListInit(&g_timeSyncCtrl.reqList);
     g_timeSyncCtrl.looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -475,7 +475,7 @@ int32_t LnnInitTimeSync(void)
     return LnnTimeSyncImplInit();
 }
 
-void LnnDeinitTimeSync(void)
+NO_SANITIZE("cfi") void LnnDeinitTimeSync(void)
 {
     if (g_timeSyncCtrl.looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync not init");

@@ -140,7 +140,7 @@ P2pLinkGroup *P2pLinkRequetGroupInfo(void)
     return grp;
 }
 
-static void InnerP2pStateChangedProc(P2pState state)
+NO_SANITIZE("cfi") static void InnerP2pStateChangedProc(P2pState state)
 {
     bool res = true;
 
@@ -162,7 +162,7 @@ static void InnerGroupStateChangedProc(void)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv group state change");
 }
 
-static void InnerConnResultProc(WifiP2pLinkedInfo info)
+NO_SANITIZE("cfi") static void InnerConnResultProc(WifiP2pLinkedInfo info)
 {
     char mac[P2P_MAC_LEN] = {0};
 
@@ -191,7 +191,7 @@ static void InnerConnResultProc(WifiP2pLinkedInfo info)
     }
 }
 
-static void InnerP2pPeersChangedCallback(WifiP2pDevice* devices, int len)
+NO_SANITIZE("cfi") static void InnerP2pPeersChangedCallback(WifiP2pDevice* devices, int len)
 {
     (void)devices;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "InnerP2pPeersChangedCallback len %d.", len);

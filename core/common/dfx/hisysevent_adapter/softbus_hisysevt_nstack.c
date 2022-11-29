@@ -18,6 +18,7 @@
 #include "nstackx.h"
 #include "nstackx_dfile.h"
 #include "softbus_adapter_log.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_hisysevent.h"
 #include "softbus_hisysevt_nstack.h"
@@ -181,7 +182,7 @@ static void NstackHiEventCb(void *softObj, const NstackDfxEvent *info)
     }
 }
 
-void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
+NO_SANITIZE("cfi") void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
 {
     if (softObj == NULL || info == NULL) {
         LOG_ERR("param is NULL");
@@ -195,7 +196,7 @@ void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
     NstackHiEventCb(softObj, &nstackInfo);
 }
 
-static void DFileHiEventCb(void *softObj, const DFileEvent *info)
+NO_SANITIZE("cfi") static void DFileHiEventCb(void *softObj, const DFileEvent *info)
 {
     NstackDfxEvent nstackInfo;
     if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(DFileEvent)) != EOK) {
@@ -205,7 +206,7 @@ static void DFileHiEventCb(void *softObj, const DFileEvent *info)
     NstackHiEventCb(softObj, &nstackInfo);
 }
 
-static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
+NO_SANITIZE("cfi") static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
 {
     NstackDfxEvent nstackInfo;
     if (memcpy_s(nstackInfo.eventName, sizeof(nstackInfo.eventName),

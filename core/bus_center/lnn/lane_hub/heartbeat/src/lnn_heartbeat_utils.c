@@ -23,12 +23,14 @@
 #include "p2plink_interface.h"
 
 #include "softbus_adapter_crypto.h"
-#include "softbus_errcode.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
+#include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
+
+NO_SANITIZE("cfi") LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
 {
     switch (addrType) {
         case CONNECTION_ADDR_WLAN:
@@ -43,7 +45,7 @@ LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
     return HEARTBEAT_TYPE_MAX;
 }
 
-ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
+NO_SANITIZE("cfi") ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
 {
     switch (type) {
         case HEARTBEAT_TYPE_UDP:
@@ -58,7 +60,7 @@ ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
     return CONNECTION_ADDR_MAX;
 }
 
-int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
+NO_SANITIZE("cfi") int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
 {
     int32_t cnt = -1;
 
@@ -136,7 +138,7 @@ static bool HbHasActiveP2pConnection(const char *networkId)
     return ret == SOFTBUS_OK ? true : false;
 }
 
-bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
+NO_SANITIZE("cfi") bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
 {
     bool ret = false;
 
@@ -194,7 +196,7 @@ static bool VisitCheckSupportedHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
     return true;
 }
 
-bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType)
+NO_SANITIZE("cfi") bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType)
 {
     if (srcType == NULL || dstType == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check supported hbType get invalid param");
@@ -203,7 +205,7 @@ bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstTyp
     return LnnVisitHbTypeSet(VisitCheckSupportedHbType, srcType, dstType);
 }
 
-int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len)
 {
     int32_t ret;
     uint8_t hashResult[SHA_256_HASH_LEN] = {0};

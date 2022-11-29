@@ -16,8 +16,10 @@
 #include "softbus_json_utils.h"
 
 #include <securec.h>
+#include "softbus_def.h"
 
-bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, uint32_t targetLen)
+NO_SANITIZE("cfi") bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
+    uint32_t targetLen)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -40,7 +42,7 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
     return true;
 }
 
-bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target)
+NO_SANITIZE("cfi") bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -54,7 +56,7 @@ bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *
     return true;
 }
 
-bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target)
+NO_SANITIZE("cfi") bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -68,7 +70,7 @@ bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string,
     return true;
 }
 
-bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, double *target)
+NO_SANITIZE("cfi") bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, double *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -82,7 +84,7 @@ bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, doubl
     return true;
 }
 
-bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target)
+NO_SANITIZE("cfi") bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -96,7 +98,7 @@ bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uin
     return true;
 }
 
-bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target)
+NO_SANITIZE("cfi") bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -110,7 +112,7 @@ bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int
     return true;
 }
 
-bool GetJsonObjectSignedNumber64Item(const cJSON *json, const char * const string, int64_t *target)
+NO_SANITIZE("cfi") bool GetJsonObjectSignedNumber64Item(const cJSON *json, const char * const string, int64_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -124,7 +126,7 @@ bool GetJsonObjectSignedNumber64Item(const cJSON *json, const char * const strin
     return true;
 }
 
-bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target)
+NO_SANITIZE("cfi") bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -138,7 +140,7 @@ bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_
     return true;
 }
 
-bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target)
+NO_SANITIZE("cfi") bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
         return false;
@@ -152,7 +154,7 @@ bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *t
     return true;
 }
 
-bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
+NO_SANITIZE("cfi") bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
 {
     if (value == NULL || json == NULL || string == NULL) {
         return false;
@@ -169,7 +171,7 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
     return true;
 }
 
-bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
+NO_SANITIZE("cfi") bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
 {
     if (json == NULL || string == NULL) {
         return false;
@@ -186,7 +188,7 @@ bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
     return true;
 }
 
-bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num)
+NO_SANITIZE("cfi") bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num)
 {
     if (json == NULL || string == NULL) {
         return false;
@@ -203,7 +205,7 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     return true;
 }
 
-bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
+NO_SANITIZE("cfi") bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
 {
     if (json == NULL || string == NULL) {
         return false;

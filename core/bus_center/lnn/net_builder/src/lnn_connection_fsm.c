@@ -29,6 +29,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "lnn_async_callback_utils.h"
@@ -768,7 +769,7 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target)
+NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target)
 {
     LnnConnectionFsm *connFsm = NULL;
 
@@ -793,7 +794,7 @@ LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target)
     return connFsm;
 }
 
-void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
+NO_SANITIZE("cfi") void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
 {
     if (connFsm == NULL) {
         return;

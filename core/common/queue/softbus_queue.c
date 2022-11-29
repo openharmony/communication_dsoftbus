@@ -15,6 +15,7 @@
 
 #include "softbus_queue.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -85,7 +86,7 @@ int32_t QueueCountGet(const LockFreeQueue* queue, uint32_t* count)
     return 0;
 }
 
-LockFreeQueue* CreateQueue(uint32_t unitNum)
+NO_SANITIZE("cfi") LockFreeQueue* CreateQueue(uint32_t unitNum)
 {
     if (!IS_POWER_OF_2(unitNum)) {
         return NULL;

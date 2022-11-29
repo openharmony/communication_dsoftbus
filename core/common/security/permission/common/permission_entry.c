@@ -539,7 +539,7 @@ bool PermIsSecLevelPublic(const char *sessionName)
     return ret;
 }
 
-int32_t InitDynamicPermission(void)
+NO_SANITIZE("cfi") int32_t InitDynamicPermission(void)
 {
     if (g_dynamicPermissionList == NULL) {
         g_dynamicPermissionList = CreateSoftBusList();

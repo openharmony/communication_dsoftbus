@@ -14,11 +14,10 @@
  */
 
 #include "client_trans_auth_manager.h"
-
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_server_proxy.h"
-#include "softbus_def.h"
 
 static IClientSessionCallBack g_sessionCb;
 

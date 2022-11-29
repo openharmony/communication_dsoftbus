@@ -41,11 +41,11 @@
 #include "lnn_sync_info_manager.h"
 #include "lnn_topo_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
-#include "softbus_def.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN 8
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
@@ -160,7 +160,7 @@ void SetWatchdogFlag(bool flag)
     g_watchdogFlag = flag;
 }
 
-bool GetWatchdogFlag(void)
+NO_SANITIZE("cfi") bool GetWatchdogFlag(void)
 {
     return g_watchdogFlag;
 }
@@ -1602,7 +1602,7 @@ static AuthVerifyCallback g_verifyCallback = {
     .onVerifyFailed = OnVerifyFailed,
 };
 
-AuthVerifyCallback *LnnGetVerifyCallback(void)
+NO_SANITIZE("cfi") AuthVerifyCallback *LnnGetVerifyCallback(void)
 {
     return &g_verifyCallback;
 }
@@ -1656,7 +1656,7 @@ static AuthVerifyCallback g_metaVerifyCallback = {
     .onVerifyFailed = OnAuthMetaVerifyFailed,
 };
 
-AuthVerifyCallback *LnnGetMetaVerifyCallback(void)
+NO_SANITIZE("cfi") AuthVerifyCallback *LnnGetMetaVerifyCallback(void)
 {
     return &g_metaVerifyCallback;
 }
@@ -1863,7 +1863,7 @@ int32_t NodeInfoSync(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitNetBuilder(void)
+NO_SANITIZE("cfi") int32_t LnnInitNetBuilder(void)
 {
     if (g_netBuilder.isInit == true) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init net builder repeatly");
@@ -1926,7 +1926,7 @@ int32_t LnnInitNetBuilderDelay(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitNetBuilder(void)
+NO_SANITIZE("cfi") void LnnDeinitNetBuilder(void)
 {
     LnnConnectionFsm *item = NULL;
     LnnConnectionFsm *nextItem = NULL;
