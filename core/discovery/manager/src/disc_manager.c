@@ -181,7 +181,7 @@ static int32_t TransferStringCapToBitmap(const char *capability)
     DISC_CHECK_AND_RETURN_RET_LOG(capability != NULL, SOFTBUS_DISCOVER_MANAGER_CAPABILITY_INVALID,
                                   "capability is null");
 
-    for (int32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
+    for (uint32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
         if (strcmp(capability, g_capabilityMap[i].capability) == 0) {
             DLOGI("capability=%s", capability);
             return g_capabilityMap[i].bitmap;
