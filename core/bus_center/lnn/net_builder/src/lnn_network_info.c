@@ -26,6 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_json_utils.h"
+#include "softbus_def.h"
 
 #define MSG_LEN 10
 #define BITS 8
@@ -233,7 +234,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     return;
 }
 
-int32_t LnnInitNetworkInfo(void)
+NO_SANITIZE("cfi") int32_t LnnInitNetworkInfo(void)
 {
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network info register bt state change fail");
@@ -250,7 +251,7 @@ int32_t LnnInitNetworkInfo(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitNetworkInfo(void)
+NO_SANITIZE("cfi") void LnnDeinitNetworkInfo(void)
 {
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
 }

@@ -102,7 +102,7 @@ static SoftBusMessage *BleConnCreateLoopMsg(int32_t what, uint64_t arg1, uint64_
     return msg;
 }
 
-int32_t GetBleAttrHandle(int32_t module)
+NO_SANITIZE("cfi") int32_t GetBleAttrHandle(int32_t module)
 {
     return (module == MODULE_BLE_NET) ? g_gattService.bleNetCharaId : g_gattService.bleConnCharaId;
 }
@@ -474,7 +474,8 @@ NO_SANITIZE("cfi") static void BleDisconnectServerCallback(int halConnId, const 
     g_softBusBleConnCb->BleDisconnectCallback(halConnInfo, SOFTBUS_BLECONNECTION_SERVER_DISCONNECT);
 }
 
-static void SoftBusGattServerOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, const char *value)
+NO_SANITIZE("cfi") static void SoftBusGattServerOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len,
+    const char *value)
 {
     if (value == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattServerOnDataReceived invalid data");

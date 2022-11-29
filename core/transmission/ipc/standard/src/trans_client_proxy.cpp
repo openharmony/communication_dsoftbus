@@ -16,11 +16,11 @@
 #include "trans_client_proxy.h"
 
 #include "softbus_client_info_manager.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_trans_def.h"
 #include "trans_client_proxy_standard.h"
-#include "softbus_def.h"
 
 using namespace OHOS;
 
@@ -31,7 +31,7 @@ static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
     return clientProxy;
 }
 
-int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
+NO_SANITIZE("cfi") int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");

@@ -26,6 +26,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
@@ -770,7 +771,7 @@ static int32_t FillAllRelation(LnnRelation *relation, uint32_t relationNum)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitTopoManager(void)
+NO_SANITIZE("cfi") int32_t LnnInitTopoManager(void)
 {
     int32_t i;
 
@@ -799,7 +800,7 @@ int32_t LnnInitTopoManager(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitTopoManager(void)
+NO_SANITIZE("cfi") void LnnDeinitTopoManager(void)
 {
     if (!g_topoTable.isSupportTopo) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not Support Topo");
@@ -810,7 +811,7 @@ void LnnDeinitTopoManager(void)
     SoftBusMutexDestroy(&g_topoTable.lock);
 }
 
-int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum)
+NO_SANITIZE("cfi") int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum)
 {
     int32_t rc;
     if (relation == NULL || relationNum == NULL) {
@@ -841,7 +842,7 @@ int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum)
     return rc;
 }
 
-int32_t LnnGetRelation(const char *udid, const char *peerUdid, uint8_t *relation, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGetRelation(const char *udid, const char *peerUdid, uint8_t *relation, uint32_t len)
 {
     TopoTableItem *topoItem = NULL;
     TopoInfo *topoInfo = NULL;

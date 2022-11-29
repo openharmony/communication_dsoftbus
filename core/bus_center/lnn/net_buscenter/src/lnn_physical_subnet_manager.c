@@ -19,6 +19,7 @@
 
 #include "lnn_network_manager.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -48,7 +49,7 @@ static LnnPhysicalSubnet *g_physicalSubnets[MAX_SUPPORTED_PHYSICAL_SUBNET];
         SoftBusMutexUnlock(LOCK);                                            \
     } while (false)
 
-int32_t LnnInitPhysicalSubnetManager(void)
+NO_SANITIZE("cfi") int32_t LnnInitPhysicalSubnetManager(void)
 {
     return SoftBusMutexInit(&g_physicalSubnetsLock, NULL);
 }
@@ -65,7 +66,7 @@ static void ClearSubnetManager(void)
     }
 }
 
-void LnnDeinitPhysicalSubnetManager(void)
+NO_SANITIZE("cfi") void LnnDeinitPhysicalSubnetManager(void)
 {
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, ClearSubnetManager());
     if (SoftBusMutexDestroy(&g_physicalSubnetsLock) != SOFTBUS_OK) {

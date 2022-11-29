@@ -55,7 +55,7 @@ static LIST_HEAD(g_bleQueueList);
 static SoftBusMutex g_bleQueueLock;
 static BleQueue *g_innerQueue = NULL;
 
-static BleQueue *CreateBleQueue(int32_t pid)
+NO_SANITIZE("cfi") static BleQueue *CreateBleQueue(int32_t pid)
 {
     BleQueue *queue = (BleQueue *)SoftBusCalloc(sizeof(BleQueue));
     if (queue == NULL) {

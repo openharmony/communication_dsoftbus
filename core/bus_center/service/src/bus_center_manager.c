@@ -27,11 +27,11 @@
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "softbus_adapter_xcollie.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
 #define WATCHDOG_INTERVAL_TIME 10000

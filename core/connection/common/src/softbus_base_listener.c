@@ -235,7 +235,7 @@ static int32_t CreateStaticModules(void)
     return SOFTBUS_OK;
 }
 
-uint32_t CreateListenerModule(void)
+NO_SANITIZE("cfi") uint32_t CreateListenerModule(void)
 {
     uint32_t moduleId = UNUSE_BUTT;
     int32_t ret = SoftBusMutexLock(&g_listenerListLock);
@@ -310,7 +310,7 @@ int32_t InitBaseListener(void)
     return SOFTBUS_OK;
 }
 
-void DeinitBaseListener(void)
+NO_SANITIZE("cfi") void DeinitBaseListener(void)
 {
     int32_t ret = SoftBusMutexLock(&g_listenerListLock);
     if (ret != SOFTBUS_OK) {
@@ -1074,7 +1074,7 @@ static int32_t WaitBaseListenerDestroy(ListenerModule module, int32_t waitTimeOu
     return SOFTBUS_TIMOUT;
 }
 
-void DestroyBaseListener(ListenerModule module)
+NO_SANITIZE("cfi") void DestroyBaseListener(ListenerModule module)
 {
     if (module >= UNUSE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid listener module.");
@@ -1151,7 +1151,7 @@ static void DelFdNode(SoftbusBaseListenerInfo *info, int32_t fd)
     }
 }
 
-int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
+NO_SANITIZE("cfi") int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 {
     if (fd < 0 || CheckTrigger(triggerType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid AddTrigger Param");
@@ -1211,7 +1211,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
     return SOFTBUS_OK;
 }
 
-int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
+NO_SANITIZE("cfi") int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType)
 {
     if (fd < 0 || CheckTrigger(triggerType)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Invalid AddTrigger Param");

@@ -46,7 +46,6 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hisysevt_connreporter.h"
-#include "softbus_def.h"
 
 #define SEND_QUEUE_UNIT_NUM 128
 #define CONNECT_REF_INCRESE 1

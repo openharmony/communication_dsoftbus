@@ -22,6 +22,7 @@
 #include "lnn_event_monitor_impl.h"
 #include "lnn_devicename_info.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_adapter_mem.h"
@@ -55,7 +56,7 @@ static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {
     LnnDeinitDriverMonitorImpl,
 };
 
-int32_t LnnInitEventMonitor(void)
+NO_SANITIZE("cfi") int32_t LnnInitEventMonitor(void)
 {
     for (uint32_t i = 0; i < MONITOR_IMPL_MAX_TYPE; ++i) {
         if (g_monitorImplInit[i] == NULL) {
@@ -69,7 +70,7 @@ int32_t LnnInitEventMonitor(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitEventMonitor(void)
+NO_SANITIZE("cfi") void LnnDeinitEventMonitor(void)
 {
     uint32_t i;
 

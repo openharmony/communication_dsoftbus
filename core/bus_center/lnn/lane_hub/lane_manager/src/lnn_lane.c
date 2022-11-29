@@ -33,10 +33,10 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 #define ID_SHIFT_STEP 5
 #define ID_CALC_MASK 0x1F
@@ -292,7 +292,7 @@ NO_SANITIZE("cfi") int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOpti
     return SOFTBUS_OK;
 }
 
-int32_t LnnFreeLane(uint32_t laneId)
+NO_SANITIZE("cfi") int32_t LnnFreeLane(uint32_t laneId)
 {
     uint32_t laneType = laneId >> LANE_ID_TYPE_SHIFT;
     if (laneType >= LANE_TYPE_BUTT) {
@@ -341,7 +341,7 @@ static int32_t LaneDelayInit(void)
     return ret;
 }
 
-int32_t InitLane(void)
+NO_SANITIZE("cfi") int32_t InitLane(void)
 {
     if (LnnInitLaneLooper() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneLooper fail");

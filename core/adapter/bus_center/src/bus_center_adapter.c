@@ -24,12 +24,13 @@
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_log.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 
-int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
+NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "fail: para error!");

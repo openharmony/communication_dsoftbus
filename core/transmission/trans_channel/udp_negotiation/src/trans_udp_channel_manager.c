@@ -30,12 +30,12 @@
 
 static SoftBusList *g_udpChannelMgr = NULL;
 
-SoftBusList *GetUdpChannelMgrHead(void)
+NO_SANITIZE("cfi") SoftBusList *GetUdpChannelMgrHead(void)
 {
     return g_udpChannelMgr;
 }
 
-int32_t GetUdpChannelLock(void)
+NO_SANITIZE("cfi") int32_t GetUdpChannelLock(void)
 {
     if (g_udpChannelMgr == NULL) {
         return SOFTBUS_NO_INIT;

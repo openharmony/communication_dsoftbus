@@ -17,9 +17,9 @@
 
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_def.h"
 
 #define LNN_ASYNC_CALLBACK_HANDLER_NAME "LnnAsyncHandler"
 
@@ -54,7 +54,7 @@ NO_SANITIZE("cfi") static void AsyncCallbackHandler(SoftBusMessage *msg)
     info->callback(info->cbPara);
 }
 
-static void FreeAsyncCallbackMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void FreeAsyncCallbackMessage(SoftBusMessage *msg)
 {
     AsyncCallbackInfo *info = NULL;
 

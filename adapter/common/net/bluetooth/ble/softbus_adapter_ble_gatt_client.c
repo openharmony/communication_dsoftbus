@@ -43,7 +43,8 @@ NO_SANITIZE("cfi") static void GattcConnectionStateChangedCallback(int clientId,
     g_softBusGattcCallback->ConnectionStateCallback(clientId, connectionState, status);
 }
 
-static void GattcConnectParaUpdateCallback(int clientId, int interval, int latency, int timeout, int status)
+NO_SANITIZE("cfi") static void GattcConnectParaUpdateCallback(int clientId, int interval, int latency, int timeout,
+    int status)
 {
     CLOGI("ParaUpdateCallback");
 }
@@ -55,22 +56,23 @@ NO_SANITIZE("cfi") static void GattcSearchServiceCompleteCallback(int clientId, 
     g_softBusGattcCallback->ServiceCompleteCallback(clientId, status);
 }
 
-static void GattcReadCharacteristicCallback(int clientId, BtGattReadData *readData, int status)
+NO_SANITIZE("cfi") static void GattcReadCharacteristicCallback(int clientId, BtGattReadData *readData, int status)
 {
     CLOGI("ReadCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
-static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic, int status)
+NO_SANITIZE("cfi") static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic,
+    int status)
 {
     CLOGI("WriteCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
-static void GattcReadDescriptorCallback(int clientId, BtGattReadData *readData, int status)
+NO_SANITIZE("cfi") static void GattcReadDescriptorCallback(int clientId, BtGattReadData *readData, int status)
 {
     CLOGI("ReadDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
-static void GattcWriteDescriptorCallback(int clientId, BtGattDescriptor *descriptor, int status)
+NO_SANITIZE("cfi") static void GattcWriteDescriptorCallback(int clientId, BtGattDescriptor *descriptor, int status)
 {
     CLOGI("WriteDescriptorCallback, id=%d, status=%d", clientId, status);
 }

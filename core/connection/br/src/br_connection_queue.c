@@ -156,7 +156,7 @@ static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxL
     return SOFTBUS_OK;
 }
 
-bool IsBrQueueEmpty(void)
+NO_SANITIZE("cfi") bool IsBrQueueEmpty(void)
 {
     uint32_t queueCount = 0;
     for (uint32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {

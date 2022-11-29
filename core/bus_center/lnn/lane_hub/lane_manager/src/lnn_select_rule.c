@@ -216,7 +216,7 @@ static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_WLAN_5G] = {true, IsEnableWlan5G, GetWlan5GScore},
 };
 
-LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
+NO_SANITIZE("cfi") LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
 {
     if ((linkType < 0) || (linkType >= LANE_LINK_TYPE_BUTT)) {
         return NULL;

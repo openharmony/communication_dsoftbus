@@ -66,7 +66,7 @@ NO_SANITIZE("cfi") uint32_t AddAuthRequest(const AuthRequest *request)
     return waitNum;
 }
 
-int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
+NO_SANITIZE("cfi") int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
     if (!RequireAuthLock()) {
@@ -105,7 +105,7 @@ int32_t UpdateAuthRequestConnInfo(uint32_t requestId, const AuthConnInfo *connIn
     return SOFTBUS_OK;
 }
 
-int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request)
+NO_SANITIZE("cfi") int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);

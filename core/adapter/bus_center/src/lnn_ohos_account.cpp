@@ -22,13 +22,14 @@
 #include "os_account_manager.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
 static const std::string DEFAULT_USER_ID = "0";
 
-int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {
     if (accountHash == nullptr || len != SHA_256_HASH_LEN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetOhosAccount get invalid param");
@@ -67,7 +68,7 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
         accountInfo.second.uid_.c_str(), accountInfo.second.uid_.length());
 }
 
-int32_t LnnInitOhosAccount(void)
+NO_SANITIZE("cfi") int32_t LnnInitOhosAccount(void)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
 
@@ -110,7 +111,7 @@ void LnnOnOhosAccountChanged(void)
     LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
 }
 
-bool LnnIsDefaultOhosAccount(void)
+NO_SANITIZE("cfi") bool LnnIsDefaultOhosAccount(void)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
     uint8_t defaultAccountHash[SHA_256_HASH_LEN] = {0};

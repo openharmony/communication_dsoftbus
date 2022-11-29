@@ -236,7 +236,7 @@ static void DumpLooperLocked(const SoftBusLooperContext *context)
     }
 }
 
-void DumpLooper(const SoftBusLooper *looper)
+NO_SANITIZE("cfi") void DumpLooper(const SoftBusLooper *looper)
 {
     if (looper == NULL) {
         return;
@@ -374,7 +374,7 @@ void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
     loop->dumpable = dumpable;
 }
 
-SoftBusLooper *CreateNewLooper(const char *name)
+NO_SANITIZE("cfi") SoftBusLooper *CreateNewLooper(const char *name)
 {
     if (g_looperCnt >= MAX_LOOPER_CNT) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Looper count:%u, exceeds the maximum", g_looperCnt);
@@ -432,7 +432,7 @@ static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_LANE, NULL}
 };
 
-SoftBusLooper *GetLooper(int type)
+NO_SANITIZE("cfi") SoftBusLooper *GetLooper(int type)
 {
     uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
     for (uint32_t i = 0; i < len; i++) {
@@ -464,7 +464,7 @@ static void ReleaseLooper(const SoftBusLooper *looper)
     }
 }
 
-void DestroyLooper(SoftBusLooper *looper)
+NO_SANITIZE("cfi") void DestroyLooper(SoftBusLooper *looper)
 {
     if (looper == NULL) {
         return;
