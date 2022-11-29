@@ -17,7 +17,7 @@
 #include "nstackx_util.h"
 #include "nstackx_error.h"
 #include "nstackx_dfile.h"
-#include "nstackx_log.h"
+#include "nstackx_dfile_log.h"
 #include "nstackx_dfile_config.h"
 #include "nstackx_dev.h"
 #include "securec.h"
@@ -70,7 +70,7 @@ uint64_t GetTarTotalBlockLength(FileList *fileList)
 
         ret = stat(path, &statInfo);
         if (ret != NSTACKX_EOK) {
-            LOGE(TAG, "get stat error: %d", ret);
+            DFILE_LOGE(TAG, "get stat error: %d", ret);
             return 0;
         }
 
@@ -118,13 +118,13 @@ static int32_t EncodeFileInfo(FileList *fileList, uint16_t fileId, uint8_t *buff
 
     if (length <= offsetof(FileInfoUnit, fileName)) {
         /* Running out of buffer */
-        LOGE(TAG, "buffer length %zu is not enough", length);
+        DFILE_LOGE(TAG, "buffer length %zu is not enough", length);
         return NSTACKX_EAGAIN;
     }
     remainLength = length - offsetof(FileInfoUnit, fileName);
     if (memcpy_s(fileInfoUnit->fileName, remainLength, fileName, fileNameLen) != EOK) {
         /* Running out of buffer */
-        LOGE(TAG, "memcpy_s fileName error. remain length %zu, fileNameLen %hu", remainLength, fileNameLen);
+        DFILE_LOGE(TAG, "memcpy_s fileName error. remain length %zu, fileNameLen %hu", remainLength, fileNameLen);
         return NSTACKX_EAGAIN;
     }
     fileInfoUnit->fileId = htons(fileId);
@@ -163,14 +163,14 @@ void EncodeFileHeaderFrameSp(FileList *fileList, int32_t *fileId, uint8_t *buffe
         nextFileId = lastAddedFileId + 1;
         if (FileListGetFileNameAcked(fileList, (uint16_t)nextFileId) ||
             (nextFileId == 0 && fileList->userData == NULL && fileList->packedUserData == NULL)) {
-            LOGI(TAG, "SKIP FILE ID %d", nextFileId);
+            DFILE_LOGI(TAG, "SKIP FILE ID %d", nextFileId);
             lastAddedFileId = nextFileId;
             continue;
         }
 
         if (EncodeFileInfo(fileList, (uint16_t)nextFileId, &headerFrame->fileInfoUnit[offset],
             bufferLength - offset, &fileInfoSize) != NSTACKX_EOK) {
-            LOGE(TAG, "EncodeFileInfo fileId %d failed", nextFileId);
+            DFILE_LOGE(TAG, "EncodeFileInfo fileId %d failed", nextFileId);
             break;
         }
 
@@ -233,7 +233,7 @@ void EncodeFileHeaderConfirmFrame(FileList *fileList, uint16_t *fileId, uint8_t 
         nextFileId = lastAckedFileId + 1;
         if (!FileListGetFileNameReceived(fileList, nextFileId)) {
             lastAckedFileId = nextFileId;
-            LOGE(TAG, "fileId %u is not acked yet", nextFileId);
+            DFILE_LOGE(TAG, "fileId %u is not acked yet", nextFileId);
             continue;
         }
         if (i >= (bufferLength >> 1)) {
@@ -364,13 +364,13 @@ int32_t DecodeDFileFrame(const uint8_t *buffer, size_t bufferLength, DFileFrame 
     uint16_t payloadLength;
 
     if (bufferLength < DFILE_FRAME_HEADER_LEN) {
-        LOGE(TAG, "drop malformed frame");
+        DFILE_LOGE(TAG, "drop malformed frame");
         return NSTACKX_EFAILED;
     }
 
     payloadLength = ntohs(dFileFrame->header.length);
     if (bufferLength - DFILE_FRAME_HEADER_LEN != payloadLength) {
-        LOGE(TAG, "drop malformed frame");
+        DFILE_LOGE(TAG, "drop malformed frame");
         return NSTACKX_EFAILED;
     }
 
@@ -422,7 +422,7 @@ int32_t DecodeFileHeaderFrameSp(FileList *fileList, FileHeaderFrame *headerFrame
     while (offset < length) {
         fileInfoUnit = (FileInfoUnit *)&buffer[offset];
         if (length - offset <= offsetof(FileInfoUnit, fileName)) {
-            LOGE(TAG, "length %u is too small", length);
+            DFILE_LOGE(TAG, "length %u is too small", length);
             return NSTACKX_EFAILED;
         }
         size_t fileNameLength = ntohs(fileInfoUnit->fileNameLength);
@@ -468,7 +468,7 @@ int32_t DecodeFileHeaderConfirmFrame(FileList *fileList, FileHeaderConfirmFrame 
     uint16_t fileId;
     uint16_t i;
     size_t length = ntohs(confirmFrame->header.length);
-    LOGI(TAG, "header confirm frame length %u", length);
+    DFILE_LOGI(TAG, "header confirm frame length %u", length);
     /* Make sure payload buffer should contain valid number of file ID. */
     if (length == 0 || length % sizeof(uint16_t) != 0) {
         return NSTACKX_EFAILED;
@@ -479,7 +479,7 @@ int32_t DecodeFileHeaderConfirmFrame(FileList *fileList, FileHeaderConfirmFrame 
     for (i = 0; i < fileIdCount; i++) {
         fileId = ntohs(fileIdList[i]);
         if (fileId > FileListGetNum(fileList)) {
-            LOGE(TAG, "Invalid file ID %u", fileId);
+            DFILE_LOGE(TAG, "Invalid file ID %u", fileId);
             continue;
         }
         FileListSetFileNameAcked(fileList, fileId);
@@ -512,7 +512,7 @@ int32_t DecodeFileTransferDoneFrame(FileList *fileList, FileTransferDoneFrame *t
     }
     fileIdNum = length / sizeof(uint16_t);
 
-    LOGI(TAG, "transId %u, FileTransferDone:fileIdNum %u, file number %u",
+    DFILE_LOGI(TAG, "transId %u, FileTransferDone:fileIdNum %u, file number %u",
          ntohs(transferDoneFrame->header.transId), fileIdNum, FileListGetNum(fileList));
     for (i = 0; i < fileIdNum; i++) {
         fileId = ntohs(transferDoneFrame->fileId[i]);
@@ -586,16 +586,16 @@ static uint8_t IsSettingFrameMtuAndTypeValid(const SettingFrame *netSettingFrame
 static int32_t DFileCheckSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSettingFrame)
 {
     if (netSettingFrame->header.sessionId != 0 || netSettingFrame->header.transId != 0) {
-        LOGE(TAG, "error transId for Setting Frame");
+        DFILE_LOGE(TAG, "error transId for Setting Frame");
         return NSTACKX_EFAILED;
     }
     uint16_t payloadLength = ntohs(netSettingFrame->header.length);
     if (!IsSettingFrameLengthValid(hostSettingFrame, payloadLength)) {
-        LOGE(TAG, "illegal setting frame length %u", payloadLength);
+        DFILE_LOGE(TAG, "illegal setting frame length %u", payloadLength);
         return NSTACKX_EFAILED;
     }
     if (!IsSettingFrameMtuAndTypeValid(netSettingFrame)) {
-        LOGE(TAG, "illegal setting frame mtu or type");
+        DFILE_LOGE(TAG, "illegal setting frame mtu or type");
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
@@ -620,7 +620,8 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
          * Then the dFileVersion will be set to zero by defulat.
          * Note that the usage of netSettingFrame->dFileVersion is illegal in this condition.
          */
-        LOGI(TAG, "this setting frame is from an old version whose setting frame doesn't have the member dFileVersion");
+        DFILE_LOGI(TAG, "this setting frame is from an old version whose setting frame doesn't "
+                "have the member dFileVersion");
         hostSettingFrame->dFileVersion = 0;
     } else if (payloadLength == sizeof(hostSettingFrame->mtu) + sizeof(hostSettingFrame->connType) +
         sizeof(hostSettingFrame->dFileVersion)) {
@@ -651,7 +652,7 @@ int32_t DecodeSettingFrame(SettingFrame *netSettingFrame, SettingFrame *hostSett
             hostSettingFrame->deviceBits = ntohs(netSettingFrame->deviceBits);
         }
     }
-    LOGI(TAG, "local version is %u, remote version is %u capability 0x%x dataFrameSize %u capsCheck 0x%x "
+    DFILE_LOGI(TAG, "local version is %u, remote version is %u capability 0x%x dataFrameSize %u capsCheck 0x%x "
         "cipherCaps 0x%x deviceBits %u",
         NSTACKX_DFILE_VERSION, hostSettingFrame->dFileVersion, hostSettingFrame->capability,
         hostSettingFrame->dataFrameSize, hostSettingFrame->capsCheck,
