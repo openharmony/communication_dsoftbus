@@ -132,12 +132,11 @@ void SoftBusReleaseDumpVar(ListNode *varList)
         ListDelete(&varNode->node);;
         SoftBusFree(varNode);
     }
-    SoftBusFree(varList);
 }
 
 static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
 {
-    HandlerNode *handlerNode = SoftBusCalloc(sizeof(HandlerNode));
+    HandlerNode *handlerNode = (HandlerNode *)SoftBusCalloc(sizeof(HandlerNode));
     if (handlerNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode malloc fail.");
         return NULL;
@@ -167,7 +166,6 @@ void SoftBusHiDumperReleaseHandler(void)
         ListDelete(&handlerNode->node);;
         SoftBusFree(handlerNode);
     }
-    SoftBusFree(&g_hidumperhander_list);
 }
 
 int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerFunc handler)
@@ -189,7 +187,7 @@ int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerF
 
 int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 {
-    if (fd < 0 || argv == NULL) {
+    if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
         return SOFTBUS_ERR;
     }
