@@ -228,7 +228,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -259,7 +259,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
     ProxyChannelInfo outChannel;
     TestCallbackFail();
     int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     TestCallbackSuccess();
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
