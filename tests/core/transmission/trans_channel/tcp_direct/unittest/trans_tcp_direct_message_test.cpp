@@ -205,7 +205,7 @@ HWTEST_F(TransTcpDirectTest, GenerateTdcChannelIdTest003, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     res = CreatSessionConnList();
-    EXPECT_TRUE(res == SOFTBUS_OK);
+    ASSERT_EQ(res, SOFTBUS_OK);
 
     SoftBusList *softbuslist = GetSessionConnList();
     EXPECT_TRUE(softbuslist != nullptr);
