@@ -160,6 +160,7 @@ HWTEST_F(TransTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     TransTcpDirectDeinit();
+    TransTcpDirectDeinit();
 }
 
 /**
@@ -176,6 +177,9 @@ HWTEST_F(TransTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
+    ret = CreatSessionConnList();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
     ret = TransTdcAddSessionConn(conn);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
