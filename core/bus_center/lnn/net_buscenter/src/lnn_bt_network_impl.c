@@ -260,7 +260,7 @@ static void LnnBtStateChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
 
-    const LnnMonitorBtStateChangedEvent *event = (const LnnMonitorBtStateChangedEvent *)info;
+    LnnMonitorBtStateChangedEvent *event = (LnnMonitorBtStateChangedEvent *)info;
     (void)LnnVisitNetif(NotifyBtStatusChanged, &event->status);
 }
 
