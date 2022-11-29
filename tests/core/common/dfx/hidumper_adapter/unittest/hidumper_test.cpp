@@ -500,7 +500,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess005, TestSize.Level1)
 HWTEST_F(HidumperTest, SoftBusDumpProcess006, TestSize.Level1)
 {
     HiDumperArgvNode testInValidBusCenterCmdArray[BUSCENTER_DUMP_PROCESS_INVALID_TEST_NUM] = {
-        {TEST_FD_ZERO, TEST_ARGC_ONE, {"-h"}},
+        {ERR_FD, TEST_ARGC_ONE, {"-h"}},
         {TEST_FD_ZERO, ERR_ARGC, {"buscenter"}},
         {ERR_FD, ERR_ARGC, {"buscenter", "-h"}},
         {ERR_FD, TEST_ARGC_TWO, {"buscenter", "-l"}},
