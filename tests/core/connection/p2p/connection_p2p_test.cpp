@@ -52,6 +52,7 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev001, TestSize.Level1
 HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev002, TestSize.Level1)
 {
     auto *info = static_cast<P2pLinkDisconnectInfo *>(SoftBusMalloc(sizeof(P2pLinkDisconnectInfo)));
+    ASSERT_TRUE(info != nullptr);
     info->pid = 11;
     info->authId = 11;
     (void)strcpy_s(info->peerMac, sizeof(info->peerMac), "abc");

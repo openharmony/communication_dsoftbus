@@ -100,6 +100,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest03, TestSize.Level1)
     int32_t ret = TransSessionServerAddItem(NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SessionServer *sessionServer = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
+    ASSERT_TRUE(sessionServer != nullptr);
     memset_s(sessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);

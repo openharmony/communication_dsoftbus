@@ -112,6 +112,7 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapStartDiscovery001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
    
     DiscCoapOption *option = (DiscCoapOption*)SoftBusMalloc(sizeof(DiscCoapOption));
+    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(DiscCoapOption), 0, sizeof(DiscCoapOption));
     option->mode = INVALID_MODE;
    

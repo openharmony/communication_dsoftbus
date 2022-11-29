@@ -228,6 +228,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
 
     TransReceiveData receiveData;
     receiveData.data = (unsigned char *)SoftBusCalloc(TEST_LEN);
+    ASSERT_TRUE(receiveData.data != nullptr);
     receiveData.dataLen = TEST_LEN;
     receiveData.dataType = TEST_DATA_TYPE;
 
