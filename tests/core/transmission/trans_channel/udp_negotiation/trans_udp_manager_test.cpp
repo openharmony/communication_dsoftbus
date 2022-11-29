@@ -86,6 +86,10 @@ int64_t TestGetChannelId()
 UdpChannelInfo* GetPackTest()
 {
     UdpChannelInfo *Channel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
+    if (Channel == nullptr) {
+        return nullptr;
+    }
+    
     Channel->info.myData.channelId = TestGetChannelId();
     Channel->info.appType = APP_TYPE_NORMAL;
     Channel->info.myData.apiVersion = API_V2;

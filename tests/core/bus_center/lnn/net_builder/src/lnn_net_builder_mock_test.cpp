@@ -146,6 +146,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_NODE_TEST_001, TestSize.Level1)
     MetaJoinRequestNode *node = TryJoinRequestMetaNode(&addr, true);
     EXPECT_TRUE(node != nullptr);
     char *networkId = (char *)SoftBusCalloc(10);
+    ASSERT_TRUE(networkId != nullptr);
     networkId[0] = 'x';
     ret = ProcessLeaveMetaNodeRequest(networkId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -187,6 +188,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ConnectionAddrKey *addrKey = (ConnectionAddrKey *)SoftBusCalloc(sizeof(ConnectionAddrKey));
+    ASSERT_TRUE(addrKey != nullptr);
     ret = TrySendJoinMetaNodeRequest(addrKey, true);
 
     ConnectionAddr addr;
@@ -196,6 +198,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_001, TestSize.Level1)
     MetaJoinRequestNode *node = TryJoinRequestMetaNode(&addr, true);
     EXPECT_TRUE(node != nullptr);
     addrKey = (ConnectionAddrKey *)SoftBusCalloc(sizeof(ConnectionAddrKey));
+    ASSERT_TRUE(addrKey != nullptr);
     addrKey->addr.type = CONNECTION_ADDR_BR;
     (void)memcpy_s(addrKey->addr.info.br.brMac, BT_MAC_LEN, "11:22:33:44:55:66", BT_MAC_LEN);
     ret = TrySendJoinMetaNodeRequest(addrKey, true);

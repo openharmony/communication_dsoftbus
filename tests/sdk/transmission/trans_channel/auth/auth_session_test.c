@@ -246,6 +246,9 @@ static void DiscoveryTestEntry(int testWay, int count)
     g_sessionAttr.dataType = TYPE_BYTES;
     int stat = 0;
     char *testData = (char *)SoftBusCalloc(SEND_DATA_SIZE_64K + 1);
+    if (testData == NULL) {
+        printf("DiscoveryTestEntry malloc fail!\n");
+    }
     if (memcpy_s(testData, SEND_DATA_SIZE_64K + 1, g_testData, strlen(g_testData)) != EOK) {
         printf("memcpy_s g_testData failed!\n");
         return;

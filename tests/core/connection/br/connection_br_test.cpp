@@ -528,6 +528,7 @@ HWTEST_F(ConnectionBrTest, PostBytesInner, TestSize.Level1)
 {
     uint32_t len = 16;
     char *data = (char *) SoftBusMalloc(len);
+    ASSERT_TRUE(data != nullptr);
     int32_t ret = PostBytesInner(0, 0, data, len);
     EXPECT_EQ(ret, SOFTBUS_BRCONNECTION_POSTBYTES_ERROR);
 }
@@ -542,6 +543,7 @@ HWTEST_F(ConnectionBrTest, PostBytes, TestSize.Level1)
 {
     uint32_t len = 16;
     char *data = (char *) SoftBusMalloc(len);
+    ASSERT_TRUE(data != nullptr);
     int32_t ret = PostBytesInner(0, 0, data, len);
     EXPECT_EQ(ret, SOFTBUS_BRCONNECTION_POSTBYTES_ERROR);
 }

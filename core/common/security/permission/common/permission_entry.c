@@ -612,6 +612,12 @@ NO_SANITIZE("cfi") int32_t AddDynamicPermission(int32_t callingUid, int32_t call
     }
 
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
+    if (permissionEntry == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddDynamicPermission malloc failed!");
+        SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    
     int32_t ret = NewDynamicPermissionEntry(permissionEntry, sessionName, callingUid, callingPid);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "NewDynamicPermissionEntry failed %d", ret);
