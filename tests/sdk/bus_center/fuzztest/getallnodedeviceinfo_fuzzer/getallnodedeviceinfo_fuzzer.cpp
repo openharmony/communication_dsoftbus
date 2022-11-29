@@ -16,6 +16,7 @@
 #include "getallnodedeviceinfo_fuzzer.h"
 #include <cstddef>
 #include <securec.h>
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -24,19 +25,40 @@ namespace OHOS {
     bool GetAllNodeDeviceInfoTest(const uint8_t* data, size_t size)
     {
         if (data == nullptr || size == 0) {
-            return true;
+            return false;
         }
         NodeBasicInfo *info = nullptr;
         int32_t infoNum;
-        char tmp[65] = {0};
-        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
-            return true;
+        char *tmp = reinterpret_cast<char *>(malloc(size));
+        if (tmp == nullptr) {
+            return false;
         }
-        int ret = GetAllNodeDeviceInfo((const char *)tmp, &info, &infoNum);
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
+        }
+
+        SetAceessTokenPermission("busCenterTest");
+        int ret = GetAllNodeDeviceInfo(reinterpret_cast<const char *>(tmp), &info, &infoNum);
         if (ret == SOFTBUS_OK && info != nullptr) {
             FreeNodeInfo(info);
         }
+        free(tmp);
         return true;
+    }
+
+    void FreeNodeInfoTest(const uint8_t* data, size_t size)
+    {
+        if (data == nullptr || size == 0) {
+            return;
+        }
+
+        NodeBasicInfo *info = nullptr;
+        FreeNodeInfo(info);
     }
 }
 
@@ -45,5 +67,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::GetAllNodeDeviceInfoTest(data, size);
+    OHOS::FreeNodeInfoTest(data, size);
     return 0;
 }
