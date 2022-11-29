@@ -29,34 +29,11 @@
 
 using namespace testing::ext;
 
-#define TEST_CONN_IP "192.168.8.1"
-#define TEST_AUTH_PORT 60000
-#define TEST_AUTH_DATA "test auth message data"
-
-#define TRANS_TEST_SESSION_ID 10
-#define TRANS_TEST_PID 0
-#define TRANS_TEST_UID 0
-#define TRANS_TEST_AUTH_ID 12345
-#define TRANS_TEST_INVALID_AUTH_ID (-1)
-#define TRANS_TEST_INVALID_PID (-1)
-#define TRANS_TEST_INVALID_UID (-1)
-#define TRANS_TEST_CHANNEL_ID 12345
-#define TRANS_TEST_INVALID_CHANNEL_ID (-1)
-#define TRANS_TEST_INVALID_SESSION_ID (-1)
-#define TRANS_TEST_FILE_ENCRYPT 10
-#define TRANS_TEST_ALGORITHM 1
-#define TRANS_TEST_CRC 1
-#define TRANS_TEST_STATE 1
-
-#define MAX_SESSION_SERVER_NUM 32
+#define TRANS_TEST_CHANNEL_ID 1000
 
 namespace OHOS {
 
-const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
-const char *g_networkId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00";
-const char *g_groupid = "TEST_GROUP_ID";
 static IServerChannelCallBack *cb = NULL;
 
 class TransAuthManagerTest : public testing::Test {
@@ -111,9 +88,8 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
  */
 HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
 {
-    ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
-    EXPECT_TRUE(connOpt != NULL);
-    memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    ConnectOption *connOpt = (ConnectOption*)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_TRUE(connOpt != NULL);
     int32_t channelId = 0;
     int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
@@ -134,7 +110,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
 HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
 {
     int32_t ret = TransAuthInit(cb);
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    ASSERT_EQ(ret,  SOFTBUS_OK);
     ret = TransCloseAuthChannel(TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(ret,  SOFTBUS_ERR);
     TransAuthDeinit();

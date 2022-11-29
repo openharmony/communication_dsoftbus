@@ -158,9 +158,9 @@ ohos_unittest("TransClientSessionTest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":TransClientSessionCallbackTest",
     ":TransClientSessionManagerTest",
     ":TransClientSessionServiceTest",
-    ":TransClientSessionCallbackTest",
     ":TransClientSessionTest",
   ]
 }
