@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -188,7 +189,7 @@ static int32_t InitParamSetByHuks(struct HksParamSet **paramSet, const struct Hk
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitHuksInterface(void)
+NO_SANITIZE("cfi") int32_t LnnInitHuksInterface(void)
 {
     int32_t ret = HksInitialize();
     if (ret != HKS_SUCCESS) {
@@ -213,7 +214,7 @@ int32_t LnnInitHuksInterface(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitHuksInterface(void)
+NO_SANITIZE("cfi") void LnnDeinitHuksInterface(void)
 {
     if (g_genParamSet != NULL) {
         HksFreeParamSet(&g_genParamSet);
@@ -226,7 +227,7 @@ void LnnDeinitHuksInterface(void)
     }
 }
 
-int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
+NO_SANITIZE("cfi") int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
 {
     if (keyAlias == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param");
@@ -244,7 +245,7 @@ int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
+NO_SANITIZE("cfi") int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
 {
     if (keyAlias == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param");
@@ -262,7 +263,8 @@ int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
     return SOFTBUS_OK;
 }
 
-int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
+NO_SANITIZE("cfi") int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
+    struct HksBlob *outData)
 {
     if (keyAlias == NULL || inData == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param");
@@ -292,7 +294,8 @@ int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     return SOFTBUS_OK;
 }
 
-int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
+NO_SANITIZE("cfi") int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
+    struct HksBlob *outData)
 {
     if (keyAlias == NULL || inData == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param");
@@ -322,7 +325,7 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenerateRandomByHuks(uint8_t *random, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGenerateRandomByHuks(uint8_t *random, uint32_t len)
 {
     struct HksBlob tmp = {0};
     tmp.size = len;

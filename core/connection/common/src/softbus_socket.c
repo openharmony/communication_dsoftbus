@@ -22,10 +22,10 @@
 
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_tcp_socket.h"
-#include "softbus_def.h"
 
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE 0x200000  // 2M
@@ -87,7 +87,7 @@ int32_t __attribute__ ((weak)) RegistNewIpSocket(void)
     return SOFTBUS_OK;
 }
 
-int32_t ConnInitSockets(void)
+NO_SANITIZE("cfi") int32_t ConnInitSockets(void)
 {
     int32_t ret = SoftBusMutexInit(&g_socketsMutex, NULL);
     if (ret != SOFTBUS_OK) {
@@ -115,7 +115,7 @@ int32_t ConnInitSockets(void)
     return ret;
 }
 
-void ConnDeinitSockets(void)
+NO_SANITIZE("cfi") void ConnDeinitSockets(void)
 {
     (void)memset_s(g_socketInterfaces, sizeof(g_socketInterfaces), 0, sizeof(g_socketInterfaces));
     (void)SoftBusMutexDestroy(&g_socketsMutex);
@@ -177,7 +177,7 @@ static int WaitEvent(int fd, short events, int timeout)
     }
     return rc;
 }
-int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
+NO_SANITIZE("cfi") int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
 {
     if (fd < 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -200,7 +200,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     return fcntl(fd, F_SETFL, flags);
 }
 
-ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
+NO_SANITIZE("cfi") ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     if (fd < 0 || buf == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d invalid params", fd);
@@ -273,12 +273,12 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
     return rc;
 }
 
-ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
+NO_SANITIZE("cfi") ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
 {
     return OnRecvData(fd, buf, len, timeout, 0);
 }
 
-void ConnCloseSocket(int32_t fd)
+NO_SANITIZE("cfi") void ConnCloseSocket(int32_t fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close fd=%d", fd);
@@ -286,7 +286,7 @@ void ConnCloseSocket(int32_t fd)
     }
 }
 
-void ConnShutdownSocket(int32_t fd)
+NO_SANITIZE("cfi") void ConnShutdownSocket(int32_t fd)
 {
     if (fd >= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "shutdown fd=%d", fd);
@@ -310,7 +310,7 @@ NO_SANITIZE("cfi") int32_t ConnGetLocalSocketPort(int32_t fd)
     return socketInterface->GetSockPort(fd);
 }
 
-int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
+NO_SANITIZE("cfi") int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
 {
     SoftBusSockAddrIn addr;
     int32_t addrLen = (int32_t)sizeof(addr);

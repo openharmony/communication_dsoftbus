@@ -19,10 +19,11 @@
 
 #include <securec.h>
 
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+NO_SANITIZE("cfi") bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
     if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
@@ -34,7 +35,7 @@ bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
     return false;
 }
 
-const char *LnnGetDeviceUdid(const NodeInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetDeviceUdid(const NodeInfo *info)
 {
     if (info == NULL) {
         return NULL;
@@ -64,7 +65,7 @@ int32_t LnnSetDiscoveryType(NodeInfo *info, DiscoveryType type)
     return SOFTBUS_OK;
 }
 
-int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type)
+NO_SANITIZE("cfi") int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type)
 {
     if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
@@ -92,7 +93,7 @@ void LnnSetNodeConnStatus(NodeInfo *info, ConnectStatus status)
     info->status = status;
 }
 
-const char *LnnGetBtMac(const NodeInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetBtMac(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
@@ -113,7 +114,7 @@ void LnnSetBtMac(NodeInfo *info, const char *mac)
     return;
 }
 
-const char *LnnGetNetIfName(const NodeInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetNetIfName(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
@@ -134,7 +135,7 @@ void LnnSetNetIfName(NodeInfo *info, const char *netIfName)
     return;
 }
 
-const char *LnnGetWiFiIp(const NodeInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetWiFiIp(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA error!");
@@ -155,7 +156,7 @@ void LnnSetWiFiIp(NodeInfo *info, const char *ip)
     return;
 }
 
-const char *LnnGetMasterUdid(const NodeInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetMasterUdid(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
@@ -177,7 +178,7 @@ int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+NO_SANITIZE("cfi") int32_t LnnGetAuthPort(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error");
@@ -196,7 +197,7 @@ int32_t LnnSetAuthPort(NodeInfo *info, int32_t port)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+NO_SANITIZE("cfi") int32_t LnnGetSessionPort(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
@@ -215,7 +216,7 @@ int32_t LnnSetSessionPort(NodeInfo *info, int32_t port)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+NO_SANITIZE("cfi") int32_t LnnGetProxyPort(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
@@ -244,7 +245,7 @@ int32_t LnnSetP2pRole(NodeInfo *info, int32_t p2pRole)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetP2pRole(const NodeInfo *info)
+NO_SANITIZE("cfi") int32_t LnnGetP2pRole(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -266,7 +267,7 @@ int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
     return SOFTBUS_OK;
 }
 
-const char *LnnGetP2pMac(const NodeInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetP2pMac(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -285,7 +286,7 @@ int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag)
     return SOFTBUS_OK;
 }
 
-uint16_t LnnGetDataChangeFlag(const NodeInfo *info)
+NO_SANITIZE("cfi") uint16_t LnnGetDataChangeFlag(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -308,7 +309,7 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
     return SOFTBUS_OK;
 }
 
-const char *LnnGetP2pGoMac(const NodeInfo *info)
+NO_SANITIZE("cfi") const char *LnnGetP2pGoMac(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -317,7 +318,7 @@ const char *LnnGetP2pGoMac(const NodeInfo *info)
     return info->p2pInfo.goMac;
 }
 
-uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
+NO_SANITIZE("cfi") uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);

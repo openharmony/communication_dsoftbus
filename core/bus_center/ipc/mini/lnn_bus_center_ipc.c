@@ -26,6 +26,7 @@
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
+#include "softbus_def.h"
 #include "softbus_log.h"
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
@@ -48,20 +49,21 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
     (void)pkgName;
     (void)addrTypeLen;
     return LnnServerJoin((ConnectionAddr *)addr);
 }
 
-int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
+NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
 {
     (void)pkgName;
     return LnnServerLeave(networkId);
 }
 
-int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
+NO_SANITIZE("cfi") int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen,
+    int *infoNum)
 {
     (void)pkgName;
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
@@ -71,20 +73,22 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
     return LnnGetAllOnlineNodeInfo((NodeBasicInfo **)info, infoNum);
 }
 
-int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
     (void)pkgName;
     (void)infoTypeLen;
     return LnnGetLocalDeviceInfo((NodeBasicInfo *)info);
 }
 
-int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
+    uint32_t len)
 {
     (void)pkgName;
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
-int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
+NO_SANITIZE("cfi") int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId,
+    uint16_t dataChangeFlag)
 {
     (void)pkgName;
     return LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
@@ -95,12 +99,12 @@ int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, in
     return LnnStartTimeSync(pkgName, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
-int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+NO_SANITIZE("cfi") int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
-int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
     PublishInfo pubInfo;
@@ -110,12 +114,12 @@ int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTyp
     return ret;
 }
 
-int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+NO_SANITIZE("cfi") int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
     SubscribeInfo subInfo;
@@ -129,7 +133,7 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTyp
     return ret;
 }
 
-int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
+NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     return LnnStopDiscDevice(pkgName, refreshId, false);
 }
@@ -139,22 +143,24 @@ int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
     return LnnActiveMetaNode(info, metaNodeId);
 }
 
-int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
+NO_SANITIZE("cfi") int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
 {
     return LnnDeactiveMetaNode(metaNodeId);
 }
 
-int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
+NO_SANITIZE("cfi") int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 {
     return LnnGetAllMetaNodeInfo(infos, infoNum);
 }
 
-int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+NO_SANITIZE("cfi") int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
 {
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
-int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
+    int32_t retCode)
 {
     (void)addrTypeLen;
     return LnnOnJoinResult(addr, networkId, retCode);
@@ -169,7 +175,7 @@ int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     return LnnOnLeaveResult(networkId, retCode);
 }
@@ -181,13 +187,13 @@ int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
     return LnnOnNodeOnlineStateChanged(isOnline, info);
 }
 
-int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+NO_SANITIZE("cfi") int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     (void)infoTypeLen;
     return LnnOnNodeBasicInfoChanged(info, type);

@@ -21,10 +21,10 @@
 #include "nstackx_dfile.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 #define DEFAULT_KEY_LENGTH 32
 

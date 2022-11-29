@@ -23,8 +23,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
-#include "softbus_socket.h"
 #include "softbus_def.h"
+#include "softbus_socket.h"
 
 #define MAGIC_NUMBER  0xBABEFACE
 #define AUTH_PKT_HEAD_LEN 24

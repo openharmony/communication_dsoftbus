@@ -27,6 +27,7 @@
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -532,7 +533,7 @@ static int32_t ModifyId(char *dstId, uint32_t dstLen, const char *sourceId)
     return SOFTBUS_OK;
 }
 
-const NodeInfo *LnnGetLocalNodeInfo(void)
+NO_SANITIZE("cfi") const NodeInfo *LnnGetLocalNodeInfo(void)
 {
     return &g_localNetLedger.localInfo;
 }
@@ -751,7 +752,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
 };
 
-int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     uint32_t i;
     int32_t ret;
@@ -880,12 +881,12 @@ static int32_t LnnSetLocalInfo(InfoKey key, void* info)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+NO_SANITIZE("cfi") int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
 }
 
-int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
+NO_SANITIZE("cfi") int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
 }
@@ -895,7 +896,7 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
     return LnnSetLocalInfo(key, (void*)&info);
 }
 
-int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
+NO_SANITIZE("cfi") int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int16_t));
 }
@@ -916,12 +917,12 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
     return LnnSetLocalInfo(key, (void *)info);
 }
 
-int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
 {
     return LnnGetLocalInfo(key, (void *)info, len);
 }
 
-int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
+NO_SANITIZE("cfi") int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     int32_t rc;
     char type[DEVICE_TYPE_BUF_LEN] = {0};
@@ -960,7 +961,7 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitLocalLedger(void)
+NO_SANITIZE("cfi") int32_t LnnInitLocalLedger(void)
 {
     NodeInfo *nodeInfo = NULL;
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
@@ -1013,7 +1014,7 @@ EXIT:
     return SOFTBUS_ERR;
 }
 
-int32_t LnnInitLocalLedgerDelay(void)
+NO_SANITIZE("cfi") int32_t LnnInitLocalLedgerDelay(void)
 {
     NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
@@ -1028,7 +1029,7 @@ int32_t LnnInitLocalLedgerDelay(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitLocalLedger(void)
+NO_SANITIZE("cfi") void LnnDeinitLocalLedger(void)
 {
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
         SoftBusMutexDestroy(&g_localNetLedger.lock);

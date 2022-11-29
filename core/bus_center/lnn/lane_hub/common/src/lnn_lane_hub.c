@@ -20,10 +20,11 @@
 #include "lnn_lane.h"
 #include "lnn_lane_qos.h"
 #include "lnn_time_sync_manager.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t LnnInitLaneHub(void)
+NO_SANITIZE("cfi") int32_t LnnInitLaneHub(void)
 {
     if (InitLane() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane fail");
@@ -53,7 +54,7 @@ int32_t LnnInitLaneHubDelay(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitLaneHub(void)
+NO_SANITIZE("cfi") void LnnDeinitLaneHub(void)
 {
     LnnDeinitQos();
     DeinitLane();

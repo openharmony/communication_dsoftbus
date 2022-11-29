@@ -18,8 +18,8 @@
 #include <sys/time.h>
 #include "cmsis_os2.h"
 #include "softbus_adapter_log.h"
-#include "softbus_errcode.h"
 #include "softbus_def.h"
+#include "softbus_errcode.h"
 
 #define MS_PER_SECOND 1000
 

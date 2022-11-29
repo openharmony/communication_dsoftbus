@@ -17,10 +17,10 @@
 
 #include "bus_center_client_proxy_standard.h"
 #include "softbus_client_info_manager.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_permission.h"
-#include "softbus_def.h"
 
 using namespace OHOS;
 

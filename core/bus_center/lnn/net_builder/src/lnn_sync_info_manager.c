@@ -179,7 +179,7 @@ static void SendSyncInfoMsg(SyncChannelInfo *info, SyncInfoMsg *msg)
     SoftBusFree(msg);
 }
 
-static void CloseUnusedChannel(void *para)
+NO_SANITIZE("cfi") static void CloseUnusedChannel(void *para)
 {
     SyncChannelInfo *item = NULL;
     SyncChannelInfo *itemNext = NULL;
@@ -220,7 +220,7 @@ static void CloseUnusedChannel(void *para)
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
 }
 
-static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
+NO_SANITIZE("cfi") static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
 {
     char networkId[NETWORK_ID_BUF_LEN];
     SyncChannelInfo *info = NULL;
@@ -378,7 +378,7 @@ static INetworkingListener g_networkListener = {
     OnMessageReceived,
 };
 
-int32_t LnnInitSyncInfoManager(void)
+NO_SANITIZE("cfi") int32_t LnnInitSyncInfoManager(void)
 {
     int32_t i;
 
@@ -397,7 +397,7 @@ int32_t LnnInitSyncInfoManager(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitSyncInfoManager(void)
+NO_SANITIZE("cfi") void LnnDeinitSyncInfoManager(void)
 {
     int32_t i;
 
@@ -448,7 +448,7 @@ int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler hand
     return SOFTBUS_OK;
 }
 
-static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
+NO_SANITIZE("cfi") static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(networkId);
     if (info == NULL) {

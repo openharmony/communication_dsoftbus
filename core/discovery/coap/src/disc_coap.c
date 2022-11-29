@@ -19,6 +19,7 @@
 #include "disc_nstackx_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -509,7 +510,7 @@ static int32_t InitCoapManager(void)
     return SOFTBUS_OK;
 }
 
-DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
+NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
 {
     if (InitCoapManager() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "coap manager init failed.");
@@ -531,7 +532,7 @@ DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
     return &g_discCoapFuncInterface;
 }
 
-void DiscCoapDeinit(void)
+NO_SANITIZE("cfi") void DiscCoapDeinit(void)
 {
     DeinitCoapManager();
     DiscNstackxDeinit();

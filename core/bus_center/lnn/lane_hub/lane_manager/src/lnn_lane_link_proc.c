@@ -29,13 +29,13 @@
 #include "lnn_node_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
 #include "wifi_device.h"
-#include "softbus_def.h"
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
 

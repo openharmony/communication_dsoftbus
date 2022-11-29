@@ -526,7 +526,7 @@ static void BleOnScanStop(int listenerId, int status)
     g_isScanning = false;
 }
 
-static void BleOnStateChanged(int listenerId, int state)
+NO_SANITIZE("cfi") static void BleOnStateChanged(int listenerId, int state)
 {
     (void)listenerId;
     SoftBusMessage *msg = NULL;
@@ -846,7 +846,7 @@ static int32_t StopAdvertiser(int32_t adv)
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateAdvertiser(int32_t adv)
+NO_SANITIZE("cfi") static int32_t UpdateAdvertiser(int32_t adv)
 {
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
@@ -1090,8 +1090,8 @@ static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t
     return msg;
 }
 
-static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t activeFlags, int32_t funcCode,
-                                  const void *option)
+NO_SANITIZE("cfi") static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t activeFlags,
+    int32_t funcCode, const void *option)
 {
     if (SoftBusGetBtState() != BLE_ENABLE) {
         DLOGE("get bt state failed.");
@@ -1229,7 +1229,7 @@ static void InitDiscBleInfo(DiscBleInfo *info)
     }
 }
 
-static void DiscBleInitPublish(void)
+NO_SANITIZE("cfi") static void DiscBleInitPublish(void)
 {
     InitDiscBleInfo(&g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE]);
     InitDiscBleInfo(&g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE]);
@@ -1460,7 +1460,7 @@ static void ProcessTimeout(SoftBusMessage *msg)
     UpdateAdvertiser(NON_ADV_ID);
 }
 
-static void DiscBleMsgHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void DiscBleMsgHandler(SoftBusMessage *msg)
 {
     switch (msg->what) {
         case PUBLISH_ACTIVE_SERVICE:
@@ -1571,7 +1571,7 @@ static int32_t InitBleListener(void)
     return SOFTBUS_OK;
 }
 
-DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
+NO_SANITIZE("cfi") DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 {
     DLOGI("enter");
     if (callback == NULL || callback->OnDeviceFound == NULL) {
@@ -1646,7 +1646,7 @@ static void DiscBleInfoDeinit(void)
     }
 }
 
-void DiscSoftBusBleDeinit(void)
+NO_SANITIZE("cfi") void DiscSoftBusBleDeinit(void)
 {
     if (g_isScanning) {
         (void)StopScaner();

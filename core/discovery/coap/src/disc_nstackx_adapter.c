@@ -21,6 +21,7 @@
 #include "nstackx.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
@@ -239,7 +240,7 @@ static NSTACKX_Parameter g_nstackxCallBack = {
     .onDFinderMsgReceived = NULL
 };
 
-int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
+NO_SANITIZE("cfi") int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 {
     if (discCoapCb == NULL || g_discCoapInnerCb == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -251,7 +252,7 @@ int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
+NO_SANITIZE("cfi") int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
     if (capabilityBitmapNum == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -262,7 +263,7 @@ int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabi
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
+NO_SANITIZE("cfi") int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
     if (capabilityBitmapNum == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -274,7 +275,7 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t dataLen)
+NO_SANITIZE("cfi") int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t dataLen)
 {
     (void)serviceData;
     (void)dataLen;
@@ -326,7 +327,7 @@ static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, cons
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
+NO_SANITIZE("cfi") int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
 {
     if (option == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "invalid param: option");
@@ -356,7 +357,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapStopDiscovery(void)
+NO_SANITIZE("cfi") int32_t DiscCoapStopDiscovery(void)
 {
     if (NSTACKX_StopDeviceFind() != SOFTBUS_OK) {
         return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
@@ -433,7 +434,7 @@ static int32_t SetLocalDeviceInfo(void)
     return SOFTBUS_OK;
 }
 
-void DiscCoapUpdateLocalIp(LinkStatus status)
+NO_SANITIZE("cfi") void DiscCoapUpdateLocalIp(LinkStatus status)
 {
     if (status == LINK_STATUS_UP) {
         int32_t ret = SetLocalDeviceInfo();
@@ -457,7 +458,7 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
     }
 }
 
-void DiscCoapUpdateDevName(void)
+NO_SANITIZE("cfi") void DiscCoapUpdateDevName(void)
 {
     char localDevName[NSTACKX_MAX_DEVICE_NAME_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
@@ -515,7 +516,7 @@ static int32_t InitLocalInfo(void)
     return SOFTBUS_OK;
 }
 
-int32_t DiscNstackxInit(void)
+NO_SANITIZE("cfi") int32_t DiscNstackxInit(void)
 {
     if (InitLocalInfo() != SOFTBUS_OK) {
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
@@ -530,7 +531,7 @@ int32_t DiscNstackxInit(void)
     return SOFTBUS_OK;
 }
 
-void DiscNstackxDeinit(void)
+NO_SANITIZE("cfi") void DiscNstackxDeinit(void)
 {
     NSTACKX_Deinit();
     DeinitLocalInfo();

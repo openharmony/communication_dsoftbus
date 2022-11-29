@@ -19,6 +19,7 @@
 #include "disc_manager.h"
 #include "disc_ble.h"
 #include "disc_ble_dispatcher.h"
+#include "softbus_def.h"
 
 static int32_t Publish(const PublishOption *option)
 {
@@ -93,7 +94,7 @@ static DiscoveryBleDispatcherInterface g_sharebleInterface = {
     .mediumInterface = &g_fun,
 };
 
-DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
+NO_SANITIZE("cfi") DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
 {
     (void)discInnerCb;
     return &g_sharebleInterface;

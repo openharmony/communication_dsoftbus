@@ -1340,7 +1340,7 @@ void P2pLinkNegoOnConnectState(int32_t state)
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, MAGICLINK_ON_CONNECTED, (void *)&state);
 }
 
-P2pLinkNegoState GetP2pLinkNegoStatus(void)
+NO_SANITIZE("cfi") P2pLinkNegoState GetP2pLinkNegoStatus(void)
 {
     uint8_t state;
     for (state = 0; state < P2PLINK_NEG_MAX_STATE; state++) {

@@ -156,7 +156,7 @@ static DiscoveryFuncInterface g_discBleFrameFuncInterface = {
     .UpdateLocalDeviceInfo = BleDispatchUpdateLocalDeviceInfo,
 };
 
-DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
+NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "discInnerCb err");
@@ -181,7 +181,7 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     return &g_discBleFrameFuncInterface;
 }
 
-DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
+NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
     DiscoveryBleDispatcherInterface *interfaceB)
 {
     g_dispatcherSize = 0;

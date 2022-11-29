@@ -30,12 +30,12 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
-#include "softbus_def.h"
 
 static IClientSessionCallBack g_sessionCb;
 static uint32_t g_authMaxByteBufSize;
