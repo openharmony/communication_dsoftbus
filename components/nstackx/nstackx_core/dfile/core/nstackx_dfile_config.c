@@ -19,7 +19,7 @@
 
 #include "nstackx_dfile_config.h"
 #include "nstackx_dfile_session.h"
-#include "nstackx_log.h"
+#include "nstackx_dfile_log.h"
 #include "nstackx_error.h"
 #include "nstackx_dfile.h"
 #include "nstackx_socket.h"
@@ -139,12 +139,12 @@ static void ConfigDFileTransWlan(DFileTransConfig *transConfig)
 int32_t ConfigDFileTrans(uint16_t connType, DFileTransConfig *transConfig)
 {
     if (transConfig == NULL) {
-        LOGE(TAG, "Invalid parameter");
+        DFILE_LOGE(TAG, "Invalid parameter");
         return NSTACKX_EINVAL;
     }
 
     if (CheckConnType(connType) != NSTACKX_EOK) {
-        LOGE(TAG, "Invalid connection type %u", connType);
+        DFILE_LOGE(TAG, "Invalid connection type %u", connType);
         return NSTACKX_EINVAL;
     }
 
@@ -164,37 +164,37 @@ void SetTcpKeepAlive(SocketDesc fd)
 
     optval = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (void *)(&optval), sizeof(optval)) != 0) {
-        LOGI(TAG, "set KEEPALIVE failed");
+        DFILE_LOGI(TAG, "set KEEPALIVE failed");
     } else {
-        LOGI(TAG, "set KEEPALIVE = %d success", optval);
+        DFILE_LOGI(TAG, "set KEEPALIVE = %d success", optval);
     }
 
     optval = KEEP_ALIVE_IDLE;
     if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, (void *)(&optval), sizeof(optval)) != 0) {
-        LOGI(TAG, "set TCP_KEEPIDLE failed");
+        DFILE_LOGI(TAG, "set TCP_KEEPIDLE failed");
     } else {
-        LOGI(TAG, "set TCP_KEEPIDLE = %d success", optval);
+        DFILE_LOGI(TAG, "set TCP_KEEPIDLE = %d success", optval);
     }
 
     optval = KEEP_ALIVE_CNT;
     if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, (void *)(&optval), sizeof(optval)) != 0) {
-        LOGI(TAG, "set TCP_KEEPCNT failed");
+        DFILE_LOGI(TAG, "set TCP_KEEPCNT failed");
     } else {
-        LOGI(TAG, "set TCP_KEEPCNT = %d success", optval);
+        DFILE_LOGI(TAG, "set TCP_KEEPCNT = %d success", optval);
     }
 
     optval = KEEP_ALIVE_INTERVAL;
     if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)(&optval), sizeof(optval)) != 0) {
-        LOGI(TAG, "set TCP_KEEPINTVL failed");
+        DFILE_LOGI(TAG, "set TCP_KEEPINTVL failed");
     } else {
-        LOGI(TAG, "set TCP_KEEPINTVL = %d success", optval);
+        DFILE_LOGI(TAG, "set TCP_KEEPINTVL = %d success", optval);
     }
 
     optval = TCP_USER_TIMEOUT_VALUE;
     if (setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, (void *)(&optval), sizeof(optval)) != 0) {
-        LOGI(TAG, "set TCP_USER_TIMEOUT option error");
+        DFILE_LOGI(TAG, "set TCP_USER_TIMEOUT option error");
     } else {
-        LOGI(TAG, "set TCP_USER_TIMEOUT option success time:%d", optval);
+        DFILE_LOGI(TAG, "set TCP_USER_TIMEOUT option success time:%d", optval);
     }
 #endif
 }
@@ -206,7 +206,7 @@ void DFileGetCipherCaps(DFileSession *session, SettingFrame *settingFramePara)
         settingFramePara->cipherCapability |= NSTACKX_CIPHER_CHACHA;
     } else {
         session->capability &= ~NSTACKX_CAPS_CHACHA;
-        LOGI(TAG, "local cipher no support %s.", CHACHA20_POLY1305_NAME);
+        DFILE_LOGI(TAG, "local cipher no support %s.", CHACHA20_POLY1305_NAME);
     }
 }
 
@@ -218,5 +218,5 @@ void DFileChooseCipherType(SettingFrame *hostSettingFrame, DFileSession *session
     } else {
         session->capability &= ~NSTACKX_CAPS_CHACHA;
     }
-    LOGI(TAG, "opposite replies %s use chacha cipher", CapsChaCha(session) ? "" : "no");
+    DFILE_LOGI(TAG, "opposite replies %s use chacha cipher", CapsChaCha(session) ? "" : "no");
 }
