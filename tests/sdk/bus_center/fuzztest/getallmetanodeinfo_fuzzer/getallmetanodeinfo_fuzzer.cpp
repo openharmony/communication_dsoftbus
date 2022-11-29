@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstring>
 #include <securec.h>
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -30,7 +31,7 @@ namespace OHOS {
         MetaNodeInfo info[MAX_META_NODE_NUM];
         int32_t infoNum = MAX_META_NODE_NUM;
 
-        char *tmp = (char *)malloc(size);
+        char *tmp = reinterpret_cast<char *>(malloc(size));
         if (tmp == nullptr) {
             return false;
         }
@@ -43,6 +44,7 @@ namespace OHOS {
             return false;
         }
 
+        SetAceessTokenPermission("busCenterTest");
         GetAllMetaNodeInfo(reinterpret_cast<const char *>(tmp), info, &infoNum);
         free(tmp);
         return true;

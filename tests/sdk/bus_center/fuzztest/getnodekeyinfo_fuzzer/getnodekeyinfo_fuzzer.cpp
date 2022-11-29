@@ -16,6 +16,7 @@
 #include "getnodekeyinfo_fuzzer.h"
 #include <cstddef>
 #include <securec.h>
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -29,7 +30,7 @@ namespace OHOS {
         NodeDeviceInfoKey key = NODE_KEY_NETWORK_CAPABILITY;
         uint8_t udid[UDID_BUF_LEN] = {0};
 
-        char *tmp = (char *)malloc(size);
+        char *tmp = reinterpret_cast<char *>(malloc(size));
         if (tmp == nullptr) {
             return false;
         }
@@ -42,6 +43,7 @@ namespace OHOS {
             return false;
         }
 
+        SetAceessTokenPermission("busCenterTest");
         GetNodeKeyInfo(reinterpret_cast<const char *>(tmp),
                        reinterpret_cast<const char *>(tmp), key, udid, UDID_BUF_LEN);
         free(tmp);
