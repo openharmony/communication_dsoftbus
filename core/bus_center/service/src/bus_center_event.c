@@ -22,10 +22,10 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_qos.h"
-#include "softbus_def.h"
 
 typedef struct {
     ListNode node;
@@ -79,7 +79,7 @@ static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
     LnnIpcNotifyBasicInfoChanged(msg->obj, sizeof(NodeBasicInfo), type);
 }
 
-static void HandleNotifyMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void HandleNotifyMessage(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid notify message.");
@@ -100,7 +100,7 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "handle notify message done, type = %d.", msg->what);
 }
 
-static void FreeNotifyMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void FreeNotifyMessage(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;
@@ -375,7 +375,7 @@ void LnnNotifyNodeAddressChanged(const char *addr)
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
-int32_t LnnInitBusCenterEvent(void)
+NO_SANITIZE("cfi") int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;
     SoftBusLooper *looper = CreateNewLooper("NotifyLooper");
@@ -395,7 +395,7 @@ int32_t LnnInitBusCenterEvent(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitBusCenterEvent(void)
+NO_SANITIZE("cfi") void LnnDeinitBusCenterEvent(void)
 {
     if (g_notifyHandler.looper != NULL) {
         DestroyLooper(g_notifyHandler.looper);

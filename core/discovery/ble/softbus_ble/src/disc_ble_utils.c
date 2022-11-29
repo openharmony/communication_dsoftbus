@@ -25,10 +25,10 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F
@@ -88,7 +88,7 @@ static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t DiscBleGetDeviceName(char *deviceName)
+NO_SANITIZE("cfi") int32_t DiscBleGetDeviceName(char *deviceName)
 {
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         DLOGE("Get local device name failed.");
@@ -97,7 +97,7 @@ int32_t DiscBleGetDeviceName(char *deviceName)
     return SOFTBUS_OK;
 }
 
-uint16_t DiscBleGetDeviceType(void)
+NO_SANITIZE("cfi") uint16_t DiscBleGetDeviceType(void)
 {
     char type[DEVICE_TYPE_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
@@ -134,7 +134,7 @@ NO_SANITIZE("cfi") int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
     return SOFTBUS_OK;
 }
 
-int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
+NO_SANITIZE("cfi") int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
 {
     uint8_t account[SHA_256_HASH_LEN] = {0};
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, account, SHA_256_HASH_LEN) != SOFTBUS_OK) {
@@ -254,7 +254,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
     return ret;
 }
 
-int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
+NO_SANITIZE("cfi") int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     if (dataLen == 0) {
         DLOGE("dataLen is invalid");

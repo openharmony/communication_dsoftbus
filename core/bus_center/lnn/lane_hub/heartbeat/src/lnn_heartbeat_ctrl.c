@@ -27,6 +27,7 @@
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -239,7 +240,7 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
     LnnUpdateSendInfoStrategy(type);
 }
 
-void LnnHbOnAuthGroupCreated(int32_t groupType)
+NO_SANITIZE("cfi") void LnnHbOnAuthGroupCreated(int32_t groupType)
 {
     int32_t ret;
 
@@ -263,7 +264,7 @@ void LnnHbOnAuthGroupCreated(int32_t groupType)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB send once ble broadcast to notify account group created.");
 }
 
-void LnnHbOnAuthGroupDeleted(void)
+NO_SANITIZE("cfi") void LnnHbOnAuthGroupDeleted(void)
 {
 #ifdef HB_CONDITION_HAS_TRUSTED_RELATION
     if (LnnIsDefaultOhosAccount() && !AuthHasTrustedRelation()) {
@@ -282,7 +283,7 @@ void LnnHbOnAuthGroupDeleted(void)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB send once ble broadcast to notify account group deleted.");
 }
 
-int32_t LnnInitHeartbeat(void)
+NO_SANITIZE("cfi") int32_t LnnInitHeartbeat(void)
 {
     if (LnnHbStrategyInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strategy module init fail!");
@@ -308,7 +309,7 @@ int32_t LnnInitHeartbeat(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitHeartbeat(void)
+NO_SANITIZE("cfi") void LnnDeinitHeartbeat(void)
 {
     LnnHbStrategyDeinit();
     LnnHbMediumMgrDeinit();

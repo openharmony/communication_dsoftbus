@@ -24,6 +24,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -148,7 +149,7 @@ static LnnHeartbeatParamManager *GetParamMgrByTypeLocked(LnnHeartbeatType type)
     return g_hbParamMgr[id];
 }
 
-int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
+NO_SANITIZE("cfi") int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
 {
     LnnHeartbeatParamManager *paramMgr = NULL;
 
@@ -531,7 +532,7 @@ int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type)
+NO_SANITIZE("cfi") int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type)
 {
     const LnnHeartbeatParamManager *paramMgr = NULL;
 
@@ -562,7 +563,7 @@ int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeart
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
+NO_SANITIZE("cfi") int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
     LnnHeartbeatStrategyType strategyType)
 {
     if (mgr == NULL) {
@@ -687,7 +688,7 @@ static bool VisitEnableHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachTy
     return true;
 }
 
-int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
+NO_SANITIZE("cfi") int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB enable hbType lock mutex fail");
@@ -698,7 +699,7 @@ int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
     return SOFTBUS_OK;
 }
 
-bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
+NO_SANITIZE("cfi") bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
 {
     bool ret = false;
     LnnHeartbeatParamManager *paramMgr = NULL;
@@ -723,7 +724,7 @@ int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
     return LnnPostUpdateSendInfoMsgToHbFsm(g_hbFsm, type);
 }
 
-int32_t LnnHbStrategyInit(void)
+NO_SANITIZE("cfi") int32_t LnnHbStrategyInit(void)
 {
     if (SoftBusMutexInit(&g_hbStrategyMutex, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strategy module init mutex fail!");
@@ -740,7 +741,7 @@ int32_t LnnHbStrategyInit(void)
     return SOFTBUS_OK;
 }
 
-void LnnHbStrategyDeinit(void)
+NO_SANITIZE("cfi") void LnnHbStrategyDeinit(void)
 {
     if (g_hbFsm != NULL) {
         (void)LnnStopHeartbeatFsm(g_hbFsm);

@@ -103,7 +103,7 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_WLAN_5G] = Wlan5GInfoProc,
 };
 
-int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+NO_SANITIZE("cfi") int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     if ((linkInfo == NULL) || (connInfo == NULL) || (profile == NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneInfoProcess param invalid");
@@ -116,7 +116,7 @@ int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, La
     return g_funcList[linkInfo->type](linkInfo, connInfo, profile);
 }
 
-int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueSize)
+NO_SANITIZE("cfi") int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueSize)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
@@ -141,7 +141,7 @@ void *LnnReadData(const Map *map, uint32_t key)
     return data;
 }
 
-void LnnDeleteData(Map *map, uint32_t key)
+NO_SANITIZE("cfi") void LnnDeleteData(Map *map, uint32_t key)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
@@ -154,7 +154,7 @@ void LnnDeleteData(Map *map, uint32_t key)
     }
 }
 
-uint64_t LnnGetSysTimeMs(void)
+NO_SANITIZE("cfi") uint64_t LnnGetSysTimeMs(void)
 {
     struct timeval time;
     time.tv_sec = 0;
@@ -167,7 +167,7 @@ uint64_t LnnGetSysTimeMs(void)
     return ms;
 }
 
-int32_t LnnInitLaneLooper(void)
+NO_SANITIZE("cfi") int32_t LnnInitLaneLooper(void)
 {
     SoftBusLooper *looper = CreateNewLooper("Lane-looper");
     if (!looper) {
@@ -179,7 +179,7 @@ int32_t LnnInitLaneLooper(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitLaneLooper(void)
+NO_SANITIZE("cfi") void LnnDeinitLaneLooper(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_LANE);
     if (looper != NULL) {

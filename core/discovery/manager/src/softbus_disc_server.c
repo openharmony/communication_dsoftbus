@@ -16,6 +16,7 @@
 #include "softbus_disc_server.h"
 
 #include "disc_client_proxy.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_log.h"
 #include "softbus_hisysevt_discreporter.h"
@@ -26,7 +27,7 @@ static IServerDiscInnerCallback g_discInnerCb = {
 
 static bool g_isCallLnn = true;
 
-int32_t DiscServerInit(void)
+NO_SANITIZE("cfi") int32_t DiscServerInit(void)
 {
     int32_t ret = DiscMgrInit();
     if (ret != SOFTBUS_OK) {
@@ -41,7 +42,7 @@ void DiscServerDeinit(void)
     DiscMgrDeinit();
 }
 
-void DiscServerDeathCallback(const char *pkgName)
+NO_SANITIZE("cfi") void DiscServerDeathCallback(const char *pkgName)
 {
     DiscMgrDeathCallback(pkgName);
 }
@@ -62,7 +63,7 @@ static int32_t DiscoveryErroCodeProcess(int32_t erroCode)
     return DISCOVERY_FAIL_REASON_INTERNAL;
 }
 
-int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info)
+NO_SANITIZE("cfi") int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info)
 {
     int32_t ret = DiscPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
@@ -76,7 +77,7 @@ int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t DiscIpcUnPublishService(const char *packageName, int32_t publishId)
+NO_SANITIZE("cfi") int32_t DiscIpcUnPublishService(const char *packageName, int32_t publishId)
 {
     int32_t ret = DiscUnPublishService(packageName, publishId);
     if (ret != SOFTBUS_OK) {
@@ -87,7 +88,7 @@ int32_t DiscIpcUnPublishService(const char *packageName, int32_t publishId)
     return SOFTBUS_OK;
 }
 
-int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info)
+NO_SANITIZE("cfi") int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info)
 {
     SetCallLnnStatus(false);
     int32_t ret = DiscStartDiscovery(packageName, info, &g_discInnerCb);
@@ -102,7 +103,7 @@ int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info
     return SOFTBUS_OK;
 }
 
-int32_t DiscIpcStopDiscovery(const char *packageName, int32_t subscribeId)
+NO_SANITIZE("cfi") int32_t DiscIpcStopDiscovery(const char *packageName, int32_t subscribeId)
 {
     int32_t ret = DiscStopDiscovery(packageName, subscribeId);
     if (ret != SOFTBUS_OK) {
@@ -118,7 +119,7 @@ void SetCallLnnStatus(bool flag)
     g_isCallLnn = flag;
 }
 
-bool GetCallLnnStatus(void)
+NO_SANITIZE("cfi") bool GetCallLnnStatus(void)
 {
     return g_isCallLnn;
 }

@@ -49,7 +49,7 @@ static int32_t OpenSppServer(const char *name, int32_t nameLen, const char *uuid
     return SppServerCreate(&socketPara, name, nameLen);
 }
 
-static void CloseSppServer(int32_t serverFd)
+NO_SANITIZE("cfi") static void CloseSppServer(int32_t serverFd)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[CloseServer Connect, and serverFd = %d]", serverFd);
     SppServerClose(serverFd);
@@ -152,7 +152,7 @@ int32_t SppGattsRegisterHalCallback(const SoftBusBtStateListener *lister)
     return SoftBusAddBtStateListener(lister);
 }
 
-SppSocketDriver *InitSppSocketDriver()
+NO_SANITIZE("cfi") SppSocketDriver *InitSppSocketDriver()
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[InitSppSocketDriver]");
     Init(&g_sppSocketDriver);

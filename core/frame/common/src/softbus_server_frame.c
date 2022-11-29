@@ -51,7 +51,7 @@ static void ServerModuleDeinit(void)
     SoftBusHiDumperDeinit();
 }
 
-bool GetServerIsInit(void)
+NO_SANITIZE("cfi") bool GetServerIsInit(void)
 {
     return g_isInit;
 }
@@ -69,7 +69,7 @@ static int32_t InitP2pLink(void)
     return SOFTBUS_OK;
 }
 
-void InitSoftBusServer(void)
+NO_SANITIZE("cfi") void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
 

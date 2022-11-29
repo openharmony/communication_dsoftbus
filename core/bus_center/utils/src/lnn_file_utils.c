@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "softbus_adapter_file.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -51,7 +52,7 @@ static int32_t InitStorageConfigPath(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
 {
     if (path == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: path is null", __func__);

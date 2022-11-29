@@ -24,12 +24,13 @@
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_meta_node_ledger.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_mem.h"
 
-int32_t LnnInitNetLedger(void)
+NO_SANITIZE("cfi") int32_t LnnInitNetLedger(void)
 {
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local net ledger fail!");
@@ -63,7 +64,7 @@ int32_t LnnInitNetLedgerDelay(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitNetLedger(void)
+NO_SANITIZE("cfi") void LnnDeinitNetLedger(void)
 {
     LnnDeinitMetaNodeLedger();
     LnnDeinitDistributedLedger();
@@ -179,7 +180,7 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetNodeKeyInfoLen(int32_t key)
+NO_SANITIZE("cfi") int32_t LnnGetNodeKeyInfoLen(int32_t key)
 {
     switch (key) {
         case NODE_KEY_UDID:

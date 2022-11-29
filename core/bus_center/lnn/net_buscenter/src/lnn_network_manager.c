@@ -25,6 +25,7 @@
 #include "lnn_ohos_account.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -202,7 +203,7 @@ static int32_t LnnInitManagerByConfig(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnClearNetConfigList(void)
+NO_SANITIZE("cfi") int32_t LnnClearNetConfigList(void)
 {
     LnnNetIfMgr *item = NULL;
     LnnNetIfMgr *next = NULL;
@@ -350,7 +351,7 @@ static VisitNextChoice GetAllProtocols(const LnnProtocolManager *manager, void *
     return CHOICE_VISIT_NEXT;
 }
 
-int32_t LnnInitNetworkManager(void)
+NO_SANITIZE("cfi") int32_t LnnInitNetworkManager(void)
 {
     RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
     RegistNetIfMgr(LNN_WLAN_TYPE, CreateNetifMgr);
@@ -434,7 +435,7 @@ int32_t LnnInitNetworkManagerDelay(void)
     return SOFTBUS_OK;
 }
 
-bool LnnIsAutoNetWorkingEnabled(void)
+NO_SANITIZE("cfi") bool LnnIsAutoNetWorkingEnabled(void)
 {
     bool isEnabled = false;
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char *)&isEnabled,
@@ -445,7 +446,7 @@ bool LnnIsAutoNetWorkingEnabled(void)
     return isEnabled;
 }
 
-void LnnDeinitNetworkManager(void)
+NO_SANITIZE("cfi") void LnnDeinitNetworkManager(void)
 {
     uint32_t i;
     if (LnnClearNetConfigList() != SOFTBUS_OK) {
@@ -461,7 +462,7 @@ void LnnDeinitNetworkManager(void)
     }
 }
 
-int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
+NO_SANITIZE("cfi") int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
 {
     if (ifName == NULL || type == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
@@ -477,7 +478,7 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
+NO_SANITIZE("cfi") int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 {
     if (type == NULL || ifName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
@@ -523,7 +524,7 @@ static VisitNextChoice FindProtocolByType(const LnnProtocolManager *manager, voi
     }
 }
 
-ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
+NO_SANITIZE("cfi") ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
 {
     struct FindProtocolByTypeRequest request = {.protocol = protocol, .manager = NULL};
     if (LnnVisitProtocol(FindProtocolByType, &request)) {

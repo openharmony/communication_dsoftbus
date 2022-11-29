@@ -66,7 +66,7 @@ NO_SANITIZE("cfi") static void DeviceFound(const ConnectionAddr *addr)
     }
 }
 
-int32_t LnnInitDiscoveryManager(void)
+NO_SANITIZE("cfi") int32_t LnnInitDiscoveryManager(void)
 {
     uint32_t i;
 

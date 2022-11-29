@@ -25,6 +25,7 @@
 #include "lnn_async_callback_utils.h"
 #include "iservice_registry.h"
 #include "message_handler.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "system_ability_definition.h"
@@ -135,7 +136,7 @@ static void RegisterNameMonitorHelper(void)
 }
 }
 
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
+NO_SANITIZE("cfi") int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
 {
     if (deviceName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
@@ -148,7 +149,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
+NO_SANITIZE("cfi") int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
 {
     if (handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "handler is null");

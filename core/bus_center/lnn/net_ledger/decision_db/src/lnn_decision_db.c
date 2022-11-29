@@ -28,6 +28,7 @@
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -292,7 +293,7 @@ static void RemoveTrustedDevInfoRecord(void *param)
     SoftBusFree(udid);
 }
 
-int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
+NO_SANITIZE("cfi") int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
 {
     char *dupUdid = NULL;
 
@@ -319,7 +320,7 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
+NO_SANITIZE("cfi") int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
     char *dupUdid = NULL;
 
@@ -377,7 +378,7 @@ static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHas
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+NO_SANITIZE("cfi") int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
@@ -461,7 +462,7 @@ static int32_t TryRecoveryTrustedDevInfoTable(void)
     return InitTrustedDevInfoTable();
 }
 
-int32_t LnnInitDecisionDbDelay(void)
+NO_SANITIZE("cfi") int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate decision db huks key fail");

@@ -31,9 +31,9 @@
 
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-
 
 #define NETLINK_BUF_LEN 1024
 
@@ -141,7 +141,7 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
     return SOFTBUS_ERR;
 }
 
-bool LnnIsLinkReady(const char *iface)
+NO_SANITIZE("cfi") bool LnnIsLinkReady(const char *iface)
 {
     if (iface == NULL) {
         return false;
