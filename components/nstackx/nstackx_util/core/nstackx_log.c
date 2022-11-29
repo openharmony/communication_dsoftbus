@@ -55,7 +55,6 @@ void SetLogImpl(LogImplInternal fn)
         return;
     }
 }
-#ifdef ENABLE_USER_LOG
 #ifdef BUILD_FOR_WINDOWS
 #ifndef NEED_EXPORT_VARIABLE
 #define NEED_EXPORT_VARIABLE
@@ -79,4 +78,8 @@ int32_t SetLogCallback(NstakcxLogCallback logCb)
     return NSTACKX_EOK;
 }
 
-#endif
+void SetDefaultLogCallback(void)
+{
+    g_nstackxLogCallBack = PrintfImpl;
+    return;
+}

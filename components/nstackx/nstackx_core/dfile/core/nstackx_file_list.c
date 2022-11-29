@@ -16,7 +16,7 @@
 #include "nstackx_file_list.h"
 #include "nstackx_error.h"
 #include "nstackx_util.h"
-#include "nstackx_log.h"
+#include "nstackx_dfile_log.h"
 #include "nstackx_dfile_frame.h"
 #include "securec.h"
 
@@ -27,13 +27,13 @@ uint8_t FileListAllFileNameAcked(const FileList *fileList)
     uint32_t i;
     if ((fileList->userDataFlag & NSTACKX_DFILE_HEADER_FRAME_USER_DATA_FLAG) &&
         !(fileList->userDataFlag & NSTACKX_FLAGS_USER_DATA_ACK)) {
-        LOGI(TAG, "user data not acked");
+        DFILE_LOGI(TAG, "user data not acked");
         return NSTACKX_FALSE;
     }
 
     if (fileList->tarFlag == NSTACKX_TRUE) {
         if (!(fileList->list[0].flags & NSTACKX_FLAGS_FILE_NAME_ACK)) {
-            LOGI(TAG, "file name 1 is not ACKED yet");
+            DFILE_LOGI(TAG, "file name 1 is not ACKED yet");
             return NSTACKX_FALSE;
         } else {
             return NSTACKX_TRUE;
@@ -42,7 +42,7 @@ uint8_t FileListAllFileNameAcked(const FileList *fileList)
 
     for (i = 0; i < fileList->num; i++) {
         if (!(fileList->list[i].flags & NSTACKX_FLAGS_FILE_NAME_ACK)) {
-            LOGI(TAG, "file name id %u is not ACKED yet", i + 1);
+            DFILE_LOGI(TAG, "file name id %u is not ACKED yet", i + 1);
             return NSTACKX_FALSE;
         }
     }
@@ -65,7 +65,7 @@ uint8_t FileListAllFileNameReceived(const FileList *fileList)
 
     if (fileList->tarFlag == NSTACKX_TRUE) {
         if (!(fileList->list[0].flags & NSTACKX_FLAGS_FILE_NAME_RECEIVED)) {
-            LOGI(TAG, "file name id 1 is not RECEIVED yet");
+            DFILE_LOGI(TAG, "file name id 1 is not RECEIVED yet");
             return NSTACKX_FALSE;
         } else {
             return NSTACKX_TRUE;
@@ -74,7 +74,7 @@ uint8_t FileListAllFileNameReceived(const FileList *fileList)
 
     for (i = 0; i < fileList->num; i++) {
         if (!(fileList->list[i].flags & NSTACKX_FLAGS_FILE_NAME_RECEIVED)) {
-            LOGI(TAG, "file name id %u is not RECEIVED yet", i + 1);
+            DFILE_LOGI(TAG, "file name id %u is not RECEIVED yet", i + 1);
             return NSTACKX_FALSE;
         }
     }
@@ -112,18 +112,18 @@ int32_t FileListSetSendFileList(FileList *fileList, FileListInfo *fileListInfo)
 
     if (fileListInfo->files == NULL || fileListInfo->fileNum == 0 ||
         fileListInfo->fileNum > NSTACKX_DFILE_MAX_FILE_NUM) {
-        LOGE(TAG, "invalid input");
+        DFILE_LOGE(TAG, "invalid input");
         return NSTACKX_EINVAL;
     }
 
     if (fileList->list != NULL) {
-        LOGE(TAG, "invalid fileList->list");
+        DFILE_LOGE(TAG, "invalid fileList->list");
         return NSTACKX_EFAILED;
     }
 
     entryList = calloc(fileListInfo->fileNum, sizeof(FileListEntry));
     if (entryList == NULL) {
-        LOGE(TAG, "entryList calloc NULL");
+        DFILE_LOGE(TAG, "entryList calloc NULL");
         return NSTACKX_ENOMEM;
     }
 
@@ -136,12 +136,12 @@ int32_t FileListSetSendFileList(FileList *fileList, FileListInfo *fileListInfo)
         }
         ret = GetFileName(fileListEntry->fullFileName, fileListEntry->fileName, sizeof(fileListEntry->fileName));
         if (ret != NSTACKX_EOK) {
-            LOGE(TAG, "GetFileName error: %d", ret);
+            DFILE_LOGE(TAG, "GetFileName error: %d", ret);
             goto L_FIN;
         }
         ret = GetTargetFileSize(fileListEntry->fullFileName, &fileListEntry->fileSize);
         if ((ret != NSTACKX_EOK) || (fileListEntry->fileSize > NSTACKX_MAX_FILE_SIZE)) {
-            LOGE(TAG, "GetTargetFileSize error: %d", ret);
+            DFILE_LOGE(TAG, "GetTargetFileSize error: %d", ret);
             goto L_FIN;
         }
         if (fileListInfo->vtransFlag) {
@@ -228,13 +228,13 @@ static int32_t ParsePackedDFileUserData(const uint8_t *buf, size_t userDataLengt
     uint16_t userDataStrLen;
     const UserDataUnit *userDataUnit = NULL;
     if (userDataLength < sizeof(UserDataUnit)) {
-        LOGE(TAG, "userDataLength is too small");
+        DFILE_LOGE(TAG, "userDataLength is too small");
         return NSTACKX_EFAILED;
     }
     userDataUnit = (UserDataUnit *)buf;
     *pathType = userDataUnit->pathType;
     if (*pathType == 0) {
-        LOGE(TAG, "path type is 0");
+        DFILE_LOGE(TAG, "path type is 0");
         return NSTACKX_EFAILED;
     }
     if (!(flag & NSTACKX_DFILE_HEADER_FRAME_USER_DATA_FLAG)) {
@@ -263,7 +263,7 @@ int32_t FileListAddUserData(FileList *fileList, const uint8_t *userData, size_t 
     if (flag & NSTACKX_DFILE_HEADER_FRAME_PATH_TYPE_FLAG) {
         if (ParsePackedDFileUserData(userData, userDataLength, &fileList->pathType, &fileList->userData, flag) !=
             NSTACKX_EOK) {
-            LOGE(TAG, "ParsePackedDFileUserData failed");
+            DFILE_LOGE(TAG, "ParsePackedDFileUserData failed");
         }
     } else if (flag & NSTACKX_DFILE_HEADER_FRAME_USER_DATA_FLAG) {
         fileList->userData = calloc(1, userDataLength + 1);
@@ -278,7 +278,7 @@ int32_t FileListAddUserData(FileList *fileList, const uint8_t *userData, size_t 
             }
         }
     } else {
-        LOGE(TAG, "invalid flag %2X", flag);
+        DFILE_LOGE(TAG, "invalid flag %2X", flag);
         return NSTACKX_EFAILED;
     }
     fileList->userDataFlag |= NSTACKX_FLAGS_FILE_NAME_RECEIVED;
@@ -301,7 +301,7 @@ void FileListGetNames(FileList *fileList, char *files[], uint32_t *fileNum, uint
         } else if (fileNameType == NOTICE_FILE_NAME_TYPE) {
             files[i] = fileList->list[i].fileName;
         } else {
-            LOGE(TAG, "invalid fileName type %u", fileNameType);
+            DFILE_LOGE(TAG, "invalid fileName type %u", fileNameType);
             break;
         }
     }
@@ -342,11 +342,11 @@ static void FileListGetFilesByFlag(FileList *fileList, uint8_t flags, char *file
                 files[count] = fileList->list[i].fileName;
                 count++;
             } else {
-                LOGE(TAG, "invalid fileName type %u", fileNameType);
+                DFILE_LOGE(TAG, "invalid fileName type %u", fileNameType);
                 break;
             }
         } else {
-            LOGE(TAG, "the %uth file is not with target flag %2X", i, flags);
+            DFILE_LOGE(TAG, "the %uth file is not with target flag %2X", i, flags);
         }
     }
     *fileNum = count;
@@ -365,7 +365,7 @@ void FileListGetSentFiles(FileList *fileList, char *files[], uint32_t *fileNum)
 void FileListSetFileNameAcked(FileList *fileList, uint16_t fileId)
 {
     if (fileId == 1 || fileId == fileList->num) {
-        LOGI(TAG, "set file id: %u acked", fileId);
+        DFILE_LOGI(TAG, "set file id: %u acked", fileId);
     }
     if (fileId == 0) {
         fileList->userDataFlag |= NSTACKX_FLAGS_USER_DATA_ACK;
@@ -456,12 +456,12 @@ static uint8_t *PreparePackedDFileUserData(uint16_t pathType, const char *userDa
 
     userDataUnit = (UserDataUnit *)calloc(packeUserDataLen, 1);
     if (userDataUnit == NULL) {
-        LOGE(TAG, "userDataUnit calloc error");
+        DFILE_LOGE(TAG, "userDataUnit calloc error");
         return NULL;
     }
     userDataUnit->pathType = pathType;
     if (userDataLen > 0 && memcpy_s(userDataUnit->userData, userDataLen, userData, userDataLen) != EOK) {
-        LOGE(TAG, "userData memcpy error");
+        DFILE_LOGE(TAG, "userData memcpy error");
         free(userDataUnit);
         return NULL;
     }
@@ -472,7 +472,7 @@ static uint8_t *PreparePackedDFileUserData(uint16_t pathType, const char *userDa
 int32_t FileListAddExtraInfo(FileList *fileList, uint16_t pathType, uint8_t noticeFileNameType, char *userData)
 {
     if (noticeFileNameType != NOTICE_FILE_NAME_TYPE && noticeFileNameType != NOTICE_FULL_FILE_NAME_TYPE) {
-        LOGE(TAG, "invalid noticeFileNameType");
+        DFILE_LOGE(TAG, "invalid noticeFileNameType");
         return NSTACKX_EFAILED;
     }
     fileList->noticeFileNameType = noticeFileNameType;
@@ -492,7 +492,7 @@ int32_t FileListAddExtraInfo(FileList *fileList, uint16_t pathType, uint8_t noti
     if (pathType > 0) {
         fileList->packedUserData = PreparePackedDFileUserData(pathType, userData, &fileList->packedUserDataLen);
         if (fileList->packedUserData == NULL) {
-            LOGE(TAG, "PreparePackedDFileUserData fail");
+            DFILE_LOGE(TAG, "PreparePackedDFileUserData fail");
             return NSTACKX_EFAILED;
         }
     }
@@ -506,7 +506,7 @@ int32_t FileListRenameFile(FileList *fileList, uint16_t fileId, const char *newF
         return NSTACKX_EINVAL;
     }
     if (strcpy_s(fileList->list[fileId - 1].fileName, NSTACKX_MAX_REMOTE_PATH_LEN, newFileName) != EOK) {
-        LOGE(TAG, "strcpy_s error");
+        DFILE_LOGE(TAG, "strcpy_s error");
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
@@ -531,25 +531,25 @@ static int32_t CopyFilesListInfo(FileListInfo *fileListInfo, FileListPara *fileL
     for (i = 0; i < fileListPara->fileNum; i++) {
         /* When second parameter is NULL, realpath() uses malloc() to allocate a buffer of up to PATH_MAX bytes. */
         if (realpath(fileListPara->files[i], tmpFileName) == NULL) {
-            LOGE(TAG, "CreateFileListInfo realpath %s failed errno %d", fileListPara->files[i], errno);
+            DFILE_LOGE(TAG, "CreateFileListInfo realpath %s failed errno %d", fileListPara->files[i], errno);
             end = i;
             goto L_ERR_FILE;
         }
         fileListInfo->files[i] = calloc(1, strlen(fileListPara->files[i]) + 1);
         if (fileListInfo->files[i] == NULL) {
-            LOGE(TAG, "CreateFileListInfo calloc failed");
+            DFILE_LOGE(TAG, "CreateFileListInfo calloc failed");
             end = i;
             goto L_ERR_FILE;
         }
         if (memcpy_s(fileListInfo->files[i], strlen(fileListPara->files[i]) + 1, fileListPara->files[i],
             strlen(fileListPara->files[i])) != NSTACKX_EOK) {
-            LOGE(TAG, "memcpy_s failed");
+            DFILE_LOGE(TAG, "memcpy_s failed");
             end = i + 1;
             goto L_ERR_FILE;
         }
         uint32_t len = GetFileNameLen(fileListInfo->files[i]);
         if (len > NSTACKX_MAX_FILE_NAME_LEN || len == 0 || !IsAccessiblePath(fileListInfo->files[i], R_OK, S_IFREG)) {
-            LOGE(TAG, "file name %s is too long or the file is not a readable file", fileListPara->files[i]);
+            DFILE_LOGE(TAG, "file name %s is too long or the file is not a readable file", fileListPara->files[i]);
             end = i + 1;
             goto L_ERR_FILE;
         }
@@ -573,7 +573,7 @@ static int32_t FileListInfoAddRemotePath(FileListInfo *fileListInfo, const char 
     uint32_t i;
     uint32_t end = 0;
     if (fileListInfo == NULL || remotePath == NULL || fileNum == 0) {
-        LOGE(TAG, "invalid input");
+        DFILE_LOGE(TAG, "invalid input");
         return NSTACKX_EINVAL;
     }
     fileListInfo->remotePath = calloc(fileNum, sizeof(char *));
@@ -588,12 +588,12 @@ static int32_t FileListInfoAddRemotePath(FileListInfo *fileListInfo, const char 
             fileListInfo->remotePath[i] = strdup(remotePath[0]);
         }
         if (fileListInfo->remotePath[i] == NULL) {
-            LOGE(TAG, "failed for copy %uth remotePath, errno(%d)", i, errno);
+            DFILE_LOGE(TAG, "failed for copy %uth remotePath, errno(%d)", i, errno);
             end = i;
             goto L_ERR_FILE;
         }
         if (strlen(fileListInfo->remotePath[i]) + 1 > NSTACKX_MAX_REMOTE_PATH_LEN) {
-            LOGE(TAG, "remotePath is too long");
+            DFILE_LOGE(TAG, "remotePath is too long");
             end = i + 1;
             goto L_ERR_FILE;
         }
@@ -645,7 +645,7 @@ FileListInfo *CreateFileListInfo(FileListPara *fileListPara)
             free(fileListInfo->userData);
             fileListInfo->userData = NULL;
         }
-        LOGE(TAG, "CreateFileListInfo FileListInfoAddRemotePath failed");
+        DFILE_LOGE(TAG, "CreateFileListInfo FileListInfoAddRemotePath failed");
         goto L_ERR_FILE;
     }
 
