@@ -27,6 +27,7 @@ if (defined(ohos_lite)) {
         "-DLWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS",
         "-DLWIP_LITEOS_A_COMPAT",
         "-DMBEDTLS_INCLUDED",
+        "-DENABLE_USER_LOG",
       ]
       cflags_cc = cflags
       include_dirs = [
@@ -46,6 +47,7 @@ if (defined(ohos_lite)) {
         "-Wall",
         "-DNSTACKX_WITH_HMOS_LINUX",
         "-DMBEDTLS_INCLUDED",
+        "-DENABLE_USER_LOG",
       ]
       cflags_cc = cflags
       include_dirs = [
@@ -71,6 +73,7 @@ if (defined(ohos_lite)) {
       "-Wall",
       "-DMBEDTLS_INCLUDED",
       "-DNSTACKX_WITH_HMOS_LINUX",
+      "-DENABLE_USER_LOG",
     ]
     cflags_cc = cflags
     include_dirs = [

@@ -214,6 +214,16 @@ typedef enum {
     DFile_PARAM_TYPE_STRING
 } DFileEventParamType;
 
+enum {
+    DFILE_LOG_LEVEL_OFF     = 0,
+    DFILE_LOG_LEVEL_FATAL   = 1,
+    DFILE_LOG_LEVEL_ERROR   = 2,
+    DFILE_LOG_LEVEL_WARNING = 3,
+    DFILE_LOG_LEVEL_INFO    = 4,
+    DFILE_LOG_LEVEL_DEBUG   = 5,
+    DFILE_LOG_LEVEL_END,
+};
+
 #define DFile_EVENT_NAME_LEN 33
 #define DFile_EVENT_TAG_LEN 16
 
@@ -371,6 +381,14 @@ NSTACKX_EXPORT int32_t NSTACKX_DFileDump(uint32_t argc, const char **arg, void *
 typedef void (*DFileEventFunc)(void *softObj, const DFileEvent *info);
 
 NSTACKX_EXPORT void NSTACKX_DFileSetEventFunc(void *softObj, DFileEventFunc func);
+
+typedef void (*DFileLogCallback)(const char *moduleName, uint32_t logLevel, const char *format, ...);
+ 
+/*
+ * Set the DFile log implementation
+ */
+NSTACKX_EXPORT int32_t NSTACKX_DFileRegisterLogCallback(DFileLogCallback userLogCallback);
+NSTACKX_EXPORT void NSTACKX_DFileRegisterDefaultLog(void);
 
 #ifdef __cplusplus
 }
