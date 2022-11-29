@@ -19,7 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "auth_interface.h"
-#include "bus_center_manager.h"
+#include "bus_center_info_key.h"
 
 namespace OHOS {
 class TransAuthInterface {
@@ -75,6 +75,9 @@ public:
 
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
+
+    virtual int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
 };
 
 class TransAuthInterfaceMock : public TransAuthInterface {
@@ -125,6 +128,9 @@ public:
 
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char *, uint32_t));
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *, char *, uint32_t));
+
+    MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char *, InfoKey, char *, uint32_t));
+    MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t (const char *, char *, uint32_t));
 };
 } // namespace OHOS
 #endif // TRANS_AUTH_MOCK_H
