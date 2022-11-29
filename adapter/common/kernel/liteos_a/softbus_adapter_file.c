@@ -78,7 +78,7 @@ int32_t SoftBusReadFile(const char *fileName, char *readBuf, uint32_t maxLen)
         return SOFTBUS_FILE_ERR;
     }
     int32_t fileLen = lseek(fd, 0, SEEK_END);
-    if (fileLen <= 0 || fileLen > (int32_t)maxLen) {
+    if (fileLen <= 0 || fileLen >= (int32_t)maxLen) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "ReadFile maxLen failed or over maxLen");
         close(fd);
         return SOFTBUS_FILE_ERR;
