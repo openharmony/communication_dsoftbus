@@ -101,7 +101,6 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
     EXPECT_CALL(localLedgerMock,
         GetCommonDevInfo(_,NotNull(),_)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnConvertDeviceTypeToId(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock,
         SoftBusRegBusCenterVarDump(_,_)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     int32_t ret = LnnInitLocalLedger();
@@ -171,12 +170,10 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 */
 HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 {
-    LocalLedgerDepsInterfaceMock localLedgerMock;
     int32_t ret = LnnSetLocalStrInfo(STRING_KEY_DEV_UDID, LOCAL_UDID);
-    EXPECT_CALL(localLedgerMock, LnnConvertDeviceTypeToId(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalStrInfo(STRING_KEY_DEV_TYPE, LOCAL_DEVTYPE);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, LOCAL_WLAN_IP);
@@ -255,7 +252,6 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnConvertDeviceTypeToId(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
 }
@@ -289,7 +285,6 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_010, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnConvertDeviceTypeToId(_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_,_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
 }
