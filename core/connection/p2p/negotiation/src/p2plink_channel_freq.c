@@ -21,6 +21,7 @@
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -39,7 +40,8 @@
 #define CHANNEL_INVALID (-1)
 #define FREQUENCY_INVALID (-1)
 
-int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString, int32_t len)
+NO_SANITIZE("cfi") int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
+    int32_t len)
 {
     if ((channelList == NULL) || (channelList->num == 0)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "channelList is null.");
@@ -246,7 +248,7 @@ static int32_t ChoseChannel5gFreq(const GcInfo *gc, const P2pLink5GList *channel
     return FREQUENCY_INVALID;
 }
 
-int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList)
+NO_SANITIZE("cfi") int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList)
 {
     if (gc == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);

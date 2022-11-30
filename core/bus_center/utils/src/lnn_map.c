@@ -21,6 +21,7 @@
 #include <securec.h>
 
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 #define HDF_MIN_MAP_SIZE 8
@@ -125,7 +126,7 @@ static MapNode *MapCreateNode(const char *key, uint32_t hash,
  *          valueSize Map value size
  * @return : SOFTBUS_OK or other error
  */
-int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSize)
+NO_SANITIZE("cfi") int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSize)
 {
     MapNode *node = NULL;
 
@@ -184,7 +185,7 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
  *          key Map key
  * @return : value of key or NULL
  */
-void* LnnMapGet(const Map *map, const char *key)
+NO_SANITIZE("cfi") void* LnnMapGet(const Map *map, const char *key)
 {
     if (map == NULL || key == NULL || map->nodeSize == 0 || map->nodes == NULL) {
         return NULL;
@@ -211,7 +212,7 @@ void* LnnMapGet(const Map *map, const char *key)
  * @param : map Map see details in type Map
  *          key Map key
  */
-int32_t LnnMapErase(Map *map, const char *key)
+NO_SANITIZE("cfi") int32_t LnnMapErase(Map *map, const char *key)
 {
     if (map == NULL || key == NULL || map->nodeSize == 0 || map->nodes == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -240,7 +241,7 @@ int32_t LnnMapErase(Map *map, const char *key)
     return SOFTBUS_ERR;
 }
 
-uint32_t MapGetSize(Map *map)
+NO_SANITIZE("cfi") uint32_t MapGetSize(Map *map)
 {
     return (map == NULL) ? 0 : map->nodeSize;
 }
@@ -249,7 +250,7 @@ uint32_t MapGetSize(Map *map)
  *
  * @param : map Map see details in type Map
  */
-void LnnMapInit(Map *map)
+NO_SANITIZE("cfi") void LnnMapInit(Map *map)
 {
     if (map == NULL) {
         return;
@@ -265,7 +266,7 @@ void LnnMapInit(Map *map)
  *
  * @param : map Map see details in type Map
  */
-void LnnMapDelete(Map *map)
+NO_SANITIZE("cfi") void LnnMapDelete(Map *map)
 {
     uint32_t i;
     MapNode *node = NULL;
@@ -296,7 +297,7 @@ void LnnMapDelete(Map *map)
  *
  * @param : map Map see details in type Map
  */
-MapIterator *LnnMapInitIterator(Map *map)
+NO_SANITIZE("cfi") MapIterator *LnnMapInitIterator(Map *map)
 {
     MapIterator *it = NULL;
     if (map == NULL) {
@@ -318,7 +319,7 @@ MapIterator *LnnMapInitIterator(Map *map)
  *
  * @param : it Iterator see details in type Iterator
  */
-bool LnnMapHasNext(MapIterator *it)
+NO_SANITIZE("cfi") bool LnnMapHasNext(MapIterator *it)
 {
     return (it->nodeNum < it->map->nodeSize);
 }
@@ -328,7 +329,7 @@ bool LnnMapHasNext(MapIterator *it)
  *
  * @param : it Iterator see details in type Iterator
  */
-MapIterator *LnnMapNext(MapIterator *it)
+NO_SANITIZE("cfi") MapIterator *LnnMapNext(MapIterator *it)
 {
     MapNode *node = NULL;
     if (it == NULL) {
@@ -358,7 +359,7 @@ MapIterator *LnnMapNext(MapIterator *it)
  *
  * @param : it Iterator see details in type Iterator
  */
-void LnnMapDeinitIterator(MapIterator *it)
+NO_SANITIZE("cfi") void LnnMapDeinitIterator(MapIterator *it)
 {
     if (it == NULL) {
         return;

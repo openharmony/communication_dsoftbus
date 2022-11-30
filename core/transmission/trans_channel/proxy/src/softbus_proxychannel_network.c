@@ -16,7 +16,7 @@
 #include "softbus_proxychannel_network.h"
 
 #include <securec.h>
-
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_transmission_interface.h"
@@ -39,7 +39,7 @@ NO_SANITIZE("cfi") int32_t NotifyNetworkingChannelOpened(int32_t channelId, cons
     return SOFTBUS_OK;
 }
 
-void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId)
+NO_SANITIZE("cfi") void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId)
 {
     if (g_netChanlistener.onChannelOpenFailed == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelOpenFailed is null");
@@ -57,7 +57,7 @@ NO_SANITIZE("cfi") void NotifyNetworkingChannelClosed(int32_t channelId)
     g_netChanlistener.onChannelClosed(channelId);
 }
 
-void NotifyNetworkingMsgReceived(int32_t channelId, const char *data, uint32_t len)
+NO_SANITIZE("cfi") void NotifyNetworkingMsgReceived(int32_t channelId, const char *data, uint32_t len)
 {
     if (g_netChanlistener.onMessageReceived == NULL) {
         return;

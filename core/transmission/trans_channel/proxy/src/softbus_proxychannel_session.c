@@ -21,6 +21,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_property.h"
@@ -90,7 +91,8 @@ void UnPackPacketHead(PacketHead *data)
     data->dataLen = (int32_t)SoftBusLtoHl((uint32_t)data->dataLen);
 }
 
-int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, TransReceiveData *receiveData)
+NO_SANITIZE("cfi") int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
+    TransReceiveData *receiveData)
 {
     int32_t ret = TransProxyOnMsgReceived(pkgName, pid, channelId, receiveData);
     if (ret != SOFTBUS_OK) {

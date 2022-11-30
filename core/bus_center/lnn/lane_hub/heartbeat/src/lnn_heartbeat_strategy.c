@@ -220,7 +220,8 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type)
+NO_SANITIZE("cfi") int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
+    LnnHeartbeatType type)
 {
     int64_t nowTime;
     SoftBusSysTime times;
@@ -433,7 +434,7 @@ static bool VisitRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType each
     return true;
 }
 
-int32_t LnnRegistParamMgrByType(LnnHeartbeatType type)
+NO_SANITIZE("cfi") int32_t LnnRegistParamMgrByType(LnnHeartbeatType type)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist paramMgr lock mutex fail");
@@ -479,7 +480,7 @@ static bool VisitUnRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType ea
     return true;
 }
 
-void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
+NO_SANITIZE("cfi") void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unRegist paramMgr lock mutex fail");
@@ -489,7 +490,7 @@ void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
     (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
 }
 
-int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
+NO_SANITIZE("cfi") int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
 {
     LnnHeartbeatParamManager *paramMgr = NULL;
 
@@ -580,7 +581,7 @@ NO_SANITIZE("cfi") int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *
     return SOFTBUS_OK;
 }
 
-int32_t LnnStartNewHbStrategyFsm(void)
+NO_SANITIZE("cfi") int32_t LnnStartNewHbStrategyFsm(void)
 {
     LnnHeartbeatFsm *hbFsm = NULL;
 
@@ -601,7 +602,7 @@ int32_t LnnStartNewHbStrategyFsm(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
+NO_SANITIZE("cfi") int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
     GearMode mode = {0};
     LnnCheckDevStatusMsgPara msgPara = {0};
@@ -623,7 +624,7 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
     return LnnPostCheckDevStatusMsgToHbFsm(g_hbFsm, &msgPara, delayMillis);
 }
 
-int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
+NO_SANITIZE("cfi") int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -641,7 +642,8 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
     return SOFTBUS_OK;
 }
 
-int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+NO_SANITIZE("cfi") int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
+    bool isRelay)
 {
     LnnProcessSendOnceMsgPara msgPara = {
         .hbType = hbType,
@@ -661,7 +663,7 @@ int32_t LnnStartHeartbeat(uint64_t delayMillis)
     return LnnPostStartMsgToHbFsm(g_hbFsm, delayMillis);
 }
 
-int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
+NO_SANITIZE("cfi") int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
 {
     if (LnnPostStopMsgToHbFsm(g_hbFsm, type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat by type post msg fail");
@@ -714,12 +716,12 @@ NO_SANITIZE("cfi") bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
     return ret;
 }
 
-int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
+NO_SANITIZE("cfi") int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
 {
     return LnnPostTransStateMsgToHbFsm(g_hbFsm, isMasterNode ? EVENT_HB_AS_MASTER_NODE : EVENT_HB_AS_NORMAL_NODE);
 }
 
-int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
+NO_SANITIZE("cfi") int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
 {
     return LnnPostUpdateSendInfoMsgToHbFsm(g_hbFsm, type);
 }

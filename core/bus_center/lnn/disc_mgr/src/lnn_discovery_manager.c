@@ -82,7 +82,7 @@ NO_SANITIZE("cfi") int32_t LnnInitDiscoveryManager(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnStartPublish(void)
+NO_SANITIZE("cfi") int32_t LnnStartPublish(void)
 {
     uint32_t i;
 
@@ -99,7 +99,7 @@ int32_t LnnStartPublish(void)
     return SOFTBUS_OK;
 }
 
-void LnnStopPublish(void)
+NO_SANITIZE("cfi") void LnnStopPublish(void)
 {
     uint32_t i;
 
@@ -114,7 +114,7 @@ void LnnStopPublish(void)
     }
 }
 
-int32_t LnnStartDiscovery(void)
+NO_SANITIZE("cfi") int32_t LnnStartDiscovery(void)
 {
     uint32_t i;
 
@@ -131,7 +131,7 @@ int32_t LnnStartDiscovery(void)
     return SOFTBUS_OK;
 }
 
-void LnnStopDiscovery(void)
+NO_SANITIZE("cfi") void LnnStopDiscovery(void)
 {
     uint32_t i;
 

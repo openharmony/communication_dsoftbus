@@ -26,6 +26,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
@@ -298,7 +299,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     return ret;
 }
 
-int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
+NO_SANITIZE("cfi") int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     SessionConn conn;
     if (GetSessionConnById(channelId, &conn) == NULL) {

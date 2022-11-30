@@ -25,6 +25,7 @@
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -223,7 +224,7 @@ static void WifiCfgChanged(const char *wificfg)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wificfg = %s", wificfg);
 }
 
-int32_t P2pLinkBroadCastInit(void)
+NO_SANITIZE("cfi") int32_t P2pLinkBroadCastInit(void)
 {
     BroadcastRecvCb cb;
 

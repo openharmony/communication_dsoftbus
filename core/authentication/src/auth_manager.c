@@ -492,7 +492,7 @@ static void NotifyDeviceDisconnect(int64_t authId)
     g_verifyListener.onDeviceDisconnect(authId);
 }
 
-static void OnDeviceNotTrusted(const char *peerUdid)
+NO_SANITIZE("cfi") static void OnDeviceNotTrusted(const char *peerUdid)
 {
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
@@ -504,7 +504,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
     g_verifyListener.onDeviceNotTrusted(peerUdid);
 }
 
-static void OnGroupCreated(const char *groupId, int32_t groupType)
+NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupCreated != NULL) {
         g_groupChangeListener.onGroupCreated(groupId, groupType);

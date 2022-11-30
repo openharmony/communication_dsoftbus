@@ -23,6 +23,7 @@
 #include "p2plink_reference.h"
 
 #include "securec.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
@@ -255,7 +256,7 @@ int32_t P2pLinkSendReuseResponse(const P2pLinkAuthId *chan, const char *myMac, i
     return SOFTBUS_OK;
 }
 
-void P2pLinkHandleHandshake(int64_t authId, int32_t seq, const cJSON *root)
+NO_SANITIZE("cfi") void P2pLinkHandleHandshake(int64_t authId, int32_t seq, const cJSON *root)
 {
     char mac[P2P_MAC_LEN] = {0};
     char ip[P2P_IP_LEN] = {0};
@@ -281,7 +282,7 @@ void P2pLinkHandleHandshake(int64_t authId, int32_t seq, const cJSON *root)
     }
 }
 
-void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
+NO_SANITIZE("cfi") void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
 {
     char peerMac[P2P_MAC_LEN] = {0};
     int32_t respRet = 0;
@@ -331,7 +332,7 @@ void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
     P2pLinkDumpRef();
 }
 
-void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, const cJSON *root)
+NO_SANITIZE("cfi") void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, const cJSON *root)
 {
     char peerMac[P2P_MAC_LEN] = {0};
     int32_t respRet;
@@ -382,7 +383,7 @@ void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, const cJSON *root)
         (void)P2pLinkSendReuseResponse(&linkAuthId, P2pLinkGetMyMac(), respRet);
     }
 }
-void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, const cJSON *root)
+NO_SANITIZE("cfi") void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, const cJSON *root)
 {
     P2pLinkRole myRole = P2pLinkGetRole();
     int32_t myRef = P2pLinkGetMyP2pRef();
@@ -437,7 +438,7 @@ void P2pLinkHandleWifiCfg(int64_t authId, int32_t seq, const cJSON *root)
     }
 }
 
-void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLinkCmdType type, const cJSON *root)
+NO_SANITIZE("cfi") void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLinkCmdType type, const cJSON *root)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv control msgtype %d", type);
     if (P2pLinkIsEnable() == false) {

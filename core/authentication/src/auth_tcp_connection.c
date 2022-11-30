@@ -269,7 +269,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t events,
     return SOFTBUS_OK;
 }
 
-static int32_t OnDataEvent(ListenerModule module, int32_t events, int32_t fd)
+NO_SANITIZE("cfi") static int32_t OnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     (void)module;
     if (events == SOFTBUS_SOCKET_OUT) {

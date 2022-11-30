@@ -29,6 +29,7 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -197,7 +198,7 @@ NO_SANITIZE("cfi") static void InnerP2pPeersChangedCallback(WifiP2pDevice* devic
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "InnerP2pPeersChangedCallback len %d.", len);
 }
 
-int32_t P2pLinkAdapterInit(const BroadcastRecvCb *cb)
+NO_SANITIZE("cfi") int32_t P2pLinkAdapterInit(const BroadcastRecvCb *cb)
 {
     WifiErrorCode ret;
 
@@ -290,7 +291,7 @@ static bool GetIpAddr(const char *ifName, char *ipAddr, int32_t len)
     return true;
 }
 
-int32_t P2pLinkGetP2pIpAddress(char *ip, int32_t len)
+NO_SANITIZE("cfi") int32_t P2pLinkGetP2pIpAddress(char *ip, int32_t len)
 {
     WifiP2pGroupInfo* groupInfo;
     char ipAddr[P2P_IP_LEN] = {0};
@@ -326,7 +327,7 @@ int32_t P2pLinkGetP2pIpAddress(char *ip, int32_t len)
 }
 
 #define P2P_BASE_INTERFACE "p2p0"
-int32_t P2pLinkGetBaseMacAddress(char *mac, int32_t len)
+NO_SANITIZE("cfi") int32_t P2pLinkGetBaseMacAddress(char *mac, int32_t len)
 {
     unsigned char macAddr[MAC_BIN_LEN] = {0};
 
@@ -368,7 +369,7 @@ int32_t P2pLinkSharelinkReuse(void)
 }
 
 
-P2pLink5GList *P2pLinkGetChannelListFor5G(void)
+NO_SANITIZE("cfi") P2pLink5GList *P2pLinkGetChannelListFor5G(void)
 {
     int32_t chanList[CHAN_LIST_LEN] = {0};
     int32_t ret = Hid2dGetChannelListFor5G(chanList, CHAN_LIST_LEN);
@@ -406,7 +407,7 @@ P2pLink5GList *P2pLinkGetChannelListFor5G(void)
 }
 
 
-int32_t P2pLinkGetFrequency(void)
+NO_SANITIZE("cfi") int32_t P2pLinkGetFrequency(void)
 {
     int32_t ret;
     WifiLinkedInfo wifiInfo;
@@ -420,7 +421,7 @@ int32_t P2pLinkGetFrequency(void)
     return wifiInfo.frequency;
 }
 
-int32_t P2pLinkCreateGroup(int32_t freq, bool isWideBandSupport)
+NO_SANITIZE("cfi") int32_t P2pLinkCreateGroup(int32_t freq, bool isWideBandSupport)
 {
     FreqType type = FREQUENCY_DEFAULT;
     if (isWideBandSupport) {
@@ -435,7 +436,7 @@ int32_t P2pLinkCreateGroup(int32_t freq, bool isWideBandSupport)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkGetRecommendChannel(int32_t *freq)
+NO_SANITIZE("cfi") int32_t P2pLinkGetRecommendChannel(int32_t *freq)
 {
     if (freq == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get recommand channel, invalid param.");
@@ -464,7 +465,7 @@ int32_t P2pLinkGetRecommendChannel(int32_t *freq)
     return SOFTBUS_ERR;
 }
 
-char *P2pLinkGetGroupConfigInfo(void)
+NO_SANITIZE("cfi") char *P2pLinkGetGroupConfigInfo(void)
 {
     WifiP2pGroupInfo *groupInfo = NULL;
     int32_t ret;
@@ -514,7 +515,7 @@ char *P2pLinkGetGroupConfigInfo(void)
     return groupCfgStr;
 }
 
-int32_t P2pLinkConnectGroup(const char *groupConfig)
+NO_SANITIZE("cfi") int32_t P2pLinkConnectGroup(const char *groupConfig)
 {
     if (groupConfig == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "connect group, invalid param.");
@@ -611,7 +612,7 @@ static int32_t ConvertIpStringToIntArray(unsigned int dest[IPV4_ARRAY_LEN], cons
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkConfigGcIp(const char *ip)
+NO_SANITIZE("cfi") int32_t P2pLinkConfigGcIp(const char *ip)
 {
     if (ip == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "config ip, invalid param.");
@@ -655,7 +656,7 @@ int32_t P2pLinkConfigGcIp(const char *ip)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkGetSelfWifiCfgInfo(char *cfgData, int32_t len)
+NO_SANITIZE("cfi") int32_t P2pLinkGetSelfWifiCfgInfo(char *cfgData, int32_t len)
 {
     if (cfgData == NULL || len == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get self wifi config, invalid param.");
@@ -753,7 +754,7 @@ int32_t P2pLinkReleaseIPAddr(void)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkGetWifiState(void)
+NO_SANITIZE("cfi") int32_t P2pLinkGetWifiState(void)
 {
     int wifiState;
 

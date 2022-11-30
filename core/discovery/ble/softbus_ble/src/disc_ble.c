@@ -1304,7 +1304,7 @@ static int32_t ReplyPassiveNonBroadcast(void)
     return SOFTBUS_OK;
 }
 
-static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
+NO_SANITIZE("cfi") static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
 {
     DLOGI("enter");
     uintptr_t key = (uintptr_t)args;
