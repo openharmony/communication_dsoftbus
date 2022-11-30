@@ -440,23 +440,6 @@ HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
     channelId = -1;
     int32_t ret = TransRequestQos(channelId, channelType, appType, quality);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    // channelId = 1111111;
-
-    // ret = TransLaneMgrInit();
-    // EXPECT_EQ(SOFTBUS_OK, ret);
-    // quality = QOS_IMPROVE;
-    // ret = TransRequestQos(channelId, channelType, appType, quality);
-    // EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    // quality = QOS_RECOVER;
-    // ret = TransRequestQos(channelId, channelType, appType, quality);
-    // EXPECT_EQ(SOFTBUS_OK, ret);
-
-    // quality = QOS_RECOVER + 1;
-    // ret = TransRequestQos(channelId, channelType, appType, quality);
-    // EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    // TransLaneMgrDeinit();
 }
 
 /**

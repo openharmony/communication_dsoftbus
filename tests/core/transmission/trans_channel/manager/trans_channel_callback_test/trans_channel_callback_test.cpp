@@ -66,6 +66,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
     const char *sessionName = TEST_SESSION_NAME;
     int32_t pid = 2112;
     ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
     memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
     int32_t ret = TransServerGetChannelCb()->OnChannelOpened(NULL, pid, sessionName, channel);
@@ -101,6 +102,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelClosed001, TestSize.Level
     int32_t channelId = 2112;
     int32_t channelType = 2112;
     ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
     memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
     int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, pid, channelId, channelType);
@@ -138,7 +140,6 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpenFailed001, TestSize.L
     pid = -1;
     TransLaneMgrDeinit();
     ret = TransServerGetChannelCb()->OnChannelOpenFailed(pkgName, channelId, channelType, errCode, pid);
-    // EXPECT_EQ(SOFTBUS_ERR, ret);
 
     pid = 12;
     ret = TransLaneMgrInit();
@@ -160,6 +161,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
     int32_t channelId = -1;
     int32_t channelType = -1;
     TransReceiveData *receiveData = (TransReceiveData *)SoftBusCalloc(sizeof(TransReceiveData));
+    ASSERT_TRUE(receiveData != nullptr);
 
     int32_t ret = TransServerGetChannelCb()->OnDataReceived(NULL, pid, channelId, channelType, receiveData);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -193,6 +195,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
 HWTEST_F(TransChannelCallbackTest, TransServerOnQosEvent001, TestSize.Level1)
 {
     QosParam *param = (QosParam *)SoftBusCalloc(sizeof(QosParam));
+    ASSERT_TRUE(param != nullptr);
     const char *pkgName = TEST_PKG_NAME;
 
     int32_t ret = TransServerGetChannelCb()->OnQosEvent(NULL, param);
