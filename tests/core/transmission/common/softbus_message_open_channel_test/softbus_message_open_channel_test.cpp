@@ -26,12 +26,6 @@
 
 using namespace testing::ext;
 namespace OHOS {
-#define TEST_SESSION_NAME "com.softbus.transmission.test"
-#define TEST_CONN_IP "192.168.8.1"
-#define TEST_AUTH_PORT 6000
-#define TEST_AUTH_DATA "test auth message data"
-#define TEST_MESSAGE "testMessage"
-#define DEVICE_ID "DEVICE_ID"
 #define SESSION_NAME_MAX_LEN 256
 #define PKG_NAME_SIZE_MAX_LEN 65
 
@@ -68,10 +62,7 @@ char *TestGetMsgPack()
         return NULL;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == nullptr) {
-        cJSON_Delete(msg);
-        return NULL;
-    }
+
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = 1;
@@ -107,6 +98,14 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackError001, TestSize.Level1)
     errCode = CODE_OPEN_CHANNEL;
     msg = PackError(errCode, NULL);
     EXPECT_EQ(NULL, msg);
+
+    const char *errDesc = "test";
+    msg = PackError(errCode, errDesc);
+    bool ret = false;
+    if (msg != NULL) {
+        ret = true;
+    }
+    EXPECT_EQ(true, ret);
 }
 
 /**
@@ -118,7 +117,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackError001, TestSize.Level1)
 HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     char *msg = PackRequest(NULL);
@@ -159,7 +157,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest001, TestSize.Level1)
     ret = UnpackRequest(json, NULL);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     ret = UnpackRequest(NULL, appInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -186,7 +183,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackReply001, TestSize.Level1)
     EXPECT_EQ(NULL, msg);
 
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.apiVersion = API_V1;
     appInfo->myData.uid = -1;
@@ -221,7 +217,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReply001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     ret = UnpackReply(NULL, appInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
