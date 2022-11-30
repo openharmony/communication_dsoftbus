@@ -203,8 +203,8 @@ static int32_t RemoveGattcInfoFromList(int32_t clientId)
     BleGattcInfo *iterator = NULL;
     LIST_FOR_EACH_ENTRY(iterator, &(g_gattcInfoList->list), BleGattcInfo, node) {
         if (iterator->clientId == clientId) {
-           target = iterator;
-           break;
+            target = iterator;
+            break;
         }
     }
     if (target != NULL) {
