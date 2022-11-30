@@ -16,6 +16,7 @@
 #include "deactivemetanode_fuzzer.h"
 #include <cstddef>
 #include <securec.h>
+#include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
@@ -26,7 +27,7 @@ namespace OHOS {
             return false;
         }
 
-        char *tmp = (char *)malloc(size);
+        char *tmp = reinterpret_cast<char *>(malloc(size));
         if (tmp == nullptr) {
             return false;
         }
@@ -38,7 +39,7 @@ namespace OHOS {
             free(tmp);
             return false;
         }
-
+        SetAceessTokenPermission("busCenterTest");
         DeactiveMetaNode(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp));
         free(tmp);
         return true;

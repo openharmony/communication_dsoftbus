@@ -177,7 +177,7 @@ int SoftBusAddScanListener(const SoftBusScanListener *listener);
 
 int SoftBusRemoveScanListener(int listenerId);
 
-int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize);
+int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize);
 
 int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param);
 

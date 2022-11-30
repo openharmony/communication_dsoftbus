@@ -68,7 +68,6 @@ static int32_t EncryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
 
 static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
 {
-    int32_t ret;
     struct HksBlob encryptData = {0};
     struct HksBlob decryptData = {0};
 
@@ -79,6 +78,7 @@ static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
     }
     encryptData.size = len;
     encryptData.data = dbKey;
+    int32_t ret;
     do {
         if (LnnDecryptDataByHuks(&g_keyAlias, &encryptData, &decryptData) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "decrypt dbKey by huks fail");
