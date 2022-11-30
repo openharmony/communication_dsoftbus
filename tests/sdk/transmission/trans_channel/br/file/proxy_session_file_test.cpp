@@ -438,6 +438,7 @@ void AuthSessionTest::TransTest(struct TransTestInfo &transInfo, int32_t testDat
     OpenAllSession(transInfo.dataType, transInfo.mySessionName, transInfo.peerSessionName);
     if (testDataType == TYPE_BYTES) {
         char *data = (char *)malloc(SEND_DATA_SIZE_1M);
+        ASSERT_NE(data, nullptr);
         (void)memset_s(data, SEND_DATA_SIZE_1M, 0, SEND_DATA_SIZE_1M);
         ASSERT_NE(data, nullptr);
         int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1M, g_testData, strlen(g_testData));
@@ -446,6 +447,7 @@ void AuthSessionTest::TransTest(struct TransTestInfo &transInfo, int32_t testDat
         free(data);
     } else if (testDataType == TYPE_MESSAGE) {
         char *data = (char *)malloc(SEND_DATA_SIZE_1M);
+        ASSERT_NE(data, nullptr);
         (void)memset_s(data, SEND_DATA_SIZE_1M, 0, SEND_DATA_SIZE_1M);
         ASSERT_NE(data, nullptr);
         int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1M, g_testData, strlen(g_testData));

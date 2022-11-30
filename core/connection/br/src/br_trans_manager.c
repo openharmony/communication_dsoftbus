@@ -128,7 +128,7 @@ int32_t BrTransReadOneFrame(uint32_t connectionId, const SppSocketDriver *sppDri
     }
 }
 
-int32_t BrTransSend(const BrConnectionInfo *brConnInfo, const SppSocketDriver *sppDriver,
+int32_t BrTransSend(BrConnectionInfo *brConnInfo, const SppSocketDriver *sppDriver,
     int32_t brSendPeerLen, const char *data, uint32_t len)
 {
     if (brConnInfo == NULL) {

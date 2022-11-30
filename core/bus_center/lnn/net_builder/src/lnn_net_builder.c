@@ -711,6 +711,12 @@ static int32_t ProcessVerifyResult(const void *para)
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (msgPara->nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "msgPara node Info is null");
+        SoftBusFree((void *)msgPara);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     do {
         connFsm = FindConnectionFsmByRequestId(msgPara->requestId);
         if (connFsm == NULL || connFsm->isDead) {
@@ -774,6 +780,12 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
 
     if (msgPara == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (msgPara->nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "msgPara nodeInfo is null");
+        SoftBusFree((void *)msgPara);
         return SOFTBUS_INVALID_PARAM;
     }
 

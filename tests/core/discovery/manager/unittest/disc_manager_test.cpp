@@ -4594,10 +4594,14 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest006, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest001, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(muduleName != nullptr);
     const char *uuid = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(uuid != nullptr);
     const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    ASSERT_TRUE(data != nullptr);
     uint32_t len = 1;
     const char *ipaddr = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(ipaddr != nullptr);
     uint8_t type = 2;
     NSTACKX_Parameter g_parameter;
     int32_t ret;
@@ -4619,8 +4623,11 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest001, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest002, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(muduleName != nullptr);
     const char *uuid = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(uuid != nullptr);
     const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    ASSERT_TRUE(data != nullptr);
     uint32_t len = 1;
     const char *ipaddr = nullptr;
     uint8_t type = 2;
@@ -4643,10 +4650,14 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest002, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest003, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(muduleName != nullptr);
     const char *uuid = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(uuid != nullptr);
     const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    ASSERT_TRUE(data != nullptr);
     uint32_t len = 1;
     const char *ipaddr = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(ipaddr != nullptr);
     uint8_t type = 2;
     int32_t ret;
 
@@ -4665,8 +4676,11 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest003, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest001, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(muduleName != nullptr);
     const char *uuid = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(muduleName != nullptr);
     const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    ASSERT_TRUE(data != nullptr);
     uint32_t len = 1;
     NSTACKX_Parameter g_parameter;
     int32_t ret;
@@ -4707,8 +4721,11 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest002, TestSize.Level1)
 HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest003, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(muduleName != nullptr);
     const char *uuid = (const char *)malloc(sizeof(char));
+    ASSERT_TRUE(uuid != nullptr);
     const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    ASSERT_TRUE(data != nullptr);
     uint32_t len = 1;
     int32_t ret;
 
@@ -4793,7 +4810,7 @@ HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest001, TestSize.Level1)
     const uint32_t device_type = 0;
     const char *version = "3.1.0";
     NSTACKX_LocalDeviceInfo *localDevInfo = (NSTACKX_LocalDeviceInfo *)malloc(sizeof(NSTACKX_LocalDeviceInfo));
-
+    ASSERT_TRUE(localDevInfo != nullptr);
     (void)memset_s(localDevInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
     strcpy_s(localDevInfo->name, sizeof(localDevInfo->name), device_name);
     strcpy_s(localDevInfo->deviceId, sizeof(localDevInfo->deviceId), device_id);
@@ -4821,7 +4838,7 @@ HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest002, TestSize.Level1)
 {
     int ret;
     NSTACKX_LocalDeviceInfo *localDevInfo = (NSTACKX_LocalDeviceInfo *)malloc(sizeof(NSTACKX_LocalDeviceInfo));
-
+    ASSERT_TRUE(localDevInfo != nullptr);
     (void)memset_s(localDevInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
     ret = NSTACKX_RegisterDevice(localDevInfo);
     free(localDevInfo);
@@ -4848,7 +4865,7 @@ HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest003, TestSize.Level1)
     const uint32_t device_type = 0;
     const char *version = "3.1.0";
     NSTACKX_LocalDeviceInfo *localDevInfo = (NSTACKX_LocalDeviceInfo *)malloc(sizeof(NSTACKX_LocalDeviceInfo));
-
+    ASSERT_TRUE(localDevInfo != nullptr);
     (void)memset_s(localDevInfo, 0, sizeof(NSTACKX_LocalDeviceInfo), 0);
     strcpy_s(localDevInfo->name, sizeof(localDevInfo->name), device_name);
     strcpy_s(localDevInfo->deviceId, sizeof(localDevInfo->deviceId), device_id);

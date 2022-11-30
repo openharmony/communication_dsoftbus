@@ -710,6 +710,7 @@ HWTEST_F(DiscSoftBusBleTest, RegisterCapability001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, RegisterCapability001, Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {};
     PublishOption publishOption = {
@@ -740,6 +741,7 @@ HWTEST_F(DiscSoftBusBleTest, UnregisterCapability001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest UnregisterCapability001 Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {
         .freq = LOW,
@@ -779,6 +781,7 @@ HWTEST_F(DiscSoftBusBleTest, UnregisterCapability002, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest UnregisterCapability002 Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     PublishOption publishOption = {
         .freq = LOW,
@@ -816,6 +819,7 @@ HWTEST_F(DiscSoftBusBleTest, UnregisterCapability003, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest UnregisterCapability003 Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     PublishOption publishOption = {
         .freq = LOW,
@@ -853,6 +857,7 @@ HWTEST_F(DiscSoftBusBleTest, UnregisterCapability004, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest UnregisterCapability004 Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     PublishOption publishOption = {
         .freq = LOW,
@@ -890,6 +895,7 @@ HWTEST_F(DiscSoftBusBleTest, UnregisterCapability005, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest UnregisterCapability005 Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
 
     PublishOption publishOption = {
@@ -1089,6 +1095,7 @@ HWTEST_F(DiscSoftBusBleTest, BleStartActiveDiscovery001, TestSize.Level1)
     SoftBusMutexInit(&g_bleInfoLock, nullptr);
     DiscBleLooperInit();
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {
         .freq = LOW,
@@ -1118,6 +1125,7 @@ HWTEST_F(DiscSoftBusBleTest, BleStartPassiveDiscovery001, TestSize.Level1)
     SoftBusMutexInit(&g_bleInfoLock, nullptr);
     DiscBleLooperInit();
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {
         .freq = LOW,
@@ -1147,6 +1155,7 @@ HWTEST_F(DiscSoftBusBleTest, BleStopActiveDiscovery001, TestSize.Level1)
     SoftBusMutexInit(&g_bleInfoLock, nullptr);
     DiscBleLooperInit();
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {
         .freq = LOW,
@@ -1177,6 +1186,7 @@ HWTEST_F(DiscSoftBusBleTest, BleStopPassiveDiscovery001, TestSize.Level1)
     SoftBusMutexInit(&g_bleInfoLock, nullptr);
     DiscBleLooperInit();
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {
         .freq = LOW,
@@ -1718,6 +1728,7 @@ HWTEST_F(DiscSoftBusBleTest, RegisterCapability002, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest RegisterCapability002 Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {
         .freq = LOW,
@@ -1757,6 +1768,7 @@ HWTEST_F(DiscSoftBusBleTest, RegisterCapability003, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest RegisterCapability003 Start");
     uint8_t *capabilityDate = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    ASSERT_TRUE(capabilityDate != nullptr);
     capabilityDate[0] = 'a';
     SubscribeOption subscribeOption = {
         .freq = LOW,
@@ -1986,18 +1998,23 @@ HWTEST_F(DiscSoftBusBleTest, DiscFreeBleScanFilter001, TestSize.Level1)
     DiscFreeBleScanFilter(&filter);
 
     filter = static_cast<SoftBusBleScanFilter *>(SoftBusMalloc(sizeof(SoftBusBleScanFilter)));
+    ASSERT_TRUE(filter != nullptr);
     filter->serviceData = nullptr;
     filter->serviceDataMask = nullptr;
     DiscFreeBleScanFilter(&filter);
 
     filter = static_cast<SoftBusBleScanFilter *>(SoftBusMalloc(sizeof(SoftBusBleScanFilter)));
+    ASSERT_TRUE(filter != nullptr);
     filter->serviceData = static_cast<uint8_t *>(SoftBusMalloc(128));
+    ASSERT_TRUE(filter->serviceData != nullptr);
     filter->serviceDataMask = nullptr;
     DiscFreeBleScanFilter(&filter);
 
     filter = static_cast<SoftBusBleScanFilter *>(SoftBusMalloc(sizeof(SoftBusBleScanFilter)));
+    ASSERT_TRUE(filter != nullptr);
     filter->serviceData = nullptr;
     filter->serviceDataMask = static_cast<uint8_t *>(SoftBusMalloc(128));
+    ASSERT_TRUE(filter->serviceDataMask != nullptr);
     DiscFreeBleScanFilter(&filter);
 
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest DiscFreeBleScanFilter001 End");

@@ -35,7 +35,7 @@ public:
     virtual int SoftBusAddScanListener(const SoftBusScanListener *listener) = 0;
     virtual int SoftBusRemoveScanListener(int listenerId) = 0;
 
-    virtual int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize) = 0;
+    virtual int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize) = 0;
 
     virtual int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback) = 0;
     virtual int SoftBusReleaseAdvChannel(int channel) = 0;
@@ -71,7 +71,7 @@ public:
     MOCK_METHOD(int, SoftBusAddScanListener, (const SoftBusScanListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveScanListener, (int listenerId), (override));
 
-    MOCK_METHOD(int, SoftBusSetScanFilter, (int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize),
+    MOCK_METHOD(int, SoftBusSetScanFilter, (int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize),
                 (override));
 
     MOCK_METHOD(int, SoftBusGetAdvChannel, (const SoftBusAdvCallback *callback), (override));
