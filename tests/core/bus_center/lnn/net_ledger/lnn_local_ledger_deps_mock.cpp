@@ -44,42 +44,6 @@ static LocalLedgerDepsInterfaceMock *GetLocalLedgerDepsInterface()
     return reinterpret_cast<LocalLedgerDepsInterfaceMock *>(g_localLedgerDepsInterface);
 }
 
-extern "C" {
-uint32_t LnnGetNetCapabilty(void)
-{
-    return GetLocalLedgerDepsInterface()->LnnGetNetCapabilty();
-}
-
-int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
-{
-    return GetLocalLedgerDepsInterface()->SoftBusGenerateRandomArray(randStr, len);
-}
-
-int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
-{
-    return GetLocalLedgerDepsInterface()->GetCommonDevInfo(key, value, len);
-}
-
-int32_t LnnInitLocalP2pInfo(NodeInfo *info)
-{
-    return GetLocalLedgerDepsInterface()->LnnInitLocalP2pInfo(info);
-}
-
-int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
-{
-    return GetLocalLedgerDepsInterface()->SoftBusRegBusCenterVarDump(dumpVar, cb);
-}
-
-int32_t LnnInitOhosAccount(void)
-{
-    return GetLocalLedgerDepsInterface()->LnnInitOhosAccount();
-}
-
-int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
-{
-    return GetLocalLedgerDepsInterface()->LnnConvertDeviceTypeToId(deviceType, typeId);
-}
-
 int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfo(const CommonDeviceKey key,
     char *value, uint32_t len)
 {
@@ -115,6 +79,37 @@ int32_t LocalLedgerDepsInterfaceMock::LedgerSoftBusRegBusCenterVarDump(char *dum
         ret = cb(SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO_FD);
     }
     return ret;
+}
+
+extern "C" {
+uint32_t LnnGetNetCapabilty(void)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetNetCapabilty();
+}
+
+int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusGenerateRandomArray(randStr, len);
+}
+
+int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->GetCommonDevInfo(key, value, len);
+}
+
+int32_t LnnInitLocalP2pInfo(NodeInfo *info)
+{
+    return GetLocalLedgerDepsInterface()->LnnInitLocalP2pInfo(info);
+}
+
+int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+{
+    return GetLocalLedgerDepsInterface()->SoftBusRegBusCenterVarDump(dumpVar, cb);
+}
+
+int32_t LnnInitOhosAccount(void)
+{
+    return GetLocalLedgerDepsInterface()->LnnInitOhosAccount();
 }
 } // extern "C"
 } // namespace OHOS
