@@ -140,7 +140,7 @@ NO_SANITIZE("cfi") static int32_t BleCilentRemoveMessageFunc(const SoftBusMessag
     return SOFTBUS_ERR;
 }
 
-static BleGattcInfo *CreateNewBleGattcInfo(SoftBusBtAddr *bleAddr)
+static BleGattcInfo *CreateNewBleGattcInfo(SoftBusBtAddr *bleAddr, int32_t clientId)
 {
     BleGattcInfo *infoNode = (BleGattcInfo *)SoftBusCalloc(sizeof(BleGattcInfo));
     if (infoNode == NULL) {
@@ -148,8 +148,8 @@ static BleGattcInfo *CreateNewBleGattcInfo(SoftBusBtAddr *bleAddr)
         return NULL;
     }
     ListInit(&(infoNode->node));
-    infoNode->clientId = INVALID_GATTC_ID;
-    infoNode->state = BLE_GATT_CLIENT_INITIAL;
+    infoNode->clientId = clientId;
+    infoNode->state = BLE_GATT_CLIENT_STARTING;
     if (memcpy_s(infoNode->peerAddr.addr, BT_ADDR_LEN, bleAddr->addr, BT_ADDR_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s fail");
         SoftBusFree(infoNode);
@@ -189,6 +189,29 @@ static int32_t AddGattcInfoToList(BleGattcInfo *info)
     }
     ListTailInsert(&(g_gattcInfoList->list), &(info->node));
     g_gattcInfoList->cnt++;
+    (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
+    return SOFTBUS_OK;
+}
+
+static int32_t RemoveGattcInfoFromList(int32_t clientId)
+{
+    if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:lock failed", __func__);
+        return SOFTBUS_LOCK_ERR;
+    }
+    BleGattcInfo *target = NULL;
+    BleGattcInfo *iterator = NULL;
+    LIST_FOR_EACH_ENTRY(iterator, &(g_gattcInfoList->list), BleGattcInfo, node) {
+        if (iterator->clientId == clientId) {
+           target = iterator;
+           break;
+        }
+    }
+    if (target != NULL) {
+        g_gattcInfoList->cnt--;
+        ListDelete(&(target->node));
+        SoftBusFree(target);
+    }
     (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
     return SOFTBUS_OK;
 }
@@ -254,44 +277,40 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         return SOFTBUS_BLEGATTC_NONT_INIT;
     }
     if (bleAddr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid ble addr param");
         return SOFTBUS_ERR;
     }
-    BleGattcInfo *infoNode = CreateNewBleGattcInfo(bleAddr);
+    int32_t clientId = SoftbusGattcRegister();
+    if (clientId == INVALID_GATTC_ID) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc rigister failed");
+        return SOFTBUS_ERR;
+    }
+    BleGattcInfo *infoNode = CreateNewBleGattcInfo(bleAddr, clientId);
     if (infoNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc create infoNode failed");
-        return SOFTBUS_ERR;
-    }
-    infoNode->clientId = SoftbusGattcRegister();
-    if (infoNode->clientId == INVALID_GATTC_ID) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc rigister failed");
-        SoftBusFree(infoNode);
-        return SOFTBUS_ERR;
-    }
-    if (SoftbusGattcConnect(infoNode->clientId, bleAddr) != SOFTBUS_OK) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect failed");
-        SoftBusFree(infoNode);
-        return SOFTBUS_ERR;
-    }
-    if (BleClientPostMsgDelay(CLIENT_TIME_OUT, infoNode->clientId,
-        SOFTBUS_BLECONNECTION_CLIENT_CONNECTED_TIMEOUT, CLIENT_CONNECTED_WAIT_TIME) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "post msg delay err");
-        SoftBusFree(infoNode);
+        (void)SoftbusGattcUnRegister(clientId);
         return SOFTBUS_ERR;
     }
     if (AddGattcInfoToList(infoNode) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AddGattcInfoToList failed");
+        (void)SoftbusGattcUnRegister(clientId);
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
     }
-    if (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_STARTING) != true) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "UpdateBleGattcInfoStateInner failed");
-        SoftBusFree(infoNode);
+    if (SoftbusGattcConnect(clientId, bleAddr) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect failed");
+        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
+        (void)SoftbusGattcUnRegister(clientId);
+        (void)RemoveGattcInfoFromList(clientId);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattClientConnect ok.\n");
-    return infoNode->clientId;
+    if (BleClientPostMsgDelay(CLIENT_TIME_OUT, clientId,
+        SOFTBUS_BLECONNECTION_CLIENT_CONNECTED_TIMEOUT, CLIENT_CONNECTED_WAIT_TIME) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "post msg delay err");
+        // continue anyway,
+    }
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattClientConnect ok, clientId: %d", clientId);
+    return clientId;
 }
 
 int32_t SoftBusGattClientDisconnect(int32_t clientId)
