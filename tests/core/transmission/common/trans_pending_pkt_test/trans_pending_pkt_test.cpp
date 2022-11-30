@@ -22,14 +22,10 @@
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "trans_pending_pkt.h"
+#include "trans_pending_pkt.c"
 
 using namespace testing::ext;
 namespace OHOS {
-#define TEST_SESSION_NAME "com.softbus.transmission.test"
-#define TEST_CONN_IP "192.168.8.1"
-#define TEST_AUTH_PORT 6000
-#define TEST_AUTH_DATA "test auth message data"
-
 class TransPendingPktTest : public testing::Test {
 public:
     TransPendingPktTest()
@@ -92,6 +88,28 @@ HWTEST_F(TransPendingPktTest, PendingDeinit001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreatePendingItem001
+ * @tc.desc: CreatePendingItem001, use the wrong parameter.
+ * @tc.desc: ReleasePendingItem, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransPendingPktTest, CreatePendingItem001, TestSize.Level1)
+{
+    int32_t seqNum = 1111;
+    int32_t channelId = 222;
+    PendingPktInfo *item = NULL;
+    item = CreatePendingItem(channelId, seqNum);
+    bool ret = false;
+    if (item != NULL) {
+        ret = true;
+    }
+    EXPECT_EQ(true, ret);
+
+    ReleasePendingItem(item);
+}
+
+/**
  * @tc.name: ProcPendingPacket001
  * @tc.desc: ProcPendingPacket001, use the wrong parameter.
  * @tc.type: FUNC
@@ -107,6 +125,10 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket001, TestSize.Level1)
     type = PENDING_TYPE_PROXY - 1;
     ret = ProcPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    type = PENDING_TYPE_PROXY + 1;
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
 }
 
 /**
@@ -148,6 +170,7 @@ HWTEST_F(TransPendingPktTest, DelPendingPacket001, TestSize.Level1)
     ret = DelPendingPacket(channelId, type);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
+    type = PENDING_TYPE_PROXY + 1;
     PendingDeinit(type);
     ret = DelPendingPacket(channelId, type);
     EXPECT_EQ(SOFTBUS_ERR, ret);

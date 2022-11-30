@@ -24,6 +24,7 @@
 #include "softbus_protocol_def.h"
 #include "softbus_adapter_mem.h"
 #include "trans_lane_manager.h"
+#include "trans_lane_manager.c"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -54,6 +55,49 @@ void TransLaneManagerTest::TearDownTestCase(void)
 {}
 
 /**
+ * @tc.name: GetTransSessionInfoByLane001
+ * @tc.desc: GetTransSessionInfoByLane, use the wrong parameter.
+ * @tc.desc: ConvertLaneLinkTypeToDumper, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, GetTransSessionInfoByLane001, TestSize.Level1)
+{
+    TransLaneInfo *laneItem = (TransLaneInfo*)SoftBusMalloc(sizeof(TransLaneInfo));
+    EXPECT_TRUE(laneItem != NULL);
+    memset_s(laneItem, sizeof(TransLaneInfo), 0, sizeof(TransLaneInfo));
+
+    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != NULL);
+    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+
+    TransDumpLaneLinkType transDumpLaneLinkType;
+
+    GetTransSessionInfoByLane(laneItem, appInfo);
+
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_BR);
+    EXPECT_EQ(DUMPER_LANE_BR, transDumpLaneLinkType);
+
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_BLE);
+    EXPECT_EQ(DUMPER_LANE_BLE, transDumpLaneLinkType);
+
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_P2P);
+    EXPECT_EQ(DUMPER_LANE_P2P, transDumpLaneLinkType);
+
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_WLAN_2P4G);
+    EXPECT_EQ(DUMPER_LANE_WLAN, transDumpLaneLinkType);
+
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_WLAN_5G);
+    EXPECT_EQ(DUMPER_LANE_WLAN, transDumpLaneLinkType);
+
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_ETH);
+    EXPECT_EQ(DUMPER_LANE_ETH, transDumpLaneLinkType);
+
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_LINK_TYPE_BUTT);
+    EXPECT_EQ(DUMPER_LANE_LINK_TYPE_BUTT, transDumpLaneLinkType);
+}
+
+/**
  * @tc.name: TransChannelInit001
  * @tc.desc: TransChannelInit001, use the wrong parameter.
  * @tc.type: FUNC
@@ -64,6 +108,23 @@ HWTEST_F(TransLaneManagerTest, TransChannelInit001, TestSize.Level1)
     int32_t ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransLaneMgrDeinit();
+}
+
+/**
+ * @tc.name: TransLaneChannelForEachShowInfo001
+ * @tc.desc: TransLaneChannelForEachShowInfo, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneManagerTest, TransLaneChannelForEachShowInfo001, TestSize.Level1)
+{
+    int fd = 1;
+    TransLaneMgrDeinit();
+    TransLaneChannelForEachShowInfo(fd);
+
+    int32_t ret = TransLaneMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransLaneChannelForEachShowInfo(fd);
 }
 
 /**
@@ -78,9 +139,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
     int32_t channelType = 2112;
     uint32_t laneId = 1;
     AppInfoData *myData = (AppInfoData *)SoftBusCalloc(sizeof(AppInfoData));
-    ASSERT_TRUE(myData != nullptr);
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
-    ASSERT_TRUE(connInfo != nullptr);
 
     TransLaneMgrDeinit();
     int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
@@ -197,6 +256,10 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelInfoByLaneId001, TestSize.Level1)
 
     ret = TransGetChannelInfoByLaneId(laneId, &channelId, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    TransLaneMgrDeinit();
+
+    ret = TransLaneMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransGetChannelInfoByLaneId(laneId, &channelId, &channelType);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 } // OHOS
