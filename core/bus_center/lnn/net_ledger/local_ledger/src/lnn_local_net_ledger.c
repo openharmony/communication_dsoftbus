@@ -818,7 +818,7 @@ static bool JudgeString(const char *info, int32_t len)
     return (len <= 0) ? false : IsValidString(info, (uint32_t)len);
 }
 
-int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
+NO_SANITIZE("cfi") int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 {
     uint32_t i;
     int32_t ret;
@@ -891,7 +891,7 @@ NO_SANITIZE("cfi") int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
     return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
 }
 
-int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
+NO_SANITIZE("cfi") int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
@@ -901,12 +901,12 @@ NO_SANITIZE("cfi") int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
     return LnnGetLocalInfo(key, (void*)info, sizeof(int16_t));
 }
 
-int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
+NO_SANITIZE("cfi") int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
 
-int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+NO_SANITIZE("cfi") int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
@@ -1037,7 +1037,7 @@ NO_SANITIZE("cfi") void LnnDeinitLocalLedger(void)
     g_localNetLedger.status = LL_INIT_UNKNOWN;
 }
 
-bool LnnIsMasterNode(void)
+NO_SANITIZE("cfi") bool LnnIsMasterNode(void)
 {
     bool ret = false;
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {

@@ -35,7 +35,7 @@ static char g_interface[P2PLINK_INTERFACE_LEN] = {0};
 static bool g_p2plinkState = false;
 static bool g_p2plinkDhcp = false;
 
-P2pLinkRole P2pLinkGetRole(void)
+NO_SANITIZE("cfi") P2pLinkRole P2pLinkGetRole(void)
 {
     return g_role;
 }
@@ -55,12 +55,12 @@ void P2pLinkSetMyIp(const char *ip)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my ip.");
 }
 
-char* P2pLinkGetMyIp(void)
+NO_SANITIZE("cfi") char* P2pLinkGetMyIp(void)
 {
     return g_myIp;
 }
 
-char* P2pLinkGetMyMac(void)
+NO_SANITIZE("cfi") char* P2pLinkGetMyMac(void)
 {
     char myMac[P2P_MAC_LEN] = {0};
 
@@ -106,12 +106,12 @@ void P2pLinkSetGcPort(int32_t port)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set gc port %d", g_goPort);
 }
 
-int32_t P2pLinkGetGcPort(void)
+NO_SANITIZE("cfi") int32_t P2pLinkGetGcPort(void)
 {
     return g_gcPort;
 }
 
-char* P2pLinkGetGoIp(void)
+NO_SANITIZE("cfi") char* P2pLinkGetGoIp(void)
 {
     if (g_role == ROLE_GO) {
         return P2pLinkGetMyIp();
@@ -119,7 +119,7 @@ char* P2pLinkGetGoIp(void)
     return g_goIp;
 }
 
-char* P2pLinkGetGoMac(void)
+NO_SANITIZE("cfi") char* P2pLinkGetGoMac(void)
 {
     if (g_role == ROLE_GO) {
         return P2pLinkGetMyMac();
@@ -127,7 +127,7 @@ char* P2pLinkGetGoMac(void)
     return g_goMac;
 }
 
-int32_t P2pLinkGetGoPort(void)
+NO_SANITIZE("cfi") int32_t P2pLinkGetGoPort(void)
 {
     return g_goPort;
 }
@@ -152,7 +152,7 @@ void P2pLinkSetDhcpState(bool isNeedDhcp)
     g_p2plinkDhcp = isNeedDhcp;
 }
 
-bool P2pLinkGetDhcpState(void)
+NO_SANITIZE("cfi") bool P2pLinkGetDhcpState(void)
 {
     return g_p2plinkDhcp;
 }
@@ -167,14 +167,14 @@ void P2pLinkSetDisconnectState(bool state)
     g_isDisconnect = state;
 }
 
-void P2pLinkCommonInit(void)
+NO_SANITIZE("cfi") void P2pLinkCommonInit(void)
 {
     g_macExpired = true;
     g_role = ROLE_NONE;
     return;
 }
 
-void P2pLinkCommonClean(void)
+NO_SANITIZE("cfi") void P2pLinkCommonClean(void)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkCommonClean");
     g_role = ROLE_NONE;

@@ -16,11 +16,11 @@
 #include "bus_center_manager.h"
 
 #include <securec.h>
-
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
+NO_SANITIZE("cfi") int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {
     int32_t ret;
     if (!isInnerRequest) {
@@ -37,7 +37,7 @@ int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isI
     return SOFTBUS_OK;
 }
 
-int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest)
+NO_SANITIZE("cfi") int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest)
 {
     if (!isInnerRequest) {
         if (DiscUnPublishService(pkgName, publishId) != SOFTBUS_OK) {
@@ -53,7 +53,8 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     return SOFTBUS_OK;
 }
 
-int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest)
+NO_SANITIZE("cfi") int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
+    bool isInnerRequest)
 {
     int32_t ret;
     if (!isInnerRequest) {
@@ -74,7 +75,7 @@ int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const
     return SOFTBUS_OK;
 }
 
-int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest)
+NO_SANITIZE("cfi") int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest)
 {
     if (!isInnerRequest) {
         if (DiscStopDiscovery(pkgName, subscribeId) != SOFTBUS_OK) {

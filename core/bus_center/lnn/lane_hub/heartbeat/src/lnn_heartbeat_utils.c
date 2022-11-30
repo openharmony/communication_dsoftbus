@@ -163,7 +163,7 @@ NO_SANITIZE("cfi") bool LnnHasActiveConnection(const char *networkId, Connection
     return false;
 }
 
-bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)
+NO_SANITIZE("cfi") bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)
 {
     bool isFinish = false;
     LnnHeartbeatType i;

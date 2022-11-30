@@ -533,7 +533,7 @@ int32_t P2pLinkMagicInit(void)
     return SOFTBUS_OK;
 }
 
-void P2pLinkClean(void)
+NO_SANITIZE("cfi") void P2pLinkClean(void)
 {
 #define CLEAN_DELAY_100MS 100000
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p clean.");

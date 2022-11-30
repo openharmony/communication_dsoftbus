@@ -29,11 +29,11 @@
 #include "lnn_sync_item_info.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_json_utils.h"
 #include "message_handler.h"
-#include "softbus_def.h"
 
 #define DELAY_LEN 1000
 #define MAX_TRY 10

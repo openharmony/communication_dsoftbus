@@ -50,7 +50,7 @@ void P2pLinkSetDevStateCallback(const P2pLinkPeerDevStateCb *cb)
     (void)memcpy_s(&g_devStateCb, sizeof(P2pLinkPeerDevStateCb), cb, sizeof(P2pLinkPeerDevStateCb));
 }
 
-void P2pLinkDevOffLineNotify(const char *peerMac)
+NO_SANITIZE("cfi") void P2pLinkDevOffLineNotify(const char *peerMac)
 {
     if (g_devStateCb.onDevOffline != NULL) {
         g_devStateCb.onDevOffline(peerMac);
@@ -65,13 +65,13 @@ void P2pLinkMyRoleChangeNotify(P2pLinkRole myRole)
     }
 }
 
-void P2pLinkAddConnedDev(ConnectedNode *item)
+NO_SANITIZE("cfi") void P2pLinkAddConnedDev(ConnectedNode *item)
 {
     ListAdd(&g_connectedDevices, &item->node);
     g_connectedCnt++;
 }
 
-ConnectedNode *P2pLinkGetConnedDevByMac(const char *peerMac)
+NO_SANITIZE("cfi") ConnectedNode *P2pLinkGetConnedDevByMac(const char *peerMac)
 {
     ConnectedNode *item = NULL;
     ConnectedNode *next = NULL;
@@ -94,7 +94,7 @@ void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId)
     item->chanId.inAuthId = authId;
 }
 
-ConnectedNode *P2pLinkGetConnedDevByPeerIp(const char *peerIp)
+NO_SANITIZE("cfi") ConnectedNode *P2pLinkGetConnedDevByPeerIp(const char *peerIp)
 {
     ConnectedNode *item = NULL;
     ConnectedNode *next = NULL;
@@ -107,7 +107,7 @@ ConnectedNode *P2pLinkGetConnedDevByPeerIp(const char *peerIp)
     return NULL;
 }
 
-int32_t P2pLinkConnedIsEmpty(void)
+NO_SANITIZE("cfi") int32_t P2pLinkConnedIsEmpty(void)
 {
     if (IsListEmpty(&g_connectedDevices)) {
         return SOFTBUS_OK;
@@ -115,7 +115,7 @@ int32_t P2pLinkConnedIsEmpty(void)
     return SOFTBUS_ERR;
 }
 
-ConnectedNode *P2pLinkGetConnedByAuthReqeustId(uint32_t reqeustId)
+NO_SANITIZE("cfi") ConnectedNode *P2pLinkGetConnedByAuthReqeustId(uint32_t reqeustId)
 {
     ConnectedNode *item = NULL;
     ConnectedNode *next = NULL;
@@ -128,7 +128,7 @@ ConnectedNode *P2pLinkGetConnedByAuthReqeustId(uint32_t reqeustId)
     return NULL;
 }
 
-void P2pLinkDelConnedByAuthId(int64_t authId)
+NO_SANITIZE("cfi") void P2pLinkDelConnedByAuthId(int64_t authId)
 {
     ConnectedNode *item = NULL;
     ConnectedNode *next = NULL;
@@ -249,7 +249,7 @@ static void P2pLinkCleanConnedDev(void)
     return;
 }
 
-ConnectingNode *P2pLinkGetConningByPeerMacState(const char *peerMac, int state)
+NO_SANITIZE("cfi") ConnectingNode *P2pLinkGetConningByPeerMacState(const char *peerMac, int state)
 {
     ConnectingNode *item = NULL;
     ConnectingNode *next = NULL;
@@ -262,7 +262,7 @@ ConnectingNode *P2pLinkGetConningByPeerMacState(const char *peerMac, int state)
     return NULL;
 }
 
-ConnectingNode *P2pLinkGetConningDevByReqId(int32_t reqId)
+NO_SANITIZE("cfi") ConnectingNode *P2pLinkGetConningDevByReqId(int32_t reqId)
 {
     ConnectingNode *item = NULL;
     ConnectingNode *next = NULL;
@@ -275,7 +275,7 @@ ConnectingNode *P2pLinkGetConningDevByReqId(int32_t reqId)
     return NULL;
 }
 
-void P2pLinkDelConning(int32_t reqId)
+NO_SANITIZE("cfi") void P2pLinkDelConning(int32_t reqId)
 {
     ConnectingNode *item = NULL;
     ConnectingNode *next = NULL;
@@ -290,14 +290,14 @@ void P2pLinkDelConning(int32_t reqId)
     }
 }
 
-void P2pLinkDelConningDev(ConnectingNode *item)
+NO_SANITIZE("cfi") void P2pLinkDelConningDev(ConnectingNode *item)
 {
     ListDelete(&item->node);
     SoftBusFree(item);
     g_connectingCnt--;
 }
 
-void P2pLinkConningCallback(const ConnectingNode *item, int32_t ret, int32_t failReason)
+NO_SANITIZE("cfi") void P2pLinkConningCallback(const ConnectingNode *item, int32_t ret, int32_t failReason)
 {
     const P2pLinkConnectInfo *devInfo = &item->connInfo;
     if (ret == SOFTBUS_ERR) {
@@ -462,7 +462,7 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
     P2pLoopProcDelay(P2pLinkTimerDevProc, 0, CONNING_TIMER_1S, P2PLOOP_CONNINGDEV_TIMER);
 }
 
-void P2pLinkAddConningDev(ConnectingNode *item)
+NO_SANITIZE("cfi") void P2pLinkAddConningDev(ConnectingNode *item)
 {
     ListAdd(&g_connectingDevices, &item->node);
     g_connectingCnt++;
@@ -487,7 +487,7 @@ static void P2pLinkCleanConningDev(void)
     }
 }
 
-void P2pLinkDumpDev(void)
+NO_SANITIZE("cfi") void P2pLinkDumpDev(void)
 {
     ConnectingNode *conningItem = NULL;
     ConnectingNode *conningNext = NULL;
@@ -514,7 +514,7 @@ void P2pLinkDevEnterDiscState(void)
     P2pLoopProcDelay(P2pLinkDevExistDiscState, NULL, DISCONNING_TIMER_3S, P2PLOOP_OPEN_DISCONNECTING_TIMEOUT);
 }
 
-int32_t P2pLinkDevInit(void)
+NO_SANITIZE("cfi") int32_t P2pLinkDevInit(void)
 {
     ListInit(&g_connectingDevices);
     ListInit(&g_connectedDevices);
@@ -525,7 +525,7 @@ int32_t P2pLinkDevInit(void)
     return SOFTBUS_OK;
 }
 
-void P2pLinkDevClean(void)
+NO_SANITIZE("cfi") void P2pLinkDevClean(void)
 {
     P2pLinkCleanConnedDev();
     P2pLinkCleanConningDev();

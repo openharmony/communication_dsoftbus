@@ -130,7 +130,7 @@ NO_SANITIZE("cfi") int32_t LnnCreateData(Map *map, uint32_t key, const void *val
     return SOFTBUS_OK;
 }
 
-void *LnnReadData(const Map *map, uint32_t key)
+NO_SANITIZE("cfi") void *LnnReadData(const Map *map, uint32_t key)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {

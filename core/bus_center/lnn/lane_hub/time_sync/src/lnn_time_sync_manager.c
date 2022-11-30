@@ -487,7 +487,7 @@ NO_SANITIZE("cfi") void LnnDeinitTimeSync(void)
     LnnTimeSyncImplDeinit();
 }
 
-int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
+NO_SANITIZE("cfi") int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     TimeSyncAccuracy accuracy, TimeSyncPeriod period)
 {
     StartTimeSyncReqMsgPara *para = NULL;
@@ -526,7 +526,7 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     return SOFTBUS_OK;
 }
 
-int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
+NO_SANITIZE("cfi") int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     StopTimeSyncReqMsgPara *para = NULL;
 

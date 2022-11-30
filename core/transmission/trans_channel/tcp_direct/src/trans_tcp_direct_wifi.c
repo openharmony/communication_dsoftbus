@@ -20,13 +20,15 @@
 #include "auth_interface.h"
 #include "lnn_network_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 
-int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
+NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
+    int32_t *channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {

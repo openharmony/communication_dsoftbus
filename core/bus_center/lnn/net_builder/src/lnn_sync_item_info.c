@@ -21,6 +21,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_wifi_api_adapter.h"
@@ -143,7 +144,7 @@ void OnReceiveTransReqMsg(LnnSyncInfoType type, const char *networkId, const uin
     }
 }
 
-int32_t LnnSyncDeviceName(const char *networkId)
+NO_SANITIZE("cfi") int32_t LnnSyncDeviceName(const char *networkId)
 {
     const char *deviceName = NULL;
     const NodeInfo *info = LnnGetLocalNodeInfo();

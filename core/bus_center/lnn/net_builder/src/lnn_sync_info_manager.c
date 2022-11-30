@@ -408,7 +408,7 @@ NO_SANITIZE("cfi") void LnnDeinitSyncInfoManager(void)
     SoftBusMutexDestroy(&g_syncInfoManager.lock);
 }
 
-int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
+NO_SANITIZE("cfi") int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
 {
     if (type >= LNN_INFO_TYPE_COUNT || handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid sync info hander reg param: %d", type);
@@ -428,7 +428,7 @@ int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handle
     return SOFTBUS_OK;
 }
 
-int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
+NO_SANITIZE("cfi") int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
 {
     if (type >= LNN_INFO_TYPE_COUNT || handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid sync info hander unreg param: %d", type);
@@ -516,7 +516,7 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
+NO_SANITIZE("cfi") int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
 {
     SyncInfoMsg *syncMsg = NULL;
