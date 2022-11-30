@@ -100,11 +100,11 @@ if (defined(ohos_lite)) {
     native_source_path = rebase_path("$dsoftbus_root_path")
     dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
     enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                           [
-                             "$native_source_path",
-                             "$dep_file",
-                           ],
-                           "value")
+                       [
+                         "$native_source_path",
+                         "$dep_file",
+                       ],
+                       "value")
 
     if (enhanced) {
       deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
