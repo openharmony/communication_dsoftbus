@@ -104,6 +104,8 @@
           "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/ipc:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/common:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel/udp/file:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/tcp_direct:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/udp_negotiation:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/auth_channel:unittest",
