@@ -416,11 +416,11 @@ static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvL
 }
 
 static UdpChannelMgrCb g_udpChannelCb = {
-    .OnUdpChannelOpened = OnUdpChannelOpened,
-    .OnUdpChannelClosed = OnUdpChannelClosed,
+    .OnStreamReceived = OnStreamReceived,
     .OnFileGetSessionId = OnFileGetSessionId,
     .OnMessageReceived = NULL,
-    .OnStreamReceived = OnStreamReceived,
+    .OnUdpChannelOpened = OnUdpChannelOpened,
+    .OnUdpChannelClosed = OnUdpChannelClosed,
     .OnQosEvent = OnQosEvent,
 };
 
