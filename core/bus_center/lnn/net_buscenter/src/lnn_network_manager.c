@@ -265,7 +265,7 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
     return SOFTBUS_ERR;
 }
 
-bool LnnVisitNetif(VisitNetifCallback callback, void *data)
+NO_SANITIZE("cfi") bool LnnVisitNetif(VisitNetifCallback callback, void *data)
 {
     LnnNetIfMgr *item = NULL;
     VisitNextChoice result = CHOICE_VISIT_NEXT;
@@ -279,7 +279,7 @@ bool LnnVisitNetif(VisitNetifCallback callback, void *data)
     return true;
 }
 
-bool LnnVisitProtocol(VisitProtocolCallback callback, void *data)
+NO_SANITIZE("cfi") bool LnnVisitProtocol(VisitProtocolCallback callback, void *data)
 {
     VisitNextChoice result = CHOICE_VISIT_NEXT;
     for (uint8_t i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
@@ -318,7 +318,7 @@ static void RestartCoapDiscovery(void)
     SetCallLnnStatus(true);
 }
 
-static void OnGroupCreated(const char *groupId, int32_t groupType)
+NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
     RestartCoapDiscovery();
@@ -328,7 +328,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     LnnHbOnAuthGroupCreated(groupType);
 }
 
-static void OnGroupDeleted(const char *groupId)
+NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupId)
 {
     (void)groupId;
     LnnOnOhosAccountChanged();

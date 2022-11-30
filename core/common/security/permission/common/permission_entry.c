@@ -389,7 +389,7 @@ static bool HaveGrantedPermission(const char *sessionName)
     return false;
 }
 
-int32_t LoadPermissionJson(const char *fileName)
+NO_SANITIZE("cfi") int32_t LoadPermissionJson(const char *fileName)
 {
     int ret = ReadConfigJson(fileName);
     if (ret != SOFTBUS_OK) {

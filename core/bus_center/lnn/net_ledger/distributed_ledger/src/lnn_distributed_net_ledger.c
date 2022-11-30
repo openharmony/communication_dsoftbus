@@ -75,7 +75,7 @@ typedef struct {
 
 static DistributedNetLedger g_distributedNetLedger;
 
-int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
+NO_SANITIZE("cfi") int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
 {
     if (authTypeValue == NULL || type >= AUTH_TYPE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
@@ -858,7 +858,7 @@ static void UpdateAuthSeq(const NodeInfo *oldInfo, NodeInfo *info)
     }
 }
 
-int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
+NO_SANITIZE("cfi") int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
 {
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
@@ -1010,7 +1010,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
     return REPORT_NONE;
 }
 
-ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
+NO_SANITIZE("cfi") ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
 
@@ -1069,7 +1069,7 @@ NO_SANITIZE("cfi") int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo
     return ret;
 }
 
-void LnnRemoveNode(const char *udid)
+NO_SANITIZE("cfi") void LnnRemoveNode(const char *udid)
 {
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (udid == NULL) {
@@ -1165,7 +1165,7 @@ NO_SANITIZE("cfi") int32_t LnnGetLnnRelation(const char *id, IdCategory type, ui
     return SOFTBUS_OK;
 }
 
-bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
+NO_SANITIZE("cfi") bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
 {
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     NodeInfo *info = NULL;
@@ -1198,7 +1198,7 @@ EXIT:
     return false;
 }
 
-bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
+NO_SANITIZE("cfi") bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
 {
     NodeInfo *node = NULL;
     if (networkId == NULL || info == NULL) {
@@ -1508,7 +1508,7 @@ NO_SANITIZE("cfi") int32_t LnnGetLaneCount(int32_t laneId)
     return g_distributedNetLedger.laneCount[laneId];
 }
 
-int32_t LnnSetLaneCount(int32_t laneId, int32_t num)
+NO_SANITIZE("cfi") int32_t LnnSetLaneCount(int32_t laneId, int32_t num)
 {
     if (laneId < 0 || laneId >= LNN_LINK_TYPE_BUTT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId is error! laneId:%d", laneId);
@@ -1544,7 +1544,7 @@ NO_SANITIZE("cfi") int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uin
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
+NO_SANITIZE("cfi") int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1561,7 +1561,7 @@ int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
+NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1578,7 +1578,7 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
+NO_SANITIZE("cfi") int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -1713,7 +1713,7 @@ static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceIn
     }
 }
 
-void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
+NO_SANITIZE("cfi") void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions)
 {
     (void)pkgName;

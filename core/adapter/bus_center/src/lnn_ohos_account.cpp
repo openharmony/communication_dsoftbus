@@ -83,7 +83,7 @@ NO_SANITIZE("cfi") int32_t LnnInitOhosAccount(void)
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
-void LnnOnOhosAccountChanged(void)
+NO_SANITIZE("cfi") void LnnOnOhosAccountChanged(void)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};

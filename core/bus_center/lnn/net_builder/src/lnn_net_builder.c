@@ -1390,7 +1390,7 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessOnAuthMetaVerifyFailed,
 };
 
-static void NetBuilderMessageHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void NetBuilderMessageHandler(SoftBusMessage *msg)
 {
     int32_t ret;
 
@@ -1795,7 +1795,7 @@ static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networ
     }
 }
 
-int32_t LnnUpdateNodeAddr(const char *addr)
+NO_SANITIZE("cfi") int32_t LnnUpdateNodeAddr(const char *addr)
 {
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
@@ -1846,7 +1846,7 @@ int32_t LnnUpdateNodeAddr(const char *addr)
     return SOFTBUS_OK;
 }
 
-int32_t NodeInfoSync(void)
+NO_SANITIZE("cfi") int32_t NodeInfoSync(void)
 {
     if (LnnInitP2p() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn p2p fail");
@@ -1946,7 +1946,7 @@ NO_SANITIZE("cfi") void LnnDeinitNetBuilder(void)
     g_netBuilder.isInit = false;
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr)
+NO_SANITIZE("cfi") int32_t LnnServerJoin(ConnectionAddr *addr)
 {
     ConnectionAddr *para = NULL;
 
@@ -1968,7 +1968,7 @@ int32_t LnnServerJoin(ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
-int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData)
+NO_SANITIZE("cfi") int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData)
 {
     ConnectionAddrKey addrDataKey = {
         .addr = *addr,
@@ -1993,7 +1993,7 @@ int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData)
     return SOFTBUS_OK;
 }
 
-int32_t LnnServerLeave(const char *networkId)
+NO_SANITIZE("cfi") int32_t LnnServerLeave(const char *networkId)
 {
     char *para = NULL;
 
@@ -2015,7 +2015,7 @@ int32_t LnnServerLeave(const char *networkId)
     return SOFTBUS_OK;
 }
 
-int32_t MetaNodeServerLeave(const char *networkId)
+NO_SANITIZE("cfi") int32_t MetaNodeServerLeave(const char *networkId)
 {
     char *para = NULL;
 
@@ -2037,7 +2037,7 @@ int32_t MetaNodeServerLeave(const char *networkId)
     return SOFTBUS_OK;
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
+NO_SANITIZE("cfi") int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
 {
     ConnectionAddr *para = NULL;
 
@@ -2059,7 +2059,7 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType,
+NO_SANITIZE("cfi") int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType,
     const char *newNetworkId)
 {
     LeaveInvalidConnMsgPara *para = NULL;
@@ -2088,7 +2088,7 @@ int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType 
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestCleanConnFsm(uint16_t connFsmId)
+NO_SANITIZE("cfi") int32_t LnnRequestCleanConnFsm(uint16_t connFsmId)
 {
     uint16_t *para = NULL;
 
@@ -2153,7 +2153,7 @@ int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
-int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight)
+NO_SANITIZE("cfi") int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight)
 {
     ElectMsgPara *para = NULL;
 
@@ -2186,7 +2186,7 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
 }
 
 /* Note: must called in connection fsm. */
-int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId)
+NO_SANITIZE("cfi") int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId)
 {
     LnnConnectionFsm *item = NULL;
 
@@ -2209,7 +2209,7 @@ int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+NO_SANITIZE("cfi") int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
 {
     bool *para = NULL;
     if (typeLen != CONNECTION_ADDR_MAX) {
@@ -2239,7 +2239,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+NO_SANITIZE("cfi") int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
 {
     SpecificLeaveMsgPara *para = NULL;
 

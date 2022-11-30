@@ -217,7 +217,8 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uin
     return ret;
 }
 
-int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
+NO_SANITIZE("cfi") int32_t MetaNodeIpcServerJoin(const char *pkgName, void *addr, CustomData *customData,
+    uint32_t addrTypeLen)
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
@@ -256,7 +257,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, const char *ne
     return ret;
 }
 
-int32_t MetaNodeIpcServerLeave(const char *pkgName, const char *networkId)
+NO_SANITIZE("cfi") int32_t MetaNodeIpcServerLeave(const char *pkgName, const char *networkId)
 {
     if (pkgName == nullptr || networkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
@@ -389,7 +390,8 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeL
     return SOFTBUS_OK;
 }
 
-int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
+    int32_t retCode)
 {
     if (addr == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -428,7 +430,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_
     return SOFTBUS_OK;
 }
 
-int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == nullptr) {
         return SOFTBUS_INVALID_PARAM;

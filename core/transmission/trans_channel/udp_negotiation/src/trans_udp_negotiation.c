@@ -129,7 +129,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
         appInfo->myData.sessionName, &info);
 }
 
-int32_t NotifyUdpChannelClosed(const AppInfo *info)
+NO_SANITIZE("cfi") int32_t NotifyUdpChannelClosed(const AppInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel closed, pkg[%s].", info->myData.pkgName);
     int32_t ret = g_channelCb->OnChannelClosed(info->myData.pkgName, info->myData.pid,
@@ -141,7 +141,7 @@ int32_t NotifyUdpChannelClosed(const AppInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
+NO_SANITIZE("cfi") int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel open failed.");
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
@@ -166,7 +166,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
     return SOFTBUS_OK;
 }
 
-int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+NO_SANITIZE("cfi") int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp qos eventId[%d].", eventId);
     char pkgName[PKG_NAME_SIZE_MAX] = {0};

@@ -27,10 +27,10 @@
 #include "lnn_lane_select.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
@@ -499,7 +499,7 @@ static void LaneLinkException(SoftBusMessage *msg)
     NotifyLaneStateChange(laneId, state);
 }
 
-static void MsgHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void MsgHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;

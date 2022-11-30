@@ -37,6 +37,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -142,15 +143,13 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     }
 }
 
-static void *NetlinkMonitorThread(void *para)
+NO_SANITIZE("cfi") static void *NetlinkMonitorThread(void *para)
 {
-    int32_t sockFd;
-    int32_t len;
     struct nlmsghdr *nlh = NULL;
 
     (void)para;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread start");
-    sockFd = CreateNetlinkSocket();
+    int32_t sockFd = CreateNetlinkSocket();
     if (sockFd < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create netlink socket failed");
         return NULL;
@@ -162,7 +161,7 @@ static void *NetlinkMonitorThread(void *para)
     }
     while (true) {
         (void)memset_s(buffer, DEFAULT_NETLINK_RECVBUF, 0, DEFAULT_NETLINK_RECVBUF);
-        len = SoftBusSocketRecv(sockFd, buffer, DEFAULT_NETLINK_RECVBUF, 0);
+        int32_t len = SoftBusSocketRecv(sockFd, buffer, DEFAULT_NETLINK_RECVBUF, 0);
         if (len < 0 && len == SOFTBUS_ADAPTER_SOCKET_EINTR) {
             continue;
         }

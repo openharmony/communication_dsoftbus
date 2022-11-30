@@ -24,7 +24,7 @@
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
 #define DEFAUTL_LNN_CAPBILITY 0x16
 
-int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+NO_SANITIZE("cfi") int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 {
     if (capability == NULL || type >= BIT_COUNT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
