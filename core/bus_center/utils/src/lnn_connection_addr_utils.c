@@ -21,7 +21,7 @@
 #include "softbus_def.h"
 #include "softbus_log.h"
 
-bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
+NO_SANITIZE("cfi") bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
 {
     if (addr1 == NULL || addr2 == NULL) {
         return false;

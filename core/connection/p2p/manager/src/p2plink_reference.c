@@ -98,7 +98,7 @@ NO_SANITIZE("cfi") void AddNewPidItem(int32_t pid, const char* mac)
     AddNewMacItem(&pItem->macList, mac);
 }
 
-void P2pLinkAddPidMacRef(int32_t pid, const char *mac)
+NO_SANITIZE("cfi") void P2pLinkAddPidMacRef(int32_t pid, const char *mac)
 {
     RefPidItem *pItem = NULL;
     RefMacItem *mItem = NULL;
@@ -117,7 +117,7 @@ void P2pLinkAddPidMacRef(int32_t pid, const char *mac)
     }
 }
 
-void P2pLinkDelPidRef(int32_t pid)
+NO_SANITIZE("cfi") void P2pLinkDelPidRef(int32_t pid)
 {
     RefPidItem *pItem = NULL;
     RefMacItem *mItem = NULL;
@@ -137,7 +137,7 @@ void P2pLinkDelPidRef(int32_t pid)
     SoftBusFree(pItem);
 }
 
-void P2pLinkDelPidMacRef(int32_t pid, const char *mac)
+NO_SANITIZE("cfi") void P2pLinkDelPidMacRef(int32_t pid, const char *mac)
 {
     RefPidItem *pItem = NULL;
     RefMacItem *mItem = NULL;
@@ -163,7 +163,7 @@ void P2pLinkDelPidMacRef(int32_t pid, const char *mac)
     }
 }
 
-int32_t P2pLinGetMacRefCnt(int32_t pid, const char *mac)
+NO_SANITIZE("cfi") int32_t P2pLinGetMacRefCnt(int32_t pid, const char *mac)
 {
     RefPidItem *pItem = NULL;
     RefMacItem *mItem = NULL;
@@ -179,7 +179,7 @@ int32_t P2pLinGetMacRefCnt(int32_t pid, const char *mac)
     return mItem->refCnt;
 }
 
-void P2pLinkDelMyP2pRef(void)
+NO_SANITIZE("cfi") void P2pLinkDelMyP2pRef(void)
 {
     if (g_myP2pRef == 0) {
         return;
@@ -194,12 +194,12 @@ void P2pLinkDelMyP2pRef(void)
     }
 }
 
-void P2pLinkAddMyP2pRef(void)
+NO_SANITIZE("cfi") void P2pLinkAddMyP2pRef(void)
 {
     g_myP2pRef++;
 }
 
-int32_t P2pLinkGetMyP2pRef(void)
+NO_SANITIZE("cfi") int32_t P2pLinkGetMyP2pRef(void)
 {
     return g_myP2pRef;
 }
@@ -238,7 +238,7 @@ NO_SANITIZE("cfi") void DisConnectByPid(int32_t pid)
     P2pLinkDelPidRef(pid);
 }
 
-void P2pLinkDumpRef(void)
+NO_SANITIZE("cfi") void P2pLinkDumpRef(void)
 {
     RefPidItem *pItem = NULL;
     RefPidItem *pNext = NULL;

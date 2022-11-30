@@ -137,7 +137,7 @@ static int64_t GetAuthIdFromItem(int32_t requestId)
     return authId;
 }
 
-int32_t LnnLanePendingInit(void)
+NO_SANITIZE("cfi") int32_t LnnLanePendingInit(void)
 {
     if (g_pendingList != NULL) {
         return SOFTBUS_OK;
@@ -149,7 +149,7 @@ int32_t LnnLanePendingInit(void)
     return SOFTBUS_OK;
 }
 
-void LnnLanePendingDeinit(void)
+NO_SANITIZE("cfi") void LnnLanePendingDeinit(void)
 {
     if (g_pendingList == NULL) {
         return;

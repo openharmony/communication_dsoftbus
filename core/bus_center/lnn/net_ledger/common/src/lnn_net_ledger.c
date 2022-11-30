@@ -158,7 +158,7 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
     }
 }
 
-int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
+NO_SANITIZE("cfi") int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
 {
     bool isLocalNetworkId = false;
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};

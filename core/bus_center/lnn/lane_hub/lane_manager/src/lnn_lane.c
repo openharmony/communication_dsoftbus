@@ -311,7 +311,7 @@ NO_SANITIZE("cfi") int32_t LnnFreeLane(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo)
+NO_SANITIZE("cfi") QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo)
 {
     if (queryInfo == NULL) {
         return QUERY_RESULT_REQUEST_ILLEGAL;

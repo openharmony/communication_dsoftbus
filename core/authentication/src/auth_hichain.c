@@ -71,7 +71,7 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
     return data;
 }
 
-static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "hichain OnTransmit: authSeq=%" PRId64 ", len=%u.", authSeq, len);
@@ -82,7 +82,7 @@ static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
     return true;
 }
 
-static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+NO_SANITIZE("cfi") static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "hichain OnSessionKeyReturned: authSeq=%" PRId64 ", len=%u.", authSeq, sessionKeyLen);
@@ -93,7 +93,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     (void)AuthSessionSaveSessionKey(authSeq, sessionKey, sessionKeyLen);
 }
 
-static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
+NO_SANITIZE("cfi") static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 {
     (void)operationCode;
     (void)returnData;
@@ -102,7 +102,7 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
     (void)AuthSessionHandleAuthResult(authSeq, SOFTBUS_OK);
 }
 
-static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
+NO_SANITIZE("cfi") static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
     (void)errorReturn;
@@ -111,7 +111,7 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
     (void)AuthSessionHandleAuthResult(authSeq, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
 
-static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
+NO_SANITIZE("cfi") static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
 {
     (void)reqParams;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
@@ -189,7 +189,7 @@ static void OnGroupCreated(const char *groupInfo)
     }
 }
 
-static void OnGroupDeleted(const char *groupInfo)
+NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupInfo)
 {
     if (groupInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid group info.");
@@ -205,7 +205,7 @@ static void OnGroupDeleted(const char *groupInfo)
     }
 }
 
-static void OnDeviceNotTrusted(const char *udid)
+NO_SANITIZE("cfi") static void OnDeviceNotTrusted(const char *udid)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain OnDeviceNotTrusted.");
     if (udid == NULL) {

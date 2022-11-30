@@ -165,7 +165,7 @@ static void HbToRecoveryNetwork(void)
     }
 }
 
-int32_t LnnStartHeartbeatFrameDelay(void)
+NO_SANITIZE("cfi") int32_t LnnStartHeartbeatFrameDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) FSM start.");
     if (LnnHbMediumMgrInit() != SOFTBUS_OK) {
@@ -191,7 +191,7 @@ int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
     return LnnSetMediumParamBySpecificType(param);
 }
 
-int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
+NO_SANITIZE("cfi") int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
 {
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB offline timing get invalid param");
@@ -211,7 +211,8 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     return SOFTBUS_OK;
 }
 
-int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+NO_SANITIZE("cfi") int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+    const GearMode *mode)
 {
     if (pkgName == NULL || mode == NULL || callerId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift lnn gear get invalid param");
@@ -235,7 +236,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_OK;
 }
 
-void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
+NO_SANITIZE("cfi") void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     LnnUpdateSendInfoStrategy(type);
 }

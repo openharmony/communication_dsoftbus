@@ -56,7 +56,7 @@ NO_SANITIZE("cfi") const char *LnnGetDeviceName(const DeviceBasicInfo *info)
     return info->deviceName;
 }
 
-int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
+NO_SANITIZE("cfi") int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
 {
     if (info == NULL || name == NULL || strlen(name) > DEVICE_NAME_BUF_LEN - 1) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnSetDeviceName para error.");

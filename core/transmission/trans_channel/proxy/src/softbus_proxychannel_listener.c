@@ -19,6 +19,7 @@
 #include "bus_center_manager.h"
 #include "lnn_lane_interface.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_proxychannel_callback.h"
@@ -78,7 +79,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     return ret;
 }
 
-int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
+NO_SANITIZE("cfi") int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
 {
     int32_t ret = SOFTBUS_ERR;
     if (appInfo == NULL) {
@@ -104,7 +105,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     return ret;
 }
 
-int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
+NO_SANITIZE("cfi") int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -128,7 +129,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     return ret;
 }
 
-int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -152,7 +153,8 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
     return ret;
 }
 
-int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, const char *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, const char *data,
+    uint32_t len)
 {
     int32_t ret = SOFTBUS_OK;
     if (appInfo == NULL || data == NULL || len == 0) {

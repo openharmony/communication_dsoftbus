@@ -147,7 +147,7 @@ static void OnReceiveP2pSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     }
 }
 
-int32_t LnnSyncP2pInfo(void)
+NO_SANITIZE("cfi") int32_t LnnSyncP2pInfo(void)
 {
     int32_t rc = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo, NULL);
     if (rc != SOFTBUS_OK) {

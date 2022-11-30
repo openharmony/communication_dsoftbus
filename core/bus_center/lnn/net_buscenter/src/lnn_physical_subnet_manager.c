@@ -90,7 +90,7 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
+NO_SANITIZE("cfi") int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
 {
     if (subnet == NULL || subnet->protocol == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol of subnet is required!", __func__);
@@ -114,7 +114,7 @@ static int32_t DoUnregistSubnetByType(ProtocolType type)
     return SOFTBUS_OK;
 }
 
-int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
+NO_SANITIZE("cfi") int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 {
     int32_t ret = SOFTBUS_OK;
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoUnregistSubnetByType(type));
@@ -156,7 +156,7 @@ static void EnableResetingSubnetByType(ProtocolType protocolType)
     }
 }
 
-void LnnNotifyAllTypeOffline(ConnectionAddrType type)
+NO_SANITIZE("cfi") void LnnNotifyAllTypeOffline(ConnectionAddrType type)
 {
     if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_MAX) {
         CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_IP));
@@ -178,7 +178,7 @@ static bool DoVisitSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
     return true;
 }
 
-bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
+NO_SANITIZE("cfi") bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
 {
     bool ret = false;
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoVisitSubnet(callback, data));

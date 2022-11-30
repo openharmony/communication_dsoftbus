@@ -439,7 +439,8 @@ static void OnAuthChannelClose(int64_t authId)
     return;
 }
 
-int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
+NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
+    int32_t *channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenP2pDirectChannel");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL || connInfo->type != CONNECT_P2P) {
@@ -493,7 +494,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     return SOFTBUS_OK;
 }
 
-int32_t P2pDirectChannelInit(void)
+NO_SANITIZE("cfi") int32_t P2pDirectChannelInit(void)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "P2pDirectChannelInit");
     AuthTransListener p2pTransCb = {
