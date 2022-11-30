@@ -17,6 +17,7 @@ trans_sdk_test_common_src = [
   "tcp_direct/unittest/trans_session_test.cpp",
   "tcp_direct/unittest/trans_tcp_direct_test.cpp",
   "udp/stream/trans_sdk_stream_test.cpp",
+  "tcp_direct/unittest/trans_sdk_tcp_direct_test.cpp",
 ]
 
 trans_sdk_test_common_inc = [
@@ -32,6 +33,8 @@ trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/core/frame/common/include",
   "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+  "$dsoftbus_root_path/sdk/transmission/ipc/include"
 ]
 trans_sdk_test_common_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
