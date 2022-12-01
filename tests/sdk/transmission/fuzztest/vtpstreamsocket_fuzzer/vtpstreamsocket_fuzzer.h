@@ -23,3 +23,4 @@
 #include <fcntl.h>
 
 #define FUZZ_PROJECT_NAME "vtpstreamsocket_fuzzer"
+#endif
