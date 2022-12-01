@@ -235,7 +235,7 @@ static void SetAndGetSuitableScanConfig(int listenerId, const SoftBusBleScanPara
 static void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, uint8_t filterSize)
 {
 #define HEX_STR_MULTIPLE_NUM 2
-   
+
     if (nativeFilter == NULL || filterSize == 0) {
         return;
     }
@@ -870,7 +870,7 @@ static bool CheckNeedStopScan(int listenerId)
     return true;
 }
 
-int SoftBusSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
+int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
     if (filter == NULL || filterSize == 0) {
         return SOFTBUS_INVALID_PARAM;
