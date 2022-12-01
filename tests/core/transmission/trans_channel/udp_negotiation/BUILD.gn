@@ -34,7 +34,6 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
-
     "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_root_path/core/authentication/include",
@@ -160,10 +159,82 @@ ohos_unittest("TransUdpManagerTest") {
   }
 }
 
+ohos_unittest("TransUdpNegotiationTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_udp_negotiation_test.cpp" ]
+
+  include_dirs = [
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+ohos_unittest("TransUdpNegotiationExTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_udp_negotiation_exchange_test.cpp" ]
+
+  include_dirs = [
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":TransUdpManagerTest",
     ":TransUdpNegoTest",
+    ":TransUdpNegotiationExTest",
+    ":TransUdpNegotiationTest",
   ]
 }
