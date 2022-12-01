@@ -33,6 +33,9 @@
 using namespace std;
 using namespace testing::ext;
 
+#define TEST_TMP_DATE 1
+#define TEST_ERRTMP_DATE (-1)
+
 namespace OHOS {
 class TransClientProxyStandardTest : public testing::Test {
 public:
@@ -107,5 +110,32 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
     clientProxy->OnRefreshLNNResult(tmp, tmp);
 
     clientProxy->OnRefreshDeviceFound(addr, addrTypeLen);
+}
+
+/**
+ * @tc.name: InformPermissionChangeTest002
+ * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest002, TestSize.Level0)
+{
+    int32_t ret;
+    const char *pkgName = "dms";
+    static const uint32_t SOFTBUS_SA_ID = 4700;
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    ret = clientProxy->OnChannelLinkDown(nullptr, TEST_TMP_DATE);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = clientProxy->OnClientPermissonChange(nullptr, TEST_TMP_DATE);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    
+    ret = clientProxy->OnClientPermissonChange(pkgName, TEST_ERRTMP_DATE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
