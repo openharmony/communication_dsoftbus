@@ -139,7 +139,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_ERR, ret);
     
     channel.isServer = false;
-    ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
+    ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
