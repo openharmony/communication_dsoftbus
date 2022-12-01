@@ -59,6 +59,17 @@ public:
     virtual int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len) = 0;
+    virtual int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability) = 0;
+    virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
+    virtual bool LnnIsNodeOnline(const NodeInfo *info) = 0;
+    virtual short LnnGetCnnCode(const char *uuid, DiscoveryType type) = 0;
+    virtual ReportCategory LnnAddOnlineNode(NodeInfo *info) = 0;
+    virtual int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo) = 0;
+    virtual int32_t LnnInsertSpecificTrustedDevInfo(const char *udid) = 0;
+    virtual const char *LnnGetDeviceUdid(const NodeInfo *info) = 0;
+    virtual ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId) = 0;
+    virtual void LnnRemoveNode(const char *udid) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -88,13 +99,30 @@ public:
     MOCK_METHOD2(LnnSetP2pMac, int32_t (NodeInfo *, const char *));
     MOCK_METHOD2(LnnSetP2pGoMac, int32_t (NodeInfo *, const char *));
     MOCK_METHOD2(LnnGetAllOnlineAndMetaNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
-    MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **info, int32_t *infoNum));
-    MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *id, IdCategory type));
+    MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
+    MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
+    MOCK_METHOD4(LnnGetLnnRelation, int32_t(const char *, IdCategory, uint8_t *, uint32_t));
+    MOCK_METHOD2(LnnSetDLConnCapability, int32_t (const char *, uint64_t));
+    MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
+    MOCK_METHOD1(LnnIsNodeOnline, bool (const NodeInfo *));
+    MOCK_METHOD2(LnnGetCnnCode, short (const char *, DiscoveryType));
+    MOCK_METHOD1(LnnAddOnlineNode, ReportCategory (NodeInfo *));
+    MOCK_METHOD2(LnnGetBasicInfoByUdid, int32_t (const char *, NodeBasicInfo *));
+    MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t (const char *));
+    MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, char * (const NodeInfo *));
+    MOCK_METHOD3(LnnSetNodeOffline, ReportCategory (const char *, ConnectionAddrType, int32_t));
+    MOCK_METHOD1(LnnRemoveNode, void (const char *));
+    MOCK_METHOD1(LnnGetDeviceUdid, const char *(const NodeInfo *));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
+    static int32_t ActionOfLnnConvertDlId1(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+        char *dstIdBuf, uint32_t dstIdBufLen);
     static inline std::map<LnnEventType, LnnEventHandler> g_lnnevent_handlers;
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
+    static int32_t ActionOfLnnGetLnnRelation(const char *id, IdCategory type,
+        uint8_t *relation, uint32_t len);
+    static int32_t ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_MOCK_H

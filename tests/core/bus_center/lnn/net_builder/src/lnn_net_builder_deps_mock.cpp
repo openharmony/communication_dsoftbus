@@ -13,7 +13,13 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+#include <securec.h>
+
 #include "lnn_net_builder_deps_mock.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,6 +71,24 @@ int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t 
 uint32_t AuthGenRequestId(void)
 {
     return GetNetBuilderDepsInterface()->AuthGenRequestId();
+}
+
+void AuthHandleLeaveLNN(int64_t authId)
+{
+    return GetNetBuilderDepsInterface()->AuthHandleLeaveLNN(authId);
+}
+
+int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len)
+{
+    if (deviceName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy info fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 }
 }

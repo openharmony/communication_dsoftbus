@@ -90,5 +90,10 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId)
 {
     return GetConnInterface()->ConnGetNewRequestId(moduleId);
 }
+
+void DiscDeviceInfoChanged(InfoTypeChanged type)
+{
+    return GetConnInterface()->DiscDeviceInfoChanged(type);
+}
 }
 }

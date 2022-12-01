@@ -16,16 +16,16 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.h"
+#include "lnn_net_builder.h"
+#include "lnn_net_builder_deps_mock.h"
+#include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "lnn_net_builder_deps_mock.h"
-#include "lnn_auth_mock.h"
-#include "lnn_net_builder.h"
-#include "lnn_service_mock.h"
 
 constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";
 constexpr uint16_t PORT = 1000;
@@ -127,18 +127,14 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
 {
     int32_t ret = LnnStartConnectionFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    LnnAuthtInterfaceMock authMock;
-    NetBuilderDepsInterfaceMock netBuilderMock;
-    LnnServicetInterfaceMock serviceMock;
-    ON_CALL(netBuilderMock, AuthGenRequestId()).WillByDefault(Return(1));
-    EXPECT_CALL(authMock, AuthStartVerify(_, _, _))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
-    ON_CALL(serviceMock, LnnNotifyJoinResult(_, _, _)).WillByDefault(Return());
+    NiceMock<LnnAuthtInterfaceMock> authMock;
+    NiceMock<NetBuilderDepsInterfaceMock> netBuilderMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    ON_CALL(netBuilderMock, AuthGenRequestId).WillByDefault(Return(1));
+    EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    ON_CALL(serviceMock, LnnNotifyJoinResult).WillByDefault(Return());
     ret = LnnSendJoinRequestToConnFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(1000);
 }
-
 } // namespace OHOS
