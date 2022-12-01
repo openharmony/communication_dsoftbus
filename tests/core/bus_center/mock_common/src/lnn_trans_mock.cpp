@@ -36,15 +36,8 @@ static LnnTransInterfaceMock *GetTransInterface()
     return reinterpret_cast<LnnTransInterfaceMock *>(g_transInterface);
 }
 
-int32_t LnnTransInterfaceMock::ActionOfTransRegister(const INetworkingListener *listener)
-{
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfTransRegister enter");
-    g_networkListener = listener;
-    return SOFTBUS_OK;
-}
-
 extern "C" {
-int32_t TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
+int TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
 {
     return GetTransInterface()->TransRegisterNetworkingChannelListener(listener);
 }
@@ -60,6 +53,21 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data,
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TransSendNetworkingMessage enter");
     return GetTransInterface()->TransSendNetworkingMessage(channelId, data, dataLen, priority);
+}
+
+int32_t TransCloseNetWorkingChannel(int32_t channelId)
+{
+    return GetTransInterface()->TransCloseNetWorkingChannel(channelId);
+}
+
+int32_t LnnTransInterfaceMock::ActionOfTransRegister(const INetworkingListener *listener)
+{
+    if (listener == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "listener is invalid para");
+        return SOFTBUS_ERR;
+    }
+    g_networkListener = listener;
+    return SOFTBUS_OK;
 }
 }
 }

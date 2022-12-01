@@ -29,6 +29,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_common.h"
 
 static NodeInfo info;
 namespace OHOS {
@@ -36,9 +37,8 @@ using namespace testing::ext;
 using namespace testing;
 
 constexpr int32_t CHANNELID = 2;
-constexpr int32_t MSG = 6;
 constexpr uint32_t LEN = 10;
-constexpr char UUID[65] = "abc";
+constexpr char UUID[SHA_256_HEX_HASH_LEN] = "abc";
 
 class LnnNetworkInfoTest : public testing::Test {
 public:
@@ -52,8 +52,10 @@ void LnnNetworkInfoTest::SetUpTestCase()
 {
     LooperInit();
     NiceMock<LnnTransInterfaceMock> transMock;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfTransRegister enter1");
     EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener(NotNull())).WillRepeatedly(
-        DoAll(LnnTransInterfaceMock::ActionOfTransRegister, Return(SOFTBUS_OK)));
+        LnnTransInterfaceMock::ActionOfTransRegister);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfTransRegister enter2");
     EXPECT_EQ(LnnInitSyncInfoManager(), SOFTBUS_OK);
 }
 
@@ -71,7 +73,7 @@ void LnnNetworkInfoTest::TearDown()
 {
 }
 
-bool GetEventHandler(LnnEventType event, LnnEventHandler &handler)
+static bool GetEventHandler(LnnEventType event, LnnEventHandler &handler)
 {
     if (LnnServicetInterfaceMock::g_lnnEventHandlers.find(event) !=
         LnnServicetInterfaceMock::g_lnnEventHandlers.end()) {
@@ -126,8 +128,8 @@ HWTEST_F(LnnNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
     handler((LnnEventBasicInfo *)&btEvent1);
 
-    char msg[65] = {0};
-    *(int32_t *)msg = MSG;
+    char msg[LEN] = {0};
+    *(int32_t *)msg = LNN_INFO_TYPE_CAPABILITY;
     if (memcpy_s(msg + sizeof(int32_t), LEN - sizeof(int32_t), "abc", strlen("abc") + 1) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy sync info msg fail");
     }

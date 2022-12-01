@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "disc_interface.h"
 #include "softbus_conn_interface.h"
 
 namespace OHOS {
@@ -38,6 +39,7 @@ public:
     virtual int32_t ConnStartLocalListening(const LocalListenerInfo *info) = 0;
     virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
+    virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
 };
 class LnnConnectInterfaceMock : public LnnConnectInterface {
 public:
@@ -54,6 +56,7 @@ public:
     MOCK_METHOD1(ConnStartLocalListening, int32_t (const LocalListenerInfo *));
     MOCK_METHOD1(ConnStopLocalListening, int32_t (const LocalListenerInfo *));
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t (ConnModule));
+    MOCK_METHOD1(DiscDeviceInfoChanged, void (InfoTypeChanged));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

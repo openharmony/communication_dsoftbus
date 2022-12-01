@@ -16,14 +16,14 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_net_builder.h"
+#include "bus_center_event.h"
+#include "bus_center_manager.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_net_builder.h"
 #include "message_handler.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "bus_center_event.h"
-#include "bus_center_manager.h"
 
 constexpr char NETWORKID[] = "ABCDEFG";
 constexpr char OLD_NETWORKID[] = "ABCDEFG";
