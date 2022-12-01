@@ -138,7 +138,7 @@ static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
     return info->cmpFunc(msg->obj, info->param);
 }
 
-int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param)
+NO_SANITIZE("cfi") int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param)
 {
     if (!IsAuthHandlerInit()) {
         return SOFTBUS_NO_INIT;
@@ -153,7 +153,7 @@ int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param)
 }
 
 /* auth lock */
-bool RequireAuthLock(void)
+NO_SANITIZE("cfi") bool RequireAuthLock(void)
 {
     if (SoftBusMutexLock(&g_authLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth lock fail.");
@@ -162,7 +162,7 @@ bool RequireAuthLock(void)
     return true;
 }
 
-void ReleaseAuthLock(void)
+NO_SANITIZE("cfi") void ReleaseAuthLock(void)
 {
     if (SoftBusMutexUnlock(&g_authLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth unlock fail.");

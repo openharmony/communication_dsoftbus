@@ -512,7 +512,7 @@ NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const S
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-bool PermIsSecLevelPublic(const char *sessionName)
+NO_SANITIZE("cfi") bool PermIsSecLevelPublic(const char *sessionName)
 {
     if (sessionName == NULL) {
         return false;

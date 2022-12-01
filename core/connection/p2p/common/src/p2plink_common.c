@@ -40,13 +40,13 @@ NO_SANITIZE("cfi") P2pLinkRole P2pLinkGetRole(void)
     return g_role;
 }
 
-void P2pLinkSetRole(P2pLinkRole role)
+NO_SANITIZE("cfi") void P2pLinkSetRole(P2pLinkRole role)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my role %d", role);
     g_role = role;
 }
 
-void P2pLinkSetMyIp(const char *ip)
+NO_SANITIZE("cfi") void P2pLinkSetMyIp(const char *ip)
 {
     int32_t ret = strcpy_s(g_myIp, sizeof(g_myIp), ip);
     if (ret != EOK) {
@@ -77,7 +77,7 @@ NO_SANITIZE("cfi") char* P2pLinkGetMyMac(void)
     return g_myMac;
 }
 
-void P2pLinkSetGoIp(const char *ip)
+NO_SANITIZE("cfi") void P2pLinkSetGoIp(const char *ip)
 {
     int32_t ret = strcpy_s(g_goIp, sizeof(g_goIp), ip);
     if (ret != EOK) {
@@ -86,7 +86,7 @@ void P2pLinkSetGoIp(const char *ip)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go ip");
 }
 
-void P2pLinkSetGoMac(const char *mac)
+NO_SANITIZE("cfi") void P2pLinkSetGoMac(const char *mac)
 {
     if (strcpy_s(g_goMac, sizeof(g_goMac), mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
@@ -94,13 +94,13 @@ void P2pLinkSetGoMac(const char *mac)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go mac");
 }
 
-void P2pLinkSetGoPort(int32_t port)
+NO_SANITIZE("cfi") void P2pLinkSetGoPort(int32_t port)
 {
     g_goPort = port;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go port %d", g_goPort);
 }
 
-void P2pLinkSetGcPort(int32_t port)
+NO_SANITIZE("cfi") void P2pLinkSetGcPort(int32_t port)
 {
     g_gcPort = port;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set gc port %d", g_goPort);
@@ -132,22 +132,22 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetGoPort(void)
     return g_goPort;
 }
 
-void P2pLinkSetMyMacExpired(bool isExpired)
+NO_SANITIZE("cfi") void P2pLinkSetMyMacExpired(bool isExpired)
 {
     g_macExpired = isExpired;
 }
 
-void P2pLinkSetState(bool state)
+NO_SANITIZE("cfi") void P2pLinkSetState(bool state)
 {
     g_p2plinkState = state;
 }
 
-bool P2pLinkIsEnable(void)
+NO_SANITIZE("cfi") bool P2pLinkIsEnable(void)
 {
     return g_p2plinkState;
 }
 
-void P2pLinkSetDhcpState(bool isNeedDhcp)
+NO_SANITIZE("cfi") void P2pLinkSetDhcpState(bool isNeedDhcp)
 {
     g_p2plinkDhcp = isNeedDhcp;
 }
@@ -157,12 +157,12 @@ NO_SANITIZE("cfi") bool P2pLinkGetDhcpState(void)
     return g_p2plinkDhcp;
 }
 
-bool P2pLinkIsDisconnectState(void)
+NO_SANITIZE("cfi") bool P2pLinkIsDisconnectState(void)
 {
     return g_isDisconnect;
 }
 
-void P2pLinkSetDisconnectState(bool state)
+NO_SANITIZE("cfi") void P2pLinkSetDisconnectState(bool state)
 {
     g_isDisconnect = state;
 }

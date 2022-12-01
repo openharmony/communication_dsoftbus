@@ -60,7 +60,7 @@ NO_SANITIZE("cfi") int CheckGattsStatus(void)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number)
+NO_SANITIZE("cfi") int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number)
 {
     if ((srvcUuid.uuidLen == 0) || (srvcUuid.uuid == NULL) || (number <= 0)) {
         return SOFTBUS_ERR;
@@ -78,7 +78,8 @@ int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int properties, int permissions)
+NO_SANITIZE("cfi") int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int properties,
+    int permissions)
 {
     if ((characUuid.uuidLen == 0) || (characUuid.uuid == NULL)) {
         return SOFTBUS_ERR;
@@ -96,7 +97,7 @@ int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int 
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permissions)
+NO_SANITIZE("cfi") int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permissions)
 {
     if ((descUuid.uuidLen == 0) || (descUuid.uuid == NULL)) {
         return SOFTBUS_ERR;
@@ -114,7 +115,7 @@ int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permis
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsStartService(int srvcHandle)
+NO_SANITIZE("cfi") int SoftBusGattsStartService(int srvcHandle)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -126,7 +127,7 @@ int SoftBusGattsStartService(int srvcHandle)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsStopService(int srvcHandle)
+NO_SANITIZE("cfi") int SoftBusGattsStopService(int srvcHandle)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -138,7 +139,7 @@ int SoftBusGattsStopService(int srvcHandle)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsDeleteService(int srvcHandle)
+NO_SANITIZE("cfi") int SoftBusGattsDeleteService(int srvcHandle)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -149,7 +150,7 @@ int SoftBusGattsDeleteService(int srvcHandle)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
+NO_SANITIZE("cfi") int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -165,7 +166,7 @@ int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
+NO_SANITIZE("cfi") int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -183,7 +184,7 @@ int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
+NO_SANITIZE("cfi") int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
 {
     CLOGI("SoftBusGattsSendNotify enter");
     if (CheckGattsStatus() != SOFTBUS_OK) {
@@ -385,7 +386,7 @@ static int GattsRegisterHalCallback(void)
     return BleGattsRegisterCallbacks(&g_bleGattsHalCallback);
 }
 
-int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
+NO_SANITIZE("cfi") int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
 {
     if (callback == NULL) {
         CLOGE("SoftBusRegisterGattsCallbacks fail:nullptr");
@@ -416,7 +417,7 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
     return SOFTBUS_OK;
 }
 
-void SoftBusUnRegisterGattsCallbacks(void)
+NO_SANITIZE("cfi") void SoftBusUnRegisterGattsCallbacks(void)
 {
     if (g_gattsCallback == NULL) {
         CLOGI("no need to unregist gatts callback.");

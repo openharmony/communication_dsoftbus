@@ -96,7 +96,7 @@ static void DumpGroupInfo(WifiP2pGroupInfo *groupInfo)
         groupInfo->interface);
 }
 
-P2pLinkGroup *P2pLinkRequetGroupInfo(void)
+NO_SANITIZE("cfi") P2pLinkGroup *P2pLinkRequetGroupInfo(void)
 {
     WifiP2pGroupInfo *groupInfo;
     P2pLinkGroup *grp = NULL;
@@ -346,7 +346,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetBaseMacAddress(char *mac, int32_t len)
 }
 
 
-int32_t P2pLinkSharelinkRemoveGroup(void)
+NO_SANITIZE("cfi") int32_t P2pLinkSharelinkRemoveGroup(void)
 {
     WifiErrorCode ret =  Hid2dSharedlinkDecrease();
     if (ret != WIFI_SUCCESS) {
@@ -357,7 +357,7 @@ int32_t P2pLinkSharelinkRemoveGroup(void)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkSharelinkReuse(void)
+NO_SANITIZE("cfi") int32_t P2pLinkSharelinkReuse(void)
 {
     WifiErrorCode ret = Hid2dSharedlinkIncrease();
     if (ret != WIFI_SUCCESS) {
@@ -560,7 +560,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkConnectGroup(const char *groupConfig)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkRequestGcIp(const char *mac, char *ip, int32_t len)
+NO_SANITIZE("cfi") int32_t P2pLinkRequestGcIp(const char *mac, char *ip, int32_t len)
 {
 #define IP_INDEX_ZERO 0
 #define IP_INDEX_ONE 1
@@ -681,7 +681,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetSelfWifiCfgInfo(char *cfgData, int32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkSetPeerWifiCfgInfo(const char *cfgData)
+NO_SANITIZE("cfi") int32_t P2pLinkSetPeerWifiCfgInfo(const char *cfgData)
 {
     if (cfgData == NULL || strlen(cfgData) == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "peer wifi config data is null.");
@@ -716,7 +716,7 @@ int32_t P2pLinkSetPeerWifiCfgInfo(const char *cfgData)
     return SOFTBUS_OK;
 }
 
-bool P2pLinkIsWideBandwidthSupported(void)
+NO_SANITIZE("cfi") bool P2pLinkIsWideBandwidthSupported(void)
 {
     if (Hid2dIsWideBandwidthSupported() == 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "don't support wide band.");
@@ -726,7 +726,7 @@ bool P2pLinkIsWideBandwidthSupported(void)
     return true;
 }
 
-int32_t P2pLinkReleaseIPAddr(void)
+NO_SANITIZE("cfi") int32_t P2pLinkReleaseIPAddr(void)
 {
     WifiP2pGroupInfo *groupInfo = NULL;
     int32_t ret;
@@ -771,7 +771,7 @@ void P2pLinkStopPeerDiscovery(void)
     (void)StopDiscoverDevices();
 }
 
-void P2pLinkRemoveGroup(void)
+NO_SANITIZE("cfi") void P2pLinkRemoveGroup(void)
 {
     WifiErrorCode ret;
 
@@ -785,7 +785,7 @@ void P2pLinkRemoveGroup(void)
     }
 }
 
-void P2pLinkRemoveGcGroup(void)
+NO_SANITIZE("cfi") void P2pLinkRemoveGcGroup(void)
 {
     WifiP2pGroupInfo* groupInfo = NULL;
     WifiErrorCode ret;

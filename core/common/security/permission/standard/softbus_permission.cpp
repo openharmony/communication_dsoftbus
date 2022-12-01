@@ -124,7 +124,7 @@ int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char 
     return AddDynamicPermission(callingUid, callingPid, sessionName);
 }
 
-int32_t RemoveTransPermission(const char *sessionName)
+NO_SANITIZE("cfi") int32_t RemoveTransPermission(const char *sessionName)
 {
     return DeleteDynamicPermission(sessionName);
 }

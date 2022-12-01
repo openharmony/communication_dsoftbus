@@ -68,7 +68,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t 
 static int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd);
 static int TcpConnectInfoDump(int fd);
 
-uint32_t TcpGetConnNum(void)
+NO_SANITIZE("cfi") uint32_t TcpGetConnNum(void)
 {
     if (g_tcpConnInfoList == NULL) {
         return 0;
@@ -325,7 +325,7 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEventIn(int32_t fd)
     return SOFTBUS_OK;
 }
 
-int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
+NO_SANITIZE("cfi") int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     (void)module;
     if (events == SOFTBUS_SOCKET_IN) {

@@ -107,7 +107,7 @@ NO_SANITIZE("cfi") int32_t GetBleAttrHandle(int32_t module)
     return (module == MODULE_BLE_NET) ? g_gattService.bleNetCharaId : g_gattService.bleConnCharaId;
 }
 
-int32_t SoftBusGattServerSend(int32_t halConnId, const char *data, int32_t len, int32_t module)
+NO_SANITIZE("cfi") int32_t SoftBusGattServerSend(int32_t halConnId, const char *data, int32_t len, int32_t module)
 {
     SoftBusGattsNotify notify = {
         .connectId = halConnId,
@@ -121,7 +121,7 @@ int32_t SoftBusGattServerSend(int32_t halConnId, const char *data, int32_t len, 
     return SoftBusGattsSendNotify(&notify);
 }
 
-int32_t SoftBusGattServerStartService(void)
+NO_SANITIZE("cfi") int32_t SoftBusGattServerStartService(void)
 {
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattServerStartService lock mutex failed");
@@ -149,7 +149,7 @@ int32_t SoftBusGattServerStartService(void)
     return SOFTBUS_ERR;
 }
 
-int32_t SoftBusGattServerStopService(void)
+NO_SANITIZE("cfi") int32_t SoftBusGattServerStopService(void)
 {
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattServerStopService lock mutex failed");
@@ -694,7 +694,7 @@ NO_SANITIZE("cfi") void SoftBusGattServerOnBtStateChanged(int state)
     ResetGattService(&g_gattService);
 }
 
-int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
+NO_SANITIZE("cfi") int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
 {
     int ret = BleConnLooperInit();
     if (ret != SOFTBUS_OK) {

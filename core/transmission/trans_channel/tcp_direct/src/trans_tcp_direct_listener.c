@@ -25,6 +25,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
@@ -32,7 +33,7 @@
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 
-uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
+NO_SANITIZE("cfi") uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 {
     switch (type) {
         case AUTH_LINK_TYPE_BR:
@@ -163,7 +164,8 @@ static int32_t CreateSessionConnNode(
     return SOFTBUS_OK;
 }
 
-static int32_t TdcOnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t TdcOnConnectEvent(ListenerModule module, int events, int cfd,
+    const ConnectOption *clientAddr)
 {
     if (events == SOFTBUS_SOCKET_EXCEPTION) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Exception occurred");
@@ -215,7 +217,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
     TransSrvDelDataBufNode(channelId);
 }
 
-static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
+NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 {
     (void)module;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));

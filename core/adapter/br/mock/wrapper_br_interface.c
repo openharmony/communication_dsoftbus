@@ -147,7 +147,7 @@ static SppSocketDriver g_sppSocketDriver = {
     .GetRemoteDeviceInfo = GetRemoteDeviceInfo
 };
 
-int32_t SppGattsRegisterHalCallback(const SoftBusBtStateListener *lister)
+NO_SANITIZE("cfi") int32_t SppGattsRegisterHalCallback(const SoftBusBtStateListener *lister)
 {
     return SoftBusAddBtStateListener(lister);
 }

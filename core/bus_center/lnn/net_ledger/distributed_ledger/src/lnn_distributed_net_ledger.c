@@ -323,7 +323,7 @@ static bool IsNetworkIdChanged(NodeInfo *newInfo, NodeInfo *oldInfo)
     return true;
 }
 
-void PostOnlineNodesToCb(const INodeStateCb *callBack)
+NO_SANITIZE("cfi") void PostOnlineNodesToCb(const INodeStateCb *callBack)
 {
     NodeInfo *info = NULL;
     NodeBasicInfo basic;

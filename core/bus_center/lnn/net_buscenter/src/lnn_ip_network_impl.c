@@ -571,7 +571,7 @@ static LnnProtocolManager g_ipProtocol = {
     .getListenerModule = LnnGetIpListenerModule
 };
 
-int32_t RegistIPProtocolManager(void)
+NO_SANITIZE("cfi") int32_t RegistIPProtocolManager(void)
 {
     return LnnRegistProtocol(&g_ipProtocol);
 }
