@@ -280,8 +280,7 @@ HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level0)
     const char *sFileList[] = { TEST_FILE_NAME };
     int32_t sessionId = INVALID_SESSION_ID;
     bool isEnabled = false;
-    ISessionListener listener;
-    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &listener);
+    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
     (void)ClientAddSession(&param, &sessionId, &isEnabled);
 
     int32_t ret = SendFile(sessionId, sFileList, NULL, 1);
