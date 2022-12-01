@@ -63,12 +63,12 @@ void TransLaneManagerTest::TearDownTestCase(void)
  */
 HWTEST_F(TransLaneManagerTest, GetTransSessionInfoByLane001, TestSize.Level1)
 {
-    TransLaneInfo *laneItem = (TransLaneInfo*)SoftBusMalloc(sizeof(TransLaneInfo));
-    EXPECT_TRUE(laneItem != NULL);
+    TransLaneInfo *laneItem = (TransLaneInfo *)SoftBusMalloc(sizeof(TransLaneInfo));
+    ASSERT_TRUE(laneItem != nullptr);
     memset_s(laneItem, sizeof(TransLaneInfo), 0, sizeof(TransLaneInfo));
 
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     TransDumpLaneLinkType transDumpLaneLinkType;
@@ -139,7 +139,9 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
     int32_t channelType = 2112;
     uint32_t laneId = 1;
     AppInfoData *myData = (AppInfoData *)SoftBusCalloc(sizeof(AppInfoData));
+    ASSERT_TRUE(myData != nullptr);
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
+    ASSERT_TRUE(connInfo != nullptr);
 
     TransLaneMgrDeinit();
     int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
