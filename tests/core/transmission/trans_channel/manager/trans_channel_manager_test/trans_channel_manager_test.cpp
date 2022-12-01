@@ -342,10 +342,10 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
     uint32_t *destBitRate = dest->sendBitRateStatsCnt;
 
     destCostCnt[FRAME_COST_TIME_MEDIUM] = MergeStatsInterval(srcCostCnt, FRAME_COST_LT30MS, FRAME_COST_LT100MS);
-    EXPECT_EQ(0, destCostCnt[FRAME_COST_TIME_MEDIUM]);
+    EXPECT_EQ(0, (int)destCostCnt[FRAME_COST_TIME_MEDIUM]);
 
     destBitRate[FRAME_BIT_RATE_MEDIUM] = MergeStatsInterval(srcBitRate, FRAME_BIT_RATE_LT30M, FRAME_BIT_RATE_LT6M);
-    EXPECT_EQ(0, destBitRate[FRAME_BIT_RATE_MEDIUM]);
+    EXPECT_EQ(0, (int)destBitRate[FRAME_BIT_RATE_MEDIUM]);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d",
         destBitRate[FRAME_BIT_RATE_MEDIUM]);
     ConvertStreamStats(src, dest);
