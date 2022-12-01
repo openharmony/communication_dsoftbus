@@ -46,7 +46,7 @@ namespace OHOS {
         .dataLen = sizeof("capdata4")
     };
 
-    static void GenRanPublishInfo(const uint8_t* data, size_t size)
+    static void GenRanPublishInfo(char* data, size_t size)
     {
         g_pInfo.publishId = size;
         g_pInfo.mode = (size % MAX_SIZE_DISCOVER_MODE) ? DISCOVER_MODE_ACTIVE : DISCOVER_MODE_PASSIVE;
@@ -63,7 +63,6 @@ namespace OHOS {
             return false;
         }
 
-        GenRanPublishInfo(data, size);
         char *tmp = reinterpret_cast<char *>(malloc(size));
         if (tmp == nullptr) {
             return false;
@@ -78,6 +77,7 @@ namespace OHOS {
         }
 
         SetAceessTokenPermission("busCenterTest");
+        GenRanPublishInfo(tmp, size);
         int32_t ret = PublishLNN(reinterpret_cast<const char *>(tmp), &g_pInfo, &g_publishCb);
         if (ret == SOFTBUS_OK) {
             StopPublishLNN(reinterpret_cast<const char *>(tmp), g_pInfo.publishId);
