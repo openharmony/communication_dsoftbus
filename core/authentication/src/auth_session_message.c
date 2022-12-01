@@ -25,6 +25,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_json_utils.h"
 
 /* DeviceId */
@@ -303,7 +304,7 @@ static int32_t UnpackWiFi(const cJSON *json, NodeInfo *info, SoftBusVersion vers
     return SOFTBUS_OK;
 }
 
-char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth)
+NO_SANITIZE("cfi") char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "PackDeviceInfo: connType = %d.", linkType);
     const NodeInfo *info = LnnGetLocalNodeInfo();
@@ -354,7 +355,7 @@ int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBusVersio
     return ret;
 }
 
-int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
+NO_SANITIZE("cfi") int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     char *msg = PackDeviceIdMessage(info->connInfo.type, info->isServer, SOFTBUS_NEW_V1);
@@ -378,7 +379,7 @@ int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
@@ -401,7 +402,7 @@ static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, Sess
     }
 }
 
-int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
+NO_SANITIZE("cfi") int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     char *msg = PackDeviceInfoMessage(info->connInfo.type, SOFTBUS_NEW_V1, false);
@@ -437,7 +438,8 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data,
+    uint32_t len)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
@@ -459,7 +461,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     return SOFTBUS_OK;
 }
 
-int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info)
+NO_SANITIZE("cfi") int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     const char *msg = "";
@@ -477,7 +479,8 @@ int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, const uint8_t *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, const uint8_t *data,
+    uint32_t len)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
@@ -513,7 +516,7 @@ static char *PackVerifyDeviceMessage(const char *uuid)
     return msg;
 }
 
-int32_t PostVerifyDeviceMessage(const AuthManager *auth)
+NO_SANITIZE("cfi") int32_t PostVerifyDeviceMessage(const AuthManager *auth)
 {
     CHECK_NULL_PTR_RETURN_VALUE(auth, SOFTBUS_INVALID_PARAM);
     char *msg = PackVerifyDeviceMessage(auth->uuid);

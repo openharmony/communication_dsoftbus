@@ -24,6 +24,7 @@
 #include "p2plink_type.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
@@ -532,7 +533,8 @@ static int32_t DecideMyRoleAsNone(int32_t peerRole, int32_t peerExpectRole, cons
     }
 }
 
-int32_t P2pLinkNegoGetFinalRole(int32_t peerRole, int32_t peerExpectRole, const char *peerGoMac, bool isSupportBridge)
+NO_SANITIZE("cfi") int32_t P2pLinkNegoGetFinalRole(int32_t peerRole, int32_t peerExpectRole, const char *peerGoMac,
+    bool isSupportBridge)
 {
     int32_t myRole = P2pLinkGetRole();
     char *myGoMac = P2pLinkGetGoMac();
@@ -1309,7 +1311,7 @@ static void P2pLinkNeoConnRequestProc(int64_t authId, const cJSON *data)
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, CONN_REQUEST, (void *)data);
 }
 
-void P2pLinkNegoMsgProc(int64_t authId, int32_t cmdType, const cJSON *data)
+NO_SANITIZE("cfi") void P2pLinkNegoMsgProc(int64_t authId, int32_t cmdType, const cJSON *data)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p link negotiation data is null.");
@@ -1323,7 +1325,7 @@ void P2pLinkNegoMsgProc(int64_t authId, int32_t cmdType, const cJSON *data)
     }
 }
 
-void P2pLinkNegoOnGroupChanged(const P2pLinkGroup *group)
+NO_SANITIZE("cfi") void P2pLinkNegoOnGroupChanged(const P2pLinkGroup *group)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p link negotiation recv group changed.");
     if (group == NULL) {
@@ -1334,7 +1336,7 @@ void P2pLinkNegoOnGroupChanged(const P2pLinkGroup *group)
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, MAGICLINK_ON_GROUP_CHANGED, (void *)group);
 }
 
-void P2pLinkNegoOnConnectState(int32_t state)
+NO_SANITIZE("cfi") void P2pLinkNegoOnConnectState(int32_t state)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p link negotiation recv connect state changed.");
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, MAGICLINK_ON_CONNECTED, (void *)&state);
@@ -1352,17 +1354,17 @@ NO_SANITIZE("cfi") P2pLinkNegoState GetP2pLinkNegoStatus(void)
     return state;
 }
 
-char *P2pLinkNegoGetCurrentPeerMac(void)
+NO_SANITIZE("cfi") char *P2pLinkNegoGetCurrentPeerMac(void)
 {
     return g_p2pLinkNegoFsm.linkInfo.peerMac;
 }
 
-void P2pLinkNegoStart(const P2pLinkNegoConnInfo *connInfo)
+NO_SANITIZE("cfi") void P2pLinkNegoStart(const P2pLinkNegoConnInfo *connInfo)
 {
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, START_NEGOTIATION, (void *)connInfo);
 }
 
-void P2pLinkNegoStop(void)
+NO_SANITIZE("cfi") void P2pLinkNegoStop(void)
 {
     P2pLinkFsmMsgProcDelayDel(CONN_REQUEST_TIME_OUT);
     P2pLinkFsmMsgProcDelayDel(MAGICLINK_CONN_GROUP_TIME_OUT);
@@ -1379,7 +1381,7 @@ void P2pLinkNegoStop(void)
     P2pLinkFsmTransactState(g_p2pLinkNegoFsm.fsm, g_p2pLinkNegoState + P2PLINK_NEG_IDLE);
 }
 
-int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback)
+NO_SANITIZE("cfi") int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback)
 {
     if (callback == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);

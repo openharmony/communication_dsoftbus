@@ -16,10 +16,10 @@
 #include "permission_status_change_cb.h"
 #include "trans_client_proxy.h"
 #include "softbus_def.h"
-#include "softbus_ipc_def.h"
-#include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_ipc_def.h"
+#include "message_parcel.h"
 
 namespace OHOS {
 void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& result)
@@ -30,7 +30,7 @@ void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& resu
     }
 }
 
-void RegisterDataSyncPermission(const uint32_t& callingTokenId,
+NO_SANITIZE("cfi") void RegisterDataSyncPermission(const uint32_t& callingTokenId,
                                 const std::string& permissionName, const std::string& pkgName, int32_t pid)
 {
     PermStateChangeScope scopeInfo;

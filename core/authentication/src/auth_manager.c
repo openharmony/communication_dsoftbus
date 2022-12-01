@@ -180,13 +180,13 @@ static void DestroyAuthManagerList(void)
     ReleaseAuthLock();
 }
 
-static int32_t SetAuthConnId(AuthManager *auth, const AuthManager *inAuth)
+NO_SANITIZE("cfi") static int32_t SetAuthConnId(AuthManager *auth, const AuthManager *inAuth)
 {
     auth->connId = inAuth->connId;
     return SOFTBUS_OK;
 }
 
-static int32_t SetAuthP2pMac(AuthManager *auth, const AuthManager *inAuth)
+NO_SANITIZE("cfi") static int32_t SetAuthP2pMac(AuthManager *auth, const AuthManager *inAuth)
 {
     if (strcpy_s(auth->p2pMac, sizeof(auth->p2pMac), inAuth->p2pMac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
@@ -898,7 +898,7 @@ static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
     }
 }
 
-int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
+NO_SANITIZE("cfi") int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
 {
     if (listener == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid listener.");
@@ -1114,7 +1114,7 @@ NO_SANITIZE("cfi") int32_t AuthDevicePostTransData(int64_t authId, const AuthTra
     return SOFTBUS_OK;
 }
 
-int32_t RegGroupChangeListener(const GroupChangeListener *listener)
+NO_SANITIZE("cfi") int32_t RegGroupChangeListener(const GroupChangeListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;

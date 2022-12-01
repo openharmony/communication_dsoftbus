@@ -142,7 +142,7 @@ static bool CheckListener(const ILaneIdStateListener *listener)
     return true;
 }
 
-void RegisterLaneIdListener(const ILaneIdStateListener *listener)
+NO_SANITIZE("cfi") void RegisterLaneIdListener(const ILaneIdStateListener *listener)
 {
     if (CheckListener(listener) == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register fail");

@@ -554,7 +554,7 @@ static void ClearAdvData(int advId)
     g_advChannel[advId].advData.scanRspData = NULL;
 }
 
-int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
+NO_SANITIZE("cfi") int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
 {
     if (callback == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -586,7 +586,7 @@ int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
     return freeAdvId;
 }
 
-int SoftBusReleaseAdvChannel(int advId)
+NO_SANITIZE("cfi") int SoftBusReleaseAdvChannel(int advId)
 {
     if (SoftBusMutexLock(&g_advLock) != 0) {
         return SOFTBUS_LOCK_ERR;
@@ -690,7 +690,7 @@ NO_SANITIZE("cfi") int SoftBusStopAdv(int advId)
     return SOFTBUS_OK;
 }
 
-int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param)
+NO_SANITIZE("cfi") int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param)
 {
     if (param == NULL || data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -706,7 +706,7 @@ int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleA
     return SoftBusStartAdv(advId, param);
 }
 
-int SoftBusAddScanListener(const SoftBusScanListener *listener)
+NO_SANITIZE("cfi") int SoftBusAddScanListener(const SoftBusScanListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_ERR;
@@ -752,7 +752,7 @@ static void FreeScanFilter(int listenerId)
     g_scanListener[listenerId].filter = NULL;
 }
 
-int SoftBusRemoveScanListener(int listenerId)
+NO_SANITIZE("cfi") int SoftBusRemoveScanListener(int listenerId)
 {
     if (listenerId < 0 || listenerId >= SCAN_MAX_NUM) {
         return SOFTBUS_INVALID_PARAM;
@@ -795,7 +795,7 @@ static bool CheckNeedStopScan(int listenerId)
     return true;
 }
 
-int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize)
+NO_SANITIZE("cfi") int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
     if (filter == NULL || filterSize == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -816,7 +816,7 @@ int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t f
     return SOFTBUS_OK;
 }
 
-int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
+NO_SANITIZE("cfi") int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
 {
     if (param == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -856,7 +856,7 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
     return SOFTBUS_ERR;
 }
 
-int SoftBusStopScan(int listenerId)
+NO_SANITIZE("cfi") int SoftBusStopScan(int listenerId)
 {
     if (SoftBusMutexLock(&g_scanerLock) != 0) {
         return SOFTBUS_LOCK_ERR;

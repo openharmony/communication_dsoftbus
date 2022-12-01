@@ -92,7 +92,7 @@ NO_SANITIZE("cfi") int32_t GetSessionConnLock(void)
     return SOFTBUS_OK;
 }
 
-void ReleaseSessonConnLock(void)
+NO_SANITIZE("cfi") void ReleaseSessonConnLock(void)
 {
     if (g_sessionConnList == NULL) {
         return;
@@ -190,7 +190,7 @@ NO_SANITIZE("cfi") SessionConn *GetSessionConnById(int32_t channelId, SessionCon
     return NULL;
 }
 
-int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
 {
     SessionConn *conn = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -226,7 +226,7 @@ NO_SANITIZE("cfi") int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
     return SOFTBUS_ERR;
 }
 
-int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
+NO_SANITIZE("cfi") int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
 {
     SessionConn *conn = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -299,7 +299,7 @@ int32_t TransTdcAddSessionConn(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
-void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLen)
+NO_SANITIZE("cfi") void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLen)
 {
     if (sessionKey == NULL || keyLen <= 0) {
         return;
@@ -325,7 +325,7 @@ void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLe
     ReleaseSessonConnLock();
 }
 
-int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
+NO_SANITIZE("cfi") int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -343,7 +343,7 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
+NO_SANITIZE("cfi") int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;

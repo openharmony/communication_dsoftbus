@@ -155,7 +155,7 @@ typedef struct {
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
 
-void SetWatchdogFlag(bool flag)
+NO_SANITIZE("cfi") void SetWatchdogFlag(bool flag)
 {
     g_watchdogFlag = flag;
 }

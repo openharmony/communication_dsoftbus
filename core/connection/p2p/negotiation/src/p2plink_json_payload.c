@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include "p2plink_type.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
@@ -88,7 +89,7 @@ static int32_t UnpackGcInfo(GcInfo *gc, const cJSON *data)
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data)
+NO_SANITIZE("cfi") int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "pack request info.");
     if (request == NULL || data == NULL) {
@@ -125,7 +126,7 @@ int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type,
     return SOFTBUS_OK;
 }
 
-int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data)
+NO_SANITIZE("cfi") int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "pack response info.");
     if (response == NULL || data == NULL) {
@@ -165,7 +166,7 @@ int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, 
     return SOFTBUS_OK;
 }
 
-int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContentType type, P2pRequestMsg *request)
+NO_SANITIZE("cfi") int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContentType type, P2pRequestMsg *request)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "unpack request info.");
     if (request == NULL || data == NULL) {
@@ -205,7 +206,7 @@ int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContentType type, P2pReque
     return SOFTBUS_OK;
 }
 
-int32_t P2plinkUnpackRepsonseMsg(const cJSON *data, P2pContentType type, P2pRespMsg *response)
+NO_SANITIZE("cfi") int32_t P2plinkUnpackRepsonseMsg(const cJSON *data, P2pContentType type, P2pRespMsg *response)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "unpack response info.");
     if (response == NULL || data == NULL) {

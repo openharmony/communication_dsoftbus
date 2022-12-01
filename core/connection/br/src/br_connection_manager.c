@@ -126,7 +126,7 @@ NO_SANITIZE("cfi") BrConnectionInfo *GetConnectionRef(uint32_t connId)
     return NULL;
 }
 
-void ReleaseBrconnectionNode(BrConnectionInfo *conn)
+NO_SANITIZE("cfi") void ReleaseBrconnectionNode(BrConnectionInfo *conn)
 {
     if (conn == NULL) {
         return;
@@ -150,7 +150,7 @@ void ReleaseBrconnectionNode(BrConnectionInfo *conn)
     SoftBusFree(conn);
 }
 
-void ReleaseConnectionRef(BrConnectionInfo *connInfo)
+NO_SANITIZE("cfi") void ReleaseConnectionRef(BrConnectionInfo *connInfo)
 {
     if (connInfo == NULL) {
         return;
@@ -167,7 +167,7 @@ void ReleaseConnectionRef(BrConnectionInfo *connInfo)
     (void)pthread_mutex_unlock(&g_connectionLock);
 }
 
-void ReleaseConnectionRefByConnId(uint32_t connId)
+NO_SANITIZE("cfi") void ReleaseConnectionRefByConnId(uint32_t connId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ReleaseConnectionRef] lock mutex failed");
@@ -274,7 +274,7 @@ int32_t GetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     return result;
 }
 
-int32_t SetRefCountByConnId(int32_t delta, int32_t *refCount, uint32_t connectionId)
+NO_SANITIZE("cfi") int32_t SetRefCountByConnId(int32_t delta, int32_t *refCount, uint32_t connectionId)
 {
     int32_t state = BR_CONNECTION_STATE_CLOSED;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
@@ -309,7 +309,7 @@ static void FreeCongestEvent(BrConnectionInfo *itemNode)
     (void)pthread_mutex_unlock(&itemNode->lock);
 }
 
-void SetBrConnStateByConnId(uint32_t connId, int32_t state)
+NO_SANITIZE("cfi") void SetBrConnStateByConnId(uint32_t connId, int32_t state)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetBrConnStateByConnId lock mutex failed");
@@ -330,7 +330,7 @@ void SetBrConnStateByConnId(uint32_t connId, int32_t state)
     (void)pthread_mutex_unlock(&g_connectionLock);
 }
 
-uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state, int32_t *perState)
+NO_SANITIZE("cfi") uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state, int32_t *perState)
 {
     uint32_t connId = 0;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
@@ -412,7 +412,7 @@ NO_SANITIZE("cfi") int32_t AddConnectionList(BrConnectionInfo *newConnInfo)
     return SOFTBUS_OK;
 }
 
-void RfcomCongestEvent(int32_t socketFd, int32_t value)
+NO_SANITIZE("cfi") void RfcomCongestEvent(int32_t socketFd, int32_t value)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[RfcomCongestEvent] lock mutex failed");
@@ -516,7 +516,7 @@ NO_SANITIZE("cfi") int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, L
     return pendingCnt;
 }
 
-int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
+NO_SANITIZE("cfi") int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClient lock mutex failed");

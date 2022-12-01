@@ -23,6 +23,7 @@
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -361,7 +362,7 @@ static LnnProtocolManager g_btProtocol = {
     .getListenerModule = LnnGetBtListenerModule,
 };
 
-int32_t RegistBtProtocolManager(void)
+NO_SANITIZE("cfi") int32_t RegistBtProtocolManager(void)
 {
     return LnnRegistProtocol(&g_btProtocol);
 }

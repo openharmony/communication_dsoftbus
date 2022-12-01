@@ -114,7 +114,7 @@ NO_SANITIZE("cfi") int32_t DiscIpcStopDiscovery(const char *packageName, int32_t
     return SOFTBUS_OK;
 }
 
-void SetCallLnnStatus(bool flag)
+NO_SANITIZE("cfi") void SetCallLnnStatus(bool flag)
 {
     g_isCallLnn = flag;
 }

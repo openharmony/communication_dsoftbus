@@ -60,7 +60,7 @@ NO_SANITIZE("cfi") bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_
     return (capBitMap[index] >> (pos % INT32_MAX_BIT_NUM)) & 0x1 ? true : false;
 }
 
-void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
+NO_SANITIZE("cfi") void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {

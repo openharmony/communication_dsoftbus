@@ -280,7 +280,7 @@ NO_SANITIZE("cfi") static int32_t OnDataEvent(ListenerModule module, int32_t eve
     return SOFTBUS_ERR;
 }
 
-int32_t SetSocketCallback(const SocketCallback *cb)
+NO_SANITIZE("cfi") int32_t SetSocketCallback(const SocketCallback *cb)
 {
     CHECK_NULL_PTR_RETURN_VALUE(cb, SOFTBUS_INVALID_PARAM);
     if (memcpy_s(&g_callback, sizeof(SocketCallback), cb, sizeof(SocketCallback)) != EOK) {
@@ -295,7 +295,7 @@ void UnsetSocketCallback(void)
     (void)memset_s(&g_callback, sizeof(SocketCallback), 0, sizeof(SocketCallback));
 }
 
-int32_t StartSocketListening(const char *ip, int32_t port)
+NO_SANITIZE("cfi") int32_t StartSocketListening(const char *ip, int32_t port)
 {
     CHECK_NULL_PTR_RETURN_VALUE(ip, SOFTBUS_INVALID_PARAM);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start socket listening.");
@@ -328,7 +328,7 @@ int32_t StartSocketListening(const char *ip, int32_t port)
     return port;
 }
 
-void StopSocketListening(void)
+NO_SANITIZE("cfi") void StopSocketListening(void)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "stop socket listening.");
     if (StopBaseListener(AUTH) != SOFTBUS_OK) {
@@ -336,7 +336,7 @@ void StopSocketListening(void)
     }
 }
 
-int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
+NO_SANITIZE("cfi") int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 {
     char localIp[MAX_ADDR_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
@@ -376,7 +376,7 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     return fd;
 }
 
-void SocketDisconnectDevice(int32_t fd)
+NO_SANITIZE("cfi") void SocketDisconnectDevice(int32_t fd)
 {
     if (fd < 0) {
         return;
@@ -385,7 +385,7 @@ void SocketDisconnectDevice(int32_t fd)
     ConnShutdownSocket(fd);
 }
 
-int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *data)
+NO_SANITIZE("cfi") int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
@@ -420,7 +420,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     return SOFTBUS_OK;
 }
 
-int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
+NO_SANITIZE("cfi") int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(isServer, SOFTBUS_INVALID_PARAM);
@@ -484,7 +484,7 @@ static void NotifyChannelDisconnected(int32_t channelId)
     }
 }
 
-int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listener)
+NO_SANITIZE("cfi") int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listener)
 {
     if (listener == NULL || listener->onDataReceived == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthChannel: invalid listener.");
