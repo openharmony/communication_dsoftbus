@@ -41,7 +41,6 @@ namespace OHOS {
 #define TEST_AUTH_PORT 6000
 #define TEST_AUTH_DATA "test auth message data"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
-#define FILLP_NULL_PTR 0
 
 #define TRANS_TEST_INVALID_PID (-1)
 #define TRANS_TEST_INVALID_UID (-1)
@@ -120,7 +119,7 @@ HWTEST_F(TransChannelManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
 
-    if(memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX) != EOK) {
+    if (memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX) != EOK) {
         return;
     }
 
@@ -284,7 +283,6 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo001, TestSize.Level1)
     EXPECT_TRUE(appInfo == NULL);
 
     SoftBusFree(appInfo);
-
 }
 
 /**
@@ -345,17 +343,15 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
 
     destCostCnt[FRAME_COST_TIME_MEDIUM] = MergeStatsInterval(srcCostCnt, FRAME_COST_LT30MS, FRAME_COST_LT100MS);
     EXPECT_EQ(0, destCostCnt[FRAME_COST_TIME_MEDIUM]);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destCostCnt[FRAME_COST_TIME_MEDIUM] is %d", destCostCnt[FRAME_COST_TIME_MEDIUM]);
 
     destBitRate[FRAME_BIT_RATE_MEDIUM] = MergeStatsInterval(srcBitRate, FRAME_BIT_RATE_LT30M, FRAME_BIT_RATE_LT6M);
     EXPECT_EQ(0, destBitRate[FRAME_BIT_RATE_MEDIUM]);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d", destBitRate[FRAME_BIT_RATE_MEDIUM]);
-
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d",
+        destBitRate[FRAME_BIT_RATE_MEDIUM]);
     ConvertStreamStats(src, dest);
 
     SoftBusFree(src);
     SoftBusFree(dest);
-
 }
 
 /**
@@ -367,8 +363,8 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
 {
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
+    int32_t channelId = 1111;
+    int32_t channelType = 222;
     StreamSendStats *data = (StreamSendStats*)SoftBusMalloc(sizeof(StreamSendStats));
     EXPECT_TRUE(data != NULL);
     memset_s(data, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
@@ -407,8 +403,8 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
 {
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
+    int32_t channelId = 1111;
+    int32_t channelType = 222;
 
     channelType = CHANNEL_TYPE_UDP;
 
@@ -432,10 +428,10 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
 {
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
-    int32_t appType = 3333;
-    int32_t quality = 444444444;
+    int32_t channelId = 1111;
+    int32_t channelType = 222;
+    int32_t appType = 333;
+    int32_t quality = 444;
 
     channelId = -1;
     int32_t ret = TransRequestQos(channelId, channelType, appType, quality);
@@ -450,8 +446,8 @@ HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
 {
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
+    int32_t channelId = 111;
+    int32_t channelType = 222;
 
     channelId = channelId + 1;
     int32_t ret = TransCloseChannel(channelId, channelType);
@@ -487,9 +483,9 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
 {
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
-    void *data = FILLP_NULL_PTR;
+    int32_t channelId = 1111;
+    int32_t channelType = 222;
+    void *data = nullptr;
     uint32_t len = 0;
     int32_t msgType = 0;
 
@@ -564,8 +560,8 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
+    int32_t channelId = 111;
+    int32_t channelType = 222;
 
     int32_t ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -603,8 +599,8 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
 {
-    int32_t channelId = 1111111;
-    int32_t channelType = 222222;
+    int32_t channelId = 111;
+    int32_t channelType = 222;
     int32_t connId = -1;
 
     channelType = CHANNEL_TYPE_PROXY + 1;
