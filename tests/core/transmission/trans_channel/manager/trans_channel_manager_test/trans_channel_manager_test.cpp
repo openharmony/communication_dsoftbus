@@ -111,17 +111,15 @@ HWTEST_F(TransChannelManagerTest, TransChannelDeinit001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
-    SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
+    SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
 
-    if (memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX) != EOK) {
-        return;
-    }
+    (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX)
 
     int32_t ret = CopyAppInfoFromSessionParam(appInfo, sessionParam);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -139,35 +137,35 @@ HWTEST_F(TransChannelManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level
  */
 HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
 {
-    SessionParam *param = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(param != NULL);
-    memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    SessionParam *param = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    ASSERT_TRUE(param != nullptr);
+    (void)memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
 
     int tmp = 0;
     param->attr = &g_sessionAttr[tmp];
 
-    TransInfo *transInfo = (TransInfo*)SoftBusMalloc(sizeof(TransInfo));
-    EXPECT_TRUE(transInfo != NULL);
-    memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
+    TransInfo *transInfo = (TransInfo *)SoftBusMalloc(sizeof(TransInfo));
+    ASSERT_TRUE(transInfo != nullptr);
+    (void)memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
 
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     int ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
-    tmp = tmp + 1;
+    tmp++;
     param->attr = &g_sessionAttr[tmp];
     ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
-    tmp = tmp + 1;
+    tmp++;
     param->attr = &g_sessionAttr[tmp];
     ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
-    tmp = tmp + 1;
+    tmp++;
     param->attr = &g_sessionAttr[tmp];
     ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
@@ -185,19 +183,19 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransGetChannelType001, TestSize.Level1)
 {
-    SessionParam *param = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
-    EXPECT_TRUE(param != NULL);
+    SessionParam *param = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    ASSERT_TRUE(param != nullptr);
     memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
 
     int tmp = 0;
     param->attr = &g_sessionAttr[tmp];
 
-    LaneConnInfo *connInfo = (LaneConnInfo*)SoftBusMalloc(sizeof(LaneConnInfo));
-    EXPECT_TRUE(connInfo != NULL);
+    LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusMalloc(sizeof(LaneConnInfo));
+    ASSERT_TRUE(connInfo != nullptr);
     memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
 
-    TransInfo *transInfo = (TransInfo*)SoftBusMalloc(sizeof(TransInfo));
-    EXPECT_TRUE(transInfo != NULL);
+    TransInfo *transInfo = (TransInfo *)SoftBusMalloc(sizeof(TransInfo));
+    ASSERT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
 
     transInfo->channelType = TransGetChannelType(NULL, connInfo);
@@ -236,12 +234,12 @@ HWTEST_F(TransChannelManagerTest, TransGetChannelType001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransOpenChannelProc001, TestSize.Level1)
 {
-    ConnectOption *connOpt = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
-    EXPECT_TRUE(connOpt != NULL);
+    ConnectOption *connOpt = (ConnectOption *)SoftBusMalloc(sizeof(ConnectOption));
+    ASSERT_TRUE(connOpt != nullptr);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     int32_t channelId = 1;
@@ -270,8 +268,8 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelProc001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, GetAuthAppInfo001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     const char *mySessionName = TEST_PKG_NAME;
@@ -295,7 +293,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
 {
     const char *sessionName = TEST_PKG_NAME;
     ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
-    EXPECT_TRUE(connOpt != NULL);
+    ASSERT_TRUE(connOpt != nullptr);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
     int32_t ret = TransOpenAuthChannel(NULL, NULL);
@@ -328,12 +326,12 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
 {
-    StreamSendStats *src = (StreamSendStats*)SoftBusMalloc(sizeof(StreamSendStats));
-    EXPECT_TRUE(src != NULL);
+    StreamSendStats *src = (StreamSendStats *)SoftBusMalloc(sizeof(StreamSendStats));
+    ASSERT_TRUE(src != nullptr);
     memset_s(src, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
 
-    FrameSendStats *dest = (FrameSendStats*)SoftBusMalloc(sizeof(FrameSendStats));
-    EXPECT_TRUE(dest != NULL);
+    FrameSendStats *dest = (FrameSendStats *)SoftBusMalloc(sizeof(FrameSendStats));
+    ASSERT_TRUE(dest != nullptr);
     memset_s(dest, sizeof(FrameSendStats), 0, sizeof(FrameSendStats));
 
     uint32_t *srcCostCnt = (uint32_t *)(src->costTimeStatsCnt);
@@ -365,12 +363,12 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
 {
     int32_t channelId = 1111;
     int32_t channelType = 222;
-    StreamSendStats *data = (StreamSendStats*)SoftBusMalloc(sizeof(StreamSendStats));
-    EXPECT_TRUE(data != NULL);
+    StreamSendStats *data = (StreamSendStats *)SoftBusMalloc(sizeof(StreamSendStats));
+    ASSERT_TRUE(data != nullptr);
     memset_s(data, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
 
-    TrafficStats *trafficStats = (TrafficStats*)SoftBusMalloc(sizeof(TrafficStats));
-    EXPECT_TRUE(trafficStats != NULL);
+    TrafficStats *trafficStats = (TrafficStats *)SoftBusMalloc(sizeof(TrafficStats));
+    ASSERT_TRUE(trafficStats != nullptr);
     memset_s(trafficStats, sizeof(TrafficStats), 0, sizeof(TrafficStats));
 
     int32_t ret = TransRippleStats(channelId, channelType, trafficStats);
@@ -404,9 +402,7 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
 HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
 {
     int32_t channelId = 1111;
-    int32_t channelType = 222;
-
-    channelType = CHANNEL_TYPE_UDP;
+    int32_t channelType = CHANNEL_TYPE_UDP;
 
     int32_t ret = TransNotifyAuthSuccess(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -428,12 +424,11 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
 {
-    int32_t channelId = 1111;
+    int32_t channelId = -1111;
     int32_t channelType = 222;
     int32_t appType = 333;
     int32_t quality = 444;
 
-    channelId = -1;
     int32_t ret = TransRequestQos(channelId, channelType, appType, quality);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
@@ -449,26 +444,26 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
     int32_t channelId = 111;
     int32_t channelType = 222;
 
-    channelId = channelId + 1;
+    channelId++;
     int32_t ret = TransCloseChannel(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    channelId = channelId + 1;
+    channelId++;
     channelType = CHANNEL_TYPE_PROXY;
     ret = TransCloseChannel(channelId, channelType);
     EXPECT_NE(SOFTBUS_ERR, ret);
 
-    channelId = channelId + 1;
+    channelId++;
     channelType = CHANNEL_TYPE_UDP;
     ret = TransCloseChannel(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    channelId = channelId + 1;
+    channelId++;
     channelType = CHANNEL_TYPE_AUTH;
     ret = TransCloseChannel(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    channelId = channelId + 1;
+    channelId++;
     channelType = CHANNEL_TYPE_TCP_DIRECT;
     ret = TransCloseChannel(channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -513,7 +508,8 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
 {
-    TransInfo *info = (TransInfo*)SoftBusMalloc(sizeof(TransInfo));
+    TransInfo *info = (TransInfo *)SoftBusMalloc(sizeof(TransInfo));
+    ASSERT_TRUE(info != nullptr);
     memset_s(info, sizeof(TransInfo), 0, sizeof(TransInfo));
     char pkgName[] = "testPackage";
     char sessionName[] = "testSession";
@@ -557,7 +553,8 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     int32_t channelId = 111;

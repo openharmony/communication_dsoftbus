@@ -62,10 +62,7 @@ char *TestGetMsgPack()
         return NULL;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == nullptr) {
-        cJSON_Delete(msg);
-        return NULL;
-    }
+    ASSERT_TRUE(appInfo != nullptr);
 
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;

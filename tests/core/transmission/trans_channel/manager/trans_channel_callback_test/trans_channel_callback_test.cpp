@@ -65,9 +65,9 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
     const char *pkgName = TEST_PKG_NAME;
     const char *sessionName = TEST_SESSION_NAME;
     int32_t pid = 2112;
-    ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channel != nullptr);
-    memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    (void)memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
     int32_t ret = TransServerGetChannelCb()->OnChannelOpened(NULL, pid, sessionName, channel);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
