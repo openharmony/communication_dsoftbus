@@ -215,6 +215,9 @@ static int DataSend(int size, int type)
 {
     int ret;
     g_contcx = (char *)calloc(1, size * sizeof(char));
+    if (g_contcx == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
     if (memset_s(g_contcx, size, "h", size) != EOK) {
         return SOFTBUS_ERR;
     }

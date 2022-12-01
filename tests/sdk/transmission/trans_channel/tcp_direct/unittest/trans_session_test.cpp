@@ -62,6 +62,21 @@ void TransSessionTest::SetUpTestCase(void)
 void TransSessionTest::TearDownTestCase(void)
 {
 }
+static int OnSessionOpened(int sessionId, int result)
+{
+    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    return SOFTBUS_OK;
+}
+
+static void OnSessionClosed(int sessionId)
+{
+    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+}
+
+static ISessionListener g_sessionlistener = {
+    .OnSessionOpened = OnSessionOpened,
+    .OnSessionClosed = OnSessionClosed,
+};
 
 /**
  * @tc.name: GetSessionKeyTest001
@@ -319,8 +334,7 @@ HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize
 
     int32_t sessionId = INVALID_SESSION_ID;
     bool isEnabled = false;
-    ISessionListener listener;
-    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &listener);
+    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
     (void)ClientAddSession(&param, &sessionId, &isEnabled);
     ClientCleanAllSessionWhenServerDeath();
     EXPECT_TRUE(true);

@@ -121,7 +121,6 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return GetTransAuthInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
 }
 
-
 int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
 {
     return GetTransAuthInterface()->AuthGetLatestIdByUuid(uuid, isIpConnection, isMeta);
@@ -208,6 +207,16 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 {
     return GetTransAuthInterface()->LnnGetNetworkIdByUuid(uuid, buf, len);
+}
+
+int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
+{
+    return GetTransAuthInterface()->LnnGetRemoteStrInfo(networkId, key, info, len);
+}
+
+int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
+{
+    return GetTransAuthInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
 }
 }
 }

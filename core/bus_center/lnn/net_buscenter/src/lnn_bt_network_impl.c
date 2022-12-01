@@ -157,29 +157,54 @@ static BtSubnetManagerEvent GetBtRegistEvent(void)
         BT_SUBNET_MANAGER_EVENT_IF_READY : BT_SUBNET_MANAGER_EVENT_IF_DOWN;
 }
 
-static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet)
+static BtSubnetManagerEvent GetBtStatusChangedEvent(SoftBusBtState btState)
 {
-    /* Only used for initialization process to obtain bt subnet status */
-    if (subnet->status == LNN_SUBNET_RUNNING) {
-        return;
+    if (btState == SOFTBUS_BR_TURN_ON || btState == SOFTBUS_BLE_TURN_ON) {
+        return BT_SUBNET_MANAGER_EVENT_IF_READY;
     }
-    BtSubnetManagerEvent event = GetBtRegistEvent();
-    if (event != BT_SUBNET_MANAGER_EVENT_IF_READY) {
-        return;
+    if (btState == SOFTBUS_BR_TURN_OFF || btState == SOFTBUS_BLE_TURN_OFF) {
+        return BT_SUBNET_MANAGER_EVENT_IF_DOWN;
+    }
+    return BT_SUBNET_MANAGER_EVENT_MAX;
+}
+
+static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
+{
+    BtSubnetManagerEvent event = BT_SUBNET_MANAGER_EVENT_MAX;
+
+    if (status == NULL) {
+        event = GetBtRegistEvent();
+        /* Only used for initialization process to obtain bt subnet status */
+        if (event != BT_SUBNET_MANAGER_EVENT_IF_READY) {
+            return;
+        }
+    } else {
+        SoftBusBtState btState = (SoftBusBtState)(*(uint8_t *)status);
+        event = GetBtStatusChangedEvent(btState);
     }
 
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     LnnNetIfType type;
     LnnGetNetIfTypeByName(subnet->ifName, &type);
-    switch (type) {
-        case LNN_NETIF_TYPE_BR:
-            ret = EnableBrSubnet(subnet);
+    switch (event) {
+        case BT_SUBNET_MANAGER_EVENT_IF_READY:
+            if (type == LNN_NETIF_TYPE_BR) {
+                ret = EnableBrSubnet(subnet);
+            }
+            if (type == LNN_NETIF_TYPE_BLE) {
+                ret = EnableBleSubnet(subnet);
+            }
             break;
-        case LNN_NETIF_TYPE_BLE:
-            ret = EnableBleSubnet(subnet);
+        case BT_SUBNET_MANAGER_EVENT_IF_DOWN:
+            if (type == LNN_NETIF_TYPE_BR) {
+                ret = DisableBrSubnet(subnet);
+            }
+            if (type == LNN_NETIF_TYPE_BLE) {
+                ret = DisableBleSubnet(subnet);
+            }
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "discard unexpected type %d", type);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "discard unexpected event %d", event);
             return;
     }
     TransactBtSubnetState(subnet, event, (ret == SOFTBUS_OK));
@@ -214,47 +239,17 @@ static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self,
     return NULL;
 }
 
-static VisitNextChoice NotifyBtStatusChanged(const LnnPhysicalSubnet *subnet, void *data)
+static VisitNextChoice NotifyBtStatusChanged(const LnnNetIfMgr *netifManager, void *data)
 {
-    int32_t ret = SOFTBUS_OK;
-    LnnNetIfType type;
-    BtSubnetManagerEvent event;
     SoftBusBtState btState = (SoftBusBtState)(*(uint8_t *)data);
-
-    LnnGetNetIfTypeByName(subnet->ifName, &type);
-    switch (type) {
-        case LNN_NETIF_TYPE_BR:
-            if (btState == SOFTBUS_BR_TURN_ON) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "net_buscenter get br turn on");
-                ret = EnableBrSubnet(subnet);
-                event = BT_SUBNET_MANAGER_EVENT_IF_READY;
-                break;
-            }
-            if (btState == SOFTBUS_BR_TURN_OFF) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "net_buscenter get br turn off");
-                ret = DisableBrSubnet(subnet);
-                event = BT_SUBNET_MANAGER_EVENT_IF_DOWN;
-                break;
-            }
-            return CHOICE_VISIT_NEXT;
-        case LNN_NETIF_TYPE_BLE:
-            if (btState == SOFTBUS_BLE_TURN_ON) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "net_buscenter get ble turn on");
-                ret = EnableBleSubnet(subnet);
-                event = BT_SUBNET_MANAGER_EVENT_IF_READY;
-                break;
-            }
-            if (btState == SOFTBUS_BLE_TURN_OFF) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "net_buscenter get ble turn off");
-                ret = DisableBleSubnet(subnet);
-                event = BT_SUBNET_MANAGER_EVENT_IF_DOWN;
-                break;
-            }
-            return CHOICE_VISIT_NEXT;
-        default:
-            return CHOICE_VISIT_NEXT;
+    if (netifManager->type == LNN_NETIF_TYPE_BR &&
+        (btState == SOFTBUS_BR_TURN_ON || btState == SOFTBUS_BR_TURN_OFF)) {
+        LnnNotifyPhysicalSubnetAddressChanged(netifManager->ifName, LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE, data);
     }
-    TransactBtSubnetState(subnet, event, (ret == SOFTBUS_OK));
+    if (netifManager->type == LNN_NETIF_TYPE_BLE &&
+        (btState == SOFTBUS_BLE_TURN_ON || btState == SOFTBUS_BLE_TURN_OFF)) {
+        LnnNotifyPhysicalSubnetAddressChanged(netifManager->ifName, LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE, data);
+    }
     return CHOICE_VISIT_NEXT;
 }
 
@@ -265,8 +260,8 @@ static void LnnBtStateChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
 
-    const LnnMonitorBtStateChangedEvent *event = (const LnnMonitorBtStateChangedEvent *)info;
-    (void)LnnVisitPhysicalSubnet(NotifyBtStatusChanged, &event->status);
+    LnnMonitorBtStateChangedEvent *event = (LnnMonitorBtStateChangedEvent *)info;
+    (void)LnnVisitNetif(NotifyBtStatusChanged, &event->status);
 }
 
 static void LnnLeaveSpecificBrNetwork(const char *btMac)

@@ -65,7 +65,6 @@ ohos_unittest("TransProxyChannelCoreTest") {
 
     "$dsoftbus_root_path/third_party/dfinder/include",
 
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "//base/security/device_auth/interfaces/innerkits",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
@@ -91,9 +90,18 @@ ohos_unittest("TransProxyChannelCoreTest") {
   }
 }
 
+import(
+    "//foundation/communication/dsoftbus/core/transmission/trans_channel/common/common.gni")
+import(
+    "//foundation/communication/dsoftbus/core/transmission/trans_channel/proxy/proxy.gni")
+
 ohos_unittest("TransProxyChannelCoreMockTest") {
   module_out_path = module_output_path
   sources = trans_comm_mock_src
+
+  sources += trans_proxy_channel_src
+  sources += trans_channel_common_src
+
   sources += [
     "trans_proxy_manager_test.cpp",
     "trans_proxy_message_test.cpp",
@@ -137,16 +145,17 @@ ohos_unittest("TransProxyChannelCoreMockTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
 
-    "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "//base/security/device_auth/interfaces/innerkits",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
     "unittest/common/",
   ]
 
+  include_dirs +=
+      [ "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include" ]
+
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
