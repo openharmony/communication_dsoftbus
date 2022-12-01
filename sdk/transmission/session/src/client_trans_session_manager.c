@@ -63,7 +63,7 @@ int32_t CheckPermissionState(int32_t sessionId)
         }
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    return SOFTBUS_PERMISSION_DENIED;
+    return SOFTBUS_TRANS_INVALID_SESSION_ID;
 }
 
 void PermissionStateChange(const char *pkgName, int32_t state)
