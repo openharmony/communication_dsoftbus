@@ -62,7 +62,6 @@ HWTEST_F(DiscCoapTest, testCoapPublish001, TestSize.Level1)
     bool ranging = true;
     
     PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -87,7 +86,6 @@ HWTEST_F(DiscCoapTest, testCoapUnPublish001, TestSize.Level1)
     int32_t ret;
     
     PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -111,7 +109,6 @@ HWTEST_F(DiscCoapTest, testCoapStartScan001, TestSize.Level1)
     int32_t ret;
     
     PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -136,7 +133,6 @@ HWTEST_F(DiscCoapTest, testCoapStopScan001, TestSize.Level1)
     bool ranging = true;
     
     PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -163,7 +159,6 @@ HWTEST_F(DiscCoapTest, testCoapStartAdvertise001, TestSize.Level1)
     int32_t ret;
 
     SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -187,7 +182,6 @@ HWTEST_F(DiscCoapTest, testCoapStopAdvertise001, TestSize.Level1)
     int32_t ret;
 
     SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -211,7 +205,6 @@ HWTEST_F(DiscCoapTest, testCoapSubscribe001, TestSize.Level1)
     int32_t ret;
 
     SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -235,7 +228,6 @@ HWTEST_F(DiscCoapTest, testCoapUnsubscribe001, TestSize.Level1)
     int32_t ret;
 
     SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);

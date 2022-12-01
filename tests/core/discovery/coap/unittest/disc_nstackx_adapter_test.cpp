@@ -112,7 +112,6 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapStartDiscovery001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
    
     DiscCoapOption *option = (DiscCoapOption*)SoftBusMalloc(sizeof(DiscCoapOption));
-    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(DiscCoapOption), 0, sizeof(DiscCoapOption));
     option->mode = INVALID_MODE;
    
@@ -141,5 +140,33 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapUpdateLocalIp, TestSize.Level1)
     DiscCoapUpdateLocalIp(status);
 
     DiscNstackxDeinit();
+}
+
+/*
+* @tc.name: testDiscCoapRegisterServiceData
+* @tc.desc: test DiscCoapRegisterServiceData
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscNstackxAdapterTest, testDiscCoapRegisterServiceData001, TestSize.Level1)
+{
+    uint32_t dataLen = 1;
+    int32_t ret = DiscCoapRegisterServiceData(NULL, dataLen);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_INIT_FAIL);
+}
+
+/*
+* @tc.name: testDiscCoapStopDiscovery
+* @tc.desc: test DiscCoapStopDiscovery
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscNstackxAdapterTest, testDiscCoapStopDiscovery001, TestSize.Level1)
+{
+    int32_t ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
+    
+    DiscCoapUpdateDevName();
+    EXPECT_EQ(true, true);
 }
 }
