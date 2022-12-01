@@ -90,37 +90,6 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
 }
 
 /**
- * @tc.name: TransServerOnChannelClosed001
- * @tc.desc: TransServerOnChannelClosed001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelCallbackTest, TransServerOnChannelClosed001, TestSize.Level1)
-{
-    const char *pkgName = TEST_PKG_NAME;
-    int32_t pid = 2112;
-    int32_t channelId = 2112;
-    int32_t channelType = 2112;
-    ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
-    ASSERT_TRUE(channel != nullptr);
-    memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
-
-    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, pid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    TransLaneMgrDeinit();
-    TransServerGetChannelCb()->OnChannelClosed(pkgName, pid, -1, channelType);
-    TransLaneMgrInit();
-
-    ret = TransServerGetChannelCb()->OnChannelClosed(pkgName, pid, channelId, channelType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    if (channel != NULL) {
-        SoftBusFree(channel);
-    }
-}
-
-/**
  * @tc.name: TransServerOnChannelOpenFailed001
  * @tc.desc: TransServerOnChannelOpenFailed001, use the wrong parameter.
  * @tc.type: FUNC
