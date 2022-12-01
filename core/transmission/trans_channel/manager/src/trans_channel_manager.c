@@ -474,7 +474,7 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: id=%d, type=%d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
-            return TransSendAuthMsg(channelId, data, (int32_t)len);
+            return TransSendAuthMsg(channelId, (char*)data, (int32_t)len);
         case CHANNEL_TYPE_PROXY:
             return TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
         default:
