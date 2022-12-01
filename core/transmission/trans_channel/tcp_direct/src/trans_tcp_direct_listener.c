@@ -237,7 +237,6 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
         ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Trans Srv Recv Data ret %d. ", ret);
         if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
             SoftBusFree(conn);
             return SOFTBUS_OK;
