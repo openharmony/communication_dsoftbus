@@ -40,7 +40,6 @@ public:
     virtual int32_t LnnInitLocalP2pInfo(NodeInfo *info);
     virtual int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
     virtual int32_t LnnInitOhosAccount(void);
-    virtual int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId);
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -52,7 +51,6 @@ public:
     MOCK_METHOD1(LnnInitLocalP2pInfo, int32_t (NodeInfo *info));
     MOCK_METHOD2(SoftBusRegBusCenterVarDump, int32_t (char *, SoftBusVarDumpCb));
     MOCK_METHOD0(LnnInitOhosAccount, int32_t ());
-    MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t (const char *, uint16_t *));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
