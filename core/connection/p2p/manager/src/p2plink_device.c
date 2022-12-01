@@ -86,6 +86,10 @@ NO_SANITIZE("cfi") ConnectedNode *P2pLinkGetConnedDevByMac(const char *peerMac)
 
 void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId)
 {
+    if (authId == -1) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkUpdateInAuthId:authid not set");
+        return;
+    }
     ConnectedNode *item = P2pLinkGetConnedDevByMac(peerMac);
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "no need update authid");
