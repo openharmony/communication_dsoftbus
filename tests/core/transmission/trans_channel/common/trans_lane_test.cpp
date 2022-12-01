@@ -184,12 +184,10 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest003, TestSize.Level1)
     uint32_t invalidId = 111;
     bool bSucc = false;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
-    if (connInfo == NULL) {
-        return;
-    }
+    ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransGetLaneReqItemByLaneId(invalidId, &bSucc, connInfo);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -223,12 +221,10 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest004, TestSize.Level1)
     uint32_t invalidId = 111;
     bool bSucc = false;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
-    if (connInfo == NULL) {
-        return;
-    }
+    ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransUpdateLaneConnInfoByLaneId(invalidId, bSucc, connInfo);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -262,12 +258,10 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest005, TestSize.Level1)
     uint32_t laneId = 1;
     uint32_t invalidId = 111;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
-    if (connInfo == NULL) {
-        return;
-    }
+    ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     TransOnLaneRequestSuccess(invalidId, connInfo);
     connInfo->connInfo.p2p.protocol = 1;
@@ -275,7 +269,6 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest005, TestSize.Level1)
 
     ret = TransDelLaneReqFromPendingList(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    TransReqLanePendingDeinit();
     TransReqLanePendingDeinit();
     SoftBusFree(connInfo);
 }
@@ -293,12 +286,10 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest006, TestSize.Level1)
     uint32_t invalidId = 111;
     LaneRequestFailReason reason = LANE_LINK_FAILED;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
-    if (connInfo == NULL) {
-        return;
-    }
+    ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     TransOnLaneRequestFail(invalidId, reason);
     connInfo->connInfo.p2p.protocol = 1;
@@ -347,26 +338,31 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest008, TestSize.Level1)
     EXPECT_TRUE(ret == LANE_T_BUTT);
 
     SessionParam* sessionParam = GenerateCommParamTest();
+    ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_MSG);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
+    ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_BYTE);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
+    ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_FILE);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
+    ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_RAW_STREAM);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
+    ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
     EXPECT_TRUE(ret == LANE_T_BUTT);
     SoftBusFree(sessionParam);
@@ -411,16 +407,15 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest009, TestSize.Level1)
 HWTEST_F(TransLanePendingTest, TransLanePendingTest010, TestSize.Level1)
 {
     int32_t ret = TransReqLanePendingInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     SessionAttribute sessionAttr = {
         .dataType = LANE_T_BUTT,
         .linkTypeNum = 4,
     };
     SessionParam *sessionParam = AddParamTest(&sessionAttr);
+    ASSERT_TRUE(sessionParam != nullptr);
     LanePreferredLinkList *preferred = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
-    if (sessionParam == NULL || preferred == NULL) {
-        return;
-    }
+    ASSERT_TRUE(preferred != nullptr);
     (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     TransformSessionPreferredToLanePreferred(sessionParam, preferred);
     SoftBusFree(sessionParam);
@@ -581,13 +576,11 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest015, TestSize.Level1)
         .connInfo.p2p.peerIp = {"peer Ip"},
     };
     SessionServer *node = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
-    if (node == NULL) {
-        return;
-    }
+    ASSERT_TRUE(node != nullptr);
     (void)memcpy_s((void *)node->sessionName, SESSION_NAME_SIZE_MAX,
         "normal sessionName", strlen("normal sessionName") + 1);
     int32_t ret = TransSessionServerAddItem(node);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
 
     SessionAttribute sessionNormalAttr = {
         .dataType = TYPE_MESSAGE,
@@ -717,5 +710,53 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest021, TestSize.Level1)
     EXPECT_TRUE(ret == false);
     ret = CheckSessionNameValidOnAuthChannel(sessionName);
     EXPECT_TRUE(ret == true);
+}
+
+/**
+ * @tc.name: TransLanePendingTest022
+ * @tc.desc: transform session perferred to lane perferred use wrong param.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransLanePendingTest022, TestSize.Level1)
+{
+    int32_t ret = TransReqLanePendingInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    SessionAttribute sessionAttr = {
+        .dataType = LANE_T_BUTT,
+        .linkTypeNum = -1,
+    };
+    SessionParam *sessionParam = AddParamTest(&sessionAttr);
+    ASSERT_TRUE(sessionParam != nullptr);
+    LanePreferredLinkList *preferred = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
+    ASSERT_TRUE(preferred != nullptr);
+    (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    TransformSessionPreferredToLanePreferred(sessionParam, preferred);
+    SoftBusFree(sessionParam);
+    SoftBusFree(preferred);
+    SessionAttribute sessionAttr1 = {
+        .dataType = LANE_T_BUTT,
+        .linkTypeNum = 5,
+    };
+    SessionParam *sessionParam1 = AddParamTest(&sessionAttr1);
+    ASSERT_TRUE(sessionParam1 != nullptr);
+    LanePreferredLinkList *preferred1 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
+    ASSERT_TRUE(preferred1 != nullptr);
+    (void)memset_s(preferred1, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    TransformSessionPreferredToLanePreferred(sessionParam1, preferred1);
+    SoftBusFree(sessionParam1);
+    SoftBusFree(preferred1);
+    SessionAttribute sessionAttr2 = {
+        .dataType = LANE_T_BUTT,
+        .linkTypeNum = 7,
+    };
+    SessionParam *sessionParam2 = AddParamTest(&sessionAttr2);
+    ASSERT_TRUE(sessionParam2 != nullptr);
+    LanePreferredLinkList *preferred2 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
+    ASSERT_TRUE(preferred2 != nullptr);
+    (void)memset_s(preferred2, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    TransformSessionPreferredToLanePreferred(sessionParam2, preferred2);
+    SoftBusFree(sessionParam2);
+    SoftBusFree(preferred2);
 }
 } // namespace OHOS
