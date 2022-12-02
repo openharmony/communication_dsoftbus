@@ -180,7 +180,7 @@ int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
     return SOFTBUS_ERR;
 }
 
-int SoftBusRemoveBtStateListener(int listenerId)
+NO_SANITIZE("cfi") int SoftBusRemoveBtStateListener(int listenerId)
 {
     if (listenerId < 0 || listenerId >= STATE_LISTENER_MAX_NUM) {
         return SOFTBUS_INVALID_PARAM;
@@ -190,7 +190,7 @@ int SoftBusRemoveBtStateListener(int listenerId)
     return SOFTBUS_OK;
 }
 
-int SoftBusEnableBt(void)
+NO_SANITIZE("cfi") int SoftBusEnableBt(void)
 {
     if (EnableBle()) {
         return SOFTBUS_OK;
@@ -198,7 +198,7 @@ int SoftBusEnableBt(void)
     return SOFTBUS_ERR;
 }
 
-int SoftBusDisableBt(void)
+NO_SANITIZE("cfi") int SoftBusDisableBt(void)
 {
     if (DisableBle()) {
         return SOFTBUS_OK;
@@ -206,7 +206,7 @@ int SoftBusDisableBt(void)
     return SOFTBUS_ERR;
 }
 
-int SoftBusGetBtState(void)
+NO_SANITIZE("cfi") int SoftBusGetBtState(void)
 {
     if (IsBleEnabled()) {
         return BLE_ENABLE;
@@ -214,7 +214,7 @@ int SoftBusGetBtState(void)
     return BLE_DISABLE;
 }
 
-int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+NO_SANITIZE("cfi") int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     if (mac == NULL) {
         return SOFTBUS_ERR;
@@ -233,7 +233,7 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len)
     return SOFTBUS_OK;
 }
 
-int SoftBusSetBtName(const char *name)
+NO_SANITIZE("cfi") int SoftBusSetBtName(const char *name)
 {
     if (SetLocalName((unsigned char *)name, strlen(name))) {
         return SOFTBUS_OK;

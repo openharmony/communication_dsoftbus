@@ -318,7 +318,7 @@ static int32_t RmoveUpdateSessionKeyFunc(const void *obj, void *para)
     return SOFTBUS_ERR;
 }
 
-void ScheduleUpdateSessionKey(int64_t authId, uint64_t delayMs)
+NO_SANITIZE("cfi") void ScheduleUpdateSessionKey(int64_t authId, uint64_t delayMs)
 {
     RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RmoveUpdateSessionKeyFunc, (void *)(&authId));
     PostAuthEvent(EVENT_UPDATE_SESSION_KEY, HandleUpdateSessionKeyEvent, &authId, sizeof(authId), delayMs);

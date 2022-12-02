@@ -59,7 +59,7 @@ typedef struct  {
 static SoftBusList *g_channelSliceProcessorList = NULL;
 int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag);
 
-void PackSliceHead(SliceHead *data)
+NO_SANITIZE("cfi") void PackSliceHead(SliceHead *data)
 {
     data->priority = (int32_t)SoftBusHtoLl((uint32_t)data->priority);
     data->sliceNum = (int32_t)SoftBusHtoLl((uint32_t)data->sliceNum);
@@ -101,7 +101,7 @@ NO_SANITIZE("cfi") int32_t NotifyClientMsgReceived(const char *pkgName, int32_t 
     return ret;
 }
 
-int32_t ProxyTypeToProxyIndex(ProxyPacketType packetType)
+NO_SANITIZE("cfi") int32_t ProxyTypeToProxyIndex(ProxyPacketType packetType)
 {
     switch (packetType) {
         case PROXY_FLAG_MESSAGE:
@@ -115,7 +115,7 @@ int32_t ProxyTypeToProxyIndex(ProxyPacketType packetType)
     }
 }
 
-ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
+NO_SANITIZE("cfi") ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
 {
     switch (sessionType) {
         case TRANS_SESSION_BYTES:
@@ -145,7 +145,7 @@ ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
     }
 }
 
-SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
+NO_SANITIZE("cfi") SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
 {
     switch (proxyType) {
         case PROXY_FLAG_BYTES:

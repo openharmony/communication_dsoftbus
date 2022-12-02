@@ -33,7 +33,7 @@ typedef struct {
     int32_t msgType;
 } P2pCallbackInfo;
 
-static void P2pLoopMsgHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void P2pLoopMsgHandler(SoftBusMessage *msg)
 {
     if (msg == 0) {
         return;
@@ -52,7 +52,7 @@ static void P2pLoopMsgHandler(SoftBusMessage *msg)
 }
 
 
-int32_t P2pLoopInit()
+NO_SANITIZE("cfi") int32_t P2pLoopInit()
 {
     g_p2pcHandler.looper = CreateNewLooper(P2P_LOOP_NAME);
     if (g_p2pcHandler.looper == 0) {
@@ -86,7 +86,7 @@ static SoftBusMessage *P2pCreateLoopMsg(int32_t what, char *data)
     return msg;
 }
 
-int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, P2pLoopMsg msgType)
+NO_SANITIZE("cfi") int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, P2pLoopMsg msgType)
 {
     P2pCallbackInfo *cbinfo = SoftBusCalloc(sizeof(P2pCallbackInfo));
     if (cbinfo == NULL) {
@@ -121,7 +121,7 @@ NO_SANITIZE("cfi") int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *p
     return SOFTBUS_OK;
 }
 
-static int32_t P2pRemoveMessageFunc(const SoftBusMessage *msg, void *para)
+NO_SANITIZE("cfi") static int32_t P2pRemoveMessageFunc(const SoftBusMessage *msg, void *para)
 {
     if (para == NULL) {
         return SOFTBUS_ERR;

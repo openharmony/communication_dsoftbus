@@ -170,7 +170,7 @@ int32_t LnnInitDeviceNameMonitorImpl(void)
     return ret;
 }
 
-void RegisterNameMonitor(void)
+NO_SANITIZE("cfi") void RegisterNameMonitor(void)
 {
     OHOS::BusCenter::RegisterNameMonitorHelper();
 }

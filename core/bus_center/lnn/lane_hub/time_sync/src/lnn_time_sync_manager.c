@@ -374,7 +374,7 @@ static void ProcessRemoveAll(void)
     }
 }
 
-static void TimeSyncMessageHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void TimeSyncMessageHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync msg is null");

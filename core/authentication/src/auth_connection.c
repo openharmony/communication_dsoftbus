@@ -170,7 +170,7 @@ NO_SANITIZE("cfi") uint32_t GetAuthDataSize(uint32_t len)
     return AUTH_CONN_DATA_HEAD_SIZE + len;
 }
 
-int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
+NO_SANITIZE("cfi") int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
     uint8_t *buf, uint32_t size)
 {
     if (size < GetAuthDataSize(head->len)) {
@@ -542,7 +542,7 @@ NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)
     }
 }
 
-int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
+NO_SANITIZE("cfi") int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);

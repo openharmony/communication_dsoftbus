@@ -71,7 +71,8 @@ NO_SANITIZE("cfi") int32_t P2plinkChannelListToString(const P2pLink5GList *chann
     return SOFTBUS_OK;
 }
 
-void P2pLinkParseItemDataByDelimit(char *srcStr, const char *delimit, char *list[], int32_t num, int32_t *outNum)
+NO_SANITIZE("cfi") void P2pLinkParseItemDataByDelimit(char *srcStr, const char *delimit, char *list[], int32_t num,
+    int32_t *outNum)
 {
     // srcStr will be cut.
     if (srcStr == NULL || delimit == NULL || list == NULL || outNum == NULL || num == 0) {
@@ -164,7 +165,7 @@ static bool IsInChannelList(int32_t channelItem, const P2pLink5GList *channelLis
     return false;
 }
 
-int32_t P2pLinkUpateAndGetStationFreq(const P2pLink5GList *channelList)
+NO_SANITIZE("cfi") int32_t P2pLinkUpateAndGetStationFreq(const P2pLink5GList *channelList)
 {
     int32_t freq = P2pLinkGetFrequency();
     if (freq < FREQUENCY_2G_FIRST) {

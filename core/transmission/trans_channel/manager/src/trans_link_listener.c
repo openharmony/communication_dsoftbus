@@ -22,6 +22,7 @@
 #include "softbus_app_info.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_session_manager.h"
@@ -98,7 +99,7 @@ static void OnP2pRoleChange(P2pLinkRole myRole)
     }
 }
 
-void ReqLinkListener(void)
+NO_SANITIZE("cfi") void ReqLinkListener(void)
 {
     P2pLinkPeerDevStateCb cb = {0};
     cb.onMyRoleChange = OnP2pRoleChange;
