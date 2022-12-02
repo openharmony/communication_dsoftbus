@@ -136,10 +136,6 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
     len = 0;
     ret = TransServerGetChannelCb()->OnDataReceived(pkgName, channelId, channelType, data, len, type);
 
-    len = 1;
-    channelType = -2;
-    ret = TransServerGetChannelCb()->OnDataReceived(pkgName, channelId, channelType, data, len, type);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channelType = 3;
     ret = TransServerGetChannelCb()->OnDataReceived(pkgName, channelId, channelType, data, len, type);

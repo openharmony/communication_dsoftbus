@@ -383,29 +383,6 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransNotifyAuthSuccess001
- * @tc.desc: TransNotifyAuthSuccess, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
-{
-    int32_t channelId = 1111;
-    int32_t channelType = CHANNEL_TYPE_UDP;
-
-    int32_t ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    channelType = CHANNEL_TYPE_AUTH;
-    ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
  * @tc.name: TransRequestQos001
  * @tc.desc: TransRequestQos001, use the wrong parameter.
  * @tc.type: FUNC
