@@ -83,7 +83,7 @@ int64_t TestGetChannelId()
     return g_channelId;
 }
 
-UdpChannelInfo* GetPackTest()
+UdpChannelInfo* GenerateChannelTest()
 {
     UdpChannelInfo *Channel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
     if (Channel == NULL) {
@@ -143,7 +143,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest002, TestSize.Level1)
     int32_t ret = TransUdpChannelMgrInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TransUdpChannelMgrDeinit();
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     ret = TransAddUdpChannel(Channel);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -160,7 +160,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest003, TestSize.Level1)
     int32_t invalidId = -1;
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     ret = TransAddUdpChannel(Channel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -186,7 +186,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest005, TestSize.Level1)
 {
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     Channel->seq = 20;
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
@@ -211,7 +211,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest005, TestSize.Level1)
  */
 HWTEST_F(TransUdpManagerTest, TransUdpManagerTest006, TestSize.Level1)
 {
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     int64_t seq = INVALID_CHANNEL_SEQ;
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
@@ -246,7 +246,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest007, TestSize.Level1)
 {
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
@@ -277,7 +277,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest008, TestSize.Level1)
     ASSERT_TRUE(newChannel != nullptr);
     (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 1;
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     TransUdpChannelMgrDeinit();
     int32_t ret = TransGetUdpChannelById(Channel->info.myData.channelId, newChannel);
@@ -307,7 +307,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest009, TestSize.Level1)
 {
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     ASSERT_TRUE(newChannel != nullptr);
@@ -336,7 +336,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest010, TestSize.Level1)
     ASSERT_TRUE(newChannel != nullptr);
     (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 1;
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     TransUdpChannelMgrDeinit();
     int32_t ret = TransGetUdpChannelById(Channel->requestId, newChannel);
@@ -370,7 +370,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest011, TestSize.Level1)
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t seq = INVALID_CHANNEL_SEQ;
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     ret = TransAddUdpChannel(Channel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -398,7 +398,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest012, TestSize.Level1)
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t channelId = INVALID_CHAN_ID;
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     ret = TransAddUdpChannel(Channel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -422,7 +422,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest013, TestSize.Level1)
 {
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
@@ -447,7 +447,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest014, TestSize.Level1)
     ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->myData.channelId = 20;
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     TransUdpChannelMgrDeinit();
     TransUpdateUdpChannelInfo(Channel->seq, appInfo);
@@ -475,7 +475,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest015, TestSize.Level1)
     ASSERT_TRUE(ret == SOFTBUS_OK);
     char pkgName[65] = {"normal pakName"};
     char sessionName[256] = {"normal sessionName"};
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     ret = TransAddUdpChannel(Channel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -498,7 +498,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest016, TestSize.Level1)
     int32_t channelId = INVALID_CHAN_ID;
     char pkgName[65] = {"wrong pakName"};
     char sessionName[256] = {"wrong sessionName"};
-    UdpChannelInfo *Channel = GetPackTest();
+    UdpChannelInfo *Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     ret = TransAddUdpChannel(Channel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -539,7 +539,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest017, TestSize.Level1)
     UdpChannelInfo* Channel_1 = TransGetChannelObj(INVALID_CHAN_ID);
     EXPECT_TRUE(Channel_1 == nullptr);
 
-    UdpChannelInfo* Channel = GetPackTest();
+    UdpChannelInfo* Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     ret = TransAddUdpChannel(Channel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -563,7 +563,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest018, TestSize.Level1)
 {
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    UdpChannelInfo* Channel = GetPackTest();
+    UdpChannelInfo* Channel = GenerateChannelTest();
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         return;
@@ -590,7 +590,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest019, TestSize.Level1)
     int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int32_t channelId = INVALID_CHAN_ID;
-    UdpChannelInfo* Channel = GetPackTest();
+    UdpChannelInfo* Channel = GenerateChannelTest();
     ASSERT_TRUE(Channel != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
