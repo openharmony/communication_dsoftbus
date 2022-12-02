@@ -30,7 +30,6 @@ typedef enum {
     STATE_SYNC_DEVICE_ID = 0,
     STATE_DEVICE_AUTH,
     STATE_SYNC_DEVICE_INFO,
-    STATE_AUTH_COMPLETE,
     STATE_NUM_MAX
 } AuthFsmStateIndex;
 
@@ -43,6 +42,7 @@ typedef enum {
     FSM_MSG_RECV_CLOSE_ACK,
     FSM_MSG_AUTH_TIMEOUT,
     FSM_MSG_DEVICE_NOT_TRUSTED,
+    FSM_MSG_DEVICE_DISCONNECTED,
 } StateMessageType;
 
 typedef struct {
@@ -98,7 +98,9 @@ static AuthFsm *TranslateToAuthFsm(FsmStateMachine *fsm, int32_t msgType, Messag
         return NULL;
     }
     /* check para */
-    if ((msgType != FSM_MSG_AUTH_TIMEOUT && msgType != FSM_MSG_DEVICE_NOT_TRUSTED) && para == NULL) {
+    if ((msgType != FSM_MSG_AUTH_TIMEOUT &&
+        msgType != FSM_MSG_DEVICE_NOT_TRUSTED &&
+        msgType != FSM_MSG_DEVICE_DISCONNECTED) && para == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid msgType: %d", msgType);
         return NULL;
     }
@@ -221,6 +223,9 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
             break;
         case FSM_MSG_DEVICE_NOT_TRUSTED:
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED);
+            break;
+        case FSM_MSG_DEVICE_DISCONNECTED:
+            CompleteAuthSession(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
@@ -715,6 +720,26 @@ int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
             continue;
         }
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_NOT_TRUSTED, NULL);
+    }
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
+
+int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
+{
+    if (!RequireAuthLock()) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthFsm *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
+        if (item->info.connId != connId) {
+            continue;
+        }
+        if (item->isDead) {
+            ALOGE("auth fsm[%"PRId64"] has dead.", item->authSeq);
+            continue;
+        }
+        LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL);
     }
     ReleaseAuthLock();
     return SOFTBUS_OK;

@@ -272,6 +272,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2)
             break;
         case AUTH_LINK_TYPE_P2P:
             if (info2->type == AUTH_LINK_TYPE_P2P &&
+                info1->info.ipInfo.port == info2->info.ipInfo.port &&
                 strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
                 return true;
             }
