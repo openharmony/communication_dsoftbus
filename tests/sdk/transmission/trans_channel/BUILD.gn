@@ -12,6 +12,8 @@
 # limitations under the License.
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import(
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
 
 trans_sdk_test_common_src = [
   "tcp_direct/unittest/trans_session_test.cpp",
@@ -146,6 +148,33 @@ if (defined(ohos_lite)) {
       external_deps = [ "hilog:libhilog" ]
     }
   }
+
+  ohos_unittest("TransSdkUdpStreamInterfaceTest") {
+    module_out_path = module_output_path
+    sources = [ "udp/stream/client_trans_udp_stream_interface_test.cpp" ]
+    include_dirs = trans_udp_channel_sdk_inc
+    deps = trans_sdk_test_common_deps
+    deps += trans_sdk_proxy_test_deps
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+  }
+
+  ohos_unittest("TransSdkUdpStreamAdaptorTest") {
+    module_out_path = module_output_path
+    sources = [ "udp/stream/stream_adaptor_test.cpp" ]
+    include_dirs = trans_udp_channel_sdk_inc
+    deps = trans_sdk_test_common_deps
+    deps += trans_sdk_proxy_test_deps
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+  }
+
   group("unittest") {
     testonly = true
     deps = [
@@ -157,5 +186,15 @@ if (defined(ohos_lite)) {
       "udp/distributed_stream:distributed_stream_test",
       "udp/file:unittest",
     ]
+    if (dsoftbus_feature_trans_udp == true) {
+      if (dsoftbus_feature_trans_udp_stream == true) {
+        if (!defined(ohos_lite)) {
+          deps += [
+            ":TransSdkUdpStreamAdaptorTest",
+            ":TransSdkUdpStreamInterfaceTest",
+          ]
+        }
+      }
+    }
   }
 }
