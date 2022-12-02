@@ -907,6 +907,51 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest28, TestSiz
 }
 
 /**
+ * @tc.name: TransClientSessionDestoryTest01
+ * @tc.desc: Transmission sdk session manager destory session by network id.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestoryTest01, TestSize.Level1)
+{
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_UDP;
+    session->routeType = WIFI_STA;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    sessionParam->peerDeviceId = g_networkId;
+    SessionInfo *newSession = GenerateSession(sessionParam);
+    ASSERT_TRUE(newSession != NULL);
+    newSession->channelId = TRANS_TEST_CHANNEL_ID + 1;
+    newSession->channelType = CHANNEL_TYPE_UDP;
+    newSession->routeType = WIFI_P2P;
+    ret = ClientAddNewSession(g_sessionName, newSession);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ClientTransOnLinkDown(g_networkId, WIFI_STA);
+    int32_t sessionId = 0;
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID + 1, CHANNEL_TYPE_UDP, &sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_GT(sessionId, 0);
+    ClientTransOnLinkDown(g_networkId, ROUTE_TYPE_ALL);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID + 1, CHANNEL_TYPE_UDP, &sessionId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ClientTransOnLinkDown(g_deviceId, ROUTE_TYPE_ALL);
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
  * @tc.name: TransClientSessionManagerTest29
  * @tc.desc: Transmission sdk session manager add and delete server with invalid parameters no initialize.
  * @tc.type: FUNC
