@@ -28,10 +28,6 @@
 
 using namespace testing::ext;
 namespace OHOS {
-#define TEST_SESSION_NAME "com.softbus.transmission.test"
-#define TEST_CONN_IP "192.168.8.1"
-#define TEST_AUTH_PORT 6000
-#define TEST_AUTH_DATA "test auth message data"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
 
 class TransLaneManagerTest : public testing::Test {
@@ -207,7 +203,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDeathCallback001, TestSize.Level1)
 
     int32_t ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    pid = -1;
+
     TransLaneMgrDeathCallback(pkgName);
     TransLaneMgrDeinit();
 }

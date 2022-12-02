@@ -30,11 +30,6 @@
 
 using namespace testing::ext;
 namespace OHOS {
-#define TEST_SESSION_NAME "com.softbus.transmission.test"
-#define TEST_CONN_IP "192.168.8.1"
-#define TEST_AUTH_PORT 6000
-#define TEST_AUTH_DATA "test auth message data"
-
 class TransLinkListenerTest : public testing::Test {
 public:
     TransLinkListenerTest()

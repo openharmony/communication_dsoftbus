@@ -100,17 +100,17 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpenFailed001, TestSize.L
     const char *pkgName = TEST_PKG_NAME;
     int32_t channelId = 12;
     int32_t channelType = 21;
+    int32_t errCode = 33;
 
-    int32_t ret = TransServerGetChannelCb()->OnChannelOpenFailed(NULL, channelType, channelId);
+    int32_t ret = TransServerGetChannelCb()->OnChannelOpenFailed(NULL, channelType, channelId, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransLaneMgrDeinit();
-    ret = TransServerGetChannelCb()->OnChannelOpenFailed(pkgName, channelId, channelType);
+    ret = TransServerGetChannelCb()->OnChannelOpenFailed(pkgName, channelId, channelType, errCode);
 
-    pid = 12;
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransServerGetChannelCb()->OnChannelOpenFailed(pkgName, channelId, channelType);
+    ret = TransServerGetChannelCb()->OnChannelOpenFailed(pkgName, channelId, channelType, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -123,7 +123,6 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpenFailed001, TestSize.L
 HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
 {
     const char *pkgName = TEST_PKG_NAME;
-    int32_t pid = 2112;
     int32_t channelId = -1;
     int32_t channelType = -1;
     uint32_t len = 1;
@@ -145,7 +144,6 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
     channelType = 3;
     ret = TransServerGetChannelCb()->OnDataReceived(pkgName, channelId, channelType, data, len, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
 }
 
 /**
@@ -169,12 +167,10 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnQosEvent001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     param->tvCount = 1;
-    param->pid = -1000000000;
     ret = TransServerGetChannelCb()->OnQosEvent(pkgName, param);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     param->tvCount = 1;
-    param->pid = 1;
     ret = TransServerGetChannelCb()->OnQosEvent(pkgName, param);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
