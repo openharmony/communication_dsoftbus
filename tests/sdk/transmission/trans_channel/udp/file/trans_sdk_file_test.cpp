@@ -40,7 +40,7 @@ char g_peerIp[] = {"11111"};
 char g_sessionKey[] = {"123548246"};
 char g_myIp[] = {"coms.132465"};
 
-UdpChannel *TransAddChannelTest()
+UdpChannel *TransGenerateChannelTest()
 {
     UdpChannel *channel = (UdpChannel *)SoftBusCalloc(sizeof(UdpChannel));
     if (channel == NULL) {
@@ -61,7 +61,7 @@ UdpChannel *TransAddChannelTest()
     (void)strcpy_s(channel->info.groupId, strlen("12345")+1, "12345");
     return channel;
 }
-ChannelInfo *TransAddChannleInfoTest()
+ChannelInfo *TransGenerateChannleInfoTest()
 {
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     if (channelInfo == NULL) {
@@ -340,7 +340,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
     const char* sessionName = "file send";
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channelInfo != nullptr);
-    UdpChannel *channel = TransAddChannelTest();
+    UdpChannel *channel = TransGenerateChannelTest();
     ASSERT_TRUE(channel != nullptr);
     int32_t filePort = 22;
     ret = ClientTransAddUdpChannel(channel);
@@ -381,9 +381,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
     IFileSendListener *sendListener = (IFileSendListener *)SoftBusCalloc(sizeof(IFileSendListener));
     ASSERT_TRUE(sendListener != nullptr);
     int32_t filePort = 22;
-    ChannelInfo *channelInfo = TransAddChannleInfoTest();
+    ChannelInfo *channelInfo = TransGenerateChannleInfoTest();
     ASSERT_TRUE(channelInfo != nullptr);
-    UdpChannel *channel = TransAddChannelTest();
+    UdpChannel *channel = TransGenerateChannelTest();
     ASSERT_TRUE(channel != nullptr);
     DFileMsg *msgData = {};
     DFileMsgType msgType = DFILE_ON_BIND;
@@ -415,7 +415,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
     (void)ClientTransUdpMgrInit(cb);
     UdpChannel *newchannel = (UdpChannel *)SoftBusCalloc(sizeof(UdpChannel));
     ASSERT_TRUE(newchannel != nullptr);
-    UdpChannel *channel = TransAddChannelTest();
+    UdpChannel *channel = TransGenerateChannelTest();
     ASSERT_TRUE(channel != nullptr);
     int32_t ret = ClientTransAddUdpChannel(channel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -448,7 +448,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
     const char* sessionName = "file receive";
     IFileReceiveListener *recvListener = (IFileReceiveListener *)SoftBusCalloc(sizeof(IFileReceiveListener));
     ASSERT_TRUE(recvListener != nullptr);
-    UdpChannel *channel = TransAddChannelTest();
+    UdpChannel *channel = TransGenerateChannelTest();
     ASSERT_TRUE(channel != nullptr);
     DFileMsg *msgData = {};
     DFileMsgType msgType = DFILE_ON_BIND;
@@ -493,7 +493,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
     IClientSessionCallBack *cb = GetClientSessionCb();
     (void)ClientTransUdpMgrInit(cb);
     (void)TransFileInit();
-    UdpChannel *channel = TransAddChannelTest();
+    UdpChannel *channel = TransGenerateChannelTest();
     ASSERT_TRUE(channel != nullptr);
     const char *rootDir = "root_dir";
     const char* sessionName = "file receive";
@@ -545,7 +545,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
     IFileSendListener *sendListener;
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channelInfo != nullptr);
-    UdpChannel *channel = TransAddChannelTest();
+    UdpChannel *channel = TransGenerateChannelTest();
     int32_t filePort = 22;
 
     ret = ClientTransAddUdpChannel(channel);
@@ -586,9 +586,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
     IFileSendListener *sendListener = (IFileSendListener *)SoftBusCalloc(sizeof(IFileSendListener));
     ASSERT_TRUE(sendListener != nullptr);
     int32_t filePort = 22;
-    ChannelInfo *channelInfo = TransAddChannleInfoTest();
+    ChannelInfo *channelInfo = TransGenerateChannleInfoTest();
     ASSERT_TRUE(channelInfo != nullptr);
-    UdpChannel *channel = TransAddChannelTest();
+    UdpChannel *channel = TransGenerateChannelTest();
     ASSERT_TRUE(channel != nullptr);
     DFileMsg *msgData = {};
     DFileMsgType msgType = DFILE_ON_BIND;
