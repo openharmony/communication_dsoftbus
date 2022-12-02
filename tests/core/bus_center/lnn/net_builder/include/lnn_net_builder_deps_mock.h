@@ -39,6 +39,7 @@ public:
     virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
         uint32_t requestId, const AuthVerifyCallback *callBack) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
+    virtual void AuthHandleLeaveLNN(int64_t authId) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -51,6 +52,8 @@ public:
     MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
         uint32_t, uint32_t, const AuthVerifyCallback *));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
+    MOCK_METHOD1(AuthHandleLeaveLNN, void (int64_t));
+    static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H

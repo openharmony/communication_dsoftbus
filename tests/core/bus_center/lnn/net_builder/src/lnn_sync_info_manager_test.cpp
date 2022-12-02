@@ -17,10 +17,10 @@
 #include <securec.h>
 
 #include "lnn_sync_info_manager.h"
-#include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "lnn_trans_mock.h"
 #include "message_handler.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
 
 namespace OHOS {
 using namespace testing;

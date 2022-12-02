@@ -41,5 +41,10 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
 {
     return GetAuthInterface()->AuthStartVerify(connInfo, requestId, callback);
 }
+
+int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
+{
+    return GetAuthInterface()->AuthGetVersion(authId, version);
+}
 }
 }
