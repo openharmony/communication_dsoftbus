@@ -135,11 +135,6 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     len = 0;
     ret = TransServerGetChannelCb()->OnDataReceived(pkgName, channelId, channelType, data, len, type);
-
-
-    channelType = 3;
-    ret = TransServerGetChannelCb()->OnDataReceived(pkgName, channelId, channelType, data, len, type);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
