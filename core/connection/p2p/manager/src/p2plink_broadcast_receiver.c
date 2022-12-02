@@ -63,7 +63,7 @@ static void UpdateP2pGcGroup(void)
     }
 }
 
-void UpdateP2pGroup(const P2pLinkGroup *group)
+NO_SANITIZE("cfi") void UpdateP2pGroup(const P2pLinkGroup *group)
 {
     if (group == NULL) {
         if (P2pLinkGetRole() != ROLE_NONE) {

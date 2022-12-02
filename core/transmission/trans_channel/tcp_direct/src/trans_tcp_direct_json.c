@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "trans_tcp_direct_json.h"
-
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_message.h"
@@ -25,7 +25,7 @@
 #define ERR_CODE "ERR_CODE"
 #define ERR_DESC "ERR_DESC"
 
-char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
+NO_SANITIZE("cfi") char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
         return NULL;
@@ -45,7 +45,7 @@ char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
     return data;
 }
 
-char *VerifyP2pPack(const char *myIp, int32_t myPort)
+NO_SANITIZE("cfi") char *VerifyP2pPack(const char *myIp, int32_t myPort)
 {
     if (myIp == NULL || myPort <= 0) {
         return NULL;
@@ -65,7 +65,7 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort)
     return data;
 }
 
-int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port)
+NO_SANITIZE("cfi") int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port)
 {
     if (json == NULL || ip == NULL || port == NULL) {
         return SOFTBUS_INVALID_PARAM;

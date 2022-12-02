@@ -137,7 +137,7 @@ static void UpdataLocalFromSetting(void *p)
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
 }
 
-void UpdateDeviceNameFromSetting(void)
+NO_SANITIZE("cfi") void UpdateDeviceNameFromSetting(void)
 {
     LnnInitGetDeviceName(HandlerGetDeviceName);
 }

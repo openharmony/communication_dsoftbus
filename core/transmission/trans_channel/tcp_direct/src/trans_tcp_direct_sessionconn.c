@@ -30,7 +30,7 @@
 static SoftBusList *g_sessionConnList = NULL;
 static int32_t g_tdcChannelId = 0;
 
-uint64_t TransTdcGetNewSeqId(void)
+NO_SANITIZE("cfi") uint64_t TransTdcGetNewSeqId(void)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcGetNewSeqId GetLock fail");
@@ -261,7 +261,7 @@ NO_SANITIZE("cfi") int64_t GetAuthIdByChanId(int32_t channelId)
     return AUTH_INVALID_ID;
 }
 
-void TransDelSessionConnById(int32_t channelId)
+NO_SANITIZE("cfi") void TransDelSessionConnById(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransDelSessionConnById: channelId=%d", channelId);
     SessionConn *item = NULL;
@@ -284,7 +284,7 @@ void TransDelSessionConnById(int32_t channelId)
     ReleaseSessonConnLock();
 }
 
-int32_t TransTdcAddSessionConn(SessionConn *conn)
+NO_SANITIZE("cfi") int32_t TransTdcAddSessionConn(SessionConn *conn)
 {
     if (conn == NULL) {
         return SOFTBUS_INVALID_PARAM;

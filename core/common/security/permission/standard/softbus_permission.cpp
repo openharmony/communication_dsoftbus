@@ -42,7 +42,7 @@ namespace {
     const std::string SAMGR_PROCESS_NAME = "samgr";
 }
 
-int32_t TransPermissionInit(void)
+NO_SANITIZE("cfi") int32_t TransPermissionInit(void)
 {
     int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
     if (ret != SOFTBUS_OK) {

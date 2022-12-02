@@ -20,7 +20,7 @@
 
 static IServerChannelCallBack g_channelCb;
 
-int32_t TransProxySetCallBack(const IServerChannelCallBack *cb)
+NO_SANITIZE("cfi") int32_t TransProxySetCallBack(const IServerChannelCallBack *cb)
 {
     if (cb == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -29,34 +29,35 @@ int32_t TransProxySetCallBack(const IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
+NO_SANITIZE("cfi") int32_t TransProxyOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
 {
     return g_channelCb.OnChannelOpened(pkgName, pid, sessionName, channel);
 }
 
-int32_t TransProxyOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
+NO_SANITIZE("cfi") int32_t TransProxyOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
     return g_channelCb.OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_PROXY);
 }
 
-int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode)
+NO_SANITIZE("cfi") int32_t TransProxyOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
+    int32_t errCode)
 {
     return g_channelCb.OnChannelOpenFailed(pkgName, pid, channelId, CHANNEL_TYPE_PROXY, errCode);
 }
 
-int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
+NO_SANITIZE("cfi") int32_t TransProxyOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
     TransReceiveData *receiveData)
 {
     return g_channelCb.OnDataReceived(pkgName, pid, channelId, CHANNEL_TYPE_PROXY, receiveData);
 }
 
-int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t len)
+NO_SANITIZE("cfi") int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t len)
 {
     return g_channelCb.GetPkgNameBySessionName(sessionName, pkgName, len);
 }
 
-int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
+NO_SANITIZE("cfi") int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     return g_channelCb.GetUidAndPidBySessionName(sessionName, uid, pid);
 }

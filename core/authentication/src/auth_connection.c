@@ -195,7 +195,7 @@ NO_SANITIZE("cfi") int32_t PackAuthData(const AuthDataHead *head, const uint8_t 
     return SOFTBUS_OK;
 }
 
-const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head)
+NO_SANITIZE("cfi") const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head)
 {
     if (len < GetAuthDataSize(0)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthData: head not enough.");

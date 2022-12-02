@@ -589,7 +589,7 @@ static LaneInterface g_transLaneObject = {
     .FreeLane = Free,
 };
 
-LaneInterface *TransLaneGetInstance(void)
+NO_SANITIZE("cfi") LaneInterface *TransLaneGetInstance(void)
 {
     return &g_transLaneObject;
 }
