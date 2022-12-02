@@ -877,9 +877,10 @@ static void OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool f
     }
 }
 
-static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
+static void HandleDisconnectedEvent(const void *para)
 {
-    CHECK_NULL_PTR_RETURN_VOID(connInfo);
+    CHECK_NULL_PTR_RETURN_VOID(para);
+    uint64_t connId = *((uint64_t *)para);
     uint32_t num = 0;
     int64_t authIds[2]; /* 2: client and server may use same connection. */
     authIds[num++]= GetAuthIdByConnId(connId, false);
@@ -891,11 +892,19 @@ static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
         if (g_transCallback.OnDisconnected != NULL) {
             g_transCallback.OnDisconnected(authIds[i]);
         }
-        if (connInfo->type == AUTH_LINK_TYPE_WIFI || connInfo->type == AUTH_LINK_TYPE_P2P) {
+        if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P) {
             RemoveAuthManagerByAuthId(authIds[i]);
             NotifyDeviceDisconnect(authIds[i]);
         }
     }
+    /* Try to terminate authing session. */
+    (void)AuthSessionHandleDeviceDisconnected(connId);
+}
+
+static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
+{
+    (void)connInfo;
+    (void)PostAuthEvent(EVENT_AUTH_DISCONNECT, HandleDisconnectedEvent, &connId, sizeof(connId), 0);
 }
 
 NO_SANITIZE("cfi") int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
