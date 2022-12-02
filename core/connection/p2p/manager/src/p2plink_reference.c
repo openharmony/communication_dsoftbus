@@ -254,13 +254,13 @@ NO_SANITIZE("cfi") void P2pLinkDumpRef(void)
     }
 }
 
-void P2pLinkInitRef(void)
+NO_SANITIZE("cfi") void P2pLinkInitRef(void)
 {
     g_myP2pRef = 0;
     ListInit(&g_pidList);
 }
 
-void P2pLinkRefClean(void)
+NO_SANITIZE("cfi") void P2pLinkRefClean(void)
 {
     RefPidItem *item = NULL;
     RefPidItem *next = NULL;
@@ -271,7 +271,7 @@ void P2pLinkRefClean(void)
     g_myP2pRef = 0;
 }
 
-void P2pLinkMyP2pRefClean(void)
+NO_SANITIZE("cfi") void P2pLinkMyP2pRefClean(void)
 {
     int32_t i;
     int32_t refCnt = P2pLinkGetMyP2pRef();

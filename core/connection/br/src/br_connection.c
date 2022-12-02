@@ -760,7 +760,7 @@ static uint64_t UpdataSeq(BrConnectionInfo *brConnInfo)
     return brConnInfo->seq;
 }
 
-void *SendHandlerLoop(void *arg)
+NO_SANITIZE("cfi") void *SendHandlerLoop(void *arg)
 {
 #define WAIT_TIME 10
     SendBrQueueNode *sendNode = NULL;

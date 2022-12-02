@@ -212,7 +212,7 @@ NO_SANITIZE("cfi") static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t
 }
 
 /* remove message when return 0, else return 1 */
-static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
+NO_SANITIZE("cfi") static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
 {
     int32_t msgType;
 

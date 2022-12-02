@@ -51,7 +51,7 @@ static int32_t P2pLinkLnnSyncSetGoMac()
     }
 }
 
-void P2pLinkLnnSync(void)
+NO_SANITIZE("cfi") void P2pLinkLnnSync(void)
 {
     int32_t change = 0;
 
@@ -90,7 +90,6 @@ void P2pLinkLnnSync(void)
         if (strlen(g_lnnGoMac) != 0) {
             g_lnnGoMac[0] = '\0';
             change = 1;
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "clean go mac");
             if (LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, g_lnnGoMac) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "clean go mac fail");
             }

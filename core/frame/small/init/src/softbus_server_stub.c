@@ -25,6 +25,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_disc_server.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
@@ -241,7 +242,7 @@ void __attribute__((weak)) HOS_SystemInit(void)
     return;
 }
 
-int ServerStubInit(void)
+NO_SANITIZE("cfi") int ServerStubInit(void)
 {
     HOS_SystemInit();
 

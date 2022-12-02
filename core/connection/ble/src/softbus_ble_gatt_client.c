@@ -231,7 +231,7 @@ static char *GetBleAttrUuid(int32_t module)
     }
 }
 
-int32_t SoftBusGattClientSend(const int32_t clientId, const char *data, int32_t len, int32_t module)
+NO_SANITIZE("cfi") int32_t SoftBusGattClientSend(const int32_t clientId, const char *data, int32_t len, int32_t module)
 {
     if (g_gattcIsInited != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc not init");
@@ -269,7 +269,7 @@ int32_t SoftBusGattClientSend(const int32_t clientId, const char *data, int32_t 
     return SoftbusGattcWriteCharacteristic(clientId, &clientData);
 }
 
-int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
+NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
 {
     if (g_gattcIsInited != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc not init");
@@ -313,7 +313,7 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
     return clientId;
 }
 
-int32_t SoftBusGattClientDisconnect(int32_t clientId)
+NO_SANITIZE("cfi") int32_t SoftBusGattClientDisconnect(int32_t clientId)
 {
     if (g_gattcIsInited != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc not init");
@@ -885,7 +885,7 @@ static int32_t BleGattcDump(int fd)
     return SOFTBUS_OK;
 }
 
-void SoftbusGattcHandShakeEvent(int32_t clientId)
+NO_SANITIZE("cfi") void SoftbusGattcHandShakeEvent(int32_t clientId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftbusGattcHandShakeEvent, cilentId:%d", clientId);
     if (BleClientPostMsgDelay(CLIENT_TIME_OUT, clientId, SOFTBUS_BLECONNECTION_CLIENT_HANDSHAKE_TIMEOUT,
@@ -894,7 +894,7 @@ void SoftbusGattcHandShakeEvent(int32_t clientId)
     }
 }
 
-void SoftbusGattcOnRecvHandShakeRespon(int32_t clientId)
+NO_SANITIZE("cfi") void SoftbusGattcOnRecvHandShakeRespon(int32_t clientId)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftbusGattcOnRecvHandShakeRespon, cilentId:%d", clientId);
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,

@@ -60,7 +60,7 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
     return SOFTBUS_OK;
 }
 
-void StopP2pSessionListener(void)
+NO_SANITIZE("cfi") void StopP2pSessionListener(void)
 {
     if (g_p2pSessionPort > 0) {
         if (StopBaseListener(DIRECT_CHANNEL_SERVER_P2P) != SOFTBUS_OK) {

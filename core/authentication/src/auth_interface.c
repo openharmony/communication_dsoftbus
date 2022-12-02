@@ -45,7 +45,7 @@ static ModuleListener g_moduleListener[] = {
     }
 };
 
-int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
+NO_SANITIZE("cfi") int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: add listener, module = %d.", module);
     if (listener == NULL || listener->onDataReceived == NULL) {

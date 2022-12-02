@@ -207,7 +207,7 @@ NO_SANITIZE("cfi") int32_t LnnGetNodeKeyInfoLen(int32_t key)
     }
 }
 
-int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
+NO_SANITIZE("cfi") int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_UDID;
@@ -223,7 +223,7 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
+NO_SANITIZE("cfi") int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_UUID;
@@ -239,7 +239,7 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
+NO_SANITIZE("cfi") int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_BR_MAC;
@@ -255,7 +255,7 @@ int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
+NO_SANITIZE("cfi") int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_IP_ADDRESS;
@@ -271,7 +271,7 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
+NO_SANITIZE("cfi") int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_CAPABILITY;
@@ -284,7 +284,7 @@ int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
+NO_SANITIZE("cfi") int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_TYPE;
@@ -297,7 +297,7 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
+NO_SANITIZE("cfi") void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
 {
     if (fd <= 0 || nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param is null");

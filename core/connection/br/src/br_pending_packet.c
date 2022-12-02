@@ -163,7 +163,7 @@ EXIT:
     return ret;
 }
 
-int32_t SetBrPendingPacket(uint32_t id, uint64_t seq, void *data)
+NO_SANITIZE("cfi") int32_t SetBrPendingPacket(uint32_t id, uint64_t seq, void *data)
 {
     PendingPacket *item = NULL;
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {

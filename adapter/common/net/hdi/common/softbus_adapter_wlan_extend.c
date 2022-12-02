@@ -21,6 +21,7 @@
 #include "lnn_async_callback_utils.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "v1_0/iwlan_interface.h"
@@ -35,7 +36,7 @@ static ChannelInfoList g_channelInfoList;
 static ChannelList g_channelList;
 static void GetOneChannelMeasResult(void *para);
 
-int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
+NO_SANITIZE("cfi") int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
 {
     if (cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameter.");
@@ -103,7 +104,7 @@ static void ExcuteChannelMeas(void)
     }
 }
 
-int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
+NO_SANITIZE("cfi") int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
 {
     if (channelId == NULL || num == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameter.");

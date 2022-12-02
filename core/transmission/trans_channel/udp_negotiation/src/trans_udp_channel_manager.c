@@ -47,7 +47,7 @@ NO_SANITIZE("cfi") int32_t GetUdpChannelLock(void)
     return SOFTBUS_OK;
 }
 
-void ReleaseUdpChannelLock(void)
+NO_SANITIZE("cfi") void ReleaseUdpChannelLock(void)
 {
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
 }

@@ -25,6 +25,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_lane_pending_ctl.h"
@@ -63,7 +64,7 @@ static int32_t GenerateUdpChannelId(void)
     return INVALID_ID;
 }
 
-void ReleaseUdpChannelId(int32_t channelId)
+NO_SANITIZE("cfi") void ReleaseUdpChannelId(int32_t channelId)
 {
     if (SoftBusMutexLock(&g_udpNegLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "release udp channel id lock failed");

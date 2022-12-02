@@ -45,7 +45,7 @@ static int32_t P2pLinkDevicingDump(int fd);
 static int32_t P2pLinkDevicedDump(int fd);
 
 P2pLinkPeerDevStateCb g_devStateCb = {0};
-void P2pLinkSetDevStateCallback(const P2pLinkPeerDevStateCb *cb)
+NO_SANITIZE("cfi") void P2pLinkSetDevStateCallback(const P2pLinkPeerDevStateCb *cb)
 {
     (void)memcpy_s(&g_devStateCb, sizeof(P2pLinkPeerDevStateCb), cb, sizeof(P2pLinkPeerDevStateCb));
 }
@@ -57,7 +57,7 @@ NO_SANITIZE("cfi") void P2pLinkDevOffLineNotify(const char *peerMac)
     }
 }
 
-void P2pLinkMyRoleChangeNotify(P2pLinkRole myRole)
+NO_SANITIZE("cfi") void P2pLinkMyRoleChangeNotify(P2pLinkRole myRole)
 {
     if (g_devStateCb.onMyRoleChange != NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "role change %d", myRole);
@@ -84,7 +84,7 @@ NO_SANITIZE("cfi") ConnectedNode *P2pLinkGetConnedDevByMac(const char *peerMac)
     return NULL;
 }
 
-void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId)
+NO_SANITIZE("cfi") void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId)
 {
     ConnectedNode *item = P2pLinkGetConnedDevByMac(peerMac);
     if (item == NULL) {
@@ -223,7 +223,7 @@ static void DevOnline(const P2pLinkGroup *group)
     return;
 }
 
-void P2pLinkUpdateDeviceByMagicGroups(const P2pLinkGroup *group)
+NO_SANITIZE("cfi") void P2pLinkUpdateDeviceByMagicGroups(const P2pLinkGroup *group)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "update online dev");
     DevOffline(group);
