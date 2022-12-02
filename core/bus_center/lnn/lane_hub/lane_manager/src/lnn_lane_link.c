@@ -35,6 +35,7 @@ typedef struct {
     int32_t requestId;
     int32_t pid;
     char networkId[NETWORK_ID_BUF_LEN];
+    char p2pMac[P2P_MAC_LEN];
     int64_t authId;
     bool isResultSet;
     bool isConnected;
@@ -58,7 +59,7 @@ static ConnRequestItem *GetConnRequestItem(int32_t requestId)
     return NULL;
 }
 
-static int32_t AddConnRequestItem(int32_t requestId, const char *networkId, int32_t pid)
+static int32_t AddConnRequestItem(int32_t requestId, const char *networkId, int32_t pid, const char *mac)
 {
     ConnRequestItem *item = (ConnRequestItem *)SoftBusCalloc(sizeof(ConnRequestItem));
     if (item == NULL) {
@@ -66,6 +67,10 @@ static int32_t AddConnRequestItem(int32_t requestId, const char *networkId, int3
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(item->networkId, sizeof(item->networkId), networkId) != EOK) {
+        SoftBusFree(item);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strcpy_s(item->p2pMac, sizeof(item->p2pMac), mac) != EOK) {
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
@@ -186,10 +191,9 @@ static int32_t GetP2pMacAndPid(int32_t requestId, char *mac, uint32_t size, int3
         if (item->requestId != requestId) {
             continue;
         }
-        if (LnnGetRemoteStrInfo(item->networkId, STRING_KEY_P2P_MAC, mac, size) != SOFTBUS_OK) {
-            (void)SoftBusMutexUnlock(&g_pendingList->lock);
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote p2p mac fail.");
-            return SOFTBUS_ERR;
+        if (strcpy_s(mac, size, item->p2pMac) != EOK) {
+            LLOGE("p2pMac cpy err");
+            return SOFTBUS_MEM_ERR;
         }
         *pid = item->pid;
         (void)SoftBusMutexUnlock(&g_pendingList->lock);
@@ -352,8 +356,13 @@ static int32_t OpenAuthConnToConnectP2p(const char *networkId, int32_t pid, LnnL
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no auth conn exist.");
         return SOFTBUS_ERR;
     }
+    char mac[P2P_MAC_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, mac, sizeof(mac)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote p2p mac fail.");
+        return SOFTBUS_ERR;
+    }
     int32_t requestId = P2pLinkGetRequestId();
-    if (AddConnRequestItem(requestId, networkId, pid) != SOFTBUS_OK) {
+    if (AddConnRequestItem(requestId, networkId, pid, mac) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add pending item fail.");
         return SOFTBUS_ERR;
     }
@@ -420,13 +429,13 @@ static void OnConnOpenFailedForDisconnect(uint32_t requestId, int32_t reason)
     DelConnRequestItem(requestId);
 }
 
-static void DisconenctP2pWithoutAuthConn(const char *networkId, int32_t pid)
+static void DisconenctP2pWithoutAuthConn(const char *networkId, int32_t pid, const char *mac)
 {
     P2pLinkDisconnectInfo info = {0};
     info.authId = -1;
     info.pid = pid;
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, info.peerMac, sizeof(info.peerMac)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote p2p mac fail.");
+    if (strcpy_s(info.peerMac, P2P_MAC_LEN, mac)!= EOK) {
+        LLOGE("p2p mac cpy err");
         return;
     }
     if (P2pLinkDisconnectDevice(&info) != SOFTBUS_OK) {
@@ -434,7 +443,7 @@ static void DisconenctP2pWithoutAuthConn(const char *networkId, int32_t pid)
     }
 }
 
-static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
+static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid, const char *mac)
 {
     char uuid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
@@ -449,7 +458,7 @@ static int32_t OpenAuthConnToDisconnectP2p(const char *networkId, int32_t pid)
         return SOFTBUS_ERR;
     }
     int32_t requestId = P2pLinkGetRequestId();
-    if (AddConnRequestItem(requestId, networkId, pid) != SOFTBUS_OK) {
+    if (AddConnRequestItem(requestId, networkId, pid, mac) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add pending item fail.");
         return SOFTBUS_ERR;
     }
@@ -478,9 +487,9 @@ NO_SANITIZE("cfi") int32_t LnnConnectP2p(const char *networkId, int32_t pid, Lnn
     return OpenAuthConnToConnectP2p(networkId, pid, p2pInfo);
 }
 
-NO_SANITIZE("cfi") int32_t LnnDisconnectP2p(const char *networkId, int32_t pid)
+NO_SANITIZE("cfi") int32_t LnnDisconnectP2p(const char *networkId, int32_t pid, const char *mac)
 {
-    if (networkId == NULL) {
+    if (networkId == NULL || mac == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -488,8 +497,9 @@ NO_SANITIZE("cfi") int32_t LnnDisconnectP2p(const char *networkId, int32_t pid)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pending not init.");
         return SOFTBUS_ERR;
     }
-    if (OpenAuthConnToDisconnectP2p(networkId, pid) != SOFTBUS_OK) {
-        DisconenctP2pWithoutAuthConn(networkId, pid);
+    if (OpenAuthConnToDisconnectP2p(networkId, pid, mac) != SOFTBUS_OK) {
+        LLOGE("DisconenctP2pWithoutAuthConn enter");
+        DisconenctP2pWithoutAuthConn(networkId, pid, mac);
     }
     return SOFTBUS_OK;
 }
