@@ -36,18 +36,8 @@
 
 using namespace testing::ext;
 namespace OHOS {
-#define TEST_SESSION_NAME "com.softbus.transmission.test"
-#define TEST_CONN_IP "192.168.8.1"
-#define TEST_AUTH_PORT 6000
-#define TEST_AUTH_DATA "test auth message data"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
-
-#define TRANS_TEST_INVALID_PID (-1)
-#define TRANS_TEST_INVALID_UID (-1)
-
 const char *g_pkgName = "dms";
-const char *g_sessionName = "ohos.distributedschedule.dms.test";
-const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 
 static SessionAttribute g_sessionAttr[] = {
     {.dataType = TYPE_MESSAGE},
@@ -479,6 +469,7 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
 {
     int32_t channelId = 1111;
     int32_t channelType = 222;
+
     void *data = nullptr;
     uint32_t len = 0;
     int32_t msgType = 0;
@@ -495,8 +486,7 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
     ret = TransSendMsg(channelId, channelType, data, len, msgType);
     EXPECT_EQ(SOFTBUS_TRANS_CHANNEL_TYPE_INVALID, ret);
 
-    int32_t pid = 1;
-    TransChannelDeathCallback(g_pkgName, pid);
+    TransChannelDeathCallback(g_pkgName);
 }
 
 /**
