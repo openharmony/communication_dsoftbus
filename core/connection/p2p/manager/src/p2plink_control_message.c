@@ -138,10 +138,12 @@ NO_SANITIZE("cfi") char* P2pLinkPackHandshake(const char *mac, const char *ip)
 
 static int32_t P2pLinkUnPackHandshake(const cJSON *root, char *mac, uint32_t macLen, char *ip, uint32_t ipLen)
 {
-    if (!GetJsonObjectStringItem(root, KEY_IP, ip, ipLen) ||
-        !GetJsonObjectStringItem(root, KEY_MAC, mac, macLen)) {
+    if (!GetJsonObjectStringItem(root, KEY_MAC, mac, macLen)) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get P2pLinkUnPackHandshake");
         return SOFTBUS_ERR;
+    }
+    if (!GetJsonObjectStringItem(root, KEY_IP, ip, ipLen)) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkUnPackHandshake：get IP Failed");
     }
     return SOFTBUS_OK;
 }
@@ -261,7 +263,6 @@ NO_SANITIZE("cfi") void P2pLinkHandleHandshake(int64_t authId, int32_t seq, cons
     char mac[P2P_MAC_LEN] = {0};
     char ip[P2P_IP_LEN] = {0};
     ConnectedNode *connedDev = NULL;
-    int32_t ret;
 
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv handshake authid %" PRId64 ", seq %d", authId, seq);
     if (P2pLinkUnPackHandshake(root, mac, sizeof(mac), ip, sizeof(ip)) != SOFTBUS_OK) {
@@ -276,10 +277,6 @@ NO_SANITIZE("cfi") void P2pLinkHandleHandshake(int64_t authId, int32_t seq, cons
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "handshake rec authid %" PRId64, authId);
     connedDev->chanId.p2pAuthId = authId;
     connedDev->chanId.p2pAuthIdState = P2PLINK_AUTHCHAN_FINISH;
-    ret = strcpy_s(connedDev->peerIp, sizeof(connedDev->peerIp), ip);
-    if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "copy ip fail");
-    }
 }
 
 NO_SANITIZE("cfi") void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
