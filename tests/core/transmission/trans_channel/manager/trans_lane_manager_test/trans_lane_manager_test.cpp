@@ -138,33 +138,30 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
     int32_t channelId = 2112;
     int32_t channelType = 2112;
     uint32_t laneId = 1;
-    AppInfoData *myData = (AppInfoData *)SoftBusCalloc(sizeof(AppInfoData));
-    ASSERT_TRUE(myData != nullptr);
+    const char *pkgName = TEST_PKG_NAME;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
 
     TransLaneMgrDeinit();
-    int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
+    int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, pkgName);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransLaneMgrDeinit();
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransLaneMgrAddLane(channelId, channelType, NULL, laneId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, NULL, laneId, pkgName);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channelId = 1;
     channelType = 2;
-    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    if (myData != NULL) {
-        SoftBusFree(myData);
-    }
+
     if (connInfo != NULL) {
         SoftBusFree(connInfo);
     }
@@ -203,16 +200,15 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
  */
 HWTEST_F(TransLaneManagerTest, TransLaneMgrDeathCallback001, TestSize.Level1)
 {
-    int32_t pid = 2112;
     const char *pkgName = TEST_PKG_NAME;
 
     TransLaneMgrDeinit();
-    TransLaneMgrDeathCallback(pkgName, pid);
+    TransLaneMgrDeathCallback(pkgName);
 
     int32_t ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     pid = -1;
-    TransLaneMgrDeathCallback(pkgName, pid);
+    TransLaneMgrDeathCallback(pkgName);
     TransLaneMgrDeinit();
 }
 
