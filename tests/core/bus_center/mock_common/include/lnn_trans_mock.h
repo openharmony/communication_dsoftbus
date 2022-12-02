@@ -31,6 +31,7 @@ public:
     virtual int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId) = 0;
     virtual int32_t TransSendNetworkingMessage(int32_t channelId, const char *data,
         uint32_t dataLen, int32_t priority) = 0;
+    virtual int32_t TransCloseNetWorkingChannel(int32_t channelId) = 0;
 };
 
 class LnnTransInterfaceMock : public LnnTransInterface {
@@ -40,8 +41,9 @@ public:
     MOCK_METHOD1(TransRegisterNetworkingChannelListener, int (const INetworkingListener *));
     MOCK_METHOD2(TransOpenNetWorkingChannel, int32_t (const char *, const char *));
     MOCK_METHOD4(TransSendNetworkingMessage, int32_t (int32_t, const char *, uint32_t, int32_t));
+    MOCK_METHOD1(TransCloseNetWorkingChannel, int32_t (int32_t));
     static int32_t ActionOfTransRegister(const INetworkingListener *listener);
-    static const inline INetworkingListener *g_networkListener;
+    static inline const INetworkingListener *g_networkListener;
 };
 } // namespace OHOS
 #endif // AUTH_TRANS_MOCK_H
