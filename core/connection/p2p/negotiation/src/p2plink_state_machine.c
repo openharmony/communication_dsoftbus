@@ -129,7 +129,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t ms
         return;
     }
     if (fsm->currentState->process != NULL) {
-        fsm->currentState->process((P2pLoopMsg)msgType, param);
+        fsm->currentState->process(msgType, param);
     }
 }
 
@@ -144,11 +144,11 @@ NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "current process is null");
         return;
     }
-    (void)P2pLoopProcDelay(fsm->currentState->process, param, delayMs, (P2pLoopMsg)msgType);
+    (void)P2pLoopProcDelay(fsm->currentState->process, param, delayMs, msgType);
 }
 
 NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelayDel(int32_t msgType)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "delete delay msg type %d", msgType);
-    (void)P2pLoopProcDelayDel(NULL, (P2pLoopMsg)msgType);
+    (void)P2pLoopProcDelayDel(NULL, msgType);
 }

@@ -29,18 +29,15 @@
 #include "p2plink_state_machine.h"
 #include "p2plink_adapter.h"
 #include "softbus_server_frame.h"
-#include "p2plink_device.c"
-#include "p2plink_state_machine.c"
 #include "p2plink_broadcast_receiver.h"
 #include "p2plink_control_message.h"
 #include "message_handler.h"
 
-#define TEST_FREQUENCY_INVALID (-1)
-#define MAX_STRING_NUM 5
-#define TEST_FREQUENCY_2G_FIRST 2412
-#define TEST_GC_FREQUENCY 2432
-#define TEST_DATA_NUM 1
-#define TEST_DEL_MS 500
+static const int32_t TEST_FREQUENCY_INVALID = -1;
+static const int32_t MAX_STRING_NUM = 5;
+static const int32_t TEST_DATA_NUM = 1;
+static const int32_t TEST_CHAN_LIST = 10;
+static const int32_t ERR_CHAN_LIST = 22;
 using namespace testing::ext;
 namespace OHOS {
 class ConnectionP2PFuncTest : public testing::Test {
@@ -58,17 +55,17 @@ void SetUp()
 
 static void TestP2pLinkNegoSuccess(int32_t requestId, const P2pLinkNegoConnResult *result)
 {
-    printf("TestP2pLinkNegoSuccess\n");
+    return;
 }
 
 static void TestP2pLinkNegoFail(int32_t requestId, int32_t reason)
 {
-    printf("TestP2pLinkNegoFail\n");
+    return;
 }
 
 static void TestP2pLinkNegoConnected(const P2pLinkNegoConnResult *result)
 {
-    printf("TestP2pLinkNegoConnected\n");
+    return;
 }
 
 static P2pLinkNegoCb g_testP2pLinkNegoCb = {
@@ -147,20 +144,19 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkSendMessage001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2plinkGetGroupGrequency001
+* @tc.name: P2plinkChannelListToStringTest001
 * @tc.desc: Use different parameters to convert the channel list to a string.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2plinkChannelListToString001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2plinkChannelListToStringTest001, TestSize.Level1)
 {
     P2pLink5GList *testChannelList = (P2pLink5GList *)SoftBusCalloc(sizeof(P2pLink5GList) +
         sizeof(int32_t) * TEST_DATA_NUM);
     ASSERT_TRUE(testChannelList != nullptr);
 
     testChannelList->num = TEST_DATA_NUM;
-    const char *testString = "10";
-    testChannelList->chans[0] = atoi(testString);
+    testChannelList->chans[0] = TEST_CHAN_LIST;
     char testChannelString[] = "aaabbb";
     int32_t len = sizeof(testChannelList->chans);
     int32_t ret = P2plinkChannelListToString(nullptr, testChannelString, len);
@@ -185,20 +181,19 @@ HWTEST_F(ConnectionP2PFuncTest, testP2plinkChannelListToString001, TestSize.Leve
 }
 
 /*
-* @tc.name: testP2pLinkUpateAndGetStationFreq001
+* @tc.name: P2pLinkUpateAndGetStationFreqTest001
 * @tc.desc: some diff param in P2pLinkUpateAndGetStationFreq update and get freq.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkUpateAndGetStationFreq001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkUpateAndGetStationFreqTest001, TestSize.Level1)
 {
     P2pLink5GList *testChannelList = (P2pLink5GList *)SoftBusCalloc(sizeof(P2pLink5GList) +
         sizeof(int32_t) * TEST_DATA_NUM);
     ASSERT_TRUE(testChannelList != nullptr);
 
     testChannelList->num = TEST_DATA_NUM;
-    const char *testString = "22";
-    testChannelList->chans[0] = atoi(testString);
+    testChannelList->chans[0] = ERR_CHAN_LIST;
 
     int32_t ret = P2pLinkUpateAndGetStationFreq(nullptr);
     EXPECT_EQ(ret, TEST_FREQUENCY_INVALID);
@@ -213,12 +208,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkUpateAndGetStationFreq001, TestSize.L
 }
 
 /*
-* @tc.name: testP2pLinkParseItemDataByDelimit001
+* @tc.name: P2pLinkParseItemDataByDelimitTest001
 * @tc.desc: some diff param in P2pLinkParseItemDataByDelimit to list.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkParseItemDataByDelimit001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkParseItemDataByDelimitTest001, TestSize.Level1)
 {
     char *testList[MAX_STRING_NUM] = {nullptr};
     int32_t testOutNum = 0;
@@ -247,12 +242,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkParseItemDataByDelimit001, TestSize.L
 }
 
 /*
-* @tc.name: testP2pLinkUnpackRequestMsg001
+* @tc.name: P2pLinkUnpackRequestMsgTest001
 * @tc.desc: use different parameters to parse the request msg packet.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkUnpackRequestMsg001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkUnpackRequestMsgTest001, TestSize.Level1)
 {
     cJSON *testData = cJSON_CreateObject();
     ASSERT_TRUE(testData != nullptr);
@@ -296,12 +291,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkUnpackRequestMsg001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2plinkUnpackRepsonseMsg001
+* @tc.name: P2plinkUnpackRepsonseMsgTest001
 * @tc.desc: use different parameters to parse the repsonse msg packet.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2plinkUnpackRepsonseMsg001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2plinkUnpackRepsonseMsgTest001, TestSize.Level1)
 {
     cJSON *testData = cJSON_CreateObject();
     ASSERT_TRUE(testData != nullptr);
@@ -345,12 +340,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2plinkUnpackRepsonseMsg001, TestSize.Level1
 }
 
 /*
-* @tc.name: testP2pLinkNegoInit001
+* @tc.name: P2pLinkNegoInitTest001
 * @tc.desc: some diff param in P2pLinkNegoInit.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoInit001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoInitTest001, TestSize.Level1)
 {
     int32_t ret = P2pLinkNegoInit(nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -360,12 +355,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoInit001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkNegoStart001
+* @tc.name: P2pLinkNegoStartTest001
 * @tc.desc: Start a negotiation with right parameters.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoStarts001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoStartTest001, TestSize.Level1)
 {
     P2pLinkNegoConnInfo testConnInfo = {
         .authId = 1,
@@ -382,14 +377,13 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoStarts001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testGetP2pLinkNegoStatus001
+* @tc.name: GetP2pLinkNegoStatusTest001
 * @tc.desc: Gets the current negotiation status.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testGetP2pLinkNegoStatus001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, GetP2pLinkNegoStatusTest001, TestSize.Level1)
 {
-
     int32_t ret = P2pLinkNegoInit(&g_testP2pLinkNegoCb);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
@@ -398,12 +392,12 @@ HWTEST_F(ConnectionP2PFuncTest, testGetP2pLinkNegoStatus001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkNegoMsgProc001
+* @tc.name: P2pLinkNegoMsgProcTest001
 * @tc.desc: Send different types of messages for negotiation.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoMsgProc001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoMsgProcTest001, TestSize.Level1)
 {
     cJSON *testData = cJSON_CreateObject();
     ASSERT_TRUE(testData != nullptr);
@@ -420,12 +414,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoMsgProc001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkNegoOnGroupChanged001
+* @tc.name: P2pLinkNegoOnGroupChangedTest001
 * @tc.desc: Different group data is modified to negotiate the group.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoOnGroupChanged001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoOnGroupChangedTest001, TestSize.Level1)
 {
     P2pLinkGroup group;
 
@@ -437,12 +431,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoOnGroupChanged001, TestSize.Level
 }
 
 /*
-* @tc.name: testP2pLinkNegoOnConnectState001
+* @tc.name: P2pLinkNegoOnConnectStateTest001
 * @tc.desc: Change the link to negotiate the recv connection state change.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoOnConnectState001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoOnConnectStateTest001, TestSize.Level1)
 {
     P2pLinkConnState testState = P2PLINK_CONNECTING;
 
@@ -453,12 +447,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoOnConnectState001, TestSize.Level
 }
 
 /*
-* @tc.name: testP2pLinkNegoGetFinalRole001
+* @tc.name: P2pLinkNegoGetFinalRoleTest001
 * @tc.desc: Different roles at both ends get the final role.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoGetFinalRole001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoGetFinalRoleTest001, TestSize.Level1)
 {
     P2pLinkRole testMyRole = ROLE_GO;
     P2pLinkRole testPeerRole = ROLE_GO;
@@ -489,12 +483,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoGetFinalRole001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkFsmInit001
+* @tc.name: P2pLinkFsmInitTest001
 * @tc.desc: some diff param in P2pLinkFsmInit.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmInit001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmInitTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -507,12 +501,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmInit001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkFsmDeinit001
+* @tc.name: P2pLinkFsmDeinitTest001
 * @tc.desc: some diff param in P2pLinkFsmDeinit.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmDeinit001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmDeinitTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -527,43 +521,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmDeinit001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkFsmAddState001
-* @tc.desc: some diff param in P2pLinkFsmAddState.
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmAddState001, TestSize.Level1)
-{
-    FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
-    ASSERT_TRUE(testFsm != nullptr);
-    FsmState *testState = (FsmState *)SoftBusCalloc(sizeof(FsmState));
-    ASSERT_TRUE(testState != nullptr);
-
-    int32_t ret = P2pLinkFsmInit(testFsm);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    P2pLinkFsmAddState(nullptr, testState);
-    bool res = IsExistState(testFsm, testState);
-    EXPECT_TRUE(res == false);
-    P2pLinkFsmAddState(testFsm, nullptr);
-    res = IsExistState(testFsm, testState);
-    EXPECT_TRUE(res == false);
-    P2pLinkFsmAddState(testFsm, testState);
-    P2pLinkFsmAddState(testFsm, testState);
-    res = IsExistState(testFsm, testState);
-    EXPECT_TRUE(res == true);
-
-    SoftBusFree(testFsm);
-    SoftBusFree(testState);
-}
-
-/*
-* @tc.name: testP2pLinkFsmStart001
+* @tc.name: P2pLinkFsmStartTest001
 * @tc.desc: some diff param in P2pLinkFsmStart.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmStart001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmStartTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -581,7 +544,7 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmStart001, TestSize.Level1)
     P2pLinkFsmStart(testFsm, testInitialState);
 
     P2pLinkFsmStop(testFsm);
-    EXPECT_TRUE(testFsm->currentState == NULL);
+    EXPECT_TRUE(testFsm->currentState == nullptr);
     P2pLinkFsmStop(testFsm);
 
     SoftBusFree(testFsm);
@@ -589,12 +552,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmStart001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkFsmTransactState001
+* @tc.name: P2pLinkFsmTransactStateTest001
 * @tc.desc: some diff param in P2pLinkFsmTransactState.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmTransactState001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmTransactStateTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -616,12 +579,12 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmTransactState001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testP2pLinkFsmMsgProc001
+* @tc.name: P2pLinkFsmMsgProcTest001
 * @tc.desc: some diff param in P2pLinkFsmMsgProc.
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkFsmMsgProc001, TestSize.Level1)
+HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmMsgProcTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
