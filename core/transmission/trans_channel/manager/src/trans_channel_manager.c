@@ -41,7 +41,7 @@
 #include "softbus_hisysevt_transreporter.h"
 #include "trans_tcp_direct_sessionconn.h"
 
-int32_t TransChannelInit(void)
+NO_SANITIZE("cfi") int32_t TransChannelInit(void)
 {
     IServerChannelCallBack *cb = TransServerGetChannelCb();
     if (cb == NULL) {
@@ -78,7 +78,7 @@ int32_t TransChannelInit(void)
     return SOFTBUS_OK;
 }
 
-void TransChannelDeinit(void)
+NO_SANITIZE("cfi") void TransChannelDeinit(void)
 {
     TransLaneMgrDeinit();
     TransAuthDeinit();
@@ -201,7 +201,7 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     return SOFTBUS_OK;
 }
 
-int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
+NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
     transInfo->channelId = INVALID_CHANNEL_ID;
@@ -295,7 +295,7 @@ EXIT_ERR:
     return NULL;
 }
 
-int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt)
+NO_SANITIZE("cfi") int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt)
 {
     int32_t channelId = INVALID_CHANNEL_ID;
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
@@ -346,7 +346,7 @@ static void ConvertStreamStats(const StreamSendStats *src, FrameSendStats *dest)
     destBitRate[FRAME_BIT_RATE_LARGE] = srcBitRate[FRAME_BIT_RATE_GE30M];
 }
 
-int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
+NO_SANITIZE("cfi") int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
 {
     (void)channelType;
     if (data == NULL) {
@@ -370,7 +370,7 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
     return SOFTBUS_OK;
 }
 
-int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
+NO_SANITIZE("cfi") int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
     (void)chanType;
     (void)appType;
@@ -400,7 +400,7 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
     return SOFTBUS_OK;
 }
 
-int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data)
+NO_SANITIZE("cfi") int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data)
 {
     (void)channelType;
     if (data == NULL) {
@@ -424,7 +424,7 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
     return SOFTBUS_OK;
 }
 
-int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
+NO_SANITIZE("cfi") int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
     int32_t ret = SOFTBUS_ERR;
     ConnectOption connOpt;
@@ -447,7 +447,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return TransNotifyAuthDataSuccess(channelId, &connOpt);
 }
 
-int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
+NO_SANITIZE("cfi") int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel: id=%d, type=%d", channelId, channelType);
     switch (channelType) {
@@ -469,7 +469,8 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
     return SOFTBUS_ERR;
 }
 
-int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
+NO_SANITIZE("cfi") int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
+    int32_t msgType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: id=%d, type=%d", channelId, channelType);
     switch (channelType) {
@@ -483,7 +484,7 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
     }
 }
 
-void TransChannelDeathCallback(const char *pkgName, int32_t pid)
+NO_SANITIZE("cfi") void TransChannelDeathCallback(const char *pkgName, int32_t pid)
 {
     TransProxyDeathCallback(pkgName, pid);
     TransTdcDeathCallback(pkgName, pid);
@@ -491,7 +492,7 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid)
     TransUdpDeathCallback(pkgName, pid);
 }
 
-int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
+NO_SANITIZE("cfi") int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionNameLen)
 {
     if (info == NULL || pkgName == NULL || sessionName == NULL) {
@@ -509,7 +510,7 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
     }
 }
 
-int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo)
+NO_SANITIZE("cfi") int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo)
 {
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -528,7 +529,7 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
     }
 }
 
-int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
+NO_SANITIZE("cfi") int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
 {
     if (channelType != CHANNEL_TYPE_PROXY) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channelType:%d error", channelType);

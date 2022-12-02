@@ -51,7 +51,7 @@ static inline CodeType getCodeType(const AppInfo *appInfo)
         CODE_FILE_TRANS_UDP : CODE_EXCHANGE_UDP_INFO;
 }
 
-int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
+NO_SANITIZE("cfi") int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
 {
     if ((msg == NULL) && (errCode == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -63,7 +63,7 @@ int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
     return SOFTBUS_OK;
 }
 
-int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
@@ -97,7 +97,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
@@ -148,7 +148,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
@@ -195,7 +195,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
@@ -225,7 +225,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc)
+NO_SANITIZE("cfi") int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack reply error info in negotiation.");
     if (msg == NULL || errDesc == NULL) {

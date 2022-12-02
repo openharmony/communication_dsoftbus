@@ -66,7 +66,7 @@ static void UnpackTdcPacketHead(TdcPacketHead *data)
     data->dataLen = SoftBusLtoHl(data->dataLen);
 }
 
-int32_t TransSrvDataListInit(void)
+NO_SANITIZE("cfi") int32_t TransSrvDataListInit(void)
 {
     if (g_tcpSrvDataList != NULL) {
         return SOFTBUS_OK;
@@ -100,7 +100,7 @@ static void TransSrvDestroyDataBuf(void)
     return;
 }
 
-void TransSrvDataListDeinit(void)
+NO_SANITIZE("cfi") void TransSrvDataListDeinit(void)
 {
     if (g_tcpSrvDataList == NULL) {
         return;
@@ -110,7 +110,7 @@ void TransSrvDataListDeinit(void)
     g_tcpSrvDataList = NULL;
 }
 
-int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
+NO_SANITIZE("cfi") int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
 {
 #define MAX_DATA_BUF 4096
     ServerDataBuf *node = (ServerDataBuf *)SoftBusCalloc(sizeof(ServerDataBuf));
@@ -142,7 +142,7 @@ int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
     return SOFTBUS_OK;
 }
 
-void TransSrvDelDataBufNode(int channelId)
+NO_SANITIZE("cfi") void TransSrvDelDataBufNode(int channelId)
 {
     if (g_tcpSrvDataList ==  NULL) {
         return;
@@ -208,7 +208,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
     return SOFTBUS_OK;
 }
 
-int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data)
+NO_SANITIZE("cfi") int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data)
 {
     if (data == NULL || packetHead == NULL || packetHead->dataLen == 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid para.");
@@ -763,7 +763,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     return SOFTBUS_ERR;
 }
 
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
+NO_SANITIZE("cfi") int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
 {
     int32_t fd = -1;
     size_t len = 0;
