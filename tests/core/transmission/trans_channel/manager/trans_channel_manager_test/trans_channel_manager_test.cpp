@@ -118,8 +118,7 @@ HWTEST_F(TransChannelManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level
     SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
-
-    (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX)
+    (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
 
     int32_t ret = CopyAppInfoFromSessionParam(appInfo, sessionParam);
     EXPECT_EQ(SOFTBUS_ERR, ret);
