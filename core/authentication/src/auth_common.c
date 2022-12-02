@@ -273,6 +273,7 @@ NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthCon
             break;
         case AUTH_LINK_TYPE_P2P:
             if (info2->type == AUTH_LINK_TYPE_P2P &&
+                info1->info.ipInfo.port == info2->info.ipInfo.port &&
                 strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
                 return true;
             }
