@@ -99,7 +99,7 @@ SessionParam* GenerateCommParamTest()
     return sessionParam;
 }
 
-SessionParam* AddParamTest(SessionAttribute *sessionAttr)
+SessionParam* GenerateParamTest(SessionAttribute *sessionAttr)
 {
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     if (sessionParam == NULL) {
@@ -412,7 +412,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest010, TestSize.Level1)
         .dataType = LANE_T_BUTT,
         .linkTypeNum = 4,
     };
-    SessionParam *sessionParam = AddParamTest(&sessionAttr);
+    SessionParam *sessionParam = GenerateParamTest(&sessionAttr);
     ASSERT_TRUE(sessionParam != nullptr);
     LanePreferredLinkList *preferred = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred != nullptr);
@@ -586,7 +586,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest015, TestSize.Level1)
         .dataType = TYPE_MESSAGE,
         .linkTypeNum = 4,
     };
-    SessionParam *sessionParam = AddParamTest(&sessionNormalAttr);
+    SessionParam *sessionParam = GenerateParamTest(&sessionNormalAttr);
     SoftBusFree(sessionParam);
     ret = TransGetLaneInfo(NULL, &connInfo, &laneId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -726,7 +726,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest022, TestSize.Level1)
         .dataType = LANE_T_BUTT,
         .linkTypeNum = -1,
     };
-    SessionParam *sessionParam = AddParamTest(&sessionAttr);
+    SessionParam *sessionParam = GenerateParamTest(&sessionAttr);
     ASSERT_TRUE(sessionParam != nullptr);
     LanePreferredLinkList *preferred = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred != nullptr);
@@ -738,7 +738,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest022, TestSize.Level1)
         .dataType = LANE_T_BUTT,
         .linkTypeNum = 5,
     };
-    SessionParam *sessionParam1 = AddParamTest(&sessionAttr1);
+    SessionParam *sessionParam1 = GenerateParamTest(&sessionAttr1);
     ASSERT_TRUE(sessionParam1 != nullptr);
     LanePreferredLinkList *preferred1 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred1 != nullptr);
@@ -750,7 +750,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest022, TestSize.Level1)
         .dataType = LANE_T_BUTT,
         .linkTypeNum = 7,
     };
-    SessionParam *sessionParam2 = AddParamTest(&sessionAttr2);
+    SessionParam *sessionParam2 = GenerateParamTest(&sessionAttr2);
     ASSERT_TRUE(sessionParam2 != nullptr);
     LanePreferredLinkList *preferred2 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred2 != nullptr);
