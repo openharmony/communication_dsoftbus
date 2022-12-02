@@ -271,7 +271,7 @@ NO_SANITIZE("cfi") int32_t RegTrustDataChangeListener(const TrustDataChangeListe
     return SOFTBUS_OK;
 }
 
-void UnregTrustDataChangeListener(void)
+NO_SANITIZE("cfi") void UnregTrustDataChangeListener(void)
 {
     const DeviceGroupManager *gmInstance = GetGmInstance();
     if (gmInstance == NULL) {

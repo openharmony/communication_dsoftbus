@@ -245,7 +245,7 @@ NO_SANITIZE("cfi") int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
     return ret;
 }
 
-int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
+NO_SANITIZE("cfi") int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
 {
     uint8_t i;
     if (protocolMgr == NULL) {

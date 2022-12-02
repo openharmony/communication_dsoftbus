@@ -102,7 +102,7 @@ static int32_t TransServerOnQosEvent(const char *pkgName, const QosParam *param)
     return SOFTBUS_OK;
 }
 
-IServerChannelCallBack *TransServerGetChannelCb(void)
+NO_SANITIZE("cfi") IServerChannelCallBack *TransServerGetChannelCb(void)
 {
     g_channelCallBack.OnChannelOpened = TransServerOnChannelOpened;
     g_channelCallBack.OnChannelClosed = TransServerOnChannelClosed;
@@ -114,7 +114,8 @@ IServerChannelCallBack *TransServerGetChannelCb(void)
     return &g_channelCallBack;
 }
 
-int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *networkId, int32_t routeType)
+NO_SANITIZE("cfi") int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *networkId,
+    int32_t routeType)
 {
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;

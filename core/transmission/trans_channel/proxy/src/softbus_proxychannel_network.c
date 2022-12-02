@@ -66,7 +66,7 @@ NO_SANITIZE("cfi") void NotifyNetworkingMsgReceived(int32_t channelId, const cha
 }
 
 
-int TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
+NO_SANITIZE("cfi") int TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
 {
     if (memcpy_s(&g_netChanlistener, sizeof(INetworkingListener),
         listener, sizeof(INetworkingListener)) != EOK) {

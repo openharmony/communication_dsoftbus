@@ -558,17 +558,17 @@ static int32_t UpdateLocalUuid(const void *id)
     return ModifyId(g_localNetLedger.localInfo.uuid, UUID_BUF_LEN, (char *)id);
 }
 
-int32_t UpdateLocalParentId(const char *id)
+NO_SANITIZE("cfi") int32_t UpdateLocalParentId(const char *id)
 {
     return ModifyId(g_localNetLedger.localInfo.parentId, ID_MAX_LEN, id);
 }
 
-int32_t UpdateLocalPublicId(const char *id)
+NO_SANITIZE("cfi") int32_t UpdateLocalPublicId(const char *id)
 {
     return ModifyId(g_localNetLedger.localInfo.publicId, ID_MAX_LEN, id);
 }
 
-int32_t UpdateLocalRole(ConnectRole role)
+NO_SANITIZE("cfi") int32_t UpdateLocalRole(ConnectRole role)
 {
     g_localNetLedger.localInfo.role = role;
     return SOFTBUS_OK;
@@ -592,13 +592,13 @@ static int32_t UpdateMasgerNodeWeight(const void *weight)
     return SOFTBUS_OK;
 }
 
-int32_t UpdateLocalStatus(ConnectStatus status)
+NO_SANITIZE("cfi") int32_t UpdateLocalStatus(ConnectStatus status)
 {
     g_localNetLedger.localInfo.status = status;
     return SOFTBUS_OK;
 }
 
-int32_t UpdateLocalWeight(int32_t weight)
+NO_SANITIZE("cfi") int32_t UpdateLocalWeight(int32_t weight)
 {
     g_localNetLedger.localInfo.masterWeight = weight;
     return SOFTBUS_OK;

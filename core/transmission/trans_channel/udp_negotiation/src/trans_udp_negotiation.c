@@ -704,7 +704,7 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
     return SOFTBUS_OK;
 }
 
-int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int32_t *channelId)
+NO_SANITIZE("cfi") int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int32_t *channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans open udp channel.");
     if (appInfo == NULL || connOpt == NULL || channelId == NULL) {
@@ -740,7 +740,7 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
     return SOFTBUS_OK;
 }
 
-int32_t TransCloseUdpChannel(int32_t channelId)
+NO_SANITIZE("cfi") int32_t TransCloseUdpChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans close udp channel.");
     UdpChannelInfo channel;
@@ -798,7 +798,7 @@ void TransUdpNodeOffLineProc(const LnnEventBasicInfo *info)
     TransCloseUdpChannelByNetWorkId(onlineStateInfo->networkId);
 }
 
-int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
+NO_SANITIZE("cfi") int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
 {
     g_channelCb = callback;
 
@@ -828,7 +828,7 @@ int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
     return SOFTBUS_OK;
 }
 
-void TransUdpChannelDeinit(void)
+NO_SANITIZE("cfi") void TransUdpChannelDeinit(void)
 {
     TransUdpChannelMgrDeinit();
     UnregAuthTransListener(MODULE_UDP_INFO);
@@ -838,7 +838,7 @@ void TransUdpChannelDeinit(void)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server trans udp channel deinit success.");
 }
 
-void TransUdpDeathCallback(const char *pkgName, int32_t pid)
+NO_SANITIZE("cfi") void TransUdpDeathCallback(const char *pkgName, int32_t pid)
 {
     if (GetUdpChannelLock() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");

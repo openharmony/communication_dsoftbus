@@ -290,7 +290,7 @@ NO_SANITIZE("cfi") int32_t SetSocketCallback(const SocketCallback *cb)
     return SOFTBUS_OK;
 }
 
-void UnsetSocketCallback(void)
+NO_SANITIZE("cfi") void UnsetSocketCallback(void)
 {
     (void)memset_s(&g_callback, sizeof(SocketCallback), 0, sizeof(SocketCallback));
 }
@@ -502,7 +502,7 @@ NO_SANITIZE("cfi") int32_t RegAuthChannelListener(int32_t module, const AuthChan
     return SOFTBUS_ERR;
 }
 
-void UnregAuthChannelListener(int32_t module)
+NO_SANITIZE("cfi") void UnregAuthChannelListener(int32_t module)
 {
     uint32_t i;
     for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {

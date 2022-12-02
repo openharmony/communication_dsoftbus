@@ -69,7 +69,7 @@ NO_SANITIZE("cfi") void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitM
     capBitMap[index] = capBitMap[index] | (0x1 << (pos % INT32_MAX_BIT_NUM));
 }
 
-void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
+NO_SANITIZE("cfi") void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {

@@ -269,7 +269,7 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
     return ret;
 }
 
-int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
+NO_SANITIZE("cfi") int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
 {
     if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:Invalid para.", __func__);
@@ -291,7 +291,7 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
     return serverPort;
 }
 
-int32_t TransTdcStopSessionListener(ListenerModule module)
+NO_SANITIZE("cfi") int32_t TransTdcStopSessionListener(ListenerModule module)
 {
     TransTdcStopSessionProc(module);
     return StopBaseListener(module);

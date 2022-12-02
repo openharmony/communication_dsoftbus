@@ -239,7 +239,7 @@ EXIT_ERR:
     return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
 }
 
-int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId)
+NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId)
 {
     AppInfo appInfo;
     ConnectOption connOpt;
@@ -271,7 +271,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     return TransProxySendMsg(channelId, data, dataLen, priority);
 }
 
-int32_t TransCloseNetWorkingChannel(int32_t channelId)
+NO_SANITIZE("cfi") int32_t TransCloseNetWorkingChannel(int32_t channelId)
 {
     return TransProxyCloseProxyChannel(channelId);
 }

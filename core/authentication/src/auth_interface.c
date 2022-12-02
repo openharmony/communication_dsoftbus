@@ -63,7 +63,7 @@ NO_SANITIZE("cfi") int32_t RegAuthTransListener(int32_t module, const AuthTransL
     return SOFTBUS_ERR;
 }
 
-void UnregAuthTransListener(int32_t module)
+NO_SANITIZE("cfi") void UnregAuthTransListener(int32_t module)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: remove listener, module=%d.", module);
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
