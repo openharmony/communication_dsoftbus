@@ -24,6 +24,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_adapter_mem.h"
 
 int CheckSendLen(int32_t channelType, int32_t businessType, unsigned int len)
 {
@@ -175,10 +176,13 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendFile no permission, ret = %d", ret);
         return ret;
     }
-    FileSchemaListener fileSchemaListener;
-    (void)memset_s(&fileSchemaListener, sizeof(FileSchemaListener), 0, sizeof(FileSchemaListener));
-    if (CheckFileSchema(sessionId, &fileSchemaListener) == SOFTBUS_OK) {
-        if (SetSchemaCallback(fileSchemaListener.schema, sFileList, fileCnt) != SOFTBUS_OK) {
+
+    FileSchemaListener *fileSchemaListener = (FileSchemaListener*)SoftBusCalloc(sizeof(FileSchemaListener));
+    if (fileSchemaListener == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (CheckFileSchema(sessionId, fileSchemaListener) == SOFTBUS_OK) {
+        if (SetSchemaCallback(fileSchemaListener->schema, sFileList, fileCnt) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set schema callback failed");
             return SOFTBUS_ERR;
         }
@@ -203,6 +207,6 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     if (isEnable != true) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
-
+    SoftBusFree(fileSchemaListener);
     return ClientTransChannelSendFile(channelId, type, sFileList, dFileList, fileCnt);
 }
