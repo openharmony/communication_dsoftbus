@@ -72,6 +72,7 @@ int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_
 int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
+int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
 
 void AuthSessionFsmExit(void);
 

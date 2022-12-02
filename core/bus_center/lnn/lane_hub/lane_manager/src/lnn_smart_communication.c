@@ -220,7 +220,7 @@ static int32_t GetLaneOfP2p(const char *netWorkId, int32_t pid, LnnLaneProperty 
     }
     laneId = LnnUpdateLaneP2pInfo(&p2pInfo);
     if (laneId < LNN_LINK_TYPE_P2P || laneId > LNN_LINK_TYPE_P2P_MAX) {
-        (void)LnnDisconnectP2p(netWorkId, pid);
+        (void)LnnDisconnectP2p(netWorkId, pid, NULL);
         return SOFTBUS_ERR;
     }
     return laneId;
