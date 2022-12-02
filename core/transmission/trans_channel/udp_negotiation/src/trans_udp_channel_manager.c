@@ -102,7 +102,7 @@ static void TransUdpTimerProc(void)
     NotifyTimeOutUdpChannel(&udpTmpChannelList);
 }
 
-int32_t TransUdpChannelMgrInit(void)
+NO_SANITIZE("cfi") int32_t TransUdpChannelMgrInit(void)
 {
     if (g_udpChannelMgr != NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel info manager has initialized.");
@@ -120,7 +120,7 @@ int32_t TransUdpChannelMgrInit(void)
     return SOFTBUS_OK;
 }
 
-void TransUdpChannelMgrDeinit(void)
+NO_SANITIZE("cfi") void TransUdpChannelMgrDeinit(void)
 {
     if (g_udpChannelMgr == NULL) {
         return;
@@ -142,7 +142,7 @@ void TransUdpChannelMgrDeinit(void)
     return;
 }
 
-int32_t TransAddUdpChannel(UdpChannelInfo *channel)
+NO_SANITIZE("cfi") int32_t TransAddUdpChannel(UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -178,7 +178,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     return SOFTBUS_OK;
 }
 
-int32_t TransDelUdpChannel(int32_t channelId)
+NO_SANITIZE("cfi") int32_t TransDelUdpChannel(int32_t channelId)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -218,7 +218,7 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
     }
 }
 
-void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
+NO_SANITIZE("cfi") void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
 {
     if ((g_udpChannelMgr == NULL) || (netWorkId == NULL)) {
         return;
@@ -247,7 +247,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
     NotifyUdpChannelCloseInList(&udpDeleteChannelList);
 }
 
-int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
+NO_SANITIZE("cfi") int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -281,7 +281,7 @@ int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
     return SOFTBUS_ERR;
 }
 
-int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
+NO_SANITIZE("cfi") int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -315,7 +315,7 @@ int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
     return SOFTBUS_ERR;
 }
 
-int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionName,
+NO_SANITIZE("cfi") int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionName,
     uint16_t pkgNameLen, uint16_t sessionNameLen)
 {
     if (g_udpChannelMgr == NULL) {
@@ -349,7 +349,7 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
     return SOFTBUS_ERR;
 }
 
-int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
+NO_SANITIZE("cfi") int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -374,7 +374,7 @@ int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
     return SOFTBUS_ERR;
 }
 
-int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
+NO_SANITIZE("cfi") int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -399,7 +399,7 @@ int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
     return SOFTBUS_ERR;
 }
 
-void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
+NO_SANITIZE("cfi") void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -430,7 +430,7 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %" PRId64 "]", seq);
 }
 
-int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel)
+NO_SANITIZE("cfi") int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
@@ -463,7 +463,7 @@ int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channe
     return SOFTBUS_ERR;
 }
 
-UdpChannelInfo *TransGetChannelObj(int32_t channelId)
+NO_SANITIZE("cfi") UdpChannelInfo *TransGetChannelObj(int32_t channelId)
 {
     if (g_udpChannelMgr == NULL) {
         return NULL;
@@ -478,7 +478,7 @@ UdpChannelInfo *TransGetChannelObj(int32_t channelId)
     return NULL;
 }
 
-int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
 {
     if ((g_udpChannelMgr == NULL) && (appInfo == NULL)) {
         return SOFTBUS_ERR;

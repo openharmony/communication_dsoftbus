@@ -336,7 +336,7 @@ NO_SANITIZE("cfi") char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion 
     return msg;
 }
 
-int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBusVersion version,
+NO_SANITIZE("cfi") int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBusVersion version,
     NodeInfo *nodeInfo, bool isMetaAuth)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "UnpackDeviceInfo: connType = %d.", linkType);

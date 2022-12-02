@@ -22,6 +22,7 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
@@ -143,7 +144,7 @@ static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
     return AuthGetIdByConnInfo(&connInfo, isAuthServer, false);
 }
 
-int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
+NO_SANITIZE("cfi") int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
     if (len <= PROXY_CHANNEL_HEAD_LEN) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parseMessage: invalid message length(%d)", len);
@@ -230,7 +231,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, int64_t authId, Proxy
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo)
+NO_SANITIZE("cfi") int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo)
 {
     if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inData == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -279,7 +280,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     return SOFTBUS_OK;
 }
 
-char *TransProxyPackHandshakeErrMsg(int32_t errCode)
+NO_SANITIZE("cfi") char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 {
     cJSON *root = NULL;
     char *buf = NULL;
@@ -299,7 +300,7 @@ char *TransProxyPackHandshakeErrMsg(int32_t errCode)
     return buf;
 }
 
-char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
+NO_SANITIZE("cfi") char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
     cJSON *root = NULL;
     SessionKeyBase64 sessionBase64;
@@ -354,7 +355,7 @@ EXIT:
     return buf;
 }
 
-char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
+NO_SANITIZE("cfi") char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
     cJSON *root = NULL;
     char *buf = NULL;
@@ -396,7 +397,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     return buf;
 }
 
-int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode)
+NO_SANITIZE("cfi") int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode)
 {
     cJSON *root = cJSON_Parse(msg);
     if ((root == NULL) || (errCode == NULL)) {
@@ -413,7 +414,7 @@ int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode)
 }
 
 
-int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo)
+NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo)
 {
     cJSON *root = 0;
     AppInfo *appInfo = &(chanInfo->appInfo);
@@ -508,7 +509,7 @@ static int32_t TransProxyUnpackAuthHandshakeMsg(cJSON *root, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
+NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
 {
     cJSON *root = cJSON_Parse(msg);
     if (root == NULL) {
@@ -559,7 +560,7 @@ ERR_EXIT:
     return SOFTBUS_ERR;
 }
 
-char *TransProxyPackIdentity(const char *identity)
+NO_SANITIZE("cfi") char *TransProxyPackIdentity(const char *identity)
 {
     cJSON *root = NULL;
     char *buf = NULL;
@@ -583,7 +584,7 @@ char *TransProxyPackIdentity(const char *identity)
     return buf;
 }
 
-int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize)
+NO_SANITIZE("cfi") int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize)
 {
     cJSON *root = NULL;
 

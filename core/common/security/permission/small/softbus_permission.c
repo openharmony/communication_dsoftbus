@@ -22,6 +22,7 @@
 #include "pms_interface.h"
 #include "pms_types.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -61,7 +62,7 @@ static int32_t GetPermType(pid_t callingUid, pid_t callingPid, const char *pkgNa
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-int32_t TransPermissionInit(void)
+NO_SANITIZE("cfi") int32_t TransPermissionInit(void)
 {
     return LoadPermissionJson(PERMISSION_JSON_FILE);
 }

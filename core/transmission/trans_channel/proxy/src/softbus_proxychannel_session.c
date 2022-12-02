@@ -67,7 +67,7 @@ NO_SANITIZE("cfi") void PackSliceHead(SliceHead *data)
     data->reserved = (int32_t)SoftBusHtoLl((uint32_t)data->reserved);
 }
 
-void UnPackSliceHead(SliceHead *data)
+NO_SANITIZE("cfi") void UnPackSliceHead(SliceHead *data)
 {
     data->priority = (int32_t)SoftBusLtoHl((uint32_t)data->priority);
     data->sliceNum = (int32_t)SoftBusLtoHl((uint32_t)data->sliceNum);
@@ -299,7 +299,8 @@ static int32_t TransProxyTransDataSendSyncMsg(int32_t channelId, const char *pay
     return ret;
 }
 
-int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, uint32_t len, ProxyPacketType flags)
+NO_SANITIZE("cfi") int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, uint32_t len,
+    ProxyPacketType flags)
 {
     ProxyDataInfo packDataInfo = {0};
     int32_t ret = SOFTBUS_ERR;
@@ -350,7 +351,8 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data, u
     return ret;
 }
 
-int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len, SessionPktType flags)
+NO_SANITIZE("cfi") int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len,
+    SessionPktType flags)
 {
     ProxyPacketType type = SessionTypeToPacketType(flags);
     return TransProxyPostPacketData(channelId, data, len, type);
@@ -492,7 +494,8 @@ static int32_t TransProxyTransAppNormalMsg(const ProxyChannelInfo *info, const c
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen, ProxyPacketType flag)
+NO_SANITIZE("cfi") int32_t TransProxyTransDataSendMsg(int32_t channelId, const char *payLoad, int payLoadLen,
+    ProxyPacketType flag)
 {
     int ret = SOFTBUS_ERR;
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -567,8 +570,8 @@ static SessionPktType PacketTypeToSessionType(ProxyPacketType pktType)
     }
 }
 
-int32_t TransProxyNotifySession(const char *pkgName, int32_t pid, int32_t channelId, ProxyPacketType flags, int32_t seq,
-    const char *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t TransProxyNotifySession(const char *pkgName, int32_t pid, int32_t channelId,
+    ProxyPacketType flags, int32_t seq, const char *data, uint32_t len)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "flags:%d", flags);
     TransReceiveData receiveData;
@@ -604,7 +607,7 @@ int32_t TransProxyNotifySession(const char *pkgName, int32_t pid, int32_t channe
     }
 }
 
-int32_t TransProxySessionDataLenCheck(uint32_t dataLen, ProxyPacketType type)
+NO_SANITIZE("cfi") int32_t TransProxySessionDataLenCheck(uint32_t dataLen, ProxyPacketType type)
 {
 #define PROXY_MAX_BYTES_LEN (1024 * 1024)
 #define PROXY_MAX_MESSAGE_LEN (1 * 1024)
@@ -901,7 +904,8 @@ static int TransProxySubPacketProc(const char *pkgName, int32_t pid, int32_t cha
     return ret;
 }
 #define SLICE_HEAD_LEN (sizeof(PacketHead) + sizeof(SliceHead))
-int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
+    const char *data, uint32_t len)
 {
     SliceHead *headSlice = NULL;
     uint32_t dataLen;
@@ -930,7 +934,8 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t chann
     }
 }
 
-int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len)
+NO_SANITIZE("cfi") int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
+    const char *data, uint32_t len)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "data null.");
@@ -952,7 +957,7 @@ int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t pid, int32_t channel
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
+NO_SANITIZE("cfi") int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
 {
     ChannelSliceProcessor *node = NULL;
     ChannelSliceProcessor *next = NULL;
@@ -1010,7 +1015,7 @@ static void TransProxySliceTimerProc(void)
     return;
 }
 
-int32_t TransSliceManagerInit(void)
+NO_SANITIZE("cfi") int32_t TransSliceManagerInit(void)
 {
     g_channelSliceProcessorList = CreateSoftBusList();
     if (g_channelSliceProcessorList == NULL) {
@@ -1023,7 +1028,7 @@ int32_t TransSliceManagerInit(void)
     return SOFTBUS_OK;
 }
 
-void TransSliceManagerDeInit(void)
+NO_SANITIZE("cfi") void TransSliceManagerDeInit(void)
 {
     if (g_channelSliceProcessorList) {
         DestroySoftBusList(g_channelSliceProcessorList);

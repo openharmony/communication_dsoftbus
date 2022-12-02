@@ -17,13 +17,14 @@
 
 #include "securec.h"
 #include "softbus_conn_interface.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 
-int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
 {
     if (appInfo == NULL || msg == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -45,7 +46,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo)
+NO_SANITIZE("cfi") int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo)
 {
     if (msg == NULL || appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -73,7 +74,8 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr, int32_t maxLen)
+NO_SANITIZE("cfi") int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr,
+    int32_t maxLen)
 {
     (void)maxLen;
     if (errMsg == NULL || cJsonStr == NULL) {

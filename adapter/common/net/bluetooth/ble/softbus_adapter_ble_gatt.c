@@ -420,7 +420,7 @@ NO_SANITIZE("cfi") static void WrapperAdvUpdateCallback(int advId, int status)
     }
 }
 
-static void WrapperSecurityRespondCallback(const BdAddr *bdAddr)
+NO_SANITIZE("cfi") static void WrapperSecurityRespondCallback(const BdAddr *bdAddr)
 {
     (void)bdAddr;
     CLOGI("WrapperSecurityRespondCallback");

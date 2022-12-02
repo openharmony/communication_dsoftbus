@@ -908,7 +908,7 @@ NO_SANITIZE("cfi") int32_t RegAuthVerifyListener(const AuthVerifyListener *liste
     return SOFTBUS_OK;
 }
 
-void UnregAuthVerifyListener(void)
+NO_SANITIZE("cfi") void UnregAuthVerifyListener(void)
 {
     (void)memset_s(&g_verifyListener, sizeof(AuthVerifyListener), 0, sizeof(AuthVerifyListener));
 }
@@ -1124,7 +1124,7 @@ NO_SANITIZE("cfi") int32_t RegGroupChangeListener(const GroupChangeListener *lis
     return SOFTBUS_OK;
 }
 
-void UnregGroupChangeListener(void)
+NO_SANITIZE("cfi") void UnregGroupChangeListener(void)
 {
     g_groupChangeListener.onGroupCreated = NULL;
     g_groupChangeListener.onGroupDeleted = NULL;

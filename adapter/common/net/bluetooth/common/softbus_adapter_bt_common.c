@@ -93,7 +93,8 @@ NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, c
     }
 }
 
-static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state, unsigned int reason)
+NO_SANITIZE("cfi") static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state,
+    unsigned int reason)
 {
     if (bdAddr == NULL) {
         CLOGE("WrapperAclStateChangedCallback addr is null");
@@ -114,7 +115,7 @@ static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState sta
     }
 }
 
-static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
+NO_SANITIZE("cfi") static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
 {
     if (bdAddr == NULL) {
         CLOGE("WrapperPairRequestedCallback addr is null");
@@ -128,7 +129,8 @@ static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
     }
 }
 
-static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, int reqType, int number)
+NO_SANITIZE("cfi") static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, int reqType,
+    int number)
 {
     if (bdAddr == NULL) {
         CLOGE("WrapperPairConfirmedCallback addr is null");

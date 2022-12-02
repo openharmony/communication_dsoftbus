@@ -18,6 +18,7 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -47,7 +48,7 @@ static void TransSessionForEachShowInfo(int fd)
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
 }
 
-int32_t TransSessionMgrInit(void)
+NO_SANITIZE("cfi") int32_t TransSessionMgrInit(void)
 {
     if (g_sessionServerList != NULL) {
         return SOFTBUS_OK;
@@ -61,7 +62,7 @@ int32_t TransSessionMgrInit(void)
     return SOFTBUS_OK;
 }
 
-void TransSessionMgrDeinit(void)
+NO_SANITIZE("cfi") void TransSessionMgrDeinit(void)
 {
     if (g_sessionServerList != NULL) {
         DestroySoftBusList(g_sessionServerList);
@@ -69,7 +70,7 @@ void TransSessionMgrDeinit(void)
     }
 }
 
-bool TransSessionServerIsExist(const char *sessionName)
+NO_SANITIZE("cfi") bool TransSessionServerIsExist(const char *sessionName)
 {
     if (sessionName == NULL) {
         return false;
@@ -97,7 +98,7 @@ bool TransSessionServerIsExist(const char *sessionName)
     return false;
 }
 
-int32_t TransSessionServerAddItem(SessionServer *newNode)
+NO_SANITIZE("cfi") int32_t TransSessionServerAddItem(SessionServer *newNode)
 {
     if (newNode == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -132,7 +133,7 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
     return SOFTBUS_OK;
 }
 
-int32_t TransSessionServerDelItem(const char *sessionName)
+NO_SANITIZE("cfi") int32_t TransSessionServerDelItem(const char *sessionName)
 {
     if (sessionName == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -163,7 +164,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     return SOFTBUS_OK;
 }
 
-void TransDelItemByPackageName(const char *pkgName, int32_t pid)
+NO_SANITIZE("cfi") void TransDelItemByPackageName(const char *pkgName, int32_t pid)
 {
     if (pkgName == NULL || g_sessionServerList == NULL) {
         return;
@@ -257,7 +258,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     return SOFTBUS_ERR;
 }
 
-void TransOnLinkDown(const char *networkId, int32_t routeType)
+NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, int32_t routeType)
 {
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;

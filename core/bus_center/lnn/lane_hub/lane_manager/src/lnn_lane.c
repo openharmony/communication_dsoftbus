@@ -167,7 +167,7 @@ NO_SANITIZE("cfi") void RegisterLaneIdListener(const ILaneIdStateListener *liste
     Unlock();
 }
 
-void UnregisterLaneIdListener(const ILaneIdStateListener *listener)
+NO_SANITIZE("cfi") void UnregisterLaneIdListener(const ILaneIdStateListener *listener)
 {
     if (listener == NULL) {
         return;

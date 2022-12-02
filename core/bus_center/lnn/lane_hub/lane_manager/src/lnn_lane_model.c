@@ -23,6 +23,7 @@
 #include "lnn_lane_def.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -151,7 +152,7 @@ NO_SANITIZE("cfi") int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *pro
     return SOFTBUS_OK;
 }
 
-void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
+NO_SANITIZE("cfi") void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
 {
     if (Lock() != SOFTBUS_OK) {
         return;
