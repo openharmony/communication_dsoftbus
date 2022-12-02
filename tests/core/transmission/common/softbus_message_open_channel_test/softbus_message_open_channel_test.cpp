@@ -62,7 +62,6 @@ char *TestGetMsgPack()
         return NULL;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
 
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
@@ -102,11 +101,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackError001, TestSize.Level1)
 
     const char *errDesc = "test";
     msg = PackError(errCode, errDesc);
-    bool ret = false;
-    if (msg != NULL) {
-        ret = true;
-    }
-    EXPECT_EQ(true, ret);
+    EXPECT_TRUE(msg != NULL);
 }
 
 /**
