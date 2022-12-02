@@ -215,7 +215,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
         case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
             if (channelType == CHANNEL_TYPE_PROXY) {
-                return ProcessReceivedFileData(sessionId, channelId, data, len, type);
+                return ProcessReceivedFileData(sessionId, channelId, (char*)data, len, type);
             }
             break;
         default:
