@@ -205,7 +205,7 @@ static void DevOnline(const P2pLinkGroup *group)
                 SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "negoing mac");
                 continue;
             }
-            nItem = SoftBusCalloc(sizeof(ConnectedNode));
+            nItem = (ConnectedNode *)SoftBusCalloc(sizeof(ConnectedNode));
             if (nItem == NULL) {
                 continue;
             }
@@ -428,13 +428,13 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
         }
         switch (item->state) {
             case P2PLINK_MANAGER_STATE_REUSE:
-                if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
+                if (item->timeOut > P2pLinkStateTimeOut((P2pLinkMangerState)(item->state))) {
                     P2pLinkReuseTimeOut(item);
                     P2pLinkDelConningDev(item);
                 }
                 break;
             case P2PLINK_MANAGER_STATE_NEGO_WAITING:
-                if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
+                if (item->timeOut > P2pLinkStateTimeOut((P2pLinkMangerState)(item->state))) {
                     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_BUSY);
                     P2pLinkDelConningDev(item);
@@ -443,7 +443,7 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                 TimerNegoWaitingProcess(item);
                 break;
             case P2PLINK_MANAGER_STATE_NEGOING:
-                if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
+                if (item->timeOut > P2pLinkStateTimeOut((P2pLinkMangerState)(item->state))) {
                     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_CONNECT_TIMEOUT);
                     P2pLinkDelConningDev(item);
