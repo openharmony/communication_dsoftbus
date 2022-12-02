@@ -184,6 +184,7 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     if (CheckFileSchema(sessionId, fileSchemaListener) == SOFTBUS_OK) {
         if (SetSchemaCallback(fileSchemaListener->schema, sFileList, fileCnt) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set schema callback failed");
+            SoftBusFree(fileSchemaListener);
             return SOFTBUS_ERR;
         }
     }
@@ -192,19 +193,23 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     int32_t type = CHANNEL_TYPE_BUTT;
     bool isEnable = false;
     if (ClientGetChannelBySessionId(sessionId, &channelId, &type, &isEnable) != SOFTBUS_OK) {
+        SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
 
     int32_t businessType = BUSINESS_TYPE_BUTT;
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
+        SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if ((businessType != BUSINESS_TYPE_FILE) && (businessType != BUSINESS_TYPE_NOT_CARE)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
+        SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
     if (isEnable != true) {
+        SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     SoftBusFree(fileSchemaListener);
