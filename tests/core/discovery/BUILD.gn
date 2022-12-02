@@ -34,7 +34,9 @@ group("unittest") {
     ]
   }
   if (dsoftbus_feature_disc_coap) {
-    deps += [ "coap/unittest:unittest" ]
+    deps += [
+      "coap/unittest:unittest",
+    ]
   }
   if (has_enhance_test) {
     deps +=
