@@ -48,6 +48,7 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo);
 
 const char *GetConnTypeStr(uint64_t connId);
 uint32_t GetConnId(uint64_t connId);
+int32_t GetConnType(uint64_t connId);
 
 uint32_t GetAuthDataSize(uint32_t len);
 int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
