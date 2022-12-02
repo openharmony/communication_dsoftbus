@@ -18,6 +18,6 @@ group("unittest") {
   testonly = true
   deps = [
     "common:unittest",
-    "trans_channel/udp_negotiation:unittest",
+    "trans_channel/manager:unittest",
   ]
 }
