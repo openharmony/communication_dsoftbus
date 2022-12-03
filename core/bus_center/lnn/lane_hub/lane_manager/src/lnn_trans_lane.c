@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
@@ -26,6 +27,7 @@
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
 #include "message_handler.h"
+#include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -43,6 +45,7 @@ typedef struct {
     uint32_t laneId;
     TransOption info;
     LaneLinkType type;
+    char p2pMac[P2P_MAC_LEN];
     ILaneListener listener;
 } TransReqInfo;
 
@@ -283,7 +286,7 @@ static int32_t Free(uint32_t laneId)
             ListDelete(&infoNode->node);
             g_requestList->cnt--;
             Unlock();
-            DestroyLink(laneId, infoNode->type, infoNode->info.pid, infoNode->info.networkId);
+            DestroyLink(laneId, infoNode->type, infoNode->info.pid, infoNode->p2pMac, infoNode->info.networkId);
             UnbindLaneId(laneId, infoNode);
             SoftBusFree(infoNode);
             return SOFTBUS_OK;
@@ -319,6 +322,18 @@ static int32_t GetLaneReqInfo(uint32_t laneId, TransReqInfo *reqInfo)
     return SOFTBUS_OK;
 }
 
+static void UpdateP2pInfo(TransReqInfo *nodeInfo)
+{
+    if (nodeInfo->type != LANE_P2P) {
+        return;
+    }
+    if (LnnGetRemoteStrInfo(nodeInfo->info.networkId, STRING_KEY_P2P_MAC,
+        nodeInfo->p2pMac, P2P_MAC_LEN) != SOFTBUS_OK) {
+        LLOGE("get remote p2p mac fail.");
+        return;
+    }
+}
+
 static void UpdateLinkType(uint32_t laneId, LaneLinkType linkType)
 {
     if (Lock() != SOFTBUS_OK) {
@@ -328,6 +343,7 @@ static void UpdateLinkType(uint32_t laneId, LaneLinkType linkType)
     LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == laneId) {
             item->type = linkType;
+            UpdateP2pInfo(item);
             break;
         }
     }

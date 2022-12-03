@@ -70,7 +70,7 @@ typedef struct {
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
-void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid, const char *networkId);
+void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid, const char *mac, const char *networkId);
 
 #ifdef __cplusplus
 }
