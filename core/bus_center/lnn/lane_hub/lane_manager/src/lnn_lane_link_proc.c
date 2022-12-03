@@ -288,15 +288,16 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     return SOFTBUS_OK;
 }
 
-void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid, const char *networkId)
+void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid,
+    const char *mac, const char *networkId)
 {
     (void)reqId;
-    if (networkId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DestroyLink, the networkId is invalid.");
+    if (networkId == NULL || mac == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "DestroyLink, the networkId or mac is invalid.");
         return;
     }
     if (type == LANE_P2P) {
-        (void)LnnDisconnectP2p(networkId, pid);
+        (void)LnnDisconnectP2p(networkId, pid, mac);
     }
 }
 
