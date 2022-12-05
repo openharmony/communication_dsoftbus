@@ -21,6 +21,7 @@
 #include "softbus_errcode.h"
 #include "session.h"
 #include "trans_udp_channel_manager.h"
+#include "client_trans_session_callback.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -41,6 +42,7 @@ namespace OHOS {
 #define TEST_REMOTE_TYPE 0
 #define TEST_EVENT_ID 2
 #define TEST_COUNT 2
+#define TEST_ERR_COUNT (-2)
 #define TEST_ERRCODE 0
 #define TEST_FILE_NAME "test.filename.01"
 #define STREAM_DATA_LENGTH 10
@@ -135,6 +137,51 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
 }
 
 /**
+ * @tc.name: TransOnUdpChannelOpenedTest003
+ * @tc.desc: trans on udp channel opened test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Level0)
+{
+    int32_t ret;
+    ChannelInfo channel;
+    char strTmp[] = "ABCDEFG";
+    char strSessionName[] = "ohos.distributedschedule.dms.test";
+    int32_t udpPort;
+    QosTv tvList;
+    channel.channelId = TEST_CHANNELID;
+    channel.businessType = BUSINESS_TYPE_STREAM;
+    channel.channelType = TEST_CHANNELTYPE;
+    channel.fd = TEST_DATA_TYPE;
+    channel.isServer = true;
+    channel.isEnabled = true;
+    channel.peerUid = TEST_CHANNELID;
+    channel.peerPid = TEST_CHANNELID;
+    channel.groupId = strTmp;
+    channel.sessionKey = strTmp;
+    channel.keyLen = sizeof(channel.sessionKey);
+    channel.peerSessionName = strSessionName;
+    channel.peerDeviceId = strTmp;
+    channel.myIp = strTmp;
+    channel.streamType = TEST_COUNT;
+    channel.isUdpFile = true;
+    channel.peerPort = TEST_COUNT;
+    channel.peerIp = strTmp;
+    channel.routeType = TEST_DATA_TYPE;
+
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransOnUdpChannelQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    channel.businessType = BUSINESS_TYPE_BUTT;
+    ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
  * @tc.name: TransOnUdpChannelOpenFailedTest001
  * @tc.desc: trans on udp channel opened test, use the wrong or normal parameter.
  * @tc.type: FUNC
@@ -199,6 +246,30 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.
 HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.Level0)
 {
     int32_t ret;
+    ChannelInfo channel;
+    char strTmp[] = "ABCDEFG";
+    char strSessionName[] = "ohos.distributedschedule.dms.test";
+    int32_t udpPort;
+    channel.channelId = TEST_CHANNELID;
+    channel.businessType = BUSINESS_TYPE_STREAM;
+    channel.channelType = TEST_CHANNELTYPE;
+    channel.fd = TEST_DATA_TYPE;
+    channel.isServer = true;
+    channel.isEnabled = true;
+    channel.peerUid = TEST_CHANNELID;
+    channel.peerPid = TEST_CHANNELID;
+    channel.groupId = strTmp;
+    channel.sessionKey = strTmp;
+    channel.keyLen = sizeof(channel.sessionKey);
+    channel.peerSessionName = strSessionName;
+    channel.peerDeviceId = strTmp;
+    channel.myIp = strTmp;
+    channel.streamType = TEST_COUNT;
+    channel.isUdpFile = true;
+    channel.peerPort = TEST_COUNT;
+    channel.peerIp = strTmp;
+    channel.routeType = TEST_DATA_TYPE;
+
     char sendStringData[STREAM_DATA_LENGTH] = "diudiudiu";
     StreamData tmpData = {
         sendStringData,
@@ -209,7 +280,14 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.L
         str,
         STREAM_DATA_LENGTH,
     };
+
     StreamFrameInfo tmpf = {};
+    ret = TransUdpChannelSendStream(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
+
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED, ret);
+
     ret = TransUdpChannelSendStream(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
@@ -252,5 +330,64 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest001, TestSize.
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     ret = TransGetUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: ClientTransAddUdpChannelTest001
+ * @tc.desc: client trans add udp channel test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, ClientTransAddUdpChannelTest001, TestSize.Level0)
+{
+    int32_t ret;
+    ChannelInfo channel;
+    char strTmp[] = "ABCDEFG";
+    char strSessionName[] = "ohos.distributedschedule.dms.test";
+    int32_t udpPort;
+    channel.channelId = TEST_CHANNELID;
+    channel.businessType = BUSINESS_TYPE_STREAM;
+    channel.channelType = TEST_CHANNELTYPE;
+    channel.fd = TEST_DATA_TYPE;
+    channel.isServer = true;
+    channel.isEnabled = true;
+    channel.peerUid = TEST_CHANNELID;
+    channel.peerPid = TEST_CHANNELID;
+    channel.groupId = strTmp;
+    channel.sessionKey = strTmp;
+    channel.keyLen = sizeof(channel.sessionKey);
+    channel.peerSessionName = strSessionName;
+    channel.peerDeviceId = strTmp;
+    channel.myIp = strTmp;
+    channel.streamType = TEST_COUNT;
+    channel.isUdpFile = true;
+    channel.peerPort = TEST_COUNT;
+    channel.peerIp = strTmp;
+    channel.routeType = TEST_DATA_TYPE;
+
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED, ret);
+
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED, ret);
+
+    ClientTransUdpMgrDeinit();
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED, ret);
+}
+
+/**
+ * @tc.name: ClientTransUdpManagerTest001
+ * @tc.desc: client trans udp manager test, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level0)
+{
+    int32_t ret;
+
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    ret = ClientTransUdpMgrInit(cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
