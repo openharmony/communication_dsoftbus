@@ -20,7 +20,7 @@
 #include "nstackx_dfile_config.h"
 #include "nstackx_dfile_mp.h"
 #include "nstackx_error.h"
-#include "nstackx_log.h"
+#include "nstackx_dfile_log.h"
 
 #define TAG "nStackXDFile"
 
@@ -50,7 +50,7 @@ void DFileSendTransferDoneAck(DFileSession *session)
     List *tmp = NULL;
     TransferDoneAckNode *transferDoneAckNode = NULL;
     if (PthreadMutexLock(&session->transferDoneAckList.lock) != 0) {
-        LOGE(TAG, "pthread mutex lock error");
+        DFILE_LOGE(TAG, "pthread mutex lock error");
         return;
     }
     LIST_FOR_EACH_SAFE(pos, tmp, &session->transferDoneAckList.head) {
@@ -58,13 +58,13 @@ void DFileSendTransferDoneAck(DFileSession *session)
         if (transferDoneAckNode == NULL) {
             continue;
         }
-        LOGI(TAG, "transferDoneAckList transId %u send num %u",
+        DFILE_LOGI(TAG, "transferDoneAckList transId %u send num %u",
             transferDoneAckNode->transId, transferDoneAckNode->sendNum);
         if (transferDoneAckNode->sendNum > 0) {
             peerInfo = ClientGetPeerInfoByTransId(session);
             if (!peerInfo) {
                 if (PthreadMutexUnlock(&session->transferDoneAckList.lock) != 0) {
-                    LOGE(TAG, "pthread mutex unlock error");
+                    DFILE_LOGE(TAG, "pthread mutex unlock error");
                 }
                 return;
             }
@@ -77,7 +77,7 @@ void DFileSendTransferDoneAck(DFileSession *session)
         }
     }
     if (PthreadMutexUnlock(&session->transferDoneAckList.lock) != 0) {
-        LOGE(TAG, "pthread mutex unlock error");
+        DFILE_LOGE(TAG, "pthread mutex unlock error");
     }
 }
 
@@ -86,7 +86,7 @@ void DFileSenderControlHandle(DFileSession *session)
     while (!session->closeFlag) {
         DFileSendTransferDoneAck(session);
         if (usleep(NSTACKX_CONTROL_INTERVAL) != 0) {
-            LOGE(TAG, "usleep(NSTACKX_CONTROL_INTERVAL) failed %d", errno);
+            DFILE_LOGE(TAG, "usleep(NSTACKX_CONTROL_INTERVAL) failed %d", errno);
         }
     }
 }
@@ -95,7 +95,7 @@ void DFileReceiverControlHandle(DFileSession *session)
 {
     while (!session->closeFlag) {
         if (usleep(NSTACKX_CONTROL_INTERVAL) != 0) {
-            LOGE(TAG, "usleep(NSTACKX_CONTROL_INTERVAL) failed %d", errno);
+            DFILE_LOGE(TAG, "usleep(NSTACKX_CONTROL_INTERVAL) failed %d", errno);
         }
     }
 }
