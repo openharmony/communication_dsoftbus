@@ -67,11 +67,7 @@ HWTEST_F(VtpInstanceTest, GetVersion001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance = std::make_shared<Communication::SoftBus::VtpInstance>();
     std::string tmpStr = vtpInstance->GetVersion();
 
-    bool ret = false;
-    if (tmpStr == "VTP_V1.0") {
-        ret = true;
-    }
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(tmpStr == "VTP_V1.0");
 }
 
 /**
@@ -85,7 +81,6 @@ HWTEST_F(VtpInstanceTest, CryptoRand001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance = std::make_shared<Communication::SoftBus::VtpInstance>();
 
     int res = (int)vtpInstance->CryptoRand();
-
     EXPECT_NE(0, res);
 }
 
@@ -104,7 +99,6 @@ HWTEST_F(VtpInstanceTest, PreSetFillpCoreParams001, TestSize.Level1)
 
     std::string pkgName = "CryptoRandTest";
     bool ret = vtpInstance->InitVtp(pkgName);
-
     EXPECT_EQ(true, ret);
 }
 

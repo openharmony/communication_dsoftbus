@@ -156,8 +156,12 @@ HWTEST_F(RawStreamDataTest, MakeRawStream001, TestSize.Level1)
     tmpIStream = iStream->MakeRawStream(*data, *info);
     EXPECT_TRUE(tmpIStream != nullptr);
 
-    SoftBusFree(data);
-    SoftBusFree(info);
+    if (data != nullptr) {
+        SoftBusFree(data);
+    }
+    if (info != nullptr) {
+        SoftBusFree(info);
+    }
 }
 
 /**
@@ -199,7 +203,9 @@ HWTEST_F(RawStreamDataTest, MakeRawStream002, TestSize.Level1)
     tmpIStream = iStream->MakeRawStream(data.get(), bufLen, *info, scene);
     EXPECT_TRUE(tmpIStream == nullptr);
 
-    SoftBusFree(indata);
+    if (indata != nullptr) {
+        SoftBusFree(indata);
+    }
 }
 
 /**
