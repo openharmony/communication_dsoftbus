@@ -17,7 +17,7 @@
 #include "securec.h"
 #include "nstackx_dfile_session.h"
 #include "nstackx_dfile_transfer.h"
-#include "nstackx_log.h"
+#include "nstackx_dfile_log.h"
 
 #define TAG "nStackXDFile"
 #ifdef DFILE_ENABLE_HIDUMP
@@ -35,7 +35,7 @@ int32_t HidumpHelp(char *message, size_t *size)
         "     transmit end: capability, sending rate, I/O rate, send block number.\n"
         "     receive end: capability, I/O rate, retransmissions number, recev number, total number\n");
     if (ret == -1) {
-        LOGE(TAG, "write message failed");
+        DFILE_LOGE(TAG, "write message failed");
         return NSTACKX_EFAILED;
     }
 
@@ -50,7 +50,7 @@ int32_t HidumpList(char *message, size_t *size)
     bool flag = 0;
     DFileSessionNode *node = NULL;
     if (PthreadMutexLock(&g_dFileSessionChainMutex) != 0) {
-        LOGE(TAG, "lock g_dFileSessionChainMutex failed");
+        DFILE_LOGE(TAG, "lock g_dFileSessionChainMutex failed");
         return 0;
     }
     List *pos = NULL;
@@ -65,13 +65,13 @@ int32_t HidumpList(char *message, size_t *size)
     }
 
     if (PthreadMutexUnlock(&g_dFileSessionChainMutex) != 0) {
-        LOGE(TAG, "unlock g_dFileSessionChainMutex failed");
+        DFILE_LOGE(TAG, "unlock g_dFileSessionChainMutex failed");
         return 0;
     }
     *size = strlen(message);
 
     if (flag == 1) {
-        LOGE(TAG, "write message failed");
+        DFILE_LOGE(TAG, "write message failed");
         return NSTACKX_EFAILED;
     }
 
@@ -169,7 +169,7 @@ int32_t HidumpInformation(char *message, size_t *size, char *opt)
     }
 
     if (ret != NSTACKX_EOK) {
-        LOGE(TAG, "write message failed");
+        DFILE_LOGE(TAG, "write message failed");
         return NSTACKX_EFAILED;
     }
 
@@ -201,7 +201,7 @@ int32_t HidumpMessage(char *message, size_t *size, char *opt)
         ret = sprintf_s(message, DUMP_INFO_MAX, "Invalid input");
     }
     if (ret == -1) {
-        LOGE(TAG, "write message failed");
+        DFILE_LOGE(TAG, "write message failed");
         return NSTACKX_EFAILED;
     }
 
@@ -216,7 +216,7 @@ static void EventAssemble(char *eventName, DFileEventType eventType, DFileEventL
     DFileEvent temp;
     DFileEvent *msg = &temp;
     if (strcpy_s(msg->eventName, DFile_EVENT_NAME_LEN, eventName) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
     msg->type = eventType;
@@ -237,11 +237,11 @@ void WaitFileHeaderTimeoutEvent(DFileTransErrorCode errorCode)
     transParam->type = DFile_PARAM_TYPE_STRING;
 
     if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "ERROR_CODE") != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed");
+        DFILE_LOGE(TAG, "string copy failed");
         return;
     }
     if (strcpy_s(transParam->value.str, DFile_EVENT_NAME_LEN, valueStr) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed");
+        DFILE_LOGE(TAG, "string copy failed");
         return;
     }
 
@@ -258,11 +258,11 @@ void DFileServerCreateEvent(void)
     transParam->type = DFile_PARAM_TYPE_STRING;
 
     if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "NA") != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed");
+        DFILE_LOGE(TAG, "string copy failed");
         return;
     }
     if (strcpy_s(transParam->value.str, DFile_EVENT_NAME_LEN, valueStr) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed");
+        DFILE_LOGE(TAG, "string copy failed");
         return;
     }
 
@@ -280,11 +280,11 @@ void DFileClientCreateEvent(void)
     transParam->type = DFile_PARAM_TYPE_STRING;
 
     if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "NA") != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed");
+        DFILE_LOGE(TAG, "string copy failed");
         return;
     }
     if (strcpy_s(transParam->value.str, DFile_EVENT_NAME_LEN, valueStr) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed");
+        DFILE_LOGE(TAG, "string copy failed");
         return;
     }
 
@@ -302,11 +302,11 @@ void DFileSendFileBeginEvent(void)
     transParam->type = DFile_PARAM_TYPE_STRING;
 
     if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "NA") != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
     if (strcpy_s(transParam->value.str, DFile_EVENT_NAME_LEN, valueStr) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
 
@@ -324,11 +324,11 @@ void PeerShuttedEvent(void)
     transParam->type = DFile_PARAM_TYPE_STRING;
 
     if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "SocketIndex") != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
     if (strcpy_s(transParam->value.str, DFile_EVENT_NAME_LEN, valueStr) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
 
@@ -346,11 +346,11 @@ void TransferCompleteEvent(const double rate)
     transParam->type = DFile_PARAM_TYPE_STRING;
 
     if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "TRANSRATE") != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
     if (strcpy_s(transParam->value.str, DFile_EVENT_NAME_LEN, valueStr) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
 
@@ -368,11 +368,11 @@ void AcceptSocketEvent(void)
     transParam->type = DFile_PARAM_TYPE_STRING;
 
     if (strcpy_s(transParam->name, DFile_EVENT_NAME_LEN, "NA") != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
     if (strcpy_s(transParam->value.str, DFile_EVENT_NAME_LEN, valueStr) != NSTACKX_EOK) {
-        LOGE(TAG, "string copy failed", 0);
+        DFILE_LOGE(TAG, "string copy failed", 0);
         return;
     }
 

@@ -16,7 +16,7 @@
 #include "nstackx_dfile_retransmission.h"
 
 #include "nstackx_dfile_session.h"
-#include "nstackx_log.h"
+#include "nstackx_dfile_log.h"
 
 #define TAG "nStackXDFile"
 
@@ -43,7 +43,7 @@ static void SendBackPressureFrame(DFileTrans *dFileTrans)
     if (GetFileBlockListSize(&dFileTrans->fileManager->taskList, &recvListAllSize, &recvInnerAllSize) != NSTACKX_EOK) {
         dFileTrans->fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(dFileTrans->fileManager, FILE_MANAGER_INNER_ERROR);
-        LOGE(TAG, "failed to get GetFileBlockListSize");
+        DFILE_LOGE(TAG, "failed to get GetFileBlockListSize");
         return;
     }
     allSize = recvListAllSize + recvInnerAllSize;
@@ -61,10 +61,10 @@ static void SendBackPressureFrame(DFileTrans *dFileTrans)
     EncodeBackPressFrame(buf, NSTACKX_DEFAULT_FRAME_SIZE, &frameLen, dFileTrans->fileManager->recvListOverIo);
     int32_t ret = DFileWriteHandle(buf, frameLen, peerInfo);
     if (ret != (int32_t)frameLen && ret != NSTACKX_EAGAIN) {
-        LOGE(TAG, "send back pressure frame failed");
+        DFILE_LOGE(TAG, "send back pressure frame failed");
     }
     if (dFileTrans->fileManager->recvListOverIo == 1) {
-        LOGI(TAG, "socket %hhu send back pressure fileManager->recvListOverIo %hhu allSize %u iowCount %llu",
+        DFILE_LOGI(TAG, "socket %hhu send back pressure fileManager->recvListOverIo %hhu allSize %u iowCount %llu",
              peerInfo->socketIndex, dFileTrans->fileManager->recvListOverIo, allSize,
              dFileTrans->fileManager->iowCount);
     }
