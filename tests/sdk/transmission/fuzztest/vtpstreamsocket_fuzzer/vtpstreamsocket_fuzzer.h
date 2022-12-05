@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef VTPSTREAMSOCKET_FUZZER_H
+#define VTPSTREAMSOCKET_FUZZER_H
 
 #include <cstdint>
 #include <unistd.h>
@@ -21,3 +23,4 @@
 #include <fcntl.h>
 
 #define FUZZ_PROJECT_NAME "vtpstreamsocket_fuzzer"
+#endif
