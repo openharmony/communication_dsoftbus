@@ -406,7 +406,7 @@ static bool TryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFai
     if (!NeedPendingJoinRequest()) {
         return false;
     }
-    request = SoftBusCalloc(sizeof(PendingJoinRequestNode));
+    request = (PendingJoinRequestNode *)SoftBusCalloc(sizeof(PendingJoinRequestNode));
     if (request == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc pending join request fail, go on it");
         return false;
@@ -422,7 +422,7 @@ static MetaJoinRequestNode *TryJoinRequestMetaNode(const ConnectionAddr *addr, b
 {
     MetaJoinRequestNode *request = NULL;
 
-    request = SoftBusCalloc(sizeof(MetaJoinRequestNode));
+    request = (MetaJoinRequestNode *)SoftBusCalloc(sizeof(MetaJoinRequestNode));
     if (request == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc MetaNode join request fail, go on it");
         return NULL;
@@ -1017,7 +1017,7 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
         }
         // The new connFsm should timeout when following errors occur
         ++count;
-        item->connInfo.cleanInfo = SoftBusMalloc(sizeof(LnnInvalidCleanInfo));
+        item->connInfo.cleanInfo = (LnnInvalidCleanInfo *)SoftBusMalloc(sizeof(LnnInvalidCleanInfo));
         if (item->connInfo.cleanInfo == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]malloc invalid clena info failed", item->id);
             continue;
@@ -1253,17 +1253,17 @@ static int32_t ProcessLeaveSpecific(const void *para)
 
 static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
 {
-    NodeInfo *new = SoftBusMalloc(sizeof(NodeInfo));
-    if (new == NULL) {
+    NodeInfo *node = (NodeInfo *)SoftBusMalloc(sizeof(NodeInfo));
+    if (node == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc NodeInfo fail");
         return NULL;
     }
-    if (memcpy_s(new, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
+    if (memcpy_s(node, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy NodeInfo fail");
-        SoftBusFree(new);
+        SoftBusFree(node);
         return NULL;
     }
-    return new;
+    return node;
 }
 
 static int32_t FillNodeInfo(MetaJoinRequestNode *metaNode, NodeInfo *info)
@@ -1414,7 +1414,7 @@ static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get AuthConnInfo fail, authId: %" PRId64, authId);
         return;
     }
-    para = SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara));
+    para = (DeviceVerifyPassMsgPara *)SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc DeviceVerifyPassMsgPara fail");
         return;
@@ -1473,14 +1473,14 @@ static void OnLnnProcessNotTrustedMsgDelay(void *para)
         SoftBusFree(info);
         return;
     }
-    DiscoveryType type;
+    uint32_t type;
     for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "OnLnnProcessNotTrustedMsgDelay: authSeq %" PRId64 "-> %" PRId64,  info->authSeq[type], authSeq[type]);
     
         if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[offline] LnnRequestLeaveSpecific type:%d", type);
-            LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType(type));
+            LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type));
             continue;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "after 5s authSeq=%" PRId64, authSeq[type]);
@@ -1532,14 +1532,14 @@ static void OnDeviceNotTrusted(const char *peerUdid)
 
 static AuthVerifyListener g_verifyListener = {
     .onDeviceVerifyPass = OnDeviceVerifyPass,
-    .onDeviceDisconnect = OnDeviceDisconnect,
     .onDeviceNotTrusted = OnDeviceNotTrusted,
+    .onDeviceDisconnect = OnDeviceDisconnect,
 };
 
 static void PostVerifyResult(uint32_t requestId, int32_t retCode, int64_t authId, const NodeInfo *info)
 {
     VerifyResultMsgPara *para = NULL;
-    para = SoftBusCalloc(sizeof(VerifyResultMsgPara));
+    para = (VerifyResultMsgPara *)SoftBusCalloc(sizeof(VerifyResultMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc verify result msg para fail");
         return;
@@ -1737,7 +1737,7 @@ static void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId,
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse elect msg json fail");
         return;
     }
-    para = SoftBusMalloc(sizeof(ElectMsgPara));
+    para = (ElectMsgPara *)SoftBusMalloc(sizeof(ElectMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc elect msg para fail");
         cJSON_Delete(json);
@@ -1884,7 +1884,7 @@ int32_t LnnInitNetBuilder(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get default looper fail");
         return SOFTBUS_ERR;
     }
-    g_netBuilder.handler.name = "NetBuilderHandler";
+    g_netBuilder.handler.name = (char *)"NetBuilderHandler";
     g_netBuilder.handler.looper = g_netBuilder.looper;
     g_netBuilder.handler.HandleMessage = NetBuilderMessageHandler;
     g_netBuilder.isInit = true;
@@ -2051,7 +2051,7 @@ int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
         return SOFTBUS_ERR;
     }
-    para = SoftBusMalloc(sizeof(LeaveInvalidConnMsgPara));
+    para = (LeaveInvalidConnMsgPara *)SoftBusMalloc(sizeof(LeaveInvalidConnMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "prepare leave invalid connection message fail");
         return SOFTBUS_MALLOC_ERR;
@@ -2079,7 +2079,7 @@ int32_t LnnRequestCleanConnFsm(uint16_t connFsmId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
         return SOFTBUS_ERR;
     }
-    para = SoftBusMalloc(sizeof(uint16_t));
+    para = (uint16_t *)SoftBusMalloc(sizeof(uint16_t));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc clean connection fsm msg failed");
         return SOFTBUS_MALLOC_ERR;
@@ -2148,7 +2148,7 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid elect msg para");
         return SOFTBUS_INVALID_PARAM;
     }
-    para = SoftBusMalloc(sizeof(ElectMsgPara));
+    para = (ElectMsgPara *)SoftBusMalloc(sizeof(ElectMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc elect msg para failed");
         return SOFTBUS_MEM_ERR;
@@ -2204,7 +2204,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
         return SOFTBUS_ERR;
     }
-    para = SoftBusMalloc(sizeof(bool) * typeLen);
+    para = (bool *)SoftBusMalloc(sizeof(bool) * typeLen);
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc leave by addr type msg para failed");
         return SOFTBUS_MEM_ERR;
