@@ -50,7 +50,7 @@ static uint64_t GenConnId(int32_t connType, int32_t id)
     return connId;
 }
 
-static int32_t GetConnType(uint64_t connId)
+int32_t GetConnType(uint64_t connId)
 {
     return (int32_t)((connId >> INT32_BIT_NUM) & MASK_UINT64_L32);
 }
