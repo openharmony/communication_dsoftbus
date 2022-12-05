@@ -19,6 +19,7 @@
 #include "client_trans_file.h"
 #include "client_trans_file_listener.h"
 #include "client_trans_stream.h"
+#include "nstackx_dfile.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
@@ -438,6 +439,7 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
     RegisterStreamCb(&g_udpChannelCb);
     TransFileInit();
     TransFileSchemaInit();
+    NSTACKX_DFileRegisterLogCallback(NstackxLog);
     RegisterFileCb(&g_udpChannelCb);
     g_udpChannelMgr = CreateSoftBusList();
     if (g_udpChannelMgr == NULL) {
