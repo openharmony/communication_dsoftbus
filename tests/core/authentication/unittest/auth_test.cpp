@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
 #include <gtest/gtest.h>
 #include <securec.h>
 #include <sys/time.h>
-#include <cinttypes>
 
 #include "auth_channel.h"
 #include "auth_common.h"
 #include "auth_connection.h"
 #include "auth_hichain.h"
+#include "auth_interface.c"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "auth_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
 #include "auth_session_message.h"
+#include "auth_tcp_connection.c"
 #include "auth_tcp_connection.h"
 #include "common_list.h"
-#include "softbus_adapter_mem.h"
+#include "lnn_net_builder.h"
 #include "softbus_access_token_test.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_socket.h"
-#include "lnn_net_builder.h"
-#include "auth_tcp_connection.c"
-#include "auth_interface.c"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -46,7 +46,7 @@ constexpr uint32_t TEST_DATA_LEN = 10;
 constexpr uint32_t CRYPT_DATA_LEN = 200;
 constexpr uint32_t ENCRYPT_OVER_HEAD_LEN_TEST = 32;
 constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
-constexpr char P2P_MAC2[BT_MAC_LEN] = {0};
+constexpr char P2P_MAC2[BT_MAC_LEN] = { 0 };
 
 class AuthTest : public testing::Test {
 public:
@@ -61,25 +61,21 @@ void AuthTest::SetUpTestCase()
     SetAceessTokenPermission("AuthTest");
 }
 
-void AuthTest::TearDownTestCase()
-{
-}
+void AuthTest::TearDownTestCase() {}
 
 void AuthTest::SetUp()
 {
     LOG_INFO("AuthTest start.");
 }
 
-void AuthTest::TearDown()
-{
-}
+void AuthTest::TearDown() {}
 
 /*
-* @tc.name: AUTH_COMMON_Test_001
-* @tc.desc: auth commone test
-* @tc.type: FUNC
-* @tc.require: I5OAEP
-*/
+ * @tc.name: AUTH_COMMON_Test_001
+ * @tc.desc: auth commone test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_COMMON_Test_001, TestSize.Level1)
 {
     int32_t ret = AuthCommonInit();
@@ -87,15 +83,15 @@ HWTEST_F(AuthTest, AUTH_COMMON_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: REG_TRUST_DATA_CHANGE_LISTENER_Test_001
-* @tc.desc: trust data change listener test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REG_TRUST_DATA_CHANGE_LISTENER_Test_001
+ * @tc.desc: trust data change listener test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t ret;
-    const TrustDataChangeListener listener = {0};
+    const TrustDataChangeListener listener = { 0 };
 
     ret = RegTrustDataChangeListener(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -103,11 +99,11 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: HICHAIN_START_AUTH_Test_001
-* @tc.desc: hichain start auth test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HICHAIN_START_AUTH_Test_001
+ * @tc.desc: hichain start auth test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -123,15 +119,15 @@ HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: HICHAIN_PROCESS_DATA_Test_001
-* @tc.desc: hichain process data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HICHAIN_PROCESS_DATA_Test_001
+ * @tc.desc: hichain process data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, HICHAIN_PROCESS_DATA_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    const uint8_t data[TEST_DATA_LEN] = {0};
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
     uint32_t len = TEST_DATA_LEN;
     int32_t ret;
 
@@ -142,40 +138,40 @@ HWTEST_F(AuthTest, HICHAIN_PROCESS_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ADD_AUTH_REQUEST_Test_001
-* @tc.desc: add auth request test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ADD_AUTH_REQUEST_Test_001
+ * @tc.desc: add auth request test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, ADD_AUTH_REQUEST_Test_001, TestSize.Level1)
 {
-    const AuthRequest request = {0};
+    const AuthRequest request = { 0 };
 
     int32_t ret = AddAuthRequest(&request);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
-* @tc.name: GET_AUTH_REQUEST_Test_001
-* @tc.desc: get auth request test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_AUTH_REQUEST_Test_001
+ * @tc.desc: get auth request test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, GET_AUTH_REQUEST_Test_001, TestSize.Level1)
 {
     uint32_t requestId = 1;
-    AuthRequest request = {0};
+    AuthRequest request = { 0 };
 
     int32_t ret = GetAuthRequest(requestId, &request);
     EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
 }
 
 /*
-* @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_Test_001
-* @tc.desc: update auth request connInfo test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_Test_001
+ * @tc.desc: update auth request connInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, UPDATE_AUTH_REQUEST_CONN_INFO_Test_001, TestSize.Level1)
 {
     uint32_t requestId = 1;
@@ -187,11 +183,11 @@ HWTEST_F(AuthTest, UPDATE_AUTH_REQUEST_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_DEVID_DATA_Test_001
-* @tc.desc: auth session process devId data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_DEVID_DATA_Test_001
+ * @tc.desc: auth session process devId data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEVID_DATA_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -203,11 +199,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEVID_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_POST_AUTH_DATA_Test_001
-* @tc.desc: auth session post auth data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_POST_AUTH_DATA_Test_001
+ * @tc.desc: auth session post auth data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_POST_AUTH_DATA_Test_001, TestSize.Level1)
 {
     int64_t authSeq = -1;
@@ -219,11 +215,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_POST_AUTH_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_AUTH_DATA_Test_001
-* @tc.desc: auth session process auth data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_AUTH_DATA_Test_001
+ * @tc.desc: auth session process auth data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_AUTH_DATA_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -235,15 +231,15 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_AUTH_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_GET_UDID_Test_001
-* @tc.desc: auth session get udid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_GET_UDID_Test_001
+ * @tc.desc: auth session get udid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_GET_UDID_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     uint32_t size = UDID_BUF_LEN;
     int32_t ret;
 
@@ -255,11 +251,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_GET_UDID_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_SAVE_SESSIONKEY_Test_001
-* @tc.desc: auth session save sessionKey test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_SAVE_SESSIONKEY_Test_001
+ * @tc.desc: auth session save sessionKey test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_SAVE_SESSIONKEY_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -271,11 +267,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_SAVE_SESSIONKEY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_DEVINFO_DATA_Test_001
-* @tc.desc: auth session process devInfo data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_DEVINFO_DATA_Test_001
+ * @tc.desc: auth session process devInfo data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEVINFO_DATA_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -287,11 +283,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEVINFO_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_CLOSE_ACK_Test_001
-* @tc.desc: auth session process close ack test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_CLOSE_ACK_Test_001
+ * @tc.desc: auth session process close ack test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -303,16 +299,16 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001
-* @tc.desc: auth session process close ack by connId test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001
+ * @tc.desc: auth session process close ack by connId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001, TestSize.Level1)
 {
     uint64_t connId = 0;
     bool isServer = true;
-    const uint8_t data[TEST_DATA_LEN] = {0};
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
     uint32_t len = TEST_DATA_LEN;
     uint32_t errlen = 0;
     int32_t ret;
@@ -326,11 +322,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001, TestSize.L
 }
 
 /*
-* @tc.name: AUTH_SESSION_HANDLE_DEVICE_NOT_TRUSTED_Test_001
-* @tc.desc: auth session handle device not trusted test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_HANDLE_DEVICE_NOT_TRUSTED_Test_001
+ * @tc.desc: auth session handle device not trusted test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_HANDLE_DEVICE_NOT_TRUSTED_Test_001, TestSize.Level1)
 {
     const char *udid = "testdata";
@@ -338,22 +334,22 @@ HWTEST_F(AuthTest, AUTH_SESSION_HANDLE_DEVICE_NOT_TRUSTED_Test_001, TestSize.Lev
 
     ret = AuthSessionHandleDeviceNotTrusted(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret =  AuthSessionHandleDeviceNotTrusted(udid);
+    ret = AuthSessionHandleDeviceNotTrusted(udid);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
-* @tc.name: ENCRYPT_INNER_Test_001
-* @tc.desc: encrypt inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ENCRYPT_INNER_Test_001
+ * @tc.desc: encrypt inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, ENCRYPT_INNER_Test_001, TestSize.Level1)
 {
-    SessionKeyList list = {0};
-    SessionKey sessionKey = {{0}, TEST_DATA_LEN};
+    SessionKeyList list = { 0 };
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
     int64_t authSeq = 0;
-    const uint8_t inData[CRYPT_DATA_LEN] = {0};
+    const uint8_t inData[CRYPT_DATA_LEN] = { 0 };
     uint32_t inLen = CRYPT_DATA_LEN;
     uint8_t *outData = nullptr;
     uint32_t outLen = 0;
@@ -385,17 +381,17 @@ HWTEST_F(AuthTest, ENCRYPT_INNER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DENCRYPT_INNER_Test_001
-* @tc.desc: dencrypt inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DENCRYPT_INNER_Test_001
+ * @tc.desc: dencrypt inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, DENCRYPT_INNER_Test_001, TestSize.Level1)
 {
-    SessionKeyList list = {0};
-    SessionKey sessionKey = {{0}, TEST_DATA_LEN};
+    SessionKeyList list = { 0 };
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
     int64_t authSeq = 0;
-    const uint8_t inData[CRYPT_DATA_LEN] = {0};
+    const uint8_t inData[CRYPT_DATA_LEN] = { 0 };
     uint32_t inLen = CRYPT_DATA_LEN;
     uint8_t *outData = nullptr;
     uint32_t outLen = 0;
@@ -427,16 +423,16 @@ HWTEST_F(AuthTest, DENCRYPT_INNER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_DEVICEID_MESSAGE_Test_001
-* @tc.desc: post deviceId message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_DEVICEID_MESSAGE_Test_001
+ * @tc.desc: post deviceId message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_DEVICEID_MESSAGE_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     int64_t errAuthSeq = -1;
-    const AuthSessionInfo info = {0};
+    const AuthSessionInfo info = { 0 };
     int32_t ret;
 
     ret = PostDeviceIdMessage(errAuthSeq, &info);
@@ -446,16 +442,16 @@ HWTEST_F(AuthTest, POST_DEVICEID_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_DEVICE_INFO_MESSAGE_Test_001
-* @tc.desc: post device info message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_DEVICE_INFO_MESSAGE_Test_001
+ * @tc.desc: post device info message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     int64_t errAuthSeq = -1;
-    const AuthSessionInfo info = {0};
+    const AuthSessionInfo info = { 0 };
     int32_t ret;
 
     ret = PostDeviceInfoMessage(errAuthSeq, &info);
@@ -465,16 +461,16 @@ HWTEST_F(AuthTest, POST_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: PROCESS_DEVICE_INFO_MESSAGE_Test_001
-* @tc.desc: process device info message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: PROCESS_DEVICE_INFO_MESSAGE_Test_001
+ * @tc.desc: process device info message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, PROCESS_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    AuthSessionInfo info = {0};
-    const uint8_t data[TEST_DATA_LEN] = {0};
+    AuthSessionInfo info = { 0 };
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
     uint32_t len = TEST_DATA_LEN;
 
     int32_t ret = ProcessDeviceInfoMessage(authSeq, &info, data, len);
@@ -482,16 +478,16 @@ HWTEST_F(AuthTest, PROCESS_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_CLOSE_ACK_MESSAGE_Test_001
-* @tc.desc: post close ack message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_CLOSE_ACK_MESSAGE_Test_001
+ * @tc.desc: post close ack message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_CLOSE_ACK_MESSAGE_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     int64_t errAuthSeq = -1;
-    const AuthSessionInfo info = {0};
+    const AuthSessionInfo info = { 0 };
     int32_t ret;
 
     ret = PostDeviceInfoMessage(errAuthSeq, &info);
@@ -501,16 +497,16 @@ HWTEST_F(AuthTest, POST_CLOSE_ACK_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_HICHAIN_AUTH_MESSAGE_Test_001
-* @tc.desc: post hichain auth message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_HICHAIN_AUTH_MESSAGE_Test_001
+ * @tc.desc: post hichain auth message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_HICHAIN_AUTH_MESSAGE_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    const AuthSessionInfo info = {0};
-    const uint8_t data[TEST_DATA_LEN] = {0};
+    const AuthSessionInfo info = { 0 };
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
     uint32_t len = TEST_DATA_LEN;
 
     int32_t ret = PostHichainAuthMessage(authSeq, &info, data, len);
@@ -518,14 +514,14 @@ HWTEST_F(AuthTest, POST_HICHAIN_AUTH_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_VERIFY_DEVICE_MESSAGE_001
-* @tc.desc: post verify device message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_VERIFY_DEVICE_MESSAGE_001
+ * @tc.desc: post verify device message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_001, TestSize.Level1)
 {
-    AuthManager auth = {0};
+    AuthManager auth = { 0 };
 
     InitSessionKeyList(&auth.sessionKeyList);
     int32_t ret = PostVerifyDeviceMessage(&auth);
@@ -533,11 +529,11 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: START_SOCKET_LISTENING_Test_001
-* @tc.desc: start socket listening test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: START_SOCKET_LISTENING_Test_001
+ * @tc.desc: start socket listening test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, START_SOCKET_LISTENING_Test_001, TestSize.Level1)
 {
     const char *ip = "192.168.12.1";
@@ -548,11 +544,11 @@ HWTEST_F(AuthTest, START_SOCKET_LISTENING_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SOCKET_CONNECT_DEVICE_Test_001
-* @tc.desc: socket connect device test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SOCKET_CONNECT_DEVICE_Test_001
+ * @tc.desc: socket connect device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, SOCKET_CONNECT_DEVICE_Test_001, TestSize.Level1)
 {
     const char *ip = "192.168.12.1";
@@ -564,27 +560,27 @@ HWTEST_F(AuthTest, SOCKET_CONNECT_DEVICE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SOCKER_POST_BYTES_Test_001
-* @tc.desc: socket post bytes test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SOCKER_POST_BYTES_Test_001
+ * @tc.desc: socket post bytes test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, SOCKER_POST_BYTES_Test_001, TestSize.Level1)
 {
     int32_t fd = 1;
-    const AuthDataHead head = {0};
-    const uint8_t data[TEST_DATA_LEN] = {0};
+    const AuthDataHead head = { 0 };
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
 
     int32_t ret = SocketPostBytes(fd, &head, data);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
-* @tc.name: SOCKER_GET_CONN_INFO_Test_001
-* @tc.desc: socket get conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SOCKER_GET_CONN_INFO_Test_001
+ * @tc.desc: socket get conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, SOCKER_GET_CONN_INFO_Test_001, TestSize.Level1)
 {
     int32_t fd = 1;
@@ -597,15 +593,15 @@ HWTEST_F(AuthTest, SOCKER_GET_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: REGAUTH_CHANNEL_LISTENER_Test_001
-* @tc.desc: regauth channel listener test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REGAUTH_CHANNEL_LISTENER_Test_001
+ * @tc.desc: regauth channel listener test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, REGAUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t module = 0;
-    AuthChannelListener listener = {0};
+    AuthChannelListener listener = { 0 };
     int32_t ret;
 
     ret = RegAuthChannelListener(module, nullptr);
@@ -616,11 +612,11 @@ HWTEST_F(AuthTest, REGAUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_OPRN_CHANNEL_Test_001
-* @tc.desc: auth open channel test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_OPRN_CHANNEL_Test_001
+ * @tc.desc: auth open channel test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_OPRN_CHANNEL_Test_001, TestSize.Level1)
 {
     const char *ip = "192.168.12.1";
@@ -635,15 +631,15 @@ HWTEST_F(AuthTest, AUTH_OPRN_CHANNEL_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_POST_CHANNEL_DATA_Test_001
-* @tc.desc: auth post channel data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_POST_CHANNEL_DATA_Test_001
+ * @tc.desc: auth post channel data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_POST_CHANNEL_DATA_Test_001, TestSize.Level1)
 {
     int32_t channelId = -1;
-    const uint8_t testData[TEST_DATA_LEN] = {0};
+    const uint8_t testData[TEST_DATA_LEN] = { 0 };
     AuthChannelData data = {
         .module = 0,
         .flag = 0,
@@ -668,43 +664,43 @@ HWTEST_F(AuthTest, AUTH_POST_CHANNEL_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_MANAGER_SET_SESSION_KEY_Test_001
-* @tc.desc: auth manager set session key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_MANAGER_SET_SESSION_KEY_Test_001
+ * @tc.desc: auth manager set session key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_MANAGER_SET_SESSION_KEY_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    const AuthSessionInfo info = {0};
-    const SessionKey sessionKey = {{0}, TEST_DATA_LEN};
+    const AuthSessionInfo info = { 0 };
+    const SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
 
     int32_t ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
-* @tc.name: AUTH_MANAGER_GET_SESSION_KEY_Test_001
-* @tc.desc: auth manager get session key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_MANAGER_GET_SESSION_KEY_Test_001
+ * @tc.desc: auth manager get session key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_MANAGER_GET_SESSION_KEY_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    const AuthSessionInfo info = {0};
-    SessionKey sessionKey = {{0}, TEST_DATA_LEN};
+    const AuthSessionInfo info = { 0 };
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
 
     int32_t ret = AuthManagerGetSessionKey(authSeq, &info, &sessionKey);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
-* @tc.name: REGAUTH_VERIFY_LISTENER_Test_001
-* @tc.desc: regAuth verify listener test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REGAUTH_VERIFY_LISTENER_Test_001
+ * @tc.desc: regAuth verify listener test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, REGAUTH_VERIFY_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t ret = RegAuthVerifyListener(nullptr);
@@ -712,16 +708,16 @@ HWTEST_F(AuthTest, REGAUTH_VERIFY_LISTENER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_START_VERIFY_Test_001
-* @tc.desc: auth start verify test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_START_VERIFY_Test_001
+ * @tc.desc: auth start verify test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
     uint32_t requestId = 0;
-    const AuthVerifyCallback callback = {0};
+    const AuthVerifyCallback callback = { 0 };
     int32_t ret;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -732,11 +728,11 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_FLUSH_DEVICE_Test_001
-* @tc.desc: auth flush device test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_FLUSH_DEVICE_Test_001
+ * @tc.desc: auth flush device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_FLUSH_DEVICE_Test_001, TestSize.Level1)
 {
     char uuid[TEST_DATA_LEN] = "testdata";
@@ -753,11 +749,11 @@ HWTEST_F(AuthTest, AUTH_FLUSH_DEVICE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001
-* @tc.desc: auth device get prefer conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001
+ * @tc.desc: auth device get prefer conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001, TestSize.Level1)
 {
     char uuid[TEST_DATA_LEN] = "testdata";
@@ -778,15 +774,15 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_DEVICE_POST_TRANS_DATA_Test_001
-* @tc.desc: auth device post trans data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_DEVICE_POST_TRANS_DATA_Test_001
+ * @tc.desc: auth device post trans data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_DEVICE_POST_TRANS_DATA_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
-    const AuthTransData dataInfo = {0};
+    const AuthTransData dataInfo = { 0 };
     int32_t ret;
 
     ret = AuthDevicePostTransData(authId, nullptr);
@@ -796,11 +792,11 @@ HWTEST_F(AuthTest, AUTH_DEVICE_POST_TRANS_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001
-* @tc.desc: auth device get latest id by uuid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001
+ * @tc.desc: auth device get latest id by uuid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001, TestSize.Level1)
 {
     char uuid[TEST_DATA_LEN] = "testdata";
@@ -819,11 +815,11 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_DEVICE_GET_ID_BY_CONN_INFO_Test_001
-* @tc.desc: auth device get id by conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_DEVICE_GET_ID_BY_CONN_INFO_Test_001
+ * @tc.desc: auth device get id by conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
@@ -837,11 +833,11 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001
-* @tc.desc: auth device get id by p2p mac test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001
+ * @tc.desc: auth device get id by p2p mac test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
 {
     AuthLinkType type = AUTH_LINK_TYPE_WIFI;
@@ -867,11 +863,11 @@ static void AuthOnDisconnected(int64_t authId)
 }
 
 /*
-* @tc.name: REGAUTH_TRANS_LISTENER_Test_001
-* @tc.desc: regAuth trans listener test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REGAUTH_TRANS_LISTENER_Test_001
+ * @tc.desc: regAuth trans listener test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, REGAUTH_TRANS_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t module = 0;
@@ -889,11 +885,11 @@ HWTEST_F(AuthTest, REGAUTH_TRANS_LISTENER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_PREFER_CONNINFO_Test_001
-* @tc.desc: auth get prefer connInfo test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_PREFER_CONNINFO_Test_001
+ * @tc.desc: auth get prefer connInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_PREFER_CONNINFO_Test_001, TestSize.Level1)
 {
     char uuid[TEST_DATA_LEN] = "testdata";
@@ -922,16 +918,16 @@ HWTEST_F(AuthTest, AUTH_GET_PREFER_CONNINFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_OPEN_CONN_Test_001
-* @tc.desc: auth open conn test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_OPEN_CONN_Test_001
+ * @tc.desc: auth open conn test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_OPEN_CONN_Test_001, TestSize.Level1)
 {
     AuthConnInfo info;
     uint32_t requestId = 0;
-    const AuthConnCallback callback = {0};
+    const AuthConnCallback callback = { 0 };
     int32_t ret;
 
     (void)memset_s(&info, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -949,15 +945,15 @@ HWTEST_F(AuthTest, AUTH_OPEN_CONN_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_POST_TRANS_DATA_Test_001
-* @tc.desc: auth post trans data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_POST_TRANS_DATA_Test_001
+ * @tc.desc: auth post trans data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_POST_TRANS_DATA_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
-    const AuthTransData dataInfo = {0};
+    const AuthTransData dataInfo = { 0 };
     int32_t ret;
 
     ret = AuthPostTransData(authId, nullptr);
@@ -968,28 +964,28 @@ HWTEST_F(AuthTest, AUTH_POST_TRANS_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: REG_GROUP_CHANGE_LISTENER_Test_001
-* @tc.desc: Reg Group Change Listener test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REG_GROUP_CHANGE_LISTENER_Test_001
+ * @tc.desc: Reg Group Change Listener test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, REG_GROUP_CHANGE_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t ret = RegGroupChangeListener(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    const GroupChangeListener listener = {0};
+    const GroupChangeListener listener = { 0 };
     ret = RegGroupChangeListener(&listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     UnregGroupChangeListener();
 }
 
 /*
-* @tc.name: AUTH_GET_LATESTID_BY_UUID_Test_001
-* @tc.desc: auth get latestId by uuid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_LATESTID_BY_UUID_Test_001
+ * @tc.desc: auth get latestId by uuid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_LATESTID_BY_UUID_Test_001, TestSize.Level1)
 {
     char uuid[TEST_DATA_LEN] = "testdata";
@@ -1005,11 +1001,11 @@ HWTEST_F(AuthTest, AUTH_GET_LATESTID_BY_UUID_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_ID_BY_CONN_INFO_Test_001
-* @tc.desc: auth get id by conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_ID_BY_CONN_INFO_Test_001
+ * @tc.desc: auth get id by conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
 {
     int64_t ret;
@@ -1021,11 +1017,11 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_ID_BY_P2P_MAC_Test_001
-* @tc.desc: auth get id by p2p mac test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_ID_BY_P2P_MAC_Test_001
+ * @tc.desc: auth get id by p2p mac test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
 {
     AuthLinkType type;
@@ -1047,17 +1043,17 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ENCRYPT_Test_001
-* @tc.desc: auth encrypt test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ENCRYPT_Test_001
+ * @tc.desc: auth encrypt test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_ENCRYPT_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
-    const uint8_t inData[CRYPT_DATA_LEN] = {0};
+    const uint8_t inData[CRYPT_DATA_LEN] = { 0 };
     uint32_t inLen = CRYPT_DATA_LEN;
-    uint8_t outData[CRYPT_DATA_LEN] = {0};
+    uint8_t outData[CRYPT_DATA_LEN] = { 0 };
     uint32_t outLen = CRYPT_DATA_LEN;
     uint32_t errLen = 0;
     int32_t ret;
@@ -1075,17 +1071,17 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_DECRYPT_Test_001
-* @tc.desc: auth eecrypt test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_DECRYPT_Test_001
+ * @tc.desc: auth eecrypt test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_DECRYPT_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
-    const uint8_t inData[CRYPT_DATA_LEN] = {0};
+    const uint8_t inData[CRYPT_DATA_LEN] = { 0 };
     uint32_t inLen = CRYPT_DATA_LEN;
-    uint8_t outData[CRYPT_DATA_LEN] = {0};
+    uint8_t outData[CRYPT_DATA_LEN] = { 0 };
     uint32_t outLen = CRYPT_DATA_LEN;
     uint32_t errLen = 0;
     int32_t ret;
@@ -1105,11 +1101,11 @@ HWTEST_F(AuthTest, AUTH_DECRYPT_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SET_P2P_MAC_Test_001
-* @tc.desc: auth set p2p mac test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SET_P2P_MAC_Test_001
+ * @tc.desc: auth set p2p mac test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SET_P2P_MAC_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
@@ -1124,11 +1120,11 @@ HWTEST_F(AuthTest, AUTH_SET_P2P_MAC_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_CONN_INFO_Test_001
-* @tc.desc: auth get conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_CONN_INFO_Test_001
+ * @tc.desc: auth get conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_CONN_INFO_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
@@ -1139,11 +1135,11 @@ HWTEST_F(AuthTest, AUTH_GET_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_SERVER_SIDE_Test_001
-* @tc.desc: auth get server side test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_SERVER_SIDE_Test_001
+ * @tc.desc: auth get server side test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_SERVER_SIDE_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
@@ -1154,11 +1150,11 @@ HWTEST_F(AuthTest, AUTH_GET_SERVER_SIDE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_META_TYPE_Test_001
-* @tc.desc: auth get meta type test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_META_TYPE_Test_001
+ * @tc.desc: auth get meta type test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_META_TYPE_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
@@ -1172,11 +1168,11 @@ HWTEST_F(AuthTest, AUTH_GET_META_TYPE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_DEVICE_UUID_Test_001
-* @tc.desc: auth get device uuid test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_DEVICE_UUID_Test_001
+ * @tc.desc: auth get device uuid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_DEVICE_UUID_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
@@ -1191,11 +1187,11 @@ HWTEST_F(AuthTest, AUTH_GET_DEVICE_UUID_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_VERSION_Test_001
-* @tc.desc: auth get version test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_VERSION_Test_001
+ * @tc.desc: auth get version test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_VERSION_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
@@ -1210,11 +1206,11 @@ HWTEST_F(AuthTest, AUTH_GET_VERSION_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_INIT_Test_001
-* @tc.desc: auth init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_INIT_Test_001
+ * @tc.desc: auth init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_INIT_Test_001, TestSize.Level1)
 {
     int32_t ret;
@@ -1238,11 +1234,11 @@ static void AuthOnDisconnectedTest(int64_t authId)
 }
 
 /*
-* @tc.name: AUTH_INIT_Test_001
-* @tc.desc: auth init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_INIT_Test_001
+ * @tc.desc: auth init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
 {
     int32_t ret;
@@ -1257,14 +1253,14 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_AUTH_EVENT_INIT_Test_001
-* @tc.desc: post suth event test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_AUTH_EVENT_INIT_Test_001
+ * @tc.desc: post suth event test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_AUTH_EVENT_INIT_Test_001, TestSize.Level1)
 {
-    EventHandler handler = {0};
+    EventHandler handler = { 0 };
     const void *obj = "testdata";
     uint32_t size = TEST_DATA_LEN;
     uint64_t delayMs = 0;
@@ -1275,11 +1271,11 @@ HWTEST_F(AuthTest, POST_AUTH_EVENT_INIT_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: COMPARE_CONN_INFO_Test_001
-* @tc.desc: compare conn info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: COMPARE_CONN_INFO_Test_001
+ * @tc.desc: compare conn info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, COMPARE_CONN_INFO_Test_001, TestSize.Level1)
 {
     AuthConnInfo info1;
@@ -1307,11 +1303,11 @@ HWTEST_F(AuthTest, COMPARE_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CONVERT_TO_CONNECT_OPTION_Test_001
-* @tc.desc: convert to connect option test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONVERT_TO_CONNECT_OPTION_Test_001
+ * @tc.desc: convert to connect option test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, CONVERT_TO_CONNECT_OPTION_Test_001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
@@ -1332,11 +1328,11 @@ HWTEST_F(AuthTest, CONVERT_TO_CONNECT_OPTION_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CONVERT_TO_AUTH_CONNINFO_Test_001
-* @tc.desc: convert to auth connInfo test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONVERT_TO_AUTH_CONNINFO_Test_001
+ * @tc.desc: convert to auth connInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, CONVERT_TO_AUTH_CONNINFO_Test_001, TestSize.Level1)
 {
     ConnectionInfo info;
@@ -1358,11 +1354,11 @@ HWTEST_F(AuthTest, CONVERT_TO_AUTH_CONNINFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_CONN_INIT_Test_001
-* @tc.desc: auth conn init test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_CONN_INIT_Test_001
+ * @tc.desc: auth conn init test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_CONN_INIT_Test_001, TestSize.Level1)
 {
     AuthConnListener listener;
@@ -1374,11 +1370,11 @@ HWTEST_F(AuthTest, AUTH_CONN_INIT_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CONNECT_AUTH_DEVICE_Test_001
-* @tc.desc: connect auth device test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CONNECT_AUTH_DEVICE_Test_001
+ * @tc.desc: connect auth device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, CONNECT_AUTH_DEVICE_Test_001, TestSize.Level1)
 {
     uint32_t requestId = 123;
@@ -1396,11 +1392,11 @@ HWTEST_F(AuthTest, CONNECT_AUTH_DEVICE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_START_LISTENING_Test_001
-* @tc.desc: auth start listening test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_START_LISTENING_Test_001
+ * @tc.desc: auth start listening test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_START_LISTENING_Test_001, TestSize.Level1)
 {
     const char *ip = "192.168.12.1";
@@ -1416,11 +1412,11 @@ HWTEST_F(AuthTest, AUTH_START_LISTENING_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001
-* @tc.desc: Find Auth Request By Conn Info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001
+ * @tc.desc: Find Auth Request By Conn Info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001, TestSize.Level1)
 {
     AuthConnInfo *authConnInfo = nullptr;
@@ -1436,11 +1432,11 @@ HWTEST_F(AuthTest, FIND_AUTH_REQUEST_BY_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: CHECK_VERIFY_CALLBACK_Test_001
-* @tc.desc: Check Verify Callback test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CHECK_VERIFY_CALLBACK_Test_001
+ * @tc.desc: Check Verify Callback test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, CHECK_VERIFY_CALLBACK_Test_001, TestSize.Level1)
 {
     bool ret = CheckVerifyCallback(LnnGetVerifyCallback());
@@ -1457,21 +1453,19 @@ HWTEST_F(AuthTest, CHECK_VERIFY_CALLBACK_Test_001, TestSize.Level1)
 
 static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".",
-        requestId, authId);
+    ALOGI("OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".", requestId, authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnConnOpenFailedTest: requestId = %d, reason = %d.",
-        requestId, reason);
+    ALOGI("OnConnOpenFailedTest: requestId = %d, reason = %d.", requestId, reason);
 }
 /*
-* @tc.name: CHECK_AUTH_CONN_CALLBACK_Test_001
-* @tc.desc: Check Auth Conn Callback test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CHECK_AUTH_CONN_CALLBACK_Test_001
+ * @tc.desc: Check Auth Conn Callback test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, CHECK_AUTH_CONN_CALLBACK_Test_001, TestSize.Level1)
 {
     AuthConnCallback cb = {
@@ -1491,11 +1485,11 @@ HWTEST_F(AuthTest, CHECK_AUTH_CONN_CALLBACK_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_START_AUTH_Test_001
-* @tc.desc: Auth Session Start Auth test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_START_AUTH_Test_001
+ * @tc.desc: Auth Session Start Auth test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
 {
     uint32_t requestId = 0;
@@ -1506,13 +1500,12 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_DEV_ID_DATA_Test_001
-* @tc.desc: Auth Session Process Dev Id Data test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_ID_DATA_Test_001,
-    TestSize.Level1)
+ * @tc.name: AUTH_SESSION_PROCESS_DEV_ID_DATA_Test_001
+ * @tc.desc: Auth Session Process Dev Id Data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_ID_DATA_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     uint8_t *data = nullptr;
@@ -1522,11 +1515,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_ID_DATA_Test_001,
 }
 
 /*
-* @tc.name: AUTH_SESSION_SAVE_SESSION_KEY_Test_001
-* @tc.desc: Auth Session Save Session Key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_SAVE_SESSION_KEY_Test_001
+ * @tc.desc: Auth Session Save Session Key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_SAVE_SESSION_KEY_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -1537,11 +1530,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_SAVE_SESSION_KEY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_DEV_INFO_DATA_Test_001
-* @tc.desc: Auth Session Process Dev Info Data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_DEV_INFO_DATA_Test_001
+ * @tc.desc: Auth Session Process Dev Info Data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_INFO_DATA_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
@@ -1552,11 +1545,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_INFO_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_DEV_INFO_DATA_BY_CONN_ID_Test_001
-* @tc.desc: Auth Session Process Dev Info Data By Conn Id test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_DEV_INFO_DATA_BY_CONN_ID_Test_001
+ * @tc.desc: Auth Session Process Dev Info Data By Conn Id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_INFO_DATA_BY_CONN_ID_Test_001, TestSize.Level1)
 {
     int64_t connId = 0;
@@ -1568,11 +1561,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_DEV_INFO_DATA_BY_CONN_ID_Test_001, TestS
 }
 
 /*
-* @tc.name: AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONN_ID_Test_001
-* @tc.desc: Auth Session Process Close Ack By Conn Id test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONN_ID_Test_001
+ * @tc.desc: Auth Session Process Close Ack By Conn Id test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONN_ID_Test_001, TestSize.Level1)
 {
     int64_t connId = 0;
@@ -1584,11 +1577,11 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONN_ID_Test_001, TestSize.
 }
 
 /*
-* @tc.name: DUP_SESSION_KEY_LIST_Test_001
-* @tc.desc: Dup Session Key List test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DUP_SESSION_KEY_LIST_Test_001
+ * @tc.desc: Dup Session Key List test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, DUP_SESSION_KEY_LIST_Test_001, TestSize.Level1)
 {
     SessionKeyList *srcList = nullptr;
@@ -1598,11 +1591,11 @@ HWTEST_F(AuthTest, DUP_SESSION_KEY_LIST_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: HAS_SESSION_KEY_Test_001
-* @tc.desc: Has Session Key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: HAS_SESSION_KEY_Test_001
+ * @tc.desc: Has Session Key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, HAS_SESSION_KEY_Test_001, TestSize.Level1)
 {
     SessionKeyList *list = nullptr;
@@ -1611,11 +1604,11 @@ HWTEST_F(AuthTest, HAS_SESSION_KEY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ADD_SESSION_KEY_Test_001
-* @tc.desc: Add Session Key test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ADD_SESSION_KEY_Test_001
+ * @tc.desc: Add Session Key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, ADD_SESSION_KEY_Test_001, TestSize.Level1)
 {
     SessionKeyList *list = nullptr;
@@ -1633,11 +1626,11 @@ HWTEST_F(AuthTest, ADD_SESSION_KEY_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ENCRYPT_DATA_Test_001
-* @tc.desc: Encrypt Data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ENCRYPT_DATA_Test_001
+ * @tc.desc: Encrypt Data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, ENCRYPT_DATA_Test_001, TestSize.Level1)
 {
     SessionKeyList *list = nullptr;
@@ -1652,11 +1645,11 @@ HWTEST_F(AuthTest, ENCRYPT_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DECRYPT_DATA_Test_001
-* @tc.desc: Decrypt Data test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DECRYPT_DATA_Test_001
+ * @tc.desc: Decrypt Data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, DECRYPT_DATA_Test_001, TestSize.Level1)
 {
     SessionKeyList *list = nullptr;
@@ -1669,11 +1662,11 @@ HWTEST_F(AuthTest, DECRYPT_DATA_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: UNPACK_DEVICE_INFO_MESSAGE_Test_001
-* @tc.desc: Unpack Device Info Message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: UNPACK_DEVICE_INFO_MESSAGE_Test_001
+ * @tc.desc: Unpack Device Info Message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
 {
     const char *msg = "";
@@ -1687,11 +1680,11 @@ HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_DEVICE_ID_MESSAGE_Test_001
-* @tc.desc: Post Device Id Message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_DEVICE_ID_MESSAGE_Test_001
+ * @tc.desc: Post Device Id Message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
 {
     AuthSessionInfo *info = nullptr;
@@ -1704,11 +1697,11 @@ HWTEST_F(AuthTest, POST_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: PROCESS_DEVICE_ID_MESSAGE_Test_001
-* @tc.desc: Process Device Id Message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: PROCESS_DEVICE_ID_MESSAGE_Test_001
+ * @tc.desc: Process Device Id Message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
 {
     AuthSessionInfo *info = nullptr;
@@ -1722,11 +1715,11 @@ HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: POST_VERIFY_DEVICE_MESSAGE_Test_001
-* @tc.desc: Post Verify Device Message test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: POST_VERIFY_DEVICE_MESSAGE_Test_001
+ * @tc.desc: Post Verify Device Message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_Test_001, TestSize.Level1)
 {
     const AuthManager *auth = nullptr;
@@ -1737,11 +1730,11 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SET_SOCKET_CALLBACK_Test_001
-* @tc.desc: Set Socket Callback test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SET_SOCKET_CALLBACK_Test_001
+ * @tc.desc: Set Socket Callback test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, SET_SOCKET_CALLBACK_Test_001, TestSize.Level1)
 {
     const SocketCallback *cb = nullptr;
@@ -1750,11 +1743,11 @@ HWTEST_F(AuthTest, SET_SOCKET_CALLBACK_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SOCKET_POST_BYTES_Test_001
-* @tc.desc: Socket Post Bytes test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SOCKET_POST_BYTES_Test_001
+ * @tc.desc: Socket Post Bytes test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
@@ -1770,11 +1763,11 @@ HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SOCKET_GET_CONN_INFO_Test_001
-* @tc.desc: Socket Get Conn Info test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SOCKET_GET_CONN_INFO_Test_001
+ * @tc.desc: Socket Get Conn Info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
@@ -1789,11 +1782,11 @@ HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: REG_AUTH_CHANNEL_LISTENER_Test_001
-* @tc.desc: Reg Auth Channel Listener test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REG_AUTH_CHANNEL_LISTENER_Test_001
+ * @tc.desc: Reg Auth Channel Listener test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, REG_AUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t module = MODULE_AUTH_CHANNEL;
@@ -1803,11 +1796,11 @@ HWTEST_F(AuthTest, REG_AUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_OPEN_CHANNEL_Test_001
-* @tc.desc: Auth Open Channel test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_OPEN_CHANNEL_Test_001
+ * @tc.desc: Auth Open Channel test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_OPEN_CHANNEL_Test_001, TestSize.Level1)
 {
     char *ip = nullptr;
@@ -1820,11 +1813,11 @@ HWTEST_F(AuthTest, AUTH_OPEN_CHANNEL_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_GET_DECRYPT_SIZE_Test_001
-* @tc.desc: Auth Get Decrypt Size test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_GET_DECRYPT_SIZE_Test_001
+ * @tc.desc: Auth Get Decrypt Size test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_GET_DECRYPT_SIZE_Test_001, TestSize.Level1)
 {
     uint32_t inLen = OVERHEAD_LEN;
@@ -1836,11 +1829,11 @@ HWTEST_F(AuthTest, AUTH_GET_DECRYPT_SIZE_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: NOTIFY_TRANS_DATA_RECEIVED_Test_001
-* @tc.desc: Notify Trans Data Received test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: NOTIFY_TRANS_DATA_RECEIVED_Test_001
+ * @tc.desc: Notify Trans Data Received test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
 {
     AuthTransListener listener = {
@@ -1866,11 +1859,11 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: AUTH_ON_CONNECT_EVENT_Test_001
-* @tc.desc: Auth On Connect Event test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: AUTH_ON_CONNECT_EVENT_Test_001
+ * @tc.desc: Auth On Connect Event test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthTest, AUTH_ON_CONNECT_EVENT_Test_001, TestSize.Level1)
 {
     ListenerModule module = AUTH;
