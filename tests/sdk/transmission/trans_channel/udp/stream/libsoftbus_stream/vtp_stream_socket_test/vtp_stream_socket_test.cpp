@@ -614,7 +614,6 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
     vtpStreamSocket->RemoveStreamSocketListener(fd);
 
     auto self = vtpStreamSocket->GetSelf();
-
     EXPECT_TRUE(self != nullptr);
 }
 

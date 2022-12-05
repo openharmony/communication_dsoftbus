@@ -54,7 +54,6 @@ ohos_unittest("StreamCommonDataTest") {
   }
 }
 
-
 group("unittest") {
   testonly = true
   deps = []
