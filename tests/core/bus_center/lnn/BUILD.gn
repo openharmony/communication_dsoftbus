@@ -157,7 +157,6 @@ ohos_unittest("LNNNetBuilderTest") {
 ohos_unittest("LNNNetBuilderMockTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
     "net_builder/src/lnn_net_builder_deps_mock.cpp",
     "net_builder/src/lnn_net_builder_mock_test.cpp",
   ]
