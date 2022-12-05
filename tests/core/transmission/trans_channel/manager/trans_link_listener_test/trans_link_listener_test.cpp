@@ -65,6 +65,11 @@ HWTEST_F(TransLinkListenerTest, OnP2pRoleChange001, TestSize.Level1)
 {
     int32_t ret = TransChannelInit();
     EXPECT_NE(SOFTBUS_OK, ret);
+
+    OnP2pRoleChange(ROLE_NONE);
+
+    OnP2pRoleChange(ROLE_BRIDGE_GC);
+
     TransChannelDeinit();
 }
 

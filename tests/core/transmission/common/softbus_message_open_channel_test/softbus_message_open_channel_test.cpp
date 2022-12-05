@@ -26,12 +26,6 @@
 
 using namespace testing::ext;
 namespace OHOS {
-#define TEST_SESSION_NAME "com.softbus.transmission.test"
-#define TEST_CONN_IP "192.168.8.1"
-#define TEST_AUTH_PORT 6000
-#define TEST_AUTH_DATA "test auth message data"
-#define TEST_MESSAGE "testMessage"
-#define DEVICE_ID "DEVICE_ID"
 #define SESSION_NAME_MAX_LEN 256
 #define PKG_NAME_SIZE_MAX_LEN 65
 
@@ -68,10 +62,7 @@ char *TestGetMsgPack()
         return NULL;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == nullptr) {
-        cJSON_Delete(msg);
-        return NULL;
-    }
+
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = 1;
@@ -107,6 +98,10 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackError001, TestSize.Level1)
     errCode = CODE_OPEN_CHANNEL;
     msg = PackError(errCode, NULL);
     EXPECT_EQ(NULL, msg);
+
+    const char *errDesc = "test";
+    msg = PackError(errCode, errDesc);
+    EXPECT_TRUE(msg != NULL);
 }
 
 /**
