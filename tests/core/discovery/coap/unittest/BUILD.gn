@@ -29,11 +29,61 @@ ohos_unittest("DiscoveryCoapDiscNstackxAdapterTest") {
     "//foundation/communication/dsoftbus/core/discovery/interface",
     "//foundation/communication/dsoftbus/core/discovery/coap/include",
     "//foundation/communication/dsoftbus/core/discovery/coap/src",
+    "//foundation/communication/dsoftbus/interfaces/kits/common",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_util/interface",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_ctrl/include",
     "//foundation/communication/dsoftbus/core/bus_center/interface",
     "//foundation/communication/dsoftbus/core/bus_center/lnn/lane_hub/lane_manager/include",
     "//foundation/communication/dsoftbus/adapter/common/include",
     "//foundation/communication/dsoftbus/adapter/default_config/spec_config",
     "//foundation/communication/dsoftbus//core/common/dfx/hidumper_adapter/include",
+    "//foundation/communication/dsoftbus//core/discovery/manager/include",
+    "//foundation/communication/dsoftbus//core/bus_center/lnn/net_ledger/local_ledger/include",
+    "//foundation/communication/dsoftbus//core/bus_center/lnn/net_ledger/common/include",
+    "//third_party/cJSON",
+  ]
+
+  deps = [
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+    "//foundation/communication/dsoftbus/core/common:softbus_utils",
+    "//foundation/communication/dsoftbus/core/frame:softbus_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+ohos_unittest("DiscoveryCoapTest") {
+  module_out_path = module_output_path
+  sources = [ "disc_coap_test.cpp" ]
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/core/common/include",
+    "//foundation/communication/dsoftbus/core/discovery/ble/dispatcher/include",
+    "//foundation/communication/dsoftbus/core/discovery/manager/include",
+    "//foundation/communication/dsoftbus/core/discovery/interface",
+    "//foundation/communication/dsoftbus/core/discovery/coap/include",
+    "//foundation/communication/dsoftbus/core/discovery/coap/src",
+    "//foundation/communication/dsoftbus/interfaces/kits/common",
+    "//foundation/communication/dsoftbus/components/nstackx/nstackx_util/interface",
+    "//foundation/communication/dsoftbus/core/bus_center/interface",
+    "//foundation/communication/dsoftbus/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "//foundation/communication/dsoftbus/adapter/common/include",
+    "//foundation/communication/dsoftbus/adapter/default_config/spec_config",
+    "//foundation/communication/dsoftbus//core/common/dfx/hidumper_adapter/include",
+    "//foundation/communication/dsoftbus//core/discovery/manager/include",
+    "//foundation/communication/dsoftbus//core/bus_center/lnn/net_ledger/local_ledger/include",
+    "//foundation/communication/dsoftbus//core/bus_center/lnn/net_ledger/common/include",
     "//third_party/cJSON",
   ]
 
@@ -59,5 +109,8 @@ ohos_unittest("DiscoveryCoapDiscNstackxAdapterTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":DiscoveryCoapDiscNstackxAdapterTest" ]
+  deps = [
+    ":DiscoveryCoapDiscNstackxAdapterTest",
+    ":DiscoveryCoapTest",
+  ]
 }
