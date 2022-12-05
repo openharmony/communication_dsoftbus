@@ -124,7 +124,7 @@ void LnnReleaseLane(int32_t laneId)
         return;
     }
     if (laneId >= LNN_LINK_TYPE_P2P && laneId <= LNN_LINK_TYPE_P2P_MAX) {
-        (void)LnnDisconnectP2p(g_lanes[laneId].networkId, g_lanes[laneId].pid);
+        (void)LnnDisconnectP2p(g_lanes[laneId].networkId, g_lanes[laneId].pid, NULL);
     }
     int32_t count = LnnGetLaneCount(laneId);
     if (count != 0) {

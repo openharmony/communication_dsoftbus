@@ -25,7 +25,7 @@ extern "C" {
 int32_t LnnLanePendingInit(void);
 void LnnLanePendingDeinit(void);
 int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo);
-int32_t LnnDisconnectP2p(const char *networkId, int32_t pid);
+int32_t LnnDisconnectP2p(const char *networkId, int32_t pid, const char *mac);
 
 #ifdef __cplusplus
 }
