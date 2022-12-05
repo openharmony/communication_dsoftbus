@@ -160,33 +160,6 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_LEAVE_META_TO_LEDGER_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_JOIN_META_NODE_TEST_001
-* @tc.desc: test TrySendJoinMetaNodeRequest
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_001, TestSize.Level1)
-{
-    int32_t ret = TrySendJoinMetaNodeRequest(nullptr, true);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ConnectionAddrKey *addrKey = (ConnectionAddrKey *)SoftBusCalloc(sizeof(ConnectionAddrKey));
-    ASSERT_TRUE(addrKey != nullptr);
-    ret = TrySendJoinMetaNodeRequest(addrKey, true);
-
-    ConnectionAddr addr;
-    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    addr.type = CONNECTION_ADDR_BR;
-    (void)memcpy_s(addr.info.br.brMac, BT_MAC_LEN, "11:22:33:44:55:66", BT_MAC_LEN);
-    MetaJoinRequestNode *node = TryJoinRequestMetaNode(&addr, true);
-    EXPECT_TRUE(node != nullptr);
-    addrKey->addr.type = CONNECTION_ADDR_BR;
-    (void)memcpy_s(addrKey->addr.info.br.brMac, BT_MAC_LEN, "11:22:33:44:55:66", BT_MAC_LEN);
-    ret = TrySendJoinMetaNodeRequest(addrKey, true);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
 * @tc.name: LNN_JOIN_META_NODE_TEST_002
 * @tc.desc: test PostJoinRequestToMetaNode
 * @tc.type: FUNC
@@ -199,11 +172,11 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_002, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
     CustomData customData;
     metaJoinNode.addr.type = CONNECTION_ADDR_SESSION;
-    NetBuilderDepsInterfaceMock mock;
+    NiceMock<NetBuilderDepsInterfaceMock> mock;
     EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, true);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 
     EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
