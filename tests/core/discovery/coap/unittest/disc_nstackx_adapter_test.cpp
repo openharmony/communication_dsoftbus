@@ -26,7 +26,6 @@
 #include "disc_manager.h"
 #include "lnn_local_net_ledger.h"
 
-
 using namespace testing::ext;
 namespace OHOS {
 
@@ -112,6 +111,7 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapStartDiscovery001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
    
     DiscCoapOption *option = (DiscCoapOption*)SoftBusMalloc(sizeof(DiscCoapOption));
+    ASSERT_TRUE(option != nullptr);
     memset_s(option, sizeof(DiscCoapOption), 0, sizeof(DiscCoapOption));
     option->mode = INVALID_MODE;
    
@@ -148,10 +148,10 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapUpdateLocalIp, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscNstackxAdapterTest, testDiscCoapRegisterServiceData001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapRegisterServiceData001, TestSize.Level1)
 {
     uint32_t dataLen = 1;
-    int32_t ret = DiscCoapRegisterServiceData(NULL, dataLen);
+    int32_t ret = DiscCoapRegisterServiceData(nullptr, dataLen);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_INIT_FAIL);
 }
 
@@ -161,12 +161,11 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapRegisterServiceData001, TestSize.Le
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscNstackxAdapterTest, testDiscCoapStopDiscovery001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapStopDiscovery001, TestSize.Level1)
 {
     int32_t ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
     
     DiscCoapUpdateDevName();
-    EXPECT_EQ(true, true);
 }
 }
