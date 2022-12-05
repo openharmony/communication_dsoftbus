@@ -111,6 +111,8 @@
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/udp_negotiation:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/auth_channel:unittest",
           "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/proxy_channel:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/common:unittest",
+          "//foundation/communication/dsoftbus/tests/core/transmission/trans_channel/manager:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center/unittest:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery/fuzztest:fuzztest",
