@@ -21,18 +21,17 @@
 #include "nstackx.h"
 #include "softbus_config_type.h"
 
-
 class AdapterInterface {
 public:
     virtual int32_t NSTACKX_RegisterServiceData(const char *serviceData) = 0;
-};
+};  
 
 class AdapterMock : public AdapterInterface {
 public:
     static AdapterMock* GetMock()
-        {
-            return mock.load();
-        }
+    {
+        return mock.load();
+    }
 
     AdapterMock();
     ~AdapterMock();

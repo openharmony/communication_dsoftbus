@@ -15,7 +15,6 @@
 
 #include "nstackx_adapter_mock.h"
 
-
 int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 {
     return AdapterMock::GetMock()->NSTACKX_RegisterServiceData(serviceData);
