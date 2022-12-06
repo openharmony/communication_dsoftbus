@@ -252,6 +252,7 @@ ohos_unittest("LNNTestMock") {
   ]
 
   include_dirs = [
+    "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
