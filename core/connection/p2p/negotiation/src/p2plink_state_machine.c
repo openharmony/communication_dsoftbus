@@ -36,7 +36,7 @@ static bool IsExistState(const FsmStateMachine *fsm, const FsmState *state)
 NO_SANITIZE("cfi") int32_t P2pLinkFsmInit(FsmStateMachine *fsm)
 {
     if (fsm == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param");
+        CLOGE("invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -48,12 +48,12 @@ NO_SANITIZE("cfi") int32_t P2pLinkFsmInit(FsmStateMachine *fsm)
 NO_SANITIZE("cfi") void P2pLinkFsmDeinit(FsmStateMachine *fsm)
 {
     if (fsm == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "fsm already deinit.");
+        CLOGD("fsm already deinit.");
         return;
     }
 
     if (fsm->currentState == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "unexpected state in deinit process");
+        CLOGD("unexpected state in deinit process");
     }
     fsm->currentState = NULL;
 }
@@ -61,12 +61,12 @@ NO_SANITIZE("cfi") void P2pLinkFsmDeinit(FsmStateMachine *fsm)
 NO_SANITIZE("cfi") void P2pLinkFsmAddState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || state == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param");
+        CLOGE("invalid param");
         return;
     }
 
     if (IsExistState(fsm, state)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "already exist state");
+        CLOGE("already exist state");
         return;
     }
     ListInit(&state->node);
@@ -76,7 +76,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmAddState(FsmStateMachine *fsm, FsmState *state
 NO_SANITIZE("cfi") void P2pLinkFsmStart(FsmStateMachine *fsm, FsmState *initialState)
 {
     if (fsm->currentState != NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unexpected state in start msg process");
+        CLOGE("unexpected state in start msg process");
         return;
     }
     if (IsExistState(fsm, initialState)) {
@@ -90,7 +90,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmStart(FsmStateMachine *fsm, FsmState *initialS
 NO_SANITIZE("cfi") void P2pLinkFsmStop(FsmStateMachine *fsm)
 {
     if (fsm->currentState == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unexpected state in stop msg process");
+        CLOGE("unexpected state in stop msg process");
         return;
     }
     fsm->currentState = NULL;
@@ -99,12 +99,12 @@ NO_SANITIZE("cfi") void P2pLinkFsmStop(FsmStateMachine *fsm)
 NO_SANITIZE("cfi") void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || state == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param");
+        CLOGE("invalid param");
         return;
     }
 
     if (fsm->currentState == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unexpected state in change state process");
+        CLOGE("unexpected state in change state process");
         return;
     }
 
@@ -117,7 +117,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *
             fsm->currentState->enter();
         }
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unexpected state in state list");
+        CLOGE("unexpected state in state list");
         return;
     }
 }
@@ -125,7 +125,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *
 NO_SANITIZE("cfi") void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t msgType, void *param)
 {
     if (fsm->currentState == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "current state is null");
+        CLOGE("current state is null");
         return;
     }
     if (fsm->currentState->process != NULL) {
@@ -137,11 +137,11 @@ NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32
     uint64_t delayMs)
 {
     if (fsm->currentState == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "current state is null");
+        CLOGE("current state is null");
         return;
     }
     if (fsm->currentState->process == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "current process is null");
+        CLOGE("current process is null");
         return;
     }
     (void)P2pLoopProcDelay(fsm->currentState->process, param, delayMs, msgType);
@@ -149,6 +149,6 @@ NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32
 
 NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelayDel(int32_t msgType)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "delete delay msg type %d", msgType);
+    CLOGI("delete delay msg type %d", msgType);
     (void)P2pLoopProcDelayDel(NULL, msgType);
 }

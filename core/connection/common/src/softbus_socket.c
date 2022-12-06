@@ -39,12 +39,12 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
 {
     if (interface == NULL || interface->GetSockPort == NULL || interface->OpenClientSocket == NULL ||
         interface->OpenServerSocket == NULL || interface->AcceptClient == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Bad socket interface!");
+        CLOGE("Bad socket interface!");
         return SOFTBUS_ERR;
     }
     int ret = SoftBusMutexLock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
+        CLOGE("get lock failed!ret=%" PRId32, ret);
         return ret;
     }
 
@@ -58,7 +58,7 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
     }
     (void)SoftBusMutexUnlock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "socket type list is full!");
+        CLOGE("socket type list is full!");
     }
     return ret;
 }
@@ -67,7 +67,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 {
     int ret = SoftBusMutexLock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:get lock failed!ret=%" PRId32, __func__, ret);
+        CLOGE("get lock failed!ret=%" PRId32, ret);
         return NULL;
     }
     const SocketInterface *result = NULL;
@@ -83,7 +83,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 
 int32_t __attribute__ ((weak)) RegistNewIpSocket(void)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s: newip not deployed", __func__);
+    CLOGI("newip not deployed");
     return SOFTBUS_OK;
 }
 
@@ -91,7 +91,7 @@ NO_SANITIZE("cfi") int32_t ConnInitSockets(void)
 {
     int32_t ret = SoftBusMutexInit(&g_socketsMutex, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: init mutex failed!ret=%" PRId32, __func__, ret);
+        CLOGE("init mutex failed!ret=%" PRId32, ret);
         return ret;
     }
 
@@ -99,15 +99,15 @@ NO_SANITIZE("cfi") int32_t ConnInitSockets(void)
 
     ret = RegistSocketProtocol(GetTcpProtocol());
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: regist tcp failed!!ret=%" PRId32, __func__, ret);
+        CLOGE("regist tcp failed!!ret=%" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "%s: tcp registed!", __func__);
+    CLOGI("tcp registed!");
 
     ret = RegistNewIpSocket();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: regist newip failed!!ret=%" PRId32, __func__, ret);
+        CLOGE("regist newip failed!!ret=%" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
@@ -128,8 +128,7 @@ NO_SANITIZE("cfi") int32_t ConnOpenClientSocket(const ConnectOption *option, con
     }
     const SocketInterface *socketInterface = GetSocketInterface(option->socketOption.protocol);
     if (socketInterface == NULL) {
-        SoftBusLog(
-            SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "protocol not supported!protocol=%d", option->socketOption.protocol);
+        ALOGE("protocol not supported!protocol=%d", option->socketOption.protocol);
         return SOFTBUS_ERR;
     }
     return socketInterface->OpenClientSocket(option, bindAddr, isNonBlock);
@@ -138,7 +137,7 @@ NO_SANITIZE("cfi") int32_t ConnOpenClientSocket(const ConnectOption *option, con
 static int WaitEvent(int fd, short events, int timeout)
 {
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:%d:fd=%d invalid params", __func__, __LINE__, fd);
+        CLOGE("fd=%d invalid params", fd);
         return -1;
     }
     SoftBusSockTimeOut tv = {0};
@@ -184,17 +183,17 @@ NO_SANITIZE("cfi") int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     }
     int32_t flags = fcntl(fd, F_GETFL, 0);
     if (flags < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d,fcntl get flag failed, errno=%d", fd, errno);
+        CLOGE("fd=%d,fcntl get flag failed, errno=%d", fd, errno);
         return SOFTBUS_ERR;
     }
     if (isNonBlock && ((uint32_t)flags & O_NONBLOCK) == 0) {
         flags = (int32_t)((uint32_t)flags | O_NONBLOCK);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to nonblock", fd);
+        CLOGI("fd=%d set to nonblock", fd);
     } else if (!isNonBlock && ((uint32_t)flags & O_NONBLOCK) != 0) {
         flags = (int32_t)((uint32_t)flags & ~O_NONBLOCK);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d set to block", fd);
+        CLOGI("fd=%d set to block", fd);
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "fd=%d nonblock state is already ok", fd);
+        CLOGI("fd=%d nonblock state is already ok", fd);
         return SOFTBUS_OK;
     }
     return fcntl(fd, F_SETFL, flags);
@@ -203,7 +202,7 @@ NO_SANITIZE("cfi") int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
 NO_SANITIZE("cfi") ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     if (fd < 0 || buf == NULL || len == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d invalid params", fd);
+        CLOGE("fd=%d invalid params", fd);
         return -1;
     }
 
@@ -213,7 +212,7 @@ NO_SANITIZE("cfi") ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_
 
     int err = WaitEvent(fd, SOFTBUS_SOCKET_OUT, USER_TIMEOUT_MS);
     if (err <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wait event error %d", err);
+        CLOGE("wait event error %d", err);
         return err;
     }
     ssize_t bytes = 0;
@@ -225,7 +224,7 @@ NO_SANITIZE("cfi") ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_
             if (bytes == 0) {
                 bytes = -1;
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "tcp send fail %zd %d", rc, errno);
+            CLOGE("tcp send fail %zd %d", rc, errno);
             break;
         }
         bytes += rc;
@@ -238,7 +237,7 @@ NO_SANITIZE("cfi") ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_
             continue;
         } else if (err < 0) {
             if (bytes == 0) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "send data wait event fail %d", err);
+                CLOGE("send data wait event fail %d", err);
                 bytes = err;
             }
             break;
@@ -250,24 +249,24 @@ NO_SANITIZE("cfi") ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_
 static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int flags)
 {
     if (fd < 0 || buf == NULL || len == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd[%d] len[%zu] invalid params", fd, len);
+        CLOGE("fd[%d] len[%zu] invalid params", fd, len);
         return -1;
     }
 
     if (timeout != 0) {
         int err = WaitEvent(fd, SOFTBUS_SOCKET_IN, timeout);
         if (err < 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "recv data wait event err[%d]", err);
+            CLOGE("recv data wait event err[%d]", err);
             return err;
         }
     }
 
     ssize_t rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketRecv(fd, buf, len, flags));
     if (rc == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "recv data socket EAGAIN");
+        CLOGW("recv data socket EAGAIN");
         rc = 0;
     } else if (rc <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "recv data fail errno[%d], rc[%d]", errno, rc);
+        CLOGE("recv data fail errno[%d], rc[%d]", errno, rc);
         rc = -1;
     }
     return rc;
@@ -281,7 +280,7 @@ NO_SANITIZE("cfi") ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len,
 NO_SANITIZE("cfi") void ConnCloseSocket(int32_t fd)
 {
     if (fd >= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close fd=%d", fd);
+        CLOGI("close fd=%d", fd);
         SoftBusSocketClose(fd);
     }
 }
@@ -289,7 +288,7 @@ NO_SANITIZE("cfi") void ConnCloseSocket(int32_t fd)
 NO_SANITIZE("cfi") void ConnShutdownSocket(int32_t fd)
 {
     if (fd >= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "shutdown fd=%d", fd);
+        CLOGI("shutdown fd=%d", fd);
         SoftBusSocketShutDown(fd, SOFTBUS_SHUT_RDWR);
         SoftBusSocketClose(fd);
     }
@@ -304,7 +303,7 @@ NO_SANITIZE("cfi") int32_t ConnGetLocalSocketPort(int32_t fd)
 {
     const SocketInterface *socketInterface = GetSocketInterface(LNN_PROTOCOL_IP);
     if (socketInterface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "LNN_PROTOCOL_IP not supported!");
+        CLOGW("LNN_PROTOCOL_IP not supported!");
         return SOFTBUS_ERR;
     }
     return socketInterface->GetSockPort(fd);
@@ -315,16 +314,16 @@ NO_SANITIZE("cfi") int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketA
     SoftBusSockAddrIn addr;
     int32_t addrLen = (int32_t)sizeof(addr);
     if (socketAddr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param", __func__);
+        CLOGE("invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int rc = SoftBusSocketGetPeerName(fd, (SoftBusSockAddr *)&addr, &addrLen);
     if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d, GetPeerName rc=%d", fd, rc);
+        CLOGE("fd=%d, GetPeerName rc=%d", fd, rc);
         return SOFTBUS_ERR;
     }
     if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&addr.sinAddr, socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd=%d, InetNtoP fail", fd);
+        CLOGE("fd=%d, InetNtoP fail", fd);
         return SOFTBUS_ERR;
     }
     socketAddr->port = SoftBusNtoHs(addr.sinPort);
