@@ -60,7 +60,7 @@ NO_SANITIZE("cfi") void P2pLinkDevOffLineNotify(const char *peerMac)
 NO_SANITIZE("cfi") void P2pLinkMyRoleChangeNotify(P2pLinkRole myRole)
 {
     if (g_devStateCb.onMyRoleChange != NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "role change %d", myRole);
+        CLOGI("role change %d", myRole);
         g_devStateCb.onMyRoleChange(myRole);
     }
 }
@@ -87,12 +87,12 @@ NO_SANITIZE("cfi") ConnectedNode *P2pLinkGetConnedDevByMac(const char *peerMac)
 NO_SANITIZE("cfi") void P2pLinkUpdateInAuthId(const char *peerMac, int64_t authId)
 {
     if (authId == -1) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkUpdateInAuthId:authid not set");
+        CLOGE("P2pLinkUpdateInAuthId:authid not set");
         return;
     }
     ConnectedNode *item = P2pLinkGetConnedDevByMac(peerMac);
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "no need update authid");
+        CLOGE("no need update authid");
         return;
     }
     item->chanId.inAuthId = authId;
@@ -139,7 +139,7 @@ NO_SANITIZE("cfi") void P2pLinkDelConnedByAuthId(int64_t authId)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
         if (item->chanId.p2pAuthId == authId) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline by authId %" PRId64, authId);
+            CLOGI("dev is offline by authId %" PRId64, authId);
             P2pLinkDevOffLineNotify(item->peerMac);
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -169,9 +169,9 @@ static void DevOffline(const P2pLinkGroup *group)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
         if (DevIsNeedDel(item->peerMac, group)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is offline");
+            CLOGI("dev is offline");
             if (item->chanId.p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "close p2p auth chan %" PRIu64, item->chanId.p2pAuthId);
+                CLOGI("close p2p auth chan %" PRIu64, item->chanId.p2pAuthId);
                 AuthCloseConn(item->chanId.p2pAuthId);
             }
             P2pLinkDevOffLineNotify(item->peerMac);
@@ -206,18 +206,18 @@ static void DevOnline(const P2pLinkGroup *group)
         onlineMac = onlineMacs + i * sizeof(P2pLinkPeerMacList);
         if (DevIsNeedAdd(onlineMac) == true) {
             if (strcmp(onlineMac, P2pLinkNegoGetCurrentPeerMac()) == 0) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "negoing mac");
+                CLOGI("negoing mac");
                 continue;
             }
             nItem = SoftBusCalloc(sizeof(ConnectedNode));
             if (nItem == NULL) {
                 continue;
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "other app use dev");
+            CLOGI("other app use dev");
             int32_t ret = strcpy_s(nItem->peerMac, sizeof(nItem->peerMac), onlineMac);
             if (ret != EOK) {
                 SoftBusFree(nItem);
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
+                CLOGI("strcpy fail");
                 continue;
             }
             ListAdd(&(g_connectedDevices), &nItem->node);
@@ -229,10 +229,10 @@ static void DevOnline(const P2pLinkGroup *group)
 
 NO_SANITIZE("cfi") void P2pLinkUpdateDeviceByMagicGroups(const P2pLinkGroup *group)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "update online dev");
+    CLOGI("update online dev");
     DevOffline(group);
     DevOnline(group);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "online dev cnt %d", g_connectedCnt);
+    CLOGI("online dev cnt %d", g_connectedCnt);
 }
 
 static void P2pLinkCleanConnedDev(void)
@@ -242,7 +242,7 @@ static void P2pLinkCleanConnedDev(void)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connectedDevices), ConnectedNode, node) {
         if (item->chanId.p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "clean p2p auth chan %" PRIu64, item->chanId.p2pAuthId);
+            CLOGI("clean p2p auth chan %" PRIu64, item->chanId.p2pAuthId);
             AuthCloseConn(item->chanId.p2pAuthId);
         }
         P2pLinkDevOffLineNotify(item->peerMac);
@@ -289,7 +289,7 @@ NO_SANITIZE("cfi") void P2pLinkDelConning(int32_t reqId)
             ListDelete(&item->node);
             SoftBusFree(item);
             g_connectingCnt--;
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "del req %d", reqId);
+            CLOGI("del req %d", reqId);
         }
     }
 }
@@ -306,13 +306,12 @@ NO_SANITIZE("cfi") void P2pLinkConningCallback(const ConnectingNode *item, int32
     const P2pLinkConnectInfo *devInfo = &item->connInfo;
     if (ret == SOFTBUS_ERR) {
         if (devInfo->cb.onConnectFailed != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify failed reqid %d, reason %d",
-                       devInfo->requestId, failReason);
+            CLOGI("notify failed reqid %d, reason %d", devInfo->requestId, failReason);
             devInfo->cb.onConnectFailed(devInfo->requestId, failReason);
         }
     } else {
         if (devInfo->cb.onConnected != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify OK reqid %d", devInfo->requestId);
+            CLOGI("notify OK reqid %d", devInfo->requestId);
             devInfo->cb.onConnected(devInfo->requestId, item->myIp, item->peerIp);
         }
     }
@@ -343,7 +342,7 @@ static void TimerPostReuse(ConnectingNode *item)
 
     int32_t ret = P2pLinkSendReuse(&chan, P2pLinkGetMyMac());
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link send reuse fail.");
+        CLOGE("P2p Link send reuse fail.");
         P2pLinkConningCallback(item, SOFTBUS_ERR, P2PLINK_P2P_SEND_REUSEFAIL);
         ListDelete(&item->node);
         SoftBusFree(item);
@@ -360,7 +359,7 @@ static void TimerNegoWaitingProcess(ConnectingNode *conningDev)
     P2pLinkNegoConnInfo negoInfo = {0};
 
     if (P2pLinkIsDisconnectState() == true) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink is disconnecting, retry next time");
+        CLOGI("p2pLink is disconnecting, retry next time");
         return;
     }
 
@@ -368,24 +367,24 @@ static void TimerNegoWaitingProcess(ConnectingNode *conningDev)
     connedDev = P2pLinkGetConnedDevByMac(requestInfo->peerMac);
     if (connedDev != NULL) {
         if (strlen(connedDev->peerIp) == 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "timer P2P link is used by another service.");
+            CLOGE("timer P2P link is used by another service.");
             P2pLinkConningCallback(conningDev, SOFTBUS_ERR, ERROR_LINK_USED_BY_ANOTHER_SERVICE);
             P2pLinkDelConningDev(conningDev);
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "timer P2p Link reuse.");
+        CLOGI("timer P2p Link reuse.");
         TimerPostReuse(conningDev);
         return;
     }
 
     if (GetP2pLinkNegoStatus() == P2PLINK_NEG_IDLE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2pLink is idle retry");
+        CLOGI("p2pLink is idle retry");
         negoInfo.authId = requestInfo->authId;
         negoInfo.requestId = requestInfo->requestId;
         negoInfo.expectRole = requestInfo->expectedRole;
         int32_t ret = strcpy_s(negoInfo.peerMac, sizeof(negoInfo.peerMac), requestInfo->peerMac);
         if (ret != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
+            CLOGI("strcpy fail");
             return;
         }
         conningDev->state = P2PLINK_MANAGER_STATE_NEGOING;
@@ -398,14 +397,14 @@ static void P2pLinkReuseTimeOut(ConnectingNode *item)
 {
     ConnectedNode *connedItem = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
+    CLOGI("conning dev timeout state %d", item->state);
     connedItem = P2pLinkGetConnedDevByMac(item->connInfo.peerMac);
     if (connedItem != NULL) {
         P2pLinkAddPidMacRef(item->connInfo.pid, item->connInfo.peerMac);
         P2pLinkAddMyP2pRef();
         if ((strcpy_s(item->myIp, sizeof(item->myIp), P2pLinkGetMyIp()) != EOK) ||
             (strcpy_s(item->peerIp, sizeof(item->peerIp), connedItem->peerIp) != EOK)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
+            CLOGE("strcpy error");
             P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_REUSE_FAILED);
             return;
         }
@@ -427,7 +426,7 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
         if (P2pLinkIsEnable() == false) {
             P2pLinkConningCallback(item, SOFTBUS_ERR, P2PLINK_P2P_STATE_CLOSE);
             P2pLinkDelConningDev(item);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p state is disable");
+            CLOGI("p2p state is disable");
             continue;
         }
         switch (item->state) {
@@ -439,7 +438,7 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                 break;
             case P2PLINK_MANAGER_STATE_NEGO_WAITING:
                 if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
+                    CLOGI("conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_BUSY);
                     P2pLinkDelConningDev(item);
                     break;
@@ -448,7 +447,7 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                 break;
             case P2PLINK_MANAGER_STATE_NEGOING:
                 if (item->timeOut > P2pLinkStateTimeOut(item->state)) {
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conning dev timeout state %d", item->state);
+                    CLOGI("conning dev timeout state %d", item->state);
                     P2pLinkConningCallback(item, SOFTBUS_ERR, ERROR_CONNECT_TIMEOUT);
                     P2pLinkDelConningDev(item);
                 }
@@ -457,10 +456,10 @@ static void P2pLinkTimerDevProc(P2pLoopMsg msgType, void *arg)
                 break;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "timer conning dev cnt %d", g_connectingCnt);
+    CLOGI("timer conning dev cnt %d", g_connectingCnt);
     if (IsListEmpty(&g_connectingDevices)) {
         g_connectingTimer = 0;
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "timer conning dev cnt zero");
+        CLOGI("timer conning dev cnt zero");
         return;
     }
     P2pLoopProcDelay(P2pLinkTimerDevProc, 0, CONNING_TIMER_1S, P2PLOOP_CONNINGDEV_TIMER);
@@ -496,9 +495,9 @@ NO_SANITIZE("cfi") void P2pLinkDumpDev(void)
     ConnectingNode *conningItem = NULL;
     ConnectingNode *conningNext = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[dump conning dev]");
+    CLOGI("[dump conning dev]");
     LIST_FOR_EACH_ENTRY_SAFE(conningItem, conningNext, &(g_connectingDevices), ConnectingNode, node) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "deving state %d", conningItem->state);
+        CLOGI("deving state %d", conningItem->state);
     }
 }
 
@@ -506,14 +505,14 @@ static void P2pLinkDevExistDiscState(P2pLoopMsg msgType, void *arg)
 {
     (void)msgType;
     (void)arg;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "timeout disconnecting state");
+    CLOGI("timeout disconnecting state");
     P2pLinkSetDisconnectState(false);
 }
 
 void P2pLinkDevEnterDiscState(void)
 {
 #define DISCONNING_TIMER_3S 3000
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "enter disconnecting state");
+    CLOGI("enter disconnecting state");
     P2pLinkSetDisconnectState(true);
     P2pLoopProcDelay(P2pLinkDevExistDiscState, NULL, DISCONNING_TIMER_3S, P2PLOOP_OPEN_DISCONNECTING_TIMEOUT);
 }

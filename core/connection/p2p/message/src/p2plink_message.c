@@ -51,7 +51,7 @@ static void P2pLinkNeoDataDispatch(int64_t authId, int64_t seq, const cJSON *msg
     int32_t cmdType;
 
     if (!GetJsonObjectNumberItem(msg, KEY_COMMAND_TYPE, &cmdType)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "parse command type from json failed.");
+        CLOGE("parse command type from json failed.");
         return;
     }
 
@@ -72,7 +72,7 @@ static void P2pLinkNeoDataDispatch(int64_t authId, int64_t seq, const cJSON *msg
             P2pLinkNegoMsgProc(authId, cmdType, msg);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unsupport command type.");
+            CLOGE("unsupport command type.");
             break;
     }
 }
@@ -82,14 +82,14 @@ static void P2pLinkNeoDataProcess(P2pLoopMsg msgType, void *param)
     (void)msgType;
     P2pLinkNeoData *info = (P2pLinkNeoData *)param;
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        CLOGE("invalid param.");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "recv msg");
+    CLOGD("recv msg");
     cJSON *json = cJSON_Parse((char *)info->data);
     if (json == NULL) {
         SoftBusFree(info);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "cjson parse failed!");
+        CLOGE("cjson parse failed!");
         return;
     }
 
@@ -101,26 +101,25 @@ static void P2pLinkNeoDataProcess(P2pLoopMsg msgType, void *param)
 static void P2pLinkNegoDataRecv(int64_t authId, const AuthTransData *data)
 {
     if (data == NULL || data->data == NULL || data->len == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param.");
+        CLOGE("invalid param.");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "p2pLink negotiation data recv: module=%d, seq=%" PRId64 ", len=%u.", data->module, data->seq, data->len);
+    CLOGI("p2pLink negotiation data recv: module=%d, seq=%" PRId64 ", len=%u.", data->module, data->seq, data->len);
     P2pLinkNeoData *param = (P2pLinkNeoData *)SoftBusCalloc(sizeof(P2pLinkNeoData) + (data->len));
     if (param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "calloc failed.");
+        CLOGE("calloc failed.");
         return;
     }
     if (memcpy_s(&param->data[0], data->len, data->data, data->len) != EOK) {
         SoftBusFree(param);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
+        CLOGE("memcpy_s failed.");
         return;
     }
     param->authId = authId;
     param->seq = data->seq;
     param->len = data->len;
     if (P2pLoopProc(P2pLinkNeoDataProcess, (void *)param, P2PLOOP_MSG_PROC) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p loop post message failed.");
+        CLOGE("p2p loop post message failed.");
         SoftBusFree(param);
         return;
     }
@@ -136,7 +135,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32
         .data = (const uint8_t *)data,
     };
     if (AuthPostTransData(authId, &dataInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "AuthPostTransData failed.");
+        CLOGE("AuthPostTransData failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -146,7 +145,7 @@ static void P2pLinkAuthChannelCloseProcess(P2pLoopMsg msgType, void *param)
 {
     (void)msgType;
     if (param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkAuthChannelCloseProcess invalid param");
+        CLOGE("P2pLinkAuthChannelCloseProcess invalid param");
         return;
     }
     int64_t authId = *(int64_t *)param;
@@ -156,15 +155,15 @@ static void P2pLinkAuthChannelCloseProcess(P2pLoopMsg msgType, void *param)
 
 static void P2pLinkAuthChannelClose(int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkAuthChannelClose authId: %" PRId64, authId);
+    CLOGI("P2pLinkAuthChannelClose authId: %" PRId64, authId);
     int64_t *param = (int64_t *)SoftBusMalloc(sizeof(int64_t));
     if (param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkAuthChannelClose malloc failed");
+        CLOGE("P2pLinkAuthChannelClose malloc failed");
         return;
     }
     *param = authId;
     if (P2pLoopProc(P2pLinkAuthChannelCloseProcess, (void *)param, P2PLOOP_AUTH_CHANNEL_CLOSED) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkAuthChannelClose p2p looper post failed");
+        CLOGE("P2pLinkAuthChannelClose p2p looper post failed");
         SoftBusFree(param);
         return;
     }
@@ -178,7 +177,7 @@ static AuthTransListener g_p2pLinkTransCb = {
 NO_SANITIZE("cfi") int32_t P2pLinkMessageInit(void)
 {
     if (RegAuthTransListener(MODULE_P2P_LINK, &g_p2pLinkTransCb) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "auth register p2plink callback failed.");
+        CLOGE("auth register p2plink callback failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

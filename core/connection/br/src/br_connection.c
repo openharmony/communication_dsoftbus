@@ -111,7 +111,7 @@ static SoftBusMessage *BrConnCreateLoopMsg(BrConnLoopMsgType what, uint64_t arg1
     SoftBusMessage *msg = NULL;
     msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrConnCreateLoopMsg SoftBusCalloc failed");
+        CLOGE("BrConnCreateLoopMsg SoftBusCalloc failed");
         return NULL;
     }
     msg->what = what;
@@ -126,23 +126,20 @@ static SoftBusMessage *BrConnCreateLoopMsg(BrConnLoopMsgType what, uint64_t arg1
 static void PostBytesInnerListener(uint32_t connId, uint64_t seq, int32_t module, int32_t result)
 {
     if (result != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "PostInner failed, connId:%u, seq:%" PRIu64 ", module:%d, result:%d", connId, seq, module, result);
+        CLOGE("PostInner failed, connId:%u, seq:%" PRIu64 ", module:%d, result:%d", connId, seq, module, result);
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PostInner success, connId:%u, seq:%" PRIu64 ", module:%d",
-            connId, seq, module);
+        CLOGE("PostInner success, connId:%u, seq:%" PRIu64 ", module:%d", connId, seq, module);
     }
 }
 
 static int32_t PostBytesInner(uint32_t connectionId, int32_t module, const char *data, uint32_t len)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "PostBytesInner connectionId=%u,len=%u,module=%d", connectionId, len, module);
+    CLOGI("PostBytesInner connectionId=%u,len=%u,module=%d", connectionId, len, module);
 
     // control message need be sent when closing
     int32_t state = GetBrConnStateByConnectionId(connectionId);
     if (state != BR_CONNECTION_STATE_CLOSING && state != BR_CONNECTION_STATE_CONNECTED) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connectionId(%u) device is not ready, state: %d",
+        CLOGI("connectionId(%u) device is not ready, state: %d",
             connectionId, state);
         SoftBusFree((void *)data);
         return SOFTBUS_BRCONNECTION_POSTBYTES_ERROR;
@@ -163,7 +160,7 @@ static int32_t PostBytesInner(uint32_t connectionId, int32_t module, const char 
     node->listener = PostBytesInnerListener;
     int32_t ret = BrEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Br PostBytesInner enqueue failed, ret: %d", ret);
+        CLOGE("Br PostBytesInner enqueue failed, ret: %d", ret);
         SoftBusFree((void *)data);
         SoftBusFree(node);
         return ret;
@@ -175,8 +172,7 @@ NO_SANITIZE("cfi") static int32_t PostClosingTimeoutEvent(uint32_t connectionId)
 {
     SoftBusMessage *msg = BrConnCreateLoopMsg(ADD_CONN_BR_CLOSING_TIMEOUT_MSG, (uint64_t)connectionId, 0, NULL);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[PostClosingTimeoutEvent] BrConnCreateLoopMsg failed, "
-        "connection id: %u", connectionId);
+        CLOGE("[PostClosingTimeoutEvent] BrConnCreateLoopMsg failed, connection id: %u", connectionId);
         return SOFTBUS_ERR;
     }
     g_brAsyncHandler.looper->PostMessageDelay(g_brAsyncHandler.looper, msg, BR_CLOSE_TIMEOUT);
@@ -188,17 +184,15 @@ static void PackRequest(int32_t delta, uint32_t connectionId)
     int32_t refCount = -1;
     int32_t state = SetRefCountByConnId(delta, &refCount, connectionId);
     if (state != BR_CONNECTION_STATE_CONNECTED && state != BR_CONNECTION_STATE_CLOSING) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connection %u not connected ever!", connectionId);
+        CLOGI("br connection %u not connected ever!", connectionId);
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "br pack request: delta:%d, ref:%d, connectionId:%u, state:%d", delta, refCount, connectionId, state);
+    CLOGI("br pack request: delta:%d, ref:%d, connectionId:%u, state:%d", delta, refCount, connectionId, state);
 
     if (state == BR_CONNECTION_STATE_CLOSING) {
         int32_t ret = PostClosingTimeoutEvent(connectionId);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "post close %u connection timeout event, ret: %d",
-            connectionId, ret);
+        CLOGI("post close %u connection timeout event, ret: %d", connectionId, ret);
         // continue, anyway
     }
 
@@ -219,10 +213,10 @@ static void DeviceConnectPackRequest(int32_t value, uint32_t connectionId)
 
 static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sppDriver connect start, connId:%d", connId);
+    CLOGI("sppDriver connect start, connId:%d", connId);
     BrConnectionInfo *brConn = GetConnectionRef(connId);
     if (brConn == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrClient not find connInfo.");
+        CLOGI("BrClient not find connInfo.");
         return SOFTBUS_BRCONNECTION_GETCONNINFO_ERROR;
     }
     if (brConn->sideType != BR_CLIENT_TYPE) {
@@ -231,7 +225,7 @@ static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
     }
     uint8_t btAddr[BT_ADDR_LEN];
     if (ConvertBtMacToBinary(brConn->mac, BT_MAC_LEN, btAddr, BT_ADDR_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "convert bt mac to binary fail.");
+        CLOGE("convert bt mac to binary fail.");
         ReleaseConnectionRef(brConn);
         return SOFTBUS_ERR;
     }
@@ -241,13 +235,13 @@ static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
     }
     if (socketFd == SOFTBUS_ERR) {
         ReleaseConnectionRef(brConn);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sppDriver connect failed, connId:%d", connId);
+        CLOGE("sppDriver connect failed, connId:%d", connId);
         return SOFTBUS_BRCONNECTION_CONNECTDEVICE_GETSOCKETIDFAIL;
     }
     brConn->socketFd = socketFd;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connection ok, Id=%d, socket=%d", connId, socketFd);
+    CLOGI("br connection ok, Id=%d, socket=%d", connId, socketFd);
     if (g_sppDriver->IsConnected(socketFd)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sppDriver IsConnected true.");
+        CLOGI("sppDriver IsConnected true.");
     }
     if (brConn->state == BR_CONNECTION_STATE_CLOSED || brConn->state == BR_CONNECTION_STATE_CLOSING) {
         g_sppDriver->DisConnect(socketFd);
@@ -289,8 +283,7 @@ NO_SANITIZE("cfi") static void ClientNoticeResultBrConnect(uint32_t connId, bool
                     requestInfo->callback.OnConnectFailed(requestInfo->requestId, value);
                 }
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-                "connnect notify, result:%d, connectionId:%u, requestId:%u", result, connId, requestInfo->requestId);
+            CLOGI("connnect notify, result:%d, connectionId:%u, requestId:%u", result, connId, requestInfo->requestId);
             ListDelete(&requestInfo->node);
             SoftBusFree(requestInfo);
         }
@@ -320,7 +313,7 @@ static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
         LIST_FOR_EACH_SAFE(item, itemNext, notifyList) {
             RequestInfo *requestInfo = LIST_ENTRY(item, RequestInfo, node);
             if (requestInfo->callback.OnConnectFailed != NULL) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify disconn connectionId=%d", connectionId);
+                CLOGI("notify disconn connectionId=%d", connectionId);
                 requestInfo->callback.OnConnectFailed(requestInfo->requestId, value);
             }
             ListDelete(&requestInfo->node);
@@ -329,7 +322,7 @@ static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
     }
     (void)sideType;
     if (g_connectCallback != NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ClientOnEvent] disconn connectionId=%d", connectionId);
+        CLOGI("[ClientOnEvent] disconn connectionId=%d", connectionId);
         g_connectCallback->OnDisconnected(connectionId, &connectionInfo);
     }
 }
@@ -341,7 +334,7 @@ static int32_t NotifyServerConn(int connectionId, const char *mac, int32_t sideT
     connectionInfo.isServer = sideType;
     connectionInfo.type = CONNECT_BR;
     if (strcpy_s(connectionInfo.brInfo.brMac, BT_MAC_LEN, mac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "NotifyServerConn scpy error");
+        CLOGE("NotifyServerConn scpy error");
         return SOFTBUS_ERR;
     }
     g_connectCallback->OnConnected(connectionId, &connectionInfo);
@@ -350,7 +343,7 @@ static int32_t NotifyServerConn(int connectionId, const char *mac, int32_t sideT
 
 static void FreeSendNode(SendBrQueueNode *node)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[FreeSendNode]");
+    CLOGI("[FreeSendNode]");
     if (node == NULL) {
         return;
     }
@@ -382,8 +375,7 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
         option.type = CONNECT_BR;
         option.brOption.sideType = CONN_SIDE_CLIENT;
         if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, connectionInfo.brInfo.brMac) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "restore connection failed, strcpy_s failed, "
-                "connectionId: %u", connectionId);
+            CLOGE("restore connection failed, strcpy_s failed, connectionId: %u", connectionId);
             return;
         }
 
@@ -391,8 +383,7 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
         ListNode *itNext = NULL;
         LIST_FOR_EACH_SAFE(it, itNext, &pendingList) {
             RequestInfo *request = LIST_ENTRY(it, RequestInfo, node);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "connection %u closed, restore connect request: %u",
-                connectionId, request->requestId);
+            CLOGE("connection %u closed, restore connect request: %u", connectionId, request->requestId);
             ConnConnectDevice(&option, request->requestId, &request->callback);
             ListDelete(&request->node);
             SoftBusFree(request);
@@ -403,18 +394,18 @@ static void BrDisconnect(int32_t socketFd, int32_t value)
 NO_SANITIZE("cfi") int32_t ConnBrOnEvent(BrConnLoopMsgType type, int32_t socketFd, int32_t value)
 {
     if (type >= ADD_CONN_BR_MAX || type <= ADD_CONN_BR_INVALID) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrOnEvent] type(%d) failed", type);
+        CLOGE("[ConnBrOnEvent] type(%d) failed", type);
         return SOFTBUS_ERR;
     }
     if (type == ADD_CONN_BR_CONGEST_MSG) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrOnEvent] ADD_CONN_BR_CONGEST_MSG");
+        CLOGE("[ConnBrOnEvent] ADD_CONN_BR_CONGEST_MSG");
         RfcomCongestEvent(socketFd, value);
         return SOFTBUS_ERR;
     }
 
     SoftBusMessage *msg = BrConnCreateLoopMsg(type, (uint64_t)socketFd, (uint64_t)value, NULL);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrOnEvent] BrConnCreateLoopMsg failed");
+        CLOGE("[ConnBrOnEvent] BrConnCreateLoopMsg failed");
         return SOFTBUS_ERR;
     }
     g_brAsyncHandler.looper->PostMessage(g_brAsyncHandler.looper, msg);
@@ -423,7 +414,7 @@ NO_SANITIZE("cfi") int32_t ConnBrOnEvent(BrConnLoopMsgType type, int32_t socketF
 
 static void ConnectDeviceExist(uint32_t connId, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceExit]");
+    CLOGI("[ConnectDeviceExit]");
     BrConnectionInfo *connInfo = GetConnectionRef(connId);
     if (connInfo == NULL) {
         return;
@@ -441,30 +432,29 @@ static void ConnectDeviceExist(uint32_t connId, uint32_t requestId, const Connec
     if (result->OnConnectSuccessed != NULL) {
         result->OnConnectSuccessed(requestId, connId, &connectionInfo);
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "connnect notify connected, connectionId:%u, requestId:%u", connId, requestId);
+    CLOGI("connnect notify connected, connectionId:%u, requestId:%u", connId, requestId);
 
     (void)PackRequest(CONNECT_REF_INCRESE, connId);
 }
 
 static int32_t ConnectDeviceStateConnecting(uint32_t connId, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceStateConnecting]");
+    CLOGI("[ConnectDeviceStateConnecting]");
     RequestInfo *requestInfo = (RequestInfo *)SoftBusMalloc(sizeof(RequestInfo));
     if (requestInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusMalloc failed");
+        CLOGI("SoftBusMalloc failed");
         return SOFTBUS_ERR;
     }
     (void)memset_s(requestInfo, sizeof(RequestInfo), 0, sizeof(RequestInfo));
     ListInit(&requestInfo->node);
     requestInfo->requestId = requestId;
     if (memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "AddRequestByConnId memcpy_s fail");
+        CLOGI("AddRequestByConnId memcpy_s fail");
         SoftBusFree(requestInfo);
         return SOFTBUS_ERR;
     }
     if (AddRequestByConnId(connId, requestInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "AddRequestByConnId failed");
+        CLOGI("AddRequestByConnId failed");
         SoftBusFree(requestInfo);
         return SOFTBUS_ERR;
     }
@@ -475,8 +465,7 @@ static int32_t ConnectDeviceStateClosing(uint32_t connId, uint32_t requestId, co
 {
     RequestInfo *requestInfo = (RequestInfo *)SoftBusCalloc(sizeof(RequestInfo));
     if (requestInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "add pending request %u failed, malloc failed, connection: %u",
-            requestId, connId);
+        CLOGE("add pending request %u failed, malloc failed, connection: %u", requestId, connId);
         return SOFTBUS_ERR;
     }
 
@@ -484,8 +473,7 @@ static int32_t ConnectDeviceStateClosing(uint32_t connId, uint32_t requestId, co
     requestInfo->requestId = requestId;
     requestInfo->callback = *result;
     if (AddPendingRequestByConnId(connId, requestInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "add pending request %u failed, connection: %u",
-            requestId, connId);
+        CLOGI("add pending request %u failed, connection: %u", requestId, connId);
         SoftBusFree(requestInfo);
         return SOFTBUS_ERR;
     }
@@ -494,14 +482,14 @@ static int32_t ConnectDeviceStateClosing(uint32_t connId, uint32_t requestId, co
 
 static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceFirstTime]");
+    CLOGI("[ConnectDeviceFirstTime]");
     if (g_sppDriver == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[sppDriver null]");
+        CLOGE("[sppDriver null]");
         return SOFTBUS_ERR;
     }
     BrConnectionInfo *newConnInfo = CreateBrconnectionNode(true);
     if (newConnInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[client node create fail]");
+        CLOGE("[client node create fail]");
         return SOFTBUS_ERR;
     }
     RequestInfo *requestInfo = (RequestInfo *)SoftBusCalloc(sizeof(RequestInfo));
@@ -513,7 +501,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
     requestInfo->requestId = requestId;
     if (memcpy_s(&requestInfo->callback, sizeof(requestInfo->callback), result, sizeof(*result)) != EOK) {
         ReleaseBrconnectionNode(newConnInfo);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDeviceFirstTime memcpy_s fail");
+        CLOGI("ConnectDeviceFirstTime memcpy_s fail");
         return SOFTBUS_ERR;
     }
     ListAdd(&newConnInfo->requestList, &requestInfo->node);
@@ -526,7 +514,7 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
         ReleaseBrconnectionNode(newConnInfo);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectDeviceFirstTime connId:%d, requestId:%d", connId, requestId);
+    CLOGI("ConnectDeviceFirstTime connId:%d, requestId:%d", connId, requestId);
     if (ConnBrOnEvent(ADD_CONN_BR_CLIENT_CONNECTED_MSG, (int32_t)connId, (int32_t)connId) != SOFTBUS_OK) {
         ReleaseConnectionRef(newConnInfo);
         SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, 0);
@@ -537,28 +525,26 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
 
 static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connect device, requestId:%u", requestId);
+    CLOGI("br connect device, requestId:%u", requestId);
     if (HasDiffMacDeviceExit(option)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[has diff mac device]");
+        CLOGI("[has diff mac device]");
     }
     uint32_t connId = 0;
     uint32_t connectingReqId = 0;
     int32_t ret = SOFTBUS_OK;
     if (pthread_mutex_lock(&g_brConnLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return SOFTBUS_ERR;
     }
     int32_t connState = GetBrConnStateByConnOption(option, &connId, &connectingReqId);
     if (connState == BR_CONNECTION_STATE_CONNECTED) {
         ConnectDeviceExist(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CONNECTING) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is connecting:%u, current:%u, connecting:%u", connId,
-            requestId, connectingReqId);
+        CLOGI("device is connecting:%u, current:%u, connecting:%u", connId, requestId, connectingReqId);
         ret = ConnectDeviceStateConnecting(connId, requestId, result);
     } else if (connState == BR_CONNECTION_STATE_CLOSING) {
         ret = ConnectDeviceStateClosing(connId, requestId, result);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "device is closing:%u, current:%u, try pending request, ret: %d",
-            connId, requestId, ret);
+        CLOGI("device is closing:%u, current:%u, try pending request, ret: %d", connId, requestId, ret);
     } else if (connState == BR_CONNECTION_STATE_CLOSED) {
         ret = ConnectDeviceFirstTime(option, requestId, result);
     }
@@ -568,14 +554,14 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
 
 static uint32_t ServerOnBrConnect(int32_t socketFd)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[new connection, socket = %d]", socketFd);
+    CLOGI("[new connection, socket = %d]", socketFd);
     if (IsExitBrConnectByFd(socketFd)) {
         return SOFTBUS_ERR;
     }
     uint32_t connectionId = 0;
     BrConnectionInfo *newConnectionInfo = CreateBrconnectionNode(false);
     if (newConnectionInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[service node create fail]");
+        CLOGE("[service node create fail]");
         g_sppDriver->DisConnect(socketFd);
         return connectionId;
     }
@@ -589,13 +575,13 @@ static uint32_t ServerOnBrConnect(int32_t socketFd)
     ListAdd(&newConnectionInfo->requestList, &requestInfo->node);
     BluetoothRemoteDevice deviceInfo;
     if (g_sppDriver->GetRemoteDeviceInfo(socketFd, &deviceInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetRemoteDeviceInfo fail");
+        CLOGE("GetRemoteDeviceInfo fail");
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
         return connectionId;
     }
     if (ConvertBtMacToStr(newConnectionInfo->mac, BT_MAC_LEN, (uint8_t *)deviceInfo.mac, BT_ADDR_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrServer convert bt mac to str fail");
+        CLOGE("BrServer convert bt mac to str fail");
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
         return connectionId;
@@ -605,7 +591,7 @@ static uint32_t ServerOnBrConnect(int32_t socketFd)
     connectionId = newConnectionInfo->connectionId;
     char mac[BT_MAC_LEN] = {0};
     if (memcpy_s(mac, BT_MAC_LEN, newConnectionInfo->mac, BT_MAC_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrServer memcpy mac fail");
+        CLOGE("BrServer memcpy mac fail");
         ReleaseBrconnectionNode(newConnectionInfo);
         g_sppDriver->DisConnect(socketFd);
         return 0;
@@ -626,20 +612,17 @@ static uint32_t ServerOnBrConnect(int32_t socketFd)
 
 static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
-
+    CLOGI("PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
     int32_t state = GetBrConnStateByConnectionId(connectionId);
     if (state != BR_CONNECTION_STATE_CONNECTED) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "connectionId(%u) device is not ready, state: %d",
-            connectionId, state);
+        CLOGI("connectionId(%u) device is not ready, state: %d", connectionId, state);
         SoftBusFree(data);
         return SOFTBUS_BRCONNECTION_POSTBYTES_ERROR;
     }
 
     SendBrQueueNode *node = (SendBrQueueNode *)SoftBusCalloc(sizeof(SendBrQueueNode));
     if (node == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PostBytes SoftBusCalloc failed");
+        CLOGE("PostBytes SoftBusCalloc failed");
         SoftBusFree(data);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -652,7 +635,7 @@ static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t
     node->listener = NULL;
     int32_t ret = BrEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Br enqueue failed, ret: %d", ret);
+        CLOGE("Br enqueue failed, ret: %d", ret);
         SoftBusFree(data);
         SoftBusFree(node);
         return ret;
@@ -663,20 +646,19 @@ static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t
 static int32_t DisconnectDevice(uint32_t connectionId)
 {
     if (!IsExitConnectionById(connectionId)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "br disconnect device failed: not find connection: %u", connectionId);
+        CLOGE("br disconnect device failed: not find connection: %u", connectionId);
         return SOFTBUS_BRCONNECTION_DISCONNECT_NOTFIND;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br disconnect device, connectionId:%u", connectionId);
+    CLOGI("br disconnect device, connectionId:%u", connectionId);
     (void)PackRequest(CONNECT_REF_DECRESE, connectionId);
     return SOFTBUS_OK;
 }
 
 static int32_t DisconnectDeviceNow(const ConnectOption *option)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[DisconnectDeviceNow]");
+    CLOGI("[DisconnectDeviceNow]");
     if (option == NULL || option->type != CONNECT_BR) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "option check fail");
+        CLOGE("option check fail");
         return SOFTBUS_ERR;
     }
     int32_t socketFd = INVALID_SOCKET;
@@ -704,8 +686,7 @@ static int32_t SendAck(BrConnectionInfo *brConnInfo, uint32_t windows, uint64_t 
     }
     int32_t ret = CreateBrPendingPacket(brConnInfo->connectionId, seq);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "create pending failed id: %u, seq: %" PRIu64 ", ret: %d",
-            brConnInfo->connectionId, seq, ret);
+        CLOGW("create pending failed id: %u, seq: %" PRIu64 ", ret: %d", brConnInfo->connectionId, seq, ret);
         SoftBusFree(buf);
         return ret;
     }
@@ -713,8 +694,7 @@ static int32_t SendAck(BrConnectionInfo *brConnInfo, uint32_t windows, uint64_t 
     if (ret != SOFTBUS_OK) {
         DelBrPendingPacket(brConnInfo->connectionId, seq);
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send ack connectId: %u, seq: %" PRIu64 ", result: %d",
-        brConnInfo->connectionId, seq, ret);
+    CLOGI("send ack connectId: %u, seq: %" PRIu64 ", result: %d", brConnInfo->connectionId, seq, ret);
     SoftBusFree(buf);
     return ret;
 }
@@ -728,7 +708,7 @@ static void WaitAck(BrConnectionInfo *brConnInfo, uint64_t seq)
         if (brConnInfo->windows < MAX_WINDOWS) {
             brConnInfo->windows = brConnInfo->windows + 1;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBrPending(%u) TRIGGERED seq:%" PRIu64 ", windows: %u",
+        CLOGI("GetBrPending(%u) TRIGGERED seq:%" PRIu64 ", windows: %u",
             brConnInfo->connectionId, seq, brConnInfo->windows);
         SoftBusFree(data);
         return;
@@ -740,7 +720,7 @@ static void WaitAck(BrConnectionInfo *brConnInfo, uint64_t seq)
         if (brConnInfo->ackTimeoutCount > WINDOWS_ACK_FAILED_TIMES && brConnInfo->windows < DEFAULT_WINDOWS) {
             brConnInfo->windows = DEFAULT_WINDOWS;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GetBrPending(%u) TIMOUT seq:%" PRIu64 ", windows: %u",
+        CLOGI("GetBrPending(%u) TIMOUT seq:%" PRIu64 ", windows: %u",
             brConnInfo->connectionId, seq, brConnInfo->windows);
         return;
     } else if (ret == SOFTBUS_OK) {
@@ -775,12 +755,12 @@ NO_SANITIZE("cfi") void *SendHandlerLoop(void *arg)
         uint32_t connId = sendNode->connectionId;
         BrConnectionInfo *brConnInfo = GetConnectionRef(connId);
         if (brConnInfo == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "[SendLoop] connId: %u, not fount failed", connId);
+            CLOGW("[SendLoop] connId: %u, not fount failed", connId);
             FreeSendNode(sendNode);
             continue;
         }
         if (brConnInfo->socketFd == INVALID_SOCKET) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "[SendLoop] connId: %u, invalid socket", connId);
+            CLOGW("[SendLoop] connId: %u, invalid socket", connId);
             ReleaseConnectionRef(brConnInfo);
             FreeSendNode(sendNode);
             continue;
@@ -799,7 +779,7 @@ NO_SANITIZE("cfi") void *SendHandlerLoop(void *arg)
         }
         ret = BrTransSend(brConnInfo, g_sppDriver, g_brSendPeerLen, sendNode->data, sendNode->len);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrTransSend fail. connId:%u, seq: %" PRIu64, connId, seq);
+            CLOGE("BrTransSend fail. connId:%u, seq: %" PRIu64, connId, seq);
         }
         ReleaseConnectionRef(brConnInfo);
         if (sendNode->listener != NULL) {
@@ -815,7 +795,7 @@ static int32_t InitDataQueue(void)
 {
     pthread_t tid;
     if (pthread_create(&tid, NULL, SendHandlerLoop, NULL) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create DeathProcTask failed");
+        CLOGE("create DeathProcTask failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -823,38 +803,37 @@ static int32_t InitDataQueue(void)
 
 NO_SANITIZE("cfi") void *ConnBrAccept(void *arg)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br server thread start");
+    CLOGI("br server thread start");
     static const char *name = "SOFTBUS_BR_SERVER";
     while (true) {
         if (!g_startListenFlag || g_brEnable != SOFTBUS_BR_STATE_TURN_ON) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-                "it is not ready for listen, as isAccept:%d, g_brEnable:%d", g_startListenFlag, g_brEnable);
+            CLOGE("it is not ready for listen, as isAccept:%d, g_brEnable:%d", g_startListenFlag, g_brEnable);
             break;
         }
         int32_t serverId = g_sppDriver->OpenSppServer(name, strlen(name), UUID, 0);
         if (serverId == SOFTBUS_ERR) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "open spp server failed, name: %s", name);
+            CLOGE("open spp server failed, name: %s", name);
             SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
             continue;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "open spp server ok, name: %s, serverId:%d", name, serverId);
+        CLOGI("open spp server ok, name: %s, serverId:%d", name, serverId);
         while (true) {
             if (!g_startListenFlag || g_brEnable != SOFTBUS_BR_STATE_TURN_ON) {
                 break;
             }
             int32_t clientId = g_sppDriver->Accept(serverId);
             if (clientId == SOFTBUS_ERR) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "accept failed, name:%s, serverId:%d", name, serverId);
+                CLOGE("accept failed, name:%s, serverId:%d", name, serverId);
                 break;
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "accept ok clientId: name:%s, serverId:%d, clientId:%d",
+            CLOGI("accept ok clientId: name:%s, serverId:%d, clientId:%d",
                 name, serverId, clientId);
             ConnBrOnEvent(ADD_CONN_BR_SERVICE_CONNECTED_MSG, clientId, clientId);
         }
         g_sppDriver->CloseSppServer(serverId);
     }
     g_startListenFlag = false;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br server thread exit");
+    CLOGE("br server thread exit");
     return NULL;
 }
 
@@ -872,7 +851,7 @@ static int32_t StartLocalListening(const LocalListenerInfo *info)
     pthread_attr_t threadAttr;
     pthread_attr_init(&threadAttr);
     if (pthread_create(&tid, &threadAttr, ConnBrAccept, NULL) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create ConnBrAccept failed");
+        CLOGE("create ConnBrAccept failed");
         pthread_attr_destroy(&threadAttr);
         return SOFTBUS_ERR;
     }
@@ -896,29 +875,29 @@ static int32_t InitProperty()
     g_brSendPeerLen = INVALID_LENGTH;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
         (unsigned char*)&g_brBuffSize, sizeof(g_brBuffSize)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br BuffSize fail");
+        CLOGE("get br BuffSize fail");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br BuffSize is %u", g_brBuffSize);
+    CLOGI("br BuffSize is %u", g_brBuffSize);
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN,
         (unsigned char*)&g_brSendPeerLen, sizeof(g_brSendPeerLen)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br SendPeerLen fail");
+        CLOGE("get br SendPeerLen fail");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br SendPeerLen is %u", g_brSendPeerLen);
+    CLOGI("br SendPeerLen is %u", g_brSendPeerLen);
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN,
         (unsigned char*)&g_brSendQueueMaxLen, sizeof(g_brSendQueueMaxLen)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get br SendQueueMaxLen fail");
+        CLOGE("get br SendQueueMaxLen fail");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br SendQueueMaxLen is %u", g_brSendQueueMaxLen);
+    CLOGI("br SendQueueMaxLen is %u", g_brSendQueueMaxLen);
     if (g_brBuffSize == INVALID_LENGTH || g_brBuffSize > MAX_BR_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brBuffSize");
+        CLOGE("Cannot get brBuffSize");
         return SOFTBUS_ERR;
     }
     if (g_brSendPeerLen == INVALID_LENGTH || g_brSendPeerLen > MAX_BR_PEER_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brSendPeerLen");
+        CLOGE("Cannot get brSendPeerLen");
         return SOFTBUS_ERR;
     }
     if (g_brSendQueueMaxLen == SOFTBUS_ERR || g_brSendQueueMaxLen > MAX_BR_PEER_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot get brSendQueueMaxLen");
+        CLOGE("Cannot get brSendQueueMaxLen");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -931,7 +910,7 @@ typedef struct BrReadThreadParams {
 
 NO_SANITIZE("cfi") void *ConnBrRead(void *arg)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnBrRead start");
+    CLOGI("ConnBrRead start");
     if (arg == NULL) {
         return NULL;
     }
@@ -950,24 +929,24 @@ NO_SANITIZE("cfi") void *ConnBrRead(void *arg)
         char *outBuf = NULL;
         int32_t packLen = BrTransReadOneFrame(connId, g_sppDriver, socketFd, &outBuf);
         if (packLen == BR_READ_SOCKET_CLOSED) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrRead] failed socket close");
+            CLOGE("[ConnBrRead] failed socket close");
             g_sppDriver->DisConnect(socketFd);
             BrDisconnect(socketFd, socketFd);
             return NULL;
         }
         if (packLen == BR_READ_FAILED) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrRead] failed");
+            CLOGE("[ConnBrRead] failed");
             g_sppDriver->DisConnect(socketFd);
             BrDisconnect(socketFd, socketFd);
             return NULL;
         }
         if (outBuf == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrRead] outBuf null");
+            CLOGE("[ConnBrRead] outBuf null");
             continue;
         }
         SoftBusMessage *msg = BrConnCreateLoopMsg(ADD_CONN_BR_RECV_MSG, (uint64_t)connId, (uint64_t)packLen, outBuf);
         if (msg == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ConnBrRead] BrConnCreateLoopMsg failed");
+            CLOGE("[ConnBrRead] BrConnCreateLoopMsg failed");
             SoftBusFree(outBuf);
             continue;
         }
@@ -997,13 +976,13 @@ NO_SANITIZE("cfi") void BrConnectedEventHandle(bool isClient, uint32_t value)
     args->connInfoId = connInfoId;
     args->socketFd = socketFd;
     if (pthread_create(&tid, NULL, ConnBrRead, (void *)args) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "create ConnBrRead failed");
+        CLOGE("create ConnBrRead failed");
         SoftBusFree(args);
         goto EXIT;
     }
     return;
 EXIT:
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrConnectedEventHandle EXIT");
+    CLOGE("BrConnectedEventHandle EXIT");
     if (!isClient) {
         ConnBrOnEvent(ADD_CONN_BR_SERVICE_DISCONNECTED_MSG, socketFd, socketFd);
     } else {
@@ -1019,7 +998,7 @@ static void Resume(uint32_t connectionId)
     ListInit(&pendings);
 
     if (ResumeConnection(connectionId, &pendings) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "resume pending connection %u failed", connectionId);
+        CLOGE("resume pending connection %u failed", connectionId);
         return;
     }
 
@@ -1037,8 +1016,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
 {
     BrConnectionInfo *connInfo = GetConnectionRef(connectionId);
     if (connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "br OnPackResponse failed: not find device, connectionId: %u", connectionId);
+        CLOGE("br OnPackResponse failed: not find device, connectionId: %u", connectionId);
         return;
     }
     connInfo->refCount += delta;
@@ -1047,18 +1025,16 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
     int32_t sideType = connInfo->sideType;
     ReleaseConnectionRef(connInfo);
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "br OnPackResponse: delta=%d, remoteRef=%d, myRef:%d, connectionId=%u",
-            delta, peerRef, myRefCount, connectionId);
+    CLOGI("br OnPackResponse: delta=%d, remoteRef=%d, myRef:%d, connectionId=%u",
+        delta, peerRef, myRefCount, connectionId);
     if (peerRef > 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[remote device Ref is > 0, do not reply]");
+        CLOGI("[remote device Ref is > 0, do not reply]");
         // resume connection when peer reference is larger than 0
         Resume(connectionId);
         return;
     }
     if (myRefCount <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-            "br OnPackResponse local device ref <= 0, and remote ref <=0 close connection now");
+        CLOGI("br OnPackResponse local device ref <= 0, and remote ref <=0 close connection now");
         SetBrConnStateByConnId(connectionId, BR_CONNECTION_STATE_CLOSING);
         if (sideType == BR_SERVICE_TYPE) {
             ConnBrOnEvent(ADD_CONN_BR_SERVICE_DISCONNECTED_MSG, mySocketFd, mySocketFd);
@@ -1078,7 +1054,7 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
 static int32_t OnAck(uint32_t connectionId, uint32_t localWindows, uint64_t remoteSeq)
 {
     int32_t dataLen = 0;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "send ack seq: %" PRIu64 " respone", remoteSeq);
+    CLOGI("send ack seq: %" PRIu64 " respone", remoteSeq);
     char *buf = BrPackRequestOrResponse(METHOD_ACK_RESPONSE, connectionId, (int32_t)localWindows, remoteSeq, &dataLen);
     if (buf != NULL) {
         return PostBytesInner(connectionId, METHOD_ACK_RESPONSE, buf, dataLen);
@@ -1106,27 +1082,26 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
     if (keyMethod == METHOD_NOTIFY_REQUEST) {
         if (!GetJsonObjectSignedNumberItem(data, KEY_DELTA, &keyDelta) ||
             !GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyReferenceNum)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "REQUEST fail");
+            CLOGI("REQUEST fail");
             return;
         }
         OnPackResponse(keyDelta, keyReferenceNum, connectionId);
     } else if (keyMethod == METHOD_NOTIFY_RESPONSE) {
         if (!GetJsonObjectSignedNumberItem(data, KEY_REFERENCE_NUM, &keyReferenceNum)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RESPONSE fail");
+            CLOGI("RESPONSE fail");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-            "br NOTIFY_RESPONSE, connectionId:%u, remote ref:%d", connectionId, keyReferenceNum);
+        CLOGI("br NOTIFY_RESPONSE, connectionId:%u, remote ref:%d", connectionId, keyReferenceNum);
         SetBrConnStateByConnId(connectionId, BR_CONNECTION_STATE_CONNECTED);
     } else if (keyMethod == METHOD_NOTIFY_ACK) {
         int32_t remoteWindows;
         int64_t remoteSeq;
         if (!GetJsonObjectSignedNumberItem(data, KEY_WINDOWS, &remoteWindows) ||
             !GetJsonObjectNumber64Item(data, KEY_ACK_SEQ_NUM, &remoteSeq)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ACK REQUEST fail");
+            CLOGI("ACK REQUEST fail");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ACK REQUEST(%u) remote seq: %" PRIu64 ", windows: %d",
+        CLOGI("recv ACK REQUEST(%u) remote seq: %" PRIu64 ", windows: %d",
             connectionId, remoteSeq, remoteWindows);
         OnAck(connectionId, GetLocalWindowsByConnId(connectionId), (uint64_t)remoteSeq);
     } else if (keyMethod == METHOD_ACK_RESPONSE) {
@@ -1134,13 +1109,13 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
         int64_t remoteSeq;
         if (!GetJsonObjectSignedNumberItem(data, KEY_WINDOWS, &remoteWindows) ||
             !GetJsonObjectNumber64Item(data, KEY_ACK_SEQ_NUM, &remoteSeq)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ACK RESPONSE fail");
+            CLOGI("ACK RESPONSE fail");
             return;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ACK RESPONSE(%u) remote seq: %" PRId64 ", windows: %d",
+        CLOGI("recv ACK RESPONSE(%u) remote seq: %" PRId64 ", windows: %d",
             connectionId, remoteSeq, remoteWindows);
         if (SetBrPendingPacket(connectionId, (uint64_t)remoteSeq, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SetBrPendingPacket(%u) failed seq: %" PRId64,
+            CLOGI("SetBrPendingPacket(%u) failed seq: %" PRId64,
                 connectionId, remoteSeq);
         }
     }
@@ -1149,16 +1124,16 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
 static void BrRecvDataHandle(uint32_t connectionId, const char *buf, int32_t len)
 {
     if (len - (int32_t)sizeof(ConnPktHead) <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br recv data illegal data size: %d", len);
+        CLOGE("br recv data illegal data size: %d", len);
         return;
     }
     ConnPktHead *head = (ConnPktHead *)buf;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrRecvDataHandle module: %d", head->module);
+    CLOGI("BrRecvDataHandle module: %d", head->module);
     if (head->module == MODULE_CONNECTION) {
         cJSON *data = NULL;
         data = cJSON_ParseWithLength(buf + sizeof(ConnPktHead), len - (int32_t)sizeof(ConnPktHead));
         if (data == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br recv data invalid");
+            CLOGE("br recv data invalid");
             return;
         }
         BrConnectedComdHandl(connectionId, (const cJSON *)data);
@@ -1175,7 +1150,7 @@ NO_SANITIZE("cfi") static void BrConnMsgHandler(SoftBusMessage *msg)
     if (msg == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br conn loop process msg type %d", msg->what);
+    CLOGI("br conn loop process msg type %d", msg->what);
     switch (msg->what) {
         case ADD_CONN_BR_CLIENT_CONNECTED_MSG:
             BrConnectedEventHandle(true, msg->arg1);
@@ -1209,7 +1184,7 @@ static int32_t BrConnLooperInit(void)
 {
     g_brAsyncHandler.looper = CreateNewLooper("brRecv_looper");
     if (g_brAsyncHandler.looper == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrConnLooperInit failed");
+        CLOGE("BrConnLooperInit failed");
         return SOFTBUS_ERR;
     }
     g_brAsyncHandler.HandleMessage = BrConnMsgHandler;
@@ -1218,7 +1193,7 @@ static int32_t BrConnLooperInit(void)
 
 static void StateChangedCallback(int32_t listenerId, int32_t status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "StateChanged id: %d, status: %d", listenerId, status);
+    CLOGI("StateChanged id: %d, status: %d", listenerId, status);
 
     LocalListenerInfo info;
     info.type = CONNECT_BR;
@@ -1240,7 +1215,7 @@ static int32_t SppRegisterConnCallback(void)
 
 NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[InitBR]");
+    CLOGI("[InitBR]");
     if (InitProperty() != SOFTBUS_OK) {
         return NULL;
     }
