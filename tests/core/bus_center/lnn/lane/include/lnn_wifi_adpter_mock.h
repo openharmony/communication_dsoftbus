@@ -27,6 +27,7 @@ public:
     LnnWifiAdpterInterface() {};
     virtual ~LnnWifiAdpterInterface() {};
     virtual int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info) = 0;
+    virtual SoftBusBand SoftBusGetLinkBand(void) = 0;
 };
 
 class LnnWifiAdpterInterfaceMock : public LnnWifiAdpterInterface {
@@ -34,6 +35,7 @@ public:
     LnnWifiAdpterInterfaceMock();
     ~LnnWifiAdpterInterfaceMock() override;
     MOCK_METHOD1(SoftBusGetLinkedInfo, int32_t (SoftBusWifiLinkedInfo*));
+    MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand ());
 };
 
 } // namespace OHOS

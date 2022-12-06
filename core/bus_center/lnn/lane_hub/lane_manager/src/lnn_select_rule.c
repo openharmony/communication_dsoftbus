@@ -29,10 +29,10 @@
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
+#include "softbus_wifi_api_adapter.h"
 #include "wifi_device.h"
 
 #define LNN_LINK_DEFAULT_SCORE 60 /* Indicates that scoring is not supported */
-#define WLAN_2PG_BAND 1
 
 static int32_t GetWlanLinkedFrequency(void)
 {
@@ -61,25 +61,10 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
     return true;
 }
 
-static bool IsWlan2P4G(void)
-{
-    LnnWlanLinkedInfo info;
-    int32_t ret = LnnGetWlanLinkedInfo(&info);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetWlanLinkedInfo fail, ret:%d", ret);
-        return false;
-    }
-    if (info.band == WLAN_2PG_BAND) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current wlan is 2.4G");
-        return true;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current wlan is 5G");
-    return false;
-}
-
 static bool IsEnableWlan2P4G(const char *networkId)
 {
-    if (!IsWlan2P4G()) {
+    if (SoftBusGetLinkBand() == BAND_5G) {
+        LLOGE("current band is 5G");
         return false;
     }
     int32_t local, remote;
@@ -97,7 +82,8 @@ static bool IsEnableWlan2P4G(const char *networkId)
 
 static bool IsEnableWlan5G(const char *networkId)
 {
-    if (IsWlan2P4G()) {
+    if (SoftBusGetLinkBand() == BAND_24G) {
+        LLOGE("current band is 2.4G");
         return false;
     }
     int32_t local, remote;

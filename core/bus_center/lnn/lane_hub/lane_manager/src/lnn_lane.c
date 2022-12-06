@@ -123,7 +123,7 @@ static bool CheckListener(const ILaneIdStateListener *listener)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneIdListener is null");
         return false;
     }
-    if ((listener->OnLaneIdEnabled == NULL) && (listener->OnLaneIdDisabled == NULL)) {
+    if ((listener->onLaneIdEnabled == NULL) && (listener->onLaneIdDisabled == NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "listener invalid");
         return false;
     }
@@ -227,8 +227,8 @@ static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
         return;
     }
     for (uint32_t i = 0; i < listenerNum; i++) {
-        if (listener[i].OnLaneIdEnabled != NULL) {
-            listener[i].OnLaneIdEnabled(laneId, profileId);
+        if (listener[i].onLaneIdEnabled != NULL) {
+            listener[i].onLaneIdEnabled(laneId, profileId);
         }
     }
     SoftBusFree(listener);
@@ -243,8 +243,8 @@ static void LaneIdDisabled(uint32_t laneId, uint32_t laneProfileId)
         return;
     }
     for (uint32_t i = 0; i < listenerNum; i++) {
-        if (listener[i].OnLaneIdDisabled != NULL) {
-            listener[i].OnLaneIdDisabled(laneId, laneProfileId);
+        if (listener[i].onLaneIdDisabled != NULL) {
+            listener[i].onLaneIdDisabled(laneId, laneProfileId);
         }
     }
     SoftBusFree(listener);
@@ -366,8 +366,8 @@ NO_SANITIZE("cfi") int32_t InitLane(void)
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    g_laneIdListener.OnLaneIdEnabled = LaneIdEnabled;
-    g_laneIdListener.OnLaneIdDisabled = LaneIdDisabled;
+    g_laneIdListener.onLaneIdEnabled = LaneIdEnabled;
+    g_laneIdListener.onLaneIdDisabled = LaneIdDisabled;
     g_laneObject[LANE_TYPE_TRANS] = TransLaneGetInstance();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "transLane get instance succ");
