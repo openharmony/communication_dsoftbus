@@ -248,9 +248,11 @@ static void DiscoveryTestEntry(int testWay, int count)
     char *testData = (char *)SoftBusCalloc(SEND_DATA_SIZE_64K + 1);
     if (testData == NULL) {
         printf("DiscoveryTestEntry malloc fail!\n");
+        return;
     }
     if (memcpy_s(testData, SEND_DATA_SIZE_64K + 1, g_testData, strlen(g_testData)) != EOK) {
         printf("memcpy_s g_testData failed!\n");
+        SoftBusFree(testData);
         return;
     }
     int ret = SOFTBUS_OK;

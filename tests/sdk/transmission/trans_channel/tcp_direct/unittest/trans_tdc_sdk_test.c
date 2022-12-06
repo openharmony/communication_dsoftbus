@@ -219,6 +219,7 @@ static int DataSend(int size, int type)
         return SOFTBUS_MALLOC_ERR;
     }
     if (memset_s(g_contcx, size, "h", size) != EOK) {
+        free(g_contcx);
         return SOFTBUS_ERR;
     }
     Wait();
