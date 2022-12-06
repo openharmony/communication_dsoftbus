@@ -71,7 +71,8 @@ void VtpStreamSocketTest::TearDownTestCase(void)
  */
 HWTEST_F(VtpStreamSocketTest, CreateClient001, TestSize.Level1)
 {
-    Communication::SoftBus::IpAndPort *local = (Communication::SoftBus::IpAndPort*)SoftBusMalloc(sizeof(Communication::SoftBus::IpAndPort));
+    Communication::SoftBus::IpAndPort *local =
+        (Communication::SoftBus::IpAndPort*)SoftBusMalloc(sizeof(Communication::SoftBus::IpAndPort));
     ASSERT_TRUE(local != nullptr);
     (void)memset_s(local, sizeof(Communication::SoftBus::IpAndPort), 0, sizeof(Communication::SoftBus::IpAndPort));
 
@@ -140,7 +141,7 @@ HWTEST_F(VtpStreamSocketTest, CreateClient002, TestSize.Level1)
  */
 HWTEST_F(VtpStreamSocketTest, CreateServer001, TestSize.Level1)
 {
-    Communication::SoftBus::IpAndPort *local = 
+    Communication::SoftBus::IpAndPort *local =
         (Communication::SoftBus::IpAndPort*)SoftBusMalloc(sizeof(Communication::SoftBus::IpAndPort));
     ASSERT_TRUE(local != nullptr);
     (void)memset_s(local, sizeof(Communication::SoftBus::IpAndPort), 0, sizeof(Communication::SoftBus::IpAndPort));
@@ -310,7 +311,6 @@ HWTEST_F(VtpStreamSocketTest, GetOption002, TestSize.Level1)
  */
 HWTEST_F(VtpStreamSocketTest, SetStreamListener001, TestSize.Level1)
 {
-
     std::shared_ptr<IStreamSocketListener> receiver = nullptr;
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
