@@ -36,6 +36,8 @@ public:
     ~LnnWifiAdpterInterfaceMock() override;
     MOCK_METHOD1(SoftBusGetLinkedInfo, int32_t (SoftBusWifiLinkedInfo*));
     MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand ());
+
+    void SetDefaultResult(void);
 };
 
 } // namespace OHOS
