@@ -68,7 +68,7 @@ HWTEST_F(RawStreamDataTest, SetTimeStamp001, TestSize.Level1)
     uint32_t timestamp = 0;
     rRawStreamData->SetTimeStamp(timestamp);
     uint32_t tmp = rRawStreamData->GetTimeStamp();
-    EXPECT_EQ(0, tmp);
+    EXPECT_EQ(0, (int)tmp);
     rRawStreamData->~RawStreamData();
 }
 
