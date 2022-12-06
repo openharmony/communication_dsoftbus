@@ -38,6 +38,10 @@ public:
     virtual int32_t SoftBusEncryptDataWithSeq(AesGcmCipherKey *cipherKey,
         const unsigned char *input, uint32_t inLen,
         unsigned char *encryptData, uint32_t *encryptLen, int32_t seqNum) = 0;
+
+    virtual int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey,
+        const unsigned char *input, uint32_t inLen,
+        unsigned char *decryptData, uint32_t *decryptLen, int32_t seqNum) = 0;
 };
 
 class TransCommInterfaceMock : public TransCommInterface {
@@ -52,6 +56,8 @@ public:
     MOCK_METHOD5(SoftBusBase64Decode, int32_t (unsigned char *, size_t, size_t *, const unsigned char *, size_t));
 
     MOCK_METHOD6(SoftBusEncryptDataWithSeq, int32_t (AesGcmCipherKey *, const unsigned char *, uint32_t,
+        unsigned char *, uint32_t *, int32_t));
+    MOCK_METHOD6(SoftBusDecryptDataWithSeq, int32_t (AesGcmCipherKey *, const unsigned char *, uint32_t,
         unsigned char *, uint32_t *, int32_t));
 };
 
