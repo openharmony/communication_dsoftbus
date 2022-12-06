@@ -35,7 +35,7 @@ static LnnWifiAdpterInterface *GetWifiAdpterInterface()
     return reinterpret_cast<LnnWifiAdpterInterface *>(g_wifiAdpterInterface);
 }
 
-void LnnWifiAdpterInterface::SetDefaultResult()
+void LnnWifiAdpterInterfaceMock::SetDefaultResult()
 {
     EXPECT_CALL(*this, SoftBusGetLinkBand).WillRepeatedly(Return(BAND_UNKNOWN));
 }
