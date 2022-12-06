@@ -62,14 +62,14 @@ NO_SANITIZE("cfi") int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
     PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PendingPacket existed. id: %u, seq: %" PRIu64, id, seq);
+            CLOGE("PendingPacket existed. id: %u, seq: %" PRIu64, id, seq);
             (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_ALREADY_EXISTED;
         }
     }
     pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
     if (pending == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateBrPendingPacket SoftBusCalloc failed");
+        CLOGE("CreateBrPendingPacket SoftBusCalloc failed");
         (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -167,7 +167,7 @@ NO_SANITIZE("cfi") int32_t SetBrPendingPacket(uint32_t id, uint64_t seq, void *d
 {
     PendingPacket *item = NULL;
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetBrPendingPacket SoftBusMutexLock failed");
+        CLOGE("SetBrPendingPacket SoftBusMutexLock failed");
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
