@@ -115,7 +115,8 @@ HWTEST_F(VtpInstanceTest, PreSetFillpCoreParams001, TestSize.Level1)
  */
 HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
 {
-    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance = std::make_shared<Communication::SoftBus::VtpInstance>();
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
 
     vtpInstance->PreSetFillpCoreParams();
 
