@@ -90,7 +90,7 @@ static SoftBusMessage *BleConnCreateLoopMsg(int32_t what, uint64_t arg1, uint64_
     SoftBusMessage *msg = NULL;
     msg = SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleConnCreateLoopMsg SoftBusCalloc failed");
+        CLOGE("BleConnCreateLoopMsg SoftBusCalloc failed");
         return NULL;
     }
     msg->what = what;
@@ -116,7 +116,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerSend(int32_t halConnId, const char *
         .valueLen = len,
         .value = (char *)data
     };
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattServerSend  halconnId:%d attrHandle:%d confirm:%d",
+    CLOGI("SoftBusGattServerSend halconnId:%d attrHandle:%d confirm:%d",
         notify.connectId, notify.attrHandle, notify.confirm);
     return SoftBusGattsSendNotify(&notify);
 }
@@ -124,12 +124,12 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerSend(int32_t halConnId, const char *
 NO_SANITIZE("cfi") int32_t SoftBusGattServerStartService(void)
 {
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattServerStartService lock mutex failed");
+        CLOGE("SoftBusGattServerStartService lock mutex failed");
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
     if ((g_gattService.state == BLE_GATT_SERVICE_STARTED) ||
         (g_gattService.state == BLE_GATT_SERVICE_STARTING)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Ble service already started or is starting");
+        CLOGI("Ble service already started or is starting");
         (void)SoftBusMutexUnlock(&g_serviceStateLock);
         return SOFTBUS_OK;
     }
@@ -137,7 +137,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerStartService(void)
         g_gattService.state = BLE_GATT_SERVICE_STARTING;
         int ret = SoftBusGattsStartService(g_gattService.svcId);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattsStartService failed");
+            CLOGE("SoftBusGattsStartService failed");
             SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_START_FAIL);
             g_gattService.state = BLE_GATT_SERVICE_ADDED;
         }
@@ -145,19 +145,19 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerStartService(void)
         return (ret == SOFTBUS_OK) ? ret : SOFTBUS_ERR;
     }
     (void)SoftBusMutexUnlock(&g_serviceStateLock);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "start gatt service wrong state:%d", g_gattService.state);
+    CLOGE("start gatt service wrong state:%d", g_gattService.state);
     return SOFTBUS_ERR;
 }
 
 NO_SANITIZE("cfi") int32_t SoftBusGattServerStopService(void)
 {
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusGattServerStopService lock mutex failed");
+        CLOGE("SoftBusGattServerStopService lock mutex failed");
         return SOFTBUS_BLECONNECTION_MUTEX_LOCK_ERROR;
     }
     if ((g_gattService.state == BLE_GATT_SERVICE_ADDED) ||
         (g_gattService.state == BLE_GATT_SERVICE_STOPPING)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Ble service already stopped or is stopping");
+        CLOGI("Ble service already stopped or is stopping");
         (void)SoftBusMutexUnlock(&g_serviceStateLock);
         return SOFTBUS_OK;
     }
@@ -171,7 +171,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerStopService(void)
         return (ret == SOFTBUS_OK) ? ret : SOFTBUS_ERR;
     }
     (void)SoftBusMutexUnlock(&g_serviceStateLock);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "stop gatt service wrong state:%d", g_gattService.state);
+    CLOGE("stop gatt service wrong state:%d", g_gattService.state);
     SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_STOP_FAIL);
     return SOFTBUS_ERR;
 }
@@ -182,7 +182,7 @@ static void UpdateGattService(SoftBusGattService *service, int status)
         return;
     }
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return;
     }
     switch (service->state) {
@@ -194,7 +194,7 @@ static void UpdateGattService(SoftBusGattService *service, int status)
                 (service->bleNetDesId != -1)) {
                 service->state = BLE_GATT_SERVICE_ADDED;
                 if (SoftBusGattServerStartService() != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleStartLocalListening failed");
+                    CLOGE("BleStartLocalListening failed");
                 }
                 break;
             }
@@ -232,7 +232,7 @@ static void ResetGattService(SoftBusGattService *service)
         return;
     }
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return;
     }
     if (service->svcId != -1) {
@@ -256,25 +256,24 @@ static void ResetGattService(SoftBusGattService *service)
 
 NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceAddCallback srvcHandle=%d\n", srvcHandle);
+    CLOGI("ServiceAddCallback srvcHandle=%d\n", srvcHandle);
     if ((uuid == NULL) || (uuid->uuid == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceAddCallback appUuid is null");
+        CLOGE("BleServiceAddCallback appUuid is null");
         return;
     }
 
     if (memcmp(uuid->uuid, SOFTBUS_SERVICE_UUID, uuid->uuidLen) == 0) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
+            CLOGE("BleRegisterServerCallback failed, status=%d", status);
             return;
         }
         if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+            CLOGE("lock mutex failed");
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-                "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
+            CLOGE("g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
             (void)SoftBusMutexUnlock(&g_serviceStateLock);
             return;
         }
@@ -307,30 +306,29 @@ NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, SoftBusBtUuid *
         }
         g_bleAsyncHandler.looper->PostMessage(g_bleAsyncHandler.looper, msg);
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceAddCallback unknown uuid");
+        CLOGE("BleServiceAddCallback unknown uuid");
     }
 }
 
 NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, SoftBusBtUuid *uuid, int srvcHandle,
     int characteristicHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle, characteristicHandle);
+    CLOGI("CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle, characteristicHandle);
     if ((uuid == NULL) || (uuid->uuid == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceAddCallback appUuid is null");
+        CLOGE("BleServiceAddCallback appUuid is null");
         return;
     }
     if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, SOFTBUS_CHARA_BLENET_UUID, uuid->uuidLen) == 0)) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
+            CLOGE("BleRegisterServerCallback failed, status=%d", status);
             return;
         }
         if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "g_gattService state not equal BLE_GATT_SERVICE_ADDING");
+            CLOGE("g_gattService state not equal BLE_GATT_SERVICE_ADDING");
             (void)SoftBusMutexUnlock(&g_serviceStateLock);
             return;
         }
@@ -341,7 +339,7 @@ NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, SoftBusB
     if ((srvcHandle == g_gattService.svcId) && (memcmp(uuid->uuid, SOFTBUS_CHARA_BLECONN_UUID, uuid->uuidLen) == 0)) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
+            CLOGE("BleRegisterServerCallback failed, status=%d", status);
             return;
         }
         if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
@@ -365,10 +363,9 @@ NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, SoftBusB
 NO_SANITIZE("cfi") static void BleDescriptorAddCallback(int status, SoftBusBtUuid *uuid,
     int srvcHandle, int descriptorHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "DescriptorAddCallback srvcHandle=%d,descriptorHandle=%d\n",
-        srvcHandle, descriptorHandle);
+    CLOGI("DescriptorAddCallback srvcHandle=%d,descriptorHandle=%d", srvcHandle, descriptorHandle);
     if ((uuid == NULL) || (uuid->uuid == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceAddCallback appUuid is null");
+        CLOGE("BleServiceAddCallback appUuid is null");
         return;
     }
 
@@ -376,16 +373,15 @@ NO_SANITIZE("cfi") static void BleDescriptorAddCallback(int status, SoftBusBtUui
         (memcmp(uuid->uuid, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID, uuid->uuidLen) == 0)) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleRegisterServerCallback failed, status=%d", status);
+            CLOGE("BleRegisterServerCallback failed, status=%d", status);
             return;
         }
         if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+            CLOGE("lock mutex failed");
             return;
         }
         if (g_gattService.state != BLE_GATT_SERVICE_ADDING) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-                "g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
+            CLOGE("g_gattService wrong state, should be BLE_GATT_SERVICE_ADDING");
             (void)SoftBusMutexUnlock(&g_serviceStateLock);
             return;
         }
@@ -397,43 +393,43 @@ NO_SANITIZE("cfi") static void BleDescriptorAddCallback(int status, SoftBusBtUui
         }
         (void)SoftBusMutexUnlock(&g_serviceStateLock);
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleDescriptorAddCallback unknown srvcHandle or uuid");
+        CLOGE("BleDescriptorAddCallback unknown srvcHandle or uuid");
     }
 }
 
 NO_SANITIZE("cfi") static void BleServiceStartCallback(int status, int srvcHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceStartCallback srvcHandle=%d\n", srvcHandle);
+    CLOGI("ServiceStartCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
         return;
     }
     if (status != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStartCallback start failed");
+        CLOGE("BleServiceStartCallback start failed");
     }
     UpdateGattService(&g_gattService, status);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleServiceStartCallback start success");
+    CLOGI("BleServiceStartCallback start success");
 }
 
 NO_SANITIZE("cfi") static void BleServiceStopCallback(int status, int srvcHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceStopCallback srvcHandle=%d\n", srvcHandle);
+    CLOGI("ServiceStopCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
         return;
     }
     if (status != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStopCallback stop failed");
+        CLOGE("BleServiceStopCallback stop failed");
     }
     UpdateGattService(&g_gattService, status);
 }
 
 NO_SANITIZE("cfi") static void BleServiceDeleteCallback(int status, int srvcHandle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ServiceDeleteCallback srvcHandle=%d\n", srvcHandle);
+    CLOGI("ServiceDeleteCallback srvcHandle=%d\n", srvcHandle);
     if (srvcHandle != g_gattService.svcId) {
         return;
     }
     if (status != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleServiceStopCallback stop failed");
+        CLOGE("BleServiceStopCallback stop failed");
     }
     UpdateGattService(&g_gattService, status);
     SoftBusUnRegisterGattsCallbacks();
@@ -441,15 +437,15 @@ NO_SANITIZE("cfi") static void BleServiceDeleteCallback(int status, int srvcHand
 
 NO_SANITIZE("cfi") static void BleConnectServerCallback(int halConnId, const SoftBusBtAddr *btAddr)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectServerCallback is coming, halConnId=%d\n", halConnId);
+    CLOGI("ConnectServerCallback is coming, halConnId=%d\n", halConnId);
     if (btAddr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "btAddr is null");
+        CLOGE("btAddr is null");
         return;
     }
     char bleStrMac[BT_MAC_LEN];
     int ret = ConvertBtMacToStr(bleStrMac, BT_MAC_LEN, btAddr->addr, BT_ADDR_LEN);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr failed:%d", ret);
+        CLOGE("Convert ble addr failed:%d", ret);
         return;
     }
     g_softBusBleConnCb->BleConnectCallback(halConnId, bleStrMac, btAddr);
@@ -457,9 +453,9 @@ NO_SANITIZE("cfi") static void BleConnectServerCallback(int halConnId, const Sof
 
 NO_SANITIZE("cfi") static void BleDisconnectServerCallback(int halConnId, const SoftBusBtAddr *btAddr)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "DisconnectServerCallback is coming, halconnId=%d", halConnId);
+    CLOGI("DisconnectServerCallback is coming, halconnId=%d", halConnId);
     if (btAddr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "btAddr is null");
+        CLOGE("btAddr is null");
         return;
     }
     char bleStrMac[BT_MAC_LEN];
@@ -468,7 +464,7 @@ NO_SANITIZE("cfi") static void BleDisconnectServerCallback(int halConnId, const 
     halConnInfo.isServer = BLE_SERVER_TYPE;
     int ret = ConvertBtMacToStr(bleStrMac, BT_MAC_LEN, btAddr->addr, BT_ADDR_LEN);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Convert ble addr failed:%d", ret);
+        CLOGE("Convert ble addr failed:%d", ret);
         return;
     }
     g_softBusBleConnCb->BleDisconnectCallback(halConnInfo, SOFTBUS_BLECONNECTION_SERVER_DISCONNECT);
@@ -478,7 +474,7 @@ NO_SANITIZE("cfi") static void SoftBusGattServerOnDataReceived(int32_t handle, i
     const char *value)
 {
     if (value == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattServerOnDataReceived invalid data");
+        CLOGE("GattServerOnDataReceived invalid data");
         return;
     }
     bool isBleConn = handle == g_gattService.bleConnCharaId;
@@ -490,8 +486,7 @@ NO_SANITIZE("cfi") static void SoftBusGattServerOnDataReceived(int32_t handle, i
 
 NO_SANITIZE("cfi") static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RequestReadCallback transId=%d, attrHandle=%d\n",
-        readCbPara.transId, readCbPara.attrHandle);
+    CLOGI("RequestReadCallback transId=%d, attrHandle=%d", readCbPara.transId, readCbPara.attrHandle);
     SoftBusGattsResponse response = {
         .connectId = readCbPara.connId,
         .status = SOFTBUS_BT_STATUS_SUCCESS,
@@ -499,7 +494,7 @@ NO_SANITIZE("cfi") static void BleRequestReadCallback(SoftBusGattReadRequest rea
         .valueLen = strlen("not support!") + 1,
         .value = "not support!"
     };
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleRequestReadCallback sendresponse");
+    CLOGI("BleRequestReadCallback sendresponse");
     SoftBusGattsSendResponse(&response);
 }
 
@@ -516,8 +511,7 @@ static void BleSendGattRsp(SoftBusGattWriteRequest *request)
         .value = (char *)request->value
     };
     int ret = SoftBusGattsSendResponse(&response);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "send gatt response, handle: %d, ret: %d", request->attrHandle, ret);
+    CLOGI("send gatt response, handle: %d, ret: %d", request->attrHandle, ret);
 }
 
 static void BleRequestCharacteristicWriteCallback(SoftBusGattWriteRequest *request)
@@ -542,8 +536,7 @@ static void BleRequestCharacteristicWriteCallback(SoftBusGattWriteRequest *reque
 
 NO_SANITIZE("cfi") static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "RequestWriteCallback halconnId: %d, transId: %d, attrHandle: %d, value length: %d, need rsp: %d",
+    CLOGI("RequestWriteCallback halconnId: %d, transId: %d, attrHandle: %d, value length: %d, need rsp: %d",
         writeCbPara.connId, writeCbPara.transId, writeCbPara.attrHandle, writeCbPara.length, writeCbPara.needRsp);
 
     if (writeCbPara.attrHandle == g_gattService.bleConnDesId ||
@@ -556,32 +549,30 @@ NO_SANITIZE("cfi") static void BleRequestWriteCallback(SoftBusGattWriteRequest w
         BleRequestCharacteristicWriteCallback(&writeCbPara);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN,
-        "BleRequestWriteCallback receive unexpectedly notify, handle: %d, expect: [%d, %d, %d, %d]",
+    CLOGW("BleRequestWriteCallback receive unexpectedly notify, handle: %d, expect: [%d, %d, %d, %d]",
         writeCbPara.attrHandle, g_gattService.bleConnDesId, g_gattService.bleNetDesId,
         g_gattService.bleConnCharaId, g_gattService.bleNetCharaId);
 }
 
 NO_SANITIZE("cfi") static void BleResponseConfirmationCallback(int status, int handle)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO,
-        "ResponseConfirmationCallback status=%d, handle=%d\n", status, handle);
+    CLOGI("ResponseConfirmationCallback status=%d, handle=%d", status, handle);
 }
 
 static void BleNotifySentCallback(int connId, int status)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "IndicationSentCallback status=%d, connId=%d\n", status, connId);
+    CLOGI("IndicationSentCallback status=%d, connId=%d", status, connId);
 }
 
 NO_SANITIZE("cfi") static void BleMtuChangeCallback(int connId, int mtu)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "MtuChangeCallback connId=%d, mtu=%d\n", connId, mtu);
+    CLOGI("MtuChangeCallback connId=%d, mtu=%d", connId, mtu);
     BleHalConnInfo halConnInfo;
     halConnInfo.halConnId = connId;
     halConnInfo.isServer = BLE_SERVER_TYPE;
     BleConnectionInfo *connInfo = g_softBusBleConnCb->GetBleConnInfoByHalConnId(halConnInfo);
     if (connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleMtuChangeCallback GetBleConnInfo failed");
+        CLOGE("BleMtuChangeCallback GetBleConnInfo failed");
         return;
     }
     connInfo->mtu = mtu;
@@ -607,14 +598,14 @@ static int GattsRegisterCallback(void)
 
 static void BleConnAddSerMsgHandler(const SoftBusMessage *msg)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "call GattsRegisterCallback");
+    CLOGI("call GattsRegisterCallback");
     int32_t ret = GattsRegisterCallback();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GattsRegisterCallbacks failed: %d", ret);
+        CLOGE("GattsRegisterCallbacks failed: %d", ret);
         return;
     }
     if (SoftBusMutexLock(&g_serviceStateLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return;
     }
     g_gattService.state = BLE_GATT_SERVICE_ADDING;
@@ -624,7 +615,7 @@ static void BleConnAddSerMsgHandler(const SoftBusMessage *msg)
     uuid.uuidLen = strlen(uuid.uuid);
     ret = SoftBusGattsAddService(uuid, true, MAX_SERVICE_CHAR_NUM);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsAddService failed:%d", ret);
+        CLOGE("BleGattsAddService failed:%d", ret);
         return;
     }
 }
@@ -636,7 +627,7 @@ NO_SANITIZE("cfi") static void BleConnMsgHandler(SoftBusMessage *msg)
     if (msg == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ble conn loop process msg type %d", msg->what);
+    CLOGI("ble conn loop process msg type %d", msg->what);
     switch (msg->what) {
         case ADD_SERVICE_MSG:
             BleConnAddSerMsgHandler(msg);
@@ -648,7 +639,7 @@ NO_SANITIZE("cfi") static void BleConnMsgHandler(SoftBusMessage *msg)
             permissions = (int32_t)msg->arg2;
             int32_t ret = SoftBusGattsAddCharacteristic(g_gattService.svcId, uuid, properties, permissions);
             if (ret != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsAddCharacteristic  failed:%d", ret);
+                CLOGE("BleGattsAddCharacteristic  failed:%d", ret);
                 return;
             }
             break;
@@ -658,7 +649,7 @@ NO_SANITIZE("cfi") static void BleConnMsgHandler(SoftBusMessage *msg)
             permissions = (int32_t)msg->arg2;
             ret = SoftBusGattsAddDescriptor(g_gattService.svcId, uuid, permissions);
             if (ret != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattsAddDescriptor  failed:%d", ret);
+                CLOGE("BleGattsAddDescriptor  failed:%d", ret);
                 return;
             }
             break;
@@ -682,7 +673,7 @@ NO_SANITIZE("cfi") void SoftBusGattServerOnBtStateChanged(int state)
     if (state != SOFTBUS_BT_STATE_TURN_ON && state != SOFTBUS_BT_STATE_TURN_OFF) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattServerOnBtStateChanged state:%d", state);
+    CLOGI("SoftBusGattServerOnBtStateChanged state:%d", state);
     if (state == SOFTBUS_BT_STATE_TURN_ON) {
         SoftBusMessage *msg = BleConnCreateLoopMsg(ADD_SERVICE_MSG, 0, 0, SOFTBUS_SERVICE_UUID);
         if (msg == NULL) {
@@ -711,7 +702,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerInit(SoftBusBleConnCalback *cb)
 static int32_t BleGattServiceDump(int fd)
 {
     if (SoftBusMutexLock(&g_serviceStateLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return SOFTBUS_LOCK_ERR;
     }
     SOFTBUS_DPRINTF(fd, "\n-----------------BLEGattService Info-------------------\n");

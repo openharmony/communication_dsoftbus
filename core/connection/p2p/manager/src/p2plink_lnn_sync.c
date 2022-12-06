@@ -42,11 +42,11 @@ static int32_t P2pLinkLnnSyncSetGoMac()
 {
     if (LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, P2pLinkGetGoMac()) == SOFTBUS_OK) {
         if (strcpy_s(g_lnnGoMac, sizeof(g_lnnGoMac), P2pLinkGetGoMac()) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
+            CLOGI("strcpy fail");
         }
         return SOFTBUS_OK;
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set lnn p2p go mac fail");
+        CLOGE("set lnn p2p go mac fail");
         return SOFTBUS_ERR;
     }
 }
@@ -58,30 +58,30 @@ NO_SANITIZE("cfi") void P2pLinkLnnSync(void)
     int32_t role =  P2pLinkGetRole();
     if (g_lnnRole != role) {
         P2pLinkMyRoleChangeNotify(role);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync role %d->%d", g_lnnRole, role);
+        CLOGI("sync role %d->%d", g_lnnRole, role);
         if (LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, role) == SOFTBUS_OK) {
             g_lnnRole = role;
             change = 1;
         } else {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set lnn p2p role fail");
+            CLOGE("set lnn p2p role fail");
         }
     }
 
     if (strcmp(P2pLinkGetMyMac(), g_lnnMyP2pMac) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync lnn p2p mymac");
+        CLOGI("sync lnn p2p mymac");
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, P2pLinkGetMyMac()) == SOFTBUS_OK) {
             if (strcpy_s(g_lnnMyP2pMac, sizeof(g_lnnMyP2pMac), P2pLinkGetMyMac()) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "strcpy fail");
+                CLOGI("strcpy fail");
             }
             change = 1;
         } else {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "set lnn p2p my mac fail");
+            CLOGE("set lnn p2p my mac fail");
         }
     }
 
     if (role == ROLE_GC) {
         if (strcmp(P2pLinkGetGoMac(), g_lnnGoMac) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sync gomac");
+            CLOGI("sync gomac");
             if (P2pLinkLnnSyncSetGoMac() == SOFTBUS_OK) {
                 change = 1;
             }
@@ -91,7 +91,7 @@ NO_SANITIZE("cfi") void P2pLinkLnnSync(void)
             g_lnnGoMac[0] = '\0';
             change = 1;
             if (LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, g_lnnGoMac) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "clean go mac fail");
+                CLOGE("clean go mac fail");
             }
         }
     }
@@ -99,10 +99,10 @@ NO_SANITIZE("cfi") void P2pLinkLnnSync(void)
     if (g_p2pDumpFlag == false) {
         SoftBusRegConnVarDump(LNN_MAC_INFO, &P2pLnnDump);
         g_p2pDumpFlag = true;
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLnnDump registration success");
+        CLOGI("P2pLnnDump registration success");
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "lnn sync flag %d", change);
+    CLOGI("lnn sync flag %d", change);
     if (change == 1) {
         LnnSyncP2pInfo();
     }
