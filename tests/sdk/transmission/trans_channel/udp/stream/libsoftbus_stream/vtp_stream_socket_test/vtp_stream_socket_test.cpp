@@ -17,7 +17,6 @@
 
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
-#include "i_stream.h"
 #include "session.h"
 
 #define protected public
@@ -25,6 +24,7 @@
 #include "vtp_stream_socket.h"
 #include "vtp_stream_socket.cpp"
 #include "stream_common.h"
+#include "i_stream.h"
 #undef private
 #undef protected
 
