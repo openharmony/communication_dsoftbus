@@ -29,6 +29,7 @@
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
+#include "softbus_wifi_api_adapter.h"
 #include "wifi_device.h"
 
 #define LNN_LINK_DEFAULT_SCORE 60 /* Indicates that scoring is not supported */
@@ -60,23 +61,11 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
     return true;
 }
 
-static bool IsWlan2P4G(void)
-{
-    LnnWlanLinkedInfo info;
-    int32_t ret = LnnGetWlanLinkedInfo(&info);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetWlanLinkedInfo fail, ret:%d", ret);
-        return false;
-    }
-    if (info.band == 1) {
-        return true;
-    }
-    return false;
-}
-
 static bool IsEnableWlan2P4G(const char *networkId)
 {
-    if (!IsWlan2P4G()) {
+    SoftBusBand band = SoftBusGetLinkBand();
+    if (band != BAND_24G && band != BAND_UNKNOWN) {
+        LLOGE("current band is unsupport");
         return false;
     }
     int32_t local, remote;
@@ -88,12 +77,15 @@ static bool IsEnableWlan2P4G(const char *networkId)
         ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)))) {
         return true;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "2.4G capa disable, local:%d, remote:%d", local, remote);
     return false;
 }
 
 static bool IsEnableWlan5G(const char *networkId)
 {
-    if (IsWlan2P4G()) {
+    SoftBusBand band = SoftBusGetLinkBand();
+    if (band != BAND_5G && band != BAND_UNKNOWN) {
+        LLOGE("current band unsupport");
         return false;
     }
     int32_t local, remote;
@@ -105,6 +97,7 @@ static bool IsEnableWlan5G(const char *networkId)
         ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)))) {
         return true;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "5G capa disable, local:%d, remote:%d", local, remote);
     return false;
 }
 
@@ -118,6 +111,7 @@ static bool IsEnableBr(const char *networkId)
     if ((local & (1 << BIT_BR)) && (remote & (1 << BIT_BR))) {
         return true;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "BR capa disable, local:%d, remote:%d", local, remote);
     return false;
 }
 
@@ -129,6 +123,7 @@ static bool IsEnableP2p(const char *networkId)
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p capa disable, local:%d, remote:%d", local, remote);
         return false;
     }
     return true;
