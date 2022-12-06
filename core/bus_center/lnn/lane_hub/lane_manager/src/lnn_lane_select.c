@@ -96,7 +96,7 @@ static bool IsLinkTypeValid(LaneLinkType type)
     return true;
 }
 
-static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw)
+NO_SANITIZE("cfi") static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw)
 {
     if (!IsLinkTypeValid(linkType)) {
         return false;

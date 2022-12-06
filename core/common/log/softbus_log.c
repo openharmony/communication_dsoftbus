@@ -72,7 +72,7 @@ static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
     {SOFTBUS_LOG_COMM, "COMM"},
 };
 
-void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...)
+NO_SANITIZE("cfi") void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...)
 {
     uint32_t ulPos;
     uint32_t level = CUST_NSTACKX_DFINDER_LOG - nstackLevel;

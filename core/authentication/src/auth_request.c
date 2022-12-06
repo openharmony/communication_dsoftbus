@@ -178,7 +178,7 @@ bool CheckAuthConnCallback(const AuthConnCallback *connCb)
     return true;
 }
 
-NO_SANITIZE("cfi") void PerformVerifyCallback(uint32_t requestId, int32_t result, int64_t authId, const NodeInfo *info)
+void PerformVerifyCallback(uint32_t requestId, int32_t result, int64_t authId, const NodeInfo *info)
 {
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {

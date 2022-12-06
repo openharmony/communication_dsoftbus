@@ -328,7 +328,7 @@ static void OnChannelClosed(int32_t channelId)
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
 }
 
-static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
+NO_SANITIZE("cfi") static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
 {
     SyncChannelInfo *info = NULL;
     LnnSyncInfoType type;

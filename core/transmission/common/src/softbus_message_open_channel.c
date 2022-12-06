@@ -23,7 +23,7 @@
 
 #define BASE64KEY 45 // Base64 encrypt SessionKey length
 
-char *PackError(int errCode, const char *errDesc)
+NO_SANITIZE("cfi") char *PackError(int errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);
@@ -150,7 +150,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-char *PackReply(const AppInfo *appInfo)
+NO_SANITIZE("cfi") char *PackReply(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);

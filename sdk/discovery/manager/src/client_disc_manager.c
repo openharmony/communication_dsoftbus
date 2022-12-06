@@ -17,6 +17,7 @@
 
 #include "disc_server_proxy.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -103,32 +104,32 @@ void DiscClientDeinit(void)
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DeInit success");
 }
 
-void DiscClientOnDeviceFound(const DeviceInfo *device)
+NO_SANITIZE("cfi") void DiscClientOnDeviceFound(const DeviceInfo *device)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDeviceFound, capabilityBitmap = %d",
         device->capabilityBitmap[0]);
     g_discInfo->subscribeCb.OnDeviceFound(device);
 }
 
-void DiscClientOnDiscoverySuccess(int32_t subscribeId)
+NO_SANITIZE("cfi") void DiscClientOnDiscoverySuccess(int32_t subscribeId)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverySuccess, subscribeId = %d", subscribeId);
     g_discInfo->subscribeCb.OnDiscoverySuccess(subscribeId);
 }
 
-void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
+NO_SANITIZE("cfi") void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverFailed, subscribeId = %d", subscribeId);
     g_discInfo->subscribeCb.OnDiscoverFailed(subscribeId, failReason);
 }
 
-void DiscClientOnPublishSuccess(int32_t publishId)
+NO_SANITIZE("cfi") void DiscClientOnPublishSuccess(int32_t publishId)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishSuccess, publishId = %d", publishId);
     g_discInfo->publishCb.OnPublishSuccess(publishId);
 }
 
-void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
+NO_SANITIZE("cfi") void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishFail, publishId = %d", publishId);
     g_discInfo->publishCb.OnPublishFail(publishId, reason);

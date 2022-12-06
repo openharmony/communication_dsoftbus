@@ -244,7 +244,7 @@ int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     return SOFTBUS_OK;
 }
 
-int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
+NO_SANITIZE("cfi") int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
     const QosTv *tvList)
 {
     int32_t sessionId;

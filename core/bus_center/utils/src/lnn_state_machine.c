@@ -111,7 +111,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
     }
 }
 
-NO_SANITIZE("cfi") static void ProcessDataMessage(SoftBusMessage *msg)
+static void ProcessDataMessage(SoftBusMessage *msg)
 {
     FsmCtrlMsgObj *ctrlMsgObj = msg->obj;
     FsmStateMachine *fsm = NULL;
@@ -334,7 +334,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
 }
 
 /* we must change state of state machine during its procedure, otherwise it will introduce concurrency */
-NO_SANITIZE("cfi") int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state)
+int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || state == NULL) {
         return SOFTBUS_INVALID_PARAM;

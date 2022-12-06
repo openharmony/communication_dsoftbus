@@ -346,7 +346,8 @@ int32_t TransOnUdpChannelClosed(int32_t channelId)
     return CloseUdpChannel(channelId, false);
 }
 
-int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
+NO_SANITIZE("cfi") int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount,
+    const QosTv *tvList)
 {
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -409,7 +410,7 @@ static int32_t OnFileGetSessionId(int32_t channelId, int32_t *sessionId)
     return g_sessionCb->OnGetSessionId(channelId, CHANNEL_TYPE_UDP, sessionId);
 }
 
-static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
+NO_SANITIZE("cfi") static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnQosEvent == NULL)) {
         return;

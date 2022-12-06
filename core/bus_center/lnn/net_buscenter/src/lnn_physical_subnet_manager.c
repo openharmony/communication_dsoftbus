@@ -144,7 +144,7 @@ void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType proto
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyStatusChange(ifName, protocolType, status));
 }
 
-static void EnableResetingSubnetByType(ProtocolType protocolType)
+NO_SANITIZE("cfi") static void EnableResetingSubnetByType(ProtocolType protocolType)
 {
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
