@@ -28,8 +28,8 @@ extern "C" {
 #define NET_IF_NAME_MAX_LEN 16
 
 typedef struct {
-    void (*OnLaneIdEnabled)(uint32_t laneId, uint32_t laneProfileId);
-    void (*OnLaneIdDisabled)(uint32_t laneId, uint32_t laneProfileId);
+    void (*onLaneIdEnabled)(uint32_t laneId, uint32_t laneProfileId);
+    void (*onLaneIdDisabled)(uint32_t laneId, uint32_t laneProfileId);
 } ILaneIdStateListener;
 
 void RegisterLaneIdListener(const ILaneIdStateListener *listener);

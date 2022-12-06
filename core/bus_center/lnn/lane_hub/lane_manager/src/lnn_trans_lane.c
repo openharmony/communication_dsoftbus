@@ -272,7 +272,7 @@ static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
     param.transType = infoNode->info.transType;
     param.priority = 0; /* default:0 */
     uint32_t profileId = GenerateLaneProfileId(&param);
-    g_laneIdCallback->OnLaneIdDisabled(laneId, profileId);
+    g_laneIdCallback->onLaneIdDisabled(laneId, profileId);
     UnbindLaneIdFromProfile(laneId, profileId);
 }
 
@@ -370,14 +370,14 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const Lan
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Notify laneAlloc succ, laneId:0x%x, linkType:%d",
         laneId, info->type);
-    reqInfo.listener.OnLaneRequestSuccess(laneId, &connInfo);
+    reqInfo.listener.onLaneRequestSuccess(laneId, &connInfo);
     UpdateLinkType(laneId, info->type);
     LaneGenerateParam param;
     param.linkType = profile.linkType;
     param.transType = profile.content;
     param.priority = profile.priority;
     uint32_t profileId = GenerateLaneProfileId(&param);
-    g_laneIdCallback->OnLaneIdEnabled(laneId, profileId);
+    g_laneIdCallback->onLaneIdEnabled(laneId, profileId);
 }
 
 static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
@@ -387,7 +387,7 @@ static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Notify laneAlloc fail, laneId:0x%x, reason:%d", laneId, reason);
-    reqInfo.listener.OnLaneRequestFail(laneId, LANE_LINK_FAILED);
+    reqInfo.listener.onLaneRequestFail(laneId, LANE_LINK_FAILED);
     if (Lock() != SOFTBUS_OK) {
         return;
     }
@@ -413,7 +413,7 @@ static void NotifyLaneStateChange(uint32_t laneId, int32_t state)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane state is changed, state:%d", state);
         laneState = LANE_STATE_EXCEPTION;
     }
-    reqInfo.listener.OnLaneStateChange(laneId, laneState);
+    reqInfo.listener.onLaneStateChange(laneId, laneState);
 }
 
 static LaneLinkNodeInfo *GetLaneLinkNodeWithoutLock(uint32_t laneId)

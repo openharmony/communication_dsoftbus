@@ -205,7 +205,7 @@ static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc, cons
     return SOFTBUS_ERR;
 }
 
-static void TransOnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *connInfo)
+static void TransonLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *connInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans on lane[%u] request success.", laneId);
     if (TransUpdateLaneConnInfoByLaneId(laneId, true, connInfo) != SOFTBUS_OK) {
@@ -214,7 +214,7 @@ static void TransOnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *connI
     return;
 }
 
-static void TransOnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void TransonLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans on lane[%u] request failed, reason[%u].", laneId, reason);
     if (TransUpdateLaneConnInfoByLaneId(laneId, false, NULL) != SOFTBUS_OK) {
@@ -223,7 +223,7 @@ static void TransOnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason
     return;
 }
 
-static void TransOnLaneStateChange(uint32_t laneId, LaneState state)
+static void TransonLaneStateChange(uint32_t laneId, LaneState state)
 {
     /* current no treatment */
     (void)laneId;
@@ -408,9 +408,9 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneId, const LaneReq
     }
 
     ILaneListener listener;
-    listener.OnLaneRequestSuccess = TransOnLaneRequestSuccess;
-    listener.OnLaneRequestFail = TransOnLaneRequestFail;
-    listener.OnLaneStateChange = TransOnLaneStateChange;
+    listener.onLaneRequestSuccess = TransonLaneRequestSuccess;
+    listener.onLaneRequestFail = TransonLaneRequestFail;
+    listener.onLaneStateChange = TransonLaneStateChange;
     if (LnnRequestLane(laneId, requestOption, &listener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans request lane failed.");
         (void)TransDelLaneReqFromPendingList(laneId);

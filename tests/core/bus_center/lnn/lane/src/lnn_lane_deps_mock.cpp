@@ -33,7 +33,7 @@ LaneDepsInterfaceMock::~LaneDepsInterfaceMock()
 
 static LaneDepsInterface *GetLaneDepsInterface()
 {
-    return reinterpret_cast<LaneDepsInterfaceMock *>(g_laneDepsInterface);
+    return reinterpret_cast<LaneDepsInterface *>(g_laneDepsInterface);
 }
 
 void LaneDepsInterfaceMock::SetDefaultResult()
@@ -41,8 +41,9 @@ void LaneDepsInterfaceMock::SetDefaultResult()
     EXPECT_CALL(*this, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(*this, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(*this, SoftBusFrequencyToChannel).WillRepeatedly(Return(1));
+    EXPECT_CALL(*this, LnnVisitPhysicalSubnet).WillRepeatedly(Return(true));
+    EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
 }
 
 extern "C" {
@@ -97,9 +98,35 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetLaneDepsInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t LnnGetWlanLinkedInfo(LnnWlanLinkedInfo *info)
+int32_t P2pLinkGetRequestId(void)
 {
-    return GetLaneDepsInterface()->LnnGetWlanLinkedInfo(info);
+    return GetLaneDepsInterface()->P2pLinkGetRequestId();
 }
+
+void AuthCloseConn(int64_t authId)
+{
+    return GetLaneDepsInterface()->AuthCloseConn(authId);
+}
+
+int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
+{
+    return GetLaneDepsInterface()->P2pLinkConnectDevice(info);
+}
+
+int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
+{
+    return GetLaneDepsInterface()->P2pLinkDisconnectDevice(info);
+}
+
+int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
+{
+    return GetLaneDepsInterface()->AuthSetP2pMac(authId, p2pMac);
+}
+
+bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
+{
+    return GetLaneDepsInterface()->LnnVisitPhysicalSubnet(callback, data);
+}
+
 }
 } // namespace OHOS

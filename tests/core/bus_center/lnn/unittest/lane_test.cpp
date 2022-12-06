@@ -39,7 +39,7 @@ constexpr uint32_t REMOTE_AUTH_PORT = 7070;
 constexpr uint32_t REMOTE_PROXY_PORT = 8080;
 constexpr char REMOTE_WLAN_IP[] = "10.146.181.134";
 constexpr char LOCAL_NETWORK_ID[] = "444455556666abcdef";
-constexpr uint32_t FILE_DEFAULT_LINK_NUM = 3;
+constexpr uint32_t FILE_DEFAULT_LINK_NUM = 4;
 constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
 constexpr uint32_t LANE_LINK_NUM = 2;
 
@@ -176,21 +176,21 @@ static const char *GetLinkType(LaneLinkType type)
     }
 }
 
-static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
+static void onLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
 {
     printf("LaneRequestSucc: laneId:0x%x, linkType:%s\n", laneId, GetLinkType(info->type));
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void onLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
 {
     printf("LaneRequestFail: laneId:0x%x, reason:%d\n", laneId, reason);
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void OnLaneStateChange(uint32_t laneId, LaneState state)
+static void onLaneStateChange(uint32_t laneId, LaneState state)
 {
     printf("LaneStateChange: laneId:0x%x, state:%d\n", laneId, state);
     int32_t ret = LnnFreeLane(laneId);
@@ -258,7 +258,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_TRUE(recommendList != nullptr);
     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
-    LaneLinkType fileLinkList[FILE_DEFAULT_LINK_NUM] = {LANE_WLAN_5G, LANE_P2P, LANE_BR};
+    LaneLinkType fileLinkList[FILE_DEFAULT_LINK_NUM] = {LANE_WLAN_5G, LANE_P2P, LANE_WLAN_2P4G, LANE_BR};
     for (uint32_t i = 0; i < listNum; i++) {
         EXPECT_EQ(fileLinkList[i], recommendList[i]) << "i = " << i;
     }
@@ -364,9 +364,9 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     trans->expectedLink.linkType[0] = LANE_P2P;
     trans->expectedLink.linkType[1] = LANE_WLAN_5G;
     ILaneListener listener = {
-        .OnLaneRequestSuccess = OnLaneRequestSuccess,
-        .OnLaneRequestFail = OnLaneRequestFail,
-        .OnLaneStateChange = OnLaneStateChange,
+        .onLaneRequestSuccess = onLaneRequestSuccess,
+        .onLaneRequestFail = onLaneRequestFail,
+        .onLaneStateChange = onLaneStateChange,
     };
     ret = LnnRequestLane(laneId, &request, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
