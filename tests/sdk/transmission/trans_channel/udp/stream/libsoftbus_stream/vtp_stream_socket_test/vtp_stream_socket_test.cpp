@@ -628,7 +628,6 @@ HWTEST_F(VtpStreamSocketTest, Decrypt001, TestSize.Level1)
 {
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-        // Communication::SoftBus::IStreamSocket vtpStreamSocket
     ASSERT_TRUE(vtpStreamSocket != nullptr);
     ssize_t inLen = 50;
     ssize_t outLen = 21;
@@ -643,7 +642,5 @@ HWTEST_F(VtpStreamSocketTest, Decrypt001, TestSize.Level1)
 
     ret = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-
-
 }
 } // OHOS
