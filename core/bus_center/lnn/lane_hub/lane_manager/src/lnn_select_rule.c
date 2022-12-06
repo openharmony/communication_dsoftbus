@@ -64,7 +64,7 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
 static bool IsEnableWlan2P4G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
-    if (band != BAND_24G || band != BAND_UNKNOWN) {
+    if (band != BAND_24G && band != BAND_UNKNOWN) {
         LLOGE("current band is unsupport");
         return false;
     }
@@ -84,7 +84,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
 static bool IsEnableWlan5G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
-    if (band != BAND_5G || band != BAND_UNKNOWN) {
+    if (band != BAND_5G && band != BAND_UNKNOWN) {
         LLOGE("current band is unsupport");
         return false;
     }
