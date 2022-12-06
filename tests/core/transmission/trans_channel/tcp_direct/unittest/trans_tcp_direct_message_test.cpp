@@ -73,11 +73,11 @@ static const char *g_ip = "192.168.8.1";
 static int32_t g_port = 6000;
 static int32_t g_netWorkId = 100;
 
-class TransTcpDirectTest : public testing::Test {
+class TransTcpDirectMessageTest : public testing::Test {
 public:
-    TransTcpDirectTest()
+    TransTcpDirectMessageTest()
     {}
-    ~TransTcpDirectTest()
+    ~TransTcpDirectMessageTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -87,12 +87,12 @@ public:
     {}
 };
 
-void TransTcpDirectTest::SetUpTestCase(void)
+void TransTcpDirectMessageTest::SetUpTestCase(void)
 {
     InitSoftBusServer();
 }
 
-void TransTcpDirectTest::TearDownTestCase(void)
+void TransTcpDirectMessageTest::TearDownTestCase(void)
 {}
 
 SessionConn *TestSetSessionConn()
@@ -132,7 +132,7 @@ AppInfo *TestSetAppInfo()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, OpenP2pDirectChannelTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_NE(appInfo, nullptr);
@@ -181,7 +181,7 @@ HWTEST_F(TransTcpDirectTest, OpenP2pDirectChannelTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, P2pDirectChannelInitTest002, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, P2pDirectChannelInitTest002, TestSize.Level1)
 {
     int32_t ret = P2pDirectChannelInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -193,7 +193,7 @@ HWTEST_F(TransTcpDirectTest, P2pDirectChannelInitTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, GenerateTdcChannelIdTest003, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GenerateTdcChannelIdTest003, TestSize.Level1)
 {
     uint64_t ret = TransTdcGetNewSeqId();
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -224,7 +224,7 @@ HWTEST_F(TransTcpDirectTest, GenerateTdcChannelIdTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, GetSessionConnByRequestIdTest004, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByRequestIdTest004, TestSize.Level1)
 {
     uint32_t requestId = 1;
     SessionConn *session = GetSessionConnByRequestId(requestId);
@@ -250,7 +250,7 @@ HWTEST_F(TransTcpDirectTest, GetSessionConnByRequestIdTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, GetSessionConnByReqTest005, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByReqTest005, TestSize.Level1)
 {
     int64_t req = INVALID_VALUE;
     SessionConn *session = GetSessionConnByReq(req);
@@ -275,7 +275,7 @@ HWTEST_F(TransTcpDirectTest, GetSessionConnByReqTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, CreateNewSessinConnTest006, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, CreateNewSessinConnTest006, TestSize.Level1)
 {
     SessionConn *session = CreateNewSessinConn(AUTH_P2P, true);
     EXPECT_TRUE(session != nullptr);
@@ -288,7 +288,7 @@ HWTEST_F(TransTcpDirectTest, CreateNewSessinConnTest006, TestSize.Level1)
  * @tc.require:
  */
 
-HWTEST_F(TransTcpDirectTest, GetSessionConnByFdTest007, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
 {
     int32_t fd = g_netWorkId;
     SessionConn *conn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
@@ -319,7 +319,7 @@ HWTEST_F(TransTcpDirectTest, GetSessionConnByFdTest007, TestSize.Level1)
  * @tc.require:
  */
  
-HWTEST_F(TransTcpDirectTest, GetSessionConnByIdTest008, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByIdTest008, TestSize.Level1)
 {
     int32_t channelId = 1;
     SessionConn *conn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
@@ -342,7 +342,7 @@ HWTEST_F(TransTcpDirectTest, GetSessionConnByIdTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, SetAppInfoByIdTest009, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, SetAppInfoByIdTest009, TestSize.Level1)
 {
     int32_t channelId = 1;
     AppInfo *appInfo = TestSetAppInfo();
@@ -362,7 +362,7 @@ HWTEST_F(TransTcpDirectTest, SetAppInfoByIdTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, GetAppInfoByIdTest0010, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetAppInfoByIdTest0010, TestSize.Level1)
 {
     int32_t channelId = 1;
     AppInfo *appInfo = TestSetAppInfo();
@@ -382,7 +382,7 @@ HWTEST_F(TransTcpDirectTest, GetAppInfoByIdTest0010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, SetAuthIdByChanIdTest0011, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, SetAuthIdByChanIdTest0011, TestSize.Level1)
 {
     int32_t channelId = 1;
     int64_t authId = 1;
@@ -399,7 +399,7 @@ HWTEST_F(TransTcpDirectTest, SetAuthIdByChanIdTest0011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
 {
     int32_t channelId = 1;
     int64_t ret = GetAuthIdByChanId(channelId);
@@ -425,7 +425,7 @@ HWTEST_F(TransTcpDirectTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransDelSessionConnByIdTest0013, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, TransDelSessionConnByIdTest0013, TestSize.Level1)
 {
     int32_t channelId = 1;
     TransDelSessionConnById(channelId);
@@ -449,7 +449,7 @@ HWTEST_F(TransTcpDirectTest, TransDelSessionConnByIdTest0013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcAddSessionConnTest0014, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, TransTdcAddSessionConnTest0014, TestSize.Level1)
 {
     SessionConn *con = TestSetSessionConn();
     int32_t ret = TransTdcAddSessionConn(nullptr);
@@ -470,7 +470,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcAddSessionConnTest0014, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, SetSessionKeyByChanIdTest0015, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, SetSessionKeyByChanIdTest0015, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *sessionKey = "key";
@@ -497,7 +497,7 @@ HWTEST_F(TransTcpDirectTest, SetSessionKeyByChanIdTest0015, TestSize.Level1)
  * @tc.require:
  */
  
-HWTEST_F(TransTcpDirectTest, SetSessionConnStatusByIdTest0016, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, SetSessionConnStatusByIdTest0016, TestSize.Level1)
 {
     int32_t channelId = 1;
     uint32_t status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
@@ -525,7 +525,7 @@ HWTEST_F(TransTcpDirectTest, SetSessionConnStatusByIdTest0016, TestSize.Level1)
  * @tc.require:
  */
  
-HWTEST_F(TransTcpDirectTest, TcpTranGetAppInfobyChannelIdTest0017, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, TcpTranGetAppInfobyChannelIdTest0017, TestSize.Level1)
 {
     int32_t channelId = 1;
     AppInfo* appInfo = TestSetAppInfo();
@@ -552,7 +552,7 @@ HWTEST_F(TransTcpDirectTest, TcpTranGetAppInfobyChannelIdTest0017, TestSize.Leve
  * @tc.require:
  */
  
-HWTEST_F(TransTcpDirectTest, OpenTcpDirectChannelTest0018, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, OpenTcpDirectChannelTest0018, TestSize.Level1)
 {
     int32_t channelId = 1;
     AppInfo* appInfo = TestSetAppInfo();
