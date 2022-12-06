@@ -38,8 +38,26 @@ ohos_unittest("VtpInstanceTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gtest_main",
   ]
+
+  native_source_path = rebase_path("$dsoftbus_root_path")
+  dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
+  enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                         [
+                           "$native_source_path",
+                           "$dep_file",
+                         ],
+                         "value")
+  if (enhanced) {
+    deps += [
+      "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
+      "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile",
+    ]
+  } else {
+    deps += [ "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open" ]
+  }
 
   if (is_standard_system) {
     external_deps = [
