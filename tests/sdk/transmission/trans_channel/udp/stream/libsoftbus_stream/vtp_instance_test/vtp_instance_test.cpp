@@ -117,12 +117,10 @@ HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
     vtpInstance->PreSetFillpCoreParams();
 
     std::string pkgName = "CryptoRandTest";
-
     const int delayTimes =  1;
-    const int count = 22;
 
-    vtpInstance->WaitForDestroy(delayTimes, count);
-    EXPECT_TRUE(!vtpInstance->isDestroyed_);
+    vtpInstance->WaitForDestroy(delayTimes);
+    EXPECT_TRUE(vtpInstance->isDestroyed_);
 
     vtpInstance->isDestroyed_ = true;
     vtpInstance->DestroyVtp(pkgName);
