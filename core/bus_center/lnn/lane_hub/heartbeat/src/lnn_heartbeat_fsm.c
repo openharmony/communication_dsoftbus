@@ -165,7 +165,7 @@ static void FreeUnhandledHbMessage(int32_t msgType, void *para)
     }
 }
 
-static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *para)
+NO_SANITIZE("cfi") static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     int32_t i, eventNum, ret;
     LnnHeartbeatFsm *hbFsm = NULL;
@@ -416,7 +416,7 @@ static void HbNoneStateEnter(FsmStateMachine *fsm)
     LnnFsmRemoveMessage(fsm, EVENT_HB_PROCESS_SEND_ONCE);
 }
 
-NO_SANITIZE("cfi") static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
+static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
     int32_t ret = SOFTBUS_ERR;

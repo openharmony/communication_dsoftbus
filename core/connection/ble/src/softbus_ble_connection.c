@@ -273,7 +273,8 @@ static int32_t GetBleConnInfoByDeviceIdHash(const char *deviceIdHash,
 }
 
 
-static void BleDeviceConnected(const BleConnectionInfo *itemNode, uint32_t requestId, const ConnectResult *result)
+NO_SANITIZE("cfi") static void BleDeviceConnected(const BleConnectionInfo *itemNode, uint32_t requestId,
+    const ConnectResult *result)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ble mac has connected");
     ConnectionInfo connectionInfo;
@@ -362,7 +363,7 @@ static int32_t UpdataBleConnectionUnsafe(const ConnectOption *option, int32_t ha
     return SOFTBUS_OK;
 }
 
-static int32_t TryReuseConnectionOrWaitUnsafe(BleConnectionInfo *exist, uint32_t requestId,
+NO_SANITIZE("cfi") static int32_t TryReuseConnectionOrWaitUnsafe(BleConnectionInfo *exist, uint32_t requestId,
     const ConnectResult *result)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "there is a ble connection processing, state: %d, requestId: %d",
@@ -876,7 +877,7 @@ static void BleClientConnectCallback(int32_t halConnId, const char *bleStrMac, c
     }
 }
 
-static void BleClientDoneConnect(BleConnectionInfo *targetNode)
+NO_SANITIZE("cfi") static void BleClientDoneConnect(BleConnectionInfo *targetNode)
 {
     ListNode notifyList;
     ListNode *item = NULL;
@@ -961,7 +962,7 @@ static void ReleaseBleConnectionInfo(BleConnectionInfo *info)
     SoftBusFree(info);
 }
 
-static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
+NO_SANITIZE("cfi") static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
     ConnectionInfo connectionInfo, int32_t errCode)
 {
     ListNode *item = NULL;
@@ -1127,7 +1128,7 @@ static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value
     return SOFTBUS_OK;
 }
 
-static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
+NO_SANITIZE("cfi") static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
 {
     if (targetNode->peerType != BLE_ROLE_CLIENT && targetNode->peerType != BLE_ROLE_SERVER) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataUpdate invalid role type");
@@ -1145,7 +1146,7 @@ static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
     return SOFTBUS_OK;
 }
 
-static void BleConnectionReceived(BleHalConnInfo halConnInfo, uint32_t len, const char *value)
+NO_SANITIZE("cfi") static void BleConnectionReceived(BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
     uint32_t connPktHeadLen = (uint32_t) sizeof(ConnPktHead);
     if (connPktHeadLen >= len) {
@@ -1186,7 +1187,7 @@ static void BleConnectionReceived(BleHalConnInfo halConnInfo, uint32_t len, cons
     RecvConnectedComd(connectionId, (const cJSON*)data);
     cJSON_Delete(data);
 }
-static void BleNetReceived(BleHalConnInfo halConnInfo, uint32_t len, const char *value)
+NO_SANITIZE("cfi") static void BleNetReceived(BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
     if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");

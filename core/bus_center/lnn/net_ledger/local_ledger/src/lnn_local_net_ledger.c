@@ -782,7 +782,7 @@ NO_SANITIZE("cfi") int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t 
     return SOFTBUS_ERR;
 }
 
-static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
+NO_SANITIZE("cfi") static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
 {
     uint32_t i;
     int32_t ret;
@@ -851,7 +851,7 @@ NO_SANITIZE("cfi") int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
     return SOFTBUS_ERR;
 }
 
-static int32_t LnnSetLocalInfo(InfoKey key, void* info)
+NO_SANITIZE("cfi") static int32_t LnnSetLocalInfo(InfoKey key, void* info)
 {
     uint32_t i;
     int32_t ret;

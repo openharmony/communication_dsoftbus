@@ -164,7 +164,7 @@ NO_SANITIZE("cfi") int32_t SoftBusStartWifiScan(void)
     return SOFTBUS_OK;
 }
 
-static void SoftBusWifiScanStateChanged(int state, int size)
+NO_SANITIZE("cfi") static void SoftBusWifiScanStateChanged(int state, int size)
 {
     for (int i = 0; i < MAX_CALLBACK_NUM; i++) {
         if (g_scanResultCb[i] != NULL) {

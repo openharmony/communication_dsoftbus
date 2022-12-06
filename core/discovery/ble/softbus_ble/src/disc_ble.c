@@ -412,7 +412,8 @@ static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
     return SOFTBUS_OK;
 }
 
-static void ProcessDisNonPacket(const uint8_t *advData, uint32_t advLen, char rssi, DeviceInfo *foundInfo)
+NO_SANITIZE("cfi") static void ProcessDisNonPacket(const uint8_t *advData, uint32_t advLen, char rssi,
+    DeviceInfo *foundInfo)
 {
     DeviceWrapper device = {
         .info=foundInfo,
@@ -779,7 +780,7 @@ static void BuildAdvParam(SoftBusBleAdvParams *advParam)
     advParam->txPower = BLE_ADV_TX_POWER_DEFAULT;
 }
 
-static int32_t StartAdvertiser(int32_t adv)
+NO_SANITIZE("cfi") static int32_t StartAdvertiser(int32_t adv)
 {
     DLOGI("enter");
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];

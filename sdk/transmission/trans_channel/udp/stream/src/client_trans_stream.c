@@ -88,7 +88,7 @@ static void OnStreamReceived(int32_t channelId, const StreamData *data, const St
     g_udpChannelMgrCb->OnStreamReceived(channelId, data, ext, param);
 }
 
-static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
+NO_SANITIZE("cfi") static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
 {
     if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnQosEvent == NULL)) {
         return;

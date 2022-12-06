@@ -217,7 +217,7 @@ static void DeviceConnectPackRequest(int32_t value, uint32_t connectionId)
     }
 }
 
-static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
+NO_SANITIZE("cfi") static int32_t ClientOnBrConnectDevice(int32_t connId, int32_t *outSocketFd)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sppDriver connect start, connId:%d", connId);
     BrConnectionInfo *brConn = GetConnectionRef(connId);
@@ -311,7 +311,7 @@ static int32_t ClientOnBrConnect(int32_t connId)
     return socketFd;
 }
 
-static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
+NO_SANITIZE("cfi") static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
     ConnectionInfo connectionInfo, int32_t value, int32_t sideType)
 {
     ListNode *item = NULL;
@@ -334,7 +334,7 @@ static void NotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
     }
 }
 
-static int32_t NotifyServerConn(int connectionId, const char *mac, int32_t sideType)
+NO_SANITIZE("cfi") static int32_t NotifyServerConn(int connectionId, const char *mac, int32_t sideType)
 {
     ConnectionInfo connectionInfo;
     connectionInfo.isAvailable = 1;
@@ -421,7 +421,7 @@ NO_SANITIZE("cfi") int32_t ConnBrOnEvent(BrConnLoopMsgType type, int32_t socketF
     return SOFTBUS_OK;
 }
 
-static void ConnectDeviceExist(uint32_t connId, uint32_t requestId, const ConnectResult *result)
+NO_SANITIZE("cfi") static void ConnectDeviceExist(uint32_t connId, uint32_t requestId, const ConnectResult *result)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[ConnectDeviceExit]");
     BrConnectionInfo *connInfo = GetConnectionRef(connId);
@@ -566,7 +566,7 @@ static int32_t ConnectDevice(const ConnectOption *option, uint32_t requestId, co
     return ret;
 }
 
-static uint32_t ServerOnBrConnect(int32_t socketFd)
+NO_SANITIZE("cfi") static uint32_t ServerOnBrConnect(int32_t socketFd)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[new connection, socket = %d]", socketFd);
     if (IsExitBrConnectByFd(socketFd)) {
@@ -1146,7 +1146,7 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
     }
 }
 
-static void BrRecvDataHandle(uint32_t connectionId, const char *buf, int32_t len)
+NO_SANITIZE("cfi") static void BrRecvDataHandle(uint32_t connectionId, const char *buf, int32_t len)
 {
     if (len - (int32_t)sizeof(ConnPktHead) <= 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br recv data illegal data size: %d", len);

@@ -69,7 +69,7 @@ int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId, int32_t errCode)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransAuthOnDataReceived(int32_t channelId,
+NO_SANITIZE("cfi") int32_t ClientTransAuthOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type)
 {
     if (data == NULL) {

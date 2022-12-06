@@ -109,14 +109,14 @@ static int32_t UnpackSocketPkt(const uint8_t *data, uint32_t len, SocketPktHead 
     return SOFTBUS_OK;
 }
 
-static void NotifyConnected(int32_t fd, bool isClient)
+NO_SANITIZE("cfi") static void NotifyConnected(int32_t fd, bool isClient)
 {
     if (g_callback.onConnected != NULL) {
         g_callback.onConnected(fd, isClient);
     }
 }
 
-static void NotifyDisconnected(int32_t fd)
+NO_SANITIZE("cfi") static void NotifyDisconnected(int32_t fd)
 {
     if (g_callback.onDisconnected != NULL) {
         g_callback.onDisconnected(fd);
@@ -139,7 +139,7 @@ static uint32_t ModuleToDataType(int32_t module)
     return DATA_TYPE_CONNECTION;
 }
 
-static void NotifyDataReceived(int32_t fd, const SocketPktHead *pktHead, const uint8_t *data)
+NO_SANITIZE("cfi") static void NotifyDataReceived(int32_t fd, const SocketPktHead *pktHead, const uint8_t *data)
 {
     if (pktHead->module == MODULE_AUTH_CHANNEL || pktHead->module == MODULE_AUTH_MSG) {
         NotifyChannelDataReceived(fd, pktHead, data);
@@ -450,7 +450,8 @@ NO_SANITIZE("cfi") int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo,
 }
 
 /* Auth Channel */
-static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data)
+NO_SANITIZE("cfi") static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head,
+    const uint8_t *data)
 {
     uint32_t i;
     AuthChannelListener *listener = NULL;
@@ -474,7 +475,7 @@ static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *he
     listener->onDataReceived(channelId, &channelData);
 }
 
-static void NotifyChannelDisconnected(int32_t channelId)
+NO_SANITIZE("cfi") static void NotifyChannelDisconnected(int32_t channelId)
 {
     uint32_t i;
     for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {
