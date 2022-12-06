@@ -628,7 +628,7 @@ HWTEST_F(VtpStreamSocketTest, Decrypt001, TestSize.Level1)
 {
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-
+    ASSERT_TRUE(vtpStreamSocket != nullptr);
     ssize_t inLen = 50;
     ssize_t outLen = 21;
     const void *in = "in";
