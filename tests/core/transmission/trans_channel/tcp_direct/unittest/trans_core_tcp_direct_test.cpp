@@ -69,11 +69,11 @@ static const char *g_pkgName = "dms";
 static const char *g_ip = "192.168.8.1";
 static int32_t g_port = 6000;
 
-class TransTcpDirectTest : public testing::Test {
+class TransCoreTcpDirectTest : public testing::Test {
 public:
-    TransTcpDirectTest()
+    TransCoreTcpDirectTest()
     {}
-    ~TransTcpDirectTest()
+    ~TransCoreTcpDirectTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -83,12 +83,12 @@ public:
     {}
 };
 
-void TransTcpDirectTest::SetUpTestCase(void)
+void TransCoreTcpDirectTest::SetUpTestCase(void)
 {
     InitSoftBusServer();
 }
 
-void TransTcpDirectTest::TearDownTestCase(void)
+void TransCoreTcpDirectTest::TearDownTestCase(void)
 {}
 
 SessionServer *TestSetPack()
@@ -162,7 +162,7 @@ string TestGetMsgPack()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
 {
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
@@ -181,7 +181,7 @@ HWTEST_F(TransTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
 {
     int32_t pid = 1;
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
@@ -207,7 +207,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
 {
     char mySessionName[SESSION_NAME_MAX_LEN] = "com.test.trans.session.sendfile";
     char peerSessionName[SESSION_NAME_MAX_LEN] = "com.test.trans.session.sendfile";
@@ -259,7 +259,7 @@ HWTEST_F(TransTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcStopSessionProcTest004, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProcTest004, TestSize.Level1)
 {
     int32_t ret = TransSrvDataListInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -275,7 +275,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcStopSessionProcTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransSrvDataListInitTest005, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransSrvDataListInitTest005, TestSize.Level1)
 {
     int32_t ret = TransSrvDataListInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -289,7 +289,7 @@ HWTEST_F(TransTcpDirectTest, TransSrvDataListInitTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransSrvAddDataBufNodeTest006, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransSrvAddDataBufNodeTest006, TestSize.Level1)
 {
     int32_t channeId = 1;
     int32_t fd = 1;
@@ -309,7 +309,7 @@ HWTEST_F(TransTcpDirectTest, TransSrvAddDataBufNodeTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
 {
     int32_t channeId = 1;
     int32_t fd = 1;
@@ -330,7 +330,7 @@ HWTEST_F(TransTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
     char *ret = VerifyP2pPack(g_ip, g_port);
     EXPECT_TRUE(ret != nullptr);
@@ -345,7 +345,7 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
 {
     char peerIp[IP_LEN] = {0};
     int32_t peerPort;
@@ -373,7 +373,7 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
 {
     int32_t code = CODE_VERIFY_P2P;
     int32_t errCode = SOFTBUS_INVALID_PARAM;
@@ -391,7 +391,7 @@ HWTEST_F(TransTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
 {
     bool isAuthServer = false;
     int64_t authId = 1;
@@ -413,7 +413,7 @@ HWTEST_F(TransTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.Level1)
 {
     LocalListenerInfo info;
     info.type = CONNECT_P2P;
@@ -446,7 +446,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
 {
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTdcSetCallBack(cb);
@@ -462,7 +462,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcOnChannelOpenedTest0014, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcOnChannelOpenedTest0014, TestSize.Level1)
 {
     int32_t pid = 0;
     ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
@@ -494,7 +494,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcOnChannelOpenedTest0014, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcGetUidAndPidTest0015, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcGetUidAndPidTest0015, TestSize.Level1)
 {
     int32_t uid = 0;
     int32_t pid = 0;
@@ -524,7 +524,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcGetUidAndPidTest0015, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *bytes = "Get Message";
@@ -552,7 +552,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t fd = 1;
@@ -576,7 +576,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
  * @tc.require:
  */
 
-HWTEST_F(TransTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level1)
+HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level1)
 {
     int errCode = SOFTBUS_OK;
     int32_t channelId = 1;
