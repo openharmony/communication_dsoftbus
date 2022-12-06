@@ -249,9 +249,9 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest005, TestSize.Level1)
     int32_t ret = TransAddLaneReqFromPendingList(laneId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
-    TransonLaneRequestSuccess(invalidId, connInfo);
+    TransOnLaneRequestSuccess(invalidId, connInfo);
     connInfo->connInfo.p2p.protocol = 1;
-    TransonLaneRequestSuccess(laneId, connInfo);
+    TransOnLaneRequestSuccess(laneId, connInfo);
 
     ret = TransDelLaneReqFromPendingList(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -277,9 +277,9 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest006, TestSize.Level1)
     int32_t ret = TransAddLaneReqFromPendingList(laneId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
-    TransonLaneRequestFail(invalidId, reason);
+    TransOnLaneRequestFail(invalidId, reason);
     connInfo->connInfo.p2p.protocol = 1;
-    TransonLaneRequestFail(laneId, reason);
+    TransOnLaneRequestFail(laneId, reason);
 
     ret = TransDelLaneReqFromPendingList(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -297,7 +297,7 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest007, TestSize.Level1)
 {
     uint32_t laneId = 1;
     LaneState state = LANE_STATE_EXCEPTION;
-    TransonLaneStateChange(laneId, state);
+    TransOnLaneStateChange(laneId, state);
 
     int32_t ret = GetStreamLaneType(RAW_STREAM);
     EXPECT_TRUE(ret == LANE_T_RAW_STREAM);
