@@ -175,7 +175,7 @@ void VtpInstance::WaitForDestroy(const int &delayTimes)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "call WaitForDestroy");
         FtDestroyNonblock();
         isDestroyed_ = true;
-        initVtpCount_ = 0;//走到
+        initVtpCount_ = 0;
     }
 }
 

@@ -115,7 +115,8 @@ HWTEST_F(StreamCommonDataTest, MakeCommonStream001, TestSize.Level1)
     uint16_t seq;
     StreamFrameInfo *frameInfo = (StreamFrameInfo *)SoftBusCalloc(sizeof(StreamFrameInfo));
     ASSERT_TRUE(frameInfo != nullptr);
-    std::shared_ptr<StreamCommonData> tmpStreamCommonData = std::make_shared<StreamCommonData>(streamId, seq, *frameInfo);
+    std::shared_ptr<StreamCommonData> tmpStreamCommonData =
+        std::make_shared<StreamCommonData>(streamId, seq, *frameInfo);
 
     int ret = tmpStreamCommonData->InitStreamData(nullptr, data->bufLen, std::move(data->extBuffer), data->extLen);
     EXPECT_EQ(-1, ret);
@@ -136,7 +137,8 @@ HWTEST_F(StreamCommonDataTest, MakeCommonStream001, TestSize.Level1)
     streamData->buffer = std::make_unique<char[]>(tmpLength);
     ASSERT_TRUE(std::move(streamData->buffer) != nullptr);
     ASSERT_TRUE(std::move(data->buffer) != nullptr);
-    ret = tmpStreamCommonData->InitStreamData(std::move(streamData->buffer), data->bufLen, std::move(data->buffer), data->extLen);
+    ret = tmpStreamCommonData->InitStreamData(std::move(streamData->buffer), data->bufLen, std::move(data->buffer),
+        data->extLen);
     EXPECT_EQ(data->extLen, tmpStreamCommonData->extBufLen_);
 
     SoftBusFree(data);

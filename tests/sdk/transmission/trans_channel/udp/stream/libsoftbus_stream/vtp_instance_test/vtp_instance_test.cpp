@@ -64,7 +64,8 @@ HWTEST_F(VtpInstanceTest, UpdateVtpLogLevel001, TestSize.Level1)
  */
 HWTEST_F(VtpInstanceTest, GetVersion001, TestSize.Level1)
 {
-    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance = std::make_shared<Communication::SoftBus::VtpInstance>();
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
     std::string tmpStr = vtpInstance->GetVersion();
 
     EXPECT_TRUE(tmpStr == "VTP_V1.0");
@@ -78,7 +79,8 @@ HWTEST_F(VtpInstanceTest, GetVersion001, TestSize.Level1)
  */
 HWTEST_F(VtpInstanceTest, CryptoRand001, TestSize.Level1)
 {
-    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance = std::make_shared<Communication::SoftBus::VtpInstance>();
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
 
     int res = (int)vtpInstance->CryptoRand();
     EXPECT_NE(0, res);
@@ -93,7 +95,8 @@ HWTEST_F(VtpInstanceTest, CryptoRand001, TestSize.Level1)
  */
 HWTEST_F(VtpInstanceTest, PreSetFillpCoreParams001, TestSize.Level1)
 {
-    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance = std::make_shared<Communication::SoftBus::VtpInstance>();
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
 
     vtpInstance->PreSetFillpCoreParams();
 
