@@ -205,7 +205,6 @@ if (defined(ohos_lite)) {
       ":TransSdkChannelManagerTest",
       ":TransSdkProxyFileManagerTest",
       ":TransSdkTest",
-      ":TransSdkUdpManagerTest",
       "monitor_permission_test:MonitorPermission",
       "permission:DynamicPermissionTest",
       "udp/distributed_stream:distributed_stream_test",
