@@ -86,11 +86,13 @@ ohos_unittest("AuthTestMock") {
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_socket_mock.cpp",
     "unittest/auth_net_ledger_mock.cpp",
     "unittest/auth_test_enhance.cpp",
   ]
 
   include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "//base/security/device_auth/interfaces/innerkits",
     "$dsoftbus_root_path/core/authentication/include",
@@ -147,10 +149,90 @@ ohos_unittest("AuthTestMock") {
   }
 }
 
+ohos_unittest("AuthTestCallBack") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/authentication/src/auth_common.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_connection.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_hichain.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_manager.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_request.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_session_fsm.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_session_key.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_session_message.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
+    "$dsoftbus_root_path/core/authentication/src/virtual/auth_meta_manager_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_socket_mock.cpp",
+    "unittest/auth_net_ledger_mock.cpp",
+    "unittest/auth_test_mock.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "//base/security/device_auth/interfaces/innerkits",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "//commonlibrary/c_utils/base/include",
+    "//third_party/cJSON",
+    "unittest/common/",
+    "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":AuthTest",
+    ":AuthTestCallBack",
     ":AuthTestMock",
   ]
 }
