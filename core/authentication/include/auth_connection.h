@@ -16,8 +16,8 @@
 #ifndef AUTH_CONNECTION_H
 #define AUTH_CONNECTION_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "auth_common.h"
 #include "auth_interface.h"
@@ -40,6 +40,7 @@ int32_t AuthConnInit(const AuthConnListener *listener);
 void AuthConnDeinit(void);
 
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType);
+void UpdateAuthDevicePriority(uint64_t connId);
 void DisconnectAuthDevice(uint64_t connId);
 int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data);
 

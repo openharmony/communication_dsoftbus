@@ -40,6 +40,7 @@ public:
     virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
     virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
+    virtual int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option) = 0;
 };
 class LnnConnectInterfaceMock : public LnnConnectInterface {
 public:
@@ -57,6 +58,7 @@ public:
     MOCK_METHOD1(ConnStopLocalListening, int32_t (const LocalListenerInfo *));
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t (ConnModule));
     MOCK_METHOD1(DiscDeviceInfoChanged, void (InfoTypeChanged));
+    MOCK_METHOD2(ConnUpdateConnection, int32_t (uint32_t, UpdateOption *));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
