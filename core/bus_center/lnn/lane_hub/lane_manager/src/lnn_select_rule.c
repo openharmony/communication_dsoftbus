@@ -65,7 +65,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band != BAND_24G && band != BAND_UNKNOWN) {
-        LLOGE("current band is unsupport");
+        LLOGE("band isn't 2.4G or unknown");
         return false;
     }
     int32_t local, remote;
@@ -85,7 +85,7 @@ static bool IsEnableWlan5G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band != BAND_5G && band != BAND_UNKNOWN) {
-        LLOGE("current band unsupport");
+        LLOGE("band isn't 5G or unknown");
         return false;
     }
     int32_t local, remote;
