@@ -327,7 +327,7 @@ static SocketInterface g_ipSocketInterface = {
     .AcceptClient = AcceptTcpClient,
 };
 
-const SocketInterface *GetTcpProtocol(void)
+NO_SANITIZE("cfi") const SocketInterface *GetTcpProtocol(void)
 {
     return &g_ipSocketInterface;
 }

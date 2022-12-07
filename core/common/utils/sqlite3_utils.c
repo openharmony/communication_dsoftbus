@@ -90,7 +90,7 @@ static SqliteManager g_sqliteMgr[TABLE_NAME_ID_MAX] = {
     },
 };
 
-static int32_t GetTrustedDevInfoByIdCb(DbContext *ctx, uint8_t *data, int32_t idx)
+NO_SANITIZE("cfi") static int32_t GetTrustedDevInfoByIdCb(DbContext *ctx, uint8_t *data, int32_t idx)
 {
     int32_t i = 0;
     char *info = (char *)data + idx * UDID_BUF_LEN;

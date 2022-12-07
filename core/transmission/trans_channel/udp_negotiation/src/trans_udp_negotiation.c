@@ -93,7 +93,7 @@ static int64_t GenerateSeq(bool isServer)
     return seq;
 }
 
-static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
+NO_SANITIZE("cfi") static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel opened.");
     ChannelInfo info = {0};
@@ -366,7 +366,7 @@ static int32_t SetPeerDeviceIdByAuth(int64_t authId, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *appInfo)
+NO_SANITIZE("cfi") static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *appInfo)
 {
     if (TransUnpackRequestUdpInfo(msg, appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack request udp info failed.");

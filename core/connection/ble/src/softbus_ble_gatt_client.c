@@ -768,7 +768,7 @@ static int32_t GetMouduleFlags(SoftBusBtUuid *charaUuid, bool *flag)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNotify *param,
+static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNotify *param,
     int32_t status)
 {
     BleGattcInfo *infoNode = NULL;

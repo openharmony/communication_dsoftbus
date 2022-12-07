@@ -132,7 +132,7 @@ static int32_t GetChannelInfoByAuthId(int32_t authId, AuthChannelInfo *dstInfo)
     return SOFTBUS_ERR;
 }
 
-static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServer)
+NO_SANITIZE("cfi") static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServer)
 {
     ChannelInfo channelInfo = {0};
     channelInfo.channelType = CHANNEL_TYPE_AUTH;
@@ -149,22 +149,23 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
         appInfo->myData.sessionName, &channelInfo);
 }
 
-static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode)
+NO_SANITIZE("cfi") static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t channelId,
+    int32_t errCode)
 {
     return g_cb->OnChannelOpenFailed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH, errCode);
 }
 
-static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
+NO_SANITIZE("cfi") static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
 {
     return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH);
 }
 
-static int32_t AuthGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
+NO_SANITIZE("cfi") static int32_t AuthGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     return g_cb->GetUidAndPidBySessionName(sessionName, uid, pid);
 }
 
-static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t len)
+NO_SANITIZE("cfi") static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t len)
 {
     AuthChannelInfo channel;
     if (GetChannelInfoByAuthId(authId, &channel) != SOFTBUS_OK) {

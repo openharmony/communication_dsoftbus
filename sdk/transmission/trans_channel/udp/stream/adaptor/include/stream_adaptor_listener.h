@@ -18,6 +18,7 @@
 
 #include "i_stream.h"
 #include "i_stream_manager.h"
+#include "softbus_def.h"
 #include "softbus_log.h"
 
 using Communication::SoftBus::IStreamManagerListener;
@@ -89,7 +90,7 @@ public:
         }
     }
 
-    void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
+    NO_SANITIZE("cfi") void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnQosEvent for channelId = %" PRId64,

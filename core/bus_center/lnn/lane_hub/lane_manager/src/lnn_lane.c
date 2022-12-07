@@ -218,7 +218,7 @@ static int32_t GetAllLaneIdListener(ILaneIdStateListener **listener, uint32_t *l
     return SOFTBUS_OK;
 }
 
-static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
+NO_SANITIZE("cfi") static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
 {
     ILaneIdStateListener *listener = NULL;
     uint32_t listenerNum = 0;
@@ -234,7 +234,7 @@ static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
     SoftBusFree(listener);
 }
 
-static void LaneIdDisabled(uint32_t laneId, uint32_t laneProfileId)
+NO_SANITIZE("cfi") static void LaneIdDisabled(uint32_t laneId, uint32_t laneProfileId)
 {
     ILaneIdStateListener *listener = NULL;
     uint32_t listenerNum = 0;

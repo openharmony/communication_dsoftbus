@@ -426,7 +426,7 @@ NO_SANITIZE("cfi") static void WrapperSecurityRespondCallback(const BdAddr *bdAd
     CLOGI("WrapperSecurityRespondCallback");
 }
 
-static void WrapperScanResultCallback(BtScanResultData *scanResultdata)
+NO_SANITIZE("cfi") static void WrapperScanResultCallback(BtScanResultData *scanResultdata)
 {
     if (scanResultdata == NULL) {
         return;

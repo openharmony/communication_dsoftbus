@@ -26,6 +26,7 @@
 #include "i_stream_msg_manager.h"
 #include "i_stream_socket.h"
 #include "session.h"
+#include "softbus_def.h"
 #include "stream_common.h"
 
 namespace Communication {
@@ -54,7 +55,7 @@ public:
             return 0;
         }
 
-        void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) const override
+        NO_SANITIZE("cfi") void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) const override
         {
             listener_->OnQosEvent(eventId, tvCount, tvList);
         }
