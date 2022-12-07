@@ -86,8 +86,8 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
 
 static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
 {
-    if (memset_s(g_dstParam, sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT, 0,
-        sizeof(SoftBusEvtReportMsg) * SOFTBUS_EVT_PARAM_BUTT) != EOK) {
+    if (memset_s(g_dstParam, sizeof(HiSysEventParam) * SOFTBUS_EVT_PARAM_BUTT, 0,
+        sizeof(HiSysEventParam) * SOFTBUS_EVT_PARAM_BUTT) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "init  g_dstParam fail");
         return SOFTBUS_ERR;
     }
