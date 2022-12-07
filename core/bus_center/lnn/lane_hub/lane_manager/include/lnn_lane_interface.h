@@ -90,9 +90,9 @@ typedef struct {
 } LaneConnInfo;
 
 typedef struct {
-    void (*onLaneRequestSuccess)(uint32_t laneId, const LaneConnInfo *info);
-    void (*onLaneRequestFail)(uint32_t laneId, LaneRequestFailReason reason);
-    void (*onLaneStateChange)(uint32_t laneId, LaneState state);
+    void (*OnLaneRequestSuccess)(uint32_t laneId, const LaneConnInfo *info);
+    void (*OnLaneRequestFail)(uint32_t laneId, LaneRequestFailReason reason);
+    void (*OnLaneStateChange)(uint32_t laneId, LaneState state);
 } ILaneListener;
 
 typedef enum {
