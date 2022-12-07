@@ -305,6 +305,7 @@ NO_SANITIZE("cfi") int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, 
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac/deviceIdHash fail.");
                 return SOFTBUS_MEM_ERR;
             }
+            option->bleOption.fastestConnectEnable = true;
             break;
         case AUTH_LINK_TYPE_P2P:
             option->type = CONNECT_TCP;

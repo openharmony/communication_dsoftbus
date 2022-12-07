@@ -269,7 +269,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientSend(const int32_t clientId, const c
     return SoftbusGattcWriteCharacteristic(clientId, &clientData);
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
+NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr, bool fastestConnectEnable)
 {
     if (g_gattcIsInited != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc not init");
@@ -296,6 +296,9 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         (void)SoftbusGattcUnRegister(clientId);
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
+    }
+    if (fastestConnectEnable && SoftbusGattcSetFastestConn(infoNode->clientId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "enable ble fastest connection failed");
     }
     if (SoftbusGattcConnect(clientId, bleAddr) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect failed");

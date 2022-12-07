@@ -14,13 +14,14 @@
  */
 #include "softbus_adapter_ble_gatt_client.h"
 
-#include <stdbool.h>
 #include "securec.h"
+#include <stdbool.h>
+
+#include "adapter_bt_utils.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
-#include "adapter_bt_utils.h"
 
 #include "ohos_bt_def.h"
 #include "ohos_bt_gatt_client.h"
@@ -239,6 +240,39 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, Sof
         clientData->valueLen, clientData->value) != SOFTBUS_OK) {
         CLOGE("SoftbusGattcWriteCharacteristic error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusGattcSetFastestConn(int32_t clientId)
+{
+    if (clientId <= 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param, '%d'", clientId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = BleGattcSetFastestConn(clientId, true);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcSetFastestConn failed, return code '%d'", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusGattPriority priority)
+{
+    if (clientId <= 0 || addr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid param, '%d'", clientId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    BdAddr bdAddr = {0};
+    if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "addr memory copy failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = BleGattcSetPriority(clientId, &bdAddr, (BtGattPriority)priority);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleGattcSetPriority failed, return code '%d'", ret);
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }

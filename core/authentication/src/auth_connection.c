@@ -43,7 +43,7 @@ typedef struct {
 static ListNode g_connRequestList = { &g_connRequestList, &g_connRequestList };
 static AuthConnListener g_listener = {0};
 
-static uint64_t GenConnId(int32_t connType, int32_t id)
+uint64_t GenConnId(int32_t connType, int32_t id)
 {
     uint64_t connId = (uint64_t)connType;
     connId = (connId << INT32_BIT_NUM) & MASK_UINT64_H32;
@@ -521,6 +521,23 @@ NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnI
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConnectDevice fail, requestId=%u.", requestId);
     }
     return ret;
+}
+
+void UpdateAuthDevicePriority(uint64_t connId)
+{
+    if (GetConnType(connId) != AUTH_LINK_TYPE_BLE) {
+        return;
+    }
+    UpdateOption option = {
+        .type = CONNECT_BLE,
+        .bleOption = {
+            .priority = CONN_BLE_PRIORITY_BALANCED,
+        }
+    };
+    int32_t ret = ConnUpdateConnection(GetConnId(connId), &option);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "UpdateAuthDevicePriority: connType=%d, id=%u update priority, ret: %d",
+        GetConnType(connId), GetConnId(connId), ret);
 }
 
 NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)

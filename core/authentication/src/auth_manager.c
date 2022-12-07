@@ -671,6 +671,7 @@ NO_SANITIZE("cfi") void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSess
         NotifyDeviceVerifyPassed(authId, &info->nodeInfo);
     } else {
         ReportAuthRequestPassed(info->requestId, authId, &info->nodeInfo);
+        UpdateAuthDevicePriority(info->connId);
         /* br and ble NOT long-connection, close connection after auth pass. */
         if (info->connInfo.type == AUTH_LINK_TYPE_BR || info->connInfo.type == AUTH_LINK_TYPE_BLE) {
             DisconnectAuthDevice(info->connId);
