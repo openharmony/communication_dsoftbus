@@ -32,13 +32,23 @@ LnnWifiAdpterInterfaceMock::~LnnWifiAdpterInterfaceMock()
 
 static LnnWifiAdpterInterface *GetWifiAdpterInterface()
 {
-    return reinterpret_cast<LnnWifiAdpterInterfaceMock *>(g_wifiAdpterInterface);
+    return reinterpret_cast<LnnWifiAdpterInterface *>(g_wifiAdpterInterface);
+}
+
+void LnnWifiAdpterInterfaceMock::SetDefaultResult()
+{
+    EXPECT_CALL(*this, SoftBusGetLinkBand).WillRepeatedly(Return(BAND_UNKNOWN));
 }
 
 extern "C" {
 int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
 {
     return GetWifiAdpterInterface()->SoftBusGetLinkedInfo(info);
+}
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    return GetWifiAdpterInterface()->SoftBusGetLinkBand();
 }
 }
 }
