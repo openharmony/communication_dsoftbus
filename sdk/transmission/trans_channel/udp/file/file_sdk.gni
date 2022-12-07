@@ -37,19 +37,19 @@ if (dsoftbus_feature_trans_udp_file == true) {
                          "value")
   dep_fileschema =
       "dsoftbus_enhance/sdk/transmission/trans_channel/udp/file/BUILD.gn"
-  enhanced_huaweishare = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                     [
-                                       "$native_source_path",
-                                       "$dep_fileschema",
-                                     ],
-                                     "value")
+  enhanced_share = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                               [
+                                 "$native_source_path",
+                                 "$dep_fileschema",
+                               ],
+                               "value")
   if (enhanced) {
     trans_file_sdk_inc += [
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile/interface",
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface",
     ]
     trans_file_sdk_deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
-    if (enhanced_huaweishare) {
+    if (enhanced_share) {
       trans_file_sdk_inc += [
         "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport",
         "$dsoftbus_root_path/dsoftbus_enhance/sdk/transmission/trans_channel/udp/file/include",
