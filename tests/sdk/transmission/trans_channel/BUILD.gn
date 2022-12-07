@@ -216,6 +216,7 @@ if (defined(ohos_lite)) {
           deps += [
             ":TransSdkUdpStreamAdaptorTest",
             ":TransSdkUdpStreamInterfaceTest",
+            "udp/stream/libsoftbus_stream:unittest",
           ]
         }
       }
