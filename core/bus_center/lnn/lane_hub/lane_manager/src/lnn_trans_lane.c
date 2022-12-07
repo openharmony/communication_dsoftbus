@@ -370,7 +370,7 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const Lan
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Notify laneAlloc succ, laneId:0x%x, linkType:%d",
         laneId, info->type);
-    reqInfo.listener.onLaneRequestSuccess(laneId, &connInfo);
+    reqInfo.listener.OnLaneRequestSuccess(laneId, &connInfo);
     UpdateLinkType(laneId, info->type);
     LaneGenerateParam param;
     param.linkType = profile.linkType;
@@ -387,7 +387,7 @@ static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Notify laneAlloc fail, laneId:0x%x, reason:%d", laneId, reason);
-    reqInfo.listener.onLaneRequestFail(laneId, LANE_LINK_FAILED);
+    reqInfo.listener.OnLaneRequestFail(laneId, LANE_LINK_FAILED);
     if (Lock() != SOFTBUS_OK) {
         return;
     }
@@ -413,7 +413,7 @@ static void NotifyLaneStateChange(uint32_t laneId, int32_t state)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane state is changed, state:%d", state);
         laneState = LANE_STATE_EXCEPTION;
     }
-    reqInfo.listener.onLaneStateChange(laneId, laneState);
+    reqInfo.listener.OnLaneStateChange(laneId, laneState);
 }
 
 static LaneLinkNodeInfo *GetLaneLinkNodeWithoutLock(uint32_t laneId)
