@@ -123,7 +123,7 @@ static bool CheckListener(const ILaneIdStateListener *listener)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneIdListener is null");
         return false;
     }
-    if ((listener->onLaneIdEnabled == NULL) && (listener->onLaneIdDisabled == NULL)) {
+    if ((listener->OnLaneIdEnabled == NULL) && (listener->OnLaneIdDisabled == NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "listener invalid");
         return false;
     }
