@@ -408,9 +408,9 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneId, const LaneReq
     }
 
     ILaneListener listener;
-    listener.onLaneRequestSuccess = TransOnLaneRequestSuccess;
-    listener.onLaneRequestFail = TransOnLaneRequestFail;
-    listener.onLaneStateChange = TransOnLaneStateChange;
+    listener.OnLaneRequestSuccess = TransOnLaneRequestSuccess;
+    listener.OnLaneRequestFail = TransOnLaneRequestFail;
+    listener.OnLaneStateChange = TransOnLaneStateChange;
     if (LnnRequestLane(laneId, requestOption, &listener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans request lane failed.");
         (void)TransDelLaneReqFromPendingList(laneId);
