@@ -44,13 +44,13 @@ constexpr uint32_t DEFAULT_SELECT_NUM = 4;
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
 
-static void onLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info);
-static void onLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason);
-static void onLaneStateChange(uint32_t laneId, LaneState state);
+static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info);
+static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason);
+static void OnLaneStateChange(uint32_t laneId, LaneState state);
 static ILaneListener g_listener = {
-        .onLaneRequestSuccess = onLaneRequestSuccess,
-        .onLaneRequestFail = onLaneRequestFail,
-        .onLaneStateChange = onLaneStateChange,
+        .OnLaneRequestSuccess = OnLaneRequestSuccess,
+        .OnLaneRequestFail = OnLaneRequestFail,
+        .OnLaneStateChange = OnLaneStateChange,
 };
 
 class LNNLaneTestMock : public testing::Test {
@@ -113,21 +113,21 @@ static void CondWait(void)
     (void)SoftBusMutexUnlock(&g_lock);
 }
 
-static void onLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
+static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
 {
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     CondSignal();
 }
 
-static void onLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
 {
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     CondSignal();
 }
 
-static void onLaneStateChange(uint32_t laneId, LaneState state)
+static void OnLaneStateChange(uint32_t laneId, LaneState state)
 {
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -202,45 +202,11 @@ HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_002, TestSize.Level1)
 
 /*
 * @tc.name: LANE_REQUEST_Test_003
-* @tc.desc: lane request for P2P MSG
-* @tc.type: Failue
-* @tc.require:
-*/
-HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_003, TestSize.Level1)
-{
-    LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneId = ApplyLaneId(laneType);
-    EXPECT_TRUE(laneId != INVALID_LANE_ID);
-
-    LaneDepsInterfaceMock mock;
-    mock.SetDefaultResult();
-    EXPECT_CALL(mock, LnnGetLocalNumInfo(NUM_KEY_NET_CAP, _))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(16), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, NUM_KEY_NET_CAP, _))
-        .WillRepeatedly(DoAll(SetArgPointee<2>(16), Return(SOFTBUS_OK)));
-    LnnWifiAdpterInterfaceMock wifiMock;
-    wifiMock.SetDefaultResult();
-
-    LaneRequestOption requestOption;
-    (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
-    requestOption.type = laneType;
-    (void)strncpy_s(requestOption.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
-        NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
-    requestOption.requestInfo.trans.transType = LANE_T_MSG;
-    requestOption.requestInfo.trans.expectedBw = 0;
-    requestOption.requestInfo.trans.expectedLink.linkTypeNum = 1;
-    requestOption.requestInfo.trans.expectedLink.linkType[0] = LANE_P2P;
-    int32_t ret = LnnRequestLane(laneId, &requestOption, &g_listener);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-}
-
-/*
-* @tc.name: LANE_REQUEST_Test_004
 * @tc.desc: lane request for Wlan5G RAW-STREAM
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_004, TestSize.Level1)
+HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_003, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = ApplyLaneId(laneType);
@@ -268,12 +234,12 @@ HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_REQUEST_Test_005
+* @tc.name: LANE_REQUEST_Test_004
 * @tc.desc: lane request failue
 * @tc.type: FAILUE
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_005, TestSize.Level1)
+HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_004, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = ApplyLaneId(laneType);
@@ -331,14 +297,14 @@ HWTEST_F(LNNLaneTestMock, LANE_REGISTER_001, TestSize.Level1)
     RegisterLaneIdListener(nullptr);
 
     const ILaneIdStateListener cb = {
-        .onLaneIdEnabled = LaneIdEnabled,
-        .onLaneIdDisabled = nullptr,
+        .OnLaneIdEnabled = LaneIdEnabled,
+        .OnLaneIdDisabled = nullptr,
     };
     RegisterLaneIdListener(&cb);
 
     const ILaneIdStateListener listener = {
-        .onLaneIdEnabled = nullptr,
-        .onLaneIdDisabled = LaneIdEnabled,
+        .OnLaneIdEnabled = nullptr,
+        .OnLaneIdDisabled = LaneIdEnabled,
     };
     RegisterLaneIdListener(&listener);
 
