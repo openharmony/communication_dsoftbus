@@ -13,6 +13,30 @@
  * limitations under the License.
  */
 
+/**
+ * @addtogroup SoftBus
+ * @{
+ *
+ * @brief Provides secure, high-speed communications between devices.
+ *
+ * This module implements unified distributed communication management of nearby devices and provides link-independent
+ * device discovery and transmission interfaces to support service publishing and data transmission.
+ * @since 1.0
+ * @version 1.0
+ */
+
+/**
+ * @file dfs_session.h
+ *
+ * @brief Declare functions and constants for the distributed file service of DSoftBus. The functions can be used to:
+ * <ul>
+ * <li>Obtain the session key and session handle.</li>
+ * <li>Disable listening for the distributed file service. </li>
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+
 #ifndef DFS_SESSION_H
 #define DFS_SESSION_H
 
@@ -22,10 +46,63 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Defines the length of the session key, including the terminating null character <b>\0</b>.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
 #define SESSION_KEY_LEN 32
 
+/**
+ * @example dfs_demo.c
+ */
+
+/**
+ * @brief Obtains the session key based on the session ID.
+ *
+ * @param sessionId Indicates the unique session ID.
+ * @param key Indicates the pointer to the buffer that stores the session key.
+ * @param len Indicates the length of the buffer.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
+ * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
+ * @return Returns <b>SOFTBUS_MEM_ERR</b> if the operation fails due to insufficient memory.
+ * @since 1.0
+ * @version 1.0
+ */
 int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len);
+
+/**
+ * @brief Obtains the session handle based on the session ID.
+ *
+ * @param sessionId Indicates the unique session ID.
+ * @param handle Indicates the pointer to the buffer that stores the session handle.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
+ * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
+ * @return Returns <b>SOFTBUS_MEM_ERR</b> if the operation fails due to insufficient memory.
+ * @since 1.0
+ * @version 1.0
+ */
 int32_t GetSessionHandle(int32_t sessionId, int *handle);
+
+/**
+ * @brief Disables the session listener based on the session ID.
+ *
+ * @param sessionId Indicates the unique session ID.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful.
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>SOFTBUS_TRANS_FUNC_NOT_SUPPORT</b> if the session ID is not supported.
+ * @return Returns <b>SOFTBUS_ERR</b> if an error occurs in the internal processing of DSoftBus.
+ * @since 1.0
+ * @version 1.0
+ */
 int32_t DisableSessionListener(int32_t sessionId);
 
 #ifdef __cplusplus
