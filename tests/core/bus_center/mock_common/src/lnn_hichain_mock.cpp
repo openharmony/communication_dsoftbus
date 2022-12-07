@@ -63,7 +63,7 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, con
     if (groupType == AUTH_PEER_TO_PEER_GROUP) {
         *groupNum = GRUOP_NUM2;
     }
-    *returnGroupVec = (char *)SoftBusCalloc(*groupNum);
+    *returnGroupVec = reinterpret_cast<char *>(SoftBusCalloc(*groupNum));
     if (*returnGroupVec == NULL) {
         return -1;
     }

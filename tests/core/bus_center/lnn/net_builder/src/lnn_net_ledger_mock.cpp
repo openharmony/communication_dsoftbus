@@ -234,7 +234,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info
         return SOFTBUS_ERR;
     }
     *infoNum = 1;
-    *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
     if (*info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "malloc info fail");
         return SOFTBUS_ERR;
@@ -281,7 +281,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInf
         return SOFTBUS_ERR;
     }
     *infoNum = 1;
-    *info = (NodeBasicInfo *)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
     if (*info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "malloc info fail");
         return SOFTBUS_ERR;
