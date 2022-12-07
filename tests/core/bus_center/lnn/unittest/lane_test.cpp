@@ -176,21 +176,21 @@ static const char *GetLinkType(LaneLinkType type)
     }
 }
 
-static void onLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
+static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
 {
     printf("LaneRequestSucc: laneId:0x%x, linkType:%s\n", laneId, GetLinkType(info->type));
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void onLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
 {
     printf("LaneRequestFail: laneId:0x%x, reason:%d\n", laneId, reason);
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void onLaneStateChange(uint32_t laneId, LaneState state)
+static void OnLaneStateChange(uint32_t laneId, LaneState state)
 {
     printf("LaneStateChange: laneId:0x%x, state:%d\n", laneId, state);
     int32_t ret = LnnFreeLane(laneId);
@@ -364,9 +364,9 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     trans->expectedLink.linkType[0] = LANE_P2P;
     trans->expectedLink.linkType[1] = LANE_WLAN_5G;
     ILaneListener listener = {
-        .onLaneRequestSuccess = onLaneRequestSuccess,
-        .onLaneRequestFail = onLaneRequestFail,
-        .onLaneStateChange = onLaneStateChange,
+        .OnLaneRequestSuccess = OnLaneRequestSuccess,
+        .OnLaneRequestFail = OnLaneRequestFail,
+        .OnLaneStateChange = OnLaneStateChange,
     };
     ret = LnnRequestLane(laneId, &request, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
