@@ -337,7 +337,7 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEvent(ListenerModule module, int32_t events,
     DelTcpConnInfo(connectionId);
     return SOFTBUS_ERR;
 }
-static void DelAllConnInfo(ListenerModule moduleId)
+NO_SANITIZE("cfi") static void DelAllConnInfo(ListenerModule moduleId)
 {
     if (g_tcpConnInfoList == NULL) {
         return;

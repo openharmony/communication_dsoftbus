@@ -30,7 +30,8 @@ static sptr<DiscClientProxy> GetClientProxy(const char *pkgName)
     return clientProxy;
 }
 
-int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
+NO_SANITIZE("cfi") int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *additions)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");

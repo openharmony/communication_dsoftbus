@@ -142,21 +142,22 @@ static void ClearConnRequest(void)
 }
 
 /* Notify Conn Listener */
-static void NotifyClientConnected(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
+NO_SANITIZE("cfi") static void NotifyClientConnected(uint32_t requestId, uint64_t connId, int32_t result,
+    const AuthConnInfo *connInfo)
 {
     if (g_listener.onConnectResult != NULL) {
         g_listener.onConnectResult(requestId, connId, result, connInfo);
     }
 }
 
-static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
+NO_SANITIZE("cfi") static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
 {
     if (g_listener.onDisconnected != NULL) {
         g_listener.onDisconnected(connId, connInfo);
     }
 }
 
-static void NotifyDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
+NO_SANITIZE("cfi") static void NotifyDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
     const AuthDataHead *head, const uint8_t *data)
 {
     if (g_listener.onDataReceived != NULL) {

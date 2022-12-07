@@ -173,7 +173,7 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
     return SOFTBUS_OK;
 }
 
-static void OnGroupCreated(const char *groupInfo)
+NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupInfo)
 {
     if (groupInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid group info.");

@@ -186,7 +186,7 @@ static void PostBusyConnResponse(void)
     }
 }
 
-static void OnConnectFailed(int32_t failedReason)
+NO_SANITIZE("cfi") static void OnConnectFailed(int32_t failedReason)
 {
     if (g_p2pLinkNegoFsm.linkInfo.requestId != 0) {
         if (g_p2pLinkNegoCb.onConnectFailed != NULL) {
@@ -817,7 +817,7 @@ static void IdleStateProcess(P2pLoopMsg msgType, void *param)
     }
 }
 
-static void OnConnectSuccess(const P2pLinkNegoConnResult *conneResult)
+NO_SANITIZE("cfi") static void OnConnectSuccess(const P2pLinkNegoConnResult *conneResult)
 {
     CLOGI("connected success");
     int32_t ret = AuthSetP2pMac(conneResult->authId, conneResult->peerMac);
@@ -888,7 +888,7 @@ static void WaitStateOnRepsonseRecv(const P2pRespMsg *response)
     OnConnectSuccess(&(g_p2pLinkNegoFsm.result));
 }
 
-static void TimeoutErrorProcess(int32_t localErrCode, int32_t peerErrCode)
+NO_SANITIZE("cfi") static void TimeoutErrorProcess(int32_t localErrCode, int32_t peerErrCode)
 {
     CLOGE("invoke timeout, errcode %d.", localErrCode);
     if (g_p2pLinkNegoFsm.linkInfo.requestId != 0) {

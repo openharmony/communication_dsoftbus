@@ -124,7 +124,7 @@ NO_SANITIZE("cfi") int32_t PostAuthEvent(EventType event, EventHandler handler,
     return SOFTBUS_OK;
 }
 
-static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
+NO_SANITIZE("cfi") static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
 {
     CHECK_NULL_PTR_RETURN_VALUE(msg, SOFTBUS_ERR);
     CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_ERR);

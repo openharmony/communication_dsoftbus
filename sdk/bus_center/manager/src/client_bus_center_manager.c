@@ -22,6 +22,7 @@
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
@@ -987,7 +988,7 @@ int32_t MetaNodeOnLeaveResult(const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info)
+NO_SANITIZE("cfi") int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info)
 {
     NodeStateCallbackItem *item = NULL;
     NodeBasicInfo *basicInfo = (NodeBasicInfo *)info;
@@ -1023,7 +1024,7 @@ int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type)
+NO_SANITIZE("cfi") int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type)
 {
     NodeStateCallbackItem *item = NULL;
     NodeBasicInfo *basicInfo = (NodeBasicInfo *)info;
@@ -1059,7 +1060,7 @@ int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnTimeSyncResult(const void *info, int retCode)
+NO_SANITIZE("cfi") int32_t LnnOnTimeSyncResult(const void *info, int retCode)
 {
     TimeSyncCallbackItem *item = NULL;
     TimeSyncResultInfo *basicInfo = (TimeSyncResultInfo *)info;
@@ -1090,21 +1091,21 @@ int32_t LnnOnTimeSyncResult(const void *info, int retCode)
     return SOFTBUS_OK;
 }
 
-void LnnOnPublishLNNResult(int32_t publishId, int32_t reason)
+NO_SANITIZE("cfi") void LnnOnPublishLNNResult(int32_t publishId, int32_t reason)
 {
     if (g_busCenterClient.publishCb.OnPublishResult != NULL) {
         g_busCenterClient.publishCb.OnPublishResult(publishId, (PublishResult)reason);
     }
 }
 
-void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
+NO_SANITIZE("cfi") void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
 {
     if (g_busCenterClient.refreshCb.OnDiscoverResult != NULL) {
         g_busCenterClient.refreshCb.OnDiscoverResult(refreshId, (RefreshResult)reason);
     }
 }
 
-void LnnOnRefreshDeviceFound(const void *device)
+NO_SANITIZE("cfi") void LnnOnRefreshDeviceFound(const void *device)
 {
     if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
         g_busCenterClient.refreshCb.OnDeviceFound((const DeviceInfo *)device);
