@@ -217,6 +217,15 @@ static void ReportLnnDfx(LnnConnectionFsm *connFsm, int32_t retCode)
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
+    if (connInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CompleteJoinLNN connInfo is NULL");
+        return;
+    }
+    if (connInfo->nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CompleteJoinLNN connInfo->nodeInfo is NULL");
+        SoftBusFree(connInfo);
+        return;
+    }
     ReportCategory report;
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     SetWatchdogFlag(true);
