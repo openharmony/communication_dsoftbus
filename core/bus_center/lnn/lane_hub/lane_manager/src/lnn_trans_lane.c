@@ -272,7 +272,7 @@ static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
     param.transType = infoNode->info.transType;
     param.priority = 0; /* default:0 */
     uint32_t profileId = GenerateLaneProfileId(&param);
-    g_laneIdCallback->onLaneIdDisabled(laneId, profileId);
+    g_laneIdCallback->OnLaneIdDisabled(laneId, profileId);
     UnbindLaneIdFromProfile(laneId, profileId);
 }
 
@@ -377,7 +377,7 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const Lan
     param.transType = profile.content;
     param.priority = profile.priority;
     uint32_t profileId = GenerateLaneProfileId(&param);
-    g_laneIdCallback->onLaneIdEnabled(laneId, profileId);
+    g_laneIdCallback->OnLaneIdEnabled(laneId, profileId);
 }
 
 static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
