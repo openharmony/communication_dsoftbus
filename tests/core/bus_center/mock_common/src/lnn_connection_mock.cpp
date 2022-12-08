@@ -21,6 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 void *g_connInterface;
+static const int32_t TEST_DATA_LEN = 200;
 LnnConnectInterfaceMock::LnnConnectInterfaceMock()
 {
     g_connInterface = reinterpret_cast<void *>(this);
@@ -147,5 +148,16 @@ int32_t LnnConnectInterfaceMock::ActionofConnGetConnectionInfo(uint32_t connecti
 void LnnConnectInterfaceMock::ActionofConnUnSetConnectCallback(ConnModule moduleId)
 {
     (void)moduleId;
+}
+
+int32_t LnnConnectInterfaceMock::ActionOfConnPostBytes(uint32_t connectionId, ConnPostData *data)
+{
+    ALOGI("ActionOfConnPostBytes");
+    g_encryptData = data->buf;
+    if (strcpy_s(g_encryptData, TEST_DATA_LEN, data->buf) != SOFTBUS_OK) {
+        ALOGE("strcpy failed in conn post bytes");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 } // namespace OHOS

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ LnnSocketInterfaceMock::~LnnSocketInterfaceMock()
     g_socketInterface = nullptr;
 }
 
-static LnnSocketInterface *GetSocketInterface()
+static LnnSocketInterface *GetSocketMockInterface()
 {
     return reinterpret_cast<LnnSocketInterfaceMock *>(g_socketInterface);
 }
@@ -37,7 +37,57 @@ static LnnSocketInterface *GetSocketInterface()
 extern "C" {
 int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
 {
-    return GetSocketInterface()->ConnOpenClientSocket(option, bindAddr, isNonBlock);
+    return GetSocketMockInterface()->ConnOpenClientSocket(option, bindAddr, isNonBlock);
+}
+
+const SocketInterface* GetSocketInterface(ProtocolType protocolType)
+{
+    return GetSocketMockInterface()->GetSocketInterface(protocolType);
+}
+
+int32_t RegistSocketProtocol(const SocketInterface* interface)
+{
+    return GetSocketMockInterface()->RegistSocketProtocol(interface);
+}
+
+ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
+{
+    return GetSocketMockInterface()->ConnSendSocketData(fd, buf, len, timeout);
+}
+
+void ConnShutdownSocket(int32_t fd)
+{
+    return GetSocketMockInterface()->ConnShutdownSocket(fd);
+}
+
+int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
+{
+    return GetSocketMockInterface()->ConnSetTcpKeepAlive(fd, seconds);
+}
+
+int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
+{
+    return GetSocketMockInterface()->ConnSetTcpUserTimeOut(fd, millSec);
+}
+
+int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
+{
+    return GetSocketMockInterface()->ConnToggleNonBlockMode(fd, isNonBlock);
+}
+
+int32_t ConnGetSocketError(int32_t fd)
+{
+    return GetSocketMockInterface()->ConnGetSocketError(fd);
+}
+
+int32_t ConnGetLocalSocketPort(int32_t fd)
+{
+    return GetSocketMockInterface()->ConnGetLocalSocketPort(fd);
+}
+
+int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
+{
+    return GetSocketMockInterface()->ConnGetPeerSocketAddr(fd, socketAddr);
 }
 }
 } // namespace OHOS

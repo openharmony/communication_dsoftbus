@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,6 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <cinttypes>
+#include <gtest/gtest.h>
+#include <securec.h>
+#include <sys/time.h>
 
 #include "auth_common.h"
 #include "auth_hichain.h"
@@ -27,30 +32,36 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "auth_session_message.h"
 #include "softbus_log.h"
-#include <cinttypes>
-#include <gtest/gtest.h>
-#include <securec.h>
-#include <sys/time.h>
 
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
-
-uint64_t g_connectionId = 8590065691;
-uint32_t g_requestId = 88;
-int64_t g_seqServer = 3;
-ConnModule moduleId = MODULE_DEVICE_AUTH;
-uint8_t g_devInfo[5] = { 0x10, 0x2, 0x14, 0x08, 0x06 };
+#define TEST_UDID "123456ABCDEF"
+#define TEST_UUID "6984321642"
+#define DEV_NAME "DEVTEST"
+#define TEST_MAC "11:22:33:44:55:66"
+#define TEST_NETWORKID "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
+#define VERSION_TYPE_LITE "LITE"
+static const uint32_t REQUEST_ID = 88;
+static const bool TEST_IS_P2P = false;
+static const int64_t SEQ_SERVER = 3;
+static const int32_t TEST_P2P_ROLE = 1;
+static const uint32_t TEST_NET_CAPACITY = 3;
+static const uint16_t TEST_DATA_CHANGE_FLAG = 1;
+static const uint64_t TEST_SUP_PROTOCOLS = 453213535465;
+static const ConnModule MODULE_ID = MODULE_DEVICE_AUTH;
+static const uint8_t DEVICE_INFO[5] = { 0x10, 0x2, 0x14, 0x08, 0x06 };
 uint8_t g_sessionKey[SESSION_KEY_LENGTH];
-int32_t g_len = 200;
-int g_operationCode = 0;
-static const int MILLIS = 15;
-const char *g_returnData = nullptr;
-static const char TESTMAC[MAC_LEN] = "11:22:33:44:55:66";
-const AuthConnInfo connInfo = {
+static const int32_t TEST_DATA_LEN = 600;
+static const int OPER_CODE = 0;
+static const int DELAY_TIME = 15;
+static const char *g_retData = nullptr;
+static uint64_t g_connId = 8590065691;
+const AuthConnInfo g_connInfo = {
     .type = AUTH_LINK_TYPE_BR,
-    .info.brInfo.brMac = "11:22:33:44:55:66",
+    .info.brInfo.brMac = TEST_MAC,
     .peerUid = "002",
 };
 const AuthVerifyCallback callBack = {
@@ -59,51 +70,58 @@ const AuthVerifyCallback callBack = {
 };
 const AuthSessionInfo info = {
     .isServer = true,
-    .connInfo = connInfo,
+    .connInfo = g_connInfo,
 };
-
-NodeInfo nodeInfo;
+const AuthSessionInfo info2 = {
+    .isServer = false,
+    .connId = g_connId,
+    .connInfo = g_connInfo,
+};
 struct MockInterfaces {
     LnnConnectInterfaceMock *connMock;
     LnnHichainInterfaceMock *hichainMock;
-    AuthNetLedgertInterfaceMock *ledgermock;
+    AuthNetLedgertInterfaceMock *ledgerMock;
     LnnSocketInterfaceMock *socketMock;
 };
 AuthDataHead devIdHead = {
     .dataType = DATA_TYPE_DEVICE_ID,
     .module = MODULE_DEVICE_AUTH,
-    .seq = g_seqServer,
+    .seq = SEQ_SERVER,
     .flag = SERVER_SIDE_FLAG,
 };
 AuthDataHead devAuthHead = {
     .dataType = DATA_TYPE_AUTH,
     .module = MODULE_DEVICE_AUTH,
-    .seq = g_seqServer,
+    .seq = SEQ_SERVER,
     .flag = SERVER_SIDE_FLAG,
 };
 AuthDataHead devInfoAuthHead = {
     .dataType = DATA_TYPE_DEVICE_INFO,
     .module = MODULE_DEVICE_AUTH,
-    .seq = g_seqServer,
+    .seq = SEQ_SERVER,
     .flag = SERVER_SIDE_FLAG,
 };
 AuthDataHead closeAckHead = {
     .dataType = DATA_TYPE_CLOSE_ACK,
     .module = MODULE_DEVICE_AUTH,
-    .seq = g_seqServer,
+    .seq = SEQ_SERVER,
     .flag = SERVER_SIDE_FLAG,
 };
-AuthVerifyListener listener = {
+AuthVerifyListener g_listener = {
     .onDeviceVerifyPass = &AuthNetLedgertInterfaceMock::OnDeviceVerifyPass,
     .onDeviceNotTrusted = &AuthNetLedgertInterfaceMock::OnDeviceNotTrusted,
     .onDeviceDisconnect = &AuthNetLedgertInterfaceMock::OnDeviceDisconnect,
 };
-LocalNetLedger g_localNetLedger = {
-    .localInfo = nodeInfo,
-    .lock = AuthNetLedgertInterfaceMock::mutex,
-    .status = LL_INIT_SUCCESS,
+NodeInfo g_localInfo = {
+    .versionType = VERSION_TYPE_LITE,
+    .uuid = TEST_UUID,
+    .networkId = TEST_NETWORKID,
+    .netCapacity = TEST_NET_CAPACITY,
+    .isBleP2p = TEST_IS_P2P,
+    .p2pInfo.p2pMac = TEST_MAC,
+    .supportedProtocols = TEST_SUP_PROTOCOLS,
+    .dataChangeFlag = TEST_DATA_CHANGE_FLAG,
 };
-
 void SendSignal()
 {
     ALOGI("SendSignal");
@@ -111,23 +129,16 @@ void SendSignal()
         ALOGE("SendSignal Lock failed");
         return;
     }
-    AuthNetLedgertInterfaceMock::gFLAG = true;
-    SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
-    SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
+    AuthNetLedgertInterfaceMock::isRuned = true;
+    (void)SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
+    (void)SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
     ALOGI("SendSignal end");
 }
 
 void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManager, DeviceGroupManager &groupManager)
 {
-    int64_t authSeq = 3;
-    uint64_t connId = 8590065691;
-    AuthConnInfo connInfo = {
-        .type = AUTH_LINK_TYPE_BR,
-        .info.brInfo.brMac = "11:22:33:44:55:66",
-        .peerUid = "001",
-    };
     bool isServer = false;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    memset_s(g_localInfo.offlineCode, OFFLINE_CODE_BYTE_SIZE, 0, OFFLINE_CODE_BYTE_SIZE);
     ON_CALL(*mockInterface->connMock, ConnConnectDevice(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     groupManager.regDataChangeListener = LnnHichainInterfaceMock::InvokeDataChangeListener;
     groupManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
@@ -138,21 +149,28 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ON_CALL(*mockInterface->hichainMock, InitDeviceAuthService()).WillByDefault(Return(0));
     ON_CALL(*mockInterface->hichainMock, GetGaInstance()).WillByDefault(Return(&authManager));
     ON_CALL(*mockInterface->hichainMock, GetGmInstance()).WillByDefault(Return(&groupManager));
-    ON_CALL(*mockInterface->ledgermock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ON_CALL(*mockInterface->connMock, ConnPostBytes).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*mockInterface->socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*mockInterface->connMock, ConnGetConnectionInfo)
         .WillByDefault(LnnConnectInterfaceMock::ActionofConnGetConnectionInfo);
-    ON_CALL(*mockInterface->ledgermock, LnnGetLocalNodeInfo).WillByDefault(Return(&g_localNetLedger.localInfo));
-    ON_CALL(*mockInterface->ledgermock, LnnGetBtMac).WillByDefault(Return(TESTMAC));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetDeviceName).WillByDefault(Return(DEV_NAME));
+    ON_CALL(*mockInterface->ledgerMock, LnnConvertIdToDeviceType).WillByDefault(Return(const_cast<char *>(TYPE_PAD)));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetDeviceUdid).WillByDefault(Return(TEST_UDID));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetP2pRole).WillByDefault(Return(TEST_P2P_ROLE));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetP2pMac).WillByDefault(Return(TEST_MAC));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetSupportedProtocols).WillByDefault(Return(TEST_SUP_PROTOCOLS));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetLocalNodeInfo).WillByDefault(Return(&g_localInfo));
+    ON_CALL(*mockInterface->ledgerMock, LnnGetBtMac).WillByDefault(Return(TEST_MAC));
     const unsigned char val = 0x01;
     SoftbusSetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, &val, sizeof(val));
-    ret = AuthStartVerify(&connInfo, g_requestId, &callBack);
+    ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack);
+
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    AuthSessionStartAuth(authSeq, g_requestId, connId, &connInfo, isServer);
-    SoftBusSleepMs(MILLIS);
+    AuthSessionStartAuth(SEQ_SERVER, REQUEST_ID, g_connId, &g_connInfo, isServer);
+    SoftBusSleepMs(DELAY_TIME);
 }
 
 bool WaitForSignal()
@@ -163,17 +181,22 @@ bool WaitForSignal()
         ALOGE("BrSoftBusCondWait SoftBusGetTime failed");
         return SOFTBUS_ERR;
     }
-    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + MILLIS * USECTONSEC;
+    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + DELAY_TIME * USECTONSEC;
     SoftBusSysTime tv;
     tv.sec = time / USECTONSEC / USECTONSEC;
     tv.usec = time % (USECTONSEC * USECTONSEC);
-    if (!AuthNetLedgertInterfaceMock::gFLAG) {
+    if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
+        ALOGE("Wait signal Lock failed");
+        return false;
+    }
+    if (!AuthNetLedgertInterfaceMock::isRuned) {
         int ret = SoftBusCondWait(&LnnHichainInterfaceMock::cond, &LnnHichainInterfaceMock::mutex, &tv);
         (void)SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
         return (ret == SOFTBUS_OK);
     } else {
-        SoftBusSleepMs(MILLIS);
-        AuthNetLedgertInterfaceMock::gFLAG = false;
+        (void)SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
+        SoftBusSleepMs(DELAY_TIME);
+        AuthNetLedgertInterfaceMock::isRuned = false;
     }
     return true;
 }
@@ -193,15 +216,15 @@ public:
 
 void AuthTestCallBack::SetUpTestCase()
 {
-    AuthNetLedgertInterfaceMock::gFLAG = false;
-    RegAuthVerifyListener(&listener);
+    AuthNetLedgertInterfaceMock::isRuned = false;
+    RegAuthVerifyListener(&g_listener);
     (void)SoftBusMutexInit(&LnnHichainInterfaceMock::mutex, nullptr);
     SoftBusCondInit(&LnnHichainInterfaceMock::cond);
 }
 
 void AuthTestCallBack::TearDownTestCase()
 {
-    AuthNetLedgertInterfaceMock::gFLAG = false;
+    AuthNetLedgertInterfaceMock::isRuned = false;
     SoftBusCondDestroy(&LnnHichainInterfaceMock::cond);
     SoftBusMutexDestroy(&LnnHichainInterfaceMock::mutex);
 }
@@ -229,18 +252,18 @@ HWTEST_F(AuthTestCallBack, CLINET_ON_DATA_RECEVIED_Test_001, TestSize.Level1)
     DeviceGroupManager groupManager;
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
-    NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
+    NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
     MockInterfaces mockInterface = {
         .connMock = &connMock,
         .hichainMock = &hichainMock,
-        .ledgermock = &ledgermock,
+        .ledgerMock = &ledgerMock,
         .socketMock = &socketMock,
     };
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     authManager.authDevice = LnnHichainInterfaceMock::AuthDeviceConnSend;
-    char *data = AuthNetLedgertInterfaceMock::Pack(g_seqServer, &info, devIdHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connectionId, moduleId, g_seqServer, data, g_len);
+    char *data = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devIdHead);
+    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data, TEST_DATA_LEN);
     (void)SoftBusMutexLock(&LnnHichainInterfaceMock::mutex);
     int ret = SoftBusCondWait(&LnnHichainInterfaceMock::cond, &LnnHichainInterfaceMock::mutex, nullptr);
     (void)SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
@@ -261,28 +284,28 @@ HWTEST_F(AuthTestCallBack, onTransmit_Test_001, TestSize.Level1)
     DeviceGroupManager groupManager;
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
-    NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
+    NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
     MockInterfaces mockInterface = {
         .connMock = &connMock,
         .hichainMock = &hichainMock,
-        .ledgermock = &ledgermock,
+        .ledgerMock = &ledgerMock,
         .socketMock = &socketMock,
     };
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     WaitForSignal();
-    char *data = AuthNetLedgertInterfaceMock::Pack(g_seqServer, &info, devIdHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connectionId, moduleId, g_seqServer, data, g_len);
+    char *data = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devIdHead);
+    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data, TEST_DATA_LEN);
     authManager.processData = LnnHichainInterfaceMock::ActionOfProcessData;
     WaitForSignal();
-    HichainProcessData(g_seqServer, g_devInfo, g_len);
+    HichainProcessData(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));
-    LnnHichainInterfaceMock::g_devAuthCb.onTransmit(g_seqServer, g_devInfo, g_len);
-    if (AuthNetLedgertInterfaceMock::gFLAG == false) {
+    LnnHichainInterfaceMock::g_devAuthCb.onTransmit(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN);
+    if (AuthNetLedgertInterfaceMock::isRuned == false) {
         bool ret = WaitForSignal();
         EXPECT_TRUE(ret);
     }
-    EXPECT_TRUE(AuthNetLedgertInterfaceMock::gFLAG == true);
+    EXPECT_TRUE(AuthNetLedgertInterfaceMock::isRuned == true);
     SoftBusFree(data);
     AuthDeviceDeinit();
 }
@@ -293,44 +316,46 @@ HWTEST_F(AuthTestCallBack, onTransmit_Test_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestCallBack, OnFinish_Test_001, TestSize.Level1)
+HWTEST_F(AuthTestCallBack, OnFinish_Test_002, TestSize.Level1)
 {
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
-    NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
+    NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
     MockInterfaces mockInterface = {
         .connMock = &connMock,
         .hichainMock = &hichainMock,
-        .ledgermock = &ledgermock,
+        .ledgerMock = &ledgerMock,
         .socketMock = &socketMock,
     };
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     WaitForSignal();
-    char *data = AuthNetLedgertInterfaceMock::Pack(g_seqServer, &info, devIdHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connectionId, moduleId, g_seqServer, data, g_len);
+    char *data = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devIdHead);
+    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data, TEST_DATA_LEN);
     authManager.processData = LnnHichainInterfaceMock::ActionOfProcessData;
-    HichainProcessData(g_seqServer, g_devInfo, g_len);
+    HichainProcessData(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN);
     WaitForSignal();
     SoftBusFree(data);
-    char *data2 = AuthNetLedgertInterfaceMock::Pack(g_seqServer, &info, devAuthHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connectionId, moduleId, g_seqServer, data2, g_len);
+    char *data2 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devAuthHead);
+    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data2, TEST_DATA_LEN);
     WaitForSignal();
     SoftBusFree(data2);
-    LnnHichainInterfaceMock::g_devAuthCb.onSessionKeyReturned(g_seqServer, g_sessionKey, SESSION_KEY_LENGTH);
+    LnnHichainInterfaceMock::g_devAuthCb.onSessionKeyReturned(SEQ_SERVER, g_sessionKey, SESSION_KEY_LENGTH);
     WaitForSignal();
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));
-    LnnHichainInterfaceMock::g_devAuthCb.onFinish(g_seqServer, g_operationCode, g_returnData);
+    LnnHichainInterfaceMock::g_devAuthCb.onFinish(SEQ_SERVER, OPER_CODE, g_retData);
     bool ret = WaitForSignal();
     EXPECT_TRUE(ret);
-    char *data3 = AuthNetLedgertInterfaceMock::Pack(g_seqServer, &info, devInfoAuthHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connectionId, moduleId, g_seqServer, data3, g_len);
+    EXPECT_CALL(connMock, ConnPostBytes).WillOnce(DoAll(SendSignal, LnnConnectInterfaceMock::ActionOfConnPostBytes));
+    PostDeviceInfoMessage(SEQ_SERVER, &info2);
     WaitForSignal();
-    SoftBusFree(data3);
-    char *data4 = AuthNetLedgertInterfaceMock::Pack(g_seqServer, &info, closeAckHead);
-    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connectionId, moduleId, g_seqServer, data4, g_len);
+    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER,
+        LnnConnectInterfaceMock::g_encryptData, TEST_DATA_LEN);
+    WaitForSignal();
+    char *data4 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, closeAckHead);
+    LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data4, TEST_DATA_LEN);
     ret = WaitForSignal();
     EXPECT_TRUE(ret);
     SoftBusFree(data4);
