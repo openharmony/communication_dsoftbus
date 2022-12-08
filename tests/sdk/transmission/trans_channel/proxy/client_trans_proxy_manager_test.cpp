@@ -17,6 +17,7 @@
 #include "securec.h"
 
 #include "client_trans_proxy_manager.h"
+#include "client_trans_session_manager.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -52,22 +53,6 @@ const char *g_proxyFileSet[] = {
     "ss",
     "/data/ss",
 };
-
-class ClientTransProxyManagerTest : public testing::Test {
-public:
-    ClientTransProxyManagerTest() {}
-    ~ClientTransProxyManagerTest() {}
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
-};
-
-void ClientTransProxyManagerTest::SetUpTestCase(void)
-{
-    SetAceessTokenPermission("dsoftbusTransTest");
-}
-void ClientTransProxyManagerTest::TearDownTestCase(void) {}
 
 int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
@@ -106,29 +91,32 @@ int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
     return SOFTBUS_OK;
 }
 
-static int OnSessionOpened(int sessionId, int result)
-{
-    return SOFTBUS_OK;
-}
-
-static void OnSessionClosed(int sessionId)
-{
-}
-
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
-{
-}
-
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
-{
-}
-
-static ISessionListener g_sessionlistener = {
-    .OnSessionOpened = OnSessionOpened,
-    .OnSessionClosed = OnSessionClosed,
-    .OnBytesReceived = OnBytesReceived,
-    .OnMessageReceived = OnMessageReceived,
+static IClientSessionCallBack g_clientSessionCb = {
+    .OnSessionOpened = TransOnSessionOpened,
+    .OnSessionClosed = TransOnSessionClosed,
+    .OnSessionOpenFailed = TransOnSessionOpenFailed,
+    .OnDataReceived = TransOnBytesReceived,
+    .OnStreamReceived = TransOnOnStreamRecevied,
+    .OnQosEvent = TransOnQosEvent,
 };
+
+class ClientTransProxyManagerTest : public testing::Test {
+public:
+    ClientTransProxyManagerTest() {}
+    ~ClientTransProxyManagerTest() {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+void ClientTransProxyManagerTest::SetUpTestCase(void)
+{
+    int ret = ClinetTransProxyInit(&g_clientSessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SetAceessTokenPermission("dsoftbusTransTest");
+}
+void ClientTransProxyManagerTest::TearDownTestCase(void) {}
 
 /**
  * @tc.name: ClinetTransProxyInitTest
@@ -138,20 +126,8 @@ static ISessionListener g_sessionlistener = {
  */
 HWTEST_F(ClientTransProxyManagerTest, ClinetTransProxyInitTest, TestSize.Level0)
 {
-    IClientSessionCallBack cb;
-    cb.OnSessionOpened = TransOnSessionOpened;
-    cb.OnSessionClosed = TransOnSessionClosed;
-    cb.OnSessionOpenFailed = TransOnSessionOpenFailed;
-    cb.OnDataReceived = TransOnBytesReceived;
-    cb.OnStreamReceived = TransOnOnStreamRecevied;
-    cb.OnGetSessionId = TransOnGetSessionId;
-    cb.OnQosEvent = TransOnQosEvent;
-
     int ret = ClinetTransProxyInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = ClinetTransProxyInit(&cb);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -167,15 +143,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
 
     ChannelInfo channelInfo = {0};
     ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
-    EXPECT_NE(SOFTBUS_ERR, ret);
-
-    ret = CreateSessionServer(g_proxyPkgName, g_proxySessionName, &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = RemoveSessionServer(g_proxyPkgName, g_proxySessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -190,15 +157,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelClosedTest, TestS
     int32_t channelId = 1;
     int ret = ClientTransProxyOnChannelClosed(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreateSessionServer(g_proxyPkgName, g_proxySessionName, &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = ClientTransProxyOnChannelClosed(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = RemoveSessionServer(g_proxyPkgName, g_proxySessionName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -211,15 +169,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenFailedTest, T
 {
     int32_t channelId = 1;
     int ret = ClientTransProxyOnChannelOpenFailed(channelId, TEST_ERR_CODE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreateSessionServer(g_proxyPkgName, g_proxySessionName, &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    
-    ret = ClientTransProxyOnChannelOpenFailed(channelId, TEST_ERR_CODE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = RemoveSessionServer(g_proxyPkgName, g_proxySessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -237,15 +186,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
     
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreateSessionServer(g_proxyPkgName, g_proxySessionName, &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = RemoveSessionServer(g_proxyPkgName, g_proxySessionName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -259,13 +199,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize
     int32_t channelId = 1;
     ClientTransProxyCloseChannel(TEST_CHANNEL_ID);
 
-    int ret = CreateSessionServer(g_proxyPkgName, g_proxySessionName, &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    
     ClientTransProxyCloseChannel(channelId);
-
-    ret = RemoveSessionServer(g_proxyPkgName, g_proxySessionName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**

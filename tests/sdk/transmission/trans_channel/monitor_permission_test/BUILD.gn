@@ -16,7 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
-ohos_unittest("MonitorPermission") {
+ohos_unittest("CheckPermissionTest") {
   module_out_path = module_output_path
   sources = [ "checkpermission_test.cpp" ]
   include_dirs = [
@@ -37,5 +37,5 @@ ohos_unittest("MonitorPermission") {
 }
 group("unittest") {
   testonly = true
-  deps = [ ":MonitorPermission" ]
+  deps = [ ":CheckPermissionTest" ]
 }
