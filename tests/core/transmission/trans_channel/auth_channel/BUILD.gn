@@ -16,7 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
-ohos_unittest("TransAuthChannelCoreTest") {
+ohos_unittest("TransAuthChannelTest") {
   module_out_path = module_output_path
   sources = [ "trans_auth_channel_test.cpp" ]
 
@@ -123,10 +123,42 @@ ohos_unittest("TransAuthManagerTest") {
   }
 }
 
+ohos_unittest("TransAuthMessageTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_auth_message_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
-    ":TransAuthChannelCoreTest",
+    ":TransAuthChannelTest",
     ":TransAuthManagerTest",
+    ":TransAuthMessageTest",
   ]
 }
