@@ -18,6 +18,7 @@
 
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_manager.h"
+#include "client_trans_session_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
@@ -41,7 +42,14 @@ public:
     void TearDown() override {}
 };
 
-void ClientTransProxyTest::SetUpTestCase(void) {}
+void ClientTransProxyTest::SetUpTestCase(void)
+{
+    int ret = InitPendingPacket();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 void ClientTransProxyTest::TearDownTestCase(void) {}
 
 /**

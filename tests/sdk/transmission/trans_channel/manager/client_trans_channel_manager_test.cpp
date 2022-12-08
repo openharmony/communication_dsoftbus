@@ -17,6 +17,11 @@
 #include "securec.h"
 
 #include "client_trans_channel_manager.h"
+#include "client_trans_session_callback.h"
+#include "client_trans_tcp_direct_callback.h"
+#include "client_trans_proxy_manager.h"
+#include "client_trans_auth_manager.h"
+#include "client_trans_udp_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
@@ -36,7 +41,61 @@ public:
     void TearDown() override {}
 };
 
-void ClientTransChannelManagerTest::SetUpTestCase(void) {}
+int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+{
+    return SOFTBUS_OK;
+}
+int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t OnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+{
+    return SOFTBUS_OK;
+}
+
+static int32_t OnDataReceived(int32_t channelId, int32_t channelType,
+    const void *data, uint32_t len, SessionPktType type)
+{
+    return SOFTBUS_OK;
+}
+
+static int32_t OnStreamReceived(int32_t channelId, int32_t channelType, const StreamData *data,
+    const StreamData *ext, const StreamFrameInfo *param)
+{
+    return SOFTBUS_OK;
+}
+
+static int32_t OnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
+    int32_t tvCount, const QosTv *tvList)
+{
+    return SOFTBUS_OK;
+}
+
+static IClientSessionCallBack g_clientSessionCb = {
+    .OnSessionOpened = OnSessionOpened,
+    .OnSessionClosed = OnSessionClosed,
+    .OnSessionOpenFailed = OnSessionOpenFailed,
+    .OnDataReceived = OnDataReceived,
+    .OnStreamReceived = OnStreamReceived,
+    .OnQosEvent = OnQosEvent,
+};
+
+void ClientTransChannelManagerTest::SetUpTestCase(void)
+{
+    int ret = ClientTransAuthInit(&g_clientSessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClinetTransProxyInit(&g_clientSessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransTdcSetCallBack(&g_clientSessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransUdpMgrInit(&g_clientSessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 void ClientTransChannelManagerTest::TearDownTestCase(void) {}
 
 /**
