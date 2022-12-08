@@ -25,7 +25,7 @@ namespace OHOS {
 void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& result)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%{public}s changed.", result.permissionName.c_str());
-    if (InformPermissionChange(result.PermStateChangeType, this->pkgName.c_str(), pid) != SOFTBUS_OK) {
+    if (InformPermissionChange(result.permStateChangeType, this->pkgName.c_str(), pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "InformPermissionChange fail");
     }
 }
