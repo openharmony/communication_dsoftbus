@@ -692,7 +692,7 @@ typedef struct {
  * @ingroup fillpevt
  * @brief  report dstream event
  *
- * @param[in] softObj   any usefull message to FillpDfxEventCb
+ * @param[in] softObj   any useful message to FillpDfxEventCb
  * @param[in]    info   event detail
  */
 typedef void (*FillpDfxEventCb)(void *softObj, const FillpDfxEvent *info);
@@ -701,7 +701,7 @@ typedef void (*FillpDfxEventCb)(void *softObj, const FillpDfxEvent *info);
  * @ingroup fillpevt
  * @brief  function to printf data.
  *
- * @param[in] softObj   any usefull message to FillpDfxDumpFunc
+ * @param[in] softObj   any useful message to FillpDfxDumpFunc
  * @param[in]    data   dump string to print
  * @param[in]     len   lenth of data
  */
