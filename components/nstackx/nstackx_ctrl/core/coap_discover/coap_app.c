@@ -164,7 +164,7 @@ static void CoAPEpollErrorHandle(void *data)
                 continue;
             }
             if (IsCoapCtxEndpointSocket(g_coapCtxArr[i].ctx, socket->fd)) {
-                DFINDER_LOGE(TAG, "coap epoll error occured, with context idx-%u", i);
+                DFINDER_LOGE(TAG, "coap epoll error occurred, with context idx-%u", i);
                 g_coapCtxArr[i].ctxSocketErrFlag = NSTACKX_TRUE;
                 return;
             }
@@ -532,7 +532,7 @@ int32_t CoapThreadInit(void)
     return NSTACKX_EOK;
 }
 
-void CoapThreadDestory(void)
+void CoapThreadDestroy(void)
 {
     PthreadMutexLock(&g_coapThreadParam.waitLock);
     g_coapThreadParam.terminated = NSTACKX_TRUE;
