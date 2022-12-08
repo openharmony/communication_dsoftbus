@@ -15,73 +15,205 @@ import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/LNN"
+bus_center_unittest_dirs = [
+  "$dsoftbus_root_path/core/bus_center/service/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+  "$dsoftbus_root_path/core/bus_center/monitor/include",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/core/connection/interface",
+  "$dsoftbus_root_path/core/authentication/interface",
+  "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/bus_center/utils/include",
+  "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
+  "$dsoftbus_root_path/core/bus_center/ipc/standard/src",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
+  "$dsoftbus_root_path/core/bus_center/ipc/include",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/common",
+  "$dsoftbus_root_path/core/adapter/bus_center/include",
+  "$dsoftbus_root_path/sdk/frame/standard/include",
+  "//commonlibrary/c_utils/base/include",
+  "//third_party/cJSON",
+  "unittest/common/",
+  "$dsoftbus_root_path/core/connection/manager",
+  "$dsoftbus_root_path/core/frame/standard/client_manager/include",
+  "$dsoftbus_root_path/adapter/common/bus_center/include/",
+  "$dsoftbus_root_path/core/discovery/manager/include",
+  "$dsoftbus_root_path/core/discovery/interface",
+  "$dsoftbus_root_path/interfaces/kits/discovery",
+  "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+  "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+  "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
+]
 
-ohos_unittest("LNNTest") {
+bus_center_unittest_deps = [
+  "$dsoftbus_root_path/adapter:softbus_adapter",
+  "$dsoftbus_root_path/core/common:softbus_utils",
+  "$dsoftbus_root_path/core/frame:softbus_server",
+  "//base/security/device_auth/services:deviceauth_sdk",
+  "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
+  "//third_party/googletest:gmock",
+  "//third_party/googletest:gtest_main",
+]
+
+ohos_unittest("LaneTest") {
   module_out_path = module_output_path
-  sources = [
-    "ipc/bus_center_client_proxy_standard_test.cpp",
-    "ipc/bus_center_client_proxy_test.cpp",
-    "ipc/lnn_bus_center_ipc_test.cpp",
-    "unittest/lane_test.cpp",
-    "unittest/ledger_lane_hub_test.cpp",
-    "unittest/lnn_huks_test.cpp",
-    "unittest/net_builder_test.cpp",
-    "unittest/net_ledger_test.cpp",
-  ]
+  sources = [ "unittest/lane_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
 
-  include_dirs = [
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/monitor/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
-    "$dsoftbus_root_path/core/bus_center/ipc/standard/src",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
-    "$dsoftbus_root_path/core/bus_center/ipc/include",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/sdk/frame/standard/include",
-    "//commonlibrary/c_utils/base/include",
-    "//third_party/cJSON",
-    "unittest/common/",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/core/frame/standard/client_manager/include",
-    "$dsoftbus_root_path/adapter/common/bus_center/include/",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
-    "$dsoftbus_root_path/sdk/bus_center/manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
-  ]
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
 
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "//base/security/device_auth/services:deviceauth_sdk",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-  ]
+ohos_unittest("NetLedgerTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/net_ledger_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
+ohos_unittest("NetBuilderTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/net_builder_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
+ohos_unittest("LnnHuksUtilsTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/lnn_huks_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
+ohos_unittest("LedgerLaneHubTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/ledger_lane_hub_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
+ohos_unittest("LnnBusCenterIpcTest") {
+  module_out_path = module_output_path
+  sources = [ "ipc/lnn_bus_center_ipc_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
+ohos_unittest("BusCenterClientProxyTest") {
+  module_out_path = module_output_path
+  sources = [ "ipc/bus_center_client_proxy_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
+ohos_unittest("BusCenterClientProxyStandardTest") {
+  module_out_path = module_output_path
+  sources = [ "ipc/bus_center_client_proxy_standard_test.cpp" ]
+  include_dirs = bus_center_unittest_dirs
+  deps = bus_center_unittest_deps
 
   if (is_standard_system) {
     external_deps = [
@@ -610,13 +742,20 @@ if (!defined(ohos_lite) && enhanced_test) {
 group("unittest") {
   testonly = true
   deps = [
+    ":BusCenterClientProxyStandardTest",
+    ":BusCenterClientProxyTest",
     ":LNNLaneTestMock",
     ":LNNLedgerTest",
     ":LNNLedgerTestMock",
     ":LNNNetBuilderMockTest",
     ":LNNNetBuilderTest",
-    ":LNNTest",
     ":LNNTestMock",
+    ":LaneTest",
+    ":LedgerLaneHubTest",
+    ":LnnBusCenterIpcTest",
+    ":LnnHuksUtilsTest",
+    ":NetBuilderTest",
+    ":NetLedgerTest",
   ]
   if (!defined(ohos_lite) && enhanced_test) {
     deps += [ ":LNNDbTestMock" ]
