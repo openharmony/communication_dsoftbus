@@ -439,8 +439,7 @@ static int32_t ErrCodeConvert(int32_t errCode)
 
 int32_t SoftbusRecordDiscFault(uint8_t medium, int32_t errCode)
 {
-    if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT || errCode < SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT||
-        errCode >= SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT) {
+    if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
