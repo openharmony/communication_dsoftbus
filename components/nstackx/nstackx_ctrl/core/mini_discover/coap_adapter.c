@@ -207,7 +207,7 @@ static int32_t CoapSoftBusDecodeEx(CoapPacket *pkt, const uint8_t *buf, uint32_t
     }
 
     if (pkt->protocol != COAP_UDP) {
-        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocal not coap_udp");
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocol not coap_udp");
         return -1;
     }
 
@@ -217,12 +217,12 @@ static int32_t CoapSoftBusDecodeEx(CoapPacket *pkt, const uint8_t *buf, uint32_t
     }
 
     if (pkt->header.ver != COAP_VERSION) {
-        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocal header version invalid");
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocol header version invalid");
         return DISCOVERY_ERR_VER_INVALID;
     }
 
     if (pkt->header.tokenLen > MAX_TOK_LEN) {
-        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocal header tokenlen invalid");
+        DFINDER_LOGE(TAG, "CoapSoftBusDecode protocol header tokenlen invalid");
         return DISCOVERY_ERR_INVALID_TOKEN_LEN;
     }
 
