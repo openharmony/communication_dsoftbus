@@ -221,11 +221,6 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CompleteJoinLNN connInfo is NULL");
         return;
     }
-    if (connInfo->nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CompleteJoinLNN connInfo->nodeInfo is NULL");
-        SoftBusFree(connInfo);
-        return;
-    }
     ReportCategory report;
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     SetWatchdogFlag(true);
@@ -233,7 +228,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_AUTO) != 0) { // only report auto network
         ReportLnnDfx(connFsm, retCode);
     }
-    if (retCode == SOFTBUS_OK) {
+    if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
         report = LnnAddOnlineNode(connInfo->nodeInfo);
         NotifyJoinResult(connFsm, networkId, retCode);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
@@ -243,7 +238,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         LnnGetLnnRelation(networkId, CATEGORY_NETWORK_ID, relation, CONNECTION_ADDR_MAX);
         LnnNotifyLnnRelationChanged(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type,
             relation[connInfo->addr.type], true);
-    } else {
+    } else if (retCode != SOFTBUS_OK) {
         NotifyJoinResult(connFsm, networkId, retCode);
         AuthHandleLeaveLNN(connInfo->authId);
     }
