@@ -969,8 +969,11 @@ static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType)
 
 static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value, int32_t len)
 {
-    cJSON *data = NULL;
-    data = cJSON_Parse(value + TYPE_HEADER_SIZE);
+    if (len <= TYPE_HEADER_SIZE) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "invalid data length");
+        return SOFTBUS_ERR;
+    }
+    cJSON *data = cJSON_ParseWithLength(value + TYPE_HEADER_SIZE, len - TYPE_HEADER_SIZE);
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse cJSON_Parse failed");
         return SOFTBUS_ERR;
