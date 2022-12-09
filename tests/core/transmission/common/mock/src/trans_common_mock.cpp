@@ -69,5 +69,10 @@ int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned cha
 {
     return GetCommonInterface()->SoftBusDecryptDataWithSeq(cipherKey, input, inLen, decryptData, decryptLen, seqNum);
 }
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetCommonInterface()->SoftBusGenerateStrHash(str, len, hash);
+}
 }
 }
