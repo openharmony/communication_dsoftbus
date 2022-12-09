@@ -37,11 +37,11 @@ const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 const char *g_groupid = "TEST_GROUP_ID";
 
-class TransUdpNegoExchange : public testing::Test {
+class TransUdpNegotiationExTest : public testing::Test {
 public:
-    TransUdpNegoExchange()
+    TransUdpNegotiationExTest()
     {}
-    ~TransUdpNegoExchange()
+    ~TransUdpNegotiationExTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -51,10 +51,10 @@ public:
     {}
 };
 
-void TransUdpNegoExchange::SetUpTestCase(void)
+void TransUdpNegotiationExTest::SetUpTestCase(void)
 {}
 
-void TransUdpNegoExchange::TearDownTestCase(void)
+void TransUdpNegotiationExTest::TearDownTestCase(void)
 {}
 
 static void GenerateAppInfo(AppInfo *appInfo)
@@ -83,12 +83,12 @@ static void GenerateAppInfo(AppInfo *appInfo)
 }
 
 /**
- * @tc.name: TransUdpNegoExchange01
+ * @tc.name: TransUdpNegotiationExTest001
  * @tc.desc: Transmission udp negotiation pack and unpack request with invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange01, TestSize.Level1)
+HWTEST_F(TransUdpNegotiationExTest, TransUdpNegotiationExTest001, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
@@ -107,12 +107,12 @@ HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange01, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoExchange02
+ * @tc.name: TransUdpNegotiationExTest002
  * @tc.desc: Transmission udp negotiation pack and unpack request.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange02, TestSize.Level1)
+HWTEST_F(TransUdpNegotiationExTest, TransUdpNegotiationExTest002, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
@@ -145,12 +145,12 @@ HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange02, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoExchange03
+ * @tc.name: TransUdpNegotiationExTest003
  * @tc.desc: Transmission udp negotiation pack and unpack reply with invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange03, TestSize.Level1)
+HWTEST_F(TransUdpNegotiationExTest, TransUdpNegotiationExTest003, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
@@ -169,12 +169,12 @@ HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange03, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoExchange04
+ * @tc.name: TransUdpNegotiationExTest004
  * @tc.desc: Transmission udp negotiation pack and unpack reply.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange04, TestSize.Level1)
+HWTEST_F(TransUdpNegotiationExTest, TransUdpNegotiationExTest004, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
@@ -206,12 +206,12 @@ HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange04, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoExchange05
+ * @tc.name: TransUdpNegotiationExTest005
  * @tc.desc: Transmission udp negotiation pack and unpack reply with invalid channel option type.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange05, TestSize.Level1)
+HWTEST_F(TransUdpNegotiationExTest, TransUdpNegotiationExTest005, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != NULL);
@@ -238,12 +238,12 @@ HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange05, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoExchange06
+ * @tc.name: TransUdpNegotiationExTest006
  * @tc.desc: Transmission udp negotiation pack and unpack error info with invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange06, TestSize.Level1)
+HWTEST_F(TransUdpNegotiationExTest, TransUdpNegotiationExTest006, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
     int errCode = TEST_ERROR_CODE;
@@ -259,12 +259,12 @@ HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange06, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoExchange07
+ * @tc.name: TransUdpNegotiationExTest007
  * @tc.desc: Transmission udp negotiation pack and unpack error info.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoExchange, TransUdpNegoExchange07, TestSize.Level1)
+HWTEST_F(TransUdpNegotiationExTest, TransUdpNegotiationExTest007, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
     EXPECT_TRUE(msg != NULL);
