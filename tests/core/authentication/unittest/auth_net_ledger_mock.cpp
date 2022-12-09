@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -185,7 +185,7 @@ void AuthNetLedgertInterfaceMock::OnDeviceVerifyPass(int64_t authId, const NodeI
         ALOGE("Device verify Lock failed");
         return;
     }
-    gFLAG = true;
+    isRuned = true;
     SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
     SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
 }
@@ -198,7 +198,7 @@ void AuthNetLedgertInterfaceMock::OnDeviceNotTrusted(const char *peerUdid)
         ALOGE("Device not trusted Lock failed");
         return;
     }
-    gFLAG = true;
+    isRuned = true;
     SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
     SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
 }
@@ -211,7 +211,7 @@ void AuthNetLedgertInterfaceMock::OnDeviceDisconnect(int64_t authId)
         ALOGE("Device disconnect Lock failed");
         return;
     }
-    gFLAG = true;
+    isRuned = true;
     SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
     SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
 }
