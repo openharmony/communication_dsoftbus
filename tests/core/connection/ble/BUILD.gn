@@ -16,7 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection"
 
-ohos_unittest("softbus_conn_ble_test") {
+ohos_unittest("ConnectionBleTest") {
   module_out_path = module_output_path
   include_dirs = [
     "$dsoftbus_root_path/interfaces/kits/common",
