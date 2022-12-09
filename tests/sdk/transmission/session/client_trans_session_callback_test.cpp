@@ -343,6 +343,8 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest04, TestS
     channel->isServer = true;
     ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BYTES);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     RelesseChannInfo(channel);

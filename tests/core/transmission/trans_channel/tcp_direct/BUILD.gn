@@ -16,7 +16,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
-ohos_unittest("TransTcpDirectTest") {
+ohos_unittest("TransServerTcpDirectTest") {
   module_out_path = module_output_path
   sources = [ "unittest/trans_tcp_direct_test.cpp" ]
 
@@ -71,6 +71,7 @@ ohos_unittest("TransTcpDirectTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
   ]
 
   deps = [
@@ -92,7 +93,7 @@ ohos_unittest("TransTcpDirectTest") {
   }
 }
 
-ohos_unittest("TransTcpDirectCoreTest") {
+ohos_unittest("TransCoreTcpDirectTest") {
   module_out_path = module_output_path
   sources = [ "unittest/trans_core_tcp_direct_test.cpp" ]
 
@@ -241,8 +242,8 @@ ohos_unittest("TransTcpDirectMessageTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":TransTcpDirectCoreTest",
+    ":TransCoreTcpDirectTest",
+    ":TransServerTcpDirectTest",
     ":TransTcpDirectMessageTest",
-    ":TransTcpDirectTest",
   ]
 }
