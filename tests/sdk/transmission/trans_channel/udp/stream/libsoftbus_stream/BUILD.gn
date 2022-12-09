@@ -24,6 +24,7 @@ group("unittest") {
           # deps file
           "raw_stream_data_test:unittest",
           "stream_common_data_test:unittest",
+          "stream_manager_test:unittest",			
           "vtp_instance_test:unittest",
           "vtp_stream_socket_test:unittest",
         ]
