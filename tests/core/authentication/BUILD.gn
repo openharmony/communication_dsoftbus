@@ -236,3 +236,8 @@ group("unittest") {
     ":AuthTestMock",
   ]
 }
+
+group("fuzztest") {
+  testonly = true
+  deps = [ "fuzztest:fuzztest" ]
+}
