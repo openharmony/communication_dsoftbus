@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,13 +62,15 @@ public:
     MOCK_METHOD1(ConnStopLocalListening, int32_t(const LocalListenerInfo *));
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
     MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged));
+    static inline char *g_encryptData;
     static inline ConnectCallback g_conncallback;
     static inline ConnectResult g_connresultcb;
+    static int32_t ActionOfConnPostBytes(uint32_t connectionId, ConnPostData *data);
     static int32_t ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback);
-    static int32_t ActionofOnConnectSuccessed(const ConnectOption *option, uint32_t requestId,
-        const ConnectResult *result);
-    static int32_t ActionofOnConnectFailed(const ConnectOption *option, uint32_t requestId,
-        const ConnectResult *result);
+    static int32_t ActionofOnConnectSuccessed(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+    static int32_t ActionofOnConnectFailed(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
     static int32_t ActionofConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info);
     static void ActionofConnUnSetConnectCallback(ConnModule moduleId);
     static void OnVerifyPassed(uint32_t requestId, int64_t authId, const NodeInfo *info)

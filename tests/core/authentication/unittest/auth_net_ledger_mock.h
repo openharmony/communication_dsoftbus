@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,12 +30,6 @@
 #include "softbus_json_utils.h"
 
 namespace OHOS {
-typedef struct {
-    NodeInfo localInfo;
-    SoftBusMutex lock;
-    LocalLedgerStatus status;
-} LocalNetLedger;
-
 class AuthNetLedgerInterface {
 public:
     AuthNetLedgerInterface() {};
@@ -77,7 +71,7 @@ public:
     MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t(const char *, uint16_t *));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));
 
-    static inline bool gFLAG;
+    static inline bool isRuned;
     static inline SoftBusMutex mutex;
     static char *Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head);
     static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info);
