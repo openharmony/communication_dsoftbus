@@ -42,6 +42,8 @@ public:
     virtual int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey,
         const unsigned char *input, uint32_t inLen,
         unsigned char *decryptData, uint32_t *decryptLen, int32_t seqNum) = 0;
+
+    virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
 };
 
 class TransCommInterfaceMock : public TransCommInterface {
@@ -59,6 +61,8 @@ public:
         unsigned char *, uint32_t *, int32_t));
     MOCK_METHOD6(SoftBusDecryptDataWithSeq, int32_t (AesGcmCipherKey *, const unsigned char *, uint32_t,
         unsigned char *, uint32_t *, int32_t));
+
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
 };
 
 } // namespace OHOS
