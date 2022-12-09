@@ -212,8 +212,10 @@ HWTEST_F(TransChannelManagerTest, TransGetChannelType001, TestSize.Level1)
 
     tmp = 0;
     param->attr = &g_sessionAttr[tmp];
+    connInfo->type = LANE_BR;
     transInfo->channelType = TransGetChannelType(param, connInfo);
     EXPECT_EQ(CHANNEL_TYPE_PROXY, transInfo->channelType);
+    connInfo->type = LANE_P2P;
 
     tmp = 1;
     param->attr = &g_sessionAttr[tmp];
