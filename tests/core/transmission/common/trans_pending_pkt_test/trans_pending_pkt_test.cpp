@@ -196,10 +196,5 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ProcPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_TIMOUT, ret);
-
-    // ret = ProcPendingPacket(channelId, seqNum, type);
-    // EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_PENDING, ret);
-    // PendingDeinit(type);
 }
-
 } // OHOS
