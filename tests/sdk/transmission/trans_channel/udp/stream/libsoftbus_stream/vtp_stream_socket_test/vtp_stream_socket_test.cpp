@@ -17,7 +17,6 @@
 
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
-#include "session.h"
 
 #define protected public
 #define private public
@@ -459,6 +458,7 @@ HWTEST_F(VtpStreamSocketTest, SetStreamScene001, TestSize.Level1)
 /**
  * @tc.name: SetStreamHeaderSize001
  * @tc.desc: SetStreamHeaderSize001, use the wrong parameter.
+ * @tc.desc: PrintOptionInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -568,14 +568,22 @@ HWTEST_F(VtpStreamSocketTest, FillpStatistics001, TestSize.Level1)
     std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
         std::make_shared<Communication::SoftBus::VtpStreamSocket>();
 
-    FtEventCbkInfo *info = FILLP_NULL_PTR;
+    FtEventCbkInfo *info = (FtEventCbkInfo*)SoftBusMalloc(sizeof(FtEventCbkInfo));
+    ASSERT_TRUE(info != nullptr);
+    (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
 
     int fd = 2;
     int ret = vtpStreamSocket->FillpStatistics(fd, nullptr);
     EXPECT_EQ(-1, ret);
 
+    info->evt = FT_EVT_FRAME_STATS;
     ret = vtpStreamSocket->FillpStatistics(fd, info);
-    EXPECT_EQ(-1, ret);
+    EXPECT_EQ(0, ret);
+
+    info->evt = FT_EVT_TRAFFIC_DATA;
+    ret = vtpStreamSocket->FillpStatistics(fd, info);
+    EXPECT_EQ(0, ret);
+
     vtpStreamSocket->FillpAppStatistics();
 
     if (info != NULL) {
@@ -602,7 +610,7 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
     bool isServer = false;
     vtpStreamSocket->RegisterMetricCallback(isServer);
 
-    int fd = 2;
+    int fd = 3;
     std::mutex streamSocketLock_;
     vtpStreamSocket->AddStreamSocketLock(fd, streamSocketLock_);
 
@@ -613,8 +621,120 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
 
     vtpStreamSocket->RemoveStreamSocketListener(fd);
 
+    FtEventCbkInfo *info = (FtEventCbkInfo*)SoftBusMalloc(sizeof(FtEventCbkInfo));
+    ASSERT_TRUE(info != nullptr);
+    (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
+
+    int ret = vtpStreamSocket->HandleFillpFrameStats(fd, info);
+    EXPECT_EQ(0, ret);
+
     auto self = vtpStreamSocket->GetSelf();
     EXPECT_TRUE(self != nullptr);
+    vtpStreamSocket->g_streamSocketMap[0] = self;
+    vtpStreamSocket->g_streamSocketMap[1] = self;
+    vtpStreamSocket->g_streamSocketMap[2] = self;
+    vtpStreamSocket->g_streamSocketMap[3] = self;
+    ret = vtpStreamSocket->HandleFillpFrameStats(fd, info);
+    EXPECT_EQ(0, ret);
+
+    if (info != nullptr) {
+        SoftBusFree(info);
+    }
+}
+
+/**
+ * @tc.name: RegisterMetricCallback002
+ * @tc.desc: RegisterMetricCallback002, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback002, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    int fd = 1;
+    std::mutex streamSocketLock_;
+    auto self = vtpStreamSocket->GetSelf();
+    EXPECT_TRUE(self != nullptr);
+
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> tmpvtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+    vtpStreamSocket->g_streamSocketMap[0] = self;
+    vtpStreamSocket->g_streamSocketMap[1] = self;
+    vtpStreamSocket->g_streamSocketMap[2] = self;
+    vtpStreamSocket->g_streamSocketMap[3] = self;
+
+    int tmpFd = 1;
+    ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
+
+    vtpStreamSocket->AddStreamSocketLock(tmpFd, streamSocketLock_);
+
+    ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
+    vtpStreamSocket->AddStreamSocketListener(fd, self);;
+
+    ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
+    vtpStreamSocket->RemoveStreamSocketLock(fd);
+    fd = 3;
+
+    ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
+    vtpStreamSocket->RemoveStreamSocketLock(fd);
+
+    fd = 100;
+    vtpStreamSocket->RemoveStreamSocketListener(fd);
+}
+
+/**
+ * @tc.name: Accept001
+ * @tc.desc: Accept, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, Accept001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    bool ret = vtpStreamSocket->Accept();
+    EXPECT_TRUE(!ret);
+}
+
+/**
+ * @tc.name: EpollTimeout001
+ * @tc.desc: EpollTimeout, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, EpollTimeout001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    int fd = 2;
+    int timeout = 5;
+    int ret = vtpStreamSocket->EpollTimeout(fd, timeout);
+    EXPECT_NE(0, ret);
+}
+
+
+/**
+ * @tc.name: InsertBufferLength001
+ * @tc.desc: SetSocketEpollMode, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, InsertBufferLength001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    int fd = 2;
+    int ret = vtpStreamSocket->SetSocketEpollMode(fd);
+    EXPECT_EQ(-1, ret);
+
+    int num = 2;
+    int length = 3;
+    vtpStreamSocket->InsertBufferLength(num, length, (uint8_t *)"test");
 }
 
 /**
@@ -640,7 +760,243 @@ HWTEST_F(VtpStreamSocketTest, Decrypt001, TestSize.Level1)
     ssize_t ret = vtpStreamSocket->Encrypt(in, inLen, data.get() + FRAME_HEADER_LEN, outLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    ssize_t res = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
+    EXPECT_EQ(SOFTBUS_ERR, res);
+
+    outLen = 23;
+    ret = vtpStreamSocket->Encrypt(in, inLen, data.get() + FRAME_HEADER_LEN, outLen);
+    EXPECT_EQ(SOFTBUS_ERR, res);
+
+    res = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
+    EXPECT_EQ(SOFTBUS_ERR, res);
+}
+
+/**
+ * @tc.name: GetVtpStackConfig001
+ * @tc.desc: GetVtpStackConfig, use the wrong parameter.
+
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, GetVtpStackConfig001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
+    ASSERT_TRUE(value != nullptr);
+    (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
+
+    int type = STREAM_TYPE_INT + 1;
+    *value = vtpStreamSocket->GetVtpStackConfig(type);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    if (value != nullptr) {
+        SoftBusFree(value);
+    }
+}
+
+/**
+ * @tc.name: GetStreamType001
+ * @tc.desc: SetStreamType, use the wrong parameter.
+ * @tc.desc: GetStreamType, use the wrong parameter.
+ * @tc.desc: GetIp, use the wrong parameter.
+ * @tc.desc: GetPort, use the wrong parameter.
+ * @tc.desc: GetNonBlockMode, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, GetStreamType001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
+    ASSERT_TRUE(value != nullptr);
+    (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
+
+    int type = STREAM_TYPE_INT + 1;
+    *value = vtpStreamSocket->GetStreamType(type);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    bool ret = vtpStreamSocket->SetStreamType(type, *value);
+    EXPECT_TRUE(!ret);
+
+    type = STREAM_TYPE_INT;
+    *value = vtpStreamSocket->GetStreamType(type);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    ret = vtpStreamSocket->SetStreamType(type, *value);
+    EXPECT_TRUE(ret);
+
+    type = LOCAL_IP;
+    *value = vtpStreamSocket->GetIp(type);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    type = LOCAL_IP + 1;
+    *value = vtpStreamSocket->GetIp(type);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    type = LOCAL_PORT;
+    *value = vtpStreamSocket->GetPort(type);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    type = LOCAL_PORT + 1;
+    *value = vtpStreamSocket->GetPort(type);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    int fd = 2;
+    *value = vtpStreamSocket->GetNonBlockMode(fd);
+    value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
+
+    if (value != nullptr) {
+        SoftBusFree(value);
+    }
+}
+
+/**
+ * @tc.name: SetSocketEpollMode001
+ * @tc.desc: EpollTimeout, use the wrong parameter.
+ * @tc.desc: SetSocketEpollMode, use the wrong parameter.
+ * @tc.desc: InsertBufferLength, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, SetSocketEpollMode001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+    int fd = 2;
+    int timeout = 10;
+    int ret  = vtpStreamSocket->EpollTimeout(fd, timeout);
+    EXPECT_NE(0, ret);
+
+    ret  = vtpStreamSocket->SetSocketEpollMode(fd);
+    EXPECT_EQ(-1, ret);
+
+    int num = 5;
+    int length = 3;
+    vtpStreamSocket->InsertBufferLength(num, length, (uint8_t *)"test");
+
+    Communication::SoftBus::StreamData *data = (Communication::SoftBus::StreamData *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamData));
+    ASSERT_TRUE(data != nullptr);
+    Communication::SoftBus::StreamFrameInfo *info = (Communication::SoftBus::StreamFrameInfo *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamFrameInfo));
+    ASSERT_TRUE(info != nullptr);
+    std::unique_ptr<IStream> stream = nullptr;
+
+    if (data != nullptr) {
+        SoftBusFree(data);
+    }
+    if (info != nullptr) {
+        SoftBusFree(info);
+    }
+}
+
+/**
+ * @tc.name: DoStreamRecv001
+ * @tc.desc: DoStreamRecv, use the wrong parameter.
+ * @tc.desc: RecvStreamLen, use the wrong parameter.
+ * @tc.desc: SetDefaultConfig, use the wrong parameter.
+ * @tc.desc: SetIpTos, use the wrong parameter.
+ * @tc.desc: GetIpTos, use the wrong parameter.
+ * @tc.desc: GetStreamSocketFd, use the wrong parameter.
+ * @tc.desc: GetListenSocketFd, use the wrong parameter.
+ * @tc.desc: SetSocketBoundInner, use the wrong parameter.
+ * @tc.desc: SetSocketBindToDevices, use the wrong parameter.
+ * @tc.desc: SetVtpStackConfigDelayed, use the wrong parameter.
+ * @tc.desc: SetVtpStackConfig, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, DoStreamRecv001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+    vtpStreamSocket->isStreamRecv_ = false;
+    vtpStreamSocket->DoStreamRecv();
+    vtpStreamSocket->isStreamRecv_ = true;
+    vtpStreamSocket->DoStreamRecv();
+
+    int ret  = vtpStreamSocket->RecvStreamLen();
+    vtpStreamSocket->streamType_ = 0;
+    vtpStreamSocket->scene_ = 1;
+    ret  = vtpStreamSocket->RecvStreamLen();
+    EXPECT_EQ(-1 , ret);
+
+    int fd = 2;
+    vtpStreamSocket->SetDefaultConfig(fd);
+
+    StreamAttr *value = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
+    ASSERT_TRUE(value != nullptr);
+    (void)memset_s(value, sizeof(StreamAttr), 0, sizeof(StreamAttr));
+    bool res = vtpStreamSocket->SetIpTos(fd, *value);
+    EXPECT_TRUE(!res);
+
+    StreamAttr *values = (StreamAttr*)SoftBusMalloc(sizeof(StreamAttr));
+    ASSERT_TRUE(values != nullptr);
+    (void)memset_s(values, sizeof(StreamAttr), 0, sizeof(StreamAttr));
+    int type = 2;
+    *values = vtpStreamSocket->GetIpTos(type);
+    EXPECT_TRUE(values != nullptr);
+
+    *values = vtpStreamSocket->GetStreamSocketFd(type);
+    EXPECT_TRUE(values != nullptr);
+
+    *values = vtpStreamSocket->GetListenSocketFd(type);
+    EXPECT_TRUE(values != nullptr);
+
+    std::string ip = "10.50.11.12";
+    res = vtpStreamSocket->SetSocketBoundInner(fd, ip);
+    EXPECT_TRUE(res);
+
+    res = vtpStreamSocket->SetSocketBindToDevices(fd, *value);
+    EXPECT_TRUE(res);
+
+    res = vtpStreamSocket->SetVtpStackConfig(fd, *value);
+    EXPECT_TRUE(res);
+    if (value != nullptr) {
+        SoftBusFree(value);
+    }
+    if (values != nullptr) {
+        SoftBusFree(values);
+    }
+}
+
+/**
+ * @tc.name: HandleRipplePolicy001
+ * @tc.desc: HandleRipplePolicy, use the wrong parameter.
+ * @tc.desc: RecvStreamLen, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, HandleRipplePolicy001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    int fd = 1;
+    FtEventCbkInfo *info = (FtEventCbkInfo*)SoftBusMalloc(sizeof(FtEventCbkInfo));
+    ASSERT_TRUE(info != nullptr);
+    (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
+
+    ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
+    int ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
+    EXPECT_EQ(0 , ret);
+
+    fd = 10;
+    ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
+    EXPECT_NE(fd , ret);
+
+    if (info != nullptr) {
+        SoftBusFree(info);
+    }
 }
 } // OHOS
