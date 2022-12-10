@@ -184,6 +184,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
 HWTEST_F(TransCoreTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
 {
     int32_t pid = 1;
+    TransTdcDeathCallback(g_pkgName, pid);
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -245,6 +246,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
+    connOpt.type = CONNECT_P2P;
     ret = TransOpenDirectChannel(appInfo, &connOpt, &channelId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
@@ -575,7 +577,6 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level1)
 {
     int errCode = SOFTBUS_OK;
