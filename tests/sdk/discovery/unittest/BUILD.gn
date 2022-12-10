@@ -36,12 +36,9 @@ if (defined(ohos_lite)) {
   import("//build/test.gni")
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
   module_output_path = "dsoftbus/discovery"
-  ohos_unittest("DiscSdkTest") {
+  ohos_unittest("DiscSdkOnlyL2Test") {
     module_out_path = module_output_path
-    sources = [
-      "disc_sdk_only_l2_test.cpp",
-      "disc_sdk_test.cpp",
-    ]
+    sources = [ "disc_sdk_only_l2_test.cpp" ]
     include_dirs = [
       "$dsoftbus_root_path/core/common/inner_communication",
       "$dsoftbus_root_path/core/common/include",
@@ -72,8 +69,46 @@ if (defined(ohos_lite)) {
       ]
     }
   }
+
+  ohos_unittest("Disc_Test") {
+    module_out_path = module_output_path
+    sources = [ "disc_sdk_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/inner_communication",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/sdk/discovery/include",
+      "//commonlibrary/c_utils/base/include",
+      "//third_party/bounds_checking_function/include",
+      "unittest/common/",
+      "$dsoftbus_root_path/sdk/discovery/manager/include",
+      "$dsoftbus_root_path/tests/sdk/common/include",
+    ]
+    deps = [
+      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+      "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
   group("unittest") {
     testonly = true
-    deps = [ ":DiscSdkTest" ]
+    deps = [
+      ":DiscSdkOnlyL2Test",
+      ":Disc_Test",
+    ]
   }
 }
