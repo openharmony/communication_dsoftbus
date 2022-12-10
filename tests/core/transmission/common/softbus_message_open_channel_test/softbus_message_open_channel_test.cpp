@@ -100,6 +100,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackError001, TestSize.Level1)
     EXPECT_EQ(NULL, msg);
 
     const char *errDesc = "test";
+    errCode = -1;
     msg = PackError(errCode, errDesc);
     EXPECT_TRUE(msg != NULL);
 }
@@ -127,11 +128,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
     EXPECT_EQ(EOK, res);
     msg = PackRequest(appInfo);
     // return data
-    bool ret = false;
-    if (msg != NULL) {
-        ret = true;
-    }
-    EXPECT_TRUE(ret == true);
+    ASSERT_TRUE(msg != nullptr);
 
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
@@ -188,11 +185,14 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackReply001, TestSize.Level1)
     appInfo->myData.pid = -1;
     msg = PackReply(appInfo);
     // return data
-    bool ret = false;
-    if (msg != NULL) {
-        ret = true;
-    }
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(msg != nullptr);
+
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo->myData.apiVersion = API_V2;
+    appInfo->myData.uid = -1;
+    appInfo->myData.pid = -1;
+    msg = PackReply(appInfo);
+    EXPECT_TRUE(msg != nullptr);
 
     if (appInfo != NULL) {
         SoftBusFree(appInfo);

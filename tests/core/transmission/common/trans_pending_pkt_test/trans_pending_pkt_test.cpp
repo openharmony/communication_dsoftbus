@@ -171,4 +171,35 @@ HWTEST_F(TransPendingPktTest, DelPendingPacket001, TestSize.Level1)
     ret = DelPendingPacket(channelId, type);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
+
+/**
+ * @tc.name: ProcPendingPacket002
+ * @tc.desc: ProcPendingPacket, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t seqNum = 0;
+    int type = 1;
+
+    int32_t ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
+
+    type = -1;
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    type = 1;
+    ret = PendingInit(type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+
+    // ret = ProcPendingPacket(channelId, seqNum, type);
+    // EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_PENDING, ret);
+    // PendingDeinit(type);
+}
+
 } // OHOS
