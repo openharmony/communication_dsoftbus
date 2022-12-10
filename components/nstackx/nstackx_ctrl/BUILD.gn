@@ -188,7 +188,7 @@ if (defined(ohos_lite)) {
     deps = [
       "../nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/cJSON:cjson_static",
+      "//third_party/cJSON:cjson",
       "//third_party/libcoap:libcoap",
     ]
     subsystem_name = "communication"
