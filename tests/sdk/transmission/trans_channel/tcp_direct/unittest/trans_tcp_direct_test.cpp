@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include <sys/socket.h>
 
+#include "client_trans_tcp_direct_manager.c"
+#include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.c"
 #include "client_trans_tcp_direct_listener.c"
 #include "client_trans_tcp_direct_message.h"
@@ -798,5 +800,37 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest001, TestSize.Level0)
     ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, fd);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     TransTdcManagerDeinit();
+}
+
+/**
+ * @tc.name: TransGetNewTcpChannelTest001
+ * @tc.desc: TransGetNewTcpChannel, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransGetNewTcpChannelTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    TcpDirectChannelInfo *info = TransGetNewTcpChannel(NULL);
+    ASSERT_EQ(info, nullptr);
+    ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channelInfo != nullptr);
+    (void)memset_s(channelInfo, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    channelInfo->peerSessionName = (char *)g_sessionName;
+    channelInfo->channelId = 1;
+    channelInfo->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    channelInfo->sessionKey = (char *)g_sessionkey;
+    channelInfo->fd = g_fd;
+
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = TransTdcManagerInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientTransTdcOnChannelOpened(g_sessionName, channelInfo);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = ClientTransCheckTdcChannelExist(channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(channelInfo);
 }
 }

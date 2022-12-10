@@ -249,6 +249,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByRequestIdTest004, TestSize.L
     session = GetSessionConnByRequestId(requestId);
     EXPECT_TRUE(session != nullptr);
 
+    requestId = INVALID_VALUE;
+    session = GetSessionConnByRequestId(requestId);
+    EXPECT_TRUE(session == nullptr);
+
     TransTcpDirectDeinit();
 }
 
@@ -295,7 +299,6 @@ HWTEST_F(TransTcpDirectMessageTest, CreateNewSessinConnTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-
 HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
 {
     int32_t fd = g_netWorkId;
@@ -326,7 +329,6 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
- 
 HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByIdTest008, TestSize.Level1)
 {
     int32_t channelId = 1;
@@ -472,6 +474,7 @@ HWTEST_F(TransTcpDirectMessageTest, TransTdcAddSessionConnTest0014, TestSize.Lev
 
     TransTcpDirectDeinit();
 }
+
 /**
  * @tc.name: SetSessionKeyByChanIdTest0015
  * @tc.desc: SetSessionKeyByChanId, use the wrong parameter.
@@ -498,13 +501,13 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionKeyByChanIdTest0015, TestSize.Leve
     SetSessionKeyByChanId(channelId, sessionKey, keyLen);
     TransTcpDirectDeinit();
 }
+
 /**
  * @tc.name: SetSessionConnStatusByIdTest0016
  * @tc.desc: SetSessionConnStatusById, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
- 
 HWTEST_F(TransTcpDirectMessageTest, SetSessionConnStatusByIdTest0016, TestSize.Level1)
 {
     int32_t channelId = 1;
@@ -532,7 +535,6 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionConnStatusByIdTest0016, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
- 
 HWTEST_F(TransTcpDirectMessageTest, TcpTranGetAppInfobyChannelIdTest0017, TestSize.Level1)
 {
     int32_t channelId = 1;
@@ -559,7 +561,6 @@ HWTEST_F(TransTcpDirectMessageTest, TcpTranGetAppInfobyChannelIdTest0017, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
- 
 HWTEST_F(TransTcpDirectMessageTest, OpenTcpDirectChannelTest0018, TestSize.Level1)
 {
     int32_t channelId = 1;
@@ -596,5 +597,4 @@ HWTEST_F(TransTcpDirectMessageTest, OpenTcpDirectChannelTest0018, TestSize.Level
     EXPECT_TRUE(ret != SOFTBUS_OK);
     AuthDeinit();
 }
-
 }
