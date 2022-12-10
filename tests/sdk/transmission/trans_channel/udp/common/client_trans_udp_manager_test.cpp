@@ -361,6 +361,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest001, TestSize.
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     ret = TransGetUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ClientTransUdpMgrDeinit();
+    ret = TransGetUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /**
@@ -397,10 +401,10 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransAddUdpChannelTest001, TestSize.Le
     channel.routeType = TEST_DATA_TYPE;
 
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED, ret);
 
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED, ret);
 
     ClientTransUdpMgrDeinit();
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
