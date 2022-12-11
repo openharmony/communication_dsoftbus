@@ -162,132 +162,132 @@ static DiscConfigItem g_discConfig = {
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
     {
         SOFTBUS_INT_MAX_BYTES_LENGTH,
-        (unsigned char*)&(g_tranConfig.maxBytesLen),
+        (unsigned char *)&(g_tranConfig.maxBytesLen),
         sizeof(g_tranConfig.maxBytesLen)
     },
     {
         SOFTBUS_INT_MAX_MESSAGE_LENGTH,
-        (unsigned char*)&(g_tranConfig.maxMessageLen),
+        (unsigned char *)&(g_tranConfig.maxMessageLen),
         sizeof(g_tranConfig.maxMessageLen)
     },
     {
         SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH,
-        (unsigned char*)&(g_config.connBrMaxDataLen),
+        (unsigned char *)&(g_config.connBrMaxDataLen),
         sizeof(g_config.connBrMaxDataLen)
     },
     {
         SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN,
-        (unsigned char*)&(g_config.connRfcomSendMaxLen),
+        (unsigned char *)&(g_config.connRfcomSendMaxLen),
         sizeof(g_config.connRfcomSendMaxLen)
     },
     {
         SOFTBUS_INT_CONN_BR_RECEIVE_MAX_LEN,
-        (unsigned char*)&(g_config.connBrRecvMaxLen),
+        (unsigned char *)&(g_config.connBrRecvMaxLen),
         sizeof(g_config.connBrRecvMaxLen)
     },
     {
         SOFTBUS_INT_CONN_TCP_MAX_LENGTH,
-        (unsigned char*)&(g_config.connTcpMaxLen),
+        (unsigned char *)&(g_config.connTcpMaxLen),
         sizeof(g_config.connTcpMaxLen)
     },
     {
         SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM,
-        (unsigned char*)&(g_config.connTcpMaxConnNum),
+        (unsigned char *)&(g_config.connTcpMaxConnNum),
         sizeof(g_config.connTcpMaxConnNum)
     },
     {
         SOFTBUS_INT_CONN_TCP_TIME_OUT,
-        (unsigned char*)&(g_config.connTcpTimeOut),
+        (unsigned char *)&(g_config.connTcpTimeOut),
         sizeof(g_config.connTcpTimeOut)
     },
     {
         SOFTBUS_INT_MAX_NODE_STATE_CB_CNT,
-        (unsigned char*)&(g_config.maxNodeStateCbCnt),
+        (unsigned char *)&(g_config.maxNodeStateCbCnt),
         sizeof(g_config.maxNodeStateCbCnt)
     },
     {
         SOFTBUS_INT_MAX_LNN_CONNECTION_CNT,
-        (unsigned char*)&(g_config.maxLnnConnCnt),
+        (unsigned char *)&(g_config.maxLnnConnCnt),
         sizeof(g_config.maxLnnConnCnt)
     },
     {
         SOFTBUS_INT_LNN_SUPPORT_CAPABILITY,
-        (unsigned char*)&(g_config.maxLnnSupportCap),
+        (unsigned char *)&(g_config.maxLnnSupportCap),
         sizeof(g_config.maxLnnSupportCap)
     },
     {
         SOFTBUS_INT_AUTH_ABILITY_COLLECTION,
-        (unsigned char*)&(g_config.authAbilityConn),
+        (unsigned char *)&(g_config.authAbilityConn),
         sizeof(g_config.authAbilityConn)
     },
     {
         SOFTBUS_INT_ADAPTER_LOG_LEVEL,
-        (unsigned char*)&(g_config.adapterLogLevel),
+        (unsigned char *)&(g_config.adapterLogLevel),
         sizeof(g_config.adapterLogLevel)
     },
     {
         SOFTBUS_STR_STORAGE_DIRECTORY,
-        (unsigned char*)(g_config.storageDir),
+        (unsigned char *)(g_config.storageDir),
         sizeof(g_config.storageDir)
     },
     {
         SOFTBUS_INT_SUPPORT_TCP_PROXY,
-        (unsigned char*)&(g_tranConfig.isSupportTcpProxy),
+        (unsigned char *)&(g_tranConfig.isSupportTcpProxy),
         sizeof(g_tranConfig.isSupportTcpProxy)
     },
     {
         SOFTBUS_INT_SUPPORT_SELECT_INTERVAL,
-        (unsigned char*)&(g_tranConfig.selectInterval),
+        (unsigned char *)&(g_tranConfig.selectInterval),
         sizeof(g_tranConfig.selectInterval)
     },
     {
         SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN,
-        (unsigned char*)&(g_config.lnnUdidInitDelayLen),
+        (unsigned char *)&(g_config.lnnUdidInitDelayLen),
         sizeof(g_config.lnnUdidInitDelayLen)
     },
     {
         SOFTBUS_STR_LNN_NET_IF_NAME,
-        (unsigned char*)&(g_config.lnnNetIfName),
+        (unsigned char *)&(g_config.lnnNetIfName),
         sizeof(g_config.lnnNetIfName)
     },
     {
         SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
-        (unsigned char*)&(g_config.lnnMaxConcurentNum),
+        (unsigned char *)&(g_config.lnnMaxConcurentNum),
         sizeof(g_config.lnnMaxConcurentNum)
     },
     {
         SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH,
-        (unsigned char*)&(g_tranConfig.maxAuthBytesLen),
+        (unsigned char *)&(g_tranConfig.maxAuthBytesLen),
         sizeof(g_tranConfig.maxAuthBytesLen)
     },
     {
         SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH,
-        (unsigned char*)&(g_tranConfig.maxAuthMessageLen),
+        (unsigned char *)&(g_tranConfig.maxAuthMessageLen),
         sizeof(g_tranConfig.maxAuthMessageLen)
     },
     {
         SOFTBUS_INT_AUTO_NETWORKING_SWITCH,
-        (unsigned char*)&(g_config.lnnAutoNetworkingSwitch),
+        (unsigned char *)&(g_config.lnnAutoNetworkingSwitch),
         sizeof(g_config.lnnAutoNetworkingSwitch)
     },
     {
         SOFTBUS_BOOL_SUPPORT_TOPO,
-        (unsigned char*)&(g_config.isSupportTopo),
+        (unsigned char *)&(g_config.isSupportTopo),
         sizeof(g_config.isSupportTopo)
     },
     {
         SOFTBUS_INT_DISC_FREQ,
-        (unsigned char*)(g_discConfig.discFreq),
+        (unsigned char *)(g_discConfig.discFreq),
         sizeof(g_discConfig.discFreq)
     },
     {
         SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH,
-        (unsigned char*)&(g_tranConfig.maxProxyBytesLen),
+        (unsigned char *)&(g_tranConfig.maxProxyBytesLen),
         sizeof(g_tranConfig.maxProxyBytesLen)
     },
     {
         SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH,
-        (unsigned char*)&(g_tranConfig.maxProxyMessageLen),
+        (unsigned char *)&(g_tranConfig.maxProxyMessageLen),
         sizeof(g_tranConfig.maxProxyMessageLen)
     },
 

@@ -60,6 +60,10 @@ static bool IsValidNodeStateCb(INodeStateCb *callback)
         callback->onNodeBasicInfoChanged == NULL) {
         return false;
     }
+    if ((callback->events & EVENT_NODE_STATUS_CHANGED) != 0 &&
+        callback->onNodeStatusChanged == NULL) {
+        return false;
+    }
     return true;
 }
 

@@ -96,7 +96,7 @@ extern "C" {
  * @since 1.0
  * @version 1.0
  */
-#define EVENT_NODE_STATUS_CHANGED 0x05
+#define EVENT_NODE_STATUS_CHANGED 0x08
 
 /**
  * @brief Indicates mask bits for {@link INodeStateCb.events}.
@@ -104,7 +104,7 @@ extern "C" {
  * @since 1.0
  * @version 1.0
  */
-#define EVENT_NODE_STATE_MASK 0x07
+#define EVENT_NODE_STATE_MASK 0x15
 
 /**
  * @brief The maximum length of meta node bypass info {@link MetaNodeConfigInfo.bypassInfo}.
@@ -123,6 +123,14 @@ extern "C" {
 #define CALLER_ID_MAX_LEN 128
 
 /**
+ * @brief Indicates the maximum length of the custom user data.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define USER_DATA_MAX_LEN 256
+
+/**
  * @brief The maximum of meta node {@link MetaNodeConfigInfo.bypassInfo}.
  *
  * @since 1.0
@@ -138,14 +146,14 @@ extern "C" {
  * @version 1.0
  */
 typedef enum {
-    NODE_KEY_UDID = 0,  /**< UDID in string format*/
-    NODE_KEY_UUID,      /**< UUID in string format */
+    NODE_KEY_UDID = 0,    /**< UDID in string format*/
+    NODE_KEY_UUID,        /**< UUID in string format */
     NODE_KEY_MASTER_UDID, /**< UDID of master node in string format */
-    NODE_KEY_BR_MAC,    /**< BR MAC in string format */
-    NODE_KEY_IP_ADDRESS, /**< IP address in string format */
-    NODE_KEY_DEV_NAME,   /**< Device name in string format */
-    NODE_KEY_NETWORK_CAPABILITY,   /**< Network capability in number format */
-    NODE_KEY_NETWORK_TYPE,        /**< Network type in number format */
+    NODE_KEY_BR_MAC,      /**< BR MAC in string format */
+    NODE_KEY_IP_ADDRESS,  /**< IP address in string format */
+    NODE_KEY_DEV_NAME,    /**< Device name in string format */
+    NODE_KEY_NETWORK_CAPABILITY, /**< Network capability in number format */
+    NODE_KEY_NETWORK_TYPE,       /**< Network type in number format */
     NODE_KEY_BLE_OFFLINE_CODE,   /**< Ble offlinecode in string format */
     NODE_KEY_DATA_CHANGE_FLAG,
 } NodeDeviceInfoKey;
@@ -254,7 +262,7 @@ typedef struct {
     uint16_t authStatus;
     uint16_t dataBaseStatus;
     uint16_t meshType;
-    uint16_t reserved[NODE_STATUS_MAX_NUM-3];
+    uint16_t reserved[NODE_STATUS_MAX_NUM - 3];
 } NodeStatus;
 
 /**
@@ -264,10 +272,10 @@ typedef struct {
  * @version 1.0
  */
 typedef enum {
-    TYPE_AUTH_STATUS = 2,  /**< certify status change */
+    TYPE_AUTH_STATUS = 2,     /**< certify status change */
     TYPE_DATABASE_STATUS = 3, /**< database  change */
-    TYPE_MESH_TYPE = 4,    /**< lnn mesh typechange */
-    TYPE_STATUS_MAX = 5,   /**< max num */
+    TYPE_MESH_TYPE = 4,       /**< lnn mesh typechange */
+    TYPE_STATUS_MAX = 5,      /**< max num */
 } NodeStatusType;
 
 /**
@@ -401,7 +409,7 @@ typedef struct {
      * @brief Called when the running status of a device changes.
      *
      * @param type Indicates the device type. For details, see {@link NodeStatusType}.
-     * @param info Indicates the pointer to the new status of the device.
+     * @param status Indicates the pointer to the new status of the device.
      * For details, see {@link NodeStatus}.
      *
      * @since 1.0
@@ -488,8 +496,8 @@ typedef enum {
  * @version 1.0
  */
 typedef struct {
-    CustomType type;        /**< user type */
-    uint8_t data[256];      /**< user data */
+    CustomType type;                  /**< user type */
+    uint8_t data[USER_DATA_MAX_LEN];  /**< user data */
 } CustomData;
 
 /**
@@ -599,8 +607,10 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 
 /**
- * @brief Removes the current device from the LNN.
+ * @brief Removes the current device from the MetaNode.
  *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
  * @param networkId Indicates the pointer to the network ID that is returned
  * after the device is added to the LNN via {@link JoinMetaNode}.
  * @param cb Indicates the callback for the result. If you set this parameter to <b>NULL</b>,

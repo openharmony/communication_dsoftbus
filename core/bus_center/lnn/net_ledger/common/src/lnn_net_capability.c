@@ -50,7 +50,7 @@ NO_SANITIZE("cfi") uint32_t LnnGetNetCapabilty(void)
     uint32_t configValue;
 
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_SUPPORT_CAPABILITY,
-        (unsigned char*)&configValue, sizeof(configValue)) != SOFTBUS_OK) {
+        (unsigned char *)&configValue, sizeof(configValue)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn capbility fail, use default value");
         configValue = DEFAUTL_LNN_CAPBILITY;
     }
