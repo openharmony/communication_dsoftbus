@@ -46,9 +46,10 @@ static bool CheckMetaNodeConfigInfo(const MetaNodeConfigInfo *info)
 static MetaNodeStorageInfo *FindMetaNodeStorageInfo(const char *id, bool isUdid)
 {
     MetaNodeStorageInfo *item = NULL;
+    MetaNodeStorageInfo *next = NULL;
     const char *itemId = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
         itemId = isUdid ? item->info.configInfo.udid : item->info.metaNodeId;
         if (strncmp(itemId, id, strlen(id)) == 0) {
             return item;
@@ -183,7 +184,9 @@ NO_SANITIZE("cfi") int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
 
 NO_SANITIZE("cfi") int32_t LnnInitMetaNodeLedger(void)
 {
-    g_metaNodeList = CreateSoftBusList();
+    if (g_metaNodeList == NULL) {
+        g_metaNodeList = CreateSoftBusList();
+    }
     if (g_metaNodeList == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create meta node list failed");
         return SOFTBUS_ERR;
@@ -194,8 +197,22 @@ NO_SANITIZE("cfi") int32_t LnnInitMetaNodeLedger(void)
 
 NO_SANITIZE("cfi") void LnnDeinitMetaNodeLedger(void)
 {
-    if (g_metaNodeList != NULL) {
-        DestroySoftBusList(g_metaNodeList);
-        g_metaNodeList = NULL;
+    if (g_metaNodeList == NULL) {
+        return;
     }
+
+    MetaNodeStorageInfo *item = NULL;
+    MetaNodeStorageInfo *next = NULL;
+    if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
+        ListDelete(&item->node);
+        g_metaNodeList->cnt--;
+        SoftBusFree(item);
+    }
+    (void)SoftBusMutexUnlock(&g_metaNodeList->lock);
+    DestroySoftBusList(g_metaNodeList);
+    g_metaNodeList = NULL;
 }

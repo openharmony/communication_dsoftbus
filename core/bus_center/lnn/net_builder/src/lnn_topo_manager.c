@@ -775,7 +775,7 @@ NO_SANITIZE("cfi") int32_t LnnInitTopoManager(void)
 {
     int32_t i;
 
-    if (SoftbusGetConfig(SOFTBUS_BOOL_SUPPORT_TOPO, (unsigned char*)&g_topoTable.isSupportTopo,
+    if (SoftbusGetConfig(SOFTBUS_BOOL_SUPPORT_TOPO, (unsigned char *)&g_topoTable.isSupportTopo,
         sizeof(g_topoTable.isSupportTopo)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get isSupportTopo from config file");
         g_topoTable.isSupportTopo = true;
