@@ -24,6 +24,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_log.h"
+#include "p2plink_interface.h"
 #include <gmock/gmock.h>
 #include <mutex>
 
@@ -45,6 +46,7 @@ public:
     virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
     virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
+    virtual int32_t P2pLinkQueryDevIsOnline(const char *peerMac) = 0;
 };
 class LnnConnectInterfaceMock : public LnnConnectInterface {
 public:
@@ -62,6 +64,7 @@ public:
     MOCK_METHOD1(ConnStopLocalListening, int32_t(const LocalListenerInfo *));
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
     MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged));
+    MOCK_METHOD1(P2pLinkQueryDevIsOnline, int32_t(const char *));
     static inline char *g_encryptData;
     static inline ConnectCallback g_conncallback;
     static inline ConnectResult g_connresultcb;
