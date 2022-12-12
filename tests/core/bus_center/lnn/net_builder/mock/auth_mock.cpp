@@ -62,5 +62,25 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     return GetAuthInterface()->AuthGetDeviceUuid(authId, uuid, size);
 }
 
+int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
+{
+    return GetAuthInterface()->RegAuthTransListener(module, listener);
+}
+
+void UnregAuthTransListener(int32_t module)
+{
+    return GetAuthInterface()->UnregAuthTransListener(module);
+}
+
+int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+{
+    return GetAuthInterface()->AuthPostTransData(authId, dataInfo);
+}
+
+int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
+{
+    return GetAuthInterface()->AuthGetIdByConnInfo(connInfo, isServer, isMeta);
+}
+
 }
 }
