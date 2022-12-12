@@ -105,10 +105,12 @@ HWTEST_F(StreamManagerTest, CreateStreamServerChannel001, TestSize.Level1)
     auto streamSocketListener = std::make_shared<Communication::SoftBus::StreamManager>(streamListener);
 
     std::string pkgName = "test";
-    Communication::SoftBus::IpAndPort *local = (Communication::SoftBus::IpAndPort*)SoftBusMalloc(sizeof(Communication::SoftBus::IpAndPort));
+    Communication::SoftBus::IpAndPort *local =
+        (Communication::SoftBus::IpAndPort*)SoftBusMalloc(sizeof(Communication::SoftBus::IpAndPort));
     (void)memset_s(local, sizeof(Communication::SoftBus::IpAndPort), 0, sizeof(Communication::SoftBus::IpAndPort));
 
-    Communication::SoftBus::Proto *protocol = (Communication::SoftBus::Proto*)SoftBusMalloc(sizeof(Communication::SoftBus::Proto));
+    Communication::SoftBus::Proto *protocol =
+        (Communication::SoftBus::Proto*)SoftBusMalloc(sizeof(Communication::SoftBus::Proto));
     (void)memset_s(protocol, sizeof(Communication::SoftBus::Proto), 0, sizeof(Communication::SoftBus::Proto));
 
 
@@ -164,10 +166,12 @@ HWTEST_F(StreamManagerTest, SetOption001, TestSize.Level1)
     auto streamSocketListener = std::make_shared<Communication::SoftBus::StreamManager>(streamListener);
 
     int type = 1;
-    Communication::SoftBus::StreamAttr *value = (Communication::SoftBus::StreamAttr*)SoftBusMalloc(sizeof(Communication::SoftBus::StreamAttr));
+    Communication::SoftBus::StreamAttr *value =
+        (Communication::SoftBus::StreamAttr*)SoftBusMalloc(sizeof(Communication::SoftBus::StreamAttr));
     (void)memset_s(value, sizeof(Communication::SoftBus::StreamAttr), 0, sizeof(Communication::SoftBus::StreamAttr));
 
-    Communication::SoftBus::StreamAttr *values = (Communication::SoftBus::StreamAttr*)SoftBusMalloc(sizeof(Communication::SoftBus::StreamAttr));
+    Communication::SoftBus::StreamAttr *values =
+        (Communication::SoftBus::StreamAttr*)SoftBusMalloc(sizeof(Communication::SoftBus::StreamAttr));
     (void)memset_s(values, sizeof(Communication::SoftBus::StreamAttr), 0, sizeof(Communication::SoftBus::StreamAttr));
 
     bool ret = streamSocketListener->SetOption(type, *value);

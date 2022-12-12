@@ -886,9 +886,11 @@ HWTEST_F(VtpStreamSocketTest, SetSocketEpollMode001, TestSize.Level1)
     int length = 3;
     vtpStreamSocket->InsertBufferLength(num, length, (uint8_t *)"test");
 
-    Communication::SoftBus::StreamData *data = (Communication::SoftBus::StreamData *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamData));
+    Communication::SoftBus::StreamData *data =
+        (Communication::SoftBus::StreamData *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamData));
     ASSERT_TRUE(data != nullptr);
-    Communication::SoftBus::StreamFrameInfo *info = (Communication::SoftBus::StreamFrameInfo *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamFrameInfo));
+    Communication::SoftBus::StreamFrameInfo *info =
+        (Communication::SoftBus::StreamFrameInfo *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamFrameInfo));
     ASSERT_TRUE(info != nullptr);
     std::unique_ptr<IStream> stream = nullptr;
 
@@ -929,7 +931,7 @@ HWTEST_F(VtpStreamSocketTest, DoStreamRecv001, TestSize.Level1)
     vtpStreamSocket->streamType_ = 0;
     vtpStreamSocket->scene_ = 1;
     ret  = vtpStreamSocket->RecvStreamLen();
-    EXPECT_EQ(-1 , ret);
+    EXPECT_EQ(-1, ret);
 
     int fd = 2;
     vtpStreamSocket->SetDefaultConfig(fd);
@@ -989,11 +991,11 @@ HWTEST_F(VtpStreamSocketTest, HandleRipplePolicy001, TestSize.Level1)
 
     ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
     int ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
-    EXPECT_EQ(0 , ret);
+    EXPECT_EQ(0, ret);
 
     fd = 10;
     ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
-    EXPECT_NE(fd , ret);
+    EXPECT_NE(fd, ret);
 
     if (info != nullptr) {
         SoftBusFree(info);
