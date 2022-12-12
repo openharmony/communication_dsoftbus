@@ -20,6 +20,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
+#include "lnn_lane_interface.h"
 
 namespace OHOS {
 class TransAuthInterface {
@@ -78,6 +79,12 @@ public:
 
     virtual int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
+
+    virtual uint32_t ApplyLaneId(LaneType type) = 0;
+    virtual int32_t LnnRequestLane(uint32_t laneId,
+        const LaneRequestOption *request, const ILaneListener *listener) = 0;
+    virtual int32_t LnnFreeLane(uint32_t laneId) = 0;
+
 };
 
 class TransAuthInterfaceMock : public TransAuthInterface {
@@ -131,6 +138,10 @@ public:
 
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char *, InfoKey, char *, uint32_t));
     MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t (const char *, char *, uint32_t));
+
+    MOCK_METHOD1(ApplyLaneId, uint32_t (LaneType));
+    MOCK_METHOD3(LnnRequestLane, int32_t (uint32_t, const LaneRequestOption *, const ILaneListener *));
+    MOCK_METHOD1(LnnFreeLane, int32_t (uint32_t laneId));
 };
 } // namespace OHOS
 #endif // TRANS_AUTH_MOCK_H

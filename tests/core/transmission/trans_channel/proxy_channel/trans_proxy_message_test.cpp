@@ -785,5 +785,4 @@ HWTEST_F(TransProxyMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
     ret = TransProxyResetPeer(&chanInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-
 } // namespace OHOS
