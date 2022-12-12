@@ -266,7 +266,8 @@ NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, c
     return channelId;
 }
 
-int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority)
+NO_SANITIZE("cfi") int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen,
+    int32_t priority)
 {
     return TransProxySendMsg(channelId, data, dataLen, priority);
 }

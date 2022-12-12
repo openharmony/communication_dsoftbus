@@ -20,9 +20,9 @@
 #include <securec.h>
 
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_def.h"
 
 static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
 {
@@ -36,7 +36,7 @@ static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
     return false;
 }
 
-static void FreeFsmHandleMsg(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void FreeFsmHandleMsg(SoftBusMessage *msg)
 {
     if (msg != NULL) {
         if (msg->obj != NULL) {

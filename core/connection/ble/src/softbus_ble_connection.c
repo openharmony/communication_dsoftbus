@@ -1047,7 +1047,7 @@ static cJSON *GetLocalInfoJson(int32_t roleType)
     return json;
 }
 
-static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType)
+NO_SANITIZE("cfi") static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType)
 {
     cJSON *json =  GetLocalInfoJson(roleType);
     if (json == NULL) {

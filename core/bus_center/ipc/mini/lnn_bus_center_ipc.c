@@ -94,7 +94,8 @@ NO_SANITIZE("cfi") int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, cons
     return LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
 }
 
-int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
+NO_SANITIZE("cfi") int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
+    int32_t period)
 {
     return LnnStartTimeSync(pkgName, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
@@ -138,7 +139,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t ref
     return LnnStopDiscDevice(pkgName, refreshId, false);
 }
 
-int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
+NO_SANITIZE("cfi") int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
 {
     return LnnActiveMetaNode(info, metaNodeId);
 }
@@ -199,7 +200,8 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t inf
     return LnnOnNodeBasicInfoChanged(info, type);
 }
 
-int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+NO_SANITIZE("cfi") int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen,
+    int32_t retCode)
 {
     (void)pkgName;
     (void)infoTypeLen;

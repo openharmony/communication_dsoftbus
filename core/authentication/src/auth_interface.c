@@ -223,7 +223,7 @@ NO_SANITIZE("cfi") int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_
     return AuthMetaGetDeviceUuid(authId, uuid, size);
 }
 
-int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
+NO_SANITIZE("cfi") int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
 {
     return AuthDeviceGetVersion(authId, version);
 }

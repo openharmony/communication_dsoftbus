@@ -51,7 +51,7 @@ NO_SANITIZE("cfi") int32_t TransPermissionInit(void)
     return InitDynamicPermission();
 }
 
-void TransPermissionDeinit(void)
+NO_SANITIZE("cfi") void TransPermissionDeinit(void)
 {
     DeinitPermissionJson();
 }
@@ -105,7 +105,7 @@ NO_SANITIZE("cfi") bool CheckDiscPermission(pid_t callingUid, const char *pkgNam
     return false;
 }
 
-bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
+NO_SANITIZE("cfi") bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
 {
     std::string pkg = "";
     if (pkgName != nullptr) {
@@ -119,7 +119,7 @@ bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
     return false;
 }
 
-int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
+NO_SANITIZE("cfi") int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
 {
     return AddDynamicPermission(callingUid, callingPid, sessionName);
 }
