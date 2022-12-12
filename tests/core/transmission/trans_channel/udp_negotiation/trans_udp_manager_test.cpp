@@ -142,7 +142,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest001, TestSize.Level1)
 HWTEST_F(TransUdpManagerTest, TransUdpManagerTest002, TestSize.Level1)
 {
     int32_t ret = TransUdpChannelMgrInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    UdpChannelInfo *newchannel = nullptr;
+    ret = TransAddUdpChannel(newchannel);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     TransUdpChannelMgrDeinit();
     UdpChannelInfo *Channel = GetPackTest();
     ret = TransAddUdpChannel(Channel);
@@ -161,8 +164,14 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest003, TestSize.Level1)
     int32_t ret = TransUdpChannelMgrInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     UdpChannelInfo *Channel = GetPackTest();
+    ret = TransAddUdpChannel(NULL);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
     ret = TransAddUdpChannel(Channel);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = TransAddUdpChannel(Channel);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = TransDelUdpChannel(invalidId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = TransDelUdpChannel(Channel->info.myData.channelId);
@@ -610,5 +619,99 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest019, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
     TransUdpChannelMgrDeinit();
     SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: TransUdpManagerTest020
+ * @tc.desc: trans notify udp channel close list.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest020, TestSize.Level1)
+{
+    int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    UdpChannelInfo* channel = GetPackTest();
+	ret = TransAddUdpChannel(channel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ListNode udpDeleteChannelList;
+	ListInit(&udpDeleteChannelList);
+	NotifyUdpChannelCloseInList(&udpDeleteChannelList);
+}
+
+/**
+ * @tc.name: TransUdpManagerTest021
+ * @tc.desc: trans close udp channel by networkId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest021, TestSize.Level1)
+{
+	string networkId = "invalid networlId";
+	TransCloseUdpChannelByNetWorkId(networkId.c_str());
+	int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+	TransCloseUdpChannelByNetWorkId(NULL);
+	UdpChannelInfo *channel = GetPackTest();
+	ret = TransAddUdpChannel(channel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    TransCloseUdpChannelByNetWorkId(channel->info.peerNetWorkId);
+}
+
+/**
+ * @tc.name: TransUdpManagerTest022
+ * @tc.desc: trans notify udp channel timeout use diff param.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest022, TestSize.Level1)
+{
+	int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+	UdpChannelInfo* channel = GetPackTest();
+	channel->info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+	ret = TransAddUdpChannel(channel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ListNode udpTmpChannelList;
+    ListInit(&udpTmpChannelList);
+	NotifyTimeOutUdpChannel(&udpTmpChannelList);
+}
+
+/**
+ * @tc.name: TransUdpManagerTest023
+ * @tc.desc: trans notify udp channel timeout use diff param.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest023, TestSize.Level1)
+{
+	int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+	UdpChannelInfo* channel = GetPackTest();
+	channel->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+	ret = TransAddUdpChannel(channel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ListNode udpTmpChannelList;
+    ListInit(&udpTmpChannelList);
+	NotifyTimeOutUdpChannel(&udpTmpChannelList);
+}
+
+/**
+ * @tc.name: TransUdpManagerTest024
+ * @tc.desc: trans notify udp channel timeout use diff param.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransUdpManagerTest024, TestSize.Level1)
+{
+	int32_t ret = TransUdpChannelMgrInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+	UdpChannelInfo* channel = GetPackTest();
+	channel->info.udpChannelOptType = TYPE_INVALID_CHANNEL;
+	ret = TransAddUdpChannel(channel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ListNode udpTmpChannelList;
+    ListInit(&udpTmpChannelList);
+	NotifyTimeOutUdpChannel(&udpTmpChannelList);
 }
 }
