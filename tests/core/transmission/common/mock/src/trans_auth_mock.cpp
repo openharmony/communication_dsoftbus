@@ -218,5 +218,20 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
 {
     return GetTransAuthInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
 }
+
+uint32_t ApplyLaneId(LaneType type)
+{
+    return GetTransAuthInterface()->ApplyLaneId(type);
+}
+
+int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
+{
+    return GetTransAuthInterface()->LnnRequestLane(laneId, request, listener);
+}
+
+int32_t LnnFreeLane(uint32_t laneId)
+{
+    return GetTransAuthInterface()->LnnFreeLane(laneId);
+}
 }
 }
