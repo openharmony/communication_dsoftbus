@@ -73,7 +73,7 @@ static int32_t TestAddConnedItem(ConnectedNode *connedItem, ConnectedNode *conn,
     return SOFTBUS_OK;
 }
 
-char* TestAddJson(const char *mac)
+char *TestAddJson(const char *mac)
 {
     char *buf = nullptr;
     cJSON *root = nullptr;
@@ -329,7 +329,7 @@ HWTEST_F(P2pManagerTest, P2pLinkAddConningDevTest001, TestSize.Level1)
 
 /*
 * @tc.name: P2pLinkGetConningByPeerMacStateTest001
-* @tc.desc: P2pLinkGetConningByPeerMacState user error parameters..
+* @tc.desc: P2pLinkGetConningByPeerMacState user error parameters.
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -354,7 +354,7 @@ HWTEST_F(P2pManagerTest, P2pLinkGetConningByPeerMacStateTest001, TestSize.Level1
 
 /*
 * @tc.name: P2pLinkGetConningDevByReqIdTest001
-* @tc.desc: P2pLinkGetConningDevByReqId user error parameters..
+* @tc.desc: P2pLinkGetConningDevByReqId user error parameters.
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -373,7 +373,7 @@ HWTEST_F(P2pManagerTest, P2pLinkGetConningDevByReqIdTest001, TestSize.Level1)
 
 /*
 * @tc.name: P2pLinkLnnSyncTest001
-* @tc.desc: P2pLinkLnnSync user diff parameters..
+* @tc.desc: P2pLinkLnnSync user diff parameters.
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -616,7 +616,7 @@ HWTEST_F(P2pManagerTest, P2pLinkRequestGcIpTest001, TestSize.Level1)
 */
 HWTEST_F(P2pManagerTest, P2pLinkConfigGcIpTest001, TestSize.Level1)
 {
-    const char *testIp ="192.168.3.3";
+    const char *testIp = "192.168.3.3";
     int32_t ret = P2pLinkConfigGcIp(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
