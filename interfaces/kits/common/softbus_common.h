@@ -468,12 +468,12 @@ typedef struct {
     unsigned int capabilityBitmap[DISC_MAX_CAPABILITY_NUM];
     /** Custom data. Its length is specified by {@link DISC_MAX_CUST_DATA_LEN}. */
     char custData[DISC_MAX_CUST_DATA_LEN];
-    /** The distance of dicovered device, in centimeters(cm)*/
+    /** The distance of discovered device, in centimeters(cm)*/
     int32_t range;
 } DeviceInfo;
 
 /**
- * @brief Defines device addtional info used by inner
+ * @brief Defines device additional info used by inner
  *
  */
 typedef struct {

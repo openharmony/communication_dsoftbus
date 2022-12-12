@@ -77,7 +77,7 @@ static AppInfo g_testAppInfo = {
     .encrypt = 1,
     .algorithm = 2,
     .crc = 101,
-    .fileProtocal = 1
+    .fileProtocol = 1
 };
 
 static void TransRegisterSessionTest1(int fd)

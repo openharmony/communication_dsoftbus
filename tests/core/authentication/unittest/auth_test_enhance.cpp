@@ -224,7 +224,7 @@ HWTEST_F(AuthTestEnhance, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_VERIFY_Test_003
- * @tc.desc: client auth start verify sucess callback
+ * @tc.desc: client auth start verify success callback
  * @tc.type: FUNC
  * @tc.require:
  */
