@@ -438,7 +438,7 @@ NO_SANITIZE("cfi") void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLi
 {
     CLOGI("recv control msgtype %d", type);
     if (P2pLinkIsEnable() == false) {
-        CLOGI("in controling p2p state is closed");
+        CLOGI("in controlling p2p state is closed");
         return;
     }
     switch (type) {

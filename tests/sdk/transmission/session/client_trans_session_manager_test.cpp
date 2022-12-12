@@ -939,12 +939,12 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest28, TestSiz
 }
 
 /**
- * @tc.name: TransClientSessionDestoryTest01
- * @tc.desc: Transmission sdk session manager destory session by network id.
+ * @tc.name: TransClientSessionDestroyTest01
+ * @tc.desc: Transmission sdk session manager destroy session by network id.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestoryTest01, TestSize.Level1)
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestroyTest01, TestSize.Level1)
 {
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);

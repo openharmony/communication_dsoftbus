@@ -216,7 +216,7 @@ NO_SANITIZE("cfi") static void ThreadPoolWorker(void *arg)
         // copy job task relative variables to run it after leave job mutex
         bool runnable = job->runnable;
         JobTask task = job->callbackFunction;
-        void *arguement = job->arg;
+        void *argument = job->arg;
         if (job->jobMode == ONCE || job->runnable == false) {
             SoftBusMutexUnlock(&(job->mutex));
             SoftBusMutexDestroy(&(job->mutex));
@@ -226,7 +226,7 @@ NO_SANITIZE("cfi") static void ThreadPoolWorker(void *arg)
             SoftBusMutexUnlock(&(job->mutex));
         }
         if (runnable) {
-            (void)(task(arguement));
+            (void)(task(argument));
         }
     }
     CLOGI("ThreadPoolWorker Exit");
