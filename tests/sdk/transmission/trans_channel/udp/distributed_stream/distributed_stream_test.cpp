@@ -379,7 +379,7 @@ void DistributeStreamTest::SendCreateSessionServerMessage()
     string msgbuf = "createSessionServer";
     int ret = SendMessage(DistributeSystemTest::AGENT_NO::ONE, msgbuf, msgbuf.length(),
         [&](const string &returnBuf, int rlen)->bool {
-            cout << "recieve reply message :" << returnBuf << endl;
+            cout << "receive reply message :" << returnBuf << endl;
             EXPECT_TRUE("ok" == returnBuf);
             int ret = sem_post(&localSem_);
             EXPECT_EQ(ret, 0);
@@ -405,7 +405,7 @@ void DistributeStreamTest::SendRemoveSessionServerMessage()
     string msgbuf = "removeSessionServer";
     int ret = SendMessage(DistributeSystemTest::AGENT_NO::ONE, msgbuf, msgbuf.length(),
         [&](const string &returnBuf, int rlen)->bool {
-            cout << "recieve reply message :" << returnBuf << endl;
+            cout << "receive reply message :" << returnBuf << endl;
             EXPECT_TRUE("ok" == returnBuf);
             int ret = sem_post(&localSem_);
             EXPECT_EQ(ret, 0);

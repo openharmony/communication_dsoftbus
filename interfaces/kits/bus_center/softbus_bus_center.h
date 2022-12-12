@@ -446,7 +446,7 @@ typedef struct {
 } MetaNodeConfigInfo;
 
 /**
- * @brief Defines a meta node infomation, see {@link GetAllMetaNodeInfo}.
+ * @brief Defines a meta node information, see {@link GetAllMetaNodeInfo}.
  *
  * @since 1.0
  * @version 1.0
@@ -797,7 +797,7 @@ int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
  * For the same caller, the value of this parameter must be the same for all functions.
- * @param info Meta node configuration infomation, see {@link MetaNodeConfigInfo}.
+ * @param info Meta node configuration information, see {@link MetaNodeConfigInfo}.
  * @param metaNodeId Save meta node ID when it is activated successfully, its buffer length must be not
  * less then NETWORK_ID_BUF_LEN
  *
