@@ -54,6 +54,48 @@ bus_center_sdk_test_deps = [
   "//third_party/bounds_checking_function:libsec_static",
 ]
 
+client_bus_center_manager_test_src = [
+  "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
+  "client_bus_center_manager_mock.cpp",
+  "client_bus_center_manager_test.cpp",
+]
+client_bus_center_manager_test_inc = [
+  "$dsoftbus_root_path/adapter/default_config/spec_config",
+  "$dsoftbus_root_path/sdk/bus_center/manager/src",
+  "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+  "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/core/discovery/interface",
+  "$dsoftbus_root_path/core/discovery/manager/include",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/common",
+  "$dsoftbus_root_path/tests/sdk/common/include",
+  "//commonlibrary/c_utils/base/include",
+  "//third_party/bounds_checking_function/include",
+  "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
+  "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+  "$dsoftbus_root_path/core/frame/standard/init/include",
+  "$dsoftbus_root_path/core/transmission/common/include",
+]
+client_bus_center_manager_test_deps = [
+  "$dsoftbus_root_path/adapter:softbus_adapter",
+  "$dsoftbus_root_path/core/common:softbus_utils",
+  "$dsoftbus_root_path/core/frame:softbus_server",
+  "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
+  "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+  "//third_party/bounds_checking_function:libsec_static",
+  "//third_party/googletest:gmock",
+  "//third_party/googletest:gtest_main",
+]
+
 if (dsoftbus_feature_lnn_meta_node) {
   bus_center_meta_node_sdk_test_src = [ "bus_center_meta_node_sdk_test.cpp" ]
 }
@@ -88,6 +130,16 @@ if (defined(ohos_lite)) {
       sources = softbus_center_sdk_test_src
       include_dirs = bus_center_sdk_test_inc
       deps = bus_center_sdk_test_deps
+      deps += [ "$hilog_lite_deps_path" ]
+    }
+  }
+  if (ohos_build_type == "debug") {
+    unittest("ClientBusCenterMngTest") {
+      output_extension = "bin"
+      output_dir = "$root_out_dir/test/unittest/dsoftbus"
+      sources = client_bus_center_manager_test_src
+      include_dirs = client_bus_center_manager_test_inc
+      deps = client_bus_center_manager_test_deps
       deps += [ "$hilog_lite_deps_path" ]
     }
   }
@@ -225,12 +277,39 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("ClientBusCenterMngTest") {
+    module_out_path = module_output_path
+    sources = client_bus_center_manager_test_src
+    include_dirs = client_bus_center_manager_test_inc
+    include_dirs += [
+      "unittest/common/",
+      "//commonlibrary/c_utils/base/include",
+    ]
+    deps = client_bus_center_manager_test_deps
+    deps += [
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
   group("unittest") {
     testonly = true
     deps = [
       ":BusCenterHeartbeatSdkTest",
       ":BusCenterMetaNodeSdkTest",
       ":BusCenterSdkTest",
+      ":ClientBusCenterMngTest",
       ":ClientBusMangerTest",
       ":SetDataChangeTest",
     ]
