@@ -137,14 +137,12 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize.L
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;
     ConnectionInfo brInfo;
-    tcpInfo.type = CONNECT_BR;
+    brInfo.type = CONNECT_BR;
     ConnectionInfo bleInfo;
-    tcpInfo.type = CONNECT_BLE;
-    TransAuthInterfaceMock authMock;
+    bleInfo.type = CONNECT_BLE;
     TransCommInterfaceMock commMock;
     TransConnInterfaceMock connMock;
-    EXPECT_CALL(connMock, ConnGetConnectionInfo(_, _))
-        .WillOnce(DoAll(SetArgPointee<1>(tcpInfo), Return(SOFTBUS_ERR)))
+    EXPECT_CALL(connMock, ConnGetConnectionInfo(_, _)).WillOnce(DoAll(SetArgPointee<1>(tcpInfo), Return(SOFTBUS_ERR)))
         .WillOnce(DoAll(SetArgPointee<1>(tcpInfo), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(brInfo), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(bleInfo), Return(SOFTBUS_OK)));
@@ -153,24 +151,18 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize.L
     TransCreateConnByConnId(3);
     TransCreateConnByConnId(4);
 
-    EXPECT_CALL(connMock, ConnGetNewRequestId)
-        .WillOnce(Return(10))
-        .WillOnce(Return(11))
+    EXPECT_CALL(connMock, ConnGetNewRequestId).WillOnce(Return(10)).WillOnce(Return(11))
         .WillRepeatedly(Return(12));
-
-    EXPECT_CALL(commMock, GenerateRandomStr)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(connMock, ConnGetHeadSize)
-        .WillRepeatedly(Return(24));
-    EXPECT_CALL(connMock, ConnPostBytes)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(connMock, ConnConnectDevice).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(24));
+    EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
 
     AppInfo appInfo;
+    appInfo.appType = APP_TYPE_AUTH;
     int32_t channelId = -1;
     int32_t ret = SOFTBUS_ERR;
     ConnectOption connInfo;
-
-    appInfo.appType = APP_TYPE_AUTH;
     connInfo.type = CONNECT_TCP;
     ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
