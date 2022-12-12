@@ -75,7 +75,7 @@ NO_SANITIZE("cfi") void UnPackSliceHead(SliceHead *data)
     data->reserved = (int32_t)SoftBusLtoHl((uint32_t)data->reserved);
 }
 
-void PackPacketHead(PacketHead *data)
+NO_SANITIZE("cfi") void PackPacketHead(PacketHead *data)
 {
     data->magicNumber = (int32_t)SoftBusHtoLl((uint32_t)data->magicNumber);
     data->seq = (int32_t)SoftBusHtoLl((uint32_t)data->seq);
@@ -83,7 +83,7 @@ void PackPacketHead(PacketHead *data)
     data->dataLen = (int32_t)SoftBusHtoLl((uint32_t)data->dataLen);
 }
 
-void UnPackPacketHead(PacketHead *data)
+NO_SANITIZE("cfi") void UnPackPacketHead(PacketHead *data)
 {
     data->magicNumber = (int32_t)SoftBusLtoHl((uint32_t)data->magicNumber);
     data->seq = (int32_t)SoftBusLtoHl((uint32_t)data->seq);

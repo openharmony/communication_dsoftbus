@@ -25,6 +25,7 @@
 #include "lnn_net_capability.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
@@ -142,21 +143,21 @@ static bool IsEnableBle(const char *networkId)
     return true;
 }
 
-static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-static int32_t GetBleScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetBleScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
@@ -182,7 +183,7 @@ static int32_t GetLinkedChannelScore(void)
     return score;
 }
 
-static int32_t GetWlan2P4GScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetWlan2P4GScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;

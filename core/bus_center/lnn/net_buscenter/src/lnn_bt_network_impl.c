@@ -337,7 +337,7 @@ int32_t LnnEnableBtProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     return SOFTBUS_OK;
 }
 
-static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
+NO_SANITIZE("cfi") static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
 {
     return UNUSE_BUTT;
 }

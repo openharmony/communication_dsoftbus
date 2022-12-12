@@ -104,7 +104,7 @@ NO_SANITIZE("cfi") static int32_t Accept(int32_t serverFd)
     return ret;
 }
 
-static int32_t Write(int32_t clientFd, const char *buf, const int32_t len)
+NO_SANITIZE("cfi") static int32_t Write(int32_t clientFd, const char *buf, const int32_t len)
 {
     return SppWrite(clientFd, buf, len);
 }

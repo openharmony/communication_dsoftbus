@@ -288,7 +288,7 @@ static void OnP2pConnected(int32_t requestId, const char *myIp, const char *peer
     SetConnectDeviceResult(requestId, true, myIp, peerIp);
 }
 
-static void OnP2pConnectFailed(int32_t requestId, int32_t reason)
+NO_SANITIZE("cfi") static void OnP2pConnectFailed(int32_t requestId, int32_t reason)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnP2pConnectFailed: requestId = %d, reason = %d.",
         requestId, reason);

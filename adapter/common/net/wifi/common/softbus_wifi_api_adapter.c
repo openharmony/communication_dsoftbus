@@ -144,7 +144,7 @@ NO_SANITIZE("cfi") int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifi
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusDisconnectDevice(void)
+NO_SANITIZE("cfi") int32_t SoftBusDisconnectDevice(void)
 {
     return Disconnect();
 }
