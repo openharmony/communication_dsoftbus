@@ -50,6 +50,6 @@ group("fuzztest") {
   deps = []
   if (has_enhance_test) {
     deps +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:fuzzttest" ]
+        [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:fuzztest" ]
   }
 }
