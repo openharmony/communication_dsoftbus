@@ -128,7 +128,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
     EXPECT_EQ(EOK, res);
     msg = PackRequest(appInfo);
     // return data
-    ASSERT_TRUE(msg != nullptr);
+    EXPECT_TRUE(msg != nullptr);
 
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
