@@ -79,7 +79,7 @@ NO_SANITIZE("cfi") int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *ap
     int code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
-        appInfo->fileProtocal = APP_INFO_UDP_FILE_PROTOCAL;
+        appInfo->fileProtocol = APP_INFO_UDP_FILE_PROTOCOL;
     }
 
     switch (appInfo->udpChannelOptType) {
@@ -130,7 +130,7 @@ NO_SANITIZE("cfi") int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *
     int code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
-        appInfo->fileProtocal = APP_INFO_UDP_FILE_PROTOCAL;
+        appInfo->fileProtocol = APP_INFO_UDP_FILE_PROTOCOL;
     }
 
     switch (appInfo->udpChannelOptType) {

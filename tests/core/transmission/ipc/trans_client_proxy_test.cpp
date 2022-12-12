@@ -65,7 +65,7 @@ void TransClientProxyTest::TearDownTestCase(void) {}
 
 /**
  * @tc.name: InformPermissionChangeTest001
- * @tc.desc: infomation permission change test, use the wrong or normal parameter.
+ * @tc.desc: information permission change test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */

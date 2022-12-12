@@ -996,7 +996,7 @@ HWTEST_F(TransAuthChannelTest, TransNotifyAuthDataSuccessTest001, TestSize.Level
 
 /**
  * @tc.name: OnRecvAuthChannelReply001
- * @tc.desc: Transmission auth manager on recieve auth channel reply with different parameters.
+ * @tc.desc: Transmission auth manager on receive auth channel reply with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */

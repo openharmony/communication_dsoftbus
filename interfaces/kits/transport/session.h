@@ -746,7 +746,7 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
  * @param sessionId Indicates the session ID.
  * @param option Indicates the session option type to get.
  * @param optionValue Indicates the session option value to get, which cannot be <b>NULL</b>.
- * @param valueSize Indicates the size of data which optionValue point to, whic cannot be <b>0</b>.
+ * @param valueSize Indicates the size of data which optionValue point to, which cannot be <b>0</b>.
  * The common error codes are as follows:
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if the option is invalid, optionValue is NULL or valueSize is Zero.
  * @return Returns <b>SOFTBUS_INVALID_SESSION_ID</b> if the sessionId is invalid.

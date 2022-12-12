@@ -308,7 +308,7 @@ NO_SANITIZE("cfi") int32_t HichainStartAuth(int64_t authSeq, const char *udid, c
     for (int32_t i = 0; i < RETRY_TIMES; i++) {
         int32_t ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authSeq, authParams, &g_hichainCallback);
         if (ret == HC_SUCCESS) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain call authDevice sucess, time = %d", i + 1);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain call authDevice success, time = %d", i + 1);
             cJSON_free(authParams);
             return SOFTBUS_OK;
         }
