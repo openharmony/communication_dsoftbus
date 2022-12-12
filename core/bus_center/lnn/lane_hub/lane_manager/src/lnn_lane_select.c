@@ -116,14 +116,6 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
     return true;
 }
 
-static bool FilterUnsupportedCase(LaneTransType transType, LaneLinkType linkType)
-{
-    if ((transType == LANE_T_MSG) && (linkType == LANE_P2P)) {
-        return true;
-    }
-    return false;
-}
-
 static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
@@ -131,9 +123,6 @@ static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *
     uint32_t listNum = request->list.linkTypeNum;
     *resNum = 0;
     for (uint32_t i = 0; i < listNum; i++) {
-        if (FilterUnsupportedCase(request->transType, preferredList[i])) {
-            continue;
-        }
         if (!IsValidLane(networkId, preferredList[i], request->expectedBw)) {
             continue;
         }
