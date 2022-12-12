@@ -922,7 +922,7 @@ NO_SANITIZE("cfi") void UnregAuthVerifyListener(void)
     (void)memset_s(&g_verifyListener, sizeof(AuthVerifyListener), 0, sizeof(AuthVerifyListener));
 }
 
-uint32_t AuthGenRequestId(void)
+NO_SANITIZE("cfi") uint32_t AuthGenRequestId(void)
 {
     return ConnGetNewRequestId(MODULE_DEVICE_AUTH);
 }
@@ -1203,7 +1203,7 @@ NO_SANITIZE("cfi") int64_t AuthDeviceGetIdByP2pMac(const char *p2pMac, AuthLinkT
     return authId;
 }
 
-uint32_t AuthGetEncryptSize(uint32_t inLen)
+NO_SANITIZE("cfi") uint32_t AuthGetEncryptSize(uint32_t inLen)
 {
     return inLen + ENCRYPT_OVER_HEAD_LEN;
 }

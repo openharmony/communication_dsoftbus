@@ -15,15 +15,16 @@
 
 #include "softbus_client_info_manager.h"
 #include "permission_status_change_cb.h"
-#include "softbus_server.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_server.h"
 
 namespace OHOS {
 typedef std::pair<std::unordered_multimap<std::string, ClientObjPair>::iterator,
     std::unordered_multimap<std::string, ClientObjPair>::iterator> ClientObjRange;
 
-SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
+NO_SANITIZE("cfi") SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
 {
     static SoftbusClientInfoManager instance;
     return instance;
