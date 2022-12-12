@@ -763,7 +763,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetWifiState(void)
     return SOFTBUS_ERR;
 }
 
-void P2pLinkStopPeerDiscovery(void)
+NO_SANITIZE("cfi") void P2pLinkStopPeerDiscovery(void)
 {
     (void)StopDiscoverDevices();
 }

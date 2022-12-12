@@ -94,7 +94,7 @@ static bool UpdateBleGattcInfoStateInner(BleGattcInfo *infoNode, int32_t newStat
 static int32_t BleGattcDump(int fd);
 static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, const char *data);
 
-static void FreeBleClientMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void FreeBleClientMessage(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;
