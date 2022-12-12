@@ -534,6 +534,10 @@ static void OnReceiveTopoUpdateMsg(LnnSyncInfoType type, const char *networkId, 
     if (type != LNN_INFO_TYPE_TOPO_UPDATE) {
         return;
     }
+    if (strnlen((char *)msg, len) == len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnReceiveTopoUpdateMsg msg invalid");
+        return;
+    }
     json = cJSON_Parse((char *)msg);
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "cjson parse topo msg fail");

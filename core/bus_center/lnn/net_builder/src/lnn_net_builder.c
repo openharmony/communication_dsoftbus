@@ -1338,6 +1338,10 @@ static void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId,
     if (type != LNN_INFO_TYPE_MASTER_ELECT) {
         return;
     }
+    if (strnlen((char *)msg, len) == len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnReceiveMasterElectMsg msg invalid");
+        return;
+    }
     json = cJSON_Parse((char *)msg);
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse elect msg json fail");
