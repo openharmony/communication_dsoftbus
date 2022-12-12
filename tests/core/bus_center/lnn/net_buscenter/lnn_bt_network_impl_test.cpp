@@ -1,0 +1,259 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+#include <securec.h>
+
+#include "bus_center_event.h"
+#include "lnn_bt_network_impl_mock.h"
+#include "lnn_bt_network_impl.c"
+#include "lnn_net_ledger_mock.h"
+#include "lnn_network_manager.h"
+#include "lnn_physical_subnet_manager.h"
+#include "lnn_trans_mock.h"
+#include "message_handler.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_common.h"
+#include "softbus_errcode.h"
+#include "softbus_log.h"
+
+#define BLE_DISABLE 0
+#define LNN_DEFAULT_IF_NAME_BR "br0"
+namespace OHOS {
+using namespace testing::ext;
+using namespace testing;
+
+class LnnBtNetworkImplTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+};
+
+void LnnBtNetworkImplTest::SetUpTestCase()
+{
+    LooperInit();
+}
+
+void LnnBtNetworkImplTest::TearDownTestCase()
+{
+    LooperDeinit();
+}
+
+void LnnBtNetworkImplTest::SetUp()
+{
+}
+
+void LnnBtNetworkImplTest::TearDown()
+{
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_001
+* @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    EXPECT_CALL(btMock, LnnRegisterEventHandler(_, _)).WillOnce(Return(SOFTBUS_ERR)).
+        WillRepeatedly(Return(SOFTBUS_OK));
+    int ret = LnnInitBtProtocol(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnInitBtProtocol(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_002
+* @tc.desc: Udid and PeerUdid not find return SOFTBUS_NOT_FIND
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_002, TestSize.Level1)
+{
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    EXPECT_CALL(btMock, LnnVisitNetif).WillRepeatedly(Return(false));
+    LnnMonitorBtStateChangedEvent info = {
+        .basic.event = LNN_EVENT_BT_STATE_CHANGED,
+        .status = (uint8_t)SOFTBUS_BLE_TURN_ON,
+    };
+    BtStateChangedEvtHandler(nullptr);
+    BtStateChangedEvtHandler((LnnEventBasicInfo *)&info);
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_003
+* @tc.desc: relationNum is NULL return SOFTBUS_INVALID_PARAM
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_003, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    EXPECT_CALL(ledgerMock, LnnGetNetworkIdByBtMac).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(btMock, LnnRequestLeaveSpecific).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnMonitorBtAclStateChangedEvent btEvent1 = {
+        .basic.event = LNN_EVENT_BT_ACL_STATE_CHANGED,
+        .status = (uint8_t)SOFTBUS_BR_ACL_CONNECTED,
+    };
+    LnnMonitorBtAclStateChangedEvent btEvent2 = {
+        .basic.event = LNN_EVENT_BT_ACL_STATE_CHANGED,
+        .status = (uint8_t)SOFTBUS_BR_ACL_DISCONNECTED,
+        .btMac = "btmac",
+    };
+    BtAclStateChangedEvtHandler(nullptr);
+    BtAclStateChangedEvtHandler((LnnEventBasicInfo *)&btEvent1);
+    BtAclStateChangedEvtHandler((LnnEventBasicInfo *)&btEvent2);
+    BtAclStateChangedEvtHandler((LnnEventBasicInfo *)&btEvent2);
+    BtAclStateChangedEvtHandler((LnnEventBasicInfo *)&btEvent2);
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_004
+* @tc.desc: *invalid parameter
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_004, TestSize.Level1)
+{
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    EXPECT_CALL(btMock, LnnNotifyPhysicalSubnetStatusChanged).WillRepeatedly(Return());
+    LnnNetIfMgr netifManager1 = {
+        .type = LNN_NETIF_TYPE_BR,
+    };
+    const LnnNetIfMgr netifManager2 = {
+        .type = LNN_NETIF_TYPE_BLE,
+    };
+    const LnnNetIfMgr netifManager3 = {
+        .type = LNN_NETIF_TYPE_WLAN,
+    };
+    SoftBusBtState btState = SOFTBUS_BR_TURN_ON;
+    void *data = (void *)(&btState);
+    EXPECT_TRUE(NotifyBtStatusChanged(&netifManager1, data) == CHOICE_VISIT_NEXT);
+    btState = SOFTBUS_BLE_TURN_ON;
+    data = (void *)(&btState);
+    EXPECT_TRUE(NotifyBtStatusChanged(&netifManager2, data) == CHOICE_VISIT_NEXT);
+    EXPECT_TRUE(NotifyBtStatusChanged(&netifManager3, data) == CHOICE_VISIT_NEXT);
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_005
+* @tc.desc: *invalid parameter
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_005, TestSize.Level1)
+{
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillRepeatedly(LnnBtNetworkImplInterfaceMock::
+        ActionOfLnnGetNetIfTypeByNameBr);
+    EXPECT_CALL(btMock, LnnRegistPhysicalSubnet).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnProtocolManager self = {0};
+    LnnNetIfMgr netifMgr = {
+        .ifName = "name",
+    };
+    int ret = LnnEnableBtProtocol(&self, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnEnableBtProtocol(&self, &netifMgr);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnEnableBtProtocol(&self, &netifMgr);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_006
+* @tc.desc: *invalid parameter
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1)
+{
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    EXPECT_CALL(btMock, LnnRequestLeaveByAddrType).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnPhysicalSubnet subnet = {
+        .status = LNN_SUBNET_IDLE,
+    };
+    DestroyBtSubnetManager(&subnet);
+    subnet.status = LNN_SUBNET_RUNNING;
+    DestroyBtSubnetManager(&subnet);
+    DestroyBtSubnetManager(&subnet);
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_007
+* @tc.desc: *invalid parameter
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_007, TestSize.Level1)
+{
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    LnnPhysicalSubnet subnet = {
+        .ifName = LNN_DEFAULT_IF_NAME_BR,
+        .status = LNN_SUBNET_RUNNING,
+    };
+    EXPECT_CALL(btMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_DISABLE));
+    EXPECT_CALL(btMock, LnnRequestLeaveByAddrType).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
+    OnBtNetifStatusChanged(nullptr, nullptr);
+
+    EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillOnce(LnnBtNetworkImplInterfaceMock::
+        ActionOfLnnGetNetIfTypeByNameBr);
+    SoftBusBtState btState1 = SOFTBUS_BR_TURN_ON;
+    OnBtNetifStatusChanged(&subnet, (void *)(&btState1));
+
+    EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillOnce(LnnBtNetworkImplInterfaceMock::
+        ActionOfLnnGetNetIfTypeByNameBle);
+    OnBtNetifStatusChanged(&subnet, (void *)(&btState1));
+
+    EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillOnce(LnnBtNetworkImplInterfaceMock::
+        ActionOfLnnGetNetIfTypeByNameBr);
+    SoftBusBtState btState2 = SOFTBUS_BR_TURN_OFF;
+    OnBtNetifStatusChanged(&subnet, (void *)(&btState2));
+
+    EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillOnce(LnnBtNetworkImplInterfaceMock::
+        ActionOfLnnGetNetIfTypeByNameBle);
+    OnBtNetifStatusChanged(&subnet, (void *)(&btState2));
+}
+
+/*
+* @tc.name: LNN_BT_NETWORK_IMPL_TEST_008
+* @tc.desc: *invalid parameter
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_008, TestSize.Level1)
+{
+    char macStr[] = "123456789";
+    NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
+    EXPECT_CALL(btMock, SoftBusGetBtMacAddr).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(btMock, ConvertBtMacToStr).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+   
+    int ret = GetAvailableBtMac(macStr, NETWORK_ID_BUF_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = GetAvailableBtMac(macStr, BT_MAC_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    ret = GetAvailableBtMac(macStr, BT_MAC_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    ret = GetAvailableBtMac(macStr, BT_MAC_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+}// namespace OHOS
