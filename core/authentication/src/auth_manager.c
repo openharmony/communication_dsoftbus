@@ -462,7 +462,7 @@ NO_SANITIZE("cfi") int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthS
     return SOFTBUS_OK;
 }
 
-static void NotifyDeviceVerifyPassed(int64_t authId, const NodeInfo *nodeInfo)
+NO_SANITIZE("cfi") static void NotifyDeviceVerifyPassed(int64_t authId, const NodeInfo *nodeInfo)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth == NULL) {
@@ -483,7 +483,7 @@ static void NotifyDeviceVerifyPassed(int64_t authId, const NodeInfo *nodeInfo)
     g_verifyListener.onDeviceVerifyPass(authId, nodeInfo);
 }
 
-static void NotifyDeviceDisconnect(int64_t authId)
+NO_SANITIZE("cfi") static void NotifyDeviceDisconnect(int64_t authId)
 {
     if (g_verifyListener.onDeviceDisconnect == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "onDeviceDisconnect not set.");
@@ -511,7 +511,7 @@ NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupId, int32_t group
     }
 }
 
-static void OnGroupDeleted(const char *groupId)
+NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupId)
 {
     if (g_groupChangeListener.onGroupDeleted != NULL) {
         g_groupChangeListener.onGroupDeleted(groupId);
@@ -584,7 +584,7 @@ static int32_t StartReconnectDevice(int64_t authId, const AuthConnInfo *connInfo
     return SOFTBUS_OK;
 }
 
-static void ReportAuthRequestPassed(uint32_t requestId, int64_t authId, const NodeInfo *nodeInfo)
+NO_SANITIZE("cfi") static void ReportAuthRequestPassed(uint32_t requestId, int64_t authId, const NodeInfo *nodeInfo)
 {
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
@@ -818,7 +818,7 @@ static void HandleCloseAckData(uint64_t connId, const AuthConnInfo *connInfo, bo
     }
 }
 
-static void HandleConnectionData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
+NO_SANITIZE("cfi") static void HandleConnectionData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
     const AuthDataHead *head, const uint8_t *data)
 {
     if (!RequireAuthLock()) {
@@ -878,7 +878,7 @@ static void OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool f
     }
 }
 
-static void HandleDisconnectedEvent(const void *para)
+NO_SANITIZE("cfi") static void HandleDisconnectedEvent(const void *para)
 {
     CHECK_NULL_PTR_RETURN_VOID(para);
     uint64_t connId = *((uint64_t *)para);
@@ -923,7 +923,7 @@ NO_SANITIZE("cfi") void UnregAuthVerifyListener(void)
     (void)memset_s(&g_verifyListener, sizeof(AuthVerifyListener), 0, sizeof(AuthVerifyListener));
 }
 
-uint32_t AuthGenRequestId(void)
+NO_SANITIZE("cfi") uint32_t AuthGenRequestId(void)
 {
     return ConnGetNewRequestId(MODULE_DEVICE_AUTH);
 }
@@ -1204,7 +1204,7 @@ NO_SANITIZE("cfi") int64_t AuthDeviceGetIdByP2pMac(const char *p2pMac, AuthLinkT
     return authId;
 }
 
-uint32_t AuthGetEncryptSize(uint32_t inLen)
+NO_SANITIZE("cfi") uint32_t AuthGetEncryptSize(uint32_t inLen)
 {
     return inLen + ENCRYPT_OVER_HEAD_LEN;
 }

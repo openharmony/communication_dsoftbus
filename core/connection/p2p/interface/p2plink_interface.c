@@ -57,7 +57,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetRequestId(void)
     return requestId;
 }
 
-int32_t P2pLinkInit(void)
+NO_SANITIZE("cfi") int32_t P2pLinkInit(void)
 {
     return P2pLinkManagerInit();
 }
@@ -71,7 +71,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
     }
     ConnectingNode *arg = SoftBusCalloc(sizeof(ConnectingNode));
     if (arg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link connect malloc fail.");
+        CLOGE("P2p Link connect malloc fail.");
         return SOFTBUS_ERR;
     }
     ret = memcpy_s(&arg->connInfo, sizeof(P2pLinkConnectInfo), info, sizeof(P2pLinkConnectInfo));
@@ -79,14 +79,13 @@ NO_SANITIZE("cfi") int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
         SoftBusFree(arg);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "conn info reqid %d, pid %d role %d",
-               info->requestId, info->pid, info->expectedRole);
+    CLOGI("conn info reqid %d, pid %d role %d", info->requestId, info->pid, info->expectedRole);
     ret = P2pLoopProc(P2pLinkLoopConnectDevice, (void *)arg, P2PLOOP_INTERFACE_LOOP_CONNECT);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkLoopConnectDevice loop fail.");
+        CLOGE("P2pLinkLoopConnectDevice loop fail.");
         SoftBusFree(arg);
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkLoopConnectDevice loop ok.");
+    CLOGI("P2pLinkLoopConnectDevice loop ok.");
     return ret;
 }
 
@@ -95,15 +94,15 @@ NO_SANITIZE("cfi") int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *
     int32_t ret;
 
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link Disconnect arg err.");
+        CLOGE("P2p Link Disconnect arg err.");
         return SOFTBUS_ERR;
     }
     P2pLinkDisconnectInfo *arg = SoftBusCalloc(sizeof(P2pLinkDisconnectInfo));
     if (arg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2p Link Disconnect malloc fail.");
+        CLOGE("P2p Link Disconnect malloc fail.");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "disconn info, pid %d", info->pid);
+    CLOGI("disconn info, pid %d", info->pid);
     ret = memcpy_s(arg, sizeof(P2pLinkDisconnectInfo), info, sizeof(P2pLinkDisconnectInfo));
     if (ret != SOFTBUS_OK) {
         SoftBusFree(arg);
@@ -111,11 +110,11 @@ NO_SANITIZE("cfi") int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *
     }
     ret = P2pLoopProc(P2pLinkLoopDisconnectDev, (void *)arg, P2PLOOP_INTERFACE_LOOP_DISCONNECT);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkLoopConnectDevice loop fail.");
+        CLOGE("P2pLinkLoopConnectDevice loop fail.");
         SoftBusFree(arg);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "disconnect loop ok.");
+    CLOGI("disconnect loop ok.");
     return SOFTBUS_OK;
 }
 
@@ -132,7 +131,7 @@ static void LoopP2pLinkIsRoleConfict(P2pLoopMsg msgType, void *arg)
 
     loopInfo = (RoleIsConfictLoopInfo *)arg;
     if (P2pLinkIsEnable() == false) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "in role p2p state is closed");
+        CLOGI("in role p2p state is closed");
         loopInfo->result = SOFTBUS_ERR;
         sem_post(&loopInfo->wait);
         return;
@@ -141,14 +140,14 @@ static void LoopP2pLinkIsRoleConfict(P2pLoopMsg msgType, void *arg)
     connedItem = P2pLinkGetConnedDevByMac(requestInfo->peerMac);
     if (connedItem != NULL) {
         if (strlen(connedItem->peerIp) == 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "dev is used by others");
+            CLOGI("dev is used by others");
             loopInfo->result = ERROR_LINK_USED_BY_ANOTHER_SERVICE;
             sem_post(&loopInfo->wait);
             return;
         }
         if ((requestInfo->expectedRole != ROLE_AUTO) &&
             (requestInfo->expectedRole != P2pLinkGetRole())) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "role is confict");
+            CLOGI("role is confict");
             loopInfo->result = ERROR_CONNECTED_WITH_MISMATCHED_ROLE;
             sem_post(&loopInfo->wait);
             return;
@@ -158,7 +157,7 @@ static void LoopP2pLinkIsRoleConfict(P2pLoopMsg msgType, void *arg)
     } else {
         loopInfo->result = P2pLinkNegoGetFinalRole(requestInfo->peerRole, requestInfo->peerRole,
             requestInfo->peerGoMac, requestInfo->isBridgeSupported);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkNegoGetFinalRole ret %d", loopInfo->result);
+        CLOGI("P2pLinkNegoGetFinalRole ret %d", loopInfo->result);
         sem_post(&loopInfo->wait);
     }
     return;
@@ -181,19 +180,19 @@ NO_SANITIZE("cfi") int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info)
     }
 
     if (sem_init(&loopInfo.wait, 0, 0)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "sem init fail");
+        CLOGI("sem init fail");
         return SOFTBUS_ERR;
     }
 
     ret = P2pLoopProc(LoopP2pLinkIsRoleConfict, (void *)&loopInfo, P2PLOOP_INTERFACE_ROLE_CONFICT);
     if (ret != SOFTBUS_OK) {
         sem_destroy(&loopInfo.wait);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "LoopP2pLinkIsRoleConfict loop fail");
+        CLOGI("LoopP2pLinkIsRoleConfict loop fail");
         return SOFTBUS_ERR;
     }
     sem_wait(&loopInfo.wait);
     sem_destroy(&loopInfo.wait);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "role confict res %d.", loopInfo.result);
+    CLOGI("role confict res %d.", loopInfo.result);
     if (loopInfo.result < 0) {
         return SOFTBUS_ERR;
     }
@@ -214,7 +213,7 @@ static void LoopP2pLinkQueryIpByMac(P2pLoopMsg msgType, void *arg)
     connedItem = P2pLinkGetConnedDevByPeerIp(queryInfo->peerIp);
     if (connedItem != NULL) {
         if (strcpy_s(queryInfo->peerMac, sizeof(queryInfo->peerMac), connedItem->peerMac) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail.");
+            CLOGE("strcpy fail.");
         }
     }
     sem_post(&queryInfo->wait);
@@ -230,40 +229,40 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char* p
         return SOFTBUS_ERR;
     }
     if (P2pLinkGetRole() == ROLE_NONE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "p2p role is none");
+        CLOGE("p2p role is none");
         return SOFTBUS_ERR;
     }
 
     (void)memset_s(&queryInfo, sizeof(queryInfo), 0, sizeof(queryInfo));
     ret = strcpy_s(queryInfo.peerIp, sizeof(queryInfo.peerIp), peerIp);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy fail");
+        CLOGE("copy fail");
         return SOFTBUS_ERR;
     }
 
     if (sem_init(&queryInfo.wait, 0, 0)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sem init fail");
+        CLOGE("sem init fail");
         return SOFTBUS_ERR;
     }
 
     ret = P2pLoopProc(LoopP2pLinkQueryIpByMac, (void *)&queryInfo, P2PLOOP_MSG_PROC);
     if (ret != SOFTBUS_OK) {
         sem_destroy(&queryInfo.wait);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopP2pLinkIsRoleConfict loop fail");
+        CLOGE("LoopP2pLinkIsRoleConfict loop fail");
         return SOFTBUS_ERR;
     }
     sem_wait(&queryInfo.wait);
     sem_destroy(&queryInfo.wait);
     if (strlen(queryInfo.peerMac) == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peerMac is null");
+        CLOGE("peerMac is null");
         return SOFTBUS_ERR;
     }
     ret = strcpy_s(peerMac, macLen, queryInfo.peerMac);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy fail");
+        CLOGE("strcpy fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "query ok ip");
+    CLOGI("query ok ip");
     return SOFTBUS_OK;
 }
 
@@ -282,18 +281,18 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen)
 
     ret = strcpy_s(tmpIp, sizeof(tmpIp), P2pLinkGetMyIp());
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "get myIp fail");
+        CLOGE("get myIp fail");
         return SOFTBUS_ERR;
     }
 
     if (strlen(tmpIp) == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "myIp is null");
+        CLOGE("myIp is null");
         return SOFTBUS_ERR;
     }
 
     ret = strcpy_s(localIp, localIpLen, tmpIp);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy tmpIp fail");
+        CLOGE("copy tmpIp fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -331,30 +330,30 @@ NO_SANITIZE("cfi") int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
 
     (void)memset_s(&queryInfo, sizeof(queryInfo), 0, sizeof(queryInfo));
     if (P2pLinkGetRole() == ROLE_NONE) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "isonline role is none");
+        CLOGE("isonline role is none");
         return SOFTBUS_ERR;
     }
 
     (void)memset_s(&queryInfo, sizeof(queryInfo), 0, sizeof(queryInfo));
     ret = strcpy_s(queryInfo.peerMac, sizeof(queryInfo.peerMac), peerMac);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "copy fail");
+        CLOGE("copy fail");
         return SOFTBUS_ERR;
     }
 
     if (sem_init(&queryInfo.wait, 0, 0)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sem init fail");
+        CLOGE("sem init fail");
         return SOFTBUS_ERR;
     }
 
     ret = P2pLoopProc(LoopP2pLinkQueryDevOnline, (void *)&queryInfo, P2PLOOP_MSG_PROC);
     if (ret != SOFTBUS_OK) {
         sem_destroy(&queryInfo.wait);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopP2pLinkIsRoleConfict loop fail");
+        CLOGE("LoopP2pLinkIsRoleConfict loop fail");
         return SOFTBUS_ERR;
     }
     sem_wait(&queryInfo.wait);
     sem_destroy(&queryInfo.wait);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "query result %d", queryInfo.result);
+    CLOGI("query result %d", queryInfo.result);
     return queryInfo.result;
 }

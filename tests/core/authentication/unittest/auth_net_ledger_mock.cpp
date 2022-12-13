@@ -14,6 +14,19 @@
  */
 
 #include "auth_net_ledger_mock.h"
+#include "auth_connection.h"
+#include "auth_manager.h"
+#include "softbus_adapter_mem.h"
+#include "string"
+
+static const std::string CMD_TAG = "TECmd";
+static const std::string CMD_GET_AUTH_INFO = "getAuthInfo";
+static const std::string CMD_RET_AUTH_INFO = "retAuthInfo";
+static const std::string DATA_TAG = "TEData";
+static const std::string DEVICE_ID_TAG = "TEDeviceId";
+static const std::string DATA_BUF_SIZE_TAG = "DataBufSize";
+static const std::string SOFT_BUS_VERSION_TAG = "softbusVersion";
+static const int PACKET_SIZE = (64 * 1024);
 
 using namespace testing;
 using namespace testing::ext;
@@ -111,4 +124,95 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return GetNetLedgerInterface()->LnnGetLocalNumInfo(key, info);
 }
 }
+
+char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)
+{
+    cJSON *obj = cJSON_CreateObject();
+    if (obj == nullptr) {
+        return nullptr;
+    }
+    char uuid[UUID_BUF_LEN] = "33654";
+    char udid[UDID_BUF_LEN] = "15464";
+    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && !info->isServer) {
+        if (!AddStringToJsonObject(obj, CMD_TAG.c_str(), CMD_GET_AUTH_INFO.c_str())) {
+            cJSON_Delete(obj);
+            return nullptr;
+        }
+    } else {
+        if (!AddStringToJsonObject(obj, CMD_TAG.c_str(), CMD_RET_AUTH_INFO.c_str())) {
+            cJSON_Delete(obj);
+            return nullptr;
+        }
+    }
+    if (!AddStringToJsonObject(obj, DATA_TAG.c_str(), uuid) ||
+        !AddStringToJsonObject(obj, DEVICE_ID_TAG.c_str(), udid) ||
+        !AddNumberToJsonObject(obj, DATA_BUF_SIZE_TAG.c_str(), PACKET_SIZE) ||
+        !AddNumberToJsonObject(obj, SOFT_BUS_VERSION_TAG.c_str(), SOFTBUS_NEW_V1)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add msg body fail.");
+        cJSON_Delete(obj);
+        return nullptr;
+    }
+    char *msg = cJSON_PrintUnformatted(obj);
+    if (msg == nullptr) {
+        cJSON_Delete(obj);
+        return nullptr;
+    }
+    cJSON_Delete(obj);
+    head.len = static_cast<uint32_t>(strlen(msg) + 1);
+    uint32_t size = GetAuthDataSize(head.len);
+    uint8_t *buf = (uint8_t *)SoftBusMalloc(size);
+    if (buf == nullptr) {
+        cJSON_free(msg);
+        return nullptr;
+    }
+    int32_t ret = PackAuthData(&head, (uint8_t *)msg, buf, size);
+    if (ret == SOFTBUS_OK) {
+        cJSON_free(msg);
+        ALOGI("PackAuthData success.");
+        return reinterpret_cast<char *>(buf);
+    }
+    SoftBusFree(buf);
+    cJSON_free(msg);
+    return nullptr;
 }
+
+void AuthNetLedgertInterfaceMock::OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
+{
+    ALOGI("Device verify passed & send cond");
+    (void)authId;
+    (void)info;
+    if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
+        ALOGE("Device verify Lock failed");
+        return;
+    }
+    isRuned = true;
+    SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
+    SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
+}
+
+void AuthNetLedgertInterfaceMock::OnDeviceNotTrusted(const char *peerUdid)
+{
+    ALOGI("Device not trusted call back & send cond");
+    (void)peerUdid;
+    if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
+        ALOGE("Device not trusted Lock failed");
+        return;
+    }
+    isRuned = true;
+    SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
+    SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
+}
+
+void AuthNetLedgertInterfaceMock::OnDeviceDisconnect(int64_t authId)
+{
+    ALOGI("Device disconnect call back & send cond");
+    (void)authId;
+    if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
+        ALOGE("Device disconnect Lock failed");
+        return;
+    }
+    isRuned = true;
+    SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
+    SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
+}
+} // namespace OHOS

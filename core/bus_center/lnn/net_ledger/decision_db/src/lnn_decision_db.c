@@ -218,7 +218,7 @@ static void CompleteUpdateTrustedDevInfo(void *para)
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
 }
 
-static void InsertTrustedDevInfoRecord(void *param)
+NO_SANITIZE("cfi") static void InsertTrustedDevInfoRecord(void *param)
 {
     DbContext *ctx = NULL;
     TrustedDevInfoRecord record;

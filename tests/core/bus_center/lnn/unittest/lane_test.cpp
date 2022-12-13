@@ -39,7 +39,7 @@ constexpr uint32_t REMOTE_AUTH_PORT = 7070;
 constexpr uint32_t REMOTE_PROXY_PORT = 8080;
 constexpr char REMOTE_WLAN_IP[] = "10.146.181.134";
 constexpr char LOCAL_NETWORK_ID[] = "444455556666abcdef";
-constexpr uint32_t FILE_DEFAULT_LINK_NUM = 3;
+constexpr uint32_t FILE_DEFAULT_LINK_NUM = 4;
 constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
 constexpr uint32_t LANE_LINK_NUM = 2;
 
@@ -258,7 +258,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_TRUE(recommendList != nullptr);
     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
-    LaneLinkType fileLinkList[FILE_DEFAULT_LINK_NUM] = {LANE_WLAN_5G, LANE_P2P, LANE_BR};
+    LaneLinkType fileLinkList[FILE_DEFAULT_LINK_NUM] = {LANE_WLAN_5G, LANE_P2P, LANE_WLAN_2P4G, LANE_BR};
     for (uint32_t i = 0; i < listNum; i++) {
         EXPECT_EQ(fileLinkList[i], recommendList[i]) << "i = " << i;
     }

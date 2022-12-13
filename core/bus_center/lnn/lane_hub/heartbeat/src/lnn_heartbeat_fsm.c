@@ -165,7 +165,7 @@ static void FreeUnhandledHbMessage(int32_t msgType, void *para)
     }
 }
 
-static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *para)
+NO_SANITIZE("cfi") static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     int32_t i, eventNum, ret;
     LnnHeartbeatFsm *hbFsm = NULL;
@@ -416,7 +416,7 @@ static void HbNoneStateEnter(FsmStateMachine *fsm)
     LnnFsmRemoveMessage(fsm, EVENT_HB_PROCESS_SEND_ONCE);
 }
 
-NO_SANITIZE("cfi") static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
+static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
     int32_t ret = SOFTBUS_ERR;
@@ -586,8 +586,8 @@ static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *par
 static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
 {
     uint64_t delayMillis;
-    GearMode mode = {0};
-
+    GearMode mode;
+    (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
     if (LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB try as master node get gearmode fail");
         return;
@@ -672,7 +672,8 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
 
 static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnHeartbeatType hbType)
 {
-    GearMode mode = {0};
+    GearMode mode;
+    (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
     uint64_t offlineToleranceLen;
 
     switch (hbType) {
@@ -834,7 +835,7 @@ NO_SANITIZE("cfi") LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void)
 {
     LnnHeartbeatFsm *hbFsm = NULL;
 
-    hbFsm = SoftBusCalloc(sizeof(LnnHeartbeatFsm));
+    hbFsm = (LnnHeartbeatFsm *)SoftBusCalloc(sizeof(LnnHeartbeatFsm));
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB malloc fsm fail");
         return NULL;
@@ -902,7 +903,7 @@ NO_SANITIZE("cfi") int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
 
 static int32_t CreateNewHbTypeObjMsg(LnnHeartbeatType srcType, LnnHeartbeatType **dstType)
 {
-    *dstType = SoftBusCalloc(sizeof(LnnHeartbeatType));
+    *dstType = (LnnHeartbeatType *)SoftBusCalloc(sizeof(LnnHeartbeatType));
     if (*dstType == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB new hbType obj msg malloc err");
         return SOFTBUS_MALLOC_ERR;
@@ -920,7 +921,7 @@ NO_SANITIZE("cfi") int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, Ln
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post send begin msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    custData = SoftBusCalloc(sizeof(LnnHeartbeatCustSendData));
+    custData = (LnnHeartbeatCustSendData *)SoftBusCalloc(sizeof(LnnHeartbeatCustSendData));
     if (custData == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB new hbType obj msg malloc err");
         return SOFTBUS_MALLOC_ERR;

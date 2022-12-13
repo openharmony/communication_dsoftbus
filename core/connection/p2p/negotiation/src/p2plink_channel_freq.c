@@ -44,25 +44,25 @@ NO_SANITIZE("cfi") int32_t P2plinkChannelListToString(const P2pLink5GList *chann
     int32_t len)
 {
     if ((channelList == NULL) || (channelList->num == 0)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "channelList is null.");
+        CLOGD("channelList is null.");
         return SOFTBUS_OK;
     }
 
     if (channelString == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        CLOGE("invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret = sprintf_s(channelString, len, "%d", channelList->chans[0]);
     if (ret == -1) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sprintf_s failed, errno = %d.", errno);
+        CLOGE("sprintf_s failed, errno = %d.", errno);
         return SOFTBUS_MEM_ERR;
     }
 
     for (int32_t i = 1; i < channelList->num; i++) {
         int32_t writeRet = sprintf_s(channelString + ret, len - ret, "##%d", channelList->chans[i]);
         if (writeRet == -1) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sprintf_s failed, errno = %d.", errno);
+            CLOGE("sprintf_s failed, errno = %d.", errno);
             return SOFTBUS_MEM_ERR;
         }
         ret += writeRet;
@@ -76,7 +76,7 @@ NO_SANITIZE("cfi") void P2pLinkParseItemDataByDelimit(char *srcStr, const char *
 {
     // srcStr will be cut.
     if (srcStr == NULL || delimit == NULL || list == NULL || outNum == NULL || num == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        CLOGE("invalid param.");
         return;
     }
 
@@ -86,7 +86,7 @@ NO_SANITIZE("cfi") void P2pLinkParseItemDataByDelimit(char *srcStr, const char *
     int32_t index = 0;
     while (itemStr != NULL) {
         if (index >= num) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "over max input num, index = %d, max num = %d.", index, num);
+            CLOGD("over max input num, index = %d, max num = %d.", index, num);
             index++;
             break;
         }
@@ -108,18 +108,18 @@ static P2pLink5GList *StringToChannelList(const char *channelString)
     int32_t num;
     char channelStringClone[CHAN_LIST_LEN] = {0};
     if (strcpy_s(channelStringClone, sizeof(channelStringClone), channelString) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy_s failed, errno = %d.", errno);
+        CLOGE("strcpy_s failed, errno = %d.", errno);
         return NULL;
     }
     P2pLinkParseItemDataByDelimit(channelStringClone, "##", list, MAX_CHANNEL_ITEM, &num);
     if (num == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "parse channel string failed.");
+        CLOGE("parse channel string failed.");
         return NULL;
     }
 
     P2pLink5GList *channelList = SoftBusCalloc(sizeof(P2pLink5GList) + sizeof(int32_t) * num);
     if (channelList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "calloc failed.");
+        CLOGE("calloc failed.");
         return NULL;
     }
 
@@ -186,7 +186,7 @@ static int32_t GetFreqByChannel(int32_t channel)
     } else if (channel >= CHANNEL_5G_FIRST && channel <= CHANNEL_5G_LAST) {
         return (channel - CHANNEL_5G_FIRST) * FREQUENCY_STEP + FREQUENCY_5G_FIRST;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "channel to freq, channel = %d.", channel);
+    CLOGE("channel to freq, channel = %d.", channel);
     return FREQUENCY_INVALID;
 }
 
@@ -195,7 +195,7 @@ static int32_t GenerateFrequency(const P2pLink5GList *channelList, const P2pLink
 {
     (void)gcScoreList;
     if (channelList == NULL || channelList->num <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "local 5g channel list is null.");
+        CLOGD("local 5g channel list is null.");
         return FREQUENCY_INVALID;
     }
 
@@ -206,7 +206,7 @@ static int32_t GenerateFrequency(const P2pLink5GList *channelList, const P2pLink
     result->num = 0;
     for (int32_t i = 0; i < channelList->num; i++) {
         if (channelList->chans[i] == INVALID_5G_CHANNEL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "can not use 5g channel 165.");
+            CLOGD("can not use 5g channel 165.");
             continue;
         }
         if (IsInChannelList(channelList->chans[i], gcChannelList)) {
@@ -215,7 +215,7 @@ static int32_t GenerateFrequency(const P2pLink5GList *channelList, const P2pLink
         }
     }
     if (result->num == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "can not use 5G channel.");
+        CLOGD("can not use 5G channel.");
         SoftBusFree(result);
         return FREQUENCY_INVALID;
     }
@@ -244,7 +244,7 @@ static int32_t ChoseChannel5gFreq(const GcInfo *gc, const P2pLink5GList *channel
         if (freq != FREQUENCY_INVALID) {
             return freq;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "no suitable 5G frequency");
+        CLOGD("no suitable 5G frequency");
     }
     return FREQUENCY_INVALID;
 }
@@ -252,20 +252,19 @@ static int32_t ChoseChannel5gFreq(const GcInfo *gc, const P2pLink5GList *channel
 NO_SANITIZE("cfi") int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList)
 {
     if (gc == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        CLOGE("invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t localStationFreq = P2pLinkUpateAndGetStationFreq(channelList);
     int32_t gcStationFreq = gc->stationFrequency;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "local station freq = %d, gc station greq = %d.",
-        localStationFreq, gcStationFreq);
+    CLOGI("local station freq = %d, gc station greq = %d.", localStationFreq, gcStationFreq);
     if (localStationFreq != -1 || gcStationFreq != -1) {
         int32_t recommandFreq;
         int32_t ret = P2pLinkGetRecommendChannel(&recommandFreq);
         if (ret == SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "get p2p recommand success, freq = %d.", recommandFreq);
+            CLOGD("get p2p recommand success, freq = %d.", recommandFreq);
             return recommandFreq;
         }
     }

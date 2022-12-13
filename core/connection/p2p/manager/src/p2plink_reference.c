@@ -78,7 +78,7 @@ NO_SANITIZE("cfi") void AddNewMacItem(ListNode *macList, const char *mac)
     }
     int32_t ret = strcpy_s(mItem->mac, sizeof(mItem->mac), mac);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy failed.");
+        CLOGE("strcpy failed.");
         SoftBusFree(mItem);
         return;
     }
@@ -214,7 +214,7 @@ NO_SANITIZE("cfi") void DisConnectByPid(int32_t pid)
 
     pItem = FindPidItem(pid);
     if (pItem == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "no find pid %d.", pid);
+        CLOGE("no find pid %d.", pid);
         return;
     }
 
@@ -226,11 +226,11 @@ NO_SANITIZE("cfi") void DisConnectByPid(int32_t pid)
         for (i = 0; i < mItem->refCnt; i++) {
             int32_t ret = P2pLinkSendDisConnect(&connedItem->chanId, P2pLinkGetMyMac());
             if (ret != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "disconnect failed.");
+                CLOGE("disconnect failed.");
             }
             ret = P2pLinkSharelinkRemoveGroup();
             if (ret != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "remove failed.");
+                CLOGE("remove failed.");
             }
             P2pLinkDelMyP2pRef();
         }
@@ -245,11 +245,11 @@ NO_SANITIZE("cfi") void P2pLinkDumpRef(void)
     RefMacItem *mItem = NULL;
     RefMacItem *mNext = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "total ref cnt %d.", g_myP2pRef);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "my ref cnt:");
+    CLOGI("total ref cnt %d.", g_myP2pRef);
+    CLOGI("my ref cnt:");
     LIST_FOR_EACH_ENTRY_SAFE(pItem, pNext, &g_pidList, RefPidItem, node) {
         LIST_FOR_EACH_ENTRY_SAFE(mItem, mNext, &pItem->macList, RefMacItem, node) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "pid %d peer ref %d", pItem->pid, mItem->refCnt);
+            CLOGI("pid %d peer ref %d", pItem->pid, mItem->refCnt);
         }
     }
 }
@@ -279,7 +279,7 @@ NO_SANITIZE("cfi") void P2pLinkMyP2pRefClean(void)
     for (i = 0; i < refCnt; i++) {
         int32_t ret = P2pLinkSharelinkRemoveGroup();
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "remove failed.");
+            CLOGE("remove failed.");
         } else {
             P2pLinkDelMyP2pRef();
         }

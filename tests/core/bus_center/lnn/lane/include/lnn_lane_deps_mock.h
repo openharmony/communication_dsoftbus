@@ -25,6 +25,8 @@
 #include "lnn_local_net_ledger.h"
 #include "bus_center_manager.h"
 #include "softbus_network_utils.h"
+#include "p2plink_interface.h"
+#include "lnn_physical_subnet_manager.h"
 
 namespace OHOS {
 class LaneDepsInterface {
@@ -43,7 +45,12 @@ public:
     virtual int SoftBusFrequencyToChannel(int frequency) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
-    virtual int32_t LnnGetWlanLinkedInfo(LnnWlanLinkedInfo *info) = 0;
+    virtual int32_t P2pLinkGetRequestId(void) = 0;
+    virtual void AuthCloseConn(int64_t authId) = 0;
+    virtual int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info) = 0;
+    virtual int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info) = 0;
+    virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
+    virtual bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -60,7 +67,12 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
     MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * ());
-    MOCK_METHOD1(LnnGetWlanLinkedInfo, int32_t (LnnWlanLinkedInfo*));
+    MOCK_METHOD0(P2pLinkGetRequestId, int32_t ());
+    MOCK_METHOD1(AuthCloseConn, void (int64_t));
+    MOCK_METHOD1(P2pLinkConnectDevice, int32_t (const P2pLinkConnectInfo*));
+    MOCK_METHOD1(P2pLinkDisconnectDevice, int32_t (const P2pLinkDisconnectInfo*));
+    MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
+    MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
 
     void SetDefaultResult(void);
 };

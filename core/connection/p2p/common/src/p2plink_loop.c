@@ -41,11 +41,11 @@ NO_SANITIZE("cfi") static void P2pLoopMsgHandler(SoftBusMessage *msg)
 
     P2pCallbackInfo *info = (P2pCallbackInfo *)msg->obj;
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLoopMsgHandler callback recv null info");
+        CLOGE("P2pLoopMsgHandler callback recv null info");
         return;
     }
     if (info->callback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLoopMsgHandler callback function is null");
+        CLOGE("P2pLoopMsgHandler callback function is null");
         return;
     }
     info->callback(msg->what, info->cbPara);
@@ -62,7 +62,7 @@ NO_SANITIZE("cfi") int32_t P2pLoopInit()
     return SOFTBUS_OK;
 }
 
-static void P2pFreeLoopMsg(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void P2pFreeLoopMsg(SoftBusMessage *msg)
 {
     if (msg != NULL) {
         if (msg->obj != NULL) {

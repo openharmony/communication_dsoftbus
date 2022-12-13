@@ -44,7 +44,7 @@ const SoftbusTestEntry *GetTestEntry(void)
     return &g_testEntry;
 }
 
-static void ProccessCustomArgs(const char *arg, unordered_map<string, int> &customArgs, int *custom)
+static void ProcessCustomArgs(const char *arg, unordered_map<string, int> &customArgs, int *custom)
 {
     int result = 0;
     int customCnt = 0;
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     int customCnt = 0;
 
     for (int i = 1; i < argc; i++) {
-        ProccessCustomArgs(argv[i], g_customArgs, &isCustomArg);
+        ProcessCustomArgs(argv[i], g_customArgs, &isCustomArg);
         if (isCustomArg > 0) {
             customCnt = customCnt + isCustomArg;
         }

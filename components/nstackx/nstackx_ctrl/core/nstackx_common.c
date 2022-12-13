@@ -470,7 +470,7 @@ void NSTACKX_Deinit(void)
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
 #endif /* END OF DFINDER_SUPPORT_MULTI_NIF */
 #ifdef _WIN32
-    CoapThreadDestory();
+    CoapThreadDestroy();
 #endif
     DeviceModuleClean();
     EventNodeChainClean(&g_eventNodeChain);

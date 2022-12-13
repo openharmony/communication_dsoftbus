@@ -32,6 +32,10 @@ public:
         uint32_t requestId, const AuthVerifyCallback *callback) = 0;
     virtual int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
+    virtual int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener) = 0;
+    virtual void UnregAuthTransListener(int32_t module) = 0;
+    virtual int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo) = 0;
+    virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
 };
 class AuthInterfaceMock : public AuthInterface {
 public:
@@ -43,6 +47,11 @@ public:
         uint32_t, const AuthVerifyCallback *), (override));
     MOCK_METHOD(int32_t, AuthGetVersion, (int64_t, SoftBusVersion *), (override));
     MOCK_METHOD(int32_t, AuthGetDeviceUuid, (int64_t, char *, uint16_t), (override));
+
+    MOCK_METHOD2(RegAuthTransListener, int32_t (int32_t, const AuthTransListener *));
+    MOCK_METHOD1(UnregAuthTransListener, void (int32_t));
+    MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
+    MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
 };
 } // namespace OHOS
 #endif // AUTH_MOCK_H

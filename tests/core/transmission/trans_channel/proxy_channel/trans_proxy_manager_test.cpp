@@ -48,6 +48,9 @@ namespace OHOS {
 #define TEST_BUF_LEN 32
 #define TEST_INVALID_LARGE_SIZE (100 * 1024)
 #define TEST_CHANNEL_IDENTITY_LEN 33
+#define TEST_RESET_MESSAGE_CHANNEL_ID 30
+#define TEST_DEATH_CHANNEL_ID 14
+#define TEST_PKG_NAME_LEN 65
 
 static int32_t m_testProxyAuthChannelId = -1;
 static int32_t m_testProxyNormalChannelId = -1;
@@ -712,7 +715,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest003, TestSize.Lev
     const char *identity = "30";
     msg.data = TransProxyPackIdentity(identity);
     ASSERT_TRUE(NULL != msg.data);
-
+    msg.dateLen = strlen(msg.data) + 1;
     msg.connId = -1;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_RESET;
     /* test no compare channel */
@@ -726,11 +729,11 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest003, TestSize.Lev
     TransConnInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnDisconnectDevice)
         .WillRepeatedly(Return(SOFTBUS_OK));
-    TestTransProxyAddAuthChannel(30, identity, PROXY_CHANNEL_STATUS_COMPLETED);
+    TestTransProxyAddAuthChannel(TEST_RESET_MESSAGE_CHANNEL_ID, identity, PROXY_CHANNEL_STATUS_COMPLETED);
     g_testProxyChannelClosedFlag = false;
     g_testProxyChannelOpenFailFlag = false;
-    msg.msgHead.myId = 30;
-    msg.msgHead.peerId = 30;
+    msg.msgHead.myId = TEST_RESET_MESSAGE_CHANNEL_ID;
+    msg.msgHead.peerId = TEST_RESET_MESSAGE_CHANNEL_ID;
     TransProxyonMessageReceived(&msg);
     EXPECT_TRUE(g_testProxyChannelClosedFlag || g_testProxyChannelOpenFailFlag);
 }
@@ -913,12 +916,12 @@ HWTEST_F(TransProxyManagerTest, TransProxyDelByConnIdTest001, TestSize.Level1)
 HWTEST_F(TransProxyManagerTest, TransProxyDeathCallbackTest001, TestSize.Level1)
 {
     AppInfo appInfo;
-    (void)strcpy_s(appInfo.myData.pkgName, 65, "com.test.pkgname");
+    (void)strcpy_s(appInfo.myData.pkgName, TEST_PKG_NAME_LEN, "com.test.pkgname");
     appInfo.appType = APP_TYPE_AUTH;
-    appInfo.myData.pid = 14;
+    appInfo.myData.pid = TEST_DEATH_CHANNEL_ID;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
-    chan->channelId = 14;
+    chan->channelId = TEST_DEATH_CHANNEL_ID;
     chan->connId = -1;
     chan->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
 
@@ -936,7 +939,8 @@ HWTEST_F(TransProxyManagerTest, TransProxyDeathCallbackTest001, TestSize.Level1)
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    TransProxyDeathCallback("com.test.pkgname", 14);
+    TransProxyDeathCallback(NULL, TEST_DEATH_CHANNEL_ID);
+    TransProxyDeathCallback("com.test.pkgname", TEST_DEATH_CHANNEL_ID);
 
     ret = TransProxyGetSendMsgChanInfo(chan->channelId, chan);
     EXPECT_NE(SOFTBUS_OK, ret);

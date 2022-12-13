@@ -20,6 +20,13 @@
 #include <mutex>
 
 #include "device_auth.h"
+#include "device_auth_defines.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_errcode.h"
+#include <map>
+
+#define TEST_LEN 1
+#define TEST_SEQ 2
 
 namespace OHOS {
 class LnnHichainInterface {
@@ -37,18 +44,27 @@ class LnnHichainInterfaceMock : public LnnHichainInterface {
 public:
     LnnHichainInterfaceMock();
     ~LnnHichainInterfaceMock() override;
-    MOCK_METHOD0(InitDeviceAuthService, int32_t ());
-    MOCK_METHOD0(DestroyDeviceAuthService, void ());
+    MOCK_METHOD0(InitDeviceAuthService, int32_t());
+    MOCK_METHOD0(DestroyDeviceAuthService, void());
     MOCK_METHOD0(GetGaInstance, GroupAuthManager *());
     MOCK_METHOD0(GetGmInstance, DeviceGroupManager *());
 
-    static int32_t InvokeAuthDevice(int32_t osAccountId, int64_t authReqId, const char *authParams,
-        const DeviceAuthCallback *gaCallback);
+    static int32_t InvokeAuthDevice(
+        int32_t osAccountId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *gaCallback);
     static int32_t InvokeDataChangeListener(const char *appId, const DataChangeListener *listener);
-    static int32_t InvokeGetJoinedGroups1(int32_t osAccountId, const char *appId, int groupType,
-        char **returnGroupVec, uint32_t *groupNum);
-    static int32_t InvokeGetJoinedGroups2(int32_t osAccountId, const char *appId, int groupType,
-        char **returnGroupVec, uint32_t *groupNum);
+    static int32_t InvokeGetJoinedGroups1(
+        int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
+    static int32_t InvokeGetJoinedGroups2(
+        int32_t osAccountId, const char *appId, int groupType, char **returnGroupVec, uint32_t *groupNum);
+    static int32_t ActionofunRegDataChangeListener(const char *appId);
+    static int32_t ActionOfProcessData(
+        int64_t authSeq, const uint8_t *data, uint32_t len, const DeviceAuthCallback *gaCallback);
+    static int32_t AuthDeviceConnSend(
+        int32_t osAccountId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *gaCallback);
+    static inline std::map<const char *, const DataChangeListener *> g_datachangelistener;
+    static inline DeviceAuthCallback g_devAuthCb;
+    static inline SoftBusCond cond;
+    static inline SoftBusMutex mutex;
 };
 
 } // namespace OHOS

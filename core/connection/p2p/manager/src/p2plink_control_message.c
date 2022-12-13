@@ -48,7 +48,7 @@ NO_SANITIZE("cfi") char* P2pLinkPackReuseRequest(const char *mac)
 static int32_t P2pLinkUnPackReuseRequest(const cJSON *root, char *mac, uint32_t len)
 {
     if (!GetJsonObjectStringItem(root, KEY_MAC, mac, len)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to UnPackReuseRequest msg mac");
+        CLOGE("Failed to UnPackReuseRequest msg mac");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -80,7 +80,7 @@ static int32_t P2pLinkUnPackReuseResponse(const cJSON *root, char *mac, uint32_t
 {
     if (!GetJsonObjectInt32Item(root, KEY_RESULT, result) ||
         !GetJsonObjectStringItem(root, KEY_MAC, mac, len)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get  P2pLinkUnPackReuseResponse");
+        CLOGE("Failed to get  P2pLinkUnPackReuseResponse");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -109,7 +109,7 @@ NO_SANITIZE("cfi") char* P2pLinkPackDisconnectCmd(const char *mac)
 static int32_t P2pLinkUnPackDisconnectCmd(const cJSON *root, char *mac, uint32_t len)
 {
     if (!GetJsonObjectStringItem(root, KEY_MAC, mac, len)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get  P2pLinkUnPackDisconnectCmd");
+        CLOGE("Failed to get  P2pLinkUnPackDisconnectCmd");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -139,11 +139,11 @@ NO_SANITIZE("cfi") char* P2pLinkPackHandshake(const char *mac, const char *ip)
 static int32_t P2pLinkUnPackHandshake(const cJSON *root, char *mac, uint32_t macLen, char *ip, uint32_t ipLen)
 {
     if (!GetJsonObjectStringItem(root, KEY_MAC, mac, macLen)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get P2pLinkUnPackHandshake");
+        CLOGE("Failed to get P2pLinkUnPackHandshake");
         return SOFTBUS_ERR;
     }
     if (!GetJsonObjectStringItem(root, KEY_IP, ip, ipLen)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkUnPackHandshake：get IP Failed");
+        CLOGE("P2pLinkUnPackHandshake：get IP Failed");
     }
     return SOFTBUS_OK;
 }
@@ -151,7 +151,7 @@ static int32_t P2pLinkUnPackHandshake(const cJSON *root, char *mac, uint32_t mac
 static int32_t P2pLinkUnPackWifiCfg(const cJSON *root, char *wificfg, uint32_t len)
 {
     if (!GetJsonObjectStringItem(root, KEY_SELF_WIFI_CONFIG, wificfg, len)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Failed to get  P2pLinkUnPackWifiCfg");
+        CLOGE("Failed to get  P2pLinkUnPackWifiCfg");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -159,8 +159,7 @@ static int32_t P2pLinkUnPackWifiCfg(const cJSON *root, char *wificfg, uint32_t l
 
 static int64_t GetPreferenceAuthId(const P2pLinkAuthId *chan)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "auth status %d p2pid %" PRId64 ", authid %" PRId64,
-        chan->p2pAuthIdState, chan->p2pAuthId, chan->inAuthId);
+    CLOGI("auth status %d p2pid %" PRId64 ", authid %" PRId64, chan->p2pAuthIdState, chan->p2pAuthId, chan->inAuthId);
     if (chan->p2pAuthIdState == P2PLINK_AUTHCHAN_FINISH) {
         return chan->p2pAuthId;
     } else {
@@ -177,12 +176,12 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendHandshake(const P2pLinkAuthId *chan, const
     authId = GetPreferenceAuthId(chan);
     buf = P2pLinkPackHandshake(myMac, myIp);
     if (buf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "pack handshake fail");
+        CLOGE("pack handshake fail");
         return SOFTBUS_ERR;
     }
     ret = P2pLinkSendMessage(authId, buf, strlen(buf) + 1);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "send handshake msg fail");
+        CLOGE("send handshake msg fail");
         cJSON_free(buf);
         return SOFTBUS_ERR;
     }
@@ -200,12 +199,12 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendDisConnect(const P2pLinkAuthId *chan, cons
     authId = GetPreferenceAuthId(chan);
     buf = P2pLinkPackDisconnectCmd(myMac);
     if (buf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "pack disconnect fail");
+        CLOGE("pack disconnect fail");
         return SOFTBUS_ERR;
     }
     ret = P2pLinkSendMessage(authId, buf, strlen(buf) + 1);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "send disconnect msg fail");
+        CLOGE("send disconnect msg fail");
         cJSON_free(buf);
         return SOFTBUS_ERR;
     }
@@ -223,12 +222,12 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendReuse(const P2pLinkAuthId *chan, const cha
     authId = GetPreferenceAuthId(chan);
     buf = P2pLinkPackReuseRequest(myMac);
     if (buf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "pack reuse fail");
+        CLOGE("pack reuse fail");
         return SOFTBUS_ERR;
     }
     ret = P2pLinkSendMessage(authId, buf, strlen(buf) + 1);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "send reuse msg fail");
+        CLOGE("send reuse msg fail");
         cJSON_free(buf);
         return SOFTBUS_ERR;
     }
@@ -245,12 +244,12 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendReuseResponse(const P2pLinkAuthId *chan, c
     authId = GetPreferenceAuthId(chan);
     buf = P2pLinkPackReuseResponse(myMac, res);
     if (buf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "pack reuse  Responsefail");
+        CLOGE("pack reuse  Responsefail");
         return SOFTBUS_ERR;
     }
     ret = P2pLinkSendMessage(authId, buf, strlen(buf) + 1);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "send reuse response msg fail");
+        CLOGE("send reuse response msg fail");
         cJSON_free(buf);
         return SOFTBUS_ERR;
     }
@@ -264,17 +263,17 @@ NO_SANITIZE("cfi") void P2pLinkHandleHandshake(int64_t authId, int32_t seq, cons
     char ip[P2P_IP_LEN] = {0};
     ConnectedNode *connedDev = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv handshake authid %" PRId64 ", seq %d", authId, seq);
+    CLOGI("recv handshake authid %" PRId64 ", seq %d", authId, seq);
     if (P2pLinkUnPackHandshake(root, mac, sizeof(mac), ip, sizeof(ip)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unpack handshake fail");
+        CLOGE("unpack handshake fail");
         return;
     }
     connedDev = P2pLinkGetConnedDevByMac(mac);
     if (connedDev == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "handshake can not find dev");
+        CLOGE("handshake can not find dev");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "handshake rec authid %" PRId64, authId);
+    CLOGI("handshake rec authid %" PRId64, authId);
     connedDev->chanId.p2pAuthId = authId;
     connedDev->chanId.p2pAuthIdState = P2PLINK_AUTHCHAN_FINISH;
 }
@@ -286,37 +285,37 @@ NO_SANITIZE("cfi") void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, 
     ConnectingNode *conningItem = NULL;
     ConnectedNode *connedDev = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ReuseResponse authid %" PRIu64 ", seq %d", authId, seq);
+    CLOGI("recv ReuseResponse authid %" PRIu64 ", seq %d", authId, seq);
     if (P2pLinkUnPackReuseResponse(root, peerMac, sizeof(peerMac), &respRet) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unpack ReuseResponse fail");
+        CLOGE("unpack ReuseResponse fail");
         return;
     }
     conningItem = P2pLinkGetConningByPeerMacState(peerMac, P2PLINK_MANAGER_STATE_REUSE);
     if (conningItem == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReuseResponse can not find dev mac");
+        CLOGE("ReuseResponse can not find dev mac");
         return;
     }
 
     if (respRet != P2PLINK_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ReuseResponse fail %d ", respRet);
+        CLOGE("ReuseResponse fail %d ", respRet);
         P2pLinkConningCallback(conningItem, SOFTBUS_ERR, respRet);
         P2pLinkDelConning(conningItem->connInfo.requestId);
         return;
     }
     connedDev = P2pLinkGetConnedDevByMac(peerMac);
     if (connedDev == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "reuse dev is offline ");
+        CLOGE("reuse dev is offline ");
         P2pLinkConningCallback(conningItem, SOFTBUS_ERR, ERROR_REUSE_FAILED);
         P2pLinkDelConning(conningItem->connInfo.requestId);
         return;
     }
     if ((strcpy_s(conningItem->myIp, sizeof(conningItem->myIp), P2pLinkGetMyIp()) != EOK) ||
         (strcpy_s(conningItem->peerIp, sizeof(conningItem->peerIp), connedDev->peerIp) != EOK)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error ");
+        CLOGE("strcpy error ");
     }
 
     if (P2pLinkSharelinkReuse() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "reuse link failed: invoke P2pLinkSharelinkReuse failed.");
+        CLOGE("reuse link failed: invoke P2pLinkSharelinkReuse failed.");
         P2pLinkConningCallback(conningItem, SOFTBUS_ERR, ERROR_REUSE_FAILED);
         P2pLinkDelConning(conningItem->connInfo.requestId);
         return;
@@ -338,22 +337,22 @@ NO_SANITIZE("cfi") void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, c
     P2pLinkAuthId linkAuthId = {0};
     linkAuthId.inAuthId = authId;
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv ReuseRequest authid %" PRIu64 ", seq %d", authId, seq);
+    CLOGI("recv ReuseRequest authid %" PRIu64 ", seq %d", authId, seq);
     if (P2pLinkUnPackReuseRequest(root, peerMac, sizeof(peerMac)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "unpack ReuseResponse fail");
+        CLOGE("unpack ReuseResponse fail");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv peer reuse request");
+    CLOGI("recv peer reuse request");
     if (myRole == ROLE_GC) {
         if (P2pLinkConnedIsEmpty() == SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "used by others");
+            CLOGE("used by others");
             respRet = ERROR_LINK_USED_BY_ANOTHER_SERVICE;
             (void)P2pLinkSendReuseResponse(&linkAuthId, P2pLinkGetMyMac(), respRet);
             return;
         } else {
             item = P2pLinkGetConnedDevByMac(peerMac);
             if (item == NULL) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer dev not onliee");
+                CLOGE("peer dev not onliee");
                 respRet = ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE;
                 (void)P2pLinkSendReuseResponse(&linkAuthId, P2pLinkGetMyMac(), respRet);
                 return;
@@ -363,7 +362,7 @@ NO_SANITIZE("cfi") void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, c
 
     item = P2pLinkGetConnedDevByMac(peerMac);
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "role is go, peer dev not onliee");
+        CLOGE("role is go, peer dev not onliee");
         respRet = ERROR_REUSE_FAILED;
         (void)P2pLinkSendReuseResponse(&linkAuthId, P2pLinkGetMyMac(), respRet);
         return;
@@ -371,11 +370,11 @@ NO_SANITIZE("cfi") void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, c
     if (P2pLinkSharelinkReuse() == SOFTBUS_OK) {
         respRet = P2PLINK_OK;
         P2pLinkAddMyP2pRef();
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "share reuse ok");
+        CLOGE("share reuse ok");
         (void)P2pLinkSendReuseResponse(&linkAuthId, P2pLinkGetMyMac(), respRet);
         P2pLinkDumpRef();
     } else {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "share reuse fail");
+        CLOGE("share reuse fail");
         respRet = ERROR_REUSE_FAILED;
         (void)P2pLinkSendReuseResponse(&linkAuthId, P2pLinkGetMyMac(), respRet);
     }
@@ -391,30 +390,30 @@ NO_SANITIZE("cfi") void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, 
     (void)seq;
     (void)authId;
     if (myRole == ROLE_NONE || myRef <= 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "already disconnected.");
+        CLOGE("already disconnected.");
         return;
     }
 
     ret = P2pLinkUnPackDisconnectCmd(root, peerMac, sizeof(peerMac));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "UnPackDisconnectCmd: onFailure ret %d", ret);
+        CLOGE("UnPackDisconnectCmd: onFailure ret %d", ret);
         return;
     }
 
     connedDev = P2pLinkGetConnedDevByMac(peerMac);
     if (connedDev == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "peer dev not online");
+        CLOGE("peer dev not online");
         return;
     }
 
     ret = P2pLinkSharelinkRemoveGroup();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sharelinkRemoveGroup: onFailure ret %d", ret);
+        CLOGE("sharelinkRemoveGroup: onFailure ret %d", ret);
         return;
     }
     P2pLinkDelMyP2pRef();
     P2pLinkDumpRef();
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "handle disconnect ok");
+    CLOGI("handle disconnect ok");
 }
 
 NO_SANITIZE("cfi") void P2pLinkHandleWifiCfg(int64_t authId, int32_t seq, const cJSON *root)
@@ -426,20 +425,20 @@ NO_SANITIZE("cfi") void P2pLinkHandleWifiCfg(int64_t authId, int32_t seq, const 
     (void)authId;
     ret = P2pLinkUnPackWifiCfg(root, wifiCfg, sizeof(wifiCfg));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkUnPackWifiCfg fail");
+        CLOGE("P2pLinkUnPackWifiCfg fail");
         return;
     }
     ret = P2pLinkSetPeerWifiCfgInfo(wifiCfg);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pLinkSetPeerWifiCfgInfo fail %d", ret);
+        CLOGE("P2pLinkSetPeerWifiCfgInfo fail %d", ret);
     }
 }
 
 NO_SANITIZE("cfi") void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLinkCmdType type, const cJSON *root)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv control msgtype %d", type);
+    CLOGI("recv control msgtype %d", type);
     if (P2pLinkIsEnable() == false) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "in controling p2p state is closed");
+        CLOGI("in controlling p2p state is closed");
         return;
     }
     switch (type) {
@@ -465,10 +464,10 @@ NO_SANITIZE("cfi") void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLi
 
 NO_SANITIZE("cfi") void P2pLinkonAuthChannelClose(int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv authid %" PRId64 " close", authId);
+    CLOGI("recv authid %" PRId64 " close", authId);
     P2pLinkDelConnedByAuthId(authId);
     if (P2pLinkConnedIsEmpty() == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "all dev is offline, clean p2p ref");
+        CLOGI("all dev is offline, clean p2p ref");
         P2pLinkMyP2pRefClean();
     }
 }

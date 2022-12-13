@@ -17,27 +17,28 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 group("unittest") {
   testonly = true
   deps = [
-    "common/unittest:softbus_conn_common_test",
-    "manager:softbus_conn_manager_test",
+    "common/unittest:SoftbusCommonTest",
+    "manager:SoftbusConnmangerFuncTest",
   ]
   if (dsoftbus_feature_conn_br) {
     deps += [
-      "br:softbus_conn_br_manager_test",
-      "br:softbus_conn_br_test",
+      "br:ConnectionBrManagerTest",
+      "br:ConnectionBrTest",
     ]
   }
   if (dsoftbus_feature_conn_ble) {
-    deps += [ "ble:softbus_conn_ble_test" ]
+    deps += [ "ble:ConnectionBleTest" ]
   }
   if (dsoftbus_feature_conn_p2p) {
     deps += [
-      "p2p:softbus_connection_p2p_test",
+      "p2p:ConnectionP2PFuncTest",
+      "p2p:P2pManagerTest",
       "p2p/common_mock:P2pCommonMockTest",
       "p2p/interface_mock:P2pInterfaceMockTest",
     ]
   }
   if (dsoftbus_feature_conn_tcp) {
-    deps += [ "tcp:softbus_tcp_manager_test" ]
+    deps += [ "tcp:SoftbusTcpManagerTest" ]
   }
 }
 

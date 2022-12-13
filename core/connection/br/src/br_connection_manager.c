@@ -56,7 +56,7 @@ NO_SANITIZE("cfi") void InitBrConnectionManager(int32_t brBuffSize)
 NO_SANITIZE("cfi") uint32_t GetLocalWindowsByConnId(uint32_t connId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetLocalWindowsByConnId mutex failed");
+        CLOGE("GetLocalWindowsByConnId mutex failed");
         return 0;
     }
     ListNode *item = NULL;
@@ -109,7 +109,7 @@ NO_SANITIZE("cfi") bool IsExitBrConnectByFd(int32_t socketFd)
 NO_SANITIZE("cfi") BrConnectionInfo *GetConnectionRef(uint32_t connId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[GetConnectionRef] mutex failed");
+        CLOGE("[GetConnectionRef] mutex failed");
         return NULL;
     }
     ListNode *item = NULL;
@@ -156,7 +156,7 @@ NO_SANITIZE("cfi") void ReleaseConnectionRef(BrConnectionInfo *connInfo)
         return;
     }
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ReleaseConnectionRef] lock mutex failed");
+        CLOGE("[ReleaseConnectionRef] lock mutex failed");
         return;
     }
     connInfo->infoObjRefCount--;
@@ -170,7 +170,7 @@ NO_SANITIZE("cfi") void ReleaseConnectionRef(BrConnectionInfo *connInfo)
 NO_SANITIZE("cfi") void ReleaseConnectionRefByConnId(uint32_t connId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ReleaseConnectionRef] lock mutex failed");
+        CLOGE("[ReleaseConnectionRef] lock mutex failed");
         return;
     }
     ListNode *item = NULL;
@@ -209,7 +209,7 @@ NO_SANITIZE("cfi") BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
 {
     BrConnectionInfo *newConnInfo = (BrConnectionInfo *)SoftBusCalloc(sizeof(BrConnectionInfo));
     if (newConnInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[Create BrConnInfo malloc fail.]");
+        CLOGE("[Create BrConnInfo malloc fail.]");
         return NULL;
     }
     if (pthread_mutex_init(&newConnInfo->lock, NULL) != 0) {
@@ -224,7 +224,7 @@ NO_SANITIZE("cfi") BrConnectionInfo* CreateBrconnectionNode(bool clientFlag)
     newConnInfo->recvBuf = (char *)SoftBusCalloc(g_brBuffSize);
     newConnInfo->recvSize = g_brBuffSize;
     if (newConnInfo->recvBuf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[Create BrConnInfo malloc recvBuf fail]");
+        CLOGE("[Create BrConnInfo malloc recvBuf fail]");
         pthread_cond_destroy(&newConnInfo->congestCond);
         pthread_mutex_destroy(&newConnInfo->lock);
         SoftBusFree(newConnInfo);
@@ -251,7 +251,7 @@ int32_t GetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
     int32_t result = SOFTBUS_ERR;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
@@ -262,7 +262,7 @@ int32_t GetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
             info->isServer = itemNode->sideType;
             info->type = CONNECT_BR;
             if (strcpy_s(info->brInfo.brMac, BT_MAC_LEN, itemNode->mac) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetConnInfo scpy error");
+                CLOGE("GetConnInfo scpy error");
                 (void)pthread_mutex_unlock(&g_connectionLock);
                 return SOFTBUS_BRCONNECTION_GETCONNINFO_ERROR;
             }
@@ -278,7 +278,7 @@ NO_SANITIZE("cfi") int32_t SetRefCountByConnId(int32_t delta, int32_t *refCount,
 {
     int32_t state = BR_CONNECTION_STATE_CLOSED;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return state;
     }
     ListNode *item = NULL;
@@ -302,7 +302,7 @@ static void FreeCongestEvent(BrConnectionInfo *itemNode)
 {
     itemNode->conGestState = BT_RFCOM_CONGEST_OFF;
     if (pthread_mutex_lock(&itemNode->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[FreeCongestEvent] mutex failed");
+        CLOGE("[FreeCongestEvent] mutex failed");
         return;
     }
     pthread_cond_broadcast(&itemNode->congestCond);
@@ -312,7 +312,7 @@ static void FreeCongestEvent(BrConnectionInfo *itemNode)
 NO_SANITIZE("cfi") void SetBrConnStateByConnId(uint32_t connId, int32_t state)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetBrConnStateByConnId lock mutex failed");
+        CLOGE("SetBrConnStateByConnId lock mutex failed");
         return;
     }
     ListNode *britem = NULL;
@@ -334,7 +334,7 @@ NO_SANITIZE("cfi") uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state
 {
     uint32_t connId = 0;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SetBrConnStateByConnId lock mutex failed");
+        CLOGE("SetBrConnStateByConnId lock mutex failed");
         return connId;
     }
     ListNode *britem = NULL;
@@ -360,7 +360,7 @@ NO_SANITIZE("cfi") uint32_t SetBrConnStateBySocket(int32_t socket, int32_t state
 NO_SANITIZE("cfi") int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return SOFTBUS_ERR;
     }
     ListNode *item = NULL;
@@ -378,7 +378,7 @@ NO_SANITIZE("cfi") int32_t AddRequestByConnId(uint32_t connId, RequestInfo *requ
 NO_SANITIZE("cfi") int32_t AddPendingRequestByConnId(uint32_t connId, RequestInfo *requestInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return SOFTBUS_ERR;
     }
 
@@ -392,7 +392,7 @@ NO_SANITIZE("cfi") int32_t AddPendingRequestByConnId(uint32_t connId, RequestInf
         }
     }
     if (target == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "pending request failed, there is no connection %u", connId);
+        CLOGE("pending request failed, there is no connection %u", connId);
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
@@ -404,7 +404,7 @@ NO_SANITIZE("cfi") int32_t AddPendingRequestByConnId(uint32_t connId, RequestInf
 NO_SANITIZE("cfi") int32_t AddConnectionList(BrConnectionInfo *newConnInfo)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return SOFTBUS_ERR;
     }
     ListAdd(&g_connection_list, &newConnInfo->node);
@@ -415,7 +415,7 @@ NO_SANITIZE("cfi") int32_t AddConnectionList(BrConnectionInfo *newConnInfo)
 NO_SANITIZE("cfi") void RfcomCongestEvent(int32_t socketFd, int32_t value)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[RfcomCongestEvent] lock mutex failed");
+        CLOGE("[RfcomCongestEvent] lock mutex failed");
         return;
     }
     ListNode *item = NULL;
@@ -427,7 +427,7 @@ NO_SANITIZE("cfi") void RfcomCongestEvent(int32_t socketFd, int32_t value)
             if (value == BT_RFCOM_CONGEST_OFF) {
                 if (pthread_mutex_lock(&itemNode->lock) != 0) {
                     (void)pthread_mutex_unlock(&g_connectionLock);
-                    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CongestEvent lock itemNode failed");
+                    CLOGE("CongestEvent lock itemNode failed");
                     return;
                 }
                 pthread_cond_broadcast(&itemNode->congestCond);
@@ -445,7 +445,7 @@ static int32_t InitConnectionInfo(ConnectionInfo *connectionInfo, const BrConnec
     (*connectionInfo).isServer = itemNode->sideType;
     (*connectionInfo).type = CONNECT_BR;
     if (strcpy_s((*connectionInfo).brInfo.brMac, BT_MAC_LEN, itemNode->mac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitConnInfo scpy error");
+        CLOGE("InitConnInfo scpy error");
         return SOFTBUS_BRCONNECTION_STRNCPY_ERROR;
     }
     return SOFTBUS_OK;
@@ -456,7 +456,7 @@ NO_SANITIZE("cfi") int32_t GetBrRequestListByConnId(uint32_t connId, ListNode *n
 {
     int32_t packRequestFlag = 0;
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClient lock mutex failed");
+        CLOGE("BrClient lock mutex failed");
         return packRequestFlag;
     }
     ListNode *britem = NULL;
@@ -484,7 +484,7 @@ NO_SANITIZE("cfi") int32_t GetBrRequestListByConnId(uint32_t connId, ListNode *n
 NO_SANITIZE("cfi") int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, ListNode *pendings)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClient lock mutex failed");
+        CLOGE("BrClient lock mutex failed");
         return 0;
     }
     BrConnectionInfo *target = NULL;
@@ -499,7 +499,7 @@ NO_SANITIZE("cfi") int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, L
 
     if (target == NULL) {
         (void)pthread_mutex_unlock(&g_connectionLock);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "get pending request failed, there is no %u conneciton", connId);
+        CLOGW("get pending request failed, there is no %u conneciton", connId);
         return 0;
     }
 
@@ -519,7 +519,7 @@ NO_SANITIZE("cfi") int32_t GetAndRemovePendingRequestByConnId(uint32_t connId, L
 NO_SANITIZE("cfi") int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClient lock mutex failed");
+        CLOGE("BrClient lock mutex failed");
         return SOFTBUS_ERR;
     }
 
@@ -534,11 +534,11 @@ NO_SANITIZE("cfi") int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
     }
 
     if (target == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "resume connection failed, there is no %u conneciton", connId);
+        CLOGW("resume connection failed, there is no %u conneciton", connId);
         (void)pthread_mutex_unlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "resume connection %u to 'BR_CONNECTION_STATE_CONNECTED'", connId);
+    CLOGE("resume connection %u to 'BR_CONNECTION_STATE_CONNECTED'", connId);
     target->state = BR_CONNECTION_STATE_CONNECTED;
     ListNode *item = NULL;
     ListNode *itemNext = NULL;
@@ -554,11 +554,11 @@ NO_SANITIZE("cfi") int32_t ResumeConnection(uint32_t connId, ListNode *pendings)
 NO_SANITIZE("cfi") bool HasDiffMacDeviceExit(const ConnectOption *option)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return true;
     }
     if (IsListEmpty(&g_connection_list)) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[g_connection_list is empty, allow to connect device.]");
+        CLOGI("[g_connection_list is empty, allow to connect device.]");
         (void)pthread_mutex_unlock(&g_connectionLock);
         return false;
     }
@@ -579,8 +579,7 @@ NO_SANITIZE("cfi") bool HasDiffMacDeviceExit(const ConnectOption *option)
 
 static bool IsTargetSideType(ConnSideType targetType, int32_t connType)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br connection: targetType = %d, current connType = %d",
-        targetType, connType);
+    CLOGI("br connection: targetType = %d, current connType = %d", targetType, connType);
     switch (targetType) {
         case CONN_SIDE_ANY:
             return true;
@@ -598,7 +597,7 @@ NO_SANITIZE("cfi") int32_t GetBrConnStateByConnOption(const ConnectOption *optio
     uint32_t *connectingReqId)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return BR_CONNECTION_STATE_CLOSED;
     }
     ListNode *item = NULL;
@@ -644,7 +643,7 @@ NO_SANITIZE("cfi") int32_t GetBrConnStateByConnectionId(uint32_t connId)
 NO_SANITIZE("cfi") int32_t BrClosingByConnOption(const ConnectOption *option, int32_t *socketFd, int32_t *sideType)
 {
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClosingByConnOption mutex failed");
+        CLOGE("BrClosingByConnOption mutex failed");
         return SOFTBUS_ERR;
     }
 
@@ -661,37 +660,37 @@ NO_SANITIZE("cfi") int32_t BrClosingByConnOption(const ConnectOption *option, in
         }
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrClosingByConnOption not find mac addr");
+    CLOGE("BrClosingByConnOption not find mac addr");
     return SOFTBUS_NOT_FIND;
 }
 
 bool BrCheckActiveConnection(const ConnectOption *option)
 {
     if (option == NULL || option->type != CONNECT_BR) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "option check fail");
+        CLOGE("option check fail");
         return false;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection");
+    CLOGI("BrCheckActiveConnection");
 
     ListNode *item = NULL;
     BrConnectionInfo *itemNode = NULL;
 
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "mutex failed");
+        CLOGE("mutex failed");
         return false;
     }
     LIST_FOR_EACH(item, &g_connection_list) {
         itemNode = LIST_ENTRY(item, BrConnectionInfo, node);
         if ((StrCmpIgnoreCase(itemNode->mac, option->brOption.brMac) == 0) &&
             (itemNode->state == BR_CONNECTION_STATE_CONNECTED)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection true");
+            CLOGI("BrCheckActiveConnection true");
             (void)pthread_mutex_unlock(&g_connectionLock);
             return true;
         }
     }
     (void)pthread_mutex_unlock(&g_connectionLock);
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrCheckActiveConnection false");
+    CLOGI("BrCheckActiveConnection false");
     return false;
 }
 
@@ -699,7 +698,7 @@ static int32_t BrConnectionInfoDump(int fd)
 {
     char tempMac[BT_ADDR_LEN] = {0};
     if (pthread_mutex_lock(&g_connectionLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        CLOGE("lock mutex failed");
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;

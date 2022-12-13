@@ -1403,7 +1403,7 @@ FILLP_INT DLL_API FtApiEventInfoGet(IN FILLP_INT fd, IO FtEventCbkInfo *info);
  * @ingroup fillpevt
  * @brief  register dfx event callback function
  *
- * @param[in] softObj   any usefull message to evtCb
+ * @param[in] softObj   any useful message to evtCb
  * @param[in]    func   event callback function
  * @return
  * On Success : returns 0
@@ -1417,7 +1417,7 @@ extern FILLP_INT DLL_API FtSetDfxEventCb(void *softObj, FillpDfxEventCb evtCb);
  *
  * @param[in]    argc   arg number
  * @param[in]    argv   arg value
- * @param[in] softObj   any usefull message to dump
+ * @param[in] softObj   any useful message to dump
  * @param[in]    dump   function to printf data
  * @return
  * On Success : returns 0

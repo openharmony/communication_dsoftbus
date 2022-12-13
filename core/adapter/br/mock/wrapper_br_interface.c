@@ -55,7 +55,7 @@ NO_SANITIZE("cfi") static void CloseSppServer(int32_t serverFd)
     SppServerClose(serverFd);
 }
 
-static int32_t Connect(const char *uuid, const BT_ADDR mac)
+NO_SANITIZE("cfi") static int32_t Connect(const char *uuid, const BT_ADDR mac)
 {
     if (mac == NULL) {
         return SOFTBUS_ERR;
@@ -82,7 +82,7 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac)
     return ret;
 }
 
-static int32_t DisConnect(int32_t clientFd)
+NO_SANITIZE("cfi") static int32_t DisConnect(int32_t clientFd)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[DisConnect, and clientFd = %d]", clientFd);
     return SppDisconnect(clientFd);
@@ -104,7 +104,7 @@ NO_SANITIZE("cfi") static int32_t Accept(int32_t serverFd)
     return ret;
 }
 
-static int32_t Write(int32_t clientFd, const char *buf, const int32_t len)
+NO_SANITIZE("cfi") static int32_t Write(int32_t clientFd, const char *buf, const int32_t len)
 {
     return SppWrite(clientFd, buf, len);
 }

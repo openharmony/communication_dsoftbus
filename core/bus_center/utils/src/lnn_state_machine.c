@@ -20,9 +20,9 @@
 #include <securec.h>
 
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_def.h"
 
 static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
 {
@@ -36,7 +36,7 @@ static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
     return false;
 }
 
-static void FreeFsmHandleMsg(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void FreeFsmHandleMsg(SoftBusMessage *msg)
 {
     if (msg != NULL) {
         if (msg->obj != NULL) {
@@ -111,7 +111,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
     }
 }
 
-NO_SANITIZE("cfi") static void ProcessDataMessage(SoftBusMessage *msg)
+static void ProcessDataMessage(SoftBusMessage *msg)
 {
     FsmCtrlMsgObj *ctrlMsgObj = msg->obj;
     FsmStateMachine *fsm = NULL;
@@ -334,7 +334,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
 }
 
 /* we must change state of state machine during its procedure, otherwise it will introduce concurrency */
-NO_SANITIZE("cfi") int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state)
+int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || state == NULL) {
         return SOFTBUS_INVALID_PARAM;

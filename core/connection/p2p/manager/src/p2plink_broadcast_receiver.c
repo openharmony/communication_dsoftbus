@@ -36,16 +36,16 @@ static void UpdateP2pGoGroup(const P2pLinkGroup *group)
     P2pLinkUpdateDeviceByMagicGroups(group);
     if (P2pLinkGetGoPort() <= 0) {
         int32_t ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my ip, ret %d", ret);
+        CLOGI("get my ip, ret %d", ret);
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
             int32_t port = AuthStartListening(AUTH_LINK_TYPE_P2P, p2pIp, 0);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p auth chan port %d", port);
+            CLOGI("p2p auth chan port %d", port);
             P2pLinkSetGoPort(port);
         }
     }
     if (group->peerMacNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "client is null, clean myref");
+        CLOGI("client is null, clean myref");
         P2pLinkMyP2pRefClean();
     }
 }
@@ -56,7 +56,7 @@ static void UpdateP2pGcGroup(void)
 
     if (P2pLinkGetDhcpState() == true) {
         int32_t ret = P2pLinkGetP2pIpAddress(p2pIp, sizeof(p2pIp));
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get dhcp ip ret %d", ret);
+        CLOGI("get dhcp ip ret %d", ret);
         if (ret != SOFTBUS_ERR) {
             P2pLinkSetMyIp(p2pIp);
         }
@@ -67,12 +67,12 @@ NO_SANITIZE("cfi") void UpdateP2pGroup(const P2pLinkGroup *group)
 {
     if (group == NULL) {
         if (P2pLinkGetRole() != ROLE_NONE) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "clean role %d", P2pLinkGetRole());
+            CLOGI("clean role %d", P2pLinkGetRole());
             P2pLinkClean();
         }
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "UpdateP2pGroup role %d num %d", group->role, group->peerMacNum);
+    CLOGI("UpdateP2pGroup role %d num %d", group->role, group->peerMacNum);
     P2pLinkSetRole(group->role);
     if (group->role == ROLE_GO) {
         UpdateP2pGoGroup(group);
@@ -86,7 +86,7 @@ static void LoopP2pStateChanged(P2pLoopMsg msgType, void *arg)
     bool state = *(bool *)arg;
 
     (void)msgType;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "p2p loop state %d", state);
+    CLOGI("p2p loop state %d", state);
     if (state == false) {
         P2pLinkSetMyMacExpired(true);
         P2pLinkSetState(false);
@@ -110,13 +110,13 @@ static void P2pStateChanged(bool state)
 
     arg = (bool *)SoftBusCalloc(sizeof(bool));
     if (arg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pStateChanged Failed to malloc");
+        CLOGE("P2pStateChanged Failed to malloc");
         return;
     }
     *arg = state;
     int32_t ret = P2pLoopProc(LoopP2pStateChanged, (void *)arg, P2PLOOP_BROADCAST_P2PSTATE_CHANGED);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopP2pStateChanged Loop fail");
+        CLOGE("LoopP2pStateChanged Loop fail");
         SoftBusFree(arg);
     }
 }
@@ -130,10 +130,10 @@ static void LoopGroupStateChanged(P2pLoopMsg msgType, void *arg)
         if (arg != NULL) {
             SoftBusFree(arg);
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "in grouping gp2p state is closed");
+        CLOGI("in grouping gp2p state is closed");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "group change loop");
+    CLOGI("group change loop");
     UpdateP2pGroup(group);
     P2pLinkNegoOnGroupChanged(group);
     if (arg != NULL) {
@@ -149,29 +149,29 @@ static void GroupStateChanged(const P2pLinkGroup *group)
     int32_t ret;
 
     if (group == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv group change is null");
+        CLOGI("recv group change is null");
         ret = P2pLoopProc(LoopGroupStateChanged, NULL, P2PLOOP_BROADCAST_GROUPSTATE_CHANGED);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopGroupStateChanged NULL Loop fail");
+            CLOGE("LoopGroupStateChanged NULL Loop fail");
         }
         return;
     }
     groupSize = sizeof(P2pLinkGroup) + sizeof(P2pLinkPeerMacList) * group->peerMacNum;
     P2pLinkGroup *arg = (P2pLinkGroup *)SoftBusCalloc(groupSize);
     if (arg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "P2pStateChanged Failed to malloc");
+        CLOGE("P2pStateChanged Failed to malloc");
         return;
     }
     ret = memcpy_s(arg, groupSize, group, groupSize);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy fail");
+        CLOGE("memcpy fail");
         SoftBusFree(arg);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv group change");
+    CLOGI("recv group change");
     ret = P2pLoopProc(LoopGroupStateChanged, (void *)arg, P2PLOOP_BROADCAST_GROUPSTATE_CHANGED);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopGroupStateChanged Loop fail");
+        CLOGE("LoopGroupStateChanged Loop fail");
         SoftBusFree(arg);
     }
 }
@@ -186,14 +186,14 @@ static void LoopConnResult(P2pLoopMsg msgType, void *arg)
 
     if (P2pLinkIsEnable() == false) {
         SoftBusFree(arg);
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "in conning p2p state is closed");
+        CLOGI("in conning p2p state is closed");
         return;
     }
 
     (void)msgType;
     state = *(P2pLinkConnState *)arg;
     SoftBusFree(arg);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "notify nego  connect result %d", state);
+    CLOGI("notify nego  connect result %d", state);
     if (state == P2PLINK_CONNECTED) {
         P2pLinkSetRole(ROLE_GC);
     }
@@ -206,22 +206,22 @@ static void ConnResult(P2pLinkConnState state)
 
     arg = (P2pLinkConnState *)SoftBusCalloc(sizeof(P2pLinkConnState));
     if (arg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnResult Failed to malloc");
+        CLOGE("ConnResult Failed to malloc");
         return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "recv connect result %d", state);
+    CLOGI("recv connect result %d", state);
     *arg = state;
     int32_t ret = P2pLoopProc(LoopConnResult, (void *)arg, P2PLOOP_BROADCAST_CONN_STATE);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "LoopConnResult Loop fail");
+        CLOGE("LoopConnResult Loop fail");
         SoftBusFree(arg);
     }
 }
 
 static void WifiCfgChanged(const char *wificfg)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wificfg = %s", wificfg);
+    CLOGI("wificfg = %s", wificfg);
 }
 
 NO_SANITIZE("cfi") int32_t P2pLinkBroadCastInit(void)

@@ -193,7 +193,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
     return SOFTBUS_OK;
 }
 
-static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
+NO_SANITIZE("cfi") static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
     if ((deviceList == NULL) || (deviceCount == 0)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "%s:invalid param.", __func__);

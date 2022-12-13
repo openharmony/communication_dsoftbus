@@ -79,7 +79,7 @@ static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
 static StateListener g_stateListener[STATE_LISTENER_MAX_NUM];
 static bool g_isRegCb = false;
 
-NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, const int status)
+static void WrapperStateChangeCallback(const int transport, const int status)
 {
     CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
     int listenerId;
@@ -93,8 +93,7 @@ NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, c
     }
 }
 
-NO_SANITIZE("cfi") static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state,
-    unsigned int reason)
+static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state, unsigned int reason)
 {
     if (bdAddr == NULL) {
         CLOGE("WrapperAclStateChangedCallback addr is null");
@@ -164,7 +163,7 @@ static int RegisterListenerCallback(void)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+NO_SANITIZE("cfi") int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_ERR;

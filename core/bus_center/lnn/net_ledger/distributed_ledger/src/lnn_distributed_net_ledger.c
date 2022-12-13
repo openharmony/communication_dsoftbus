@@ -323,36 +323,6 @@ static bool IsNetworkIdChanged(NodeInfo *newInfo, NodeInfo *oldInfo)
     return true;
 }
 
-NO_SANITIZE("cfi") void PostOnlineNodesToCb(const INodeStateCb *callBack)
-{
-    NodeInfo *info = NULL;
-    NodeBasicInfo basic;
-    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memset_s basic fail!");
-    }
-    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
-    if (callBack->onNodeOnline == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "onNodeOnline IS null!");
-        return;
-    }
-    MapIterator *it = LnnMapInitIterator(&map->udidMap);
-    if (it == NULL) {
-        return;
-    }
-    while (LnnMapHasNext(it)) {
-        it = LnnMapNext(it);
-        if (it == NULL) {
-            return;
-        }
-        info = (NodeInfo *)it->node->value;
-        if (LnnIsNodeOnline(info)) {
-            ConvertNodeInfoToBasicInfo(info, &basic);
-            callBack->onNodeOnline(&basic);
-        }
-    }
-    LnnMapDeinitIterator(it);
-}
-
 NO_SANITIZE("cfi") NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
 {
     NodeInfo *info = NULL;

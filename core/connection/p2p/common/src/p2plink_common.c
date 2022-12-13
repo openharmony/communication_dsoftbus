@@ -42,7 +42,7 @@ NO_SANITIZE("cfi") P2pLinkRole P2pLinkGetRole(void)
 
 NO_SANITIZE("cfi") void P2pLinkSetRole(P2pLinkRole role)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my role %d", role);
+    CLOGI("set my role %d", role);
     g_role = role;
 }
 
@@ -50,9 +50,9 @@ NO_SANITIZE("cfi") void P2pLinkSetMyIp(const char *ip)
 {
     int32_t ret = strcpy_s(g_myIp, sizeof(g_myIp), ip);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
+        CLOGE("strcpy error");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set my ip.");
+    CLOGI("set my ip.");
 }
 
 NO_SANITIZE("cfi") char* P2pLinkGetMyIp(void)
@@ -69,9 +69,9 @@ NO_SANITIZE("cfi") char* P2pLinkGetMyMac(void)
         if (ret == SOFTBUS_OK) {
             ret = strcpy_s(g_myMac, sizeof(g_myMac), myMac);
             if (ret != EOK) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
+                CLOGE("strcpy error");
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "get my mac");
+            CLOGI("get my mac");
         }
     }
     return g_myMac;
@@ -81,29 +81,29 @@ NO_SANITIZE("cfi") void P2pLinkSetGoIp(const char *ip)
 {
     int32_t ret = strcpy_s(g_goIp, sizeof(g_goIp), ip);
     if (ret != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
+        CLOGE("strcpy error");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go ip");
+    CLOGI("set go ip");
 }
 
 NO_SANITIZE("cfi") void P2pLinkSetGoMac(const char *mac)
 {
     if (strcpy_s(g_goMac, sizeof(g_goMac), mac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "strcpy error");
+        CLOGE("strcpy error");
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go mac");
+    CLOGI("set go mac");
 }
 
 NO_SANITIZE("cfi") void P2pLinkSetGoPort(int32_t port)
 {
     g_goPort = port;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set go port %d", g_goPort);
+    CLOGI("set go port %d", g_goPort);
 }
 
 NO_SANITIZE("cfi") void P2pLinkSetGcPort(int32_t port)
 {
     g_gcPort = port;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "set gc port %d", g_goPort);
+    CLOGI("set gc port %d", g_goPort);
 }
 
 NO_SANITIZE("cfi") int32_t P2pLinkGetGcPort(void)
@@ -176,7 +176,7 @@ NO_SANITIZE("cfi") void P2pLinkCommonInit(void)
 
 NO_SANITIZE("cfi") void P2pLinkCommonClean(void)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkCommonClean");
+    CLOGI("P2pLinkCommonClean");
     g_role = ROLE_NONE;
     g_myIp[0] = 0;
     g_myMac[0] = 0;

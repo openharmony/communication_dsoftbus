@@ -57,7 +57,7 @@ void DeRegisteCoAPEpollTaskCtx(struct coap_context_t *ctx, uint32_t *socketNum, 
 void ResetCoapSocketTaskCount(uint8_t isBusy);
 #ifdef _WIN32
 int32_t CoapThreadInit(void);
-void CoapThreadDestory(void);
+void CoapThreadDestroy(void);
 #endif
 
 #ifdef __cplusplus
