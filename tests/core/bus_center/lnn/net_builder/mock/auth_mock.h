@@ -48,10 +48,10 @@ public:
     MOCK_METHOD(int32_t, AuthGetVersion, (int64_t, SoftBusVersion *), (override));
     MOCK_METHOD(int32_t, AuthGetDeviceUuid, (int64_t, char *, uint16_t), (override));
 
-    MOCK_METHOD2(RegAuthTransListener, int32_t, (int32_t, const AuthTransListener *));
-    MOCK_METHOD1(UnregAuthTransListener, void, (int32_t));
-    MOCK_METHOD2(AuthPostTransData, int32_t, (int64_t, const AuthTransData *));
-    MOCK_METHOD3(AuthGetIdByConnInfo, int64_t, (const AuthConnInfo *, bool, bool));
+    MOCK_METHOD2(RegAuthTransListener, int32_t (int32_t, const AuthTransListener *));
+    MOCK_METHOD1(UnregAuthTransListener, void (int32_t));
+    MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
+    MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
 };
 } // namespace OHOS
 #endif // AUTH_MOCK_H
