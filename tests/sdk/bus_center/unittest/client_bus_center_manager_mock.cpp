@@ -105,9 +105,9 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return GetBusCenterManagerInterface()->ServerIpcStopTimeSync(pkgName, targetNetworkId);
 }
 
-int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen)
+int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    return GetBusCenterManagerInterface()->ServerIpcPublishLNN(pkgName, info, infoLen);
+    return GetBusCenterManagerInterface()->ServerIpcPublishLNN(pkgName, info);
 }
 
 int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
@@ -115,9 +115,9 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return GetBusCenterManagerInterface()->ServerIpcStopPublishLNN(pkgName, publishId);
 }
 
-int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    return GetBusCenterManagerInterface()->ServerIpcRefreshLNN(pkgName, info, infoTypeLen);
+    return GetBusCenterManagerInterface()->ServerIpcRefreshLNN(pkgName, info);
 }
 
 int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)

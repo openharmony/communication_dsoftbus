@@ -25,6 +25,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_ipc_def.h"
 #include "softbus_log.h"
 
@@ -150,7 +151,7 @@ void BusCenterServerProxyDeInit(void)
     g_serverProxy = NULL;
 }
 
-int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
+int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     if (info == NULL || infoNum == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Invalid param");
@@ -174,8 +175,10 @@ int ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t inf
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
+    uint32_t maxConnCount = UINT32_MAX;
+    (void)SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, (unsigned char *)&maxConnCount, sizeof(maxConnCount));
     *infoNum = reply.arg1;
-    if (*infoNum < 0) {
+    if (*infoNum < 0 || (uint32_t)(*infoNum) > maxConnCount) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetAllOnlineNodeInfo invoke failed[%d].", *infoNum);
         return SOFTBUS_ERR;
     }
@@ -263,8 +266,9 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
-    if (reply.data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNodeKeyInfo read retBuf failed!");
+    if (reply.data == NULL || reply.dataLen > len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+            "GetNodeKeyInfo read retBuf failed, len:%d, reply.dataLen:%d", len, reply.dataLen);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(buf, len, reply.data, reply.dataLen) != EOK) {
@@ -291,10 +295,7 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
     WriteString(&request, pkgName);
     WriteString(&request, networkId);
     WriteInt16(&request, dataChangeFlag);
-    Reply reply = {0};
-    reply.id = GET_NODE_KEY_INFO;
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_NODE_DATA_CHANGE_FLAG, &request, &reply,
-        ClientBusCenterResultCb);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_NODE_DATA_CHANGE_FLAG, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SetNodeDataChangeFlag invoke failed[%d].", ans);
         return SOFTBUS_ERR;
@@ -423,7 +424,7 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen)
+int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "publish Lnn ipc client push.");
     if (info == NULL || pkgName == NULL) {
@@ -440,10 +441,18 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t info
     reply.id = START_PUBLISH_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
-    WriteUint32(&request, infoLen);
-    WriteBuffer(&request, info, infoLen);
+    WriteInt32(&request, info->publishId);
+    WriteInt32(&request, info->mode);
+    WriteInt32(&request, info->medium);
+    WriteInt32(&request, info->freq);
+    WriteString(&request, info->capability);
+    WriteUint32(&request, info->dataLen);
+    if (info->dataLen != 0) {
+        WriteBuffer(&request, info->capabilityData, info->dataLen);
+    }
+    WriteBool(&request, info->ranging);
     /* asynchronous invocation */
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, &reply, NULL);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, &reply, ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "publish Lnn invoke failed[%d, %d].", ans, reply.retCode);
         return SOFTBUS_ERR;
@@ -477,7 +486,7 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "refresh Lnn ipc client push.");
     if (info == NULL || pkgName == NULL) {
@@ -494,8 +503,17 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t info
     reply.id = START_REFRESH_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     WriteString(&request, pkgName);
-    WriteUint32(&request, infoTypeLen);
-    WriteBuffer(&request, info, infoTypeLen);
+    WriteInt32(&request, info->subscribeId);
+    WriteInt32(&request, info->mode);
+    WriteInt32(&request, info->medium);
+    WriteInt32(&request, info->freq);
+    WriteBool(&request, info->isSameAccount);
+    WriteBool(&request, info->isWakeRemote);
+    WriteString(&request, info->capability);
+    WriteUint32(&request, info->dataLen);
+    if (info->dataLen != 0) {
+        WriteBuffer(&request, info->capabilityData, info->dataLen);
+    }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REFRESH_LNN, &request, &reply, ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
@@ -528,7 +546,6 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN invoke failed[%d].", ans);
         return SOFTBUS_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
