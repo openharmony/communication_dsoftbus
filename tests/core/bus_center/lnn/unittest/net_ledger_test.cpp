@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "lnn_decision_db.h"
@@ -27,10 +28,12 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
-#include "softbus_log.h"
-#include "softbus_utils.h"
+
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_conn_interface.h"
+#include "softbus_log.h"
+#include "softbus_utils.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -207,13 +210,16 @@ HWTEST_F(NetLedgerTest, GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001, TestSize.Lev
     NodeBasicInfo base;
     NodeBasicInfo *info = nullptr;
     int32_t infoNum = 0;
-    EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(nullptr, &infoNum) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(nullptr, &infoNum) == SOFTBUS_INVALID_PARAM);
     info = &base;
     (void)memset_s(info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-    EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(&info, nullptr) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(&info, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(&info, &infoNum) == SOFTBUS_OK);
+    SoftBusFree(info);
+    info = nullptr;
     infoNum = DEFAULT_SIZE;
     EXPECT_TRUE(LnnGetAllOnlineAndMetaNodeInfo(&info, &infoNum) == SOFTBUS_OK);
+    SoftBusFree(info);
 }
 
 /*

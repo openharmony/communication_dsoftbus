@@ -25,7 +25,6 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_ipc_utils.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
@@ -200,9 +199,12 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uin
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
-    (void)addrTypeLen;
     if (pkgName == nullptr || connAddr == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
@@ -315,14 +317,9 @@ NO_SANITIZE("cfi") int32_t LnnIpcStopTimeSync(const char *pkgName, const char *t
     return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    (void)infoTypeLen;
-    PublishInfo pubInfo;
-    (void)memset_s(&pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    ConvertVoidToPublishInfo(info, &pubInfo);
-    int32_t ret = LnnPublishService(pkgName, &pubInfo, false);
-    return ret;
+    return LnnPublishService(pkgName, info, false);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
@@ -330,18 +327,13 @@ NO_SANITIZE("cfi") int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t pub
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    (void)infoTypeLen;
-    SubscribeInfo subInfo;
-    (void)memset_s(&subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
-    ConvertVoidToSubscribeInfo(info, &subInfo);
     SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    int32_t ret = LnnStartDiscDevice(pkgName, &subInfo, &callback, false);
-    return ret;
+    return LnnStartDiscDevice(pkgName, info, &callback, false);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)

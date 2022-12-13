@@ -248,8 +248,11 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001, TestSize.L
     int infoNum;
 
     EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &info, &infoNum) == SOFTBUS_OK);
-    EXPECT_TRUE(info == nullptr);
-    EXPECT_TRUE(infoNum == 0);
+    if (infoNum == 0) {
+        EXPECT_TRUE(info == nullptr);
+    } else {
+        EXPECT_TRUE(info != nullptr);
+    }
     if (info != nullptr) {
         FreeNodeInfo(info);
     }
@@ -544,15 +547,10 @@ HWTEST_F(BusCenterSdkTest, JOIN_META_NODE_INNER_Test001, TestSize.Level1)
 HWTEST_F(BusCenterSdkTest, LEAVE_META_NODE_INNER_Test001, TestSize.Level1)
 {
     char pkgName[] = "test";
-    char networkId[] = "0123456789";
     char *networkId1 = nullptr;
     OnLeaveMetaNodeResult cb = nullptr;
     int32_t  ret = LeaveMetaNodeInner(pkgName, networkId1, cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    printf("LeaveMetaNodeInner ret2 = %d\n", ret);
-    ret = LeaveMetaNodeInner(pkgName, networkId, cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    printf("LeaveMetaNodeInner ret3 = %d\n", ret);
 }
 
 /*
@@ -570,7 +568,7 @@ HWTEST_F(BusCenterSdkTest, META_NODE_ON_JOIN_RESULT_Test001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ConnectionAddr connAddr;
     (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    addr = (void*)&connAddr;
+    addr = (void *)&connAddr;
     ret = MetaNodeOnJoinResult(addr, networkId, retCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -601,13 +599,11 @@ HWTEST_F(BusCenterSdkTest, META_NODE_ON_LEAVE_RESULT_Test001, TestSize.Level1)
 HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001, TestSize.Level1)
 {
     char pkgName[] = "test";
-    char networkId[] = "ABCDEFG";
     char *networkId1 = nullptr;
     uint16_t dataChangeFlag = false;
+    BusCenterServerProxyInit();
     int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId1, dataChangeFlag);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -677,10 +673,12 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_LEAVE_META_NODE_Test001, TestSize.Level1)
     char pkgNameValue[] = "test";
     char networkId[] = "ABCDEFG";
     char *networkId1 = nullptr;
-    int32_t ret = ServerIpcLeaveMetaNode(pkgName, networkId1);
+    int32_t ret = ServerIpcLeaveMetaNode(pkgName, networkId);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = ServerIpcLeaveMetaNode(pkgNameValue, networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = ServerIpcLeaveMetaNode(pkgName, networkId1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcLeaveMetaNode(pkgNameValue, networkId1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*

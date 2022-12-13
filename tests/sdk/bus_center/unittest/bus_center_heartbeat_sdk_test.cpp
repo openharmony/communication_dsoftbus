@@ -17,6 +17,9 @@
 
 #include <securec.h>
 
+#include "bus_center_event.h"
+#include "lnn_heartbeat_ctrl.h"
+#include "message_handler.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
@@ -38,10 +41,16 @@ public:
 void BusCenterHeartbeatSdkTest::SetUpTestCase()
 {
     SetAceessTokenPermission("busCenterTest");
+    LooperInit();
+    LnnInitBusCenterEvent();
+    LnnInitHeartbeat();
 }
 
 void BusCenterHeartbeatSdkTest::TearDownTestCase()
 {
+    LnnDeinitHeartbeat();
+    LnnDeinitBusCenterEvent();
+    LooperDeinit();
 }
 
 void BusCenterHeartbeatSdkTest::SetUp()
