@@ -31,6 +31,7 @@ const char *g_groupid = "TEST_GROUP_ID";
 
 namespace OHOS {
 #define TEST_CHANNELID 5
+#define ERR_CHANNELID (-1)
 #define TEST_SESSIONID 1
 #define TEST_COUNT 2
 #define STREAM_DATA_LENGTH 10
@@ -86,6 +87,136 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
 
     UdpChannel channel;
     ret = TransGetUdpChannel(TEST_CHANNELID, &channel);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = ClosePeerUdpChannel(TEST_CHANNELID);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: ClientTransUdpManagerStaticTest002
+ * @tc.desc: client trans udp manager static test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, TestSize.Level0)
+{
+    int32_t ret;
+    int32_t sessionId = 0;
+    char sendStringData[STREAM_DATA_LENGTH] = "diudiudiu";
+    QosTv tvList;
+    StreamData tmpData = {
+        sendStringData,
+        STREAM_DATA_LENGTH,
+    };
+    char str[STREAM_DATA_LENGTH] = "oohoohooh";
+    StreamData tmpData2 = {
+        str,
+        STREAM_DATA_LENGTH,
+    };
+
+    StreamFrameInfo tmpf = {};
+
+    ret = ClientTransUdpMgrInit(NULL);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    ret = ClientTransUdpMgrInit(cb);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    OnUdpChannelClosed(TEST_CHANNELID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    OnStreamReceived(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
+
+    ret = OnFileGetSessionId(TEST_CHANNELID, &sessionId);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+
+    OnQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
+}
+
+/**
+ * @tc.name: ClientTransAddUdpChannelTest001
+ * @tc.desc: client trans add udp channel test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestSize.Level0)
+{
+    int32_t ret;
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    ret = ClientTransUdpMgrInit(cb);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransAddUdpChannel(NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    udpChannel.channelId = TEST_CHANNELID;
+    ret = ClientTransAddUdpChannel(&udpChannel);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransAddUdpChannel(&udpChannel);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransSetUdpChannelEnable(TEST_CHANNELID, false);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSetUdpChannelEnable(ERR_CHANNELID, false);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: OnUdpChannelOpenedTest001
+ * @tc.desc: on udp channel opend test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, OnUdpChannelOpenedTest001, TestSize.Level0)
+{
+    int32_t ret;
+
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    ret = ClientTransUdpMgrInit(cb);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    udpChannel.channelId = TEST_CHANNELID;
+    ret = ClientTransAddUdpChannel(&udpChannel);
+    ASSERT_EQ(SOFTBUS_ERR, ret);
+
+    OnUdpChannelOpened(TEST_CHANNELID);
+}
+
+/**
+ * @tc.name: TransDeleteBusinnessChannelTest001
+ * @tc.desc: trans delete businness channel test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, TestSize.Level0)
+{
+    int32_t ret;
+    UdpChannel channel;
+    channel.businessType = BUSINESS_TYPE_STREAM;
+    channel.channelId = ERR_CHANNELID;
+    channel.dfileId = TEST_CHANNELID;
+
+    ret = TransDeleteBusinnessChannel(&channel);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    channel.channelId = TEST_CHANNELID;
+    ret = TransDeleteBusinnessChannel(&channel);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    channel.businessType = BUSINESS_TYPE_FILE;
+    ret = TransDeleteBusinnessChannel(&channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    channel.businessType = TEST_CHANNELID;
+    ret = TransDeleteBusinnessChannel(&channel);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 } // namespace OHOS
