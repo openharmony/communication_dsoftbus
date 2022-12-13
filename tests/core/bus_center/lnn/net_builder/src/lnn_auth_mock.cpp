@@ -46,5 +46,10 @@ int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
 {
     return GetAuthInterface()->AuthGetVersion(authId, version);
 }
+
+int32_t RegGroupChangeListener(const GroupChangeListener *listener)
+{
+    return GetAuthInterface()->RegGroupChangeListener(listener);
+}
 }
 }

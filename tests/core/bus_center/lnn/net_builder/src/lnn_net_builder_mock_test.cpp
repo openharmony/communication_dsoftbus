@@ -176,7 +176,7 @@ HWTEST_F(LnnNetBuilderMockTest, LNN_JOIN_META_NODE_TEST_002, TestSize.Level1)
     EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, true);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     EXPECT_CALL(mock, TransGetConnByChanId(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AuthMetaStartVerify(_,_,_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
