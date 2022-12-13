@@ -336,7 +336,7 @@ static void DestroyIpSubnetManager(LnnPhysicalSubnet *subnet)
 
 typedef enum {
     IP_SUBNET_MANAGER_EVENT_IF_READY,
-    IP_SUBNET_MANAGER_EVENT_IF_DOWN,    // addr change from avaliable to
+    IP_SUBNET_MANAGER_EVENT_IF_DOWN,    // addr change from available to
     IP_SUBNET_MANAGER_EVENT_IF_CHANGED, // addr changed
     IP_SUBNET_MANAGER_EVENT_MAX
 } IpSubnetManagerEvent;
@@ -471,7 +471,7 @@ static VisitNextChoice NotifyIpAddressChanged(const LnnPhysicalSubnet *subnet, v
     return CHOICE_VISIT_NEXT;
 }
 
-static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
+NO_SANITIZE("cfi") static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_IP_ADDR_CHANGED) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event");

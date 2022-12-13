@@ -292,24 +292,25 @@ HWTEST_F(TransAuthChannelTest, TransSendAuthMsgTest001, TestSize.Level1)
  */
 HWTEST_F(TransAuthChannelTest, OnAuthChannelDataRecvTest001, TestSize.Level1)
 {
-    int32_t authId = -1;
-    AuthChannelData data;
+    int32_t authId = TRANS_TEST_AUTH_ID;
+    AuthChannelData *data = (AuthChannelData*)SoftBusCalloc(sizeof(AuthChannelData));
+    ASSERT_TRUE(data != NULL);
 
     OnAuthChannelDataRecv(authId, NULL);
 
-    data.data = NULL;
-    OnAuthChannelDataRecv(authId, &data);
+    data->data = NULL;
+    OnAuthChannelDataRecv(authId, data);
 
-    data.data = (uint8_t *)"test data";
-    data.flag = AUTH_CHANNEL_REQ;
-    OnAuthChannelDataRecv(authId, &data);
+    data->data = (uint8_t *)TEST_AUTH_DATA;
+    data->len = strlen(TEST_AUTH_DATA) + 1;
+    data->flag = AUTH_CHANNEL_REQ;
+    OnAuthChannelDataRecv(authId, data);
 
-    data.flag = AUTH_CHANNEL_REPLY;
-    OnAuthChannelDataRecv(authId, &data);
+    data->flag = AUTH_CHANNEL_REPLY;
+    OnAuthChannelDataRecv(authId, data);
 
-    data.flag = -1;
-    OnAuthChannelDataRecv(authId, &data);
-    EXPECT_TRUE(true);
+    data->flag = -1;
+    OnAuthChannelDataRecv(authId, data);
 }
 
 /**
@@ -579,6 +580,10 @@ HWTEST_F(TransAuthChannelTest, CopyPeerAppInfoTest001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     AppInfo *channelAppInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(channelAppInfo != NULL);
+    ret = CopyPeerAppInfo(NULL, channelAppInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CopyPeerAppInfo(recvAppInfo, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = CopyPeerAppInfo(recvAppInfo, channelAppInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(recvAppInfo);
@@ -706,6 +711,13 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
     OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
     bool res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_authSessionName);
     ASSERT_EQ(res, EOK);
+    cJSON_Delete(msg);
+    cJSON_free(data);
+    msg = cJSON_CreateObject();
+    ret = TransAuthChannelMsgPack(msg, appInfo);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    data = cJSON_PrintUnformatted(msg);
+    ASSERT_TRUE(data != NULL);
     OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
     SoftBusFree(appInfo);
     cJSON_free(data);
@@ -731,13 +743,13 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
     ASSERT_TRUE(appInfo != NULL);
     ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_authSessionName);
+    ASSERT_EQ(ret, EOK);
     ret = TransAuthChannelMsgPack(msg, appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
     char *data = cJSON_PrintUnformatted(msg);
     ASSERT_TRUE(data != NULL);
-    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, 0);
-    ret = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_authSessionName);
-    ASSERT_EQ(ret, EOK);
+    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
     AuthChannelInfo *info = CreateAuthChannelInfo(g_authSessionName);
     ASSERT_TRUE(info != NULL);
     info->authId = TRANS_TEST_AUTH_ID + 1;
@@ -882,6 +894,8 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnOptionByChanIdTest002, TestSize.L
     ASSERT_EQ(ret, SOFTBUS_OK);
     ConnectOption *connOpt = (ConnectOption*)SoftBusCalloc(sizeof(ConnectOption));
     ASSERT_TRUE(connOpt != NULL);
+    ret = TransAuthGetConnOptionByChanId(TRANS_TEST_CHANNEL_ID, connOpt);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_UID, TRANS_TEST_PID);
     ASSERT_EQ(ret, SOFTBUS_OK);
     AuthChannelInfo *info = CreateAuthChannelInfo(g_sessionName);
@@ -982,7 +996,7 @@ HWTEST_F(TransAuthChannelTest, TransNotifyAuthDataSuccessTest001, TestSize.Level
 
 /**
  * @tc.name: OnRecvAuthChannelReply001
- * @tc.desc: Transmission auth manager on recieve auth channel reply with different parameters.
+ * @tc.desc: Transmission auth manager on receive auth channel reply with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1055,4 +1069,95 @@ HWTEST_F(TransAuthChannelTest, TransCloseAuthChannel001, TestSize.Level1)
     TransAuthDeinit();
 }
 
+/**
+ * @tc.name: TransAuthGetChannelInfo001
+ * @tc.desc: Transmission auth manager get different info by different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthGetChannelInfo001, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransAuthInit(callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_UID, TRANS_TEST_PID);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    AuthChannelInfo *info = CreateAuthChannelInfo(g_sessionName);
+    ASSERT_TRUE(info != NULL);
+    int32_t channelId = info->appInfo.myData.channelId;
+    info->authId = TRANS_TEST_AUTH_ID;
+    ret = AddAuthChannelInfo(info);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    AuthChannelInfo *newInfo = CreateAuthChannelInfo(g_sessionName);
+    ASSERT_TRUE(newInfo != NULL);
+    int32_t newChannelId = newInfo->appInfo.myData.channelId;
+    newInfo->authId = TRANS_TEST_AUTH_ID + 1;
+    ret = AddAuthChannelInfo(newInfo);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = GetAuthIdByChannelId(channelId);
+    EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID);
+    ret = GetAuthIdByChannelId(newChannelId);
+    EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID + 1);
+    AuthChannelInfo *destInfo = (AuthChannelInfo*)SoftBusCalloc(sizeof(AuthChannelInfo));
+    ASSERT_TRUE(destInfo != NULL);
+    ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, destInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = memcmp(info, destInfo,  sizeof(AuthChannelInfo));
+    EXPECT_EQ(ret, EOK);
+    memset_s(destInfo, sizeof(AuthChannelInfo), 0, sizeof(AuthChannelInfo));
+    ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID + 1, destInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = memcmp(newInfo, destInfo,  sizeof(AuthChannelInfo));
+    EXPECT_EQ(ret, EOK);
+
+    DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
+    ret = GetAuthIdByChannelId(channelId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID + 1);
+    ret = GetAuthIdByChannelId(newChannelId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    SoftBusFree(destInfo);
+    TransSessionMgrDeinit();
+    TransAuthDeinit();
+}
+
+/**
+ * @tc.name: TransOpenAuthMsgChannelTest003
+ * @tc.desc: Transmission auth manager open auth message channel.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest003, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    ConnectOption connInfo = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = {0},
+            .port = TEST_AUTH_PORT,
+            .moduleId = MODULE_MESSAGE_SERVICE,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+    int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_CONN_IP);
+    ASSERT_EQ(ret, EOK);
+
+    ret = TransSessionMgrInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransAuthInit(callback);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_UID, TRANS_TEST_PID);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOpenAuthMsgChannel(g_sessionName, &connInfo, &channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    TransSessionMgrDeinit();
+    TransAuthDeinit();
+}
 } // namespace OHOS

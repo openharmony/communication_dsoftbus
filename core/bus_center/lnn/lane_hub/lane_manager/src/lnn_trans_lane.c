@@ -265,7 +265,7 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
     return SOFTBUS_OK;
 }
 
-static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
+NO_SANITIZE("cfi") static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
 {
     LaneGenerateParam param;
     param.linkType = infoNode->type;
@@ -380,7 +380,7 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const Lan
     g_laneIdCallback->OnLaneIdEnabled(laneId, profileId);
 }
 
-static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
+NO_SANITIZE("cfi") static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
 {
     TransReqInfo reqInfo;
     if (GetLaneReqInfo(laneId, &reqInfo) != SOFTBUS_OK) {

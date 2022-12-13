@@ -37,15 +37,14 @@ static int32_t ReceivedHeadCheck(BrConnectionInfo *conn)
     UnpackConnPktHead(head);
     if ((uint32_t)(head->magic) != MAGIC_NUMBER) {
         conn->recvPos = 0;
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[ReceivedHeadCheck] magic error 0x%x", head->magic);
+        CLOGE("[ReceivedHeadCheck] magic error 0x%x", head->magic);
         return SOFTBUS_ERR;
     }
 
     if ((int32_t)(head->len) < 0 ||
         conn->recvSize - pktHeadLen < (int32_t)(head->len)) {
         conn->recvPos = 0;
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "[ReceivedHeadCheck]data size is illegal. module=%d, seq=%" PRId64 ", datalen=%d",
+        CLOGE("[ReceivedHeadCheck]data size is illegal. module=%d, seq=%" PRId64 ", datalen=%d",
             head->module, head->seq, head->len);
         return SOFTBUS_ERR;
     }
@@ -61,28 +60,28 @@ static char *BrRecvDataParse(BrConnectionInfo *conn, int32_t *outLen)
     ConnPktHead *head = (ConnPktHead *)(conn->recvBuf);
     int32_t packLen = (int32_t)(head->len) + sizeof(ConnPktHead);
     if (bufLen < packLen) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "not a complete package, continue");
+        CLOGI("not a complete package, continue");
         return NULL;
     }
     if (bufLen < 0 || packLen < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "bufLen or packLen invalid");
+        CLOGI("bufLen or packLen invalid");
         return NULL;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[BrTransRead] a complete package packLen: %d", packLen);
+    CLOGI("[BrTransRead] a complete package packLen: %d", packLen);
     char *dataCopy = SoftBusMalloc(packLen);
     if (dataCopy == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] SoftBusMalloc failed");
+        CLOGE("[BrTransRead] SoftBusMalloc failed");
         return NULL;
     }
     if (memcpy_s(dataCopy, packLen, conn->recvBuf, packLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] memcpy_s failed");
+        CLOGE("[BrTransRead] memcpy_s failed");
         SoftBusFree(dataCopy);
         return NULL;
     }
 
     if (bufLen > packLen &&
         memmove_s(conn->recvBuf, conn->recvSize, conn->recvBuf + packLen, bufLen - packLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[BrTransRead] memmove_s failed");
+        CLOGE("[BrTransRead] memmove_s failed");
         SoftBusFree(dataCopy);
         return NULL;
     }
@@ -114,7 +113,7 @@ NO_SANITIZE("cfi") int32_t BrTransReadOneFrame(uint32_t connectionId, const SppS
                 return BR_READ_SOCKET_CLOSED;
             }
             if (recvLen == BR_READ_FAILED) {
-                SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "sppDriver Read BR_READ_FAILED");
+                CLOGE("sppDriver Read BR_READ_FAILED");
                 ReleaseConnectionRef(conn);
                 return BR_READ_SOCKET_CLOSED;
             }
@@ -135,7 +134,7 @@ NO_SANITIZE("cfi") int32_t BrTransSend(BrConnectionInfo *brConnInfo, const SppSo
     if (brConnInfo == NULL) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrTransSend, %d", brConnInfo->connectionId);
+    CLOGI("BrTransSend, %d", brConnInfo->connectionId);
     int32_t socketFd = brConnInfo->socketFd;
     if (socketFd == -1) {
         return SOFTBUS_ERR;
@@ -148,9 +147,9 @@ NO_SANITIZE("cfi") int32_t BrTransSend(BrConnectionInfo *brConnInfo, const SppSo
         (void)pthread_mutex_lock(&brConnInfo->lock);
         if (brConnInfo->conGestState == BT_RFCOM_CONGEST_ON &&
             (brConnInfo->state == BR_CONNECTION_STATE_CONNECTED || brConnInfo->state == BR_CONNECTION_STATE_CLOSING)) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait congest condition, %d", brConnInfo->connectionId);
+            CLOGI("wait congest condition, %d", brConnInfo->connectionId);
             pthread_cond_wait(&brConnInfo->congestCond, &brConnInfo->lock);
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "free congest condition, %d", brConnInfo->connectionId);
+            CLOGI("free congest condition, %d", brConnInfo->connectionId);
         }
         (void)pthread_mutex_unlock(&brConnInfo->lock);
 
@@ -173,7 +172,7 @@ static char *BrAddNumToJson(int32_t method, uint32_t connectionId, int32_t delta
 {
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "Cannot create cJSON object");
+        CLOGE("Cannot create cJSON object");
         return NULL;
     }
     if (method == METHOD_NOTIFY_REQUEST) {
@@ -219,7 +218,7 @@ NO_SANITIZE("cfi") char *BrPackRequestOrResponse(int32_t requestOrResponse, uint
 {
     char *data = BrAddNumToJson(requestOrResponse, connectionId, delta, count);
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrAddNumToJson failed");
+        CLOGE("BrAddNumToJson failed");
         return NULL;
     }
 
@@ -238,13 +237,13 @@ NO_SANITIZE("cfi") char *BrPackRequestOrResponse(int32_t requestOrResponse, uint
     head.len = strlen(data) + 1;
     PackConnPktHead(&head);
     if (memcpy_s(buf, dataLen, (void *)&head, headSize) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s head error");
+        CLOGE("memcpy_s head error");
         cJSON_free(data);
         SoftBusFree(buf);
         return NULL;
     }
     if (memcpy_s(buf + headSize, dataLen - headSize, data, strlen(data) + 1) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "memcpy_s data error");
+        CLOGE("memcpy_s data error");
         cJSON_free(data);
         SoftBusFree(buf);
         return NULL;

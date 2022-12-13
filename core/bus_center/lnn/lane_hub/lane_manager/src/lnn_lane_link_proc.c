@@ -79,7 +79,8 @@ NO_SANITIZE("cfi") static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest
     return SOFTBUS_OK;
 }
 
-static int32_t LaneLinkP2pConn(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
+NO_SANITIZE("cfi") static int32_t LaneLinkP2pConn(const LinkRequest *reqInfo, uint32_t reqId,
+    const LaneLinkCb *callback)
 {
     LnnLaneP2pInfo p2pInfo;
     int32_t ret = LnnConnectP2p(reqInfo->peerNetworkId, reqInfo->pid, &p2pInfo);
@@ -103,7 +104,7 @@ static int32_t LaneLinkP2pConn(const LinkRequest *reqInfo, uint32_t reqId, const
     return SOFTBUS_OK;
 }
 
-static int32_t LaneLinkOfP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+NO_SANITIZE("cfi") static int32_t LaneLinkOfP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK) {
         return SOFTBUS_ERR;

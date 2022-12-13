@@ -49,7 +49,7 @@ int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode)
     return g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_TCP_DIRECT, errCode);
 }
 
-int32_t ClientTransTdcOnDataReceived(int32_t channelId,
+NO_SANITIZE("cfi") int32_t ClientTransTdcOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type)
 {
     return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_TCP_DIRECT, data, len, type);

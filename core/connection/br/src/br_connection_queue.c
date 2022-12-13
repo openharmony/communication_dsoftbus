@@ -113,7 +113,7 @@ static int32_t BrSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_
     }
     SoftBusSysTime now;
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrSoftBusCondWait SoftBusGetTime failed");
+        CLOGE("BrSoftBusCondWait SoftBusGetTime failed");
         return SOFTBUS_ERR;
     }
     int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + timeMillis * USECTONSEC;
@@ -131,25 +131,25 @@ static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxL
     uint32_t queueCount = 0;
     while (true) {
         if (QueueCountGet(lockFreeQueue, &queueCount) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wait get queue count fail");
+            CLOGE("wait get queue count fail");
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "br pid = %d, queue count = %d", pid, queueCount);
+        CLOGI("br pid = %d, queue count = %d", pid, queueCount);
         if (queueCount < (maxLen - diffLen)) {
             break;
         }
         retry++;
         if (retry > WAIT_RETRY_NUM) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "wait queue length retry over");
+            CLOGI("wait queue length retry over");
             if (queueCount < maxLen) {
                 return SOFTBUS_OK;
             }
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL!!");
+            CLOGI("SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL!!");
             return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
         }
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Wait g_sendWaitCond");
+        CLOGI("Wait g_sendWaitCond");
         if (BrSoftBusCondWait(&g_sendWaitCond, &g_brQueueLock, WAIT_QUEUE_DELAY) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "wait queue length cond wait fail");
+            CLOGE("wait queue length cond wait fail");
             return SOFTBUS_ERR;
         }
     }
@@ -203,7 +203,7 @@ NO_SANITIZE("cfi") int32_t BrEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         BrQueue *newQueue = CreateBrQueue(queueNode->pid);
         if (newQueue == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "br enqueue create queue fail");
+            CLOGE("br enqueue create queue fail");
             goto END;
         }
         ListTailInsert(&g_brQueueList, &(newQueue->node));
@@ -231,7 +231,7 @@ static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull)
     uint32_t queueCount;
     for (uint32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {
         if (QueueCountGet(queue->queue[i], &queueCount) != 0) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "GetMsg get queue count fail");
+            CLOGE("GetMsg get queue count fail");
             continue;
         }
         if (queueCount >= (QUEUE_LIMIT[i] - WAIT_QUEUE_BUFFER_PERIOD_LEN)) {
@@ -266,7 +266,7 @@ NO_SANITIZE("cfi") int32_t BrDequeueNonBlock(void **msg)
     }
     if (IsListEmpty(&g_brQueueList)) {
         if (BrSoftBusCondWait(&g_sendCond, &g_brQueueLock, DEQUEUE_DELAY) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BrSendCondWait failed");
+            CLOGI("BrSendCondWait failed");
             (void)SoftBusMutexUnlock(&g_brQueueLock);
             return SOFTBUS_ERR;
         }
@@ -282,7 +282,7 @@ NO_SANITIZE("cfi") int32_t BrDequeueNonBlock(void **msg)
     }
     ListTailInsert(&g_brQueueList, &(item->node));
     if (isFull) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "Broadcast g_sendWaitCond");
+        CLOGI("Broadcast g_sendWaitCond");
         (void)SoftBusCondBroadcast(&g_sendWaitCond);
     }
     (void)SoftBusMutexUnlock(&g_brQueueLock);
@@ -305,7 +305,7 @@ NO_SANITIZE("cfi") int32_t BrInnerQueueInit(void)
     }
     g_innerQueue = CreateBrQueue(0);
     if (g_innerQueue == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BrInnerQueueInit CreateBrQueue(0) failed");
+        CLOGE("BrInnerQueueInit CreateBrQueue(0) failed");
         (void)SoftBusMutexDestroy(&g_brQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);

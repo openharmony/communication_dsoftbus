@@ -16,5 +16,9 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 group("unittest") {
   testonly = true
-  deps = [ "lnn:unittest" ]
+  deps = [
+    "lnn:unittest",
+    "test:unittest",
+    "utils:unittest",
+  ]
 }

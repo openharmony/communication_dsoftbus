@@ -212,8 +212,10 @@ HWTEST_F(TransChannelManagerTest, TransGetChannelType001, TestSize.Level1)
 
     tmp = 0;
     param->attr = &g_sessionAttr[tmp];
+    connInfo->type = LANE_BR;
     transInfo->channelType = TransGetChannelType(param, connInfo);
     EXPECT_EQ(CHANNEL_TYPE_PROXY, transInfo->channelType);
+    connInfo->type = LANE_P2P;
 
     tmp = 1;
     param->attr = &g_sessionAttr[tmp];
@@ -409,10 +411,6 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
     channelType = CHANNEL_TYPE_AUTH;
     ret = TransNotifyAuthSuccess(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransNotifyAuthSuccess(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /**
@@ -446,11 +444,6 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
     channelId++;
     int32_t ret = TransCloseChannel(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    channelId++;
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransCloseChannel(channelId, channelType);
-    EXPECT_NE(SOFTBUS_ERR, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_UDP;
@@ -487,16 +480,14 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
     int32_t ret = TransSendMsg(channelId, channelType, data, len, msgType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransSendMsg(channelId, channelType, data, len, msgType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     channelType = CHANNEL_TYPE_UDP;
     ret = TransSendMsg(channelId, channelType, data, len, msgType);
     EXPECT_EQ(SOFTBUS_TRANS_CHANNEL_TYPE_INVALID, ret);
 
     int32_t pid = 1;
-    TransChannelDeathCallback(g_pkgName, pid);
+
+    TransProxyDeathCallback(NULL, pid);
+    TransChannelDeathCallback(NULL, pid);
 }
 
 /**
@@ -526,10 +517,6 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
     info->channelType = 8888;
     ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    info->channelType = CHANNEL_TYPE_PROXY;
-    ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     info->channelType = CHANNEL_TYPE_UDP;
     ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
@@ -570,10 +557,6 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
     ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
     channelType = CHANNEL_TYPE_UDP;
     ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
@@ -602,9 +585,5 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
     channelType = CHANNEL_TYPE_PROXY + 1;
     int32_t ret = TransGetConnByChanId(channelId, channelType, &connId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    channelType = CHANNEL_TYPE_PROXY;
-    ret = TransGetConnByChanId(channelId, channelType, &connId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID, ret);
 }
 } // OHOS

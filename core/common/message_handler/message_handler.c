@@ -252,7 +252,7 @@ NO_SANITIZE("cfi") void DumpLooper(const SoftBusLooper *looper)
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
+NO_SANITIZE("cfi") static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
     if (looper->dumpable) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=% " PRId64 " us",
@@ -311,7 +311,7 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)
 {
     msg->time = UptimeMicros();
     PostMessageAtTime(looper, msg);
@@ -361,7 +361,8 @@ NO_SANITIZE("cfi") static void LoopRemoveMessageCustom(const SoftBusLooper *loop
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandler *handler, int what)
+NO_SANITIZE("cfi") static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandler *handler,
+    int what)
 {
     LoopRemoveMessageCustom(looper, handler, WhatRemoveFunc, (void*)(intptr_t)what);
 }

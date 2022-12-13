@@ -75,7 +75,7 @@ NO_SANITIZE("cfi") void UnregAuthTransListener(int32_t module)
     }
 }
 
-static void NotifyTransDataReceived(int64_t authId,
+NO_SANITIZE("cfi") static void NotifyTransDataReceived(int64_t authId,
     const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
     AuthTransListener *listener = NULL;
@@ -99,7 +99,7 @@ static void NotifyTransDataReceived(int64_t authId,
     listener->onDataReceived(authId, &transData);
 }
 
-static void NotifyTransDisconnected(int64_t authId)
+NO_SANITIZE("cfi") static void NotifyTransDisconnected(int64_t authId)
 {
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].listener.onDisconnected != NULL) {
@@ -223,7 +223,7 @@ NO_SANITIZE("cfi") int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_
     return AuthMetaGetDeviceUuid(authId, uuid, size);
 }
 
-int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
+NO_SANITIZE("cfi") int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
 {
     return AuthDeviceGetVersion(authId, version);
 }

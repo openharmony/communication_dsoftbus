@@ -32,6 +32,7 @@ group("integration_test") {
 group("unittest") {
   testonly = true
   deps = [
+    "ipc:unittest",
     "session:unittest",
     "trans_channel:unittest",
   ]

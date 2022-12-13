@@ -1015,7 +1015,7 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
     return;
 }
 
-void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
+NO_SANITIZE("cfi") void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     (void)OnProxyChannelOpenFailed(channelId, appInfo, errCode);
 }

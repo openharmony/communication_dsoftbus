@@ -57,7 +57,38 @@ public:
     void TearDown() override {}
 };
 
-void ClientTransUdpManagerTest::SetUpTestCase(void) {}
+static int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+{
+    return SOFTBUS_OK;
+}
+
+static int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+{
+    return SOFTBUS_OK;
+}
+
+static int32_t OnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+{
+    return SOFTBUS_OK;
+}
+
+static int32_t OnDataReceived(int32_t channelId, int32_t channelType, const void *data,
+    uint32_t len, SessionPktType type)
+{
+    return SOFTBUS_OK;
+}
+static IClientSessionCallBack g_sessionCb = {
+    .OnSessionOpened = OnSessionOpened,
+    .OnSessionClosed = OnSessionClosed,
+    .OnSessionOpenFailed = OnSessionOpenFailed,
+    .OnDataReceived = OnDataReceived,
+};
+
+void ClientTransUdpManagerTest::SetUpTestCase(void)
+{
+    int ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 
 void ClientTransUdpManagerTest::TearDownTestCase(void) {}
 

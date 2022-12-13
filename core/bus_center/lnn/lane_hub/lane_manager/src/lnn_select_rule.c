@@ -25,14 +25,15 @@
 #include "lnn_net_capability.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
+#include "softbus_wifi_api_adapter.h"
 #include "wifi_device.h"
 
 #define LNN_LINK_DEFAULT_SCORE 60 /* Indicates that scoring is not supported */
-#define WLAN_2PG_BAND 1
 
 static int32_t GetWlanLinkedFrequency(void)
 {
@@ -61,25 +62,11 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
     return true;
 }
 
-static bool IsWlan2P4G(void)
-{
-    LnnWlanLinkedInfo info;
-    int32_t ret = LnnGetWlanLinkedInfo(&info);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetWlanLinkedInfo fail, ret:%d", ret);
-        return false;
-    }
-    if (info.band == WLAN_2PG_BAND) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current wlan is 2.4G");
-        return true;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current wlan is 5G");
-    return false;
-}
-
 static bool IsEnableWlan2P4G(const char *networkId)
 {
-    if (!IsWlan2P4G()) {
+    SoftBusBand band = SoftBusGetLinkBand();
+    if (band != BAND_24G && band != BAND_UNKNOWN) {
+        LLOGE("band isn't 2.4G or unknown");
         return false;
     }
     int32_t local, remote;
@@ -97,7 +84,9 @@ static bool IsEnableWlan2P4G(const char *networkId)
 
 static bool IsEnableWlan5G(const char *networkId)
 {
-    if (IsWlan2P4G()) {
+    SoftBusBand band = SoftBusGetLinkBand();
+    if (band != BAND_5G && band != BAND_UNKNOWN) {
+        LLOGE("band isn't 5G or unknown");
         return false;
     }
     int32_t local, remote;
@@ -154,21 +143,21 @@ static bool IsEnableBle(const char *networkId)
     return true;
 }
 
-static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-static int32_t GetBleScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetBleScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
@@ -194,7 +183,7 @@ static int32_t GetLinkedChannelScore(void)
     return score;
 }
 
-static int32_t GetWlan2P4GScore(const char *networkId, uint32_t expectedBw)
+NO_SANITIZE("cfi") static int32_t GetWlan2P4GScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;

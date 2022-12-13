@@ -35,7 +35,7 @@ int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t s
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(state)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write PermStateChangeType failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write permStateChangeType failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(pkgName)) {

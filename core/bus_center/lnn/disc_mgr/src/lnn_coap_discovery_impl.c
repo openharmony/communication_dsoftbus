@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -33,7 +34,7 @@ static DiscInnerCallback g_discCb = {
     .OnDeviceFound = DeviceFound,
 };
 
-static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+NO_SANITIZE("cfi") static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     ConnectionAddr addr;
     (void) addtions;

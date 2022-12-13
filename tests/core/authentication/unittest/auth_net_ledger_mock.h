@@ -19,8 +19,15 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "auth_common.h"
+#include "auth_session_fsm.h"
 #include "bus_center_manager.h"
+#include "cJSON.h"
+#include "lnn_hichain_mock.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
+#include "softbus_conn_manager.h"
+#include "softbus_json_utils.h"
 
 namespace OHOS {
 class AuthNetLedgerInterface {
@@ -48,21 +55,28 @@ class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
     AuthNetLedgertInterfaceMock();
     ~AuthNetLedgertInterfaceMock() override;
-    MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char *, uint32_t));
-    MOCK_METHOD1(LnnDeleteSpecificTrustedDevInfo, int32_t (const char *));
+    MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
+    MOCK_METHOD1(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *));
     MOCK_METHOD0(LnnGetLocalNodeInfo, const NodeInfo *());
-    MOCK_METHOD1(LnnGetAuthPort, int32_t (const NodeInfo *));
-    MOCK_METHOD1(LnnGetSessionPort, int32_t (const NodeInfo *));
-    MOCK_METHOD1(LnnGetProxyPort, int32_t (const NodeInfo *));
+    MOCK_METHOD1(LnnGetAuthPort, int32_t(const NodeInfo *));
+    MOCK_METHOD1(LnnGetSessionPort, int32_t(const NodeInfo *));
+    MOCK_METHOD1(LnnGetProxyPort, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnGetBtMac, const char *(const NodeInfo *));
     MOCK_METHOD1(LnnGetDeviceName, const char *(const DeviceBasicInfo *));
     MOCK_METHOD1(LnnConvertIdToDeviceType, char *(uint16_t));
     MOCK_METHOD1(LnnGetDeviceUdid, const char *(const NodeInfo *));
-    MOCK_METHOD1(LnnGetP2pRole, int32_t (const NodeInfo *));
+    MOCK_METHOD1(LnnGetP2pRole, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnGetP2pMac, const char *(const NodeInfo *));
-    MOCK_METHOD1(LnnGetSupportedProtocols, uint64_t (const NodeInfo *));
-    MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t (const char *, uint16_t *));
-    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t *));
+    MOCK_METHOD1(LnnGetSupportedProtocols, uint64_t(const NodeInfo *));
+    MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t(const char *, uint16_t *));
+    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));
+
+    static inline bool isRuned;
+    static inline SoftBusMutex mutex;
+    static char *Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head);
+    static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info);
+    static void OnDeviceNotTrusted(const char *peerUdid);
+    static void OnDeviceDisconnect(int64_t authId);
 };
 } // namespace OHOS
 #endif // AUTH_NET_LEDGER_MOCK_H

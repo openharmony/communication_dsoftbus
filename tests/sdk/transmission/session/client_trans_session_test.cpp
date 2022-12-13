@@ -28,11 +28,13 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_session_service.h"
 #include "client_trans_session_service.c"
+#include "client_trans_session_manager.c"
 #include "softbus_access_token_test.h"
 #include "softbus_common.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_CHANNEL_ID 1000
+#define TRANS_TEST_DEVICE_TYPE_ID 3
 #define TRANS_TEST_FILE_ENCRYPT 10
 #define TRANS_TEST_ALGORITHM 1
 #define TRANS_TEST_CRC 1
@@ -55,6 +57,7 @@ const char *g_sessionKey = "www.huaweitest.com";
 const char *g_networkId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_groupId = "TEST_GROUP_ID";
+const char *g_deviceName = "rk3568test";
 const char *g_rootDir = "/data/local/test";
 static SessionAttribute g_sessionAttr = {
     .dataType = TYPE_BYTES,
@@ -254,10 +257,8 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
 
 static void DeleteSessionServerAndSession(const char *sessionName, int32_t sessionId)
 {
-    int32_t ret = ClientDeleteSession(sessionId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, sessionName);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    (void)ClientDeleteSession(sessionId);
+    (void)ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, sessionName);
 }
 
 /**
@@ -538,7 +539,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
 
 /**
  * @tc.name: TransClientSessionTest10
- * @tc.desc: Transmission sdk session service check wether session is opened with different parameters.
+ * @tc.desc: Transmission sdk session service check whether session is opened with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -692,19 +693,19 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest15, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
     int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, false);
     ASSERT_GT(sessionId, 0);
-    ret =  ClientGetSessionSide(sessionId);
+    ret =  GetSessionSide(sessionId);
     EXPECT_EQ(ret, IS_CLIENT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, true);
     ASSERT_GT(sessionId, 0);
-    ret =  ClientGetSessionSide(sessionId);
+    ret =  GetSessionSide(sessionId);
     EXPECT_EQ(ret, IS_SERVER);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
 /**
  * @tc.name: TransClientSessionTest16
- * @tc.desc: Transmission sdk session service set file recieve listener with different parameters.
+ * @tc.desc: Transmission sdk session service set file receive listener with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -893,6 +894,170 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest24, TestSize.Level1)
     ret = GetSessionOption(sessionId, SESSION_OPTION_MAX_SENDBYTES_SIZE,
                            &optionValue, sizeof(optionValue));
     EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+}
+
+/**
+ * @tc.name: TransClientSessionTest25
+ * @tc.desc: Transmission sdk session manager lnn offline process with different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest25, TestSize.Level1)
+{
+    ClientTransLnnOfflineProc(NULL);
+    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_TCP_DIRECT, false);
+    ASSERT_GT(sessionId, 0);
+
+    NodeBasicInfo info;
+    memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    int ret = strcpy_s(info.networkId, sizeof(info.networkId), g_networkId);
+    ASSERT_EQ(ret, EOK);
+    ret = strcpy_s(info.deviceName, sizeof(info.deviceName), g_deviceName);
+    ASSERT_EQ(ret, EOK);
+    info.deviceTypeId = TRANS_TEST_DEVICE_TYPE_ID;
+    ClientTransLnnOfflineProc(&info);
+
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+}
+
+/**
+ * @tc.name: TransClientSessionTest26
+ * @tc.desc: Transmission sdk session manager judge session whether session is available.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest26, TestSize.Level1)
+{
+    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_TCP_DIRECT, false);
+    ASSERT_GT(sessionId, 0);
+    DestroyClientSessionServer(NULL, NULL);
+    bool res = SessionIdIsAvailable(sessionId);
+    EXPECT_FALSE(res);
+
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+}
+
+/**
+ * @tc.name: TransClientSessionTest27
+ * @tc.desc: Transmission sdk session manager get new session server with different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest27, TestSize.Level1)
+{
+    ClientSessionServer *server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName, g_pkgName, &g_sessionlistener);
+    ASSERT_TRUE(server != NULL);
+    SoftBusFree(server);
+    char sessionName[SESSION_NAME_SIZE_MAX + 2] = {0};
+    memset_s(sessionName, sizeof(sessionName), 'A', SESSION_NAME_SIZE_MAX + 1);
+    server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, sessionName, g_pkgName, &g_sessionlistener);
+    EXPECT_TRUE(server == NULL);
+    char pkgName[PKG_NAME_SIZE_MAX + 2] = {0};
+    memset_s(pkgName, sizeof(pkgName), 'B', PKG_NAME_SIZE_MAX + 1);
+    server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName, pkgName, &g_sessionlistener);
+    EXPECT_TRUE(server == NULL);
+}
+
+/**
+ * @tc.name: TransClientSessionTest28
+ * @tc.desc: Transmission sdk session manager judge whether parameter is valid with different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest28, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+
+    bool res = IsValidSessionParam(NULL);
+    EXPECT_FALSE(res);
+    res = IsValidSessionParam(sessionParam);
+    EXPECT_FALSE(res);
+    sessionParam->sessionName = g_sessionName;
+    res = IsValidSessionParam(sessionParam);
+    EXPECT_FALSE(res);
+    sessionParam->peerSessionName = g_sessionName;
+    res = IsValidSessionParam(sessionParam);
+    EXPECT_FALSE(res);
+    sessionParam->peerDeviceId = g_deviceId;
+    res = IsValidSessionParam(sessionParam);
+    EXPECT_FALSE(res);
+    sessionParam->groupId = g_groupId;
+    res = IsValidSessionParam(sessionParam);
+    EXPECT_FALSE(res);
+    sessionParam->attr = (const SessionAttribute*)&g_sessionAttr;
+    res = IsValidSessionParam(sessionParam);
+    EXPECT_TRUE(res);
+
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionTest29
+ * @tc.desc: Transmission sdk session manager create new session with different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest29, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = CreateNewSession(sessionParam);
+    EXPECT_TRUE(session != NULL);
+    SoftBusFree(session);
+
+    char sessionName[SESSION_NAME_SIZE_MAX + 2] = {0};
+    memset_s(sessionName, sizeof(sessionName), 'A', SESSION_NAME_SIZE_MAX + 1);
+    sessionParam->peerSessionName = (const char*)sessionName;
+    session = CreateNewSession(sessionParam);
+    EXPECT_TRUE(session == NULL);
+
+    char deviceId[DEVICE_ID_SIZE_MAX + 2] = {0};
+    memset_s(deviceId, sizeof(deviceId), 'B', DEVICE_ID_SIZE_MAX + 1);
+    sessionParam->peerSessionName = g_sessionName;
+    sessionParam->peerDeviceId = (const char*)deviceId;
+    session = CreateNewSession(sessionParam);
+    EXPECT_TRUE(session == NULL);
+
+    char groupId[GROUP_ID_SIZE_MAX + 2] = {0};
+    memset_s(groupId, sizeof(groupId), 'C', GROUP_ID_SIZE_MAX + 1);
+    sessionParam->peerSessionName = g_sessionName;
+    sessionParam->peerDeviceId = g_deviceId;
+    sessionParam->groupId = (const char*)groupId;
+    session = CreateNewSession(sessionParam);
+    EXPECT_TRUE(session == NULL);
+
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionTest30
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest30, TestSize.Level1)
+{
+    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_TCP_DIRECT, false);
+    ASSERT_GT(sessionId, 0);
+
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+
+    SessionInfo *session = GetExistSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+
+    int ret = strcmp(session->info.peerSessionName, sessionParam->peerSessionName);
+    EXPECT_EQ(ret, EOK);
+    ret = strcmp(session->info.peerDeviceId, sessionParam->peerDeviceId);
+    EXPECT_EQ(ret, EOK);
+    ret = strcmp(session->info.groupId, sessionParam->groupId);
+    EXPECT_EQ(ret, EOK);
+
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 }

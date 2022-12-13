@@ -80,6 +80,7 @@
               "header_files": [
                 "bus_center/softbus_bus_center.h",
                 "common/softbus_common.h",
+                "common/softbus_error_code.h",
                 "discovery/discovery_service.h",
                 "transport/session.h"
               ],
@@ -90,6 +91,7 @@
         "test": [
           "//foundation/communication/dsoftbus/tests/adapter:fuzztest",
           "//foundation/communication/dsoftbus/tests/adapter:unittest",
+          "//foundation/communication/dsoftbus/tests/core/authentication:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
           "//foundation/communication/dsoftbus/tests/core/bus_center:unittest",
           "//foundation/communication/dsoftbus/tests/core/common:fuzztest",
@@ -97,6 +99,7 @@
           "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/connection:unittest",
           "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
+          "//foundation/communication/dsoftbus/tests/core/discovery:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/transmission:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center:fuzztest",
           "//foundation/communication/dsoftbus/tests/sdk/bus_center:unittest",

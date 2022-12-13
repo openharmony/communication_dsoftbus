@@ -124,7 +124,7 @@ NO_SANITIZE("cfi") int BleEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         BleQueue *newQueue = CreateBleQueue(queueNode->pid);
         if (newQueue == NULL) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleEnqueueNonBlock CreateBleQueue failed");
+            CLOGE("BleEnqueueNonBlock CreateBleQueue failed");
             (void)SoftBusMutexUnlock(&g_bleQueueLock);
             return SOFTBUS_ERR;
         }
@@ -180,7 +180,7 @@ NO_SANITIZE("cfi") int BleInnerQueueInit(void)
     }
     g_innerQueue = CreateBleQueue(0);
     if (g_innerQueue == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleQueueInit CreateBleQueue(0) failed");
+        CLOGE("BleQueueInit CreateBleQueue(0) failed");
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
         return SOFTBUS_ERR;
     }

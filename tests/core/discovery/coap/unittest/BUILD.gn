@@ -18,7 +18,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/discovery"
 
-ohos_unittest("DiscoveryCoapDiscNstackxAdapterTest") {
+ohos_unittest("DiscNstackxAdapterTest") {
   module_out_path = module_output_path
   sources = [ "disc_nstackx_adapter_test.cpp" ]
 
@@ -63,7 +63,7 @@ ohos_unittest("DiscoveryCoapDiscNstackxAdapterTest") {
   }
 }
 
-ohos_unittest("DiscoveryCoapTest") {
+ohos_unittest("DiscCoapTest") {
   module_out_path = module_output_path
   sources = [ "disc_coap_test.cpp" ]
 
@@ -110,7 +110,7 @@ ohos_unittest("DiscoveryCoapTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":DiscoveryCoapDiscNstackxAdapterTest",
-    ":DiscoveryCoapTest",
+    ":DiscCoapTest",
+    ":DiscNstackxAdapterTest",
   ]
 }

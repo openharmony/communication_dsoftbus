@@ -16,11 +16,17 @@
 #ifndef LNN_CONNECTION_MOCK_H
 #define LNN_CONNECTION_MOCK_H
 
+#include "auth_common.h"
+#include "disc_interface.h"
+#include "lnn_node_info.h"
+#include "map"
+#include "p2plink_interface.h"
+#include "securec.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
+#include "softbus_log.h"
 #include <gmock/gmock.h>
 #include <mutex>
-
-#include "disc_interface.h"
-#include "softbus_conn_interface.h"
 
 namespace OHOS {
 class LnnConnectInterface {
@@ -41,24 +47,50 @@ public:
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
     virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
     virtual int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option) = 0;
+    virtual int32_t P2pLinkQueryDevIsOnline(const char *peerMac) = 0;
 };
 class LnnConnectInterfaceMock : public LnnConnectInterface {
 public:
     LnnConnectInterfaceMock();
     ~LnnConnectInterfaceMock() override;
-    MOCK_METHOD2(ConnGetConnectionInfo, int32_t (uint32_t, ConnectionInfo *));
-    MOCK_METHOD2(ConnSetConnectCallback, int32_t (ConnModule, const ConnectCallback *));
-    MOCK_METHOD1(ConnUnSetConnectCallback, void (ConnModule));
-    MOCK_METHOD3(ConnConnectDevice, int32_t (const ConnectOption *, uint32_t, const ConnectResult *));
-    MOCK_METHOD1(ConnDisconnectDevice, int32_t (uint32_t));
-    MOCK_METHOD0(ConnGetHeadSize, uint32_t (void));
-    MOCK_METHOD2(ConnPostBytes, int32_t (uint32_t, ConnPostData *));
-    MOCK_METHOD1(CheckActiveConnection, bool (const ConnectOption *));
-    MOCK_METHOD1(ConnStartLocalListening, int32_t (const LocalListenerInfo *));
-    MOCK_METHOD1(ConnStopLocalListening, int32_t (const LocalListenerInfo *));
-    MOCK_METHOD1(ConnGetNewRequestId, uint32_t (ConnModule));
-    MOCK_METHOD1(DiscDeviceInfoChanged, void (InfoTypeChanged));
-    MOCK_METHOD2(ConnUpdateConnection, int32_t (uint32_t, UpdateOption *));
+    MOCK_METHOD2(ConnGetConnectionInfo, int32_t(uint32_t, ConnectionInfo *));
+    MOCK_METHOD2(ConnSetConnectCallback, int32_t(ConnModule, const ConnectCallback *));
+    MOCK_METHOD1(ConnUnSetConnectCallback, void(ConnModule));
+    MOCK_METHOD3(ConnConnectDevice, int32_t(const ConnectOption *, uint32_t, const ConnectResult *));
+    MOCK_METHOD1(ConnDisconnectDevice, int32_t(uint32_t));
+    MOCK_METHOD0(ConnGetHeadSize, uint32_t(void));
+    MOCK_METHOD2(ConnPostBytes, int32_t(uint32_t, ConnPostData *));
+    MOCK_METHOD1(CheckActiveConnection, bool(const ConnectOption *));
+    MOCK_METHOD1(ConnStartLocalListening, int32_t(const LocalListenerInfo *));
+    MOCK_METHOD1(ConnStopLocalListening, int32_t(const LocalListenerInfo *));
+    MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
+    MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged));
+    MOCK_METHOD1(P2pLinkQueryDevIsOnline, int32_t(const char *));
+    MOCK_METHOD2(ConnUpdateConnection, int32_t(uint32_t, UpdateOption *));
+    static inline char *g_encryptData;
+    static inline ConnectCallback g_conncallback;
+    static inline ConnectResult g_connresultcb;
+    static int32_t ActionOfConnPostBytes(uint32_t connectionId, ConnPostData *data);
+    static int32_t ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback);
+    static int32_t ActionofOnConnectSuccessed(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+    static int32_t ActionofOnConnectFailed(
+        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+    static int32_t ActionofConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info);
+    static void ActionofConnUnSetConnectCallback(ConnModule moduleId);
+    static void OnVerifyPassed(uint32_t requestId, int64_t authId, const NodeInfo *info)
+    {
+        (void)requestId;
+        (void)authId;
+        (void)info;
+        return;
+    }
+    static void onVerifyFailed(uint32_t requestId, int32_t reason)
+    {
+        (void)requestId;
+        (void)reason;
+        return;
+    }
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

@@ -292,6 +292,38 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest06, TestSiz
 }
 
 /**
+ * @tc.name: TransClientAddSessionOutOfMaxTest01
+ * @tc.desc: Transmission sdk session manager add session out of maxmum.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientAddSessionOutOfMaxTest01, TestSize.Level1)
+{
+    int32_t sessionId = 0;
+    bool isEnabled = false;
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    GenerateCommParam(sessionParam);
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret,  SOFTBUS_OK);
+
+    for (int i = 0; i < MAX_SESSION_ID; ++i) {
+        char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+        ret = sprintf_s(sessionName, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, i);
+        ASSERT_GT(ret, 0);
+        sessionParam->peerSessionName = (const char*)sessionName;
+        ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+        EXPECT_EQ(ret,  SOFTBUS_OK);
+    }
+
+    sessionParam->peerSessionName = g_sessionName;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
+}
+
+/**
  * @tc.name: TransClientSessionManagerTest07
  * @tc.desc: Transmission sdk session manager add session with existed session.
  * @tc.type: FUNC
@@ -907,12 +939,12 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest28, TestSiz
 }
 
 /**
- * @tc.name: TransClientSessionDestoryTest01
- * @tc.desc: Transmission sdk session manager destory session by network id.
+ * @tc.name: TransClientSessionDestroyTest01
+ * @tc.desc: Transmission sdk session manager destroy session by network id.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestoryTest01, TestSize.Level1)
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestroyTest01, TestSize.Level1)
 {
     int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -1098,6 +1130,9 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest36, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &sessionId);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    char data[SESSION_NAME_SIZE_MAX] = {0};
+    ret = ClientGetSessionDataById(TRANS_TEST_SESSION_ID, data, SESSION_NAME_SIZE_MAX, KEY_PEER_SESSION_NAME);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 
 /**
@@ -1188,6 +1223,8 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest41, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientGetFileConfigInfoById(TRANS_TEST_SESSION_ID, &fileEncrypt, &algorithm, &crc);
     EXPECT_EQ(ret,  SOFTBUS_ERR);
+    ret = CheckPermissionState(TRANS_TEST_SESSION_ID);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 
 /**

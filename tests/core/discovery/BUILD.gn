@@ -44,3 +44,12 @@ group("unittest") {
         [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:unittest" ]
   }
 }
+
+group("fuzztest") {
+  testonly = true
+  deps = []
+  if (has_enhance_test) {
+    deps +=
+        [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:fuzztest" ]
+  }
+}

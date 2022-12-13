@@ -14,8 +14,8 @@
  */
 
 #include "lnn_trans_mock.h"
-#include "softbus_log.h"
 #include "softbus_error_code.h"
+#include "softbus_log.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -48,8 +48,7 @@ int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetw
     return GetTransInterface()->TransOpenNetWorkingChannel(sessionName, peerNetworkId);
 }
 
-int32_t TransSendNetworkingMessage(int32_t channelId, const char *data,
-    uint32_t dataLen, int32_t priority)
+int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TransSendNetworkingMessage enter");
     return GetTransInterface()->TransSendNetworkingMessage(channelId, data, dataLen, priority);
@@ -70,4 +69,4 @@ int32_t LnnTransInterfaceMock::ActionOfTransRegister(const INetworkingListener *
     return SOFTBUS_OK;
 }
 }
-}
+} // namespace OHOS
