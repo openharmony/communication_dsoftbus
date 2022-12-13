@@ -96,6 +96,10 @@ void DiscDeviceInfoChanged(InfoTypeChanged type)
 {
     return GetConnInterface()->DiscDeviceInfoChanged(type);
 }
+int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
+{
+    return GetConnInterface()->P2pLinkQueryDevIsOnline(peerMac);
+}
 }
 
 int32_t LnnConnectInterfaceMock::ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
