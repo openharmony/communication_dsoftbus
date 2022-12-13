@@ -60,7 +60,7 @@ static bool IsAuthHandlerInit(void)
     return true;
 }
 
-static void DelAuthMessage(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void DelAuthMessage(SoftBusMessage *msg)
 {
     CHECK_NULL_PTR_RETURN_VOID(msg);
     if (msg->obj != NULL) {

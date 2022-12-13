@@ -167,7 +167,7 @@ NO_SANITIZE("cfi") bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
     return true;
 }
 
-bool CheckAuthConnCallback(const AuthConnCallback *connCb)
+NO_SANITIZE("cfi") bool CheckAuthConnCallback(const AuthConnCallback *connCb)
 {
     if (connCb == NULL) {
         return false;

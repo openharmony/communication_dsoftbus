@@ -306,7 +306,7 @@ static void DelListener(ConnModule moduleId)
     return;
 }
 
-uint32_t ConnGetHeadSize(void)
+NO_SANITIZE("cfi") uint32_t ConnGetHeadSize(void)
 {
     return sizeof(ConnPktHead);
 }

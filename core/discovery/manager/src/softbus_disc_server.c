@@ -37,7 +37,7 @@ NO_SANITIZE("cfi") int32_t DiscServerInit(void)
     return SOFTBUS_OK;
 }
 
-void DiscServerDeinit(void)
+NO_SANITIZE("cfi") void DiscServerDeinit(void)
 {
     DiscMgrDeinit();
 }

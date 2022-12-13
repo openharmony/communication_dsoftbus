@@ -539,7 +539,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
 
 /**
  * @tc.name: TransClientSessionTest10
- * @tc.desc: Transmission sdk session service check wether session is opened with different parameters.
+ * @tc.desc: Transmission sdk session service check whether session is opened with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -705,7 +705,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest15, TestSize.Level1)
 
 /**
  * @tc.name: TransClientSessionTest16
- * @tc.desc: Transmission sdk session service set file recieve listener with different parameters.
+ * @tc.desc: Transmission sdk session service set file receive listener with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -923,7 +923,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest25, TestSize.Level1)
 
 /**
  * @tc.name: TransClientSessionTest26
- * @tc.desc: Transmission sdk session manager judge session wether session is available.
+ * @tc.desc: Transmission sdk session manager judge session whether session is available.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -961,7 +961,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest27, TestSize.Level1)
 
 /**
  * @tc.name: TransClientSessionTest28
- * @tc.desc: Transmission sdk session manager judge wether parameter is valid with different parameters.
+ * @tc.desc: Transmission sdk session manager judge whether parameter is valid with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */

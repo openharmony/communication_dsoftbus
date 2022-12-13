@@ -25,6 +25,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_callback.h"
+#include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_transmission_interface.h"
@@ -400,7 +401,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest002, TestSize.Level1)
     EXPECT_CALL(connMock, ConnGetHeadSize)
         .WillRepeatedly(Return(sizeof(ConnPktHead)));
     EXPECT_CALL(authMock, AuthGetEncryptSize)
-        .WillRepeatedly(Return(35));
+        .WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
     EXPECT_CALL(authMock, AuthEncrypt)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -575,4 +576,213 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
     SoftBusFree(buf);
 }
 
+/**
+  * @tc.name: TransProxyTransSendMsgTest001
+  * @tc.desc: TransProxyTransSendMsgTest001, use wrong param.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, TransProxyTransSendMsgTest001, TestSize.Level1)
+{
+    int32_t ret = SOFTBUS_ERR;
+    ProxyChannelInfo info;
+    int32_t priority = 0;
+    const char *payLoad = "test payload data";
+    uint32_t payLoadLen = strlen(payLoad);
+
+    /* test info is null */
+    ret = TransProxySendMessage(NULL, payLoad, payLoadLen, priority);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    /* test appType no auth */
+    info.appInfo.appType = APP_TYPE_INNER;
+    info.authId = -1;
+    ret = TransProxySendMessage(&info, payLoad, payLoadLen, priority);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    TransAuthInterfaceMock authMock;
+    TransConnInterfaceMock connMock;
+    EXPECT_CALL(authMock, AuthGetEncryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
+    EXPECT_CALL(authMock, AuthEncrypt).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
+
+    info.authId = 1;
+    ret = TransProxySendMessage(&info, payLoad, payLoadLen, priority);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = TransProxySendMessage(&info, payLoad, payLoadLen, priority);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: TransProxyHandshakeTest001
+  * @tc.desc: TransProxyHandshakeTest001, use wrong param and normal param.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, TransProxyHandshakeTest001, TestSize.Level1)
+{
+    int32_t ret = SOFTBUS_OK;
+    ProxyChannelInfo info;
+    info.channelId = -1;
+    info.appInfo.appType = APP_TYPE_INNER;
+    TransConnInterfaceMock connMock;
+    TransAuthInterfaceMock authMock;
+    TransCommInterfaceMock commMock;
+
+    /* test info is null */
+    ret = TransProxyHandshake(NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test appType no auth and invalid channel */
+    ret = TransProxyHandshake(&info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    AuthConnInfo wifiInfo, bleInfo;
+    wifiInfo.type = AUTH_LINK_TYPE_WIFI;
+    bleInfo.type = AUTH_LINK_TYPE_BLE;
+    EXPECT_CALL(authMock, AuthGetConnInfo).WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(DoAll(SetArgPointee<1>(wifiInfo), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(wifiInfo), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(bleInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(authMock, AuthGetServerSide).WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(true), Return(SOFTBUS_OK)));
+    info.channelId = TEST_PARSE_MESSAGE_CHANNEL;
+    /* test auth mock get auth conn info fail */
+    ret = TransProxyHandshake(&info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test auth mock get auth server side fail */
+    ret = TransProxyHandshake(&info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test pack handshake msg failed after pass set cipher */
+    EXPECT_CALL(commMock, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = TransProxyHandshake(&info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test pack message failed after pass packhandshakemsg */
+    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(authMock, AuthGetEncryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
+    EXPECT_CALL(authMock, AuthEncrypt).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = TransProxyHandshake(&info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test pack message success and send msg fail */
+    EXPECT_CALL(connMock, ConnPostBytes).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = TransProxyHandshake(&info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test send msg success */
+    ret = TransProxyHandshake(&info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: TransProxyAckHandshakeTest001
+  * @tc.desc: TransProxyAckHandshakeTest001, use wrong param and normal param.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
+{
+    int32_t ret = SOFTBUS_ERR;
+    int32_t retCode = -1;
+    uint32_t connId = -1;
+    ProxyChannelInfo channelInfo;
+    /* test channelInfo is null */
+    ret = TransProxyAckHandshake(connId, NULL, retCode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    /* test payLoad is NULL */
+    retCode = SOFTBUS_OK;
+    channelInfo.appInfo.appType = APP_TYPE_NOT_CARE;
+    ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test retCode not SOFTBUS_OK and pack message fail */
+    TransConnInterfaceMock connMock;
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(authMock, AuthGetEncryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
+    EXPECT_CALL(authMock, AuthEncrypt).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    retCode = SOFTBUS_ERR;
+    ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test pack message success and send fail */
+    EXPECT_CALL(connMock, ConnPostBytes).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: TransProxyKeepAliveTest001
+  * @tc.desc: test proxy keepalive and keepalive ack message.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, TransProxyKeepAliveTest001, TestSize.Level1)
+{
+    ProxyChannelInfo chanInfo;
+    uint32_t connId = -1;
+    TransProxyKeepalive(connId, NULL);
+
+    TransConnInterfaceMock connMock;
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(authMock, AuthGetEncryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
+    EXPECT_CALL(authMock, AuthEncrypt).WillOnce(Return(SOFTBUS_ERR)).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(connMock, ConnPostBytes).WillOnce(Return(SOFTBUS_ERR)).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    chanInfo.appInfo.appType = APP_TYPE_INNER;
+    /* test auth encrypt fail */
+    TransProxyKeepalive(connId, &chanInfo);
+    /* test send msg fail */
+    TransProxyKeepalive(connId, &chanInfo);
+    /* test app type is auth */
+    chanInfo.appInfo.appType = APP_TYPE_AUTH;
+    TransProxyKeepalive(connId, &chanInfo);
+    /* test ack keepalive info null */
+    int32_t ret = TransProxyAckKeepalive(NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test pack message fail */
+    chanInfo.appInfo.appType = APP_TYPE_INNER;
+    ret = TransProxyAckKeepalive(&chanInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test send message fail and pack success */
+    ret = TransProxyAckKeepalive(&chanInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    chanInfo.appInfo.appType = APP_TYPE_AUTH;
+    ret = TransProxyAckKeepalive(&chanInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: TransProxyResetPeerTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
+{
+    int32_t ret = SOFTBUS_ERR;
+    ProxyChannelInfo chanInfo;
+
+    ret = TransProxyResetPeer(NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    TransConnInterfaceMock connMock;
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(authMock, AuthGetEncryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
+    EXPECT_CALL(authMock, AuthEncrypt).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(connMock, ConnPostBytes).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    /* test apptype is inner, and pack message fail */
+    chanInfo.appInfo.appType = APP_TYPE_INNER;
+    ret = TransProxyResetPeer(&chanInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test send msg fail */
+    ret = TransProxyResetPeer(&chanInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    /* test apptype is auth, and success */
+    ret = TransProxyResetPeer(&chanInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 } // namespace OHOS

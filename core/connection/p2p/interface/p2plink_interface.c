@@ -57,7 +57,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetRequestId(void)
     return requestId;
 }
 
-int32_t P2pLinkInit(void)
+NO_SANITIZE("cfi") int32_t P2pLinkInit(void)
 {
     return P2pLinkManagerInit();
 }

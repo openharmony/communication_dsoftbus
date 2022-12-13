@@ -294,7 +294,7 @@ NO_SANITIZE("cfi") void ConnShutdownSocket(int32_t fd)
     }
 }
 
-int32_t ConnGetSocketError(int32_t fd)
+NO_SANITIZE("cfi") int32_t ConnGetSocketError(int32_t fd)
 {
     return SoftBusSocketGetError(fd);
 }

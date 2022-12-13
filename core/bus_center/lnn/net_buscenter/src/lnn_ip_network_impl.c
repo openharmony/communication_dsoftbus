@@ -336,7 +336,7 @@ static void DestroyIpSubnetManager(LnnPhysicalSubnet *subnet)
 
 typedef enum {
     IP_SUBNET_MANAGER_EVENT_IF_READY,
-    IP_SUBNET_MANAGER_EVENT_IF_DOWN,    // addr change from avaliable to
+    IP_SUBNET_MANAGER_EVENT_IF_DOWN,    // addr change from available to
     IP_SUBNET_MANAGER_EVENT_IF_CHANGED, // addr changed
     IP_SUBNET_MANAGER_EVENT_MAX
 } IpSubnetManagerEvent;

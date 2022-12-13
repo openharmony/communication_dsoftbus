@@ -21,6 +21,7 @@
 #include "lnn_async_callback_utils.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
@@ -115,7 +116,7 @@ int32_t LnnInitBtStateMonitorImpl(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitBtStateMonitorImpl(void)
+NO_SANITIZE("cfi") void LnnDeinitBtStateMonitorImpl(void)
 {
     (void)SoftBusRemoveBtStateListener(g_btStateListenerId);
 }

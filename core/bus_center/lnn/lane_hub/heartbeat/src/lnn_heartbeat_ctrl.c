@@ -186,7 +186,7 @@ NO_SANITIZE("cfi") int32_t LnnStartHeartbeatFrameDelay(void)
     return LnnStartHeartbeat(0);
 }
 
-int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
+NO_SANITIZE("cfi") int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
 {
     return LnnSetMediumParamBySpecificType(param);
 }
