@@ -423,7 +423,7 @@ NO_SANITIZE("cfi") static int32_t PostMessageToHandler(int32_t msgType, void *pa
     return SOFTBUS_OK;
 }
 
-static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t retCode)
+NO_SANITIZE("cfi") static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t retCode)
 {
     TimeSyncCompleteMsgPara *para = NULL;
 

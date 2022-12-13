@@ -23,6 +23,7 @@
 #include "client_trans_tcp_direct_message.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
@@ -59,7 +60,7 @@ static int32_t ClientTdcOnConnectEvent(ListenerModule module, int events, int cf
     return SOFTBUS_OK;
 }
 
-static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t fd)
+NO_SANITIZE("cfi") static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t fd)
 {
     (void)module;
     TcpDirectChannelInfo channel;

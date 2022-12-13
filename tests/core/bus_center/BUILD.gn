@@ -19,5 +19,6 @@ group("unittest") {
   deps = [
     "lnn:unittest",
     "test:unittest",
+    "utils:unittest",
   ]
 }

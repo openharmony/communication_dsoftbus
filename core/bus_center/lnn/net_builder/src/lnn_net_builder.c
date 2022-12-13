@@ -622,7 +622,7 @@ static void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
     const ConnectionAddr *addr2 = NULL;
     ConnectOption option;
 
-    // Not realy leaving lnn
+    // Not really leaving lnn
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) == 0) {
         return;
     }

@@ -62,7 +62,7 @@ NO_SANITIZE("cfi") int32_t P2pLoopInit()
     return SOFTBUS_OK;
 }
 
-static void P2pFreeLoopMsg(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static void P2pFreeLoopMsg(SoftBusMessage *msg)
 {
     if (msg != NULL) {
         if (msg->obj != NULL) {

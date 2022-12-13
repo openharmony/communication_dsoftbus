@@ -163,7 +163,7 @@ static int RegisterListenerCallback(void)
     return SOFTBUS_OK;
 }
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+NO_SANITIZE("cfi") int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_ERR;

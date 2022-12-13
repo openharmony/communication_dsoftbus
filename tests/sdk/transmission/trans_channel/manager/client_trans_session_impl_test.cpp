@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include "securec.h"
 
+#include "client_trans_session_manager.h"
+#include "session_impl.h"
 #include "session_service_impl.h"
 #include "ISessionListener.h"
 #include "softbus_def.h"
@@ -23,11 +25,53 @@
 #include "softbus_access_token_test.h"
 
 #define TEST_DATA_LENGTH 1024
+#define MAX_BYTE_LENGTH (128 * 1024 * 1024)
 
 using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
+std::string g_sessionName1;
+std::string g_sessionName2 = "security.dpms_channel";
+std::string g_pkgName1;
+std::string g_pkgName2 = "ohos.security.distributed_permission";
+std::string g_pkgName3 = "test";
+std::string g_peerNetWorkId1;
+std::string g_peerNetWorkId2 = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
+std::string g_groupId;
+int g_flags = 0;
+
+class ISessionListenerTest : public Communication::SoftBus::ISessionListener {
+public:
+    ISessionListenerTest() = default;
+    ~ISessionListenerTest() = default;
+
+    int OnSessionOpened(std::shared_ptr<Communication::SoftBus::Session> session)
+    {
+        return SOFTBUS_OK;
+    }
+
+    void OnSessionClosed(std::shared_ptr<Communication::SoftBus::Session> session)
+    {
+        return;
+    }
+
+    void OnMessageReceived(std::shared_ptr<Communication::SoftBus::Session> session, const char *data, ssize_t len)
+    {
+        return;
+    }
+
+    void OnBytesReceived(std::shared_ptr<Communication::SoftBus::Session> session, const char *data, ssize_t len)
+    {
+        return;
+    }
+
+    bool OnDataAvailable(std::shared_ptr<Communication::SoftBus::Session> session, uint32_t status)
+    {
+        return true;
+    }
+};
+
 class ClientTransSessionImplTest : public testing::Test {
 public:
     ClientTransSessionImplTest() {}
@@ -54,29 +98,28 @@ void ClientTransSessionImplTest::TearDownTestCase(void) {}
 HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest001, TestSize.Level0)
 {
     Communication::SoftBus::SessionServiceImpl testSessionServiceImpl;
-    std::string pkgName1;
-    std::string sessionName1;
-    std::shared_ptr<Communication::SoftBus::ISessionListener> listern;
-    int ret = testSessionServiceImpl.CreateSessionServer(pkgName1, sessionName1, listern);
+    ISessionListenerTest *test = new ISessionListenerTest();
+    std::shared_ptr<Communication::SoftBus::ISessionListener> listern(test);
+
+    int ret = testSessionServiceImpl.CreateSessionServer(g_pkgName1, g_sessionName1, listern);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    sessionName1 = "test";
-    ret = testSessionServiceImpl.CreateSessionServer(pkgName1, sessionName1, listern);
+    ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName1, listern);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    std::string pkgName2 ="ohos.security.distributed_permission";
-    ret = testSessionServiceImpl.CreateSessionServer(pkgName2, sessionName1, listern);
+    ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName2, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = testSessionServiceImpl.CreateSessionServer(pkgName2, sessionName1, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    ret = testSessionServiceImpl.CreateSessionServer(g_pkgName3, g_sessionName2, listern);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = testSessionServiceImpl.CreateSessionServer(pkgName2, sessionName1, listern);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName2, listern);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
-    std::string sessionName2 = "security.dpms_channel";
-    ret = testSessionServiceImpl.CreateSessionServer(pkgName2, sessionName2, listern);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    ret = testSessionServiceImpl.RemoveSessionServer(g_pkgName2, g_sessionName2);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    delete test;
 }
 
 /**
@@ -88,34 +131,29 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest001, TestSi
 HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSize.Level0)
 {
     Communication::SoftBus::SessionServiceImpl testSessionServiceImpl;
-    std::string pkgName1;
-    std::string sessionName1;
-    std::string sessionName2 = "security.dpms_channel";
-    std::string pkgName2 ="ohos.security.distributed_permission";
-    std::string peerNetWorkId1;
-    std::string peerNetWorkId2 = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-    std::string groupId;
-    int flags = 0;
     int ret;
-    std::shared_ptr<Communication::SoftBus::Session> session = testSessionServiceImpl.OpenSession(sessionName1,
-        sessionName2, peerNetWorkId2, groupId, flags);
+    std::shared_ptr<Communication::SoftBus::Session> session = testSessionServiceImpl.OpenSession(g_sessionName1,
+        g_sessionName2, g_peerNetWorkId2, g_groupId, g_flags);
     EXPECT_EQ(nullptr, session);
 
-    session = testSessionServiceImpl.OpenSession(sessionName2, sessionName1, peerNetWorkId2, groupId, flags);
+    session = testSessionServiceImpl.OpenSession(g_sessionName2, g_sessionName1, g_peerNetWorkId2, g_groupId, g_flags);
     EXPECT_EQ(nullptr, session);
 
-    session = testSessionServiceImpl.OpenSession(sessionName2, sessionName2, peerNetWorkId1, groupId, flags);
+    session = testSessionServiceImpl.OpenSession(g_sessionName2, g_sessionName2, g_peerNetWorkId1, g_groupId, g_flags);
     EXPECT_EQ(nullptr, session);
 
-    session = testSessionServiceImpl.OpenSession(sessionName2, sessionName2, peerNetWorkId2, groupId, flags);
+    session = testSessionServiceImpl.OpenSession(g_sessionName2, g_sessionName2, g_peerNetWorkId2, g_groupId, g_flags);
     EXPECT_EQ(nullptr, session);
 
     int uid = 0;
     int pid = 0;
-    ret = testSessionServiceImpl.GrantPermission(-1, -1, pkgName1);
+    ret = testSessionServiceImpl.GrantPermission(-1, -1, g_pkgName1);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = testSessionServiceImpl.GrantPermission(uid, pid, pkgName2);
+    ret = testSessionServiceImpl.GrantPermission(uid, pid, g_pkgName1);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = testSessionServiceImpl.GrantPermission(uid, pid, g_pkgName2);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     int sessionId = 1;
@@ -130,9 +168,39 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSi
     ret = testSessionServiceImpl.CloseSession(session);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = testSessionServiceImpl.RemoveSessionServer(pkgName2, sessionName1);
+    ret = testSessionServiceImpl.RemoveSessionServer(g_pkgName1, g_sessionName1);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    ret = testSessionServiceImpl.RemoveSessionServer(pkgName2, sessionName2);
+
+    ret = testSessionServiceImpl.RemoveSessionServer(g_pkgName2, g_sessionName1);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = testSessionServiceImpl.RemoveSessionServer(g_pkgName3, g_sessionName2);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
-} // namespace OHOS nvv
+
+/**
+ * @tc.name: ClientTransSessionServerImplTest003
+ * @tc.desc: client trans session server impl test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest003, TestSize.Level0)
+{
+    Communication::SoftBus::SessionImpl testSessionImpl;
+    ssize_t len = 0;
+    int ret = testSessionImpl.SendBytes(nullptr, len);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    const char *data = "test";
+    ret = testSessionImpl.SendBytes(data, len);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    len = MAX_BYTE_LENGTH + 1;
+    ret = testSessionImpl.SendBytes(data, len);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    len = TEST_DATA_LENGTH;
+    ret = testSessionImpl.SendBytes(data, len);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+} // namespace OHOS

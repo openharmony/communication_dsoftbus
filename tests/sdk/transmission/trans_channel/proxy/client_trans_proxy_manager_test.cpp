@@ -100,6 +100,34 @@ static IClientSessionCallBack g_clientSessionCb = {
     .OnQosEvent = TransOnQosEvent,
 };
 
+int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+{
+    return SOFTBUS_ERR;
+}
+
+int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+{
+    return SOFTBUS_ERR;
+}
+
+int32_t OnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+{
+    return SOFTBUS_ERR;
+}
+
+int32_t OnBytesReceived(int32_t channelId, int32_t channelType,
+    const void *data, uint32_t len, SessionPktType type)
+{
+    return SOFTBUS_ERR;
+}
+
+static IClientSessionCallBack g_sessionCb = {
+    .OnSessionOpened = OnSessionOpened,
+    .OnSessionClosed = OnSessionClosed,
+    .OnSessionOpenFailed = OnSessionOpenFailed,
+    .OnDataReceived = OnBytesReceived,
+};
+
 class ClientTransProxyManagerTest : public testing::Test {
 public:
     ClientTransProxyManagerTest() {}
@@ -186,6 +214,32 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
     
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyErrorCallBackTest
+ * @tc.desc: client trans proxy error callback test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSize.Level0)
+{
+    int ret = ClinetTransProxyInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ChannelInfo channelInfo = {0};
+    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    int32_t channelId = 1;
+    ret = ClientTransProxyOnChannelClosed(channelId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = ClientTransProxyOnChannelOpenFailed(channelId, TEST_ERR_CODE);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**

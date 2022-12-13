@@ -177,6 +177,20 @@ static IFileReceiveListener g_fileRecvListener = {
     .OnFileTransError = OnFileTransErrorTest,
 };
 
+void GenerateAndAddUdpChannel(UdpChannel *channel)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    channel->channelId = 1;
+    channel->dfileId = 1;
+    channel->businessType = BUSINESS_TYPE_STREAM;
+    memcpy_s(channel->info.mySessionName, SESSION_NAME_SIZE_MAX,
+        "normal sessionName", strlen("normal sessionName"));
+    ret = ClientTransAddUdpChannel(channel);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
 /**
  * @tc.name: TransFileListenerTest001
  * @tc.desc: trans file listener init.
@@ -443,95 +457,107 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest005
- * @tc.desc: trans file receive listener use diff param.
+ * @tc.desc: trans file send listener use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
 {
-    IClientSessionCallBack *cb = GetClientSessionCb();
-    (void)ClientTransUdpMgrInit(cb);
-    (void)TransFileInit();
-    const char* rootDir = "rootDir";
-    const char* sessionName = "file receive";
-    IFileReceiveListener *recvListener = (IFileReceiveListener *)SoftBusCalloc(sizeof(IFileReceiveListener));
-    if (recvListener == NULL) {
-        return;
-    }
-    UdpChannel *channel = TransAddChannelTest();
-    DFileMsg *msgData = {};
-    DFileMsgType msgType = DFILE_ON_BIND;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    
-    int32_t ret = ClientTransAddUdpChannel(channel);
+    int32_t ret = TransFileInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = TransSetFileReceiveListener(sessionName, recvListener, rootDir);
+    DFileMsgType msgType = DFILE_ON_CONNECT_SUCCESS;
+    DFileMsg msgData = {};
+    UdpChannel *channel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_TRUE(channel != nullptr);
+    GenerateAndAddUdpChannel(channel);
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgData.rate = 1;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_BIND;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_SESSION_IN_PROGRESS;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_SESSION_TRANSFER_RATE;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    ret = TransSetFileSendListener(channel->info.mySessionName, &g_fileSendListener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    
-    msgType = DFILE_ON_FILE_LIST_RECEIVED;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    
-    msgType = DFILE_ON_FILE_RECEIVE_SUCCESS;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    
-    msgType = DFILE_ON_FILE_RECEIVE_FAIL;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    
-    msgType = DFILE_ON_TRANS_IN_PROGRESS;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    
+
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
     msgType = DFILE_ON_FILE_SEND_SUCCESS;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_FILE_SEND_FAIL;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_TRANS_IN_PROGRESS;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_SESSION_TRANSFER_RATE;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
     msgType = DFILE_ON_CONNECT_FAIL;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    
-    TransDeleteFileListener(sessionName);
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_FATAL_ERROR;
+    FileSendListener(channel->dfileId, msgType, &msgData);
+
+    TransDeleteFileListener(channel->info.mySessionName);
     TransFileDeinit();
     ClientTransUdpMgrDeinit();
 }
 
 /**
  * @tc.name: TransFileTest006
- * @tc.desc: trans file receive listener.
+ * @tc.desc: trans file recv listener use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
 {
-    IClientSessionCallBack *cb = GetClientSessionCb();
-    (void)ClientTransUdpMgrInit(cb);
-    (void)TransFileInit();
-    UdpChannel *channel = TransAddChannelTest();
-    const char *rootDir = "root_dir";
-    const char* sessionName = "file receive";
-    DFileMsg *msgData = {};
-    DFileMsgType msgType = DFILE_ON_BIND;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    int32_t ret = ClientTransAddUdpChannel(channel);
+    int32_t ret = TransFileInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    DFileMsgType msgType = DFILE_ON_CONNECT_SUCCESS;
+    DFileMsg msgData = {};
+    UdpChannel *channel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
+    ASSERT_TRUE(channel != nullptr);
+    GenerateAndAddUdpChannel(channel);
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
 
-    ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
+    msgData.rate = 1;
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
+
+    string rootDir = "rootDir";
+    ret = TransSetFileReceiveListener(channel->info.mySessionName, &g_fileRecvListener, rootDir.c_str());
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     msgType = DFILE_ON_FILE_LIST_RECEIVED;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
 
     msgType = DFILE_ON_FILE_RECEIVE_SUCCESS;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-
-    msgType = DFILE_ON_FILE_RECEIVE_FAIL;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
 
     msgType = DFILE_ON_TRANS_IN_PROGRESS;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
 
-    msgType = DFILE_ON_FILE_SEND_SUCCESS;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
+    msgType = DFILE_ON_FILE_RECEIVE_FAIL;
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_CONNECT_SUCCESS;
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
 
     msgType = DFILE_ON_CONNECT_FAIL;
-    FileReceiveListener(channel->dfileId, msgType, msgData);
-    TransDeleteFileListener(sessionName);
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
+
+    msgType = DFILE_ON_FATAL_ERROR;
+    FileReceiveListener(channel->dfileId, msgType, &msgData);
+
+    TransDeleteFileListener(channel->info.mySessionName);
     TransFileDeinit();
     ClientTransUdpMgrDeinit();
 }
