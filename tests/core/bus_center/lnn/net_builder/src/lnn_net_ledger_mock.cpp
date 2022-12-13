@@ -227,6 +227,16 @@ const char *LnnGetDeviceUdid(const NodeInfo *info)
     return GetNetLedgerInterface()->LnnGetDeviceUdid(info);
 }
 
+int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
+{
+    return GetNetLedgerInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
+}
+
+int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
+{
+    return GetNetLedgerInterface()->LnnSetLocalNum64Info(key, info);
+}
+
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
 {
     if (info == NULL || infoNum == NULL) {

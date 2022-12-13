@@ -70,6 +70,8 @@ public:
     virtual const char *LnnGetDeviceUdid(const NodeInfo *info) = 0;
     virtual ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId) = 0;
     virtual void LnnRemoveNode(const char *udid) = 0;
+    virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
+    virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -113,6 +115,8 @@ public:
     MOCK_METHOD3(LnnSetNodeOffline, ReportCategory (const char *, ConnectionAddrType, int32_t));
     MOCK_METHOD1(LnnRemoveNode, void (const char *));
     MOCK_METHOD1(LnnGetDeviceUdid, const char *(const NodeInfo *));
+    MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t (const char *, char *, uint32_t));
+    MOCK_METHOD2(LnnSetLocalNum64Info, int32_t (InfoKey, int64_t));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
