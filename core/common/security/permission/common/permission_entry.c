@@ -221,6 +221,7 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
     char mapKey[TEMP_STR_MAX_LEN];
     int appInfoSize;
     int appInfoIndex;
+    cJSON *appInfoArray;
     if (!GetJsonObjectStringItem(object, SESSION_NAME_STR, permissionEntry->sessionName, SESSION_NAME_SIZE_MAX)) {
         goto EXIT;
     }
@@ -233,7 +234,7 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
     if (GetJsonObjectStringItem(object, SEC_LEVEL_STR, mapKey, TEMP_STR_MAX_LEN)) {
         permissionEntry->secLevel = GetPeMapValue(mapKey);
     }
-    cJSON *appInfoArray = cJSON_GetObjectItem(object, APP_INFO_STR);
+    appInfoArray = cJSON_GetObjectItem(object, APP_INFO_STR);
     if (appInfoArray != NULL) {
         appInfoSize = cJSON_GetArraySize(appInfoArray);
         for (appInfoIndex = 0; appInfoIndex < appInfoSize; appInfoIndex++) {
@@ -456,7 +457,7 @@ NO_SANITIZE("cfi") void DeinitPermissionJson(void)
 NO_SANITIZE("cfi") SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
     const char *pkgName, uint32_t actions)
 {
-    SoftBusPermissionItem *pItem = SoftBusCalloc(sizeof(SoftBusPermissionItem));
+    SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
     if (pItem == NULL) {
         return NULL;
     }
