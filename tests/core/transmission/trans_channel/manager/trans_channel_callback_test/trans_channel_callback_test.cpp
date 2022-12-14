@@ -97,24 +97,12 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
  */
 HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpenFailed001, TestSize.Level1)
 {
-    const char *pkgName = TEST_PKG_NAME;
     int32_t pid = 2112;
     int32_t channelId = 12;
     int32_t channelType = 21;
     int32_t errCode = 2;
-
     int32_t ret = TransServerGetChannelCb()->OnChannelOpenFailed(NULL, pid, channelId, channelType, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    pid = -1;
-    TransLaneMgrDeinit();
-    ret = TransServerGetChannelCb()->OnChannelOpenFailed(pkgName, channelId, channelType, errCode, pid);
-
-    pid = 12;
-    ret = TransLaneMgrInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransServerGetChannelCb()->OnChannelOpenFailed(pkgName, pid, channelId, channelType, errCode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -213,5 +201,20 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelLinkDown001, TestSize.Lev
     pid = 1;
     ret = TransServerOnChannelLinkDown(pkgName, pid, networkId, routeType);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransServerOnChannelClosed
+ * @tc.desc: TransServerOnChannelClosed, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelCallbackTest, TransServerOnChannelClosed, TestSize.Level1)
+{
+    int32_t channelId = 12;
+    int32_t channelType = CHANNEL_TYPE_UDP;
+    int32_t pid = 212;
+    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, pid, channelId, channelType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // OHOS
