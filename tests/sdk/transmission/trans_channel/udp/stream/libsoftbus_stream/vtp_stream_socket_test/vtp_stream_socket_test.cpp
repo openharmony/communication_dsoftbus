@@ -63,66 +63,6 @@ void VtpStreamSocketTest::TearDownTestCase(void)
 {}
 
 /**
- * @tc.name: InsertBufferLength001
- * @tc.desc: SetSocketEpollMode, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(VtpStreamSocketTest, InsertBufferLength001, TestSize.Level1)
-{
-    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
-        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-
-    int fd = 2;
-    int ret = vtpStreamSocket->SetSocketEpollMode(fd);
-    EXPECT_EQ(-1, ret);
-
-    int num = 2;
-    int length = 3;
-    vtpStreamSocket->InsertBufferLength(num, length, (uint8_t *)"test");
-}
-
-/**
- * @tc.name: SetSocketEpollMode001
- * @tc.desc: EpollTimeout, use the wrong parameter.
- * @tc.desc: SetSocketEpollMode, use the wrong parameter.
- * @tc.desc: InsertBufferLength, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(VtpStreamSocketTest, SetSocketEpollMode001, TestSize.Level1)
-{
-    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
-        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
-    int fd = 2;
-    int timeout = 10;
-    int ret  = vtpStreamSocket->EpollTimeout(fd, timeout);
-    EXPECT_NE(0, ret);
-
-    ret  = vtpStreamSocket->SetSocketEpollMode(fd);
-    EXPECT_EQ(-1, ret);
-
-    int num = 5;
-    int length = 3;
-    vtpStreamSocket->InsertBufferLength(num, length, (uint8_t *)"test");
-
-    Communication::SoftBus::StreamData *data =
-        (Communication::SoftBus::StreamData *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamData));
-    ASSERT_TRUE(data != nullptr);
-    Communication::SoftBus::StreamFrameInfo *info =
-        (Communication::SoftBus::StreamFrameInfo *)SoftBusCalloc(sizeof(Communication::SoftBus::StreamFrameInfo));
-    ASSERT_TRUE(info != nullptr);
-    std::unique_ptr<IStream> stream = nullptr;
-
-    if (data != nullptr) {
-        SoftBusFree(data);
-    }
-    if (info != nullptr) {
-        SoftBusFree(info);
-    }
-}
-
-/**
  * @tc.name: CreateClient001
  * @tc.desc: CreateClient, use the wrong parameter.
  * @tc.type: FUNC
@@ -963,6 +903,11 @@ HWTEST_F(VtpStreamSocketTest, DoStreamRecv001, TestSize.Level1)
 
     res = vtpStreamSocket->SetVtpStackConfig(fd, *value);
     EXPECT_TRUE(res);
+
+    vtpStreamSocket->streamFd_ = 1;
+    res = vtpStreamSocket->SetVtpStackConfig(fd, *value);
+    EXPECT_TRUE(!res);
+
     if (value != nullptr) {
         SoftBusFree(value);
     }
@@ -1000,4 +945,55 @@ HWTEST_F(VtpStreamSocketTest, HandleRipplePolicy001, TestSize.Level1)
         SoftBusFree(info);
     }
 }
+
+/**
+ * @tc.name: InsertBufferLength001
+ * @tc.desc: SetSocketEpollMode, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, InsertBufferLength001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    int fd = 2;
+    vtpStreamSocket->epollFd_ = 2;
+    ASSERT_TRUE(vtpStreamSocket != nullptr);
+    int ret = vtpStreamSocket->SetSocketEpollMode(fd);
+    EXPECT_EQ(-1, ret);
+
+    int num = 2;
+    int length = 2;
+    ASSERT_TRUE(vtpStreamSocket != nullptr);
+    std::unique_ptr<char[]> data = nullptr;
+    data = std::make_unique<char[]>(length);
+    ASSERT_TRUE(data != nullptr);
+    vtpStreamSocket->InsertBufferLength(num, length, reinterpret_cast<uint8_t *>(data.get()));
+
+    length = 0;
+    vtpStreamSocket->InsertBufferLength(num, length, reinterpret_cast<uint8_t *>(data.get()));
+}
+
+/**
+ * @tc.name: SetSocketEpollMode001
+ * @tc.desc: EpollTimeout, use the wrong parameter.
+ * @tc.desc: SetSocketEpollMode, use the wrong parameter.
+ * @tc.desc: InsertBufferLength, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, SetSocketEpollMode001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+    int fd = 2;
+    int timeout = 10;
+    int ret  = vtpStreamSocket->EpollTimeout(fd, timeout);
+    EXPECT_NE(0, ret);
+
+    ret  = vtpStreamSocket->SetSocketEpollMode(fd);
+    EXPECT_EQ(-1, ret);
+}
+
 } // OHOS
