@@ -263,8 +263,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest006, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
 {
-    IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    int32_t ret = TransUdpChannelMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
     char* data = TestGetMsgInfo();
     ASSERT_TRUE(data != nullptr);
@@ -279,7 +278,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest007, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TransOnExchangeUdpInfoRequest(authId, newChannel->seq, NULL);
     cJSON_Delete(msg);
-    TransUdpChannelDeinit();
+    TransUdpChannelMgrDeinit();
 }
 
 /**
@@ -325,20 +324,6 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
 
     data.flag = 0;
     UdpModuleCb(authId, &data);
-}
-
-/**
- * @tc.name: TransUdpNegoTest010
- * @tc.desc: extern module active publish, stop session whitout start.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpNegoTest, TransUdpNegoTest010, TestSize.Level1)
-{
-    IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    TransUdpChannelDeinit();
 }
 
 /**
