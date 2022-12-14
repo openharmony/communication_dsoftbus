@@ -793,6 +793,55 @@ ohos_unittest("LNNLaneTestMock") {
   }
 }
 
+ohos_unittest("LNNDiscMgrTest") {
+  module_out_path = module_output_path
+  sources = [
+    "disc_mgr/disc_manager_mock.cpp",
+    "disc_mgr/lnn_discovery_interface_test.cpp",
+  ]
+
+  include_dirs = [
+    "disc_mgr",
+    "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/connection/interface",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 native_source_path = rebase_path("$dsoftbus_root_path")
 dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
 enhanced_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
@@ -880,6 +929,7 @@ group("unittest") {
     ":BusCenterClientProxyStandardTest",
     ":BusCenterClientProxyTest",
     ":LNNBtNetworkImplMock",
+    ":LNNDiscMgrTest",
     ":LNNLaneTestMock",
     ":LNNLedgerTest",
     ":LNNLedgerTestMock",
