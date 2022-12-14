@@ -62,9 +62,9 @@ void StreamDepacketizerTest::TearDownTestCase(void)
  */
 HWTEST_F(StreamDepacketizerTest, GetDataLength001, TestSize.Level1)
 {
-    // int type = 1;
     int streamType_ = Communication::SoftBus::COMMON_VIDEO_STREAM;
-    std::shared_ptr<Communication::SoftBus::StreamDepacketizer> streamDepacketizer= std::make_shared<Communication::SoftBus::StreamDepacketizer>(streamType_);
+    std::shared_ptr<Communication::SoftBus::StreamDepacketizer> streamDepacketizer =
+        std::make_shared<Communication::SoftBus::StreamDepacketizer>(streamType_);
 
     int ret = streamDepacketizer->GetHeaderDataLen();
     EXPECT_EQ(0, ret);
@@ -116,5 +116,4 @@ HWTEST_F(StreamDepacketizerTest, DepacketizeHeader001, TestSize.Level1)
     int ret = streamDepacketizer->GetDataLength();
     EXPECT_EQ(0, ret);
 }
-
 } // OHOS

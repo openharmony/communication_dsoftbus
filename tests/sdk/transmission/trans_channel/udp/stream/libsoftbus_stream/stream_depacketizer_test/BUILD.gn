@@ -19,9 +19,7 @@ module_output_path = "dsoftbus/transmission"
 ## UnitTest StreamDepacketizerTest {{{
 ohos_unittest("StreamDepacketizerTest") {
   module_out_path = module_output_path
-  sources = [
-    "stream_depacketizer_test.cpp",
-   ]
+  sources = [ "stream_depacketizer_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -41,8 +39,8 @@ ohos_unittest("StreamDepacketizerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/googletest:gtest_main",
     "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -57,7 +55,6 @@ ohos_unittest("StreamDepacketizerTest") {
     ]
   }
 }
-
 
 group("unittest") {
   testonly = true
