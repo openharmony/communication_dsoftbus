@@ -162,18 +162,16 @@ HWTEST_F(VtpStreamSocketTest, CreateServer001, TestSize.Level1)
     vtpStreamSocket->DestroyStreamSocket();
 
     vtpStreamSocket->isDestroyed_ = false;
-    vtpStreamSocket->DestroyStreamSocket();
-
     vtpStreamSocket->listenFd_ = 2;
-    vtpStreamSocket->DestroyStreamSocket();
-
     vtpStreamSocket->streamFd_ = 2;
-    vtpStreamSocket->DestroyStreamSocket();
-
     vtpStreamSocket->epollFd_ = 2;
     vtpStreamSocket->DestroyStreamSocket();
 
+    vtpStreamSocket->listenFd_ = -1;
+    vtpStreamSocket->streamFd_ = -1;
+    vtpStreamSocket->epollFd_ = -1;
     vtpStreamSocket->DestroyStreamSocket();
+
     EXPECT_EQ(true, vtpStreamSocket->isDestroyed_);
 
     if (local != nullptr) {
@@ -227,7 +225,13 @@ HWTEST_F(VtpStreamSocketTest, GetOption001, TestSize.Level1)
     vtpStreamSocket->optFuncMap_.clear();
     *value = vtpStreamSocket->GetOption(type);
     value->GetIntValue();
+    EXPECT_TRUE(value != NULL);
 
+    Communication::SoftBus::VtpStreamSocket::OptionFunc fun = {
+    };
+    type = 2;
+    vtpStreamSocket->optFuncMap_.insert(std::pair<int, Communication::SoftBus::VtpStreamSocket::OptionFunc>(type, fun));
+    *value = vtpStreamSocket->GetOption(type);
     EXPECT_TRUE(value != NULL);
 
     if (value != nullptr) {
@@ -269,6 +273,15 @@ HWTEST_F(VtpStreamSocketTest, SetOption001, TestSize.Level1)
     type = BOOL_TYPE;
     ret = vtpStreamSocket->SetOption(type, *value);
     EXPECT_EQ(false, ret);
+
+    Communication::SoftBus::VtpStreamSocket::OptionFunc fun = {
+    };
+    type = 2;
+    vtpStreamSocket->optFuncMap_.insert(std::pair<int, Communication::SoftBus::VtpStreamSocket::OptionFunc>(type, fun));
+    type = 1000;
+    ret = vtpStreamSocket->SetOption(type, *value);
+    EXPECT_EQ(false, ret);
+
     if (value != nullptr) {
         SoftBusFree(value);
     }
@@ -479,6 +492,13 @@ HWTEST_F(VtpStreamSocketTest, SetStreamHeaderSize001, TestSize.Level1)
     ret = vtpStreamSocket->SetStreamHeaderSize(type, *value);
     EXPECT_EQ(true, ret);
 
+    value->type_ = BOOL_TYPE;
+    PrintOptionInfo(type, *value);
+
+    value->type_ = STRING_TYPE;
+    PrintOptionInfo(type, *value);
+
+
     if (value != nullptr) {
         SoftBusFree(value);
     }
@@ -612,10 +632,12 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
 
     int fd = 3;
     std::mutex streamSocketLock_;
-    vtpStreamSocket->AddStreamSocketLock(fd, streamSocketLock_);
 
     std::shared_ptr<VtpStreamSocket> streamreceiver;
     vtpStreamSocket->AddStreamSocketListener(fd, streamreceiver);
+
+    vtpStreamSocket->g_streamSocketLockMap.insert(std::pair<int, std::mutex &>(fd, streamSocketLock_));
+    vtpStreamSocket->AddStreamSocketLock(fd, streamSocketLock_);
 
     vtpStreamSocket->RemoveStreamSocketLock(fd);
 
@@ -714,6 +736,43 @@ HWTEST_F(VtpStreamSocketTest, EpollTimeout001, TestSize.Level1)
     int timeout = 5;
     int ret = vtpStreamSocket->EpollTimeout(fd, timeout);
     EXPECT_NE(0, ret);
+}
+
+/**
+ * @tc.name: MakeStreamData001
+ * @tc.desc: MakeStreamData, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, MakeStreamData001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpStreamSocket> vtpStreamSocket =
+        std::make_shared<Communication::SoftBus::VtpStreamSocket>();
+
+    std::unique_ptr<char[]> dataBuffer = nullptr;
+    std::unique_ptr<char[]> extBuffer = nullptr;
+    int dataLength = 2;
+    int extLen = 0;
+    dataBuffer = vtpStreamSocket->RecvStream(dataLength);
+    Communication::SoftBus::StreamData data = { std::move(dataBuffer), dataLength, std::move(extBuffer), extLen };
+    Communication::SoftBus::StreamFrameInfo info = {};
+    std::unique_ptr<IStream> stream = vtpStreamSocket->MakeStreamData(data, info);
+    EXPECT_TRUE(stream == nullptr);
+
+    vtpStreamSocket->streamType_ = Communication::SoftBus::VIDEO_SLICE_STREAM;
+    stream = vtpStreamSocket->MakeStreamData(data, info);
+
+    vtpStreamSocket->streamType_ = Communication::SoftBus::COMMON_VIDEO_STREAM;
+    stream = vtpStreamSocket->MakeStreamData(data, info);
+
+    vtpStreamSocket->streamType_ = Communication::SoftBus::COMMON_AUDIO_STREAM;
+    stream = vtpStreamSocket->MakeStreamData(data, info);
+
+    vtpStreamSocket->streamType_ = Communication::SoftBus::RAW_STREAM;
+    stream = vtpStreamSocket->MakeStreamData(data, info);
+
+    vtpStreamSocket->streamType_ = Communication::SoftBus::INVALID;
+    stream = vtpStreamSocket->MakeStreamData(data, info);
 }
 
 /**
