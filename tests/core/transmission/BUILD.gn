@@ -14,6 +14,15 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+native_source_path = rebase_path("$dsoftbus_root_path")
+dep_dir = "dsoftbus_enhance/test/core/transmission"
+has_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                               [
+                                 "$native_source_path",
+                                 "$dep_dir",
+                               ],
+                               "value")
+
 group("unittest") {
   testonly = true
   deps = [
@@ -27,4 +36,7 @@ group("unittest") {
     "trans_channel/tcp_direct:unittest",
     "trans_channel/udp_negotiation:unittest",
   ]
+  if (has_enhance_test) {
+    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/trans_channel:unittest" ]
+  }
 }

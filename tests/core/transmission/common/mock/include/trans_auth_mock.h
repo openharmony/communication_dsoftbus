@@ -84,7 +84,6 @@ public:
     virtual int32_t LnnRequestLane(uint32_t laneId,
         const LaneRequestOption *request, const ILaneListener *listener) = 0;
     virtual int32_t LnnFreeLane(uint32_t laneId) = 0;
-
 };
 
 class TransAuthInterfaceMock : public TransAuthInterface {
