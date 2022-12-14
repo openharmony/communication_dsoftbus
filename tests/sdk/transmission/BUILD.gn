@@ -14,6 +14,15 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+native_source_path = rebase_path("$dsoftbus_root_path")
+dep_dir = "dsoftbus_enhance/test/sdk/transmission"
+trans_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                 [
+                                   "$native_source_path",
+                                   "$dep_dir",
+                                 ],
+                                 "value")
+
 group("benchmarktest") {
   testonly = true
   deps = [ "benchmarktest:benchmarktest" ]
@@ -36,4 +45,9 @@ group("unittest") {
     "session:unittest",
     "trans_channel:unittest",
   ]
+  if (trans_enhance_test) {
+    deps += [
+      "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission:unittest",
+    ]
+  }
 }
