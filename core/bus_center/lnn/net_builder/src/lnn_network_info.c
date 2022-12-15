@@ -207,12 +207,10 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bt state change btState = %d", btState);
     switch (btState) {
         case SOFTBUS_BR_TURN_ON:
-
             (void)LnnSetNetCapability(&netCapability, BIT_BR);
             (void)LnnSetNetCapability(&netCapability, BIT_BLE);
             break;
         case SOFTBUS_BR_TURN_OFF:
-
             (void)LnnClearNetCapability(&netCapability, BIT_BR);
             (void)LnnClearNetCapability(&netCapability, BIT_BLE);
             isSend = true;
