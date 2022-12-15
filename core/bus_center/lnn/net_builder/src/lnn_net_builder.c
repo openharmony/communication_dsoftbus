@@ -1541,7 +1541,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         return;
     }
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnProcessNotTrustedMsgDelay,
-        info, NOT_TRUSTED_DEVICE_MSG_DELAY) != SOFTBUS_OK) {
+        (void *)info, NOT_TRUSTED_DEVICE_MSG_DELAY) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async not trusted msg delay fail");
         SoftBusFree(info);
     }
