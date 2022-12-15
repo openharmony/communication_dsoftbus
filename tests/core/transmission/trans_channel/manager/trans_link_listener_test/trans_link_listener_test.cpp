@@ -29,6 +29,8 @@
 #include "trans_link_listener.c"
 
 using namespace testing::ext;
+constexpr char NODE5_NETWORK_ID[] = "235689BNHFCZ";
+
 namespace OHOS {
 #define TEST_SESSION_NAME "com.softbus.transmission.test"
 #define TEST_CONN_IP "192.168.8.1"
@@ -92,6 +94,7 @@ HWTEST_F(TransLinkListenerTest, ReqLinkListener001, TestSize.Level1)
 /**
  * @tc.name: OnP2pLinkDisconnected001
  * @tc.desc: OnP2pLinkDisconnected001, use the wrong parameter.
+ * @tc.desc: FreeMem, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -107,5 +110,13 @@ HWTEST_F(TransLinkListenerTest, OnP2pLinkDisconnected001, TestSize.Level1)
     OnP2pLinkDisconnected(NULL);
     ret = GetNetworkIdByP2pMac(peerMac, networkId, sizeof(networkId));
     EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    NodeBasicInfo *nodeInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo));
+    (void)memset_s(nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strncpy_s(nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE5_NETWORK_ID, strlen(NODE5_NETWORK_ID));
+
+    FreeMem(NULL);
+    ASSERT_TRUE(nodeInfo != nullptr);
+    FreeMem((const NodeBasicInfo *)nodeInfo);
 }
 } // OHOS
