@@ -187,9 +187,59 @@ ohos_unittest("ClientProxyTest") {
   }
 }
 
+ohos_unittest("BusCenterIpcTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/test/ipc/bus_center_ipc_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/bus_center_ipc_mock.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/ipc/standard/src",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//base/security/device_auth/services:deviceauth_sdk",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":BusCenterIpcTest",
     ":ClientProxyTest",
     ":HeartBeatMediumTest",
     ":HeartFsmTest",
