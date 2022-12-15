@@ -1494,7 +1494,6 @@ static void OnLnnProcessNotTrustedMsgDelay(void *para)
     for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "OnLnnProcessNotTrustedMsgDelay: authSeq %" PRId64 "-> %" PRId64,  info->authSeq[type], authSeq[type]);
-    
         if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[offline] LnnRequestLeaveSpecific type:%d", type);
             LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type));
