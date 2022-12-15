@@ -729,20 +729,19 @@ HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
 {
-    const char *myIp = "127.0.0.1";
     uint8_t key = 215;
     uint32_t keyLen = 8;
     int32_t filePort = 25;
     int32_t ret = StartNStackXDFileServer(NULL, &key, keyLen, g_fileMsgRecviver, &filePort);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    ret = StartNStackXDFileServer(myIp, &key, keyLen, g_fileMsgRecviver, NULL);
+    ret = StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, NULL);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     ret = ConnInitSockets();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = StartNStackXDFileServer(myIp, &key, keyLen, g_fileMsgRecviver, &filePort);
+    ret = StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ConnDeinitSockets();
 }
@@ -755,14 +754,13 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
 {
-    const char *peerIp = "127.0.0.1";
     uint8_t key = 215;
     uint32_t keyLen = 8;
     int32_t peerPort = 25;
     int32_t ret = StartNStackXDFileClient(NULL, peerPort, &key, keyLen, g_fileMsgRecviver);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     
-    ret = StartNStackXDFileClient(peerIp, peerPort, &key, keyLen, g_fileMsgRecviver);
+    ret = StartNStackXDFileClient("127.0.0.1", peerPort, &key, keyLen, g_fileMsgRecviver);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 }
