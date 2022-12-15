@@ -157,7 +157,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("softbus_server") {
     sanitize = {
       cfi = true
-      debug = false
+      debug = true
     }
     defines = AUTH_SERVER_DEFINES
     defines += [ "__STDC_FORMAT_MACROS" ]
