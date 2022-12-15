@@ -740,7 +740,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
 
     ret = ConnInitSockets();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    (void))StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
+    (void)StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
     ConnDeinitSockets();
 }
 
