@@ -19,21 +19,21 @@
 
 #include "bus_center_manager.h"
 #include "message_handler.h"
-#include "softbus_base_listener.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_feature_config.h"
 
-#define TIME_SEC_TO_MSEC 1000L
+#define TIME_SEC_TO_MSEC  1000L
 #define TIME_MSEC_TO_USEC 1000L
 
 #define SEQ_NETWORK_ID_BITS 32
 #define SEQ_TIME_STAMP_BITS 8
 #define SEQ_TIME_STAMP_MASK 0xFFL
-#define SEQ_INTEGER_BITS 24
-#define SEQ_INTEGER_MAX 0xFFFFFF
+#define SEQ_INTEGER_BITS    24
+#define SEQ_INTEGER_MAX     0xFFFFFF
 
 #define AUTH_SUPPORT_AS_SERVER_MASK 0x01
 
@@ -50,10 +50,8 @@ static SoftBusHandler g_authHandler = { NULL, NULL, NULL };
 /* auth handler */
 static bool IsAuthHandlerInit(void)
 {
-    if (g_authHandler.looper == NULL ||
-        g_authHandler.looper->PostMessage == NULL ||
-        g_authHandler.looper->PostMessageDelay == NULL ||
-        g_authHandler.looper->RemoveMessageCustom == NULL) {
+    if (g_authHandler.looper == NULL || g_authHandler.looper->PostMessage == NULL ||
+        g_authHandler.looper->PostMessageDelay == NULL || g_authHandler.looper->RemoveMessageCustom == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth handler not init.");
         return false;
     }
@@ -96,15 +94,14 @@ NO_SANITIZE("cfi") static void HandleAuthMessage(SoftBusMessage *msg)
     CHECK_NULL_PTR_RETURN_VOID(msg);
     EventHandler handler = (EventHandler)(uintptr_t)msg->arg1;
     if (handler == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "invalid event handler, event: %d", msg->what);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid event handler, event: %d", msg->what);
         return;
     }
     handler(msg->obj);
 }
 
-NO_SANITIZE("cfi") int32_t PostAuthEvent(EventType event, EventHandler handler,
-    const void *obj, uint32_t size, uint64_t delayMs)
+NO_SANITIZE("cfi")
+int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, uint32_t size, uint64_t delayMs)
 {
     if (!IsAuthHandlerInit()) {
         return SOFTBUS_NO_INIT;
@@ -173,8 +170,7 @@ NO_SANITIZE("cfi") void ReleaseAuthLock(void)
 NO_SANITIZE("cfi") bool GetConfigSupportAsServer(void)
 {
     uint32_t ability = 0;
-    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION,
-        (uint8_t *)(&ability), sizeof(ability)) != SOFTBUS_OK) {
+    if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, (uint8_t *)(&ability), sizeof(ability)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get auth ability from config file fail.");
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth ability: %u", ability);
@@ -200,12 +196,12 @@ NO_SANITIZE("cfi") uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
 
 static void UpdateUniqueId(void)
 {
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get local networkId fail.");
         return;
     }
-    uint8_t hashId[SHA_256_HASH_LEN] = {0};
+    uint8_t hashId[SHA_256_HASH_LEN] = { 0 };
     if (SoftBusGenerateStrHash((uint8_t *)networkId, strlen(networkId), hashId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "GenerateStrHash fail.");
         return;
@@ -235,7 +231,7 @@ NO_SANITIZE("cfi") int64_t GenSeq(bool isServer)
 
 NO_SANITIZE("cfi") uint64_t GetCurrentTimeMs(void)
 {
-    SoftBusSysTime now = {0};
+    SoftBusSysTime now = { 0 };
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusGetTime fail.");
         return 0;
@@ -254,8 +250,7 @@ NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthCon
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
     switch (info1->type) {
         case AUTH_LINK_TYPE_WIFI:
-            if (info2->type == AUTH_LINK_TYPE_WIFI &&
-                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+            if (info2->type == AUTH_LINK_TYPE_WIFI && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
                 return true;
             }
             break;
@@ -272,8 +267,7 @@ NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthCon
             }
             break;
         case AUTH_LINK_TYPE_P2P:
-            if (info2->type == AUTH_LINK_TYPE_P2P &&
-                info1->info.ipInfo.port == info2->info.ipInfo.port &&
+            if (info2->type == AUTH_LINK_TYPE_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
                 strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
                 return true;
             }
@@ -300,8 +294,8 @@ NO_SANITIZE("cfi") int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, 
         case AUTH_LINK_TYPE_BLE:
             option->type = CONNECT_BLE;
             if (strcpy_s(option->bleOption.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK ||
-                memcpy_s(option->bleOption.deviceIdHash, UDID_HASH_LEN,
-                    connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                memcpy_s(option->bleOption.deviceIdHash, UDID_HASH_LEN, connInfo->info.bleInfo.deviceIdHash,
+                    UDID_HASH_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac/deviceIdHash fail.");
                 return SOFTBUS_MEM_ERR;
             }
@@ -309,8 +303,8 @@ NO_SANITIZE("cfi") int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, 
             break;
         case AUTH_LINK_TYPE_P2P:
             option->type = CONNECT_TCP;
-            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr),
-                connInfo->info.ipInfo.ip) != EOK) {
+            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->info.ipInfo.ip) !=
+                EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy ip fail.");
                 return SOFTBUS_MEM_ERR;
             }
@@ -353,8 +347,8 @@ NO_SANITIZE("cfi") int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, Aut
         case CONNECT_BLE:
             connInfo->type = AUTH_LINK_TYPE_BLE;
             if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, info->bleInfo.bleMac) != EOK ||
-                memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
-                    info->bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, info->bleInfo.deviceIdHash,
+                    UDID_HASH_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac/deviceIdHash fail.");
                 return SOFTBUS_MEM_ERR;
             }
