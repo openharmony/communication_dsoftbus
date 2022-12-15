@@ -128,7 +128,7 @@ if (defined(ohos_lite)) {
   ohos_shared_library("softbus_utils") {
     sanitize = {
       cfi = true
-      debug = false
+      debug = true
     }
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
