@@ -31,6 +31,7 @@ using namespace testing::ext;
 #define TEST_CHANNELID 5
 #define TEST_LEN 50
 #define ERR_CHANNELID (-1)
+const char *g_sessionName = "ohos.distributedschedule.dms.test";
 
 namespace OHOS {
 class TransTcpDirectMessageAppendTest : public testing::Test {
@@ -79,6 +80,42 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
     EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = NotifyChannelOpenFailed(ERR_CHANNELID, 0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+    cJSON replyData;
+    ret = OpenDataBusReply(TEST_CHANNELID, 0, &replyData);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = OpenDataBusReply(ERR_CHANNELID, 0, &replyData);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    char reply[TEST_LEN];
+    int ret2 = TransTdcPostReplyMsg(TEST_CHANNELID, 0, 0, reply);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret2);
+
+    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != NULL);
+    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
+    ASSERT_TRUE(res == EOK);
+    ret = OpenDataBusRequestReply(appInfo, TEST_CHANNELID, 0, 0);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+    SoftBusFree(appInfo);
+
+    int32_t errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
+    char errDesc[TEST_LEN] = "Get Uuid By ChanId failed";
+    ret = OpenDataBusRequestError(TEST_CHANNELID, 0, errDesc, errCode, 0);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+
+    OpenDataBusRequestOutSessionName(g_sessionName, g_sessionName);
+
+    TransSrvDataListDeinit();
+    ServerDataBuf *serverDataBuf = TransSrvGetDataBufNodeById(TEST_CHANNELID);
+    EXPECT_EQ(NULL, serverDataBuf);
+
+    int64_t ret3 = GetAuthIdByChannelInfo(ERR_CHANNELID, 0, 0);
+    EXPECT_EQ(AUTH_INVALID_ID, ret3);
+
+    ret3 = GetAuthIdByChannelInfo(TEST_CHANNELID, 0, 0);
+    EXPECT_EQ(AUTH_INVALID_ID, ret3);
 }
 
 /**
