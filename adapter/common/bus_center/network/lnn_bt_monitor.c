@@ -73,7 +73,8 @@ static void LnnOnBtStateChanged(int32_t listenerId, int32_t state)
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn async notify bt state changed, listenerId:%d, notifyState:%d",
         listenerId, *notifyState);
-    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyBtStateChangeEvent, notifyState);
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyBtStateChangeEvent,
+        (void *)notifyState);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn async notify bt state err, ret:%d", ret);
         SoftBusFree(notifyState);

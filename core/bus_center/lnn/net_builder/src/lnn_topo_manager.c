@@ -732,7 +732,7 @@ static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
         SoftBusFree(msg);
         return;
     }
-    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnRelationChangedDelay, msg,
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnRelationChangedDelay, (void *)msg,
         RELATION_CHANGED_MSG_DELAY) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async relation changed msg delay fail");
         SoftBusFree(msg);
