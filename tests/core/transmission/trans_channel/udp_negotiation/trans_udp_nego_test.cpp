@@ -176,8 +176,6 @@ static void GenerateSessionServer(SessionServer *newNode)
     newNode->pid = 1;
 }
 
-
-
 /**
  * @tc.name: TransUdpNegoTest001
  * @tc.desc: extern module active publish, stop session whitout start.
