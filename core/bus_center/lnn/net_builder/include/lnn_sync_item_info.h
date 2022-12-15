@@ -25,6 +25,8 @@ extern "C" {
 #endif
 
 int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo);
+int32_t LnnInitOffline(void);
+void LnnDeinitOffline(void);
 
 #ifdef __cplusplus
 }

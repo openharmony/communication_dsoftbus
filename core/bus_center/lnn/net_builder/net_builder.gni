@@ -32,6 +32,7 @@ if (dsoftbus_feature_lnn_net) {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_topo_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_item_info.c",
   ]
   if (!enhanced) {
     bus_center_builder_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c" ]
