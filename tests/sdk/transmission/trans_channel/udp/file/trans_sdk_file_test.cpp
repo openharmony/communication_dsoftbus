@@ -717,7 +717,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
    ret = OpenTcpServer("280567565", port);
    EXPECT_TRUE(ret == SOFTBUS_ERR);
 
-   ret = OpenTcpServer("127.0.0.1", NULL);
+   ret = OpenTcpServer("127.0.0.1", 0);
    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -742,7 +742,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_ERR);
     ConnDeinitSockets();
 }
 
@@ -761,6 +761,6 @@ HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     
     ret = StartNStackXDFileClient("127.0.0.1", peerPort, &key, keyLen, g_fileMsgRecviver);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_ERR);
 }
 }
