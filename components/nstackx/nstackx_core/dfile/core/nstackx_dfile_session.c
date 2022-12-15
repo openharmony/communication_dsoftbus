@@ -129,7 +129,7 @@ void CalculateSessionTransferRatePrepare(DFileSession *session)
     if (!ListIsEmpty(&session->dFileTransChain)) {
         return;
     }
-    DFILE_LOGI(TAG, "begin to calulate transfer rate");
+    DFILE_LOGI(TAG, "begin to calculate transfer rate");
     session->bytesTransferred = 0;
     session->transCount = 0;
     ClockGetTime(CLOCK_MONOTONIC, &session->startTs);
