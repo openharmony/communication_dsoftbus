@@ -15,10 +15,10 @@
 
 #ifndef SOFTBUS_CONN_INTERFACE_H
 #define SOFTBUS_CONN_INTERFACE_H
-#include <stdint.h>
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -56,7 +56,7 @@ typedef enum {
     CONNECT_TYPE_MAX
 } ConnectType;
 
-#define CONN_INVALID_LISTENER_MODULE_ID 0xffff
+#define CONN_INVALID_LISTENER_MODULE_ID    0xffff
 #define CONN_DYNAMIC_LISTENER_MODULE_COUNT 5
 
 typedef enum {
