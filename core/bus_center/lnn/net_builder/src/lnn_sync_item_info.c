@@ -25,6 +25,12 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_wifi_api_adapter.h"
+#include "softbus_adapter_socket.h"
+#include "lnn_net_builder.h"
+#include "lnn_connection_addr_utils.h"
+
+#define CONN_CODE_SHIFT 16
+#define DISCOVERY_TYPE_MASK 0x7FFF
 
 static int32_t FillTargetWifiConfig(const unsigned char *targetBssid, const char *ssid,
                                     const SoftBusWifiDevConf *conWifiConf, SoftBusWifiDevConf *targetWifiConf)
@@ -144,25 +150,41 @@ void OnReceiveTransReqMsg(LnnSyncInfoType type, const char *networkId, const uin
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnSyncDeviceName(const char *networkId)
+static void OnReceiveBrOffline(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    const char *deviceName = NULL;
-    const NodeInfo *info = LnnGetLocalNodeInfo();
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local node info fail");
-        return SOFTBUS_ERR;
+    uint32_t combinedInt;
+    char uuid[UUID_BUF_LEN];
+    int16_t peerCode, code;
+    DiscoveryType discType;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv offline info, type:%d, len:%d", type, len);
+    if (type != LNN_INFO_TYPE_OFFLINE) {
+        return;
     }
-    deviceName = LnnGetDeviceName(&info->deviceInfo);
-    if (deviceName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get device name fail");
-        return SOFTBUS_ERR;
+    if (msg == NULL || len != sizeof(int32_t)) {
+        return;
     }
-    if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_DEVICE_NAME, networkId, (const uint8_t *)deviceName,
-        strlen(deviceName) + 1, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send sync device name fail");
-        return SOFTBUS_ERR;
+    combinedInt = *(uint32_t *)msg;
+    combinedInt = SoftBusNtoHl(combinedInt);
+    peerCode = (int16_t)(combinedInt >> CONN_CODE_SHIFT);
+    discType = (DiscoveryType)(combinedInt & DISCOVERY_TYPE_MASK);
+    if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "covert networkId to uuid fail!");
+        return;
     }
-    return SOFTBUS_OK;
+    code = LnnGetCnnCode(uuid, DISCOVERY_TYPE_BR);
+    if (code == INVALID_CONNECTION_CODE_VALUE) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid not exist!");
+        return;
+    }
+    if (discType != DISCOVERY_TYPE_BR || code != peerCode) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info error discType=%d, code=%d, peerCode=%d!",
+            discType, code, peerCode);
+        return;
+    }
+    if (LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType(discType)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "request leave specific fail!");
+    }
 }
 
 int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo)
@@ -188,4 +210,14 @@ int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t LnnInitOffline(void)
+{
+    return LnnRegSyncInfoHandler(LNN_INFO_TYPE_OFFLINE, OnReceiveBrOffline);
+}
+
+NO_SANITIZE("cfi") void LnnDeinitOffline(void)
+{
+    (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_OFFLINE, OnReceiveBrOffline);
 }
