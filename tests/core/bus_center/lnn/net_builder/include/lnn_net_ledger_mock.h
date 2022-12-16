@@ -127,6 +127,7 @@ public:
     static int32_t ActionOfLnnGetLnnRelation(const char *id, IdCategory type,
         uint8_t *relation, uint32_t len);
     static int32_t ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
+    static int32_t ActionLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_MOCK_H
