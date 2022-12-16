@@ -454,7 +454,7 @@ uint16_t GetStandardBlockSize(const FileManager *fileManager);
 
 int32_t SetCryptPara(FileListTask *fileList, const uint8_t key[], uint32_t keyLen);
 
-FileListTask *GetFileListById(MutexList *taskList, uint16_t transId, uint8_t *isErrorOccured);
+FileListTask *GetFileListById(MutexList *taskList, uint16_t transId, uint8_t *isErrorOccurred);
 
 void RefreshBytesTransFerred(FileManager *fileManager, BlockFrame *frame);
 int32_t GetFileBlockListSize(MutexList *taskList, uint32_t *recvListAllSize, uint32_t *recvInnerAllSize);
