@@ -24,6 +24,7 @@ group("unittest") {
     "log:unittest",
     "network:unittest",
     "security/permission/common:unittest",
+    "security/permission/standard:unittest",
     "sequence_verification:unittest",
     "utils:unittest",
   ]
