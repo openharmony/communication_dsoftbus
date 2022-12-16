@@ -75,5 +75,10 @@ void LnnHbOnAuthGroupDeleted(void)
 {
     return GetNetworkManagerInterface()->LnnHbOnAuthGroupDeleted();
 }
+
+int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+{
+    return GetNetworkManagerInterface()->SoftbusGetConfig(type, val, len);
+}
 }
 }

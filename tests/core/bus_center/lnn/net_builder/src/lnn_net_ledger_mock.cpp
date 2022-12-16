@@ -44,6 +44,23 @@ static LnnNetLedgerInterface *GetNetLedgerInterface()
     return reinterpret_cast<LnnNetLedgerInterface *>(g_netLedgerinterface);
 }
 
+int32_t LnnNetLedgertInterfaceMock::ActionLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    if (key == STRING_KEY_NET_IF_NAME) {
+        if (strcpy_s(info, len, "deviceName") != EOK) {
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    if (key == STRING_KEY_WLAN_IP) {
+        if (strcpy_s(info, len, "127.0.0.2") != EOK) {
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
+}
+
 extern "C" {
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
