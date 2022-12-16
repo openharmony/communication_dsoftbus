@@ -951,6 +951,8 @@ group("unittest") {
     deps += [
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/heartbeat:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_channel_rating:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_qos:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_stastic:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/time_sync:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/unittest:unittest",
     ]
