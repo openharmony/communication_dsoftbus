@@ -186,13 +186,15 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1)
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnRequestLeaveByAddrType).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    LnnPhysicalSubnet subnet = {
-        .status = LNN_SUBNET_IDLE,
-    };
-    DestroyBtSubnetManager(&subnet);
-    subnet.status = LNN_SUBNET_RUNNING;
-    DestroyBtSubnetManager(&subnet);
-    DestroyBtSubnetManager(&subnet);
+    LnnPhysicalSubnet *subnet = reinterpret_cast<LnnPhysicalSubnet *>(SoftBusMalloc(sizeof(LnnPhysicalSubnet)));
+    memset_s(subnet, sizeof(LnnPhysicalSubnet), 0, sizeof(LnnPhysicalSubnet));
+    subnet->status = LNN_SUBNET_IDLE;
+    DestroyBtSubnetManager(subnet);
+
+    LnnPhysicalSubnet *subnet1 = reinterpret_cast<LnnPhysicalSubnet *>(SoftBusMalloc(sizeof(LnnPhysicalSubnet)));
+    memset_s(subnet1, sizeof(LnnPhysicalSubnet), 0, sizeof(LnnPhysicalSubnet));
+    subnet1->status = LNN_SUBNET_RUNNING;
+    DestroyBtSubnetManager(subnet1);
 }
 
 /*

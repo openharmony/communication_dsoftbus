@@ -22,6 +22,7 @@
 #include "bus_center_event.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
+#include "softbus_config_type.h"
 
 namespace OHOS {
 class LnnNetworkManagerInterface {
@@ -36,6 +37,7 @@ public:
     virtual int32_t LnnStartDiscovery(void) = 0;
     virtual void SetCallLnnStatus(bool flag) = 0;
     virtual void LnnHbOnAuthGroupDeleted(void) =0;
+    virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -50,6 +52,7 @@ public:
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
     MOCK_METHOD1(SetCallLnnStatus, void (bool));
     MOCK_METHOD0(LnnHbOnAuthGroupDeleted, void (void));
+    MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H
