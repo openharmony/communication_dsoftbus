@@ -354,13 +354,12 @@ if (defined(ohos_lite)) {
     sources = [ "udp/stream/client_trans_stream_test.cpp" ]
     include_dirs = trans_udp_channel_sdk_inc
     include_dirs += trans_sdk_test_common_inc
-      include_dirs += [
-        "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
-        "$dsoftbus_root_path/sdk/transmission/ipc/standard/src",
-        "$dsoftbus_root_path/sdk/transmission/ipc/standard/include",
-        "$dsoftbus_root_path/core/frame/standard/init/include",
-      ]
-
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
+      "$dsoftbus_root_path/sdk/transmission/ipc/standard/src",
+      "$dsoftbus_root_path/sdk/transmission/ipc/standard/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
+    ]
 
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
@@ -408,9 +407,9 @@ if (defined(ohos_lite)) {
       if (dsoftbus_feature_trans_udp_stream == true) {
         if (!defined(ohos_lite)) {
           deps += [
+            ":ClientTransStreamTest",
             ":TransSdkUdpStreamAdaptorTest",
             ":TransSdkUdpStreamInterfaceTest",
-            ":ClientTransStreamTest",
             "udp/stream/libsoftbus_stream:unittest",
           ]
         }
