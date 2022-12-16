@@ -237,20 +237,20 @@ int32_t MutexListPopFront(MutexList *mutexList, List **curFront, uint8_t *isPope
     return ret;
 }
 
-static FileListTask *PrepareOneTaskByStatus(FileManager *fileManager, uint32_t runStatus, uint8_t *isErrorOccured)
+static FileListTask *PrepareOneTaskByStatus(FileManager *fileManager, uint32_t runStatus, uint8_t *isErrorOccurred)
 {
     List *pos = NULL;
     List *tmp = NULL;
     FileListTask *fileList = NULL;
     uint8_t isFound = NSTACKX_FALSE;
-    *isErrorOccured = NSTACKX_FALSE;
+    *isErrorOccurred = NSTACKX_FALSE;
 
     if (fileManager == NULL) {
         return NULL;
     }
     if (PthreadMutexLock(&fileManager->taskList.lock) != 0) {
         DFILE_LOGE(TAG, "pthread mutex lock error");
-        *isErrorOccured = NSTACKX_TRUE;
+        *isErrorOccurred = NSTACKX_TRUE;
         return NULL;
     }
     LIST_FOR_EACH_SAFE(pos, tmp, &fileManager->taskList.head) {
@@ -272,7 +272,7 @@ static FileListTask *PrepareOneTaskByStatus(FileManager *fileManager, uint32_t r
     }
     if (PthreadMutexUnlock(&fileManager->taskList.lock) != 0) {
         DFILE_LOGE(TAG, "pthread mutex unlock error");
-        *isErrorOccured = NSTACKX_TRUE;
+        *isErrorOccurred = NSTACKX_TRUE;
         if (runStatus != FILE_LIST_STATUS_STOP) {
             return NULL;
         }
@@ -894,7 +894,7 @@ static void *FileManagerThread(void *arg)
     FileManager *fileManager = ctx->fileManager;
     uint32_t threadIdx = ctx->threadIdx;
     free(ctx);
-    uint8_t isErrorOccured = NSTACKX_FALSE;
+    uint8_t isErrorOccurred = NSTACKX_FALSE;
     FileListTask *fileList = NULL;
     uint8_t isBind = NSTACKX_FALSE;
     FileManagerPre(fileManager, threadIdx);
@@ -904,8 +904,8 @@ static void *FileManagerThread(void *arg)
             break;
         }
         uint8_t isStopTaskDetached = NSTACKX_FALSE;
-        fileList = PrepareOneTaskByStatus(fileManager, FILE_LIST_STATUS_STOP, &isErrorOccured);
-        if (isErrorOccured) {
+        fileList = PrepareOneTaskByStatus(fileManager, FILE_LIST_STATUS_STOP, &isErrorOccurred);
+        if (isErrorOccurred) {
             fileManager->errCode = FILE_MANAGER_EMUTEX;
             NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
             DFILE_LOGE(TAG, "error occuerd when get stop file list");
@@ -915,12 +915,12 @@ static void *FileManagerThread(void *arg)
             DFILE_LOGI(TAG, "Thread %u is clearing fileList %u", threadIdx, fileList->transId);
             ClearFileList(fileManager, fileList);
         }
-        if (isErrorOccured || isStopTaskDetached) {
+        if (isErrorOccurred || isStopTaskDetached) {
             continue;
         }
 
-        fileList = PrepareOneTaskByStatus(fileManager, FILE_LIST_STATUS_IDLE, &isErrorOccured);
-        if (isErrorOccured) {
+        fileList = PrepareOneTaskByStatus(fileManager, FILE_LIST_STATUS_IDLE, &isErrorOccurred);
+        if (isErrorOccurred) {
             fileManager->errCode = FILE_MANAGER_EMUTEX;
             NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
             DFILE_LOGE(TAG, "error occuerd when get idle file list");
@@ -1076,13 +1076,13 @@ int32_t SetCryptPara(FileListTask *fileList, const uint8_t key[], uint32_t keyLe
  * Note that this interface is only called by dfile main thread now. If other thread wants to call it, must be very
  * careful about thread-safety.
  */
-FileListTask *GetFileListById(MutexList *taskList, uint16_t transId, uint8_t *isErrorOccured)
+FileListTask *GetFileListById(MutexList *taskList, uint16_t transId, uint8_t *isErrorOccurred)
 {
     List *list = NULL;
     FileListTask *fileList = NULL;
     uint8_t isFound = NSTACKX_FALSE;
-    if (isErrorOccured != NULL) {
-        *isErrorOccured = NSTACKX_FALSE;
+    if (isErrorOccurred != NULL) {
+        *isErrorOccurred = NSTACKX_FALSE;
     }
     if (taskList == NULL) {
         return NULL;
@@ -1093,7 +1093,7 @@ FileListTask *GetFileListById(MutexList *taskList, uint16_t transId, uint8_t *is
     }
     LIST_FOR_EACH(list, &taskList->head) {
         fileList = (FileListTask *)list;
-        /* If the target filelist has been stopped, it will not be accessable by other thread. */
+        /* If the target filelist has been stopped, it will not be accessible by other thread. */
         if (fileList->transId == transId && fileList->runStatus != FILE_LIST_STATUS_STOP) {
             isFound = NSTACKX_TRUE;
             break;
@@ -1108,8 +1108,8 @@ FileListTask *GetFileListById(MutexList *taskList, uint16_t transId, uint8_t *is
     }
     return NULL;
 L_ERR_FILE_MANAGER:
-    if (isErrorOccured != NULL) {
-        *isErrorOccured = NSTACKX_TRUE;
+    if (isErrorOccurred != NULL) {
+        *isErrorOccurred = NSTACKX_TRUE;
     }
     return NULL;
 }
@@ -1132,7 +1132,7 @@ int32_t GetFileBlockListSize(MutexList *taskList, uint32_t *recvListAllSize, uin
     }
     LIST_FOR_EACH(list, &taskList->head) {
         fileList = (FileListTask *)list;
-        /* If the target filelist has been stopped, it will not be accessable by other thread. */
+        /* If the target filelist has been stopped, it will not be accessible by other thread. */
         if (fileList->runStatus != FILE_LIST_STATUS_STOP) {
             sum += fileList->recvBlockList.size;
             innerSum += fileList->innerRecvSize;
@@ -1610,7 +1610,7 @@ int32_t FileManagerRecvFileTask(FileManager *fileManager, RecvFileListInfo *file
     }
 
     if (MutexListAddNode(&fileManager->taskList, &fmFileList->list, NSTACKX_FALSE) != NSTACKX_EOK) {
-        DFILE_LOGE(TAG, "Add tast to list error");
+        DFILE_LOGE(TAG, "Add task to list error");
         ClearRecvFileList(fmFileList);
         fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
@@ -1670,7 +1670,7 @@ int32_t FileManagerFileWrite(FileManager *fileManager, FileDataFrame *frame)
 {
     uint16_t transId;
     FileListTask *fileList = NULL;
-    uint8_t isErrorOccured = NSTACKX_FALSE;
+    uint8_t isErrorOccurred = NSTACKX_FALSE;
     BlockFrame block = {
         .list = {NULL, NULL},
         .fileDataFrame = frame,
@@ -1680,8 +1680,8 @@ int32_t FileManagerFileWrite(FileManager *fileManager, FileDataFrame *frame)
         return NSTACKX_EINVAL;
     }
     transId = ntohs(frame->header.transId);
-    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccured);
-    if (isErrorOccured || fileList == NULL) {
+    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccurred);
+    if (isErrorOccurred || fileList == NULL) {
         fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
         DFILE_LOGE(TAG, "failed to get target fileList %u", transId);
@@ -1947,7 +1947,7 @@ int32_t FileManagerGetReceivedFiles(FileManager *fileManager, uint16_t transId, 
                                     uint8_t fileIdSuccessFlag[], uint32_t *fileNum)
 {
     FileListTask *fileList = NULL;
-    uint8_t isErrorOccured;
+    uint8_t isErrorOccurred;
 
     if (fileNum == NULL || *fileNum == 0) {
         return NSTACKX_EFAILED;
@@ -1958,8 +1958,8 @@ int32_t FileManagerGetReceivedFiles(FileManager *fileManager, uint16_t transId, 
         return NSTACKX_EFAILED;
     }
 
-    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccured);
-    if (isErrorOccured) {
+    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccurred);
+    if (isErrorOccurred) {
         fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
         *fileNum = 0;
