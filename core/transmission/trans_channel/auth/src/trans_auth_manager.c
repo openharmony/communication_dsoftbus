@@ -42,7 +42,7 @@ typedef struct {
     AppInfo appInfo;
     int32_t authId;
     ConnectOption connOpt;
-    bool isConnOptValid;
+    bool isClient;
 } AuthChannelInfo;
 
 static SoftBusList *g_authChannelList = NULL;
@@ -225,7 +225,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         }
         item->authId = authId;
         appInfo->myData.channelId = item->appInfo.myData.channelId;
-        item->isConnOptValid = false;
+        item->isClient = false;
         if (AddAuthChannelInfo(item) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddAuthChannelInfo failed");
             SoftBusFree(item);
@@ -587,7 +587,7 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
     if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    info->isConnOptValid = false;
+    info->isClient = false;
     return info;
 EXIT_ERR:
     SoftBusFree(info);
@@ -609,7 +609,7 @@ NO_SANITIZE("cfi") int32_t TransOpenAuthMsgChannel(const char *sessionName, cons
         return SOFTBUS_MEM_ERR;
     }
     *channelId = channel->appInfo.myData.channelId;
-    channel->isConnOptValid = true;
+    channel->isClient = true;
     int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port);
     if (authId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthOpenChannel failed");
@@ -646,7 +646,6 @@ NO_SANITIZE("cfi") int32_t TransCloseAuthChannel(int32_t channelId)
         ListDelete(&channel->node);
         g_authChannelList->cnt--;
         AuthCloseChannel(channel->authId);
-        NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
         SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_OK;
@@ -689,7 +688,7 @@ NO_SANITIZE("cfi") int32_t TransAuthGetConnOptionByChanId(int32_t channelId, Con
         return SOFTBUS_ERR;
     }
 
-    if (!chanInfo.isConnOptValid) {
+    if (!chanInfo.isClient) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "auth channel of conn opt invalid");
         return SOFTBUS_ERR;
     }
