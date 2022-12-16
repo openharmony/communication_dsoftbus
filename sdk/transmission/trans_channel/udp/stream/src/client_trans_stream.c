@@ -138,7 +138,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
     }
     if (channel->isServer) {
         VtpStreamOpenParam p1 = {
-            "DSOFTBUS_STREAM",
+            (char *)"DSOFTBUS_STREAM",
             channel->myIp,
             NULL,
             -1,
@@ -156,7 +156,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "stream server success, listen port = %d.", port);
     } else {
         VtpStreamOpenParam p1 = {
-            "DSOFTBUS_STREAM",
+            (char *)"DSOFTBUS_STREAM",
             channel->myIp,
             channel->peerIp,
             channel->peerPort,
