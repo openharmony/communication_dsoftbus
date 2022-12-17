@@ -288,6 +288,7 @@ static int32_t TransListCopy(ListNode *sessionServerList)
         if (newpos == NULL) {
             TransListDelete(sessionServerList);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusMalloc fail!");
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_MALLOC_ERR;
         }
         *newpos = *pos;
