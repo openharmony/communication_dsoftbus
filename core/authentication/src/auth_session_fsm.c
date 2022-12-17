@@ -95,7 +95,7 @@ static AuthFsm *TranslateToAuthFsm(FsmStateMachine *fsm, int32_t msgType, Messag
         return NULL;
     }
     if (authFsm->isDead) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%"PRId64"] has dead", authFsm->authSeq);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%" PRId64 "] has dead", authFsm->authSeq);
         return NULL;
     }
     /* check para */
@@ -117,7 +117,7 @@ static uint32_t GetNextAuthFsmId(void)
 static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t connId,
     const AuthConnInfo *connInfo, bool isServer)
 {
-    AuthFsm *authFsm = SoftBusCalloc(sizeof(AuthFsm));
+    AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
     if (authFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc AuthFsm fail");
         return NULL;
@@ -143,14 +143,14 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     }
     ListNodeInsert(&g_authFsmList, &authFsm->node);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "create auth fsm[%"PRId64"], name[%s], side[%s], reqId[%u], "CONN_INFO,
+        "create auth fsm[%" PRId64 "], name[%s], side[%s], reqId[%u], " CONN_INFO,
         authFsm->authSeq, authFsm->fsmName, GetAuthSideStr(isServer), requestId, CONN_DATA(connId));
     return authFsm;
 }
 
 static void DestroyAuthFsm(AuthFsm *authFsm)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "destroy auth fsm[%"PRId64"], side[%s], reqId[%u]",
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "destroy auth fsm[%" PRId64 "], side[%s], reqId[%u]",
         authFsm->authSeq, GetAuthSideStr(authFsm->info.isServer), authFsm->info.requestId);
     ListDelete(&authFsm->node);
     if (authFsm->info.deviceInfoData != NULL) {
@@ -199,7 +199,7 @@ static void FreeMessagePara(MessagePara *para)
 
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth fsm[%"PRId64"] complete: side=%s, result=%d",
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth fsm[%" PRId64 "] complete: side=%s, result=%d",
         authFsm->authSeq, GetAuthSideStr(authFsm->info.isServer), result);
     LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
 
@@ -219,7 +219,7 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
     (void)msgPara;
     switch (msgType) {
         case FSM_MSG_AUTH_TIMEOUT:
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%"PRId64"] timeout", authFsm->authSeq);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%" PRId64 "] timeout", authFsm->authSeq);
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_TIMEOUT);
             break;
         case FSM_MSG_DEVICE_NOT_TRUSTED:
@@ -230,7 +230,7 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-                "auth fsm[%"PRId64"] cannot handle msg: %d", authFsm->authSeq, msgType);
+                "auth fsm[%" PRId64 "] cannot handle msg: %d", authFsm->authSeq, msgType);
             break;
         }
 }
@@ -247,7 +247,7 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "SyncDevIdState: auth fsm[%"PRId64"] enter", authFsm->authSeq);
+        "SyncDevIdState: auth fsm[%" PRId64 "] enter", authFsm->authSeq);
     if (!authFsm->info.isServer) {
         if (PostDeviceIdMessage(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVID_FAIL);
@@ -295,7 +295,7 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
         return false;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "SyncDevIdState: auth fsm[%"PRId64"] process message: %d", authFsm->authSeq, msgType);
+        "SyncDevIdState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
     switch (msgType) {
         case FSM_MSG_RECV_DEVICE_ID:
             HandleMsgRecvDeviceId(authFsm, msgPara);
@@ -326,7 +326,7 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
     }
     if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth fsm[%"PRId64"] save session key fail", authFsm->authSeq);
+            "auth fsm[%" PRId64 "] save session key fail", authFsm->authSeq);
     }
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
 }
@@ -359,13 +359,13 @@ static void HandleMsgAuthResult(AuthFsm *authFsm, MessagePara *para)
     }
     if (TrySyncDeviceInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth fsm[%"PRId64"] sync device info fail", authFsm->authSeq);
+            "auth fsm[%" PRId64 "] sync device info fail", authFsm->authSeq);
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
         return;
     }
     if (authFsm->info.deviceInfoData != NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth fsm[%"PRId64"] dispatch device info to next state", authFsm->authSeq);
+            "auth fsm[%" PRId64 "] dispatch device info to next state", authFsm->authSeq);
         (void)AuthSessionProcessDevInfoData(authFsm->authSeq,
             authFsm->info.deviceInfoData, authFsm->info.deviceInfoDataLen);
         SoftBusFree(authFsm->info.deviceInfoData);
@@ -377,7 +377,7 @@ static void HandleMsgAuthResult(AuthFsm *authFsm, MessagePara *para)
 static void HandleMsgRecvDevInfoEarly(AuthFsm *authFsm, MessagePara *para)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth fsm[%"PRId64"] recv device info early, save it", authFsm->authSeq);
+        "auth fsm[%" PRId64 "] recv device info early, save it", authFsm->authSeq);
     AuthSessionInfo *info = &authFsm->info;
     if (info->deviceInfoData != NULL) {
         SoftBusFree(info->deviceInfoData);
@@ -400,7 +400,7 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
         return false;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "DeviceAuthState: auth fsm[%"PRId64"] process message: %d", authFsm->authSeq, msgType);
+        "DeviceAuthState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
     switch (msgType) {
         case FSM_MSG_RECV_AUTH_DATA:
             HandleMsgRecvAuthData(authFsm, msgPara);
@@ -462,7 +462,7 @@ static void HandleMsgRecvCloseAck(AuthFsm *authFsm, MessagePara *para)
     (void)para;
     AuthSessionInfo *info = &authFsm->info;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth fsm[%"PRId64"] recv close ack, isNodeInfoReceived=%d", authFsm->authSeq, info->isNodeInfoReceived);
+        "auth fsm[%" PRId64 "] recv close ack, isNodeInfoReceived=%d", authFsm->authSeq, info->isNodeInfoReceived);
     if (info->isNodeInfoReceived) {
         CompleteAuthSession(authFsm, SOFTBUS_OK);
     } else {
@@ -480,7 +480,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
         return false;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "SyncDevInfoState: auth fsm[%"PRId64"] process message: %d", authFsm->authSeq, msgType);
+        "SyncDevInfoState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
     switch (msgType) {
         case FSM_MSG_RECV_DEVICE_INFO:
             HandleMsgRecvDeviceInfo(authFsm, msgPara);
@@ -505,12 +505,12 @@ static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
         }
         if (item->isDead) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-                "auth fsm[%"PRId64"] has dead.", item->authSeq);
+                "auth fsm[%" PRId64 "] has dead.", item->authSeq);
             break;
         }
         return item;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%"PRId64"] not found.", authSeq);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%" PRId64 "] not found.", authSeq);
     return NULL;
 }
 
@@ -523,13 +523,13 @@ static AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer)
         }
         if (item->isDead) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-                "auth fsm[%"PRId64"] has dead.", item->authSeq);
+                "auth fsm[%" PRId64 "] has dead.", item->authSeq);
             break;
         }
         return item;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-        "auth fsm not found by "CONN_INFO, CONN_DATA(connId));
+        "auth fsm not found by " CONN_INFO, CONN_DATA(connId));
     return NULL;
 }
 
@@ -540,7 +540,7 @@ static int32_t GetSessionInfoFromAuthFsm(int64_t authSeq, AuthSessionInfo *info)
     }
     AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
     if (authFsm == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%"PRId64"] not found.", authSeq);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth fsm[%" PRId64 "] not found.", authSeq);
         ReleaseAuthLock();
         return SOFTBUS_ERR;
     }
@@ -617,7 +617,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t reques
         return SOFTBUS_MEM_ERR;
     }
     if (LnnFsmStart(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "start auth fsm[%"PRId64"]", authFsm->authSeq);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "start auth fsm[%" PRId64 "]", authFsm->authSeq);
         DestroyAuthFsm(authFsm);
         ReleaseAuthLock();
         return SOFTBUS_ERR;
@@ -733,7 +733,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
         }
         if (item->isDead) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-                "auth fsm[%"PRId64"] has dead.", item->authSeq);
+                "auth fsm[%" PRId64 "] has dead.", item->authSeq);
             continue;
         }
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_NOT_TRUSTED, NULL);
@@ -753,7 +753,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
             continue;
         }
         if (item->isDead) {
-            ALOGE("auth fsm[%"PRId64"] has dead.", item->authSeq);
+            ALOGE("auth fsm[%" PRId64 "] has dead.", item->authSeq);
             continue;
         }
         LnnFsmPostMessage(&item->fsm, FSM_MSG_DEVICE_DISCONNECTED, NULL);

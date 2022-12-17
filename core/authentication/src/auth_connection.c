@@ -457,11 +457,11 @@ static int32_t PostCommData(uint32_t connectionId, bool toServer,
         .seq = GenSeq(!toServer),
         .flag = CONN_HIGH,
         .pid = 0,
-        .buf = (char *)buf,
         .len = size,
+        .buf = (char *)buf,
     };
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "PostCommData: data{seq=%"PRId64", len=%u} conn{id=%u, seq=%"PRId64", len=%u}",
+        "PostCommData: data{seq=%" PRId64 ", len=%u} conn{id=%u, seq=%" PRId64 ", len=%u}",
         head->seq, head->len, connectionId, connData.seq, connData.len);
     return ConnPostBytes(connectionId, &connData);
 }
@@ -548,7 +548,7 @@ NO_SANITIZE("cfi") int32_t PostAuthData(uint64_t connId, bool toServer, const Au
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth post data{type=0x%x, module=%d, seq=%"PRId64", flag=%d, len=%u} " CONN_INFO " to[%s]",
+        "auth post data{type=0x%x, module=%d, seq=%" PRId64 ", flag=%d, len=%u} " CONN_INFO " to[%s]",
         head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId), GetAuthSideStr(toServer));
     switch (GetConnType(connId)) {
         case AUTH_LINK_TYPE_WIFI:
