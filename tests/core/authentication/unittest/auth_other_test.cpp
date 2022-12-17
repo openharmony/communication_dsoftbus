@@ -52,7 +52,8 @@ void AuthOtherTest::SetUpTestCase()
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-void AuthOtherTest::TearDownTestCase() {
+void AuthOtherTest::TearDownTestCase()
+{
     AuthCommonDeinit();
 }
 
@@ -63,7 +64,7 @@ void AuthOtherTest::SetUp()
 
 void AuthOtherTest::TearDown() {}
 
-void onConnectResultTest(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
+void OnConnectResultTest(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
     (void)requestId;
     (void)connId;
@@ -71,14 +72,14 @@ void onConnectResultTest(uint32_t requestId, uint64_t connId, int32_t result, co
     (void)connInfo;
 }
 
-void onDisconnectedTest(uint64_t connId, const AuthConnInfo *connInfo)
+void OnDisconnectedTest(uint64_t connId, const AuthConnInfo *connInfo)
 {
     (void)connId;
     (void)connInfo;
 }
 
-void onDataReceivedTest(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-        const AuthDataHead *head, const uint8_t *data)
+void OnDataReceivedTest(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
+    const AuthDataHead *head, const uint8_t *data)
 {
     (void)connId;
     (void)connInfo;
@@ -87,18 +88,18 @@ void onDataReceivedTest(uint64_t connId, const AuthConnInfo *connInfo, bool from
     (void)data;
 }
 
-void onDeviceNotTrustedTest(const char *udid)
+void OnDeviceNotTrustedTest(const char *udid)
 {
     (void)udid;
 }
 
-void onDeviceVerifyPassTest(int64_t authId, const NodeInfo *info)
+void OnDeviceVerifyPassTest(int64_t authId, const NodeInfo *info)
 {
     (void)authId;
     (void)info;
 }
 
-void onDeviceDisconnectTest(int64_t authId)
+void OnDeviceDisconnectTest(int64_t authId)
 {
     (void)authId;
 }
@@ -109,7 +110,7 @@ void OnGroupCreatedTest(const char *groupId, int32_t groupType)
     (void)groupType;
 }
 
-void onGroupDeletedTest(const char *groupId)
+void OnGroupDeletedTest(const char *groupId)
 {
     (void)groupId;
 }
@@ -150,7 +151,7 @@ HWTEST_F(AuthOtherTest, NOTIFY_CLIENT_CONNECTED_TEST_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     g_listener.onConnectResult = nullptr;
     NotifyClientConnected(requestId, connId, result, &connInfo);
-    g_listener.onConnectResult = onConnectResultTest;
+    g_listener.onConnectResult = OnConnectResultTest;
     NotifyClientConnected(requestId, connId, result, &connInfo);
 }
 
@@ -168,7 +169,7 @@ HWTEST_F(AuthOtherTest, NOTIFY_DISCONNECTED_TEST_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     g_listener.onDisconnected = nullptr;
     NotifyDisconnected(connId, &connInfo);
-    g_listener.onDisconnected = onDisconnectedTest;
+    g_listener.onDisconnected = OnDisconnectedTest;
     NotifyDisconnected(connId, &connInfo);
 }
 
@@ -190,7 +191,7 @@ HWTEST_F(AuthOtherTest, NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
     (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
     g_listener.onDataReceived = nullptr;
     NotifyDataReceived(connId, &connInfo, fromServer, &head, data);
-    g_listener.onDataReceived = onDataReceivedTest;
+    g_listener.onDataReceived = OnDataReceivedTest;
     NotifyDataReceived(connId, &connInfo, fromServer, &head, data);
 }
 
@@ -219,11 +220,11 @@ HWTEST_F(AuthOtherTest, REMOVE_FUNC_TEST_001, TestSize.Level1)
     uint32_t obj = 1;
     uint32_t param = 1;
 
-    int32_t ret = RemoveFunc(nullptr, (void *)param);
+    int32_t ret = RemoveFunc(nullptr, static_cast<void *>(&param));
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = RemoveFunc((void *)obj, nullptr);
+    ret = RemoveFunc(static_cast<void *>(&obj), nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = RemoveFunc((void *)obj, (void *)param);
+    ret = RemoveFunc(static_cast<void *>(&obj), static_cast<void *>(&param));
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -418,9 +419,9 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
     EXPECT_TRUE(auth != nullptr);
     NotifyDeviceVerifyPassed(errAuthId, &nodeInfo);
     g_verifyListener.onDeviceVerifyPass = nullptr;
-    NotifyDeviceVerifyPassed(errAuthId, &nodeInfo);
-    g_verifyListener.onDeviceVerifyPass = onDeviceVerifyPassTest,
-    NotifyDeviceVerifyPassed(errAuthId, &nodeInfo);
+    NotifyDeviceVerifyPassed(authId, &nodeInfo);
+    g_verifyListener.onDeviceVerifyPass = OnDeviceVerifyPassTest,
+    NotifyDeviceVerifyPassed(authId, &nodeInfo);
     DelAuthManager(auth, true);
 }
 
@@ -436,7 +437,7 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_DISCONNECT_TEST_001, TestSize.Level1)
 
     g_verifyListener.onDeviceDisconnect = nullptr;
     NotifyDeviceDisconnect(authId);
-    g_verifyListener.onDeviceDisconnect = onDeviceDisconnectTest;
+    g_verifyListener.onDeviceDisconnect = OnDeviceDisconnectTest;
     NotifyDeviceDisconnect(authId);
 }
 
@@ -452,7 +453,7 @@ HWTEST_F(AuthOtherTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 
     g_verifyListener.onDeviceNotTrusted = nullptr;
     OnDeviceNotTrusted(peerUdid);
-    g_verifyListener.onDeviceNotTrusted = onDeviceNotTrustedTest;
+    g_verifyListener.onDeviceNotTrusted = OnDeviceNotTrustedTest;
     OnDeviceNotTrusted(peerUdid);
 }
 
@@ -473,7 +474,7 @@ HWTEST_F(AuthOtherTest, ON_GROUP_CREATED_TEST_001, TestSize.Level1)
     OnGroupCreated(groupId, groupType);
     g_groupChangeListener.onGroupDeleted = nullptr;
     OnGroupDeleted(groupId);
-    g_groupChangeListener.onGroupDeleted = onGroupDeletedTest;
+    g_groupChangeListener.onGroupDeleted = OnGroupDeletedTest;
     OnGroupDeleted(groupId);
 }
 
