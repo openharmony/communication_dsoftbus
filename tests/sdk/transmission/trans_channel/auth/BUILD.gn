@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//build/lite/config/component/lite_component.gni")
+import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
@@ -65,7 +65,7 @@ ohos_unittest("TransClientSdkAuthManagerTest") {
   module_out_path = module_output_path
   sources = [ "trans_sdk_auth_manager_test.cpp" ]
 
-include_dirs = [
+  include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
@@ -95,7 +95,5 @@ include_dirs = [
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":TransClientSdkAuthManagerTest",
-  ]
+  deps = [ ":TransClientSdkAuthManagerTest" ]
 }
