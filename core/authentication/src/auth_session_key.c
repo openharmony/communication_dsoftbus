@@ -99,7 +99,7 @@ NO_SANITIZE("cfi") int32_t AddSessionKey(SessionKeyList *list, int32_t index, co
 {
     CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
-    SessionKeyItem *item = SoftBusMalloc(sizeof(SessionKeyItem));
+    SessionKeyItem *item = (SessionKeyItem *)SoftBusMalloc(sizeof(SessionKeyItem));
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc SessionKeyItem fail.");
         return SOFTBUS_MALLOC_ERR;
@@ -280,7 +280,7 @@ NO_SANITIZE("cfi") void DumpSessionkeyList(const SessionKeyList *list)
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG,
-            "[Dump] SessionKey[%d]: {index=%d, key: {len=%u, key=XX}, lastUseTime=%"PRIu64"}",
+            "[Dump] SessionKey[%d]: {index=%d, key: {len=%u, key=XX}, lastUseTime=%" PRIu64 "}",
             keyNum, item->index, item->key.len, item->lastUseTime);
         keyNum++;
     }
