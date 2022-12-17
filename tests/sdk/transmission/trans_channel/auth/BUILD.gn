@@ -12,8 +12,10 @@
 # limitations under the License.
 
 import("//build/lite/config/component/lite_component.gni")
+import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+module_output_path = "dsoftbus/transmission"
 if (defined(ohos_lite)) {
   # L0
   static_library("auth_session_test") {
@@ -57,4 +59,41 @@ if (defined(ohos_lite)) {
     }
     subsystem_name = "communication"
   }
+}
+
+ohos_unittest("TransClientSdkAuthManagerTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_sdk_auth_manager_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/auth/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/auth/src",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":TransClientSdkAuthManagerTest" ]
 }
