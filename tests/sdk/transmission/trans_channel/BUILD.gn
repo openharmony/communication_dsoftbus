@@ -396,11 +396,11 @@ if (defined(ohos_lite)) {
       ":TransSdkStreamTest",
       ":TransSdkTest",
       ":TransSessionTest",
+      "auth:unittest",
       "monitor_permission_test:CheckPermissionTest",
       "permission:TransDynamicPermissionTest",
       "udp/distributed_stream:distributed_stream_test",
       "udp/file:unittest",
-      "auth:unittest",
     ]
     if (dsoftbus_feature_trans_udp == true) {
       if (dsoftbus_feature_trans_udp_stream == true) {
