@@ -11,9 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import("//build/test.gni")
 import("//build/lite/config/component/lite_component.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+module_output_path = "dsoftbus/transmission"
 if (defined(ohos_lite)) {
   # L0
   static_library("auth_session_test") {
