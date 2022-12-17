@@ -35,7 +35,6 @@ trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
   "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
   "$dsoftbus_root_path/sdk/transmission/ipc/include",
-  "$dsoftbus_root_path/core/transmission/common/include",
 ]
 trans_sdk_test_common_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
@@ -417,6 +416,7 @@ if (defined(ohos_lite)) {
       ":TransSdkStreamTest",
       ":TransSdkTest",
       ":TransSessionTest",
+      "auth:unittest",
       "monitor_permission_test:CheckPermissionTest",
       "permission:TransDynamicPermissionTest",
       "udp/distributed_stream:distributed_stream_test",
