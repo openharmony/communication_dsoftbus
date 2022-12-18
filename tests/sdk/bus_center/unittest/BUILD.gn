@@ -305,12 +305,39 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("BusCenterServerTest") {
+    module_out_path = module_output_path
+    sources = [ "bus_center_server_test.cpp" ]
+    include_dirs = bus_center_sdk_test_inc
+    include_dirs += [
+      "unittest/common/",
+      "//commonlibrary/c_utils/base/include",
+    ]
+    deps = bus_center_sdk_test_deps
+    deps += [
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hiviewdfx_hilog_native:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
   group("unittest") {
     testonly = true
     deps = [
       ":BusCenterHeartbeatSdkTest",
       ":BusCenterMetaNodeSdkTest",
       ":BusCenterSdkTest",
+      ":BusCenterServerTest",
       ":ClientBusCenterMgrTest",
       ":ClientBusMangerTest",
       ":SetDataChangeTest",
