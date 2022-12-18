@@ -110,7 +110,8 @@
           "//foundation/communication/dsoftbus/tests/sdk/bus_center:benchmarktest",
           "//foundation/communication/dsoftbus/tests/sdk/discovery:benchmarktest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission:benchmarktest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission:integration_test"
+          "//foundation/communication/dsoftbus/tests/sdk/transmission:integration_test",
+          "//foundation/communication/dsoftbus/tests/sdk/frame/common:unittest"
         ]
       }
     }
