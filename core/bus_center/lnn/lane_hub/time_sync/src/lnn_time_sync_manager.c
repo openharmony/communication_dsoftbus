@@ -100,7 +100,7 @@ static TimeSyncReqInfo *FindTimeSyncReqInfo(const char *networkId)
 static StartTimeSyncReq *CreateStartTimeSyncReq(const char *pkgName, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period)
 {
-    StartTimeSyncReq *req = SoftBusMalloc(sizeof(StartTimeSyncReq));
+    StartTimeSyncReq *req = (StartTimeSyncReq *)SoftBusMalloc(sizeof(StartTimeSyncReq));
 
     if (req == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc start time sync request fail: %s", pkgName);
@@ -119,7 +119,7 @@ static StartTimeSyncReq *CreateStartTimeSyncReq(const char *pkgName, TimeSyncAcc
 
 static TimeSyncReqInfo *CreateTimeSyncReqInfo(const StartTimeSyncReqMsgPara *para)
 {
-    TimeSyncReqInfo *info = SoftBusMalloc(sizeof(TimeSyncReqInfo));
+    TimeSyncReqInfo *info = (TimeSyncReqInfo *)SoftBusMalloc(sizeof(TimeSyncReqInfo));
 
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc time sync request info fail");
@@ -431,7 +431,7 @@ NO_SANITIZE("cfi") static void OnTimeSyncImplComplete(const char *networkId, dou
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync complete para invalid");
         return;
     }
-    para = SoftBusMalloc(sizeof(TimeSyncCompleteMsgPara));
+    para = (TimeSyncCompleteMsgPara *)SoftBusMalloc(sizeof(TimeSyncCompleteMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc time sync complete msg para fail");
         return;
@@ -468,7 +468,7 @@ NO_SANITIZE("cfi") int32_t LnnInitTimeSync(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync get default looper fail");
         return SOFTBUS_ERR;
     }
-    g_timeSyncCtrl.handler.name = "TimeSync";
+    g_timeSyncCtrl.handler.name = (char *)"TimeSync";
     g_timeSyncCtrl.handler.looper = g_timeSyncCtrl.looper;
     g_timeSyncCtrl.handler.HandleMessage = TimeSyncMessageHandler;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init time sync success");
@@ -500,7 +500,7 @@ NO_SANITIZE("cfi") int32_t LnnStartTimeSync(const char *pkgName, const char *tar
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync not init");
         return SOFTBUS_NO_INIT;
     }
-    para = SoftBusMalloc(sizeof(StartTimeSyncReqMsgPara));
+    para = (StartTimeSyncReqMsgPara *)SoftBusMalloc(sizeof(StartTimeSyncReqMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc stop time sync request msg para fail");
         return SOFTBUS_MALLOC_ERR;
@@ -538,7 +538,7 @@ NO_SANITIZE("cfi") int32_t LnnStopTimeSync(const char *pkgName, const char *targ
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync not init");
         return SOFTBUS_NO_INIT;
     }
-    para = SoftBusMalloc(sizeof(StopTimeSyncReqMsgPara));
+    para = (StopTimeSyncReqMsgPara *)SoftBusMalloc(sizeof(StopTimeSyncReqMsgPara));
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc stop time sync request msg para fail");
         return SOFTBUS_MALLOC_ERR;
