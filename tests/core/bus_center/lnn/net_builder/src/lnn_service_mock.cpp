@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+#include <securec.h>
+
 #include "lnn_service_mock.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "softbus_log.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -113,6 +118,26 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     return GetServiceInterface()->LnnOfflineTimingByHeartbeat(networkId, addrType);
 }
 
+int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
+{
+    return GetServiceInterface()->LnnGetSettingDeviceName(deviceName, len);
+}
+
+uint32_t AuthGenRequestId(void)
+{
+    return GetServiceInterface()->AuthGenRequestId();
+}
+
+void AuthHandleLeaveLNN(int64_t authId)
+{
+    return GetServiceInterface()->AuthHandleLeaveLNN(authId);
+}
+
+int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
+{
+    return GetServiceInterface()->AuthGetDeviceUuid(authId, uuid, size);
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
@@ -128,6 +153,19 @@ int32_t LnnServicetInterfaceMock::ActionOfLnnInitGetDeviceName(LnnDeviceNameHand
         return SOFTBUS_INVALID_PARAM;
     }
     g_deviceNameHandler = handler;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnServicetInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len)
+{
+    if (deviceName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy info fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 }
