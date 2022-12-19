@@ -65,20 +65,23 @@ public:
 void AuthTestEnhance::SetUpTestCase()
 {
     SetAceessTokenPermission("AuthTestEnhance");
+    LooperInit();
+    AuthCommonInit();
 }
 
-void AuthTestEnhance::TearDownTestCase() {}
+void AuthTestEnhance::TearDownTestCase()
+{
+    SoftBusSleepMs(MILLIS);
+    AuthCommonDeinit();
+    LooperDeinit();
+}
 
 void AuthTestEnhance::SetUp()
 {
-    LooperInit();
     LOG_INFO("AuthTest start.");
 }
 
-void AuthTestEnhance::TearDown()
-{
-    LooperDeinit();
-}
+void AuthTestEnhance::TearDown() {}
 
 void AuthInitMock(LnnConnectInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock, GroupAuthManager authManager,
     DeviceGroupManager groupManager)
