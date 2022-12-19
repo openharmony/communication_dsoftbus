@@ -381,8 +381,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest009, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest011, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t authId = 1;
     uint8_t val = 1;
@@ -401,6 +403,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest011, TestSize.Level1)
     data3.flag = true;
     UdpModuleCb(authId, &data3);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -411,8 +414,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest011, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest012, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t authId = 1;
     uint8_t val = 1;
@@ -425,6 +430,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest012, TestSize.Level1)
     TransOnExchangeUdpInfo(authId, data.flag, data.seq, json);
     cJSON_Delete(json);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -435,8 +441,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest012, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest013, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t authId = 1;
     int64_t invalidSeq = 0;
@@ -453,6 +461,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest013, TestSize.Level1)
     cJSON_Delete(msg);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -463,8 +472,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest013, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest014, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t authId = 1;
     int64_t invalidSeq = 0;
@@ -481,6 +492,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest014, TestSize.Level1)
     cJSON_Delete(msg);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -491,8 +503,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest014, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest015, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t authId = 1;
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
@@ -503,6 +517,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest015, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -513,8 +528,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest015, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest016, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     uint32_t invalidId = 0;
     int64_t authId = 1;
@@ -526,6 +543,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest016, TestSize.Level1)
     UdpOnAuthConnOpened(channel->requestId, authId);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -536,8 +554,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest016, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest017, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     uint32_t invalidId = 0;
     int32_t reason = 1;
@@ -549,6 +569,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest017, TestSize.Level1)
     UdpOnAuthConnOpenFailed(channel->requestId, reason);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -577,8 +598,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest018, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest019, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     string peerUid = "normal peerUid";
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
@@ -594,6 +617,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest019, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -644,8 +668,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest021, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest022, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     bool isServerSide = true;
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
@@ -674,6 +700,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest022, TestSize.Level1)
     SoftBusFree(appInfo);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -684,8 +711,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest022, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest023, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    int32_t ret = TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     int32_t errCode = 0;
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
@@ -704,6 +733,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest023, TestSize.Level1)
     SoftBusFree(appInfo);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -788,12 +818,12 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoTest28
+ * @tc.name: TransUdpNegoTest028
  * @tc.desc: Trans set peer device id by auth.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransUdpNegoTest28, TestSize.Level1)
+HWTEST_F(TransUdpNegoTest, TransUdpNegoTest028, TestSize.Level1)
 {
     int64_t authId = 0;
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
@@ -809,15 +839,18 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest28, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpNegoTest29
+ * @tc.name: TransUdpNegoTest029
  * @tc.desc: Trans parse request appInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransUdpNegoTest29, TestSize.Level1)
+HWTEST_F(TransUdpNegoTest, TransUdpNegoTest029, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    (void)TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t authId = INVALID_AUTH_ID;
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != nullptr);
@@ -827,7 +860,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest29, TestSize.Level1)
     cJSON *msg = cJSON_CreateObject();
     ASSERT_TRUE(msg != nullptr);
 
-    int32_t ret = TransPackRequestUdpInfo(msg, appInfo);
+    ret = TransPackRequestUdpInfo(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     ret = ParseRequestAppInfo(authId, msg, appInfo);
@@ -862,6 +895,7 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest29, TestSize.Level1)
     SoftBusFree(appInfo);
     SoftBusFree(newNode);
     TransUdpChannelDeinit();
+    LnnDeinitBusCenterEvent();
 }
 
 /**
@@ -872,8 +906,11 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest29, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransUdpNegoTest030, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    (void)TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     int64_t authId = 1;
     int64_t seq = 1;
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
@@ -883,23 +920,27 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest030, TestSize.Level1)
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     cJSON *msg = cJSON_CreateObject();
     ASSERT_TRUE(msg != nullptr);
-    int32_t ret = TransPackRequestUdpInfo(msg, appInfo);
+    ret = TransPackRequestUdpInfo(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransOnExchangeUdpInfoRequest(authId, seq, msg);
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
+    LnnDeinitBusCenterEvent();
 }
 
 /**
- * @tc.name: TransUdpNegoTest31
+ * @tc.name: TransUdpNegoTest031
  * @tc.desc: Trans process abnormal udp channel state.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransUdpNegoTest31, TestSize.Level1)
+HWTEST_F(TransUdpNegoTest, TransUdpNegoTest031, TestSize.Level1)
 {
+    int32_t ret = LnnInitBusCenterEvent();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     IServerChannelCallBack *cb = TransServerGetChannelCb();
-    (void)TransUdpChannelInit(cb);
+    ret = TransUdpChannelInit(cb);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != NULL);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
@@ -910,15 +951,16 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest31, TestSize.Level1)
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
     ProcessAbnormalUdpChannelState(appInfo, errCode, needClose);
     SoftBusFree(appInfo);
+    LnnDeinitBusCenterEvent();
 }
 
 /**
- * @tc.name: TransUdpNegoTest32
+ * @tc.name: TransUdpNegoTest032
  * @tc.desc: Trans get code type.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpNegoTest, TransUdpNegoTest32, TestSize.Level1)
+HWTEST_F(TransUdpNegoTest, TransUdpNegoTest032, TestSize.Level1)
 {
     bool flag = IsIShareSession(g_sessionName);
     EXPECT_TRUE(flag == SOFTBUS_OK);
