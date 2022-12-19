@@ -52,7 +52,7 @@ typedef struct {
 } IStreamListener;
 
 typedef struct {
-    char *pkgName;
+    const char *pkgName;
     char *myIp;
     char *peerIp;
     int32_t peerPort;
