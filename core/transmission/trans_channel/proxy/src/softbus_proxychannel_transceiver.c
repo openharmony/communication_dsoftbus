@@ -525,6 +525,7 @@ NO_SANITIZE("cfi") void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
         "can not find proxy conn when set conn state. reqid[%d] connid[%d]", reqId, connId);
+    (void)ConnDisconnectDevice(connId);
 }
 
 static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
