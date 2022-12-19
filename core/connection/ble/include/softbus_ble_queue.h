@@ -40,7 +40,7 @@ typedef struct {
 int BleInnerQueueInit(void);
 void BleInnerQueueDeinit(void);
 int BleEnqueueNonBlock(const void *msg);
-int BleDequeueNonBlock(void **msg);
+int BleDequeueBlock(void **msg);
 
 #ifdef __cplusplus
 #if __cplusplus
