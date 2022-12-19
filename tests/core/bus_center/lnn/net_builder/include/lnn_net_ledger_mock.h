@@ -124,10 +124,17 @@ public:
         char *dstIdBuf, uint32_t dstIdBufLen);
     static inline std::map<LnnEventType, LnnEventHandler> g_lnnevent_handlers;
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
+    static int32_t ActionOfLnnGetAllOnlineNodeInfo1(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnGetLnnRelation(const char *id, IdCategory type,
         uint8_t *relation, uint32_t len);
+    static int32_t ActionOfLnnGetLnnRelation1(const char *id, IdCategory type,
+        uint8_t *relation, uint32_t len);
     static int32_t ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
-    static int32_t ActionLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
+    static int32_t ActionOfLnnGetLocalStrInfo1(InfoKey key, char *info, uint32_t len);
+    static int32_t ActionOfLnnGetLocalStrInfo2(InfoKey key, char *info, uint32_t len);
+
+    static inline std::string localId = "6c38a1a0a8476679d0da6b24ec1e99eac67857244586e781bb8a07c77f636a3f";
+    static inline std::string peerId = "54fec99a89886bef18373f0742661809b83b2d5dac9afbaf1728b940b9d51cb5";
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_MOCK_H
