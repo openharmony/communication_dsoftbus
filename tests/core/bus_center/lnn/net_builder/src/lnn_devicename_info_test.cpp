@@ -19,6 +19,7 @@
 #include "bus_center_info_key.h"
 #include "lnn_connection_mock.h"
 #include "lnn_devicename_info.h"
+#include "lnn_net_builder_deps_mock.h"
 #include "lnn_node_info.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_p2p_info.h"
@@ -68,12 +69,13 @@ void LnnDeviceNameInfoTest::TearDown()
 */
 HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
+    NiceMock<NetBuilderDepsInterfaceMock> netbuilderMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnConnectInterfaceMock> connMock;
     LooperInit();
-    EXPECT_CALL(serviceMock, LnnGetSettingDeviceName).WillRepeatedly(
-        LnnServicetInterfaceMock::ActionOfLnnGetSettingDeviceName);
+    EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName).WillRepeatedly(
+        NetBuilderDepsInterfaceMock::ActionOfLnnGetSettingDeviceName);
     EXPECT_CALL(ledgerMock, LnnSetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineAndMetaNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(info));
@@ -97,10 +99,11 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
 */
 HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_002, TestSize.Level1)
 {
+    NiceMock<NetBuilderDepsInterfaceMock> netbuilderMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, LnnInitGetDeviceName).WillRepeatedly(
         LnnServicetInterfaceMock::ActionOfLnnInitGetDeviceName);
-    EXPECT_CALL(serviceMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(netbuilderMock, LnnGetSettingDeviceName(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     UpdateDeviceName(nullptr);
 }
 } // namespace OHOS
