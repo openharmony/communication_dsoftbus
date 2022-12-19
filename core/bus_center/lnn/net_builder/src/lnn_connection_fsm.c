@@ -36,6 +36,7 @@
 #include "trans_channel_manager.h"
 
 #define DATA_SIZE 32
+#define DISCOVERY_TYPE_MASK 0x7FFF
 
 typedef enum {
     STATE_AUTH_INDEX = 0,
@@ -649,7 +650,7 @@ static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para
     return true;
 }
 
-static int32_t SyncOffline(const LnnConnectionFsm *connFsm)
+static int32_t SyncBrOffline(const LnnConnectionFsm *connFsm)
 {
     int16_t code;
     uint32_t combinedInt;
@@ -669,7 +670,7 @@ static int32_t SyncOffline(const LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid not exist!");
         return SOFTBUS_INVALID_PARAM;
     }
-    combinedInt = ((uint16_t)code << CONN_CODE_SHIFT) | ((uint16_t)DISCOVERY_TYPE_BR & 0x7FFF);
+    combinedInt = ((uint16_t)code << CONN_CODE_SHIFT) | ((uint16_t)DISCOVERY_TYPE_BR & DISCOVERY_TYPE_MASK);
     combinedInt = SoftBusHtoNl(combinedInt);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetOfflineMsg combinedInt: 0x%04x", combinedInt);
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_OFFLINE, connFsm->connInfo.peerNetworkId,
@@ -696,7 +697,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    rc = SyncOffline(connFsm);
+    rc = SyncBrOffline(connFsm);
     if (rc == SOFTBUS_OK) {
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT,
             NULL, LEAVE_LNN_TIMEOUT_LEN);
