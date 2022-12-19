@@ -308,6 +308,12 @@ HWTEST_F(LNNLaneTestMock, LANE_REGISTER_001, TestSize.Level1)
     };
     RegisterLaneIdListener(&listener);
 
+    const ILaneIdStateListener invalidListener = {
+        .OnLaneIdEnabled = nullptr,
+        .OnLaneIdDisabled = nullptr,
+    };
+    RegisterLaneIdListener(&invalidListener);
+
     UnregisterLaneIdListener(nullptr);
 }
 
@@ -549,4 +555,22 @@ HWTEST_F(LNNLaneTestMock, LNN_SELECT_LANE_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(recommendList);
 }
+
+/*
+* @tc.name: LNN_QUERY_LANE_001
+* @tc.desc: QueryLane
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneTestMock, LNN_LANE_QUERY_001, TestSize.Level1)
+{
+    QueryResult ret = LnnQueryLaneResource(nullptr);
+    EXPECT_EQ(ret, QUERY_RESULT_REQUEST_ILLEGAL);
+
+    LaneQueryInfo query;
+    query.transType = LANE_T_BYTE;
+    ret = LnnQueryLaneResource((const LaneQueryInfo *)&query);
+    EXPECT_EQ(ret, QUERY_RESULT_OK);
+}
+
 } // namespace OHOS
