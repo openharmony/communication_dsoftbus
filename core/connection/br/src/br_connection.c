@@ -746,11 +746,10 @@ NO_SANITIZE("cfi") void *SendHandlerLoop(void *arg)
 #define WAIT_TIME 10
     SendBrQueueNode *sendNode = NULL;
     while (1) {
-        int32_t ret = BrDequeueNonBlock((void **)(&sendNode));
+        int32_t ret = BrDequeueBlock((void **)(&sendNode));
         if (ret != SOFTBUS_OK) {
-            if (ret != SOFTBUS_TIMOUT) {
-                SoftBusSleepMs(WAIT_TIME);
-            }
+            CLOGE("ATTENSION: br dequeue send node failed, error=%d", ret);
+            SoftBusSleepMs(WAIT_TIME);
             continue;
         }
         uint32_t connId = sendNode->connectionId;

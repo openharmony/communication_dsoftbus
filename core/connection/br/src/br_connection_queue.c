@@ -173,7 +173,7 @@ NO_SANITIZE("cfi") bool IsBrQueueEmpty(void)
 NO_SANITIZE("cfi") int32_t BrEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     SendBrQueueNode *queueNode = (SendBrQueueNode *)msg;
     int32_t priority = GetPriority(queueNode->flag);
@@ -247,46 +247,49 @@ static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t BrDequeueNonBlock(void **msg)
+NO_SANITIZE("cfi") int32_t BrDequeueBlock(void **msg)
 {
-#define DEQUEUE_DELAY 1000
+    bool isFull = false;
+    int32_t status = SOFTBUS_ERR;
+    BrQueue *item = NULL;
+    BrQueue *next = NULL;
+
     if (msg == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_brQueueLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
-    bool isFull = false;
-    if (GetMsg(g_innerQueue, msg, &isFull) == SOFTBUS_OK) {
-        if (isFull) {
-            (void)SoftBusCondBroadcast(&g_sendWaitCond);
+    do {
+        if (GetMsg(g_innerQueue, msg, &isFull) == SOFTBUS_OK) {
+            status = SOFTBUS_OK;
+            break;
         }
-        (void)SoftBusMutexUnlock(&g_brQueueLock);
-        return SOFTBUS_OK;
-    }
-    if (IsListEmpty(&g_brQueueList)) {
-        if (BrSoftBusCondWait(&g_sendCond, &g_brQueueLock, DEQUEUE_DELAY) != SOFTBUS_OK) {
+        LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_brQueueList, BrQueue, node) {
+            ListDelete(&(item->node));
+            if (GetMsg(g_innerQueue, msg, &isFull) == SOFTBUS_OK) {
+                ListTailInsert(&g_brQueueList, &(item->node));
+                status = SOFTBUS_OK;
+                break;
+            }
+            DestroyBrQueue(item);
+        }
+        if (status == SOFTBUS_OK) {
+            break;
+        }
+        CLOGI("br queue is empty, dequeue start wait ...");
+        if (SoftBusCondWait(&g_sendCond, &g_brQueueLock, NULL) != SOFTBUS_OK) {
             CLOGI("BrSendCondWait failed");
-            (void)SoftBusMutexUnlock(&g_brQueueLock);
-            return SOFTBUS_ERR;
+            status = SOFTBUS_ERR;
+            break;
         }
-        (void)SoftBusMutexUnlock(&g_brQueueLock);
-        return SOFTBUS_TIMOUT;
-    }
-    BrQueue *item = LIST_ENTRY(g_brQueueList.next, BrQueue, node);
-    ListDelete(&(item->node));
-    if (GetMsg(item, msg, &isFull) != SOFTBUS_OK) {
-        DestroyBrQueue(item);
-        (void)SoftBusMutexUnlock(&g_brQueueLock);
-        return SOFTBUS_ERR;
-    }
-    ListTailInsert(&g_brQueueList, &(item->node));
+    } while (true);
+
     if (isFull) {
-        CLOGI("Broadcast g_sendWaitCond");
         (void)SoftBusCondBroadcast(&g_sendWaitCond);
     }
     (void)SoftBusMutexUnlock(&g_brQueueLock);
-    return SOFTBUS_OK;
+    return status;
 }
 
 NO_SANITIZE("cfi") int32_t BrInnerQueueInit(void)
