@@ -46,6 +46,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "lnn_sync_item_info.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN 8
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
@@ -1859,6 +1860,10 @@ NO_SANITIZE("cfi") int32_t NodeInfoSync(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitDeviceName fail");
         return SOFTBUS_ERR;
     }
+    if (LnnInitOffline() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitOffline fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1942,6 +1947,7 @@ NO_SANITIZE("cfi") void LnnDeinitNetBuilder(void)
     LnnDeinitP2p();
     LnnDeinitSyncInfoManager();
     LnnDeinitFastOffline();
+    LnnDeinitOffline();
     g_netBuilder.isInit = false;
 }
 
