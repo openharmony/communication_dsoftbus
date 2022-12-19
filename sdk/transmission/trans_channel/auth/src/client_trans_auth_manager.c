@@ -89,9 +89,6 @@ void ClientTransAuthCloseChannel(int32_t channelId)
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_AUTH) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server ipc close channel[%d] err.", channelId);
     }
-    if (ClientTransAuthOnChannelClosed(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server auth close channel[%d] err.", channelId);
-    }
 }
 
 int32_t TransAuthChannelSendBytes(int32_t channelId, const void *data, uint32_t len)

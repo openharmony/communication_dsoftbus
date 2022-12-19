@@ -42,6 +42,7 @@
 #define TEST_PATH_SIZE 50
 #define TEST_FILE_TEST_TXT_FILE 16
 #define TEST_FRAME_NUMBER 2
+#define TEST_FILEPATH_LENGTH 4
 #define TEST_SEQ8 8
 #define TEST_SEQ16 16
 #define TEST_SEQ32 32
@@ -377,6 +378,9 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest
     ProxyFileMutexLock *sessionLock = GetSessionFileLock(channelId);
     EXPECT_NE(nullptr, sessionLock);
 
+    sessionLock = GetSessionFileLock(channelId);
+    EXPECT_NE(nullptr, sessionLock);
+
     DelSessionFileLock(nullptr);
     sessionLock->count = 1;
     DelSessionFileLock(sessionLock);
@@ -646,12 +650,21 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, T
     int64_t len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
     EXPECT_EQ(SOFTBUS_ERR, len);
 
+    info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
+    EXPECT_EQ(SOFTBUS_ERR, len);
+
     len = PackReadFileRetransData(&fileFrame, seq, readLength, fileOffset, &info);
     EXPECT_EQ(SOFTBUS_ERR, len);
 
     uint32_t dataTest = TEST_DATA_LENGTH;
     fileFrame.data = (uint8_t *)&dataTest;
     fileFrame.fileData = (uint8_t *)&dataTest;
+    info.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+    len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
+    EXPECT_NE(SOFTBUS_ERR, len);
+
+    info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
     len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
     EXPECT_NE(SOFTBUS_ERR, len);
 
@@ -1359,7 +1372,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckRequestTest001,
 
 /**
  * @tc.name: ClinetTransProxyFileAckResponseTest001
- * @tc.desc: client trans proxy file ack Response test, use normal parameter.
+ * @tc.desc: client trans proxy file ack response test, use normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1398,5 +1411,97 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001
     sessionId = 1;
     ret = ProcessFileAckResponse(sessionId, &frame);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyCheckParameterTest001
+ * @tc.desc: client trans proxy check parameter test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckParameterTest001, TestSize.Level0)
+{
+    bool result = IsValidFileString(nullptr, TEST_FILE_CNT, TEST_FILE_LENGTH);
+    EXPECT_EQ(false, result);
+
+    uint32_t fileNum = 0;
+    result = IsValidFileString(g_testProxyFileList, fileNum, TEST_FILE_LENGTH);
+    EXPECT_EQ(false, result);
+
+    int32_t sessionId = 1;
+    int ret = ProcessFileTransResult(sessionId, nullptr);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyProcessFileListDataTest001
+ * @tc.desc: client trans proxy process file list data test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessFileListDataTest001, TestSize.Level0)
+{
+    int32_t sessionId = 1;
+    FileFrame frame = {
+        .frameLength = TEST_FILE_SIZE,
+        .data = (uint8_t *)"00010010datatest,"
+    };
+    int ret = ProcessFileListData(sessionId, &frame);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyGetFileInfoTest001
+ * @tc.desc: client trans proxy get file info test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileInfoTest001, TestSize.Level0)
+{
+    FileFrame frame = {
+        .frameLength = 0,
+        .data = (uint8_t *)"00010010datatest.txt",
+    };
+    FileRecipientInfo info = {
+        .fileListener.rootDir = "../test",
+    };
+    info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    SingleFileInfo file;
+    int ret = GetFileInfoByStartFrame(nullptr, nullptr, nullptr);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = GetFileInfoByStartFrame(&frame, &info, &file);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = memcpy_s(info.fileListener.rootDir, TEST_FILEPATH_LENGTH, g_rootDir + 1, TEST_FILEPATH_LENGTH);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ret = GetFileInfoByStartFrame(&frame, &info, &file);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    frame.frameLength = FRAME_DATA_SEQ_OFFSET + 9;
+    info.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+    ret = GetFileInfoByStartFrame(&frame, &info, &file);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyWriteFrameTest001
+ * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteFrameTest001, TestSize.Level0)
+{
+    int32_t sessionId = 1;
+    FileFrame frame = {
+        .frameLength = 0,
+        .data = (uint8_t *)"00010010datatest.txt",
+    };
+    int ret = WriteFrameToFile(sessionId, &frame);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    frame.frameLength = TEST_DATA_LENGTH;
+    ret = WriteFrameToFile(sessionId, &frame);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

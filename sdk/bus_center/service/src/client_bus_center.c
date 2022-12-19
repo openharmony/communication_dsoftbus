@@ -15,6 +15,7 @@
 
 #include "client_bus_center.h"
 
+#include <securec.h>
 #include <string.h>
 
 #include "client_trans_session_manager.h"
@@ -68,29 +69,31 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if ((info->medium < AUTO) || (info->medium > COAP)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    if (info->capability == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "capability is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    if (info->dataLen == 0) {
+        return SOFTBUS_OK;
+    }
     if ((info->capabilityData != NULL) &&
         ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
-        (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN))) {
+        (strnlen((char *)(info->capabilityData), MAX_CAPABILITYDATA_LEN) == MAX_CAPABILITYDATA_LEN))) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
-
     return SOFTBUS_OK;
 }
 
@@ -100,29 +103,31 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if ((info->medium < AUTO) || (info->medium > COAP)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    if (info->capability == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "capability is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-
+    if (info->dataLen == 0) {
+        return SOFTBUS_OK;
+    }
     if ((info->capabilityData != NULL) &&
         ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
-        (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN))) {
+        (strnlen((char *)(info->capabilityData), MAX_CAPABILITYDATA_LEN) == MAX_CAPABILITYDATA_LEN))) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
-
     return SOFTBUS_OK;
 }
 
@@ -175,6 +180,7 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     if (ret != SOFTBUS_OK) {
         return ret;
     }
+    (void)memset_s(info, infoLen, 0, infoLen);
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 
@@ -231,7 +237,7 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
 
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
-    if (networkId == NULL || cb == NULL || pkgName == NULL) {
+    if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -240,7 +246,7 @@ int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb
 
 int32_t LeaveMetaNode(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb)
 {
-    if (networkId == NULL || cb == NULL || pkgName == NULL) {
+    if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -272,7 +278,8 @@ int32_t UnregNodeDeviceStateCb(INodeStateCb *callback)
 int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb)
 {
-    if (pkgName == NULL || targetNetworkId == NULL || cb == NULL || cb->onTimeSyncResult == NULL) {
+    if (pkgName == NULL || !IsValidString(targetNetworkId, NETWORK_ID_BUF_LEN) ||
+        cb == NULL || cb->onTimeSyncResult == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -285,7 +292,7 @@ int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSync
 
 int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
-    if (pkgName == NULL || targetNetworkId == NULL) {
+    if (pkgName == NULL || !IsValidString(targetNetworkId, NETWORK_ID_BUF_LEN)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -298,7 +305,7 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
 
 int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb)
 {
-    if ((pkgName == NULL) || (info == NULL) || (cb == NULL)) {
+    if (pkgName == NULL || info == NULL || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -327,7 +334,7 @@ int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
 
 int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
 {
-    if ((pkgName == NULL) || (info == NULL) || (cb == NULL)) {
+    if (pkgName == NULL || info == NULL || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -399,14 +406,18 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid shift lnn gear para");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (CommonInit(pkgName) != SOFTBUS_OK) {
-        return SOFTBUS_INVALID_PARAM;
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     size_t len = strnlen(callerId, CALLER_ID_MAX_LEN);
     if (len == 0 || len >= CALLER_ID_MAX_LEN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid shift lnn gear callerId len:%d", len);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (targetNetworkId != NULL && strnlen(targetNetworkId, NETWORK_ID_BUF_LEN) != NETWORK_ID_BUF_LEN - 1) {
+    if (targetNetworkId != NULL &&
+        strnlen(targetNetworkId, NETWORK_ID_BUF_LEN) != NETWORK_ID_BUF_LEN - 1) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid shift lnn gear targetNetworkId");
         return SOFTBUS_INVALID_PARAM;
     }
     return ShiftLNNGearInner(pkgName, callerId, targetNetworkId, mode);

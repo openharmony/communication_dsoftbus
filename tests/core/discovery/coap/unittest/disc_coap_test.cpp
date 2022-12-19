@@ -12,21 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#include <securec.h>
 
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <unistd.h>
+
 #include "disc_coap.h"
-#include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
 #include "disc_manager.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
 
 
 using namespace testing::ext;
 namespace OHOS {
 
-static DiscoveryFuncInterface *g_discCoapFuncInterface = NULL;
+static DiscoveryFuncInterface *g_discCoapFuncInterface = nullptr;
 
 class DiscCoapTest : public testing::Test {
 public:
@@ -50,201 +50,180 @@ static DiscInnerCallback g_discInnerCb = {
     .OnDeviceFound = NULL
 };
 
+static PublishOption testPubOption = {
+    .freq = LOW,
+    .capabilityBitmap = {64},
+    .capabilityData = nullptr,
+    .dataLen = 0,
+    .ranging = false
+};
+
+static SubscribeOption testSubOption = {
+    .freq = LOW,
+    .isSameAccount = false,
+    .isWakeRemote = false,
+    .capabilityBitmap = {128},
+    .capabilityData = nullptr,
+    .dataLen = 0
+};
+
 /*
-* @tc.name: testCoapPublish
-* @tc.desc: test CoapPublish
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testCoapPublish001
+ * @tc.desc: test CoapPublish
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscCoapTest, testCoapPublish001, TestSize.Level1)
 {
-    int32_t ret;
-    bool ranging = true;
-    
-    PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
-
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->Publish(NULL);
+    int32_t ret = g_discCoapFuncInterface->Publish(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    
-    ranging = false;
-    ret = g_discCoapFuncInterface->Publish(option);
+    ret = g_discCoapFuncInterface->Unpublish(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = g_discCoapFuncInterface->Publish(&testPubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    
-    SoftBusFree(option);
+    ret = g_discCoapFuncInterface->Unpublish(&testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testPubOption.ranging = true;
+    ret = g_discCoapFuncInterface->Publish(&testPubOption);
+    testPubOption.ranging = false;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->Unpublish(&testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscCoapDeinit();
+    g_discCoapFuncInterface = nullptr;
 }
 
 /*
-* @tc.name: testCoapUnPublish
-* @tc.desc: test CoapUnPublish
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscCoapTest, testCoapUnPublish001, TestSize.Level1)
-{
-    int32_t ret;
-    
-    PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
-
-    g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->Unpublish(NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = g_discCoapFuncInterface->Unpublish(option);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    
-    SoftBusFree(option);
-}
-
-/*
-* @tc.name: testCoapStartScan
-* @tc.desc: test CoapStartScan
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testCoapStartScan001
+ * @tc.desc: test CoapStartScan
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscCoapTest, testCoapStartScan001, TestSize.Level1)
 {
-    int32_t ret;
-    
-    PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
-
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->StartScan(NULL);
+    int32_t ret = g_discCoapFuncInterface->StartScan(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    
-    ret = g_discCoapFuncInterface->StartScan(option);
+    ret = g_discCoapFuncInterface->StopScan(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = g_discCoapFuncInterface->StartScan(&testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopScan(&testPubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SoftBusFree(option);
+    testPubOption.ranging = true;
+    ret = g_discCoapFuncInterface->StartScan(&testPubOption);
+    testPubOption.ranging = false;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopScan(&testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscCoapDeinit();
+    g_discCoapFuncInterface = nullptr;
 }
 
 /*
-* @tc.name: testCoapStopScan
-* @tc.desc: test CoapStopScan
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscCoapTest, testCoapStopScan001, TestSize.Level1)
-{
-    int32_t ret;
-    bool ranging = true;
-    
-    PublishOption *option = (PublishOption*)SoftBusMalloc(sizeof(PublishOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(PublishOption), 0, sizeof(PublishOption));
-
-    g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->StopScan(NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    
-    ret = g_discCoapFuncInterface->StopScan(option);
-    
-    ranging = false;
-    ret = g_discCoapFuncInterface->StopScan(option);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    SoftBusFree(option);
-}
-
-/*
-* @tc.name: testCoapStartAdvertise
-* @tc.desc: test CoapStartAdvertise
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testCoapStartAdvertise001
+ * @tc.desc: test CoapStartAdvertise
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscCoapTest, testCoapStartAdvertise001, TestSize.Level1)
 {
-    int32_t ret;
-
-    SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
-
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->StartAdvertise(NULL);
+    int32_t ret = g_discCoapFuncInterface->StartAdvertise(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = g_discCoapFuncInterface->StopAdvertise(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = g_discCoapFuncInterface->StartAdvertise(option);
+    ret = g_discCoapFuncInterface->StartAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopAdvertise(&testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SoftBusFree(option);
+    DiscCoapDeinit();
+    g_discCoapFuncInterface = nullptr;
 }
 
 /*
-* @tc.name: testCoapStopAdvertise
-* @tc.desc: test CoapStopAdvertise
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscCoapTest, testCoapStopAdvertise001, TestSize.Level1)
-{
-    int32_t ret;
-
-    SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
-
-    g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->StopAdvertise(NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = g_discCoapFuncInterface->StopAdvertise(option);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    SoftBusFree(option);
-}
-
-/*
-* @tc.name: testCoapSubscribe
-* @tc.desc: test CoapSubscribe
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testCoapSubscribe001
+ * @tc.desc: test CoapSubscribe
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(DiscCoapTest, testCoapSubscribe001, TestSize.Level1)
 {
-    int32_t ret;
-
-    SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
-
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->Subscribe(NULL);
+    int32_t ret = g_discCoapFuncInterface->Subscribe(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = g_discCoapFuncInterface->Unsubscribe(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = g_discCoapFuncInterface->Subscribe(option);
+    ret = g_discCoapFuncInterface->Subscribe(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->Unsubscribe(&testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SoftBusFree(option);
+    DiscCoapDeinit();
+    g_discCoapFuncInterface = nullptr;
 }
 
 /*
-* @tc.name: testCoapUnsubscribe
-* @tc.desc: test CoapUnsubscribe
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscCoapTest, testCoapUnsubscribe001, TestSize.Level1)
+ * @tc.name: testCoapLinkStatusChanged001
+ * @tc.desc: test CoapLinkStatusChanged
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscCoapTest, testCoapLinkStatusChanged001, TestSize.Level1)
 {
-    int32_t ret;
-
-    SubscribeOption *option = (SubscribeOption*)SoftBusMalloc(sizeof(SubscribeOption));
-    ASSERT_TRUE(option != nullptr);
-    memset_s(option, sizeof(SubscribeOption), 0, sizeof(SubscribeOption));
-
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
-    ret = g_discCoapFuncInterface->Unsubscribe(NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = g_discCoapFuncInterface->Unsubscribe(option);
+    int32_t ret = g_discCoapFuncInterface->StartAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopAdvertise(&testSubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SoftBusFree(option);
+    g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP);
+    ret = g_discCoapFuncInterface->StartAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscCoapDeinit();
+    g_discCoapFuncInterface = nullptr;
+}
+
+/*
+ * @tc.name: testCoapUpdateLocalDevInfo001
+ * @tc.desc: test CoapUpdateLocalDevInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscCoapTest, testCoapUpdateLocalDevInfo001, TestSize.Level1)
+{
+    g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
+    int32_t ret = g_discCoapFuncInterface->StartAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_discCoapFuncInterface->UpdateLocalDeviceInfo(TYPE_LOCAL_DEVICE_NAME);
+    ret = g_discCoapFuncInterface->StartAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_discCoapFuncInterface->UpdateLocalDeviceInfo(TYPE_ACCOUNT);
+    ret = g_discCoapFuncInterface->StartAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = g_discCoapFuncInterface->StopAdvertise(&testSubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscCoapDeinit();
+    g_discCoapFuncInterface = nullptr;
 }
 }

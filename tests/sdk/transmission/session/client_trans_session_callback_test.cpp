@@ -429,6 +429,19 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest07, TestS
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_FIRST_FRAME);
     EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ONGOINE_FRAME);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_LAST_FRAME);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ONLYONE_FRAME);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_BYTES);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -566,5 +579,88 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest11, TestS
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
     SoftBusFree(tvList);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest12
+ * @tc.desc: Transmission sdk session callback on session open failed with no callback.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest12, TestSize.Level1)
+{
+    ISessionListener sessionlistener = {
+        .OnSessionOpened = NULL,
+        .OnSessionClosed = OnSessionClosed,
+        .OnBytesReceived = OnBytesReceived,
+        .OnMessageReceived = OnMessageReceived,
+        .OnStreamReceived = OnStreamReceived,
+        .OnQosEvent = OnQosEvent,
+    };
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: TransClientSessionCallbackTest13
+ * @tc.desc: Transmission sdk session callback on data received with different parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest13, TestSize.Level1)
+{
+    int32_t ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, TRANS_TEST_AUTH_DATA,
+                                      strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_FIRST_FRAME);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    session->channelType = CHANNEL_TYPE_UDP;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ALLFILE_SENT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_CRC_CHECK_FRAME);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_RESULT_FRAME);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ACK_REQUEST_SENT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ACK_RESPONSE_SENT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
+                              strlen(TRANS_TEST_AUTH_DATA), (SessionPktType)(TRANS_SESSION_FILE_ACK_RESPONSE_SENT + 1));
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
 }
 }

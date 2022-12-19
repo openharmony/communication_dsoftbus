@@ -226,7 +226,7 @@ if (defined(ohos_lite)) {
   }
 
   module_output_path = "dsoftbus/transmission"
-  ohos_unittest("TransSdkUdpManagerTest") {
+  ohos_unittest("ClientTransUdpManagerStaticTest") {
     module_out_path = module_output_path
     sources = [ "udp/common/client_trans_udp_manager_static_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -238,6 +238,23 @@ if (defined(ohos_lite)) {
     ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
+    native_source_path = rebase_path("$dsoftbus_root_path")
+    dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
+    enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                           [
+                             "$native_source_path",
+                             "$dep_file",
+                           ],
+                           "value")
+
+    if (enhanced) {
+      include_dirs += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface" ]
+      deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
+    } else {
+      include_dirs +=
+          [ "$dsoftbus_root_path/components/nstackx/nstackx_util/interface" ]
+      deps += [ "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open" ]
+    }
     if (is_standard_system) {
       external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
@@ -349,6 +366,27 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("ClientTransStreamTest") {
+    module_out_path = module_output_path
+    sources = [ "udp/stream/client_trans_stream_test.cpp" ]
+    include_dirs = trans_udp_channel_sdk_inc
+    include_dirs += trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
+      "$dsoftbus_root_path/sdk/transmission/ipc/standard/src",
+      "$dsoftbus_root_path/sdk/transmission/ipc/standard/include",
+      "$dsoftbus_root_path/core/frame/standard/init/include",
+    ]
+
+    deps = trans_sdk_test_common_deps
+    deps += trans_sdk_proxy_test_deps
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+  }
+
   ohos_unittest("TransSdkUdpStreamAdaptorTest") {
     module_out_path = module_output_path
     sources = [ "udp/stream/stream_adaptor_test.cpp" ]
@@ -372,11 +410,13 @@ if (defined(ohos_lite)) {
       ":ClientTransProxyManagerTest",
       ":ClientTransProxyTest",
       ":ClientTransSessionImplTest",
+      ":ClientTransUdpManagerStaticTest",
       ":ClientTransUdpManagerTest",
       ":TransSdkCommStreamTest",
       ":TransSdkStreamTest",
       ":TransSdkTest",
       ":TransSessionTest",
+      "auth:unittest",
       "monitor_permission_test:CheckPermissionTest",
       "permission:TransDynamicPermissionTest",
       "udp/distributed_stream:distributed_stream_test",
@@ -386,6 +426,7 @@ if (defined(ohos_lite)) {
       if (dsoftbus_feature_trans_udp_stream == true) {
         if (!defined(ohos_lite)) {
           deps += [
+            ":ClientTransStreamTest",
             ":TransSdkUdpStreamAdaptorTest",
             ":TransSdkUdpStreamInterfaceTest",
             "udp/stream/libsoftbus_stream:unittest",

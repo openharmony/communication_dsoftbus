@@ -25,6 +25,7 @@ using namespace testing;
 using namespace testing::ext;
 
 #define LNN_RELATION_JOIN_THREAD 1
+#define LNN_MOCK_ONLINE_NODE_CNT 2
 
 namespace OHOS {
     
@@ -42,6 +43,161 @@ LnnNetLedgertInterfaceMock::~LnnNetLedgertInterfaceMock()
 static LnnNetLedgerInterface *GetNetLedgerInterface()
 {
     return reinterpret_cast<LnnNetLedgerInterface *>(g_netLedgerinterface);
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
+{
+    if (info == NULL || infoNum == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    *infoNum = 1;
+    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
+    if (*info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "malloc info fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy networkId fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType,
+    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    if (srcId == NULL || dstIdBuf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy dstIdBuf fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(const char *srcId, IdCategory srcIdType,
+    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    if (srcId == NULL || dstIdBuf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(dstIdBuf, dstIdBufLen, peerId.c_str()) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy dstIdBuf fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    if (info == NULL || infoNum == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    *infoNum = 1;
+    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
+    if (*info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "malloc info fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy networkId fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1(NodeBasicInfo **info, int32_t *infoNum)
+{
+    if (info == NULL || infoNum == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    *infoNum = LNN_MOCK_ONLINE_NODE_CNT;
+    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
+    if (*info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "malloc info fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy networkId fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s((*info + 1)->networkId, sizeof((*info + 1)->networkId), peerId.c_str(), peerId.length() + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy networkId fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation(const char *id, IdCategory type,
+    uint8_t *relation, uint32_t len)
+{
+    if (len <= CONNECTION_ADDR_BR) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set relation fail");
+        return SOFTBUS_ERR;
+    }
+    relation[CONNECTION_ADDR_BR] = LNN_RELATION_JOIN_THREAD;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1(const char *id, IdCategory type,
+    uint8_t *relation, uint32_t len)
+{
+    if (len <= CONNECTION_ADDR_BR) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set relation fail");
+        return SOFTBUS_ERR;
+    }
+    relation[CONNECTION_ADDR_BR] = LNN_RELATION_JOIN_THREAD;
+    relation[CONNECTION_ADDR_BLE] = LNN_RELATION_JOIN_THREAD;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(info, len, "abc", strlen("abc") + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy info fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1(InfoKey key, char *info, uint32_t len)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(info, len, localId.c_str(), localId.length() + 1) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy info fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2(InfoKey key, char *info, uint32_t len)
+{
+    if (key == STRING_KEY_NET_IF_NAME) {
+        if (strcpy_s(info, len, "deviceName") != EOK) {
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    if (key == STRING_KEY_WLAN_IP) {
+        if (strcpy_s(info, len, "127.0.0.2") != EOK) {
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
 }
 
 extern "C" {
@@ -227,94 +383,14 @@ const char *LnnGetDeviceUdid(const NodeInfo *info)
     return GetNetLedgerInterface()->LnnGetDeviceUdid(info);
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
+int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
 {
-    if (info == NULL || infoNum == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
-        return SOFTBUS_ERR;
-    }
-    *infoNum = 1;
-    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "malloc info fail");
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy networkId fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
+    return GetNetLedgerInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
 }
 
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType,
-    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
+int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
-    if (srcId == NULL || dstIdBuf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(dstIdBuf, dstIdBufLen, "abc", strlen("abc") + 1) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy dstIdBuf fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(const char *srcId, IdCategory srcIdType,
-    IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
-{
-    if (srcId == NULL || dstIdBuf == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
-        return SOFTBUS_ERR;
-    }
-    if (strcpy_s(dstIdBuf, dstIdBufLen, "abdef") != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "memcpy dstIdBuf fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
-{
-    if (info == NULL || infoNum == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
-        return SOFTBUS_ERR;
-    }
-    *infoNum = 1;
-    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "malloc info fail");
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s((*info)->networkId, sizeof((*info)->networkId), "abc", strlen("abc") + 1) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy networkId fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation(const char *id, IdCategory type,
-    uint8_t *relation, uint32_t len)
-{
-    if (CONNECTION_ADDR_BR >= len) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set relation fail");
-        return SOFTBUS_ERR;
-    }
-    relation[CONNECTION_ADDR_BR] = LNN_RELATION_JOIN_THREAD;
-    return SOFTBUS_OK;
-}
-
-int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
-{
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(info, len, "abc", strlen("abc") + 1) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy info fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
+    return GetNetLedgerInterface()->LnnSetLocalNum64Info(key, info);
 }
 }
 }

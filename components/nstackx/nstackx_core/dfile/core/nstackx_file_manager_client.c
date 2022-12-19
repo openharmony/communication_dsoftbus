@@ -839,7 +839,7 @@ int32_t FileManagerSendFileTask(FileManager *fileManager, const SendFileListInfo
     fmFileList->socketIndex = peerinfo->socketIndex;
     fmFileList->bindedSendBlockListIdx = GetTargetSendBlockListIdx(fileManager);
     if (MutexListAddNode(&fileManager->taskList, &fmFileList->list, NSTACKX_FALSE) != NSTACKX_EOK) {
-        DFILE_LOGE(TAG, "Add tast to list error");
+        DFILE_LOGE(TAG, "Add task to list error");
         ClearSendFileList(fileManager, fmFileList);
         fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
@@ -897,7 +897,7 @@ static uint8_t IsValidOutSet(const FileListTask *fileList, uint16_t fileId, uint
 int32_t FileManagerResetSendOutSet(FileManager *fileManager, uint16_t fileId, uint32_t blockSequence, uint16_t transId)
 {
     FileListTask *fileList = NULL;
-    uint8_t isErrorOccured;
+    uint8_t isErrorOccurred;
     int32_t ret;
 
     if (CheckSenderManager(fileManager) != NSTACKX_EOK ||
@@ -905,8 +905,8 @@ int32_t FileManagerResetSendOutSet(FileManager *fileManager, uint16_t fileId, ui
         DFILE_LOGE(TAG, "Invalid input");
         return NSTACKX_EINVAL;
     }
-    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccured);
-    if (isErrorOccured) {
+    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccurred);
+    if (isErrorOccurred) {
         DFILE_LOGE(TAG, "get target file list error");
         goto L_ERR_FILE_MANAGER;
     }
@@ -1114,12 +1114,12 @@ void ClearSendFrameList(FileManager *fileManager)
 uint8_t FileManagerIsLastBlockRead(FileManager *fileManager, uint16_t transId)
 {
     FileListTask *fileList = NULL;
-    uint8_t isErrorOccured;
+    uint8_t isErrorOccurred;
     if (fileManager == NULL) {
         return NSTACKX_FALSE;
     }
-    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccured);
-    if (isErrorOccured) {
+    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccurred);
+    if (isErrorOccurred) {
         fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
         return NSTACKX_FALSE;
@@ -1254,14 +1254,14 @@ uint8_t FileManagerHasPendingData(FileManager *fileManager)
 int32_t FileManagerGetLastSequence(FileManager *fileManager, uint16_t transId, uint16_t fileId, uint32_t *sequence)
 {
     FileListTask *fileList = NULL;
-    uint8_t isErrorOccured;
+    uint8_t isErrorOccurred;
     if (fileManager == NULL || transId == 0 || fileId == 0) {
         DFILE_LOGE(TAG, "invalid input");
         return NSTACKX_EINVAL;
     }
 
-    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccured);
-    if (isErrorOccured) {
+    fileList = GetFileListById(&fileManager->taskList, transId, &isErrorOccurred);
+    if (isErrorOccurred) {
         fileManager->errCode = FILE_MANAGER_EMUTEX;
         NotifyFileManagerMsg(fileManager, FILE_MANAGER_INNER_ERROR);
         DFILE_LOGE(TAG, "failed to get target fileList %hu", transId);

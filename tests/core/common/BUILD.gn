@@ -18,9 +18,13 @@ group("unittest") {
   testonly = true
   deps = [
     "anonymize:unittest",
+    "bitmap:unittest",
     "dfx/hidumper_adapter/unittest:unittest",
     "dfx/hisysevent_adapter/unittest:unittest",
     "log:unittest",
+    "network:unittest",
+    "security/permission/common:unittest",
+    "security/permission/standard:unittest",
     "sequence_verification:unittest",
     "utils:unittest",
   ]

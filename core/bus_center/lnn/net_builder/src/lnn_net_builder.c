@@ -168,12 +168,12 @@ NO_SANITIZE("cfi") bool GetWatchdogFlag(void)
 static void NetBuilderConfigInit(void)
 {
     if (SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT,
-        (unsigned char*)&g_netBuilder.maxConnCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
+        (unsigned char *)&g_netBuilder.maxConnCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max connection count fail, use default value");
         g_netBuilder.maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
-        (unsigned char*)&g_netBuilder.maxConcurrentCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
+        (unsigned char *)&g_netBuilder.maxConcurrentCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max conncurent count fail, use default value");
         g_netBuilder.maxConcurrentCount = 0;
     }
@@ -1494,7 +1494,6 @@ static void OnLnnProcessNotTrustedMsgDelay(void *para)
     for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "OnLnnProcessNotTrustedMsgDelay: authSeq %" PRId64 "-> %" PRId64,  info->authSeq[type], authSeq[type]);
-    
         if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[offline] LnnRequestLeaveSpecific type:%d", type);
             LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type));
@@ -1541,7 +1540,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         return;
     }
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnProcessNotTrustedMsgDelay,
-        info, NOT_TRUSTED_DEVICE_MSG_DELAY) != SOFTBUS_OK) {
+        (void *)info, NOT_TRUSTED_DEVICE_MSG_DELAY) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async not trusted msg delay fail");
         SoftBusFree(info);
     }

@@ -90,6 +90,7 @@ bool LnnIsAutoNetWorkingEnabled(void);
 
 bool LnnVisitNetif(VisitNetifCallback callback, void *data);
 bool LnnVisitProtocol(VisitProtocolCallback callback, void *data);
+int32_t RegistIPProtocolManager(void);
 
 #ifdef __cplusplus
 #if __cplusplus

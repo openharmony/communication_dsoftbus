@@ -177,6 +177,8 @@ static IFileReceiveListener g_fileRecvListener = {
     .OnFileTransError = OnFileTransErrorTest,
 };
 
+static DFileMsgReceiver g_fileMsgRecviver = DFileMsgReceiverTest;
+
 void GenerateAndAddUdpChannel(UdpChannel *channel)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
@@ -664,5 +666,97 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
 
     ret = TransSendFile(sessionId, &fileList, &dFileList, fileCnt);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransFileTest010
+ * @tc.desc: trans set reuse addr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
+{
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    int on = 65536;
+    int ret = SetReuseAddr(fd, on);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    
+    ret = SetReuseAddr(0, on);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransFileTest011
+ * @tc.desc: trans set reuse port.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
+{
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    int on = 65536;
+    int ret = SetReusePort(fd, on);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    
+    ret = SetReusePort(0, on);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransFileTest012
+ * @tc.desc: trans open tcp server.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
+{
+   int port = 5683;
+   int ret = OpenTcpServer("127.0.0.1", port);
+   EXPECT_TRUE(ret != SOFTBUS_ERR);
+
+   ret = OpenTcpServer("280567565", port);
+   EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+   ret = OpenTcpServer("127.0.0.1", 0);
+   EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransFileTest013
+ * @tc.desc: trans start nstackx file at server.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
+{
+    uint8_t key = 215;
+    uint32_t keyLen = 8;
+    int32_t filePort = 25;
+    int32_t ret = StartNStackXDFileServer(NULL, &key, keyLen, g_fileMsgRecviver, &filePort);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = ConnInitSockets();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    (void)StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
+    ConnDeinitSockets();
+}
+
+/**
+ * @tc.name: TransFileTest014
+ * @tc.desc: trans start nstackx file at client.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
+{
+    uint8_t key = 215;
+    uint32_t keyLen = 8;
+    int32_t peerPort = 25;
+    int32_t ret = StartNStackXDFileClient(NULL, peerPort, &key, keyLen, g_fileMsgRecviver);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    (void)StartNStackXDFileClient("127.0.0.1", peerPort, &key, keyLen, g_fileMsgRecviver);
 }
 }

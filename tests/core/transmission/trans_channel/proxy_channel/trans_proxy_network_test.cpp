@@ -195,7 +195,7 @@ HWTEST_F(TransProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, TestS
     appInfo.appType = APP_TYPE_NOT_CARE;
     ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is normal and get network id fail*/
+    /* test app type is normal and get network id fail */
     appInfo.appType = APP_TYPE_NORMAL;
     TransAuthInterfaceMock authMock;
     EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -287,7 +287,7 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.
     appInfo.appType = APP_TYPE_AUTH;
     ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test app type is normal and return err*/
+    /* test app type is normal and return err */
     appInfo.appType = APP_TYPE_NORMAL;
     ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);

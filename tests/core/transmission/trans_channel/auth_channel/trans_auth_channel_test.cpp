@@ -902,7 +902,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnOptionByChanIdTest002, TestSize.L
     ASSERT_TRUE(info != NULL);
     info->appInfo.myData.channelId = TRANS_TEST_CHANNEL_ID;
     info->authId = TRANS_TEST_AUTH_ID;
-    info->isConnOptValid = false;
+    info->isClient = false;
     ret = AddAuthChannelInfo(info);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthGetConnOptionByChanId(TRANS_TEST_CHANNEL_ID, connOpt);
@@ -912,7 +912,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnOptionByChanIdTest002, TestSize.L
     ASSERT_TRUE(info != NULL);
     info->appInfo.myData.channelId = TRANS_TEST_CHANNEL_ID;
     info->authId = TRANS_TEST_AUTH_ID;
-    info->isConnOptValid = true;
+    info->isClient = true;
     ret = AddAuthChannelInfo(info);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthGetConnOptionByChanId(TRANS_TEST_CHANNEL_ID, connOpt);

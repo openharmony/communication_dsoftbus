@@ -103,6 +103,7 @@ HWTEST_F(TransPendingPktTest, CreatePendingItem001, TestSize.Level1)
     EXPECT_TRUE(item != NULL);
 
     ReleasePendingItem(item);
+    ReleasePendingItem(NULL);
 }
 
 /**
@@ -197,4 +198,63 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
     ret = ProcPendingPacket(channelId, seqNum, type);
     EXPECT_EQ(SOFTBUS_TIMOUT, ret);
 }
+
+/**
+ * @tc.name: TimeBefore001
+ * @tc.desc: TimeBefore001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransPendingPktTest, TimeBefore001, TestSize.Level1)
+{
+    SoftBusSysTime outtime;
+    SoftBusSysTime now;
+    SoftBusGetTime(&now);
+    outtime.sec = now.sec + TIME_OUT;
+    outtime.usec = now.usec;
+    bool res = TimeBefore(&outtime);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: ProcPendingPacket002
+ * @tc.desc: ProcPendingPacket, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransPendingPktTest, SetPendingPacket002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t seqNum = 0;
+    int type = 1;
+
+    int32_t ret = PendingInit(type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    ret = SetPendingPacket(channelId, seqNum, type);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    PendingDeinit(type);
+}
+
+/**
+ * @tc.name: DelPendingPacket002
+ * @tc.desc: DelPendingPacket002, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransPendingPktTest, DelPendingPacket002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int type = 1;
+    int32_t seqNum = 0;
+
+    int ret = PendingInit(type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ProcPendingPacket(channelId, seqNum, type);
+    EXPECT_NE(SOFTBUS_ERR, ret);
+    ret = DelPendingPacket(channelId, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
 } // OHOS

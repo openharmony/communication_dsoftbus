@@ -48,9 +48,9 @@ public:
     virtual int32_t ServerIpcStartTimeSync(const char *pkgName,
         const char *targetNetworkId, int32_t accuracy, int32_t period);
     virtual int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
-    virtual int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen);
+    virtual int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info);
     virtual int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId);
-    virtual int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+    virtual int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info);
     virtual int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
 };
 class ClientBusCenterManagerInterfaceMock : public ClientBusCenterManagerInterface {
@@ -71,9 +71,9 @@ public:
     MOCK_METHOD2(ServerIpcLeaveMetaNode, int32_t (const char *, const char *));
     MOCK_METHOD4(ServerIpcStartTimeSync, int32_t (const char *, const char *, int32_t, int32_t));
     MOCK_METHOD2(ServerIpcStopTimeSync, int32_t (const char *, const char *));
-    MOCK_METHOD3(ServerIpcPublishLNN, int32_t (const char *, const void *, uint32_t));
+    MOCK_METHOD2(ServerIpcPublishLNN, int32_t (const char *, const PublishInfo *));
     MOCK_METHOD2(ServerIpcStopPublishLNN, int32_t (const char *, int32_t));
-    MOCK_METHOD3(ServerIpcRefreshLNN, int32_t (const char *, const void *, uint32_t));
+    MOCK_METHOD2(ServerIpcRefreshLNN, int32_t (const char *, const SubscribeInfo *));
     MOCK_METHOD2(ServerIpcStopRefreshLNN, int32_t (const char *, int32_t));
 };
 } // namespace OHOS
