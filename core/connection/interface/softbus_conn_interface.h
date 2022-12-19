@@ -15,10 +15,10 @@
 
 #ifndef SOFTBUS_CONN_INTERFACE_H
 #define SOFTBUS_CONN_INTERFACE_H
-#include <stdint.h>
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -56,7 +56,7 @@ typedef enum {
     CONNECT_TYPE_MAX
 } ConnectType;
 
-#define CONN_INVALID_LISTENER_MODULE_ID 0xffff
+#define CONN_INVALID_LISTENER_MODULE_ID    0xffff
 #define CONN_DYNAMIC_LISTENER_MODULE_COUNT 5
 
 typedef enum {
@@ -139,6 +139,7 @@ struct BrOption {
 struct BleOption {
     char bleMac[BT_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
+    bool fastestConnectEnable;
 };
 
 struct SocketOption {
@@ -157,6 +158,21 @@ typedef struct {
         struct SocketOption socketOption;
     };
 } ConnectOption;
+
+typedef enum {
+    CONN_BLE_PRIORITY_BALANCED = 0x0,
+    CONN_BLE_PRIORITY_HIGH,
+    CONN_BLE_PRIORITY_LOW_POWER,
+} ConnectBlePriority;
+
+typedef struct {
+    ConnectType type;
+    union {
+        struct {
+            ConnectBlePriority priority;
+        } bleOption;
+    };
+} UpdateOption;
 
 struct ListenerSocketOption {
     char addr[IP_LEN];
@@ -318,6 +334,15 @@ int32_t ConnStopLocalListening(const LocalListenerInfo *info);
 int32_t ConnStartLocalListening(const LocalListenerInfo *info);
 
 bool CheckActiveConnection(const ConnectOption *option);
+
+/**
+ * @ingroup Softbus_conn_manager
+ * @brief update connection properties as need
+ * @param[in] connectionId connection id which should be update.
+ * @param[in] option the option will acts on connection
+ * @return <b>SOFTBUS_OK</b> if update connection properties successfully, others if failed.
+ */
+int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option);
 
 #ifdef __cplusplus
 #if __cplusplus

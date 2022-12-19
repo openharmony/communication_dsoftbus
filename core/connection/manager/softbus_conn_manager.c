@@ -28,13 +28,13 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_hisysevt_connreporter.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
-#include "softbus_hisysevt_connreporter.h"
 
-ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = {0};
+ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
 static bool g_isInited = false;
 static SoftBusList *g_connTimeList = NULL;
@@ -58,7 +58,7 @@ static int32_t AddConnTimeNode(const ConnectionInfo *info, ConnTimeNode *timeNod
         CLOGE("g_connTimeList is null");
         return SOFTBUS_ERR;
     }
-    SoftBusSysTime now = {0};
+    SoftBusSysTime now = { 0 };
     SoftBusGetTime(&now);
     timeNode->startTime = (uint32_t)now.sec * SEC_TIME + (uint32_t)now.usec / SEC_TIME;
     if (memcpy_s(&(timeNode->info), sizeof(ConnectionInfo), info, sizeof(ConnectionInfo)) != EOK) {
@@ -153,12 +153,10 @@ static void FreeConnTimeNode(ConnTimeNode *timeNode)
 
 static int32_t ModuleCheck(ConnModule moduleId)
 {
-    ConnModule id[] = {
-        MODULE_TRUST_ENGINE, MODULE_HICHAIN, MODULE_AUTH_SDK, MODULE_AUTH_CONNECTION, MODULE_MESSAGE_SERVICE,
-        MODULE_AUTH_CHANNEL, MODULE_AUTH_MSG, MODULE_BLUETOOTH_MANAGER, MODULE_CONNECTION, MODULE_DIRECT_CHANNEL,
-        MODULE_PROXY_CHANNEL, MODULE_DEVICE_AUTH, MODULE_P2P_LINK, MODULE_UDP_INFO, MODULE_PKG_VERIFY,
-        MODULE_META_AUTH, MODULE_BLE_NET, MODULE_BLE_CONN
-    };
+    ConnModule id[] = { MODULE_TRUST_ENGINE, MODULE_HICHAIN, MODULE_AUTH_SDK, MODULE_AUTH_CONNECTION,
+        MODULE_MESSAGE_SERVICE, MODULE_AUTH_CHANNEL, MODULE_AUTH_MSG, MODULE_BLUETOOTH_MANAGER, MODULE_CONNECTION,
+        MODULE_DIRECT_CHANNEL, MODULE_PROXY_CHANNEL, MODULE_DEVICE_AUTH, MODULE_P2P_LINK, MODULE_UDP_INFO,
+        MODULE_PKG_VERIFY, MODULE_META_AUTH, MODULE_BLE_NET, MODULE_BLE_CONN };
     int32_t i;
     int32_t idNum = sizeof(id) / sizeof(ConnModule);
 
@@ -321,12 +319,12 @@ NO_SANITIZE("cfi") uint32_t ConnGetNewRequestId(ConnModule moduleId)
     return reqId;
 }
 
-NO_SANITIZE("cfi") void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data,
-    int32_t len)
+NO_SANITIZE("cfi")
+void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     ConnListenerNode listener;
     int32_t ret;
-    char* pkt = NULL;
+    char *pkt = NULL;
     int32_t pktLen;
 
     if (data == NULL) {
@@ -356,7 +354,7 @@ static void ReportConnectTime(const ConnectionInfo *info)
         CLOGE("ReportConnectTime:info is null");
         return;
     }
-    SoftBusSysTime time = {0};
+    SoftBusSysTime time = { 0 };
     ConnTimeNode *timeNode = GetConnTimeNode(info);
     if (timeNode == NULL) {
         CLOGE("ReportConnectTime:get timeNode failed");
@@ -374,7 +372,7 @@ static void ReportConnectTime(const ConnectionInfo *info)
 
 static void RecordStartTime(const ConnectOption *info)
 {
-    ConnectionInfo conInfo = {0};
+    ConnectionInfo conInfo = { 0 };
     conInfo.type = info->type;
     switch (info->type) {
         case CONNECT_BR:
@@ -469,9 +467,7 @@ NO_SANITIZE("cfi") int32_t ConnSetConnectCallback(ConnModule moduleId, const Con
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if ((callback->OnConnected == NULL) ||
-        (callback->OnDisconnected == NULL) ||
-        (callback->OnDataReceived == NULL)) {
+    if ((callback->OnConnected == NULL) || (callback->OnDisconnected == NULL) || (callback->OnDataReceived == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
     return AddListener(moduleId, callback);
@@ -488,8 +484,7 @@ NO_SANITIZE("cfi") int32_t ConnTypeIsSupport(ConnectType type)
     return ConnTypeCheck(type);
 }
 
-NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId,
-    const ConnectResult *result)
+NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const ConnectResult *result)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -621,7 +616,7 @@ NO_SANITIZE("cfi") int32_t ConnStopLocalListening(const LocalListenerInfo *info)
     return g_connManager[info->type]->StopLocalListening(info);
 }
 
-ConnectCallback g_connManagerCb = {0};
+ConnectCallback g_connManagerCb = { 0 };
 
 NO_SANITIZE("cfi") int32_t ConnServerInit(void)
 {
@@ -633,13 +628,13 @@ NO_SANITIZE("cfi") int32_t ConnServerInit(void)
 
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
-        CLOGE("ConnInitSockets failed!ret=%"PRId32, ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
 
     ret = InitBaseListener();
     if (ret != SOFTBUS_OK) {
-        CLOGE("InitBaseListener failed!ret=%"PRId32, ret);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
 
@@ -721,4 +716,20 @@ NO_SANITIZE("cfi") bool CheckActiveConnection(const ConnectOption *info)
     }
 
     return g_connManager[info->type]->CheckActiveConnection(info);
+}
+
+int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    if (option == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    uint32_t type = (connectionId >> CONNECT_TYPE_SHIFT);
+    if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
+        return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
+    }
+    if (g_connManager[type]->UpdateConnection == NULL) {
+        return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
+    }
+    return g_connManager[type]->UpdateConnection(connectionId, option);
 }

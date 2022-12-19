@@ -28,15 +28,15 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
-#define MAX_AUTH_VALID_PERIOD (30 * 60 * 1000L) /* 30 mins */
+#define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
 
-static AuthVerifyListener g_verifyListener = {0};
-static GroupChangeListener g_groupChangeListener = {0};
-static AuthTransCallback g_transCallback = {0};
+static AuthVerifyListener g_verifyListener = { 0 };
+static GroupChangeListener g_groupChangeListener = { 0 };
+static AuthTransCallback g_transCallback = { 0 };
 /* Auth Manager */
 static AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
 {
@@ -63,8 +63,8 @@ static AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
     } else {
         ListTailInsert(&g_authClientList, &auth->node);
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "create auth manager, side=%s, authId=%" PRId64 ".", GetAuthSideStr(auth->isServer), auth->authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "create auth manager, side=%s, authId=%" PRId64 ".",
+        GetAuthSideStr(auth->isServer), auth->authId);
     return auth;
 }
 
@@ -91,8 +91,8 @@ NO_SANITIZE("cfi") void DelAuthManager(AuthManager *auth, bool removeAuthFromLis
 {
     CHECK_NULL_PTR_RETURN_VOID(auth);
     if (removeAuthFromList) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "delete auth manager, side=%s, authId=%" PRId64 ".", GetAuthSideStr(auth->isServer), auth->authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "delete auth manager, side=%s, authId=%" PRId64 ".",
+            GetAuthSideStr(auth->isServer), auth->authId);
         ListDelete(&auth->node);
     }
     DestroySessionKeyList(&auth->sessionKeyList);
@@ -128,8 +128,7 @@ static AuthManager *FindAuthManagerByP2pMac(const char *p2pMac, AuthLinkType typ
     AuthManager *item = NULL;
     ListNode *list = isServer ? &g_authServerList : &g_authClientList;
     LIST_FOR_EACH_ENTRY(item, list, AuthManager, node) {
-        if (item->connInfo.type == type &&
-            (StrCmpIgnoreCase(item->p2pMac, p2pMac) == 0)) {
+        if (item->connInfo.type == type && (StrCmpIgnoreCase(item->p2pMac, p2pMac) == 0)) {
             return item;
         }
     }
@@ -189,29 +188,26 @@ NO_SANITIZE("cfi") static int32_t SetAuthConnId(AuthManager *auth, const AuthMan
 NO_SANITIZE("cfi") static int32_t SetAuthP2pMac(AuthManager *auth, const AuthManager *inAuth)
 {
     if (strcpy_s(auth->p2pMac, sizeof(auth->p2pMac), inAuth->p2pMac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "copy auth p2p mac fail, authId=%" PRId64, auth->authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy auth p2p mac fail, authId=%" PRId64, auth->authId);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateAuthManagerByAuthId(int64_t authId,
-    int32_t (*updateFunc)(AuthManager *, const AuthManager *), const AuthManager *inAuth)
+static int32_t UpdateAuthManagerByAuthId(
+    int64_t authId, int32_t (*updateFunc)(AuthManager *, const AuthManager *), const AuthManager *inAuth)
 {
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth manager not found, authId=%" PRId64, authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found, authId=%" PRId64, authId);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     if (updateFunc(auth, inAuth) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "update auth manager fail, authId=%" PRId64, authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "update auth manager fail, authId=%" PRId64, authId);
         ReleaseAuthLock();
         return SOFTBUS_ERR;
     }
@@ -226,8 +222,7 @@ static void RemoveAuthManagerByAuthId(int64_t authId)
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "auth manager already removed, authId=%" PRId64, authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth manager already removed, authId=%" PRId64, authId);
         ReleaseAuthLock();
         return;
     }
@@ -242,8 +237,8 @@ static void RemoveAuthManagerByConnInfo(const AuthConnInfo *connInfo, bool isSer
     }
     AuthManager *auth = FindAuthManagerByConnInfo(connInfo, isServer);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "auth manager already removed, connType=%d, side=%s", connInfo->type, GetAuthSideStr(isServer));
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth manager already removed, connType=%d, side=%s",
+            connInfo->type, GetAuthSideStr(isServer));
         ReleaseAuthLock();
         return;
     }
@@ -317,8 +312,8 @@ static AuthManager *GetAuthManagerByConnInfo(const AuthConnInfo *connInfo, bool 
     }
     AuthManager *item = FindAuthManagerByConnInfo(connInfo, isServer);
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "auth manager not found, connType=%d, side=%s", connInfo->type, GetAuthSideStr(isServer));
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth manager not found, connType=%d, side=%s", connInfo->type,
+            GetAuthSideStr(isServer));
         ReleaseAuthLock();
         return NULL;
     }
@@ -335,8 +330,8 @@ static int64_t GetAuthIdByConnId(uint64_t connId, bool isServer)
     }
     AuthManager *auth = FindAuthManagerByConnId(connId, isServer);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN,
-            "auth manager[%s] not found, " CONN_INFO, GetAuthSideStr(isServer), CONN_DATA(connId));
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "auth manager[%s] not found, " CONN_INFO,
+            GetAuthSideStr(isServer), CONN_DATA(connId));
         ReleaseAuthLock();
         return AUTH_INVALID_ID;
     }
@@ -353,8 +348,8 @@ static int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
     }
     AuthManager *auth = FindAuthManagerByConnInfo(connInfo, isServer);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth manager not found, connType=%d, side=%s", connInfo->type, GetAuthSideStr(isServer));
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found, connType=%d, side=%s", connInfo->type,
+            GetAuthSideStr(isServer));
         ReleaseAuthLock();
         return AUTH_INVALID_ID;
     }
@@ -369,7 +364,7 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
         return AUTH_INVALID_ID;
     }
     uint32_t num = 0;
-    AuthManager *auth[2] = {NULL, NULL}; /* 2: client + server */
+    AuthManager *auth[2] = { NULL, NULL }; /* 2: client + server */
     auth[num++] = FindAuthManagerByConnInfo(connInfo, false);
     auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
     /* Check auth valid period */
@@ -396,8 +391,8 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
     return authId;
 }
 
-NO_SANITIZE("cfi") int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
-    const SessionKey *sessionKey)
+NO_SANITIZE("cfi")
+int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, const SessionKey *sessionKey)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(sessionKey, SOFTBUS_INVALID_PARAM);
@@ -437,8 +432,8 @@ NO_SANITIZE("cfi") int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthS
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
-    SessionKey *sessionKey)
+NO_SANITIZE("cfi")
+int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(sessionKey, SOFTBUS_INVALID_PARAM);
@@ -518,11 +513,10 @@ NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupId)
     }
 }
 
-static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo,
-    const AuthVerifyCallback *verifyCb, const AuthConnCallback *connCb)
+static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
+    const AuthConnCallback *connCb)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "start verify device: requestId=%u.", requestId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start verify device: requestId=%u.", requestId);
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     if (connCb != NULL) {
@@ -537,13 +531,12 @@ static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInf
     request.type = REQUEST_TYPE_VERIFY;
     uint32_t waitNum = AddAuthRequest(&request);
     if (waitNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "add verify request to list fail, requestId=%u.", requestId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add verify request to list fail, requestId=%u.", requestId);
         return SOFTBUS_AUTH_INNER_ERR;
     }
     if (waitNum > 1) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "wait last verify request complete, waitNum=%u, requestId=%u.", waitNum, requestId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "wait last verify request complete, waitNum=%u, requestId=%u.",
+            waitNum, requestId);
         return SOFTBUS_OK;
     }
     if (ConnectAuthDevice(requestId, connInfo, CONN_SIDE_ANY) != SOFTBUS_OK) {
@@ -553,11 +546,11 @@ static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInf
     return SOFTBUS_OK;
 }
 
-static int32_t StartReconnectDevice(int64_t authId, const AuthConnInfo *connInfo,
-    uint32_t requestId, const AuthConnCallback *connCb)
+static int32_t StartReconnectDevice(
+    int64_t authId, const AuthConnInfo *connInfo, uint32_t requestId, const AuthConnCallback *connCb)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "start reconnect device: requestId=%u, authId=%" PRId64, requestId, authId);
+    SoftBusLog(
+        SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start reconnect device: requestId=%u, authId=%" PRId64, requestId, authId);
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth == NULL) {
         return SOFTBUS_AUTH_NOT_FOUND;
@@ -573,8 +566,7 @@ static int32_t StartReconnectDevice(int64_t authId, const AuthConnInfo *connInfo
     request.requestId = requestId;
     request.type = REQUEST_TYPE_RECONNECT;
     if (AddAuthRequest(&request) == 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "add reconnect request fail, requestId=%u.", requestId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add reconnect request fail, requestId=%u.", requestId);
         return SOFTBUS_ERR;
     }
     if (ConnectAuthDevice(requestId, connInfo, sideType) != SOFTBUS_OK) {
@@ -588,24 +580,21 @@ NO_SANITIZE("cfi") static void ReportAuthRequestPassed(uint32_t requestId, int64
 {
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "auth request not found, only notify LNN to update nodeInfo.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth request not found, only notify LNN to update nodeInfo.");
         NotifyDeviceVerifyPassed(authId, nodeInfo);
         return;
     }
     do {
         if (CheckAuthConnCallback(&request.connCb)) {
             NotifyDeviceVerifyPassed(authId, nodeInfo);
-            if (request.connInfo.type == AUTH_LINK_TYPE_WIFI ||
-                request.connInfo.type == AUTH_LINK_TYPE_P2P) {
+            if (request.connInfo.type == AUTH_LINK_TYPE_WIFI || request.connInfo.type == AUTH_LINK_TYPE_P2P) {
                 PerformAuthConnCallback(request.requestId, SOFTBUS_OK, authId);
                 DelAuthRequest(request.requestId);
                 continue;
             }
             /* For open auth br/ble connection, reconnect to keep long-connection. */
             DelAuthRequest(request.requestId);
-            if (StartReconnectDevice(authId, &request.connInfo,
-                request.requestId, &request.connCb) != SOFTBUS_OK) {
+            if (StartReconnectDevice(authId, &request.connInfo, request.requestId, &request.connCb) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "open auth reconnect fail.");
                 request.connCb.onConnOpenFailed(request.requestId, SOFTBUS_AUTH_CONN_FAIL);
             }
@@ -633,8 +622,7 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
         /* verify request wait list is empty, return. */
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "find another verify request in wait list, do verify again.");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "find another verify request in wait list, do verify again.");
     if (ConnectAuthDevice(request.requestId, &request.connInfo, CONN_SIDE_ANY) != SOFTBUS_OK) {
         ReportAuthRequestFailed(request.requestId, SOFTBUS_AUTH_CONN_FAIL);
     }
@@ -652,16 +640,15 @@ NO_SANITIZE("cfi") void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSess
     }
     AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth manager not found, connType=%d, side=%s", info->connInfo.type, GetAuthSideStr(info->isServer));
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found, connType=%d, side=%s",
+            info->connInfo.type, GetAuthSideStr(info->isServer));
         ReleaseAuthLock();
         return;
     }
     auth->hasAuthPassed = true;
     if (info->nodeInfo.p2pInfo.p2pMac[0] != '\0') {
         if (strcpy_s(auth->p2pMac, sizeof(auth->p2pMac), info->nodeInfo.p2pInfo.p2pMac)) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-                "copy p2pMac fail, authSeq=%" PRId64, authSeq);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy p2pMac fail, authSeq=%" PRId64, authSeq);
         }
     }
     authId = auth->authId;
@@ -671,6 +658,7 @@ NO_SANITIZE("cfi") void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSess
         NotifyDeviceVerifyPassed(authId, &info->nodeInfo);
     } else {
         ReportAuthRequestPassed(info->requestId, authId, &info->nodeInfo);
+        UpdateAuthDevicePriority(info->connId);
         /* br and ble NOT long-connection, close connection after auth pass. */
         if (info->connInfo.type == AUTH_LINK_TYPE_BR || info->connInfo.type == AUTH_LINK_TYPE_BLE) {
             DisconnectAuthDevice(info->connId);
@@ -684,8 +672,7 @@ NO_SANITIZE("cfi") void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSess
         authSeq, info->requestId, reason);
     AuthManager *auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth != NULL && auth->hasAuthPassed) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "update session key fail, authId=%" PRId64, auth->authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "update session key fail, authId=%" PRId64, auth->authId);
         NotifyDeviceDisconnect(auth->authId);
     }
     DelAuthManager(auth, false);
@@ -705,10 +692,9 @@ static void HandleReconnectResult(const AuthRequest *request, uint64_t connId, i
         DelAuthRequest(request->requestId);
         return;
     }
-    AuthManager inAuth = {.connId = connId};
+    AuthManager inAuth = { .connId = connId };
     if (UpdateAuthManagerByAuthId(request->authId, SetAuthConnId, &inAuth) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "set auth connId fail, requestId=%u.", request->requestId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set auth connId fail, requestId=%u.", request->requestId);
         PerformAuthConnCallback(request->requestId, SOFTBUS_AUTH_NOT_FOUND, AUTH_INVALID_ID);
         DelAuthRequest(request->requestId);
         return;
@@ -719,8 +705,7 @@ static void HandleReconnectResult(const AuthRequest *request, uint64_t connId, i
 
 static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "OnConnectResult: requestId=%u, result=%d.", requestId, result);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "OnConnectResult: requestId=%u, result=%d.", requestId, result);
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "request not found, requestId=%u.", requestId);
@@ -739,16 +724,15 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
     (void)UpdateAuthRequestConnInfo(requestId, connInfo);
     int32_t ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, connInfo, false);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "start auth session fail(=%d), requestId=%u.", ret, requestId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "start auth session fail(=%d), requestId=%u.", ret, requestId);
         DisconnectAuthDevice(connId);
         ReportAuthRequestFailed(requestId, ret);
         return;
     }
 }
 
-static void HandleDeviceIdData(uint64_t connId, const AuthConnInfo *connInfo,
-    const AuthDataHead *head, const uint8_t *data)
+static void HandleDeviceIdData(
+    uint64_t connId, const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
 {
     int32_t ret;
     if (head->flag == CLIENT_SIDE_FLAG) {
@@ -772,8 +756,7 @@ static void HandleDeviceIdData(uint64_t connId, const AuthConnInfo *connInfo,
     }
 }
 
-static void HandleAuthData(const AuthConnInfo *connInfo,
-    const AuthDataHead *head, const uint8_t *data)
+static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
 {
     int32_t ret = AuthSessionProcessAuthData(head->seq, data, head->len);
     if (ret != SOFTBUS_OK) {
@@ -783,8 +766,8 @@ static void HandleAuthData(const AuthConnInfo *connInfo,
     }
 }
 
-static void HandleDeviceInfoData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-    const AuthDataHead *head, const uint8_t *data)
+static void HandleDeviceInfoData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     int32_t ret;
     if (head->seq != 0) {
@@ -800,8 +783,8 @@ static void HandleDeviceInfoData(uint64_t connId, const AuthConnInfo *connInfo, 
     }
 }
 
-static void HandleCloseAckData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-    const AuthDataHead *head, const uint8_t *data)
+static void HandleCloseAckData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     int32_t ret;
     if (head->seq != 0) {
@@ -817,8 +800,9 @@ static void HandleCloseAckData(uint64_t connId, const AuthConnInfo *connInfo, bo
     }
 }
 
-NO_SANITIZE("cfi") static void HandleConnectionData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-    const AuthDataHead *head, const uint8_t *data)
+NO_SANITIZE("cfi")
+static void HandleConnectionData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     if (!RequireAuthLock()) {
         return;
@@ -846,8 +830,8 @@ NO_SANITIZE("cfi") static void HandleConnectionData(uint64_t connId, const AuthC
     SoftBusFree(decData);
 }
 
-static void OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-    const AuthDataHead *head, const uint8_t *data)
+static void OnDataReceived(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     if (connInfo == NULL || head == NULL || data == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
@@ -883,8 +867,8 @@ NO_SANITIZE("cfi") static void HandleDisconnectedEvent(const void *para)
     uint64_t connId = *((uint64_t *)para);
     uint32_t num = 0;
     int64_t authIds[2]; /* 2: client and server may use same connection. */
-    authIds[num++]= GetAuthIdByConnId(connId, false);
-    authIds[num++]= GetAuthIdByConnId(connId, true);
+    authIds[num++] = GetAuthIdByConnId(connId, false);
+    authIds[num++] = GetAuthIdByConnId(connId, true);
     for (uint32_t i = 0; i < num; i++) {
         if (authIds[i] == AUTH_INVALID_ID) {
             continue;
@@ -927,8 +911,8 @@ NO_SANITIZE("cfi") uint32_t AuthGenRequestId(void)
     return ConnGetNewRequestId(MODULE_DEVICE_AUTH);
 }
 
-NO_SANITIZE("cfi") int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-    const AuthVerifyCallback *callback)
+NO_SANITIZE("cfi")
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback)
 {
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -939,15 +923,13 @@ NO_SANITIZE("cfi") int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_
 
 NO_SANITIZE("cfi") void AuthHandleLeaveLNN(int64_t authId)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth handle leave LNN, authId=%" PRId64, authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth handle leave LNN, authId=%" PRId64, authId);
     if (!RequireAuthLock()) {
         return;
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-            "auth manager not found, authId=%" PRId64, authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth manager not found, authId=%" PRId64, authId);
         ReleaseAuthLock();
         return;
     }
@@ -968,7 +950,7 @@ NO_SANITIZE("cfi") int32_t AuthFlushDevice(const char *uuid)
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t num = 0;
-    AuthManager *auth[2] = {NULL, NULL}; /* 2: WiFi * (Client + Server) */
+    AuthManager *auth[2] = { NULL, NULL }; /* 2: WiFi * (Client + Server) */
     auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, false);
     auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, true);
     for (uint32_t i = 0; i < num; i++) {
@@ -983,7 +965,7 @@ NO_SANITIZE("cfi") int32_t AuthFlushDevice(const char *uuid)
 
 static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get networkdId by uuid fail.");
         return SOFTBUS_ERR;
@@ -1032,15 +1014,14 @@ NO_SANITIZE("cfi") int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthCon
     return TryGetBrConnInfo(uuid, connInfo);
 }
 
-NO_SANITIZE("cfi") int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId,
-    const AuthConnCallback *callback)
+NO_SANITIZE("cfi")
+int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
 {
     if (info == NULL || !CheckAuthConnCallback(callback)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "open auth conn: connType=%d, requestId=%u.", info->type, requestId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "open auth conn: connType=%d, requestId=%u.", info->type, requestId);
     int64_t authId;
     switch (info->type) {
         case AUTH_LINK_TYPE_WIFI:
@@ -1149,7 +1130,7 @@ NO_SANITIZE("cfi") int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool is
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t num = 0;
-    AuthManager *auth[4] = {NULL, NULL, NULL, NULL}; /* 4: max size for (BR + BLE) * (CLIENT+ SERVER) */
+    AuthManager *auth[4] = { NULL, NULL, NULL, NULL }; /* 4: max size for (BR + BLE) * (CLIENT+ SERVER) */
     if (isIpConnection) {
         auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, false);
         auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, true);
@@ -1193,8 +1174,8 @@ NO_SANITIZE("cfi") int64_t AuthDeviceGetIdByP2pMac(const char *p2pMac, AuthLinkT
     }
     AuthManager *auth = FindAuthManagerByP2pMac(p2pMac, type, isServer);
     if (auth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth manager not found by p2pMac, connType=%d, side=%s", type, GetAuthSideStr(isServer));
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager not found by p2pMac, connType=%d, side=%s", type,
+            GetAuthSideStr(isServer));
         ReleaseAuthLock();
         return AUTH_INVALID_ID;
     }
@@ -1216,8 +1197,8 @@ NO_SANITIZE("cfi") uint32_t AuthGetDecryptSize(uint32_t inLen)
     return inLen - OVERHEAD_LEN;
 }
 
-NO_SANITIZE("cfi") int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen)
+NO_SANITIZE("cfi")
+int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     if (inData == NULL || inLen == 0 || outData == NULL || outLen == NULL || *outLen < AuthGetEncryptSize(inLen)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1236,8 +1217,8 @@ NO_SANITIZE("cfi") int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inDa
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen)
+NO_SANITIZE("cfi")
+int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     if (inData == NULL || inLen == 0 || outData == NULL || outLen == NULL || *outLen < AuthGetDecryptSize(inLen)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
@@ -1262,10 +1243,9 @@ NO_SANITIZE("cfi") int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMa
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "p2pMac is empty.");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthManager inAuth = {0};
+    AuthManager inAuth = { 0 };
     if (strcpy_s(inAuth.p2pMac, sizeof(inAuth.p2pMac), p2pMac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "copy p2pMac fail, authId=%" PRId64, authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy p2pMac fail, authId=%" PRId64, authId);
         return SOFTBUS_MEM_ERR;
     }
     return UpdateAuthManagerByAuthId(authId, SetAuthP2pMac, &inAuth);

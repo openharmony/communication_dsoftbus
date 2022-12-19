@@ -14,45 +14,44 @@
  */
 #include "softbus_adapter_ble_gatt_client.h"
 
-#include <stdbool.h>
 #include "securec.h"
+#include <stdbool.h>
+
+#include "adapter_bt_utils.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
-#include "adapter_bt_utils.h"
 
 #include "ohos_bt_def.h"
 #include "ohos_bt_gatt_client.h"
 
 #define APP_UUID_LEN 2
-#define INVALID_ID (-1)
+#define INVALID_ID   (-1)
 
-static BtGattClientCallbacks g_btGattClientCallbacks = {0};
+static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
 static SoftBusGattcCallback *g_softBusGattcCallback = NULL;
 
 NO_SANITIZE("cfi") static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
 {
-    CLOGI("StateChangedCallback id=%d, state=%d, status=%d",
-        clientId, connectionState, status);
+    CLOGI("StateChangedCallback id=%d, state=%d, status=%d", clientId, connectionState, status);
     if (connectionState != OHOS_STATE_CONNECTED && connectionState != OHOS_STATE_DISCONNECTED) {
         CLOGI("GattcConnectionStateChangedCallback ignore");
         return;
     }
-    
+
     g_softBusGattcCallback->ConnectionStateCallback(clientId, connectionState, status);
 }
 
-NO_SANITIZE("cfi") static void GattcConnectParaUpdateCallback(int clientId, int interval, int latency, int timeout,
-    int status)
+NO_SANITIZE("cfi")
+static void GattcConnectParaUpdateCallback(int clientId, int interval, int latency, int timeout, int status)
 {
     CLOGI("ParaUpdateCallback");
 }
 
 NO_SANITIZE("cfi") static void GattcSearchServiceCompleteCallback(int clientId, int status)
 {
-    CLOGI("SearchServiceCompleteCallback, id=%d, status=%d",
-        clientId, status);
+    CLOGI("SearchServiceCompleteCallback, id=%d, status=%d", clientId, status);
     g_softBusGattcCallback->ServiceCompleteCallback(clientId, status);
 }
 
@@ -61,8 +60,8 @@ NO_SANITIZE("cfi") static void GattcReadCharacteristicCallback(int clientId, BtG
     CLOGI("ReadCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
-NO_SANITIZE("cfi") static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic,
-    int status)
+NO_SANITIZE("cfi")
+static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic, int status)
 {
     CLOGI("WriteCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
@@ -79,8 +78,7 @@ NO_SANITIZE("cfi") static void GattcWriteDescriptorCallback(int clientId, BtGatt
 
 NO_SANITIZE("cfi") static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
 {
-    CLOGI("ConfigureMtuSizeCallback, id=%d, mtusize=%d, status=%d",
-        clientId, mtuSize, status);
+    CLOGI("ConfigureMtuSizeCallback, id=%d, mtusize=%d, status=%d", clientId, mtuSize, status);
     g_softBusGattcCallback->ConfigureMtuSizeCallback(clientId, mtuSize, status);
 }
 
@@ -106,7 +104,6 @@ static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, 
     g_softBusGattcCallback->NotificationReceiveCallback(clientId, &notify, status);
 }
 
-
 NO_SANITIZE("cfi") void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb)
 {
     g_btGattClientCallbacks.ConnectionStateCb = GattcConnectionStateChangedCallback;
@@ -124,7 +121,7 @@ NO_SANITIZE("cfi") void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb)
 NO_SANITIZE("cfi") int32_t SoftbusGattcRegister(void)
 {
     BtUuid appId;
-    char uuid[APP_UUID_LEN] = {0xEE, 0xFD};
+    char uuid[APP_UUID_LEN] = { 0xEE, 0xFD };
     appId.uuid = uuid;
     appId.uuidLen = APP_UUID_LEN;
     int32_t clientId = BleGattcRegister(appId);
@@ -158,7 +155,7 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *
         CLOGE("BleGattcConnect error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
-    
+
     return SOFTBUS_OK;
 }
 
@@ -198,8 +195,8 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUui
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *serverUuid,
-    SoftBusBtUuid *charaUuid)
+NO_SANITIZE("cfi")
+int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid)
 {
     BtGattCharacteristic btCharaUuid;
     btCharaUuid.serviceUuid.uuid = serverUuid->uuid;
@@ -235,10 +232,43 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, Sof
     characteristic.serviceUuid.uuidLen = clientData->serviceUuid.uuidLen;
     characteristic.characteristicUuid.uuid = clientData->characterUuid.uuid;
     characteristic.characteristicUuid.uuidLen = clientData->characterUuid.uuidLen;
-    if (BleGattcWriteCharacteristic(clientId, characteristic, OHOS_GATT_WRITE_NO_RSP,
-        clientData->valueLen, clientData->value) != SOFTBUS_OK) {
+    if (BleGattcWriteCharacteristic(
+            clientId, characteristic, OHOS_GATT_WRITE_NO_RSP, clientData->valueLen, clientData->value) != SOFTBUS_OK) {
         CLOGE("SoftbusGattcWriteCharacteristic error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusGattcSetFastestConn(int32_t clientId)
+{
+    if (clientId <= 0) {
+        CLOGE("invalid param, '%d'", clientId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = BleGattcSetFastestConn(clientId, true);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        CLOGE("BleGattcSetFastestConn failed, return code '%d'", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusGattPriority priority)
+{
+    if (clientId <= 0 || addr == NULL) {
+        CLOGE("invalid param, '%d'", clientId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    BdAddr bdAddr = { 0 };
+    if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
+        CLOGE("addr memory copy failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = BleGattcSetPriority(clientId, &bdAddr, (BtGattPriority)priority);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        CLOGE("BleGattcSetPriority failed, return code '%d'", ret);
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }

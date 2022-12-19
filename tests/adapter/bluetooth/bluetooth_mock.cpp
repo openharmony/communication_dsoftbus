@@ -151,6 +151,16 @@ int BleGattcUnRegister(int clientId)
     return MockBluetooth::GetMocker()->BleGattcUnRegister(clientId);
 }
 
+int BleGattcSetFastestConn(int clientId, bool fastestConnFlag)
+{
+    return MockBluetooth::GetMocker()->BleGattcSetFastestConn(clientId, fastestConnFlag);
+}
+
+int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority)
+{
+    return MockBluetooth::GetMocker()->BleGattcSetPriority(clientId, bdAddr, priority);
+}
+
 int BleGattsRegisterCallbacks(BtGattServerCallbacks *func)
 {
     return MockBluetooth::GetMocker()->BleGattsRegisterCallbacks(func);
