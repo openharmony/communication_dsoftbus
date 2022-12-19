@@ -57,6 +57,8 @@ public:
     virtual int BleGattcWriteCharacteristic(
         int clientId, BtGattCharacteristic characteristic, BtGattWriteType writeType, int len, const char *value) = 0;
     virtual int BleGattcUnRegister(int clientId) = 0;
+    virtual int BleGattcSetFastestConn(int clientId, bool fastestConnFlag) = 0;
+    virtual int BleGattcSetPriority(int clientId, const BdAddr *bdAddr, BtGattPriority priority) = 0;
 
     // GATT Server相关
     virtual int BleGattsRegisterCallbacks(BtGattServerCallbacks *func) = 0;
@@ -110,6 +112,8 @@ public:
         (int clientId, BtGattCharacteristic characteristic, BtGattWriteType writeType, int len, const char *value),
         (override));
     MOCK_METHOD(int, BleGattcUnRegister, (int clientId), (override));
+    MOCK_METHOD(int, BleGattcSetFastestConn, (int clientId, bool fastestConnFlag), (override));
+    MOCK_METHOD(int, BleGattcSetPriority, (int clientId, const BdAddr *bdAddr, BtGattPriority priority), (override));
 
     MOCK_METHOD(int, BleGattsRegisterCallbacks, (BtGattServerCallbacks *func), (override));
     MOCK_METHOD(int, BleGattsRegister, (BtUuid appUuid), (override));

@@ -27,22 +27,22 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hidumper_conn.h"
+#include "softbus_hisysevt_connreporter.h"
 #include "softbus_log.h"
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_conn.h"
-#include "softbus_hisysevt_connreporter.h"
 
-#define INVALID_GATTC_ID (-1)
-#define DEFAULT_MTU_SIZE 512
-#define BLE_GATTC_INFO "BleGattcInfo"
-#define CLIENT_CONNECTED_WAIT_TIME (5*1000)
-#define CLIENT_SERVICE_SEARCHED_WAIT_TIME (5*1000)
-#define CLIENT_NOTIFICATED_ONCE_WAIT_TIME (3*1000)
-#define CLIENT_NOTIFICATED_TWICE_WAIT_TIME (3*1000)
-#define CLIENT_MTU_SETTED_WAIT_TIME (3*1000)
-#define CLIENT_HANDSHAKE_WAIT_TIME (5*1000)
+#define INVALID_GATTC_ID                   (-1)
+#define DEFAULT_MTU_SIZE                   512
+#define BLE_GATTC_INFO                     "BleGattcInfo"
+#define CLIENT_CONNECTED_WAIT_TIME         (5 * 1000)
+#define CLIENT_SERVICE_SEARCHED_WAIT_TIME  (5 * 1000)
+#define CLIENT_NOTIFICATED_ONCE_WAIT_TIME  (3 * 1000)
+#define CLIENT_NOTIFICATED_TWICE_WAIT_TIME (3 * 1000)
+#define CLIENT_MTU_SETTED_WAIT_TIME        (3 * 1000)
+#define CLIENT_HANDSHAKE_WAIT_TIME         (5 * 1000)
 
 typedef enum {
     BLE_GATT_CLIENT_INITIAL = 0,
@@ -71,9 +71,7 @@ typedef enum {
     CLIENT_TIME_OUT,
 } BleClientConnLoopMsg;
 
-static SoftBusHandler g_bleClientAsyncHandler = {
-    .name ="g_bleClientAsyncHandler"
-};
+static SoftBusHandler g_bleClientAsyncHandler = { .name = "g_bleClientAsyncHandler" };
 
 typedef struct {
     ListNode node;
@@ -86,7 +84,7 @@ typedef struct {
     int32_t errCode;
 } BleCilentErrCode;
 
-static SoftBusGattcCallback g_softbusGattcCb = {0};
+static SoftBusGattcCallback g_softbusGattcCb = { 0 };
 static SoftBusBleConnCalback *g_softBusBleConnCb = NULL;
 static SoftBusList *g_gattcInfoList = NULL;
 static bool g_gattcIsInited = false;
@@ -106,8 +104,8 @@ NO_SANITIZE("cfi") static void FreeBleClientMessage(SoftBusMessage *msg)
     SoftBusFree(msg);
 }
 
-NO_SANITIZE("cfi") static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode,
-    int32_t time)
+NO_SANITIZE("cfi")
+static int32_t BleClientPostMsgDelay(int32_t msgWhat, int32_t clientId, int32_t errCode, int32_t time)
 {
     BleCilentErrCode *bleErrCode = SoftBusCalloc(sizeof(BleCilentErrCode));
     if (bleErrCode == NULL) {
@@ -269,7 +267,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientSend(const int32_t clientId, const c
     return SoftbusGattcWriteCharacteristic(clientId, &clientData);
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
+NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr, bool fastestConnectEnable)
 {
     if (g_gattcIsInited != true) {
         CLOGE("gattc not init");
@@ -297,6 +295,9 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
     }
+    if (fastestConnectEnable && SoftbusGattcSetFastestConn(infoNode->clientId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "enable ble fastest connection failed");
+    }
     if (SoftbusGattcConnect(clientId, bleAddr) != SOFTBUS_OK) {
         CLOGE("SoftbusGattcConnect failed");
         SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
@@ -304,12 +305,12 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         (void)RemoveGattcInfoFromList(clientId);
         return SOFTBUS_ERR;
     }
-    if (BleClientPostMsgDelay(CLIENT_TIME_OUT, clientId,
-        SOFTBUS_BLECONNECTION_CLIENT_CONNECTED_TIMEOUT, CLIENT_CONNECTED_WAIT_TIME) != SOFTBUS_OK) {
+    if (BleClientPostMsgDelay(CLIENT_TIME_OUT, clientId, SOFTBUS_BLECONNECTION_CLIENT_CONNECTED_TIMEOUT,
+            CLIENT_CONNECTED_WAIT_TIME) != SOFTBUS_OK) {
         CLOGE("post msg delay err");
         // continue anyway,
     }
-    CLOGI("SoftBusGattClientConnect ok, clientId: %d", clientId);
+    CLOGI("SoftBusGattClientConnect ok, clientId: %d, fastestEnable: %d", clientId, fastestConnectEnable);
     return clientId;
 }
 
@@ -372,8 +373,8 @@ static SoftBusMessage *BleClientConnCreateLoopMsg(int32_t what, uint64_t arg1, u
 
 NO_SANITIZE("cfi") static void ConnectedMsgHandler(int32_t clientId, int status)
 {
-    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
-        &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
+    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
+        BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);
     BleGattcInfo *infoNode = NULL;
     int32_t errCode = 0;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
@@ -386,8 +387,7 @@ NO_SANITIZE("cfi") static void ConnectedMsgHandler(int32_t clientId, int status)
         return;
     }
 
-    if ((status != SOFTBUS_GATT_SUCCESS) ||
-        (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_STARTED) != true)) {
+    if ((status != SOFTBUS_GATT_SUCCESS) || (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_STARTED) != true)) {
         CLOGE("ConnectedMsgHandler error");
         SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_UPDATA_STATE_ERR);
         errCode = SOFTBUS_BLECONNECTION_CLIENT_UPDATA_STATE_ERR;
@@ -398,7 +398,7 @@ NO_SANITIZE("cfi") static void ConnectedMsgHandler(int32_t clientId, int status)
         goto EXIT;
     }
     if (BleClientPostMsgDelay(CLIENT_TIME_OUT, infoNode->clientId,
-        SOFTBUS_BLECONNECTION_CLIENT_SERVICE_SEARCHED_TIMEOUT, CLIENT_SERVICE_SEARCHED_WAIT_TIME) != SOFTBUS_OK) {
+            SOFTBUS_BLECONNECTION_CLIENT_SERVICE_SEARCHED_TIMEOUT, CLIENT_SERVICE_SEARCHED_WAIT_TIME) != SOFTBUS_OK) {
         CLOGE("post msg delay err");
         errCode = SOFTBUS_BLECONNECTION_CLIENT_CREATE_DELAY_MSG_ERR;
         goto EXIT;
@@ -438,7 +438,7 @@ static int32_t BleClientRegisterOnce(int32_t clientId, SoftBusBtUuid *serverUuid
     }
 
     if (BleClientPostMsgDelay(CLIENT_TIME_OUT, clientId, SOFTBUS_BLECONNECTION_CLIENT_NOTIFICATED_ONCE_TIMEOUT,
-        CLIENT_NOTIFICATED_ONCE_WAIT_TIME) != SOFTBUS_OK) {
+            CLIENT_NOTIFICATED_ONCE_WAIT_TIME) != SOFTBUS_OK) {
         CLOGE("post msg delay err");
         return SOFTBUS_ERR;
     }
@@ -447,8 +447,8 @@ static int32_t BleClientRegisterOnce(int32_t clientId, SoftBusBtUuid *serverUuid
 
 static void SearchedMsgHandler(int32_t clientId, int status)
 {
-    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
-        &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
+    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
+        BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);
     BleGattcInfo *infoNode = NULL;
     CLOGI("%d  %d", clientId, status);
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
@@ -507,7 +507,7 @@ static int32_t NotificatedOnceHandler(BleGattcInfo *infoNode)
         return SOFTBUS_ERR;
     }
     if (BleClientPostMsgDelay(CLIENT_TIME_OUT, infoNode->clientId,
-        SOFTBUS_BLECONNECTION_CLIENT_NOTIFICATED_TWICE_TIMEOUT, CLIENT_NOTIFICATED_TWICE_WAIT_TIME) != SOFTBUS_OK) {
+            SOFTBUS_BLECONNECTION_CLIENT_NOTIFICATED_TWICE_TIMEOUT, CLIENT_NOTIFICATED_TWICE_WAIT_TIME) != SOFTBUS_OK) {
         CLOGE("post msg delay err");
         return SOFTBUS_ERR;
     }
@@ -527,19 +527,18 @@ static int32_t NotificatedTwiceHandler(BleGattcInfo *infoNode)
     if (SoftbusGattcConfigureMtuSize(infoNode->clientId, DEFAULT_MTU_SIZE) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (BleClientPostMsgDelay(CLIENT_TIME_OUT, infoNode->clientId,
-        SOFTBUS_BLECONNECTION_CLIENT_MTU_SETTED_TIMEOUT, CLIENT_MTU_SETTED_WAIT_TIME) != SOFTBUS_OK) {
+    if (BleClientPostMsgDelay(CLIENT_TIME_OUT, infoNode->clientId, SOFTBUS_BLECONNECTION_CLIENT_MTU_SETTED_TIMEOUT,
+            CLIENT_MTU_SETTED_WAIT_TIME) != SOFTBUS_OK) {
         CLOGE("post msg delay err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-
 static void NotificatedMsgHandler(int32_t clientId, int status)
 {
-    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
-        &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
+    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
+        BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
         CLOGE("lock failed");
@@ -551,8 +550,7 @@ static void NotificatedMsgHandler(int32_t clientId, int status)
         return;
     }
 
-    if (infoNode->state != BLE_GATT_CLIENT_NOTIFICATING_ONCE &&
-        infoNode->state != BLE_GATT_CLIENT_NOTIFICATING_TWICE) {
+    if (infoNode->state != BLE_GATT_CLIENT_NOTIFICATING_ONCE && infoNode->state != BLE_GATT_CLIENT_NOTIFICATING_TWICE) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
         CLOGE("invalid process for client:%d", clientId);
         return;
@@ -562,13 +560,11 @@ static void NotificatedMsgHandler(int32_t clientId, int status)
         CLOGE("NotificatedMsgHandler error");
         goto EXIT;
     }
-    if ((infoNode->state == BLE_GATT_CLIENT_NOTIFICATED_ONCE) &&
-        (NotificatedOnceHandler(infoNode) != SOFTBUS_OK)) {
+    if ((infoNode->state == BLE_GATT_CLIENT_NOTIFICATED_ONCE) && (NotificatedOnceHandler(infoNode) != SOFTBUS_OK)) {
         CLOGE("NotificatedOnceHandler error");
         goto EXIT;
     }
-    if ((infoNode->state == BLE_GATT_CLIENT_NOTIFICATED_TWICE) &&
-        (NotificatedTwiceHandler(infoNode) != SOFTBUS_OK)) {
+    if ((infoNode->state == BLE_GATT_CLIENT_NOTIFICATED_TWICE) && (NotificatedTwiceHandler(infoNode) != SOFTBUS_OK)) {
         CLOGE("NotificatedTwiceHandler error");
         goto EXIT;
     }
@@ -582,8 +578,8 @@ EXIT:
 
 NO_SANITIZE("cfi") static void DisconnectedMsgHandler(int32_t clientId, int status)
 {
-    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
-        &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
+    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
+        BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
         CLOGE("lock failed");
@@ -611,8 +607,8 @@ NO_SANITIZE("cfi") static void DisconnectedMsgHandler(int32_t clientId, int stat
 
 NO_SANITIZE("cfi") static void MtuSettedMsgHandler(int32_t clientId, int32_t mtuSize)
 {
-    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper,
-        &g_bleClientAsyncHandler, BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
+    g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
+        BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);
     BleGattcInfo *infoNode = NULL;
     char bleStrMac[BT_MAC_LEN];
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
@@ -768,8 +764,7 @@ static int32_t GetMouduleFlags(SoftBusBtUuid *charaUuid, bool *flag)
     return SOFTBUS_ERR;
 }
 
-static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNotify *param,
-    int32_t status)
+static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNotify *param, int32_t status)
 {
     BleGattcInfo *infoNode = NULL;
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != 0) {
@@ -798,8 +793,7 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
     BleHalConnInfo halConnInfo;
     halConnInfo.halConnId = clientId;
     halConnInfo.isServer = BLE_CLIENT_TYPE;
-    char *value = BleTransRecv(halConnInfo, (char *)param->data,
-        (uint32_t)param->dataLen, &len, &index);
+    char *value = BleTransRecv(halConnInfo, (char *)param->data, (uint32_t)param->dataLen, &len, &index);
     if (value == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
         CLOGI("data not enough");
@@ -862,7 +856,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientInit(SoftBusBleConnCalback *cb)
 
 static int32_t BleGattcDump(int fd)
 {
-    char addr[UDID_BUF_LEN] = {0};
+    char addr[UDID_BUF_LEN] = { 0 };
     if (SoftBusMutexLock(&g_gattcInfoList->lock) != SOFTBUS_OK) {
         CLOGE("lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -885,7 +879,7 @@ NO_SANITIZE("cfi") void SoftbusGattcHandShakeEvent(int32_t clientId)
 {
     CLOGI("SoftbusGattcHandShakeEvent, cilentId:%d", clientId);
     if (BleClientPostMsgDelay(CLIENT_TIME_OUT, clientId, SOFTBUS_BLECONNECTION_CLIENT_HANDSHAKE_TIMEOUT,
-        CLIENT_HANDSHAKE_WAIT_TIME) != SOFTBUS_OK) {
+            CLIENT_HANDSHAKE_WAIT_TIME) != SOFTBUS_OK) {
         CLOGE("post msg delay err");
     }
 }
@@ -894,5 +888,5 @@ NO_SANITIZE("cfi") void SoftbusGattcOnRecvHandShakeRespon(int32_t clientId)
 {
     CLOGI("SoftbusGattcOnRecvHandShakeRespon, cilentId:%d", clientId);
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
-        BleCilentRemoveMessageFunc, (void*)(uintptr_t)clientId);
+        BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);
 }

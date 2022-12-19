@@ -94,6 +94,7 @@ typedef struct {
      */
     int32_t (*StopLocalListening)(const LocalListenerInfo *info);
     bool (*CheckActiveConnection)(const ConnectOption *info);
+    int32_t (*UpdateConnection)(uint32_t connectionId, UpdateOption *option);
 } ConnectFuncInterface;
 
 #define MAGIC_NUMBER  0xBABEFACE

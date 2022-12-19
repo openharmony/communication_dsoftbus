@@ -89,6 +89,8 @@ static void MockAll(MockBluetooth &mocker)
     EXPECT_CALL(mocker, BleGattcConfigureMtuSize).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     EXPECT_CALL(mocker, BleGattcWriteCharacteristic).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     EXPECT_CALL(mocker, BleGattcUnRegister).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    EXPECT_CALL(mocker, BleGattcSetFastestConn).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    EXPECT_CALL(mocker, BleGattcSetPriority).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
 }
 
 /**
@@ -377,6 +379,51 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle, TestSize.Level3)
     };
     ASSERT_TRUE(notificationReceiveCtx.Expect(clientId, OHOS_BT_STATUS_SUCCESS, &notify));
     ASSERT_EQ(SoftbusGattcUnRegister(clientId), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: AdapterBleGattClientTest_EnableFastestConn
+ * @tc.desc: test ennable ble fatest connect
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattClientTest, EnableFastestConn, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    MockAll(mocker);
+
+    ASSERT_EQ(SoftbusGattcSetFastestConn(-1), SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(mocker, BleGattcSetFastestConn)
+        .Times(2)
+        .WillOnce(Return(OHOS_BT_STATUS_FAIL))
+        .WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
+    ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_ERR);
+    ASSERT_EQ(SoftbusGattcSetFastestConn(1), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: AdapterBleGattClientTest_SetBleConnectionPriority
+ * @tc.desc: test ennable ble fatest connect
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattClientTest, SetBleConnectionPriority, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    MockAll(mocker);
+
+    SoftBusBtAddr addr = {
+        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66}
+    };
+    ASSERT_EQ(SoftbusGattcSetPriority(-1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftbusGattcSetPriority(1, nullptr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(SoftbusGattcSetPriority(-1, nullptr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(mocker, BleGattcSetPriority)
+        .Times(2)
+        .WillOnce(Return(OHOS_BT_STATUS_FAIL))
+        .WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
+    ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_ERR);
+    ASSERT_EQ(SoftbusGattcSetPriority(1, &addr, SOFTBUS_GATT_PRIORITY_BALANCED), SOFTBUS_OK);
 }
 
 void GattcNotifyRecordCtx::Reset()

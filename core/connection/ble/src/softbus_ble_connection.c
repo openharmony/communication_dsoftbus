@@ -14,9 +14,9 @@
  */
 #include "softbus_ble_connection.h"
 
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/prctl.h>
 #include <time.h>
@@ -27,40 +27,40 @@
 #include "message_handler.h"
 #include "securec.h"
 #include "softbus_adapter_ble_gatt_server.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_ble_gatt_client.h"
 #include "softbus_ble_gatt_server.h"
 #include "softbus_ble_queue.h"
 #include "softbus_ble_trans_manager.h"
-#include "softbus_conn_manager.h"
 #include "softbus_common.h"
-#include "softbus_def.h"
+#include "softbus_conn_manager.h"
 #include "softbus_datahead_transform.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hidumper_conn.h"
+#include "softbus_hisysevt_connreporter.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_conn.h"
-#include "softbus_hisysevt_connreporter.h"
 
-#define SEND_QUEUE_UNIT_NUM 128
-#define CONNECT_REF_INCRESE 1
-#define CONNECT_REF_DECRESE (-1)
-#define METHOD_NOTIFY_REQUEST 1
+#define SEND_QUEUE_UNIT_NUM    128
+#define CONNECT_REF_INCRESE    1
+#define CONNECT_REF_DECRESE    (-1)
+#define METHOD_NOTIFY_REQUEST  1
 #define METHOD_NOTIFY_RESPONSE 2
-#define METHOD_SHUT_DOWN 3
-#define CONN_MAGIC_NUMBER  0xBABEFACE
-#define KEY_METHOD "KEY_METHOD"
-#define KEY_DELTA "KEY_DELTA"
-#define KEY_REF_NUM "KEY_REF_NUM"
-#define TYPE_HEADER_SIZE 4
-#define INVALID_CLIENID (-1)
-#define BLE_CONNECTION_INFO "BleConnectionInfo"
-#define CONNECTED_WAIT_TIME (2 * 1000)
+#define METHOD_SHUT_DOWN       3
+#define CONN_MAGIC_NUMBER      0xBABEFACE
+#define KEY_METHOD             "KEY_METHOD"
+#define KEY_DELTA              "KEY_DELTA"
+#define KEY_REF_NUM            "KEY_REF_NUM"
+#define TYPE_HEADER_SIZE       4
+#define INVALID_CLIENID        (-1)
+#define BLE_CONNECTION_INFO    "BleConnectionInfo"
+#define CONNECTED_WAIT_TIME    (2 * 1000)
 
 typedef enum {
     BLE_CONNECTION_STATE_CONNECTING = 0,
@@ -81,9 +81,7 @@ typedef enum {
     BLE_CONNECTION_DISCONNECT_OUT,
 } BleConnectionLoopMsg;
 
-static SoftBusHandler g_bleConnectAsyncHandler = {
-    .name = (char *)"g_bleConnectAsyncHandler"
-};
+static SoftBusHandler g_bleConnectAsyncHandler = { .name = (char *)"g_bleConnectAsyncHandler" };
 
 static const int BLE_GATT_ATT_MTU_DEFAULT_PAYLOAD = 21;
 static const int BLE_GATT_ATT_MTU_MAX = 512;
@@ -92,7 +90,7 @@ static const int BLE_ROLE_SERVER = 2;
 
 static LIST_HEAD(g_connection_list);
 static ConnectCallback *g_connectCallback = NULL;
-static ConnectFuncInterface g_bleInterface = {0};
+static ConnectFuncInterface g_bleInterface = { 0 };
 static SoftBusMutex g_connectionLock;
 
 static void PackRequest(int32_t delta, uint32_t connectionId);
@@ -125,7 +123,7 @@ static uint32_t AllocBleConnectionIdLocked()
     return tempId;
 }
 
-static BleConnectionInfo* CreateBleConnectionNode(void)
+static BleConnectionInfo *CreateBleConnectionNode(void)
 {
     BleConnectionInfo *newConnectionInfo = (BleConnectionInfo *)SoftBusCalloc(sizeof(BleConnectionInfo));
     if (newConnectionInfo == NULL) {
@@ -163,7 +161,7 @@ static void ReleaseBleconnectionNode(BleConnectionInfo *newConnectionInfo)
     return;
 }
 
-NO_SANITIZE("cfi") void DeleteBleConnectionNode(BleConnectionInfo* node)
+NO_SANITIZE("cfi") void DeleteBleConnectionNode(BleConnectionInfo *node)
 {
     if (node == NULL) {
         return;
@@ -177,7 +175,7 @@ NO_SANITIZE("cfi") void DeleteBleConnectionNode(BleConnectionInfo* node)
     SoftBusFree(node);
 }
 
-static BleConnectionInfo* GetBleConnInfoByConnId(uint32_t connectionId)
+static BleConnectionInfo *GetBleConnInfoByConnId(uint32_t connectionId)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
@@ -195,7 +193,7 @@ static BleConnectionInfo* GetBleConnInfoByConnId(uint32_t connectionId)
     return itemNode;
 }
 
-BleConnectionInfo* GetBleConnInfoByHalConnId(BleHalConnInfo halConnInfo)
+BleConnectionInfo *GetBleConnInfoByHalConnId(BleHalConnInfo halConnInfo)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
@@ -242,8 +240,8 @@ static int32_t GetBleConnInfoByAddr(const char *strAddr, BleConnectionInfo **ser
     return SOFTBUS_OK;
 }
 
-static int32_t GetBleConnInfoByDeviceIdHash(const char *deviceIdHash,
-    BleConnectionInfo **server, BleConnectionInfo **client)
+static int32_t GetBleConnInfoByDeviceIdHash(
+    const char *deviceIdHash, BleConnectionInfo **server, BleConnectionInfo **client)
 {
     ListNode *item = NULL;
     BleConnectionInfo *itemNode = NULL;
@@ -272,9 +270,8 @@ static int32_t GetBleConnInfoByDeviceIdHash(const char *deviceIdHash,
     return SOFTBUS_OK;
 }
 
-
-NO_SANITIZE("cfi") static void BleDeviceConnected(const BleConnectionInfo *itemNode, uint32_t requestId,
-    const ConnectResult *result)
+NO_SANITIZE("cfi")
+static void BleDeviceConnected(const BleConnectionInfo *itemNode, uint32_t requestId, const ConnectResult *result)
 {
     CLOGI("ble mac has connected");
     ConnectionInfo connectionInfo;
@@ -287,8 +284,7 @@ NO_SANITIZE("cfi") static void BleDeviceConnected(const BleConnectionInfo *itemN
     int connectionId = itemNode->connId;
 
     if (result->OnConnectSuccessed != NULL) {
-        result->OnConnectSuccessed(
-            requestId, connectionId, &connectionInfo);
+        result->OnConnectSuccessed(requestId, connectionId, &connectionInfo);
     }
 
     (void)PackRequest(CONNECT_REF_INCRESE, connectionId);
@@ -306,7 +302,7 @@ static BleRequestInfo *CreateBleRequestInfo(uint32_t requestId, const ConnectRes
     return request;
 }
 
-static BleConnectionInfo* NewBleConnection(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
+static BleConnectionInfo *NewBleConnection(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     BleConnectionInfo *newConnectionInfo = CreateBleConnectionNode();
     if (newConnectionInfo == NULL) {
@@ -316,14 +312,13 @@ static BleConnectionInfo* NewBleConnection(const ConnectOption *option, uint32_t
     newConnectionInfo->mtu = BLE_GATT_ATT_MTU_MAX;
     newConnectionInfo->state = BLE_CONNECTION_STATE_CONNECTING;
     newConnectionInfo->info.isServer = BLE_CLIENT_TYPE;
-    if (strcpy_s(newConnectionInfo->info.bleInfo.bleMac, BT_MAC_LEN,
-        option->bleOption.bleMac) != EOK) {
+    if (strcpy_s(newConnectionInfo->info.bleInfo.bleMac, BT_MAC_LEN, option->bleOption.bleMac) != EOK) {
         CLOGE("strcpy_s failed, requestId: %d", requestId);
         ReleaseBleconnectionNode(newConnectionInfo);
         return NULL;
     }
-    if (ConvertBtMacToBinary(option->bleOption.bleMac, BT_MAC_LEN,
-        newConnectionInfo->btBinaryAddr.addr, BT_ADDR_LEN) != SOFTBUS_OK) {
+    if (ConvertBtMacToBinary(option->bleOption.bleMac, BT_MAC_LEN, newConnectionInfo->btBinaryAddr.addr, BT_ADDR_LEN) !=
+        SOFTBUS_OK) {
         CLOGE("convert bt mac to binary failed, requestId: %d", requestId);
         ReleaseBleconnectionNode(newConnectionInfo);
         return NULL;
@@ -349,12 +344,12 @@ static int32_t UpdataBleConnectionUnsafe(const ConnectOption *option, int32_t ha
     (void)server;
     if (client == NULL) {
         CLOGE("unexperted failure! there is no ble connection info, "
-            "requestId: %d", requestId);
+              "requestId: %d",
+            requestId);
         return SOFTBUS_ERR;
     }
     if (halId < 0) {
-        CLOGE("gatt client connect failed, ret: %d, requestId: %d",
-            halId, requestId);
+        CLOGE("gatt client connect failed, ret: %d, requestId: %d", halId, requestId);
         ListDelete(&client->node);
         ReleaseBleconnectionNode(client);
         return SOFTBUS_ERR;
@@ -363,11 +358,10 @@ static int32_t UpdataBleConnectionUnsafe(const ConnectOption *option, int32_t ha
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TryReuseConnectionOrWaitUnsafe(BleConnectionInfo *exist, uint32_t requestId,
-    const ConnectResult *result)
+NO_SANITIZE("cfi")
+static int32_t TryReuseConnectionOrWaitUnsafe(BleConnectionInfo *exist, uint32_t requestId, const ConnectResult *result)
 {
-    CLOGI("there is a ble connection processing, state: %d, requestId: %d",
-        exist->state, requestId);
+    CLOGI("there is a ble connection processing, state: %d, requestId: %d", exist->state, requestId);
 
     if (exist->state == BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) {
         BleDeviceConnected(exist, requestId, result);
@@ -424,7 +418,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     (void)SoftBusMutexUnlock(&g_connectionLock);
 
     int32_t clientId = INVALID_CLIENID;
-    clientId = SoftBusGattClientConnect(&(newConnectionInfo->btBinaryAddr));
+    clientId = SoftBusGattClientConnect(&(newConnectionInfo->btBinaryAddr), option->bleOption.fastestConnectEnable);
 
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         CLOGE("lock mutex failed, requestId: %d", requestId);
@@ -530,8 +524,7 @@ static int AddNumToJson(cJSON *json, int32_t requestOrResponse, int32_t delta, i
 {
     if (requestOrResponse == METHOD_NOTIFY_REQUEST) {
         if (!AddNumberToJsonObject(json, KEY_METHOD, METHOD_NOTIFY_REQUEST) ||
-            !AddNumberToJsonObject(json, KEY_DELTA, delta) ||
-            !AddNumberToJsonObject(json, KEY_REF_NUM, count)) {
+            !AddNumberToJsonObject(json, KEY_DELTA, delta) || !AddNumberToJsonObject(json, KEY_REF_NUM, count)) {
             return SOFTBUS_BRCONNECTION_PACKJSON_ERROR;
         }
     } else {
@@ -671,8 +664,8 @@ static void OnPackResponse(int32_t delta, int32_t peerRef, uint32_t connectionId
         return;
     }
     if (peerRef > 0 && targetNode->state == BLE_CONNECTION_STATE_CLOSING) {
-        g_bleConnectAsyncHandler.looper->RemoveMessageCustom(g_bleConnectAsyncHandler.looper,
-            &g_bleConnectAsyncHandler, BleConnectionRemoveMessageFunc, (void*)(uintptr_t)connectionId);
+        g_bleConnectAsyncHandler.looper->RemoveMessageCustom(g_bleConnectAsyncHandler.looper, &g_bleConnectAsyncHandler,
+            BleConnectionRemoveMessageFunc, (void *)(uintptr_t)connectionId);
 
         targetNode->state = BLE_CONNECTION_STATE_CONNECTED;
     }
@@ -725,7 +718,7 @@ static void RecvConnectedComd(uint32_t connectionId, const cJSON *data)
             if (itemNode->connId == connectionId) {
                 if (itemNode->state == BLE_CONNECTION_STATE_CLOSING) {
                     g_bleConnectAsyncHandler.looper->RemoveMessageCustom(g_bleConnectAsyncHandler.looper,
-                        &g_bleConnectAsyncHandler, BleConnectionRemoveMessageFunc, (void*)(uintptr_t)connectionId);
+                        &g_bleConnectAsyncHandler, BleConnectionRemoveMessageFunc, (void *)(uintptr_t)connectionId);
                     CLOGI("NOTIFY_CHANGE");
                     itemNode->state = BLE_CONNECTION_STATE_CONNECTED;
                 }
@@ -845,6 +838,44 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     return false;
 }
 
+static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    BleConnectionInfo *connInfo = GetBleConnInfoByConnId(connectionId);
+    if (connInfo == NULL) {
+        CLOGE("update ble connection failed, %u not exist", connectionId);
+        return SOFTBUS_ERR;
+    }
+    if (connInfo->state != BLE_CONNECTION_STATE_CONNECTED &&
+        connInfo->state != BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) {
+        CLOGE("update ble connection failed, %u current state is %d, only %d or %d support", connectionId,
+            connInfo->state, BLE_CONNECTION_STATE_CONNECTED, BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED);
+        return SOFTBUS_ERR;
+    }
+    if (connInfo->info.isServer) {
+        CLOGE("update ble connection failed, %u is server side, only client side support", connectionId);
+        return SOFTBUS_ERR;
+    }
+
+    SoftbusGattPriority priority;
+    switch (option->bleOption.priority) {
+        case CONN_BLE_PRIORITY_BALANCED:
+            priority = SOFTBUS_GATT_PRIORITY_BALANCED;
+            break;
+        case CONN_BLE_PRIORITY_HIGH:
+            priority = SOFTBUS_GATT_PRIORITY_HIGH;
+            break;
+        case CONN_BLE_PRIORITY_LOW_POWER:
+            priority = SOFTBUS_GATT_PRIORITY_LOW_POWER;
+            break;
+        default:
+            CLOGE("update ble connection failed, %u, unknown priority: %d", connectionId, option->bleOption.priority);
+            return SOFTBUS_ERR;
+    }
+    int32_t ret = SoftbusGattcSetPriority(connInfo->halConnId, &connInfo->btBinaryAddr, priority);
+    CLOGI("set ble connection priority to %d, ret=%d", priority, ret);
+    return ret;
+}
+
 static void BleDeviceConnectPackRequest(int32_t value, int32_t connId)
 {
     int32_t data = value;
@@ -894,8 +925,7 @@ NO_SANITIZE("cfi") static void BleClientDoneConnect(BleConnectionInfo *targetNod
     LIST_FOR_EACH_SAFE(item, itemNext, &notifyList) {
         requestInfo = LIST_ENTRY(item, BleRequestInfo, node);
         if (requestInfo->callback.OnConnectSuccessed != NULL) {
-            requestInfo->callback.OnConnectSuccessed(
-                requestInfo->requestId, targetNode->connId, &targetNode->info);
+            requestInfo->callback.OnConnectSuccessed(requestInfo->requestId, targetNode->connId, &targetNode->info);
         }
         ListDelete(&requestInfo->node);
         SoftBusFree(requestInfo);
@@ -958,8 +988,9 @@ static void ReleaseBleConnectionInfo(BleConnectionInfo *info)
     SoftBusFree(info);
 }
 
-NO_SANITIZE("cfi") static void BleNotifyDisconnect(const ListNode *notifyList, int32_t connectionId,
-    ConnectionInfo connectionInfo, int32_t errCode)
+NO_SANITIZE("cfi")
+static void BleNotifyDisconnect(
+    const ListNode *notifyList, int32_t connectionId, ConnectionInfo connectionInfo, int32_t errCode)
 {
     ListNode *item = NULL;
     ListNode *itemNext = NULL;
@@ -1023,12 +1054,12 @@ static void BleDisconnectCallback(BleHalConnInfo halConnInfo, int32_t errCode)
 
 static cJSON *GetLocalInfoJson(int32_t roleType)
 {
-    cJSON *json =  cJSON_CreateObject();
+    cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         CLOGE("Cannot create cJSON object");
         return NULL;
     }
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         cJSON_Delete(json);
         CLOGE("SendSelfBasicInfo Get local dev Id failed.");
@@ -1049,7 +1080,7 @@ static cJSON *GetLocalInfoJson(int32_t roleType)
 
 NO_SANITIZE("cfi") static int32_t SendSelfBasicInfo(uint32_t connId, int32_t roleType)
 {
-    cJSON *json =  GetLocalInfoJson(roleType);
+    cJSON *json = GetLocalInfoJson(roleType);
     if (json == NULL) {
         return SOFTBUS_ERR;
     }
@@ -1066,7 +1097,7 @@ NO_SANITIZE("cfi") static int32_t SendSelfBasicInfo(uint32_t connId, int32_t rol
         return SOFTBUS_ERR;
     }
     buf[0] = TYPE_BASIC_INFO;
-    if (memcpy_s((char*)buf + TYPE_HEADER_SIZE, dataLen - TYPE_HEADER_SIZE, data, strlen(data) + 1)) {
+    if (memcpy_s((char *)buf + TYPE_HEADER_SIZE, dataLen - TYPE_HEADER_SIZE, data, strlen(data) + 1)) {
         CLOGE("memcpy_s data error");
         cJSON_free(data);
         SoftBusFree(buf);
@@ -1080,7 +1111,7 @@ NO_SANITIZE("cfi") static int32_t SendSelfBasicInfo(uint32_t connId, int32_t rol
         .flag = 0,
         .pid = 0,
         .len = dataLen,
-        .buf = (char*)buf
+        .buf = (char *)buf,
     };
     CLOGI("SendSelfBasicInfo BlePostBytesInner module:%d", postData.module);
     int ret = BlePostBytesInner(connId, &postData);
@@ -1113,7 +1144,7 @@ static int32_t PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value
     cJSON_Delete(data);
     char udidHash[UDID_HASH_LEN];
     if (SoftBusGenerateStrHash((unsigned char *)connInfo->peerDevId, strlen(connInfo->peerDevId),
-        (unsigned char *)udidHash) != SOFTBUS_OK) {
+            (unsigned char *)udidHash) != SOFTBUS_OK) {
         DLOGE("PeerBasicInfoParse GenerateStrHash failed");
         return SOFTBUS_ERR;
     }
@@ -1144,7 +1175,7 @@ NO_SANITIZE("cfi") static int32_t BleOnDataUpdate(BleConnectionInfo *targetNode)
 
 NO_SANITIZE("cfi") static void BleConnectionReceived(BleHalConnInfo halConnInfo, uint32_t len, const char *value)
 {
-    uint32_t connPktHeadLen = (uint32_t) sizeof(ConnPktHead);
+    uint32_t connPktHeadLen = (uint32_t)sizeof(ConnPktHead);
     if (connPktHeadLen >= len) {
         CLOGE("BleOnConnectionReceived len error");
         return;
@@ -1169,8 +1200,8 @@ NO_SANITIZE("cfi") static void BleConnectionReceived(BleHalConnInfo halConnInfo,
     (void)SoftBusMutexUnlock(&g_connectionLock);
     if (head->module != MODULE_CONNECTION) {
         if (g_connectCallback != NULL) {
-            g_connectCallback->OnDataReceived(connectionId, (ConnModule) head->module, head->seq,
-                (char *)value, head->len + connPktHeadLen);
+            g_connectCallback->OnDataReceived(
+                connectionId, (ConnModule)head->module, head->seq, (char *)value, head->len + connPktHeadLen);
         }
         return;
     }
@@ -1179,7 +1210,7 @@ NO_SANITIZE("cfi") static void BleConnectionReceived(BleHalConnInfo halConnInfo,
         CLOGE("[receive data invalid]");
         return;
     }
-    RecvConnectedComd(connectionId, (const cJSON*)data);
+    RecvConnectedComd(connectionId, (const cJSON *)data);
     cJSON_Delete(data);
 }
 NO_SANITIZE("cfi") static void BleNetReceived(BleHalConnInfo halConnInfo, uint32_t len, const char *value)
@@ -1274,6 +1305,7 @@ static void InitBleInterface(void)
     g_bleInterface.StartLocalListening = BleStartLocalListening;
     g_bleInterface.StopLocalListening = BleStopLocalListening;
     g_bleInterface.CheckActiveConnection = BleCheckActiveConnection;
+    g_bleInterface.UpdateConnection = BleUpdateConnection;
 }
 
 static int BleQueueInit(void)
@@ -1365,8 +1397,7 @@ static int BleConnLooperInit(void)
     g_bleConnectAsyncHandler.name = (char *)"ble_conn_handler";
     g_bleConnectAsyncHandler.HandleMessage = BleConnectionMsgHandler;
     g_bleConnectAsyncHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (g_bleConnectAsyncHandler.looper == NULL ||
-        g_bleConnectAsyncHandler.looper->PostMessage == NULL ||
+    if (g_bleConnectAsyncHandler.looper == NULL || g_bleConnectAsyncHandler.looper->PostMessage == NULL ||
         g_bleConnectAsyncHandler.looper->PostMessageDelay == NULL ||
         g_bleConnectAsyncHandler.looper->RemoveMessageCustom == NULL) {
         CLOGE("create looper failed");
@@ -1416,7 +1447,7 @@ NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitBle(const ConnectCallback *call
         CLOGE("SoftBusAddBtStateListener failed: %d", ret);
         return NULL;
     }
-    g_connectCallback = (ConnectCallback*)callback;
+    g_connectCallback = (ConnectCallback *)callback;
     InitBleInterface();
     SoftBusRegConnVarDump(BLE_CONNECTION_INFO, &BleConnectionDump);
     return &g_bleInterface;
@@ -1424,10 +1455,10 @@ NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitBle(const ConnectCallback *call
 
 static int32_t BleConnectionDump(int fd)
 {
-    char addr[BT_ADDR_LEN] = {0};
-    char bleMac[BT_MAC_LEN] = {0};
-    char deviceIdHash[UDID_HASH_LEN] = {0};
-    char peerDevId[UDID_BUF_LEN] = {0};
+    char addr[BT_ADDR_LEN] = { 0 };
+    char bleMac[BT_MAC_LEN] = { 0 };
+    char deviceIdHash[UDID_HASH_LEN] = { 0 };
+    char peerDevId[UDID_BUF_LEN] = { 0 };
     if (SoftBusMutexLock(&g_connectionLock) != SOFTBUS_OK) {
         CLOGE("lock mutex failed");
         return SOFTBUS_LOCK_ERR;
