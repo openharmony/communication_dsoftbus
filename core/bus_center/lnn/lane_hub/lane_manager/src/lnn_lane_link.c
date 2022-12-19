@@ -192,6 +192,7 @@ static int32_t GetP2pMacAndPid(int32_t requestId, char *mac, uint32_t size, int3
             continue;
         }
         if (strcpy_s(mac, size, item->p2pMac) != EOK) {
+            (void)SoftBusMutexUnlock(&g_pendingList->lock);
             LLOGE("p2pMac cpy err");
             return SOFTBUS_MEM_ERR;
         }

@@ -258,6 +258,46 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     return SOFTBUS_ERR;
 }
 
+static void TransListDelete(ListNode *sessionServerList)
+{
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, sessionServerList, SessionServer, node) {
+        ListDelete(&pos->node);
+        SoftBusFree(pos);
+    }
+    return;
+}
+
+static int32_t TransListCopy(ListNode *sessionServerList)
+{
+    if (sessionServerList == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
+        SessionServer *newpos = (SessionServer *)SoftBusMalloc(sizeof(SessionServer));
+        if (newpos == NULL) {
+            TransListDelete(sessionServerList);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusMalloc fail!");
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_MALLOC_ERR;
+        }
+        *newpos = *pos;
+        ListAdd(sessionServerList, &newpos->node);
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, int32_t routeType)
 {
     if (networkId == NULL || g_sessionServerList == NULL) {
@@ -265,18 +305,22 @@ NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, int32_t routeType
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown: routeType=%d", routeType);
 
+    ListNode sessionServerList = {0};
+    ListInit(&sessionServerList);
+    int32_t ret = TransListCopy(&sessionServerList);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown copy list fail!");
+        return;
+    }
+
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
 
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return;
-    }
-    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
         (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, networkId, routeType);
     }
-    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
 
+    TransListDelete(&sessionServerList);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown end");
     return;
 }

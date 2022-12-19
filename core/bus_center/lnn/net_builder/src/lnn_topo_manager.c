@@ -118,7 +118,7 @@ static uint32_t HashIndex(const char *udid)
 
 static TopoTableItem *CreateTopoItem(const char *udid)
 {
-    TopoTableItem *item = SoftBusMalloc(sizeof(TopoTableItem));
+    TopoTableItem *item = (TopoTableItem *)SoftBusMalloc(sizeof(TopoTableItem));
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc topo item fail");
         return NULL;
@@ -136,7 +136,7 @@ static TopoTableItem *CreateTopoItem(const char *udid)
 
 static TopoInfo *CreateTopoInfo(const char *udid, const uint8_t *relation, uint32_t len)
 {
-    TopoInfo *info = SoftBusMalloc(sizeof(TopoInfo));
+    TopoInfo *info = (TopoInfo *)SoftBusMalloc(sizeof(TopoInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc topo info fail");
         return NULL;
@@ -259,7 +259,7 @@ static int32_t PackTopoInfo(cJSON *info, const char *udid, const char *peerUdid,
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create topo info json fail");
         return SOFTBUS_ERR;
     }
-    if (len < CONNECTION_ADDR_MAX) {
+    if (len != CONNECTION_ADDR_MAX) {
         cJSON_Delete(item);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -626,7 +626,7 @@ static void NotifyLnnRelationChange(const char *localUdid, const char *udid,
 static void TryClearTopoTable(void)
 {
     NodeBasicInfo *info = NULL;
-    int32_t infoNum;
+    int32_t infoNum = 0;
 
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get all online node info fail");
@@ -719,7 +719,7 @@ static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid relation changed params");
         return;
     }
-    msg = SoftBusMalloc(sizeof(RelationChangedMsg));
+    msg = (RelationChangedMsg *)SoftBusMalloc(sizeof(RelationChangedMsg));
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc relation changed msg fail");
         return;
@@ -732,7 +732,7 @@ static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
         SoftBusFree(msg);
         return;
     }
-    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnRelationChangedDelay, msg,
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), OnLnnRelationChangedDelay, (void *)msg,
         RELATION_CHANGED_MSG_DELAY) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async relation changed msg delay fail");
         SoftBusFree(msg);
@@ -808,6 +808,13 @@ NO_SANITIZE("cfi") void LnnDeinitTopoManager(void)
     }
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, OnReceiveTopoUpdateMsg);
     LnnUnregisterEventHandler(LNN_EVENT_RELATION_CHANGED, OnLnnRelationChanged);
+
+    if (SoftBusMutexLock(&g_topoTable.lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock topo table fail");
+        return;
+    }
+    ClearTopoTable();
+    (void)SoftBusMutexUnlock(&g_topoTable.lock);
     SoftBusMutexDestroy(&g_topoTable.lock);
 }
 
@@ -828,7 +835,7 @@ NO_SANITIZE("cfi") int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *r
         (void)SoftBusMutexUnlock(&g_topoTable.lock);
         return SOFTBUS_OK;
     }
-    *relation = SoftBusMalloc(*relationNum * sizeof(LnnRelation));
+    *relation = (LnnRelation *)SoftBusMalloc(*relationNum * sizeof(LnnRelation));
     if (*relation == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc LnnRelation error");
         (void)SoftBusMutexUnlock(&g_topoTable.lock);

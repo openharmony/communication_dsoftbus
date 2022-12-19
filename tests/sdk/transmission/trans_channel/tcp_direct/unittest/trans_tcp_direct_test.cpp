@@ -21,10 +21,12 @@
 #include "client_trans_tcp_direct_message.c"
 #include "client_trans_tcp_direct_listener.c"
 #include "client_trans_tcp_direct_message.h"
+#include "client_trans_session_manager.h"
 #include "client_trans_session_callback.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_app_info.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_access_token_test.h"
@@ -39,13 +41,23 @@
 #define SESSIONKEY_LEN 32
 #define INVALID_VALUE (-1)
 
+#define TRANS_TEST_SESSION_ID 10
+#define TRANS_TEST_CHANNEL_ID 1000
+#define TRANS_TEST_FILE_ENCRYPT 10
+#define TRANS_TEST_ALGORITHM 1
+#define TRANS_TEST_CRC 1
+#define TRANS_TEST_FD 1000
+#define TRANS_TEST_ADDR_INFO_NUM 2
+#define TRANS_TEST_INVALID_SESSION_ID (-1)
+
 using namespace testing::ext;
 
 namespace OHOS {
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-const char *g_groupid = "TEST_GROUP_ID";
+const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
+const char *g_groupId = "TEST_GROUP_ID";
 static const char *g_sessionkey = "clientkey";
 static int32_t g_fd = socket(AF_INET, SOCK_STREAM, 0);
 static SessionAttribute g_sessionAttr = {
@@ -72,6 +84,8 @@ public:
 
 void TransTcpDirectTest::SetUpTestCase(void)
 {
+    int32_t ret = TransClientInit();
+    ASSERT_EQ(ret,  SOFTBUS_OK);
     SetAceessTokenPermission("dsoftbusTransTest");
 }
 
@@ -106,6 +120,104 @@ static ISessionListener g_sessionlistener = {
     .OnBytesReceived = OnBytesReceived,
     .OnMessageReceived = OnMessageReceived,
 };
+
+static void TestGenerateCommParam(SessionParam *sessionParam)
+{
+    sessionParam->sessionName = g_sessionName;
+    sessionParam->peerSessionName = g_sessionName;
+    sessionParam->peerDeviceId = g_deviceId;
+    sessionParam->groupId = g_groupId;
+    sessionParam->attr = &g_sessionAttr;
+}
+
+static SessionInfo *TestGenerateSession(const SessionParam *param)
+{
+    SessionInfo *session = (SessionInfo*)SoftBusCalloc(sizeof(SessionInfo));
+    if (session == NULL) {
+        return NULL;
+    }
+
+    if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK ||
+        strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK ||
+        strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, param->groupId) != EOK) {
+        SoftBusFree(session);
+        return NULL;
+    }
+
+    session->sessionId = TRANS_TEST_SESSION_ID;
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_BUTT;
+    session->isServer = false;
+    session->isEnable = false;
+    session->routeType = ROUTE_TYPE_ALL;
+    session->info.flag = TYPE_BYTES;
+    session->isEncrypt = true;
+    session->algorithm = TRANS_TEST_ALGORITHM;
+    session->fileEncrypt = TRANS_TEST_FILE_ENCRYPT;
+    session->crc = TRANS_TEST_CRC;
+
+    return session;
+}
+
+static int32_t AddSessionServerAndSession(const char *sessionName, int32_t channelType, bool isServer)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    if (sessionParam == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    TestGenerateCommParam(sessionParam);
+    sessionParam->sessionName = sessionName;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    if (session == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    session->channelType = (ChannelType)channelType;
+    session->isServer = isServer;
+    ret = ClientAddNewSession(sessionName, session);
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    int32_t sessionId = 0;
+    ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, channelType, &sessionId);
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusFree(sessionParam);
+    return sessionId;
+}
+
+static void DeleteSessionServerAndSession(const char *sessionName, int32_t sessionId)
+{
+    (void)ClientDeleteSession(sessionId);
+    (void)ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, sessionName);
+}
+static int32_t TestTransTdcManagerInit()
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    if (cb == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    if (TransTdcManagerInit(cb) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static void TestTransTdcManagerDeinit()
+{
+    TransTdcManagerDeinit();
+}
 
 /**
  * @tc.name: CreateSessionServerTest001
@@ -250,23 +362,23 @@ HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level0)
     int ret;
     g_sessionAttr.dataType = TYPE_BYTES;
 
-    ret = OpenSession(NULL, g_sessionName, g_networkid, g_groupid, &g_sessionAttr);
+    ret = OpenSession(NULL, g_sessionName, g_networkid, g_groupId, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
-    ret = OpenSession(g_sessionName, NULL, g_networkid, g_groupid, &g_sessionAttr);
+    ret = OpenSession(g_sessionName, NULL, g_networkid, g_groupId, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
-    ret = OpenSession(g_sessionName, g_sessionName, NULL, g_groupid, &g_sessionAttr);
+    ret = OpenSession(g_sessionName, g_sessionName, NULL, g_groupId, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
     ret = OpenSession(g_sessionName, g_sessionName, g_networkid, NULL, &g_sessionAttr);
     EXPECT_GE(SOFTBUS_OK, ret);
 
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupid, NULL);
+    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupId, NULL);
     EXPECT_GE(SOFTBUS_OK, ret);
 
     g_sessionAttr.dataType = TYPE_BUTT;
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupid, &g_sessionAttr);
+    ret = OpenSession(g_sessionName, g_sessionName, g_networkid, g_groupId, &g_sessionAttr);
     g_sessionAttr.dataType = TYPE_BYTES;
     EXPECT_GE(SOFTBUS_OK, ret);
 }
@@ -457,8 +569,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcPackDataTest001, TestSize.Level0)
     const char *data = "data";
     uint32_t len = BUF_LEN;
     int flags = FLAG_ACK;
+    char *ret = TransTdcPackData(channel, data, len, flags, NULL);
+    EXPECT_TRUE(ret == nullptr);
     uint32_t outLen = 0;
-    char *ret = TransTdcPackData(channel, data, len, flags, &outLen);
+    ret = TransTdcPackData(channel, data, len, flags, &outLen);
     EXPECT_TRUE(ret != nullptr);
     SoftBusFree(channel);
 }
@@ -832,5 +946,81 @@ HWTEST_F(TransTcpDirectTest, TransGetNewTcpChannelTest001, TestSize.Level0)
     ret = ClientTransCheckTdcChannelExist(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(channelInfo);
+}
+
+/**
+ * @tc.name: TransTdcProcessDataByFlagTest002
+ * @tc.desc: TransTdcProcessDataByFlag, use different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcessDataByFlagTest002, TestSize.Level0)
+{
+    TcpDirectChannelInfo *channel = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+
+    int ret = memcpy_s(channel->detail.sessionKey, SESSIONKEY_LEN, g_sessionkey, strlen(g_sessionkey));
+    ASSERT_EQ(ret, EOK);
+    channel->channelId = TRANS_TEST_CHANNEL_ID;
+    channel->detail.channelType = CHANNEL_TYPE_TCP_DIRECT;
+    channel->detail.fd = TRANS_TEST_FD;
+    channel->detail.sequence = 1;
+    int32_t seqNum = 1;
+    const char *plain = "plain";
+
+    ret = TestTransTdcManagerInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_TCP_DIRECT, false);
+    ASSERT_GT(sessionId, 0);
+
+    ret = TransTdcProcessDataByFlag(FLAG_BYTES, seqNum, channel, plain, (uint32_t)strlen(plain));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransTdcProcessDataByFlag(FLAG_ACK, seqNum, channel, plain, (uint32_t)strlen(plain));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransTdcProcessDataByFlag(FLAG_MESSAGE, seqNum, channel, plain, (uint32_t)strlen(plain));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransTdcProcessDataByFlag(FILE_FIRST_FRAME, seqNum, channel, plain, (uint32_t)strlen(plain));
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+    TestTransTdcManagerDeinit();
+    SoftBusFree(channel);
+}
+
+/**
+ * @tc.name: TransTdcProcAllDataTest002
+ * @tc.desc: TransTdcProcAllData, use different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest002, TestSize.Level0)
+{
+    int32_t ret = TransDataListInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransAddDataBufNode(TRANS_TEST_CHANNEL_ID, TRANS_TEST_FD);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransTdcProcAllData(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    TransDataListDeinit();
+}
+
+/**
+ * @tc.name: TransTdcDecryptTest002
+ * @tc.desc: TransTdcDecrypt, use different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcDecryptTest002, TestSize.Level0)
+{
+    char output[MAX_LEN] = {0};
+    uint32_t outLen = MAX_LEN;
+    int32_t ret = TransTdcDecrypt(g_sessionkey, RECV_BUF, strlen(RECV_BUF) + 1, output, &outLen);
+    EXPECT_FALSE(ret == SOFTBUS_OK);
 }
 }

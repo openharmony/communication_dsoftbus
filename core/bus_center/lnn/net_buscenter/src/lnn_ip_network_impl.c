@@ -91,8 +91,8 @@ static int32_t OpenSessionPort(void)
         .socketOption = {
             .addr = "",
             .port = 0,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP,
-            .moduleId = DIRECT_CHANNEL_SERVER_WIFI
         }
     };
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, info.socketOption.addr, sizeof(info.socketOption.addr)) != SOFTBUS_OK) {
@@ -120,8 +120,8 @@ static void OpenProxyPort(void)
         .socketOption = {
             .addr = "",
             .port = 0,
+            .moduleId = PROXY,
             .protocol = LNN_PROTOCOL_IP,
-            .moduleId = PROXY
         }
     };
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr,
@@ -145,8 +145,8 @@ static void CloseProxyPort(void)
         .socketOption = {
             .addr = "",
             .port = 0,
+            .moduleId = PROXY,
             .protocol = LNN_PROTOCOL_IP,
-            .moduleId = PROXY
         }
     };
     if (ConnStopLocalListening(&listenerInfo) != SOFTBUS_OK) {
@@ -561,14 +561,14 @@ void LnnDeinitIpNetwork(struct LnnProtocolManager *self)
 }
 
 static LnnProtocolManager g_ipProtocol = {
-    .id = LNN_PROTOCOL_IP,
-    .pri = 10,
-    .supportedNetif = LNN_NETIF_TYPE_ETH | LNN_NETIF_TYPE_WLAN,
     .init = LnnInitIpProtocol,
     .deinit = LnnDeinitIpNetwork,
     .enable = LnnEnableIpProtocol,
     .disable = NULL,
-    .getListenerModule = LnnGetIpListenerModule
+    .getListenerModule = LnnGetIpListenerModule,
+    .id = LNN_PROTOCOL_IP,
+    .supportedNetif = LNN_NETIF_TYPE_ETH | LNN_NETIF_TYPE_WLAN,
+    .pri = 10,
 };
 
 NO_SANITIZE("cfi") int32_t RegistIPProtocolManager(void)

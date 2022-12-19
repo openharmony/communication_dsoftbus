@@ -544,11 +544,11 @@ HWTEST_F(P2pManagerTest, P2pLinkCreateGroupTest001, TestSize.Level1)
     int32_t testFreq = 2432;
     bool testIsWideBandSupport = true;
     int32_t ret = P2pLinkCreateGroup(testFreq, testIsWideBandSupport);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     testFreq = -1;
     ret = P2pLinkCreateGroup(testFreq, testIsWideBandSupport);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /*
@@ -561,8 +561,8 @@ HWTEST_F(P2pManagerTest, P2pLinkGetRecommendChannelTest001, TestSize.Level1)
 {
     int32_t testFreq = 0;
     int32_t ret = P2pLinkGetRecommendChannel(&testFreq);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_NE(0, testFreq);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(0, testFreq);
 }
 
 /*
@@ -582,7 +582,7 @@ HWTEST_F(P2pManagerTest, P2pLinkConnectGroupTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     ret = P2pLinkConnectGroup(testGroupConfig);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /*
@@ -605,7 +605,7 @@ HWTEST_F(P2pManagerTest, P2pLinkRequestGcIpTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = P2pLinkRequestGcIp(testMac, testIp, sizeof(testIp));
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /*
@@ -677,7 +677,7 @@ HWTEST_F(P2pManagerTest, P2pLinkSharelinkReuseTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = P2pLinkSharelinkRemoveGroup();
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = P2pLinkReleaseIPAddr();
     EXPECT_EQ(SOFTBUS_ERR, ret);

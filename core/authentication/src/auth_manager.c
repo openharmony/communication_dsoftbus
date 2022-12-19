@@ -72,13 +72,15 @@ static AuthManager *DupAuthManager(const AuthManager *auth)
 {
     AuthManager *newAuth = (AuthManager *)DupMemBuffer((const uint8_t *)auth, sizeof(AuthManager));
     if (newAuth == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager[%" PRId64 "] dup fail", auth->authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "auth manager[%" PRId64 "] dup fail", auth->authId);
         return NULL;
     }
     ListInit(&newAuth->node);
     ListInit(&newAuth->sessionKeyList);
     if (DupSessionKeyList(&auth->sessionKeyList, &newAuth->sessionKeyList)) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth manager[%" PRId64 "] dup session key fail", auth->authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "auth manager[%" PRId64 "] dup session key fail", auth->authId);
         SoftBusFree(newAuth);
         return NULL;
     }
@@ -293,7 +295,8 @@ NO_SANITIZE("cfi") AuthManager *GetAuthManagerByAuthId(int64_t authId)
     }
     AuthManager *item = FindAuthManagerByAuthId(authId);
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth manager[%" PRId64 "] not found", authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+            "auth manager[%" PRId64 "] not found", authId);
         ReleaseAuthLock();
         return NULL;
     }
@@ -382,7 +385,8 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
             authId = auth[i]->authId;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "get active auth manager[%" PRId64 "]", authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "get active auth manager[%" PRId64 "]", authId);
     ReleaseAuthLock();
     return authId;
 }
@@ -422,8 +426,8 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, c
     if (auth->connInfo.type == AUTH_LINK_TYPE_WIFI && !auth->isServer) {
         ScheduleUpdateSessionKey(auth->authId, SCHEDULE_UPDATE_SESSION_KEY_PERIOD);
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "auth manager[%" PRId64 "] add session key succ, index=%d.",
-        auth->authId, TO_INT32(authSeq));
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG,
+        "auth manager[%" PRId64 "] add session key succ, index=%d.", auth->authId, TO_INT32(authSeq));
     ReleaseAuthLock();
     return SOFTBUS_OK;
 }
@@ -739,15 +743,15 @@ static void HandleDeviceIdData(
         }
         ret = AuthSessionStartAuth(head->seq, AuthGenRequestId(), connId, connInfo, true);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "perform auth(=%" PRId64 ") session start auth fail(=%d)",
-                head->seq, ret);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+                "perform auth(=%" PRId64 ") session start auth fail(=%d)", head->seq, ret);
             return;
         }
     }
     ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "perform auth(=%" PRId64 ") session recv devId fail(=%d)",
-            head->seq, ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "perform auth(=%" PRId64 ") session recv devId fail(=%d)", head->seq, ret);
         return;
     }
 }
@@ -756,8 +760,8 @@ static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *hea
 {
     int32_t ret = AuthSessionProcessAuthData(head->seq, data, head->len);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "perform auth(=%" PRId64 ") session recv authData fail(=%d)",
-            head->seq, ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "perform auth(=%" PRId64 ") session recv authData fail(=%d)", head->seq, ret);
         return;
     }
 }
@@ -773,8 +777,8 @@ static void HandleDeviceInfoData(
         ret = AuthSessionProcessDevInfoDataByConnId(connId, !fromServer, data, head->len);
     }
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "perform auth(=%" PRId64 ") session recv devInfo fail(=%d)",
-            head->seq, ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "perform auth(=%" PRId64 ") session recv devInfo fail(=%d)", head->seq, ret);
         return;
     }
 }
@@ -790,8 +794,8 @@ static void HandleCloseAckData(
         ret = AuthSessionProcessCloseAckByConnId(connId, !fromServer, data, head->len);
     }
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "perform auth(=%" PRId64 ") session recv closeAck fail(=%d)",
-            head->seq, ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "perform auth(=%" PRId64 ") session recv closeAck fail(=%d)", head->seq, ret);
         return;
     }
 }
@@ -834,8 +838,8 @@ static void OnDataReceived(
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "auth recv data{type=0x%x, module=%d, seq=%" PRId64 ", flag=%d, len=%u} " CONN_INFO " from[%s]", head->dataType,
-        head->module, head->seq, head->flag, head->len, CONN_DATA(connId), GetAuthSideStr(fromServer));
+        "auth recv data{type=0x%x, module=%d, seq=%" PRId64 ", flag=%d, len=%u} " CONN_INFO " from[%s]",
+        head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId), GetAuthSideStr(fromServer));
     switch (head->dataType) {
         case DATA_TYPE_DEVICE_ID:
             HandleDeviceIdData(connId, connInfo, head, data);
@@ -1145,8 +1149,8 @@ NO_SANITIZE("cfi") int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool is
         }
     }
     ReleaseAuthLock();
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "latest auth manager[%" PRId64 "] found, lastVerifyTime=%" PRIu64,
-        latestAuthId, latestVerifyTime);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "latest auth manager[%" PRId64 "] found, lastVerifyTime=%" PRIu64, latestAuthId, latestVerifyTime);
     return latestAuthId;
 }
 
@@ -1328,8 +1332,8 @@ NO_SANITIZE("cfi") int32_t AuthDeviceInit(const AuthTransCallback *callback)
 
     AuthConnListener connListener = {
         .onConnectResult = OnConnectResult,
-        .onDataReceived = OnDataReceived,
         .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
     };
     if (AuthConnInit(&connListener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthConnInit fail.");

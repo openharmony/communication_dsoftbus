@@ -455,12 +455,14 @@ static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthData
         .seq = GenSeq(!toServer),
         .flag = CONN_HIGH,
         .pid = 0,
-        .buf = (char *)buf,
         .len = size,
+        .buf = (char *)buf,
     };
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "PostCommData: data{seq=%" PRId64 ", len=%u} conn{id=%u, seq=%" PRId64 ", len=%u}", head->seq, head->len,
         connectionId, connData.seq, connData.len);
+        "PostCommData: data{seq=%" PRId64 ", len=%u} conn{id=%u, seq=%" PRId64 ", len=%u}",
+        head->seq, head->len, connectionId, connData.seq, connData.len);
     return ConnPostBytes(connectionId, &connData);
 }
 

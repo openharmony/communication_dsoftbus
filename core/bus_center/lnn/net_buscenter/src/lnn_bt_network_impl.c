@@ -261,7 +261,7 @@ static void BtStateChangedEvtHandler(const LnnEventBasicInfo *info)
         return;
     }
     LnnMonitorBtStateChangedEvent *event = (LnnMonitorBtStateChangedEvent *)info;
-    (void)LnnVisitNetif(NotifyBtStatusChanged, &event->status);
+    (void)LnnVisitNetif(NotifyBtStatusChanged, (void *)&event->status);
 }
 
 static void LeaveSpecificBrNetwork(const char *btMac)
@@ -352,14 +352,14 @@ void LnnDeinitBtNetwork(struct LnnProtocolManager *self)
 }
 
 static LnnProtocolManager g_btProtocol = {
-    .id = LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE,
-    .pri = LNN_BT_PROTOCOL_PRI,
-    .supportedNetif = LNN_NETIF_TYPE_BR | LNN_NETIF_TYPE_BLE,
     .init = LnnInitBtProtocol,
     .deinit = LnnDeinitBtNetwork,
     .enable = LnnEnableBtProtocol,
     .disable = NULL,
     .getListenerModule = LnnGetBtListenerModule,
+    .id = LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE,
+    .supportedNetif = LNN_NETIF_TYPE_BR | LNN_NETIF_TYPE_BLE,
+    .pri = LNN_BT_PROTOCOL_PRI,
 };
 
 NO_SANITIZE("cfi") int32_t RegistBtProtocolManager(void)
