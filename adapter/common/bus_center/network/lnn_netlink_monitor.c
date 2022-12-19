@@ -121,7 +121,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
 {
     int len;
     struct rtattr *tb[IFLA_MAX + 1] = {NULL};
-    struct ifinfomsg *ifinfo = NLMSG_DATA(nlh);
+    struct ifinfomsg *ifinfo = (struct ifinfomsg *)NLMSG_DATA(nlh);
     LnnNetIfType type = LNN_NETIF_TYPE_ETH;
 
     len = (int32_t)nlh->nlmsg_len - NLMSG_SPACE(sizeof(*ifinfo));
@@ -132,14 +132,14 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         return;
     }
 
-    if (LnnGetNetIfTypeByName(RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
+    if (LnnGetNetIfTypeByName((const char *)RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetNetIfTypeByName error");
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
         SoftBusLog(
             SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "%s:link status changed, type:%d", RTA_DATA(tb[IFLA_IFNAME]), type);
-        LnnNotifyAddressChangedEvent(RTA_DATA(tb[IFLA_IFNAME]));
+        LnnNotifyAddressChangedEvent((const char *)RTA_DATA(tb[IFLA_IFNAME]));
     }
 }
 
