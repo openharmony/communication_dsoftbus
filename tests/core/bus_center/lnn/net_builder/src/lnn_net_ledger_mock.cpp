@@ -392,5 +392,20 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
     return GetNetLedgerInterface()->LnnSetLocalNum64Info(key, info);
 }
+
+int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
+{
+    return GetNetLedgerInterface()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
+}
+
+int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
+{
+    return GetNetLedgerInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
+}
+
+int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
+{
+    return GetNetLedgerInterface()->LnnGetLocalDeviceInfo(info);
+}
 }
 }
