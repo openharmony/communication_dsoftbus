@@ -48,10 +48,6 @@ public:
     virtual void RegisterNameMonitor(void) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
-    virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
-    virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual void AuthHandleLeaveLNN(int64_t authId) = 0;
-    virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -73,13 +69,8 @@ public:
     MOCK_METHOD0(RegisterNameMonitor, void (void));
     MOCK_METHOD2(LnnUnregisterEventHandler, void (LnnEventType, LnnEventHandler));
     MOCK_METHOD2(LnnOfflineTimingByHeartbeat, int32_t (const char *, ConnectionAddrType));
-    MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
-    MOCK_METHOD0(AuthGenRequestId, uint32_t ());
-    MOCK_METHOD1(AuthHandleLeaveLNN, void (int64_t));
-    MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char*, uint16_t));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static int32_t ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler);
-    static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static inline std::map<LnnEventType, LnnEventHandler> g_lnnEventHandlers;
     static inline LnnDeviceNameHandler g_deviceNameHandler;
 };
