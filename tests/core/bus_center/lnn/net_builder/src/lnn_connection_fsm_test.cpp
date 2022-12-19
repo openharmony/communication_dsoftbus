@@ -19,7 +19,6 @@
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_net_builder.h"
-#include "lnn_net_builder_deps_mock.h"
 #include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -128,9 +127,8 @@ HWTEST_F(LnnConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
     int32_t ret = LnnStartConnectionFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     NiceMock<LnnAuthtInterfaceMock> authMock;
-    NiceMock<NetBuilderDepsInterfaceMock> netBuilderMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    ON_CALL(netBuilderMock, AuthGenRequestId).WillByDefault(Return(1));
+    ON_CALL(serviceMock, AuthGenRequestId).WillByDefault(Return(1));
     EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
     ON_CALL(serviceMock, LnnNotifyJoinResult).WillByDefault(Return());
     ret = LnnSendJoinRequestToConnFsm(connFsm2);

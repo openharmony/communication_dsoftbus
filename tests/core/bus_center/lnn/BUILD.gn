@@ -372,7 +372,6 @@ ohos_unittest("LNNTestMock") {
     "net_builder/src/lnn_auth_mock.cpp",
     "net_builder/src/lnn_connection_fsm_test.cpp",
     "net_builder/src/lnn_devicename_info_test.cpp",
-    "net_builder/src/lnn_net_builder_deps_mock.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_network_info_test.cpp",
     "net_builder/src/lnn_node_weight_test.cpp",
@@ -1021,6 +1020,7 @@ group("unittest") {
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_qos:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_stastic:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/time_sync:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/fast_offline:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/unittest:unittest",
     ]
   }
