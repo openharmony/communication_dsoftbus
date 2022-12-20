@@ -1282,9 +1282,11 @@ NO_SANITIZE("cfi") void *BleSendTask(void *arg)
 {
 #define WAIT_TIME 10
     CLOGI("BleSendTask enter");
+    SendQueueNode *node = NULL;
     while (1) {
-        SendQueueNode *node = NULL;
-        if (BleDequeueNonBlock((void **)(&node)) != SOFTBUS_OK) {
+        int32_t ret = BleDequeueBlock((void **)(&node));
+        if (ret != SOFTBUS_OK) {
+            CLOGE("ATTENSION: ble dequeue send node failed, error=%d", ret);
             SoftBusSleepMs(WAIT_TIME);
             continue;
         }
@@ -1292,6 +1294,7 @@ NO_SANITIZE("cfi") void *BleSendTask(void *arg)
             CLOGI("SendItem fail");
         }
         FreeSendNode(node);
+        node = NULL;
     }
 }
 
