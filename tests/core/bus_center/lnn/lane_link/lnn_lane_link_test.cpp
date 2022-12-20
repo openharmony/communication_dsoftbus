@@ -122,7 +122,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
 
     EXPECT_CALL(linkMock, AuthOpenConn)
         .WillOnce(DoAll(WithArg<2>(authOpen), Return(SOFTBUS_OK)));
-    
+
     auto p2pOpenFail = [](const P2pLinkConnectInfo *param) { param->cb.onConnectFailed(1, SOFTBUS_ERR); };
     EXPECT_CALL(linkMock, P2pLinkConnectDevice)
         .WillOnce(DoAll(WithArg<0>(p2pOpenFail), Return(SOFTBUS_OK)));
@@ -176,7 +176,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
 HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_005, TestSize.Level1)
 {
     (void)LnnLanePendingInit();
-    
+
     const char *network = "network123";
     const char *mac = "AA:11:BB:22:CC:33";
     LaneDepsInterfaceMock linkMock;

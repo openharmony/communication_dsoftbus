@@ -134,6 +134,27 @@ static void OnLaneStateChange(uint32_t laneId, LaneState state)
     CondSignal();
 }
 
+static void OnLaneLinkException(uint32_t reqId, int32_t reason)
+{
+    (void)reqId;
+    (void)reason;
+    return;
+}
+
+static void OnLaneLinkFail(uint32_t reqId, int32_t reason)
+{
+    (void)reqId;
+    (void)reason;
+    return;
+}
+
+static void OnLaneLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
+{
+    (void)reqId;
+    (void)linkInfo;
+    return;
+}
+
 /*
 * @tc.name: LANE_REQUEST_Test_001
 * @tc.desc: lane request for Wlan2p4G MSG
@@ -573,4 +594,47 @@ HWTEST_F(LNNLaneTestMock, LNN_LANE_QUERY_001, TestSize.Level1)
     EXPECT_EQ(ret, QUERY_RESULT_OK);
 }
 
+/*
+* @tc.name: LNN_BUILD_LINK_001
+* @tc.desc: BUILDLINK
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneTestMock, LNN_BUILD_LINK_001, TestSize.Level1)
+{
+    LinkRequest reqInfo;
+    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    reqInfo.linkType = LANE_P2P;
+    LaneLinkCb cb = {
+        .OnLaneLinkSuccess = OnLaneLinkSuccess,
+        .OnLaneLinkFail = OnLaneLinkFail,
+        .OnLaneLinkException = OnLaneLinkException,
+    };
+    int32_t ret;
+    cb.OnLaneLinkException = nullptr;
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    cb.OnLaneLinkFail = nullptr;
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    cb.OnLaneLinkSuccess = nullptr;
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = BuildLink(&reqInfo, 0, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    reqInfo.linkType = LANE_BLE;
+    ret = BuildLink(&reqInfo, 0, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = BuildLink(nullptr, 0, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    DestroyLink(0, LANE_P2P, 0, NODE_NETWORK_ID, NODE_NETWORK_ID);
+    DestroyLink(0, LANE_P2P, 0, NODE_NETWORK_ID, nullptr);
+    DestroyLink(0, LANE_P2P, 0, nullptr, nullptr);
+}
 } // namespace OHOS
