@@ -1241,9 +1241,11 @@ void *BleSendTask(void *arg)
 {
 #define WAIT_TIME 10
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleSendTask enter");
+    SendQueueNode *node = NULL;
     while (1) {
-        SendQueueNode *node = NULL;
-        if (BleDequeueNonBlock((void **)(&node)) != SOFTBUS_OK) {
+        int32_t ret = BleDequeueBlock((void **)(&node));
+        if (ret != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ble dequeue send node failed, error=%d", ret);
             SoftBusSleepMs(WAIT_TIME);
             continue;
         }
@@ -1251,6 +1253,7 @@ void *BleSendTask(void *arg)
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SendItem fail");
         }
         FreeSendNode(node);
+        node = NULL;
     }
 }
 

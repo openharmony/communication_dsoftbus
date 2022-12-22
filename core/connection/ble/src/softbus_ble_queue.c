@@ -54,6 +54,7 @@ static const int32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
 static LIST_HEAD(g_bleQueueList);
 static SoftBusMutex g_bleQueueLock;
 static BleQueue *g_innerQueue = NULL;
+static SoftBusCond g_sendCond;
 
 static BleQueue *CreateBleQueue(int32_t pid)
 {
@@ -104,20 +105,28 @@ static int GetPriority(int32_t flag)
 int BleEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     SendQueueNode *queueNode = (SendQueueNode *)msg;
+    int32_t priority = GetPriority(queueNode->flag);
+    if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    int32_t ret = SOFTBUS_ERR;
+    bool isListEmpty = true;
     if (queueNode->pid == 0) {
-        return QueueMultiProducerEnqueue(g_innerQueue->queue[GetPriority(queueNode->flag)], msg);
+        ret = QueueMultiProducerEnqueue(g_innerQueue->queue[priority], msg);
+        goto END;
+    }
+
+    if (!IsListEmpty(&g_bleQueueList)) {
+        isListEmpty = false;
     }
     LockFreeQueue *lockFreeQueue = NULL;
     BleQueue *item = NULL;
-    if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
-        return SOFTBUS_ERR;
-    }
     LIST_FOR_EACH_ENTRY(item, &g_bleQueueList, BleQueue, node) {
         if (item->pid == queueNode->pid) {
-            lockFreeQueue = item->queue[GetPriority(queueNode->flag)];
+            lockFreeQueue = item->queue[priority];
             break;
         }
     }
@@ -125,14 +134,18 @@ int BleEnqueueNonBlock(const void *msg)
         BleQueue *newQueue = CreateBleQueue(queueNode->pid);
         if (newQueue == NULL) {
             SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleEnqueueNonBlock CreateBleQueue failed");
-            (void)SoftBusMutexUnlock(&g_bleQueueLock);
-            return SOFTBUS_ERR;
+            goto END;
         }
         ListTailInsert(&g_bleQueueList, &(newQueue->node));
-        lockFreeQueue = newQueue->queue[GetPriority(queueNode->flag)];
+        lockFreeQueue = newQueue->queue[priority];
+    }
+    ret = QueueMultiProducerEnqueue(lockFreeQueue, msg);
+END:
+    if (isListEmpty) {
+        (void)SoftBusCondBroadcast(&g_sendCond);
     }
     (void)SoftBusMutexUnlock(&g_bleQueueLock);
-    return QueueMultiProducerEnqueue(lockFreeQueue, msg);
+    return ret;
 }
 
 static int GetMsg(BleQueue *queue, void **msg)
@@ -145,32 +158,44 @@ static int GetMsg(BleQueue *queue, void **msg)
     return SOFTBUS_ERR;
 }
 
-int BleDequeueNonBlock(void **msg)
+int BleDequeueBlock(void **msg)
 {
-    if (msg == NULL) {
-        return SOFTBUS_ERR;
-    }
-    if (GetMsg(g_innerQueue, msg) == SOFTBUS_OK) {
-        return SOFTBUS_OK;
-    }
+    int32_t status = SOFTBUS_ERR;
+    BleQueue *item = NULL;
+    BleQueue *next = NULL;
 
+    if (msg == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
-    if (IsListEmpty(&g_bleQueueList)) {
-        (void)SoftBusMutexUnlock(&g_bleQueueLock);
-        return SOFTBUS_ERR;
-    }
-    BleQueue *item = LIST_ENTRY(g_bleQueueList.next, BleQueue, node);
-    ListDelete(&(item->node));
-    if (GetMsg(item, msg) == SOFTBUS_OK) {
-        ListTailInsert(&g_bleQueueList, &(item->node));
-        (void)SoftBusMutexUnlock(&g_bleQueueLock);
-        return SOFTBUS_OK;
-    }
-    DestroyBleQueue(item);
+    do {
+        if (GetMsg(g_innerQueue, msg) == SOFTBUS_OK) {
+            status = SOFTBUS_OK;
+            break;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_bleQueueList, BleQueue, node) {
+            ListDelete(&(item->node));
+            if (GetMsg(g_innerQueue, msg) == SOFTBUS_OK) {
+                ListTailInsert(&g_bleQueueList, &(item->node));
+                status = SOFTBUS_OK;
+                break;
+            }
+            DestroyBleQueue(item);
+        }
+        if (status == SOFTBUS_OK) {
+            break;
+        }
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ble queue is empty, dequeue start wait...");
+        if (SoftBusCondWait(&g_sendCond, &g_bleQueueLock, NULL) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleSendCondWait failed");
+            status = SOFTBUS_ERR;
+            break;
+        }
+    } while (true);
     (void)SoftBusMutexUnlock(&g_bleQueueLock);
-    return SOFTBUS_ERR;
+    return status;
 }
 
 int BleInnerQueueInit(void)
@@ -178,10 +203,15 @@ int BleInnerQueueInit(void)
     if (SoftBusMutexInit(&g_bleQueueLock, NULL) != 0) {
         return SOFTBUS_ERR;
     }
+    if (SoftBusCondInit(&g_sendCond) != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_bleQueueLock);
+        return SOFTBUS_ERR;
+    }
     g_innerQueue = CreateBleQueue(0);
     if (g_innerQueue == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleQueueInit CreateBleQueue(0) failed");
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
+        (void)SoftBusCondDestroy(&g_sendCond);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -189,7 +219,8 @@ int BleInnerQueueInit(void)
 
 void BleInnerQueueDeinit(void)
 {
-    SoftBusMutexDestroy(&g_bleQueueLock);
+    (void)SoftBusMutexDestroy(&g_bleQueueLock);
+    (void)SoftBusCondDestroy(&g_sendCond);
     DestroyBleQueue(g_innerQueue);
     g_innerQueue = NULL;
 }

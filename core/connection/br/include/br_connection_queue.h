@@ -39,7 +39,7 @@ typedef struct {
 int32_t BrInnerQueueInit(void);
 void BrInnerQueueDeinit(void);
 int32_t BrEnqueueNonBlock(const void *msg);
-int32_t BrDequeueNonBlock(void **msg);
+int32_t BrDequeueBlock(void **msg);
 bool IsBrQueueEmpty(void);
 
 #ifdef __cplusplus
