@@ -633,7 +633,7 @@ HWTEST_F(LNNLaneTestMock, LNN_BUILD_LINK_001, TestSize.Level1)
     ret = BuildLink(nullptr, 0, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    DestroyLink(0, LANE_P2P, 0, NODE_NETWORK_ID, NODE_NETWORK_ID);
+    DestroyLink(0, LANE_BLE, 0, NODE_NETWORK_ID, NODE_NETWORK_ID);
     DestroyLink(0, LANE_P2P, 0, NODE_NETWORK_ID, nullptr);
     DestroyLink(0, LANE_P2P, 0, nullptr, nullptr);
 }
