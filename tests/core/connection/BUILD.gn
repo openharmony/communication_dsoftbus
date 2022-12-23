@@ -32,6 +32,7 @@ group("unittest") {
   if (dsoftbus_feature_conn_p2p) {
     deps += [
       "p2p:ConnectionP2PFuncTest",
+      "p2p:P2pDeviceTest",
       "p2p:P2pManagerTest",
       "p2p/common_mock:P2pCommonMockTest",
       "p2p/interface_mock:P2pInterfaceMockTest",

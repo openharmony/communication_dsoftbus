@@ -57,7 +57,7 @@ NO_SANITIZE("cfi") void P2pLinkLnnSync(void)
 
     int32_t role =  P2pLinkGetRole();
     if (g_lnnRole != role) {
-        P2pLinkMyRoleChangeNotify(role);
+        P2pLinkMyRoleChangeNotify((P2pLinkRole)role);
         CLOGI("sync role %d->%d", g_lnnRole, role);
         if (LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, role) == SOFTBUS_OK) {
             g_lnnRole = role;
