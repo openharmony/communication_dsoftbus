@@ -32,15 +32,8 @@ using ::testing::Return;
 namespace OHOS {
 static SoftBusBtStateListener *GetMockBtStateListener();
 
-static BtGapCallBacks *g_btGapCallback = NULL;
 static StRecordCtx g_btStateChangedCtx("OnBtStateChanged");
 static BtAddrRecordCtx g_btAclStateChangedCtx("OnBtAclStateChanged");
-
-static int ActionGapRegisterCallbacks(BtGapCallBacks *func)
-{
-    g_btGapCallback = func;
-    return OHOS_BT_STATUS_SUCCESS;
-}
 
 /**
  * @tc.name: AdapterBtCommonTest_ConvertStatus
@@ -120,12 +113,12 @@ HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
 
 static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, int *outlistenerId)
 {
-    EXPECT_CALL(mocker, GapRegisterCallbacks).Times(AtMost(1)).WillOnce(ActionGapRegisterCallbacks);
+    EXPECT_CALL(mocker, BleStopScan).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
     auto listenerId = SoftBusAddBtStateListener(GetMockBtStateListener());
     if (listenerId == SOFTBUS_ERR) {
         return testing::AssertionFailure() << "SoftBusAddBtStateListener failed";
     }
-    if (g_btGapCallback == nullptr) {
+    if (MockBluetooth::btGapCallback == nullptr) {
         return testing::AssertionFailure() << "GapRegisterCallback is not invoke";
     }
     *outlistenerId = listenerId;
@@ -145,36 +138,36 @@ HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
 
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_ON);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_ON);
     auto btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_ON);
     EXPECT_TRUE(btStateResult);
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_ON);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_ON);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURNING_ON);
     EXPECT_TRUE(btStateResult);
 
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_ON);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_ON);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURN_ON);
     EXPECT_TRUE(btStateResult);
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_ON);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_ON);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURN_ON);
     EXPECT_TRUE(btStateResult);
 
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_OFF);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURNING_OFF);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURNING_OFF);
     EXPECT_TRUE(btStateResult);
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_OFF);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURNING_OFF);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURNING_OFF);
     EXPECT_TRUE(btStateResult);
 
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_OFF);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, OHOS_GAP_STATE_TURN_OFF);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BR_STATE_TURN_OFF);
     EXPECT_TRUE(btStateResult);
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_OFF);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_LE, OHOS_GAP_STATE_TURN_OFF);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, SOFTBUS_BT_STATE_TURN_OFF);
     EXPECT_TRUE(btStateResult);
 
     // invalid status
-    g_btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, -1);
+    MockBluetooth::btGapCallback->stateChangeCallback(OHOS_BT_TRANSPORT_BR_EDR, -1);
     btStateResult = g_btStateChangedCtx.Expect(listenerId, -1);
     EXPECT_TRUE(btStateResult);
 
@@ -194,7 +187,7 @@ HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
 
-    g_btGapCallback->aclStateChangedCallbak(nullptr, (GapAclState)-1, 0);
+    MockBluetooth::btGapCallback->aclStateChangedCallbak(nullptr, (GapAclState)-1, 0);
 
     BdAddr bdAddr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
@@ -202,24 +195,24 @@ HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
-    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_CONNECTED, 0);
+    MockBluetooth::btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_CONNECTED, 0);
     auto aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_CONNECTED);
     EXPECT_TRUE(aclStateResult);
 
-    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_DISCONNECTED, 0);
+    MockBluetooth::btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_DISCONNECTED, 0);
     aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_DISCONNECTED);
     EXPECT_TRUE(aclStateResult);
 
-    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_LE_CONNECTED, 0);
+    MockBluetooth::btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_LE_CONNECTED, 0);
     aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_LE_CONNECTED);
     EXPECT_TRUE(aclStateResult);
 
-    g_btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_LE_DISCONNECTED, 0);
+    MockBluetooth::btGapCallback->aclStateChangedCallbak(&bdAddr, OHOS_GAP_ACL_STATE_LE_DISCONNECTED, 0);
     aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, SOFTBUS_ACL_STATE_LE_DISCONNECTED);
     EXPECT_TRUE(aclStateResult);
 
     // invalid GapAclState
-    g_btGapCallback->aclStateChangedCallbak(&bdAddr, (GapAclState)-1, 0);
+    MockBluetooth::btGapCallback->aclStateChangedCallbak(&bdAddr, (GapAclState)-1, 0);
     aclStateResult = g_btAclStateChangedCtx.Expect(listenerId, &addr, -1);
     EXPECT_TRUE(aclStateResult);
 
@@ -247,9 +240,9 @@ HWTEST(AdapterBtCommonTest, PairRequestedCallback, TestSize.Level3)
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
 
-    g_btGapCallback->pairRequestedCallback(nullptr, OHOS_BT_TRANSPORT_INVALID);
-    g_btGapCallback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
-    g_btGapCallback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
+    MockBluetooth::btGapCallback->pairRequestedCallback(nullptr, OHOS_BT_TRANSPORT_INVALID);
+    MockBluetooth::btGapCallback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
+    MockBluetooth::btGapCallback->pairRequestedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE);
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
@@ -273,9 +266,9 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
     auto prepareResult = PrepareBtStateListener(mocker, &listenerId);
     ASSERT_TRUE(prepareResult);
 
-    g_btGapCallback->pairConfiremedCallback(nullptr, OHOS_BT_TRANSPORT_INVALID, 0, 0);
-    g_btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
-    g_btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
+    MockBluetooth::btGapCallback->pairConfiremedCallback(nullptr, OHOS_BT_TRANSPORT_INVALID, 0, 0);
+    MockBluetooth::btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
+    MockBluetooth::btGapCallback->pairConfiremedCallback(&bdAddr, OHOS_BT_TRANSPORT_LE, 0, 0);
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
