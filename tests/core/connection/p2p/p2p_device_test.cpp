@@ -154,7 +154,7 @@ static int32_t TestAddConnedDev(ConnectedNode *connedItem, ConnectedNode *conn, 
 
 static AuthConnInfo *TestAddAuthChan(const P2pLinkNegoConnResult *conn)
 {
-    char *peerMac = NULL;
+    char *peerMac = nullptr;
     AuthConnInfo *authInfo = NULL;
     int32_t ret;
 
