@@ -53,7 +53,52 @@ static volatile bool g_lockInit = false;
 static SoftBusMutex g_advLock = {0};
 static SoftBusMutex g_scanerLock = {0};
 
-static bool g_isRegCb = false;
+static volatile bool g_isRegCb = false;
+
+static void OnBtStateChanged(int listenerId, int state)
+{
+    (void)listenerId;
+    if (state != SOFTBUS_BT_STATE_TURN_OFF) {
+        return;
+    }
+
+    CLOGI("receive bt turn off event, start reset bt adapter state...");
+    if (SoftBusMutexLock(&g_advLock) != 0) {
+        CLOGE("ATTENTION, try to get adv lock failed, something unexpected happened");
+        return;
+    }
+    for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
+        AdvChannel *advChannel = &g_advChannel[index];
+        if (advChannel->isUsed && advChannel->isAdvertising) {
+            // ignore status code explicitedly, just to notify bt cleanup resources associated with this advertisement
+            (void)BleStopAdv(advChannel->advId);
+            advChannel->advId = -1;
+            advChannel->isAdvertising = false;
+            SoftBusCondBroadcast(&advChannel->cond);
+            advChannel->advCallback->AdvDisableCallback(index, SOFTBUS_BT_STATUS_SUCCESS);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_advLock);
+
+    if (SoftBusMutexLock(&g_scanerLock) != 0) {
+        CLOGE("ATTENTION, try to get scan lock failed, something unexpected happened");
+        return;
+    }
+    bool needStopScan = false;
+    for (int index = 0; index < SCAN_MAX_NUM; index++) {
+        ScanListener *scanListener = &g_scanListener[index];
+        if (scanListener->isUsed && scanListener->isScanning) {
+            scanListener->isScanning = false;
+            scanListener->listener->OnScanStop(index, SOFTBUS_BT_STATUS_SUCCESS);
+            needStopScan = true;
+        }
+    }
+    if (needStopScan) {
+        // ignore status code explicitedly, just to notify bt cleanup resources associated with this scan
+        (void)BleStopScan();
+    }
+    (void)SoftBusMutexUnlock(&g_scanerLock);
+}
 
 NO_SANITIZE("cfi") int BleGattLockInit(void)
 {
@@ -464,12 +509,20 @@ static BtGattCallbacks g_softbusGattCb = {
     .scanParamSetCb = WrapperScanParameterSetCompletedCallback
 };
 
+static SoftBusBtStateListener g_btStateLister = {
+    .OnBtStateChanged = OnBtStateChanged,
+    .OnBtAclStateChanged = NULL,
+};
+
 static int RegisterBleGattCallback(void)
 {
     if (g_isRegCb) {
         return SOFTBUS_OK;
     }
     if (BleGattRegisterCallbacks(&g_softbusGattCb) != 0) {
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusAddBtStateListener(&g_btStateLister) < 0) {
         return SOFTBUS_ERR;
     }
     g_isRegCb = true;
