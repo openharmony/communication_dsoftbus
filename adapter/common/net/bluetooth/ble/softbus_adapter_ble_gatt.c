@@ -69,7 +69,7 @@ static void OnBtStateChanged(int listenerId, int state)
     }
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
-        if (advChannel->isUsed && advChannel->isAdvertising) {
+        if (advChannel->isUsed && advChannel->advId != -1) {
             // ignore status code explicitedly, just to notify bt cleanup resources associated with this advertisement
             (void)BleStopAdv(advChannel->advId);
             advChannel->advId = -1;

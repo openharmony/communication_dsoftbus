@@ -131,6 +131,10 @@ public:
     MOCK_METHOD(int, BleGattsSendIndication, (int serverId, GattsSendIndParam *param), (override));
 
     static MockBluetooth *GetMocker();
+
+    static BtGapCallBacks *btGapCallback;
+    static BtGattCallbacks *btGattCallback;
+
 private:
     static MockBluetooth *targetMocker;
 };

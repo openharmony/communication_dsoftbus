@@ -23,6 +23,20 @@
 #include "softbus_utils.h"
 
 MockBluetooth *MockBluetooth::targetMocker = nullptr;
+BtGapCallBacks *MockBluetooth::btGapCallback = nullptr;
+BtGattCallbacks *MockBluetooth::btGattCallback = nullptr;
+
+static int ActionGapRegisterCallbacks(BtGapCallBacks *func)
+{
+    MockBluetooth::btGapCallback = func;
+    return OHOS_BT_STATUS_SUCCESS;
+}
+
+static int ActionBleGattRegisterCallbacks(BtGattCallbacks *func)
+{
+    MockBluetooth::btGattCallback = func;
+    return OHOS_BT_STATUS_SUCCESS;
+}
 
 MockBluetooth *MockBluetooth::GetMocker()
 {
@@ -32,6 +46,9 @@ MockBluetooth *MockBluetooth::GetMocker()
 MockBluetooth::MockBluetooth()
 {
     MockBluetooth::targetMocker = this;
+    // common callback is register glabal
+    EXPECT_CALL(*this, GapRegisterCallbacks).WillRepeatedly(ActionGapRegisterCallbacks);
+    EXPECT_CALL(*this, BleGattRegisterCallbacks).WillRepeatedly(ActionBleGattRegisterCallbacks);
 }
 
 MockBluetooth::~MockBluetooth()
