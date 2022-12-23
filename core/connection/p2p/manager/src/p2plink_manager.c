@@ -290,7 +290,7 @@ static void LoopOpenP2pAuthChan(P2pLoopMsg msgType, void *arg)
     bool isMetaAuth = false;
     authInfo->info.ipInfo.authId = connedItem->chanId.inAuthId;
     (void)AuthGetMetaType(authInfo->info.ipInfo.authId, &isMetaAuth);
-    CLOGI("open auth chan, inAuthId=%"PRId64", isMetaAuth=%d", connedItem->chanId.inAuthId, isMetaAuth);
+    CLOGI("open auth chan, inAuthId=%" PRId64", isMetaAuth=%d", connedItem->chanId.inAuthId, isMetaAuth);
     connedItem->chanId.authRequestId = AuthGenRequestId();
     if (AuthOpenConn(authInfo, connedItem->chanId.authRequestId, &authCb, isMetaAuth) != SOFTBUS_OK) {
         CLOGE("open auth chan fail");
@@ -305,7 +305,7 @@ static void P2pLinkStartOpenP2pAuthChan(const P2pLinkNegoConnResult *conn)
     AuthConnInfo *authInfo = NULL;
     int32_t ret;
 
-    authInfo = SoftBusCalloc(sizeof(AuthConnInfo) + P2P_MAC_LEN);
+    authInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo) + P2P_MAC_LEN);
     if (authInfo != NULL) {
         CLOGI("send auth chan loop msg");
         authInfo->type = AUTH_LINK_TYPE_P2P;
@@ -343,7 +343,7 @@ static int32_t P2pLinkNegoSuccessAddConnedItem(const P2pLinkNegoConnResult *conn
 {
     ConnectedNode *connedItem = NULL;
 
-    connedItem = SoftBusCalloc(sizeof(ConnectedNode));
+    connedItem = (ConnectedNode *)SoftBusCalloc(sizeof(ConnectedNode));
     if (connedItem == NULL) {
         CLOGE("Nego ok malloc fail");
         return SOFTBUS_ERR;
