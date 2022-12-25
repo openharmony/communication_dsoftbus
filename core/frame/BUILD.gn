@@ -191,7 +191,7 @@ if (defined(ohos_lite)) {
       ":softbus_server.rc",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "//third_party/cJSON:cjson_static",
+      "//third_party/cJSON:cjson",
     ]
     dsoftbus_server_common_external_deps =
         bus_center_server_external_deps + disc_server_external_deps +
