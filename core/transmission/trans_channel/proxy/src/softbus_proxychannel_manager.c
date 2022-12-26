@@ -827,20 +827,24 @@ NO_SANITIZE("cfi") void TransProxyProcessResetMsg(const ProxyMessage *msg)
 
     if (CheckAppTypeAndMsgHead(&msg->msgHead, &info->appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
+        SoftBusFree(info);
         return;
     }
 
     if (info->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
-    } else {
+    } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
+        (void)TransProxyDelSliceProcessorByChannelId(info->channelId);
+        (void)DelPendingPacket(info->channelId, PENDING_TYPE_PROXY);
+
+        if ((info->type == CONNECT_BR || info->type == CONNECT_BLE)) {
+            (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
+        } else {
+            (void)TransProxyCloseConnChannel(msg->connId);
+        }
     }
-    if ((info->type == CONNECT_BR || info->type == CONNECT_BLE) &&
-        info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
-        (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
-    } else {
-        (void)TransProxyCloseConnChannel(msg->connId);
-    }
+
     SoftBusFree(info);
 }
 
