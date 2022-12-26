@@ -86,6 +86,7 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
     UpdateDeviceName(nullptr);
     LnnDeviceNameHandler HandlerGetDeviceName = LnnServicetInterfaceMock::g_deviceNameHandler;
     HandlerGetDeviceName();
+    SoftBusSleepMs(10000);
     LooperDeinit();
 }
 
