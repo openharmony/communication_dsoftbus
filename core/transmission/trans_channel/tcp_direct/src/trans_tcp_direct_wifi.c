@@ -52,7 +52,7 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
         return SOFTBUS_ERR;
     }
 
-    int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, false);
+    int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, true);
     if (fd < 0) {
         SoftBusFree(newConn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel connect fail");
