@@ -31,9 +31,11 @@ constexpr char MASTER_UDID[] = "0123456";
 constexpr uint16_t CONN_FSM_ID = 1;
 constexpr int32_t MASTER_WEIGHT = 1;
 constexpr uint32_t TYPE_LEN = 1;
+constexpr uint32_t TYPE_LENTH = 5;
 constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";
 constexpr uint16_t PORT = 1000;
 constexpr char PEERUID[MAX_ACCOUNT_HASH_LEN] = "021315ASD";
+constexpr uint8_t MSG[] = "123456BNHFCF";
 
 namespace OHOS {
 using namespace testing::ext;
@@ -98,6 +100,8 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestLeaveByAddrType(type, TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnRequestLeaveByAddrType(type, TYPE_LENTH);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -254,6 +258,58 @@ HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_LEAVE_TEST_001, TestSize.Level0)
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = MetaNodeServerLeave(networkId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SYNC_OFFLINE_COMPLETE_TEST_001
+* @tc.desc: test LnnSyncOfflineComplete
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
+{
+    uint32_t len = TYPE_LEN;
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, len);
+    int32_t ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, len);
+}
+
+/*
+* @tc.name: LNN_SERVER_LEAVE_TEST_001
+* @tc.desc: test LnnServerLeave
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
+{
+    int32_t ret = LnnServerLeave(NETWORKID);
+    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
+    ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnServerLeave(NETWORKID);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SERVER_JOIN_TEST_001
+* @tc.desc: test LnnServerJoin
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LnnNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
+{
+    ConnectionAddr addr = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = PORT
+    };
+    (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
+    int32_t ret = LnnServerJoin(&addr);
+    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
+    ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnServerJoin(&addr);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
