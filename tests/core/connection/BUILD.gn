@@ -36,6 +36,7 @@ group("unittest") {
       "p2p:P2pManagerTest",
       "p2p/common_mock:P2pCommonMockTest",
       "p2p/interface_mock:P2pInterfaceMockTest",
+      "p2p/negotiation:P2pNegotiationMockTest",
     ]
   }
   if (dsoftbus_feature_conn_tcp) {

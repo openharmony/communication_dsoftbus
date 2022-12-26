@@ -724,7 +724,7 @@ static P2pRequestMsg *JsonToConnRequest(const cJSON *data)
         return NULL;
     }
 
-    if (P2pLinkUnpackRequestMsg(data, contentType, request) != SOFTBUS_OK) {
+    if (P2pLinkUnpackRequestMsg(data, (P2pContentType)contentType, request) != SOFTBUS_OK) {
         CLOGE("unpack p2p link negotiation request message failed.");
         SoftBusFree(request);
         return NULL;
@@ -1258,7 +1258,7 @@ static void P2pLinkNeoConnResponseProc(int64_t authId, const cJSON *data)
         return;
     }
 
-    if (P2plinkUnpackRepsonseMsg(data, contentType, response) != SOFTBUS_OK) {
+    if (P2plinkUnpackRepsonseMsg(data, (P2pContentType)contentType, response) != SOFTBUS_OK) {
         CLOGE("unpack p2p link negotiation response message failed.");
         SoftBusFree(response);
         return;
@@ -1339,7 +1339,7 @@ NO_SANITIZE("cfi") P2pLinkNegoState GetP2pLinkNegoStatus(void)
         }
     }
 
-    return state;
+    return (P2pLinkNegoState)state;
 }
 
 NO_SANITIZE("cfi") char *P2pLinkNegoGetCurrentPeerMac(void)
