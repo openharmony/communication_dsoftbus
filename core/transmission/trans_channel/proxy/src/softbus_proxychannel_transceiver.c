@@ -393,6 +393,26 @@ NO_SANITIZE("cfi") int32_t TransAddConnItem(ProxyConnInfo *chan)
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") static void TransConnInfoToConnOpt(ConnectionInfo *connInfo, ConnectOption *connOption)
+{
+    connOption->type = connInfo->type;
+    if (connOption->type == CONNECT_BR) {
+        (void)memcpy_s(connOption->brOption.brMac, sizeof(char) * BT_MAC_LEN,
+            connInfo->brInfo.brMac, sizeof(char) * BT_MAC_LEN);
+    } else if (connOption->type == CONNECT_BLE) {
+        (void)memcpy_s(connOption->bleOption.bleMac, sizeof(char) * BT_MAC_LEN,
+            connInfo->bleInfo.bleMac, sizeof(char) * BT_MAC_LEN);
+        (void)memcpy_s(connOption->bleOption.deviceIdHash, sizeof(char) * UDID_HASH_LEN,
+            connInfo->bleInfo.deviceIdHash, sizeof(char) * UDID_HASH_LEN);
+    } else {
+        (void)memcpy_s(connOption->socketOption.addr, sizeof(char) * IP_LEN,
+            connInfo->socketInfo.addr, sizeof(char) * IP_LEN);
+        connOption->socketOption.protocol = connInfo->socketInfo.protocol;
+        connOption->socketOption.port = connInfo->socketInfo.port;
+        connOption->socketOption.moduleId = connInfo->socketInfo.moduleId;
+    }
+}
+
 NO_SANITIZE("cfi") void TransCreateConnByConnId(uint32_t connId)
 {
     ProxyConnInfo *item = NULL;
@@ -430,12 +450,7 @@ NO_SANITIZE("cfi") void TransCreateConnByConnId(uint32_t connId)
     item->state = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create conn ref = %d", item->ref);
     item->connId = connId;
-    if (memcpy_s(&(item->connInfo), sizeof(ConnectOption), &info, sizeof(ConnectOption)) != EOK) {
-        SoftBusFree(item);
-        SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
-        return;
-    }
+    TransConnInfoToConnOpt(&info, &item->connInfo);
     ListAdd(&(g_proxyConnectionList->list), &(item->node));
     g_proxyConnectionList->cnt++;
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
