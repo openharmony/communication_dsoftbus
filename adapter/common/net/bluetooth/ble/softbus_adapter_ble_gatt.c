@@ -839,44 +839,19 @@ static void FreeScanFilter(int listenerId)
 {
     uint8_t filterSize = g_scanListener[listenerId].filterSize;
     SoftBusBleScanFilter *filter = g_scanListener[listenerId].filter;
-
-    if (filter == NULL || filterSize == 0) {
-        return;
-    }
-    if (!g_scanListener[listenerId].isUsed) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_DBG, "ScanListener id:%d is not in use", listenerId);
-        return;
-    }
     while (filterSize-- > 0) {
-        if ((filter + filterSize) == NULL) {
-            continue;
-        }
-        if ((filter + filterSize)->address != NULL) {
-            SoftBusFree((filter + filterSize)->address);
-        }
-        if ((filter + filterSize)->deviceName != NULL) {
-            SoftBusFree((filter + filterSize)->deviceName);
-        }
-        if ((filter + filterSize)->serviceUuid != NULL) {
-            SoftBusFree((filter + filterSize)->serviceUuid);
-        }
-        if ((filter + filterSize)->serviceUuidMask != NULL) {
-            SoftBusFree((filter + filterSize)->serviceUuidMask);
-        }
-        if ((filter + filterSize)->serviceData != NULL) {
-            SoftBusFree((filter + filterSize)->serviceData);
-        }
-        if ((filter + filterSize)->serviceDataMask != NULL) {
-            SoftBusFree((filter + filterSize)->serviceDataMask);
-        }
-        if ((filter + filterSize)->manufactureData != NULL) {
-            SoftBusFree((filter + filterSize)->manufactureData);
-        }
-        if ((filter + filterSize)->manufactureDataMask != NULL) {
-            SoftBusFree((filter + filterSize)->manufactureDataMask);
-        }
+        SoftBusFree((filter + filterSize)->address);
+        SoftBusFree((filter + filterSize)->deviceName);
+        SoftBusFree((filter + filterSize)->serviceUuid);
+        SoftBusFree((filter + filterSize)->serviceUuidMask);
+        SoftBusFree((filter + filterSize)->serviceData);
+        SoftBusFree((filter + filterSize)->serviceDataMask);
+        SoftBusFree((filter + filterSize)->manufactureData);
+        SoftBusFree((filter + filterSize)->manufactureDataMask);
     }
     SoftBusFree(filter);
+    g_scanListener[listenerId].filterSize = 0;
+    g_scanListener[listenerId].filter = NULL;
 }
 
 int SoftBusRemoveScanListener(int listenerId)
