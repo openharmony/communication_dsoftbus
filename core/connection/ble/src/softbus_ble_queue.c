@@ -177,7 +177,7 @@ NO_SANITIZE("cfi") int BleDequeueBlock(void **msg)
         }
         LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_bleQueueList, BleQueue, node) {
             ListDelete(&(item->node));
-            if (GetMsg(g_innerQueue, msg) == SOFTBUS_OK) {
+            if (GetMsg(item, msg) == SOFTBUS_OK) {
                 ListTailInsert(&g_bleQueueList, &(item->node));
                 status = SOFTBUS_OK;
                 break;
