@@ -120,9 +120,15 @@ NO_SANITIZE("cfi") int32_t TransSessionServerAddItem(SessionServer *newNode)
     SessionServer  *tmp = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, newNode->sessionName) == 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server [%s] is exist", newNode->sessionName);
-            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-            return SOFTBUS_SERVER_NAME_REPEATED;
+            if ((pos->uid == newNode->uid) && (pos->pid == newNode->pid)) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server [%s] is exist", newNode->sessionName);
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_SERVER_NAME_REPEATED;
+            } else {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "sessionname [%s] has been used by other processes", newNode->sessionName);
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_SERVER_NAME_USED;
+            }
         }
     }
 
