@@ -327,7 +327,9 @@ EXIT_ERR:
 
 static void AuthOnTransDataRecv(int64_t authId, const ConnectOption *option, const AuthTransDataInfo *info)
 {
-    if (option == NULL || info == NULL) {
+    if (option == NULL || info == NULL || info->data == NULL || info->len < 1 ||
+        info->data[info->len - 1] != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
     switch (info->module) {
