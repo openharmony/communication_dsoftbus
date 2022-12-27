@@ -187,7 +187,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dfinder_interface" ]
     deps = [
       "../nstackx_util:nstackx_util.open",
-      "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/cJSON:cjson",
       "//third_party/libcoap:libcoap",
     ]
