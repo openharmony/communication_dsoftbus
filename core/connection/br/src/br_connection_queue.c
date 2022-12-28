@@ -267,7 +267,7 @@ int32_t BrDequeueBlock(void **msg)
         }
         LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_brQueueList, BrQueue, node) {
             ListDelete(&(item->node));
-            if (GetMsg(g_innerQueue, msg, &isFull) == SOFTBUS_OK) {
+            if (GetMsg(item, msg, &isFull) == SOFTBUS_OK) {
                 ListTailInsert(&g_brQueueList, &(item->node));
                 status = SOFTBUS_OK;
                 break;
