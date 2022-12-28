@@ -96,7 +96,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
-    EXPECT_EQ(ret,  SOFTBUS_SERVER_NAME_REPEATED);
+    EXPECT_EQ(ret, SOFTBUS_SERVER_NAME_USED);
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
