@@ -159,6 +159,7 @@ static int32_t BleHalSend(const BleConnectionInfo *connInfo, const char *data, i
 int32_t BleTransSend(BleConnectionInfo *connInfo, const char *data, uint32_t len, int32_t seq, int32_t module)
 {
 #define BLE_SEND_PACKET_DELAY_LEN 10 // ms
+    CLOGI("enter connId:%d, datalen:%d, module:%d", connInfo->connId, len, module);
     uint32_t tempLen = len;
     char *sendData = (char *)data;
     uint32_t dataLenMax = (uint32_t)(connInfo->mtu - MTU_HEADER_SIZE - sizeof(BleTransHeader));
