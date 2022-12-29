@@ -42,7 +42,7 @@ int32_t ServerJoinLNN(void *origin, IpcIo *req, IpcIo *reply)
     }
     uint32_t addrTypeLen = IpcIoPopUint32(req);
     void *addr = (void*)IpcIoPopFlatObj(req, &size);
-    if (addr == NULL) {
+    if (addr == NULL || addrTypeLen != sizeof(ConnectionAddr) || size != sizeof(ConnectionAddr)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerJoinLNN read addr is null.");
         return SOFTBUS_ERR;
     }
