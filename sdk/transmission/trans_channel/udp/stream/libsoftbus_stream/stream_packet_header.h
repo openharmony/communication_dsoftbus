@@ -26,6 +26,7 @@
 
 #include "securec.h"
 #include "stream_common.h"
+#include "i_stream.h"
 
 using ::std::chrono::duration_cast;
 using ::std::chrono::milliseconds;
@@ -54,7 +55,8 @@ struct CommonHeader {
     uint8_t streamType : 4;
     uint8_t marker : 1;
     uint8_t flag : 1;
-    uint8_t pad : 6;
+    uint8_t level : 4;
+    uint8_t pad : 2;
     uint16_t streamId;
     uint32_t timestamp;
     uint32_t dataLen;
@@ -219,7 +221,7 @@ class StreamPacketHeader {
 public:
     static constexpr int STREAM_HEADER_SIZE = 16;
     static constexpr int VERSION = 0;
-    static constexpr int SUB_VERSION = 0;
+    static constexpr int SUB_VERSION = 1;
 
     static constexpr uint32_t VERSION_OFFSET = 30;
     static constexpr uint32_t SUB_VERSION_OFFSET = 29;
@@ -227,28 +229,36 @@ public:
     static constexpr uint32_t STREAM_TYPE_OFFSET = 24;
     static constexpr uint32_t MAKER_OFFSET = 23;
     static constexpr uint32_t FLAG_OFFSET = 22;
+    static constexpr uint32_t LEVEL_OFFSET = 18;
     static constexpr uint32_t SEQ_NUM_OFFSET = 0;
 
     static constexpr uint32_t WORD_SIZE = 16;
 
     StreamPacketHeader() {}
-    StreamPacketHeader(uint8_t streamType, bool extended, uint16_t seqNum, uint16_t streamId, uint32_t dataLen)
+    StreamPacketHeader(uint8_t streamType, bool extended, uint32_t dataLen,
+        const Communication::SoftBus::StreamFrameInfo* streamFrameInfo)
     {
+        uint32_t ts = 0;
+        if (streamFrameInfo->timeStamp == 0) {
+            const auto now = system_clock::now();
+            const auto ms = duration_cast<milliseconds>(now.time_since_epoch()).count();
+            ts = static_cast<uint32_t>(ms);
+        } else {
+            ts = streamFrameInfo->timeStamp;
+        }
+
         SetVersion(VERSION, SUB_VERSION);
         commonHeader_.extFlag = extended ? 1 : 0;
         commonHeader_.streamType = streamType;
-        commonHeader_.subSeqNum = 0;
         commonHeader_.marker = 0;
         commonHeader_.flag = 0;
+        commonHeader_.level = streamFrameInfo->level;
         commonHeader_.pad = 0;
-        commonHeader_.seqNum = seqNum;
-
-        // ftsend 发送时间戳放到二级tlv中。 流时间戳，要么app直接给，要么调用send_stream接口时生成。
-        const auto now = system_clock::now();
-        const auto ms = duration_cast<milliseconds>(now.time_since_epoch()).count();
-        commonHeader_.timestamp = static_cast<uint32_t>(ms);
-        commonHeader_.streamId = streamId;
+        commonHeader_.streamId = streamFrameInfo->streamId;
+        commonHeader_.timestamp = ts;
         commonHeader_.dataLen = dataLen;
+        commonHeader_.seqNum = streamFrameInfo->seqNum;
+        commonHeader_.subSeqNum = streamFrameInfo->seqSubNum;
     }
 
     virtual ~StreamPacketHeader() = default;
@@ -264,6 +274,7 @@ public:
         common |= commonHeader_.streamType << STREAM_TYPE_OFFSET;
         common |= commonHeader_.marker << MAKER_OFFSET;
         common |= commonHeader_.flag << FLAG_OFFSET;
+        common |= commonHeader_.level << LEVEL_OFFSET;
         common |= static_cast<uint16_t>(commonHeader_.streamId << SEQ_NUM_OFFSET);
 
         *start++ = htonl(common);
@@ -291,6 +302,7 @@ public:
         commonHeader_.streamType = common >> STREAM_TYPE_OFFSET;
         commonHeader_.marker = common >> MAKER_OFFSET;
         commonHeader_.flag = common >> FLAG_OFFSET;
+        commonHeader_.level = common >> LEVEL_OFFSET;
         commonHeader_.streamId = common >> SEQ_NUM_OFFSET;
     }
 
@@ -355,6 +367,10 @@ public:
     uint16_t GetSubSeqNum() const
     {
         return commonHeader_.subSeqNum;
+    }
+    uint8_t GetLevel() const
+    {
+        return commonHeader_.level;
     }
 
 private:
