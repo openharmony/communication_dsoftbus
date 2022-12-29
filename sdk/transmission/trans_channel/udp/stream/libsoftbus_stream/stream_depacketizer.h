@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "stream_packet_header.h"
+#include "i_stream.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -36,14 +37,18 @@ public:
         return header_.GetDataLen();
     }
 
-    uint32_t GetStreamId() const
+    StreamFrameInfo GetFrameInfo() const
     {
-        return header_.GetStreamId();
-    }
-
-    uint32_t GetSeqNum() const
-    {
-        return header_.GetSeqNum();
+        StreamFrameInfo info;
+        info.streamId = header_.GetStreamId();
+        info.seqNum = header_.GetSeqNum();
+        info.level = header_.GetLevel();
+        info.frameType = NONE;
+        info.seqSubNum = header_.GetSubSeqNum();
+        info.bitMap = 0;
+        info.timeStamp = header_.GetTimestamp();
+        info.bitrate = 0;
+        return info;
     }
 
     std::unique_ptr<char[]> GetUserExt()

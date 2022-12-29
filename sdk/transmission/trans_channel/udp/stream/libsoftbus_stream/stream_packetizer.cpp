@@ -50,8 +50,8 @@ std::unique_ptr<char[]> StreamPacketizer::PacketizeStream()
     extSize_ = CalculateExtSize(originData_->GetExtBufferLen());
     auto data = std::make_unique<char[]>(hdrSize_ + extSize_ + dataSize_);
 
-    auto streamPktHeader = StreamPacketHeader(streamType_, extSize_ > 0, originData_->GetSeqNum(),
-        originData_->GetStreamId(), extSize_ + dataSize_);
+    auto streamPktHeader = StreamPacketHeader(streamType_, extSize_ > 0, extSize_ + dataSize_,
+        originData_->GetStreamFrameInfo());
     streamPktHeader.Packetize(data.get(), hdrSize_, 0);
 
     TwoLevelsTlv tlv(originData_->GetExtBuffer(), originData_->GetExtBufferLen());

@@ -1090,8 +1090,7 @@ void VtpStreamSocket::DoStreamRecv()
 
             extBuffer = decode.GetUserExt();
             extLen = decode.GetUserExtSize();
-            info.seqNum = decode.GetSeqNum();
-            info.streamId = decode.GetStreamId();
+            info = decode.GetFrameInfo();
             dataBuffer = decode.GetData();
             dataLength = decode.GetDataLength();
             if (dataLength <= 0) {

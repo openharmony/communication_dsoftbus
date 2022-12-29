@@ -30,12 +30,25 @@ public:
     StreamAdaptorListener() = default;
     explicit StreamAdaptorListener(std::shared_ptr<StreamAdaptor> adaptor) : adaptor_(adaptor) {}
     virtual ~StreamAdaptorListener() override = default;
+    void ConvertStreamFrameInfo(StreamFrameInfo *outFrameInfo,
+        const Communication::SoftBus::StreamFrameInfo *inFrameInfo)
+    {
+        outFrameInfo->frameType = inFrameInfo->frameType;
+        outFrameInfo->timeStamp = (int64_t)inFrameInfo->timeStamp;
+        outFrameInfo->seqNum = (int)inFrameInfo->seqNum;
+        outFrameInfo->seqSubNum = (int)inFrameInfo->seqSubNum;
+        outFrameInfo->level = (int)inFrameInfo->level;
+        outFrameInfo->bitMap = (int)inFrameInfo->bitMap;
+        outFrameInfo->tvCount = 0;
+        outFrameInfo->tvList = nullptr;
+    }
     void OnStreamReceived(std::unique_ptr<IStream> stream) override
     {
         if (adaptor_ == nullptr || adaptor_->GetListenerCallback() == nullptr ||
             adaptor_->GetListenerCallback()->OnStreamReceived == nullptr) {
             return;
         }
+        StreamFrameInfo tmpf = {0};
         auto uniptr = stream->GetBuffer();
         char *retbuf = uniptr.get();
         int32_t buflen = stream->GetBufferLen();
@@ -48,6 +61,7 @@ public:
         if (streamType == StreamType::COMMON_VIDEO_STREAM || streamType == StreamType::COMMON_AUDIO_STREAM) {
             retStreamData.buf = retbuf;
             retStreamData.bufLen = buflen;
+            ConvertStreamFrameInfo(&tmpf, stream->GetStreamFrameInfo());
         } else if (streamType == StreamType::RAW_STREAM) {
             int32_t plainDataLength = buflen - adaptor_->GetEncryptOverhead();
             if (plainDataLength < 0) {
@@ -74,8 +88,6 @@ public:
             extRetBuf,
             extRetBuflen,
         };
-
-        StreamFrameInfo tmpf = {0};
         adaptor_->GetListenerCallback()->OnStreamReceived(adaptor_->GetChannelId(),
             &retStreamData, &extStreamData, &tmpf);
     }
