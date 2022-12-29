@@ -127,6 +127,5 @@ bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
 {
     return GetLaneDepsInterface()->LnnVisitPhysicalSubnet(callback, data);
 }
-
 }
 } // namespace OHOS
