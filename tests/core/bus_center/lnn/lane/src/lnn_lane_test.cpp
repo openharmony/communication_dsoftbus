@@ -48,9 +48,9 @@ static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info);
 static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason);
 static void OnLaneStateChange(uint32_t laneId, LaneState state);
 static ILaneListener g_listener = {
-        .OnLaneRequestSuccess = OnLaneRequestSuccess,
-        .OnLaneRequestFail = OnLaneRequestFail,
-        .OnLaneStateChange = OnLaneStateChange,
+    .OnLaneRequestSuccess = OnLaneRequestSuccess,
+    .OnLaneRequestFail = OnLaneRequestFail,
+    .OnLaneStateChange = OnLaneStateChange,
 };
 
 class LNNLaneTestMock : public testing::Test {
@@ -396,7 +396,7 @@ HWTEST_F(LNNLaneTestMock, LANE_INFO_004, TestSize.Level1)
 
 /*
 * @tc.name: LNN_DATA_001
-* @tc.desc: LnnCreateData 
+* @tc.desc: LnnCreateData
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -410,7 +410,7 @@ HWTEST_F(LNNLaneTestMock, LNN_DATA_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_GET_TIME_001
-* @tc.desc: LnnGetSysTimeMs 
+* @tc.desc: LnnGetSysTimeMs
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -421,7 +421,7 @@ HWTEST_F(LNNLaneTestMock, LNN_GET_TIME_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_LANE_PROFILE_001
-* @tc.desc: BindLaneIdToProfile 
+* @tc.desc: BindLaneIdToProfile
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -470,7 +470,7 @@ HWTEST_F(LNNLaneTestMock, LNN_LANE_PROFILE_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_SELECT_LANE_001
-* @tc.desc: SelectLane 
+* @tc.desc: SelectLane
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -514,7 +514,7 @@ HWTEST_F(LNNLaneTestMock, LNN_SELECT_LANE_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_SELECT_LANE_002
-* @tc.desc: SelectLane 
+* @tc.desc: SelectLane
 * @tc.type: FUNC
 * @tc.require:
 */
