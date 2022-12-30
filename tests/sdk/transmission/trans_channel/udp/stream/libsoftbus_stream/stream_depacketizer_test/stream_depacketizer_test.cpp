@@ -69,12 +69,6 @@ HWTEST_F(StreamDepacketizerTest, GetDataLength001, TestSize.Level1)
     int ret = streamDepacketizer->GetHeaderDataLen();
     EXPECT_EQ(0, ret);
 
-    ret = streamDepacketizer->GetStreamId();
-    EXPECT_EQ(0, ret);
-
-    ret = streamDepacketizer->GetSeqNum();
-    EXPECT_EQ(0, ret);
-
     streamDepacketizer->GetUserExt();
     ret = streamDepacketizer->GetUserExtSize();
     EXPECT_EQ(0, ret);
