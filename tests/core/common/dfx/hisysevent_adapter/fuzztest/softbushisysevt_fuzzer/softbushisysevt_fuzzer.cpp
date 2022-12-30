@@ -46,10 +46,13 @@ void SoftBusHiSysEvtBusCenterFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     int32_t tmpErrCode = *(reinterpret_cast<const int32_t *>(data));
-    int32_t ret = CreateBusCenterFaultEvt(reinterpret_cast<SoftBusEvtReportMsg *>(tmpString),
-        tmpErrCode, reinterpret_cast<ConnectionAddr *>(tmpString));
-    if (ret == SOFTBUS_OK) {
-        ReportBusCenterFaultEvt(reinterpret_cast<SoftBusEvtReportMsg *>(tmpString));
+    SoftBusEvtReportMsg testMsg;
+    if (memset_s(&testMsg, sizeof(SoftBusEvtReportMsg), 0, sizeof(SoftBusEvtReportMsg)) != EOK) {
+        return;
+    }
+    int32_t ret = CreateBusCenterFaultEvt(&testMsg, tmpErrCode, reinterpret_cast<ConnectionAddr *>(tmpString));
+    if (ret == SOFTBUS_OK && testMsg.paramArray != nullptr) {
+        ReportBusCenterFaultEvt(&testMsg);
     }
 }
 
