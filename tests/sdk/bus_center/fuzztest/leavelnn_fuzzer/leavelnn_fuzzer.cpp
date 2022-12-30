@@ -33,12 +33,21 @@ namespace OHOS {
             return true;
         }
 
-        char tmp[65] = {0};
-        if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
-            return true;
+        char *tmp = reinterpret_cast<char *>(malloc(size));
+        if (tmp == nullptr) {
+            return false;
+        }
+        if (memset_s(tmp, size, '\0', size) != EOK) {
+            free(tmp);
+            return false;
+        }
+        if (memcpy_s(tmp, size, data, size - 1) != EOK) {
+            free(tmp);
+            return false;
         }
 
-        LeaveLNN(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(data), OnLeaveLNNResult);
+        LeaveLNN(reinterpret_cast<const char *>(tmp), reinterpret_cast<const char *>(tmp), OnLeaveLNNResult);
+        free(tmp);
         return true;
     }
 }
