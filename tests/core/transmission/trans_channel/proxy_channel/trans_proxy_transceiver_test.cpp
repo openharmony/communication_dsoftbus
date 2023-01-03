@@ -151,8 +151,6 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize.L
     TransCreateConnByConnId(3);
     TransCreateConnByConnId(4);
 
-    EXPECT_CALL(connMock, ConnGetNewRequestId).WillOnce(Return(10)).WillOnce(Return(11))
-        .WillRepeatedly(Return(12));
     EXPECT_CALL(connMock, ConnConnectDevice).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(24));
