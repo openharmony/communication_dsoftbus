@@ -710,6 +710,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyonMessageReceivedTest003, TestSize.Lev
     msg.data = TransProxyPackIdentity(identity);
     ASSERT_TRUE(NULL != msg.data);
 
+    msg.dateLen = strlen(msg.data) + 1;
     msg.connId = -1;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_RESET;
     /* test no compare channel */

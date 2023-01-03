@@ -423,7 +423,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     (void)SoftBusMutexUnlock(&g_connectionLock);
 
     int32_t clientId = INVALID_CLIENID;
-    clientId = SoftBusGattClientConnect(&(newConnectionInfo->btBinaryAddr));
+    clientId = SoftBusGattClientConnect(&(newConnectionInfo->btBinaryAddr), option->bleOption.fastestConnectEnable);
 
     if (SoftBusMutexLock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "%s: lock mutex failed, requestId: %d", __func__, requestId);
@@ -846,6 +846,44 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     (void)SoftBusMutexUnlock(&g_connectionLock);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "BleCheckActiveConnection no active conn");
     return false;
+}
+
+static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    BleConnectionInfo *connInfo = GetBleConnInfoByConnId(connectionId);
+    if (connInfo == NULL) {
+        CLOGE("update ble connection failed, %u not exist", connectionId);
+        return SOFTBUS_ERR;
+    }
+    if (connInfo->state != BLE_CONNECTION_STATE_CONNECTED &&
+        connInfo->state != BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) {
+        CLOGE("update ble connection failed, %u current state is %d, only %d or %d support", connectionId,
+            connInfo->state, BLE_CONNECTION_STATE_CONNECTED, BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED);
+        return SOFTBUS_ERR;
+    }
+    if (connInfo->info.isServer) {
+        CLOGE("update ble connection failed, %u is server side, only client side support", connectionId);
+        return SOFTBUS_ERR;
+    }
+
+    SoftbusGattPriority priority;
+    switch (option->bleOption.priority) {
+        case CONN_BLE_PRIORITY_BALANCED:
+            priority = SOFTBUS_GATT_PRIORITY_BALANCED;
+            break;
+        case CONN_BLE_PRIORITY_HIGH:
+            priority = SOFTBUS_GATT_PRIORITY_HIGH;
+            break;
+        case CONN_BLE_PRIORITY_LOW_POWER:
+            priority = SOFTBUS_GATT_PRIORITY_LOW_POWER;
+            break;
+        default:
+            CLOGE("update ble connection failed, %u, unknown priority: %d", connectionId, option->bleOption.priority);
+            return SOFTBUS_ERR;
+    }
+    int32_t ret = SoftbusGattcSetPriority(connInfo->halConnId, &connInfo->btBinaryAddr, priority);
+    CLOGI("set ble connection priority to %d, ret=%d", priority, ret);
+    return ret;
 }
 
 static void BleDeviceConnectPackRequest(int32_t value, int32_t connId)
@@ -1281,6 +1319,7 @@ static void InitBleInterface(void)
     g_bleInterface.StartLocalListening = BleStartLocalListening;
     g_bleInterface.StopLocalListening = BleStopLocalListening;
     g_bleInterface.CheckActiveConnection = BleCheckActiveConnection;
+    g_bleInterface.UpdateConnection = BleUpdateConnection;
 }
 
 static int BleQueueInit(void)

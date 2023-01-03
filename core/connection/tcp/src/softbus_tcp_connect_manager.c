@@ -650,6 +650,7 @@ static void InitTcpInterface(void)
     g_tcpInterface.StartLocalListening = TcpStartListening;
     g_tcpInterface.StopLocalListening = TcpStopListening;
     g_tcpInterface.CheckActiveConnection = TcpCheckActiveConnection;
+    g_tcpInterface.UpdateConnection = NULL;
 }
 
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)

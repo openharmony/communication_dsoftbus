@@ -47,6 +47,12 @@ typedef struct {
     void (*ConfigureMtuSizeCallback)(int clientId, int mtuSize, int status);
 } SoftBusGattcCallback;
 
+typedef enum {
+    SOFTBUS_GATT_PRIORITY_BALANCED = 0x0,
+    SOFTBUS_GATT_PRIORITY_HIGH,
+    SOFTBUS_GATT_PRIORITY_LOW_POWER,
+} SoftbusGattPriority;
+
 void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb);
 int32_t SoftbusGattcRegister(void);
 int32_t SoftbusGattcUnRegister(int32_t clientId);
@@ -57,6 +63,9 @@ int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid);
 int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid);
 int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData);
 int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize);
+
+int32_t SoftbusGattcSetFastestConn(int32_t clientId);
+int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusGattPriority priority);
 
 #ifdef __cplusplus
 #if __cplusplus

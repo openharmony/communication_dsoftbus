@@ -95,5 +95,11 @@ void DiscDeviceInfoChanged(InfoTypeChanged type)
 {
     return GetConnInterface()->DiscDeviceInfoChanged(type);
 }
+
+int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    return GetConnInterface()->ConnUpdateConnection(connectionId, option);
+}
+
 }
 }

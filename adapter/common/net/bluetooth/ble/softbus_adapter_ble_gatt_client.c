@@ -258,3 +258,36 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
     }
     return SOFTBUS_OK;
 }
+
+int32_t SoftbusGattcSetFastestConn(int32_t clientId)
+{
+    if (clientId <= 0) {
+        CLOGE("invalid param, '%d'", clientId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = BleGattcSetFastestConn(clientId, true);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        CLOGE("BleGattcSetFastestConn failed, return code '%d'", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusGattPriority priority)
+{
+    if (clientId <= 0 || addr == NULL) {
+        CLOGE("invalid param, '%d'", clientId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    BdAddr bdAddr = { 0 };
+    if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
+        CLOGE("addr memory copy failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = BleGattcSetPriority(clientId, &bdAddr, (BtGattPriority)priority);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        CLOGE("BleGattcSetPriority failed, return code '%d'", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
