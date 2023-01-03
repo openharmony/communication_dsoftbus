@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef SESSIONCALLBACKMOCK_FUZZER_H
+#define SESSIONCALLBACKMOCK_FUZZER_H
 
 #include <cstdint>
 #include <unistd.h>
@@ -19,9 +21,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fcntl.h>
-
-#ifndef SESSIONCALLBACKMOCK_FUZZER_H
-#define SESSIONCALLBACKMOCK_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "sessioncallbackmock_fuzzer"
 
