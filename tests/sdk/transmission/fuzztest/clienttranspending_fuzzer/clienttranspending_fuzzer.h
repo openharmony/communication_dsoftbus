@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUSCLIENTTRANSPENDING_FUZZER_H
-#define SOFTBUSCLIENTTRANSPENDING_FUZZER_H
+#ifndef CLIENTTRANSPENDING_FUZZER_H
+#define CLIENTTRANSPENDING_FUZZER_H
 
 #include <cstdint>
 #include <unistd.h>
