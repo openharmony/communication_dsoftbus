@@ -521,6 +521,21 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
     return ret;
 }
 
+void UpdateAuthDevicePriority(uint64_t connId)
+{
+    if (GetConnType(connId) != AUTH_LINK_TYPE_BLE) {
+        return;
+    }
+    UpdateOption option = {
+        .type = CONNECT_BLE,
+        .bleOption = {
+            .priority = CONN_BLE_PRIORITY_BALANCED,
+        }
+    };
+    int32_t ret = ConnUpdateConnection(GetConnId(connId), &option);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "update connecton priority to balanced, connType=%d, id=%u, ret: %d",
+        GetConnType(connId), GetConnId(connId), ret);
+}
 void DisconnectAuthDevice(uint64_t connId)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,

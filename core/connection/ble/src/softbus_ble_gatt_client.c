@@ -268,7 +268,7 @@ int32_t SoftBusGattClientSend(const int32_t clientId, const char *data, int32_t 
     return SoftbusGattcWriteCharacteristic(clientId, &clientData);
 }
 
-int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
+int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr, bool fastestConnectEnable)
 {
     if (g_gattcIsInited != true) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "gattc not init");
@@ -296,6 +296,9 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         SoftBusFree(infoNode);
         return SOFTBUS_ERR;
     }
+    if (fastestConnectEnable && SoftbusGattcSetFastestConn(infoNode->clientId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "enable ble fastest connection failed");
+    }
     if (SoftbusGattcConnect(clientId, bleAddr) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftbusGattcConnect failed");
         SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
@@ -308,7 +311,7 @@ int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr)
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "post msg delay err");
         // continue anyway,
     }
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "SoftBusGattClientConnect ok, clientId: %d", clientId);
+    CLOGI("SoftBusGattClientConnect ok, clientId: %d, fastestEnable: %d", clientId, fastestConnectEnable);
     return clientId;
 }
 

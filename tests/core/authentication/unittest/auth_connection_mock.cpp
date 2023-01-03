@@ -90,5 +90,11 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId)
 {
     return GetConnInterface()->ConnGetNewRequestId(moduleId);
 }
+
+int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    return GetConnInterface()->ConnUpdateConnection(connectionId, option);
+}
+
 }
 }
