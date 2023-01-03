@@ -722,3 +722,18 @@ bool CheckActiveConnection(const ConnectOption *info)
     return g_connManager[info->type]->CheckActiveConnection(info);
 }
 
+int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    if (option == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    uint32_t type = (connectionId >> CONNECT_TYPE_SHIFT);
+    if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
+        return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
+    }
+    if (g_connManager[type]->UpdateConnection == NULL) {
+        return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
+    }
+    return g_connManager[type]->UpdateConnection(connectionId, option);
+}
