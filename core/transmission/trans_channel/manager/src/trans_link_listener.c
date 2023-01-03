@@ -40,10 +40,11 @@ static int32_t GetNetworkIdByP2pMac(const char *peerMac, char *networkId, int32_
     NodeBasicInfo *info = NULL;
     int32_t num = 0;
 
-    if (LnnGetAllOnlineNodeInfo(&info, &num) != SOFTBUS_OK) {
+    if (LnnGetAllOnlineAndMetaNodeInfo(&info, &num) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get online node fail");
         return SOFTBUS_ERR;
     }
+
     if (info == NULL || num == 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "no online node");
         return SOFTBUS_NOT_FIND;
