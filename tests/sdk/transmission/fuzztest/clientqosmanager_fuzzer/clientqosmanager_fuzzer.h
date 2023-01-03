@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUSCLIENTQOSMANAGER_FUZZER_H
-#define SOFTBUSCLIENTQOSMANAGER_FUZZER_H
+#ifndef CLIENTQOSMANAGER_FUZZER_H
+#define CLIENTQOSMANAGER_FUZZER_H
 
 #include <cstdint>
 #include <unistd.h>

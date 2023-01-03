@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SOFTBUSCLIENTTRANSPROXYMANAGER_FUZZER_H
-#define SOFTBUSCLIENTTRANSPROXYMANAGER_FUZZER_H
+#ifndef CLIENTTRANSPROXYMANAGER_FUZZER_H
+#define CLIENTTRANSPROXYMANAGER_FUZZER_H
 
 #include <cstdint>
 #include <unistd.h>
