@@ -85,7 +85,8 @@ static ConnectFuncInterface g_brInterface = {
     .GetConnectionInfo = GetConnectionInfo,
     .StartLocalListening = StartLocalListening,
     .StopLocalListening = StopLocalListening,
-    .CheckActiveConnection = BrCheckActiveConnection
+    .CheckActiveConnection = BrCheckActiveConnection,
+    .UpdateConnection = NULL,
 };
 
 static SppSocketDriver *g_sppDriver = NULL;
