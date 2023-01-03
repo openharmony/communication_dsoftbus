@@ -1113,7 +1113,7 @@ int PeerBasicInfoParse(BleConnectionInfo *connInfo, const char *value, int32_t l
     return SOFTBUS_OK;
 }
 
-static void BleConnectionReceived(BleConnectionInfo *targetNode, uint32_t len, const char *value)
+static void BleConnectionReceived(int32_t halConnId, uint32_t len, const char *value)
 {
     uint32_t connPktHeadLen = (uint32_t) sizeof(ConnPktHead);
     if (connPktHeadLen >= len) {
@@ -1126,40 +1126,6 @@ static void BleConnectionReceived(BleConnectionInfo *targetNode, uint32_t len, c
                    head->len + connPktHeadLen);
         return;
     }
-    if (head->module != MODULE_CONNECTION) {
-        if (g_connectCallback != NULL) {
-            g_connectCallback->OnDataReceived(targetNode->connId, (ConnModule) head->module, head->seq,
-                (char *)value, head->len + connPktHeadLen);
-        }
-        return;
-    }
-    cJSON *data = cJSON_ParseWithLength(value + connPktHeadLen, head->len);
-    if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[receive data invalid]");
-        return;
-    }
-    RecvConnectedComd(targetNode->connId, (const cJSON*)data);
-    cJSON_Delete(data);
-}
-static void BleNetReceived(BleConnectionInfo *targetNode, uint32_t len, const char *value)
-{
-    if (targetNode->state != BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) {
-        if (PeerBasicInfoParse(targetNode, value, len) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse failed");
-            return;
-        }
-        targetNode->state = BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED;
-        SendSelfBasicInfo(targetNode->connId);
-    }
-    g_connectCallback->OnDataReceived(targetNode->connId, MODULE_BLE_NET, 0, (char *)value, len);
-}
-
-static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, const char *value)
-{
-    if (value == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived invalid data");
-        return;
-    }
     if (pthread_mutex_lock(&g_connectionLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
@@ -1170,8 +1136,57 @@ static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, c
         (void)pthread_mutex_unlock(&g_connectionLock);
         return;
     }
-    handle == g_gattService.bleConnCharaId ? BleConnectionReceived(targetNode, len, value) : BleNetReceived(targetNode, len, value);
+    uint32_t connectionId = targetNode->connId;
     (void)pthread_mutex_unlock(&g_connectionLock);
+    if (head->module != MODULE_CONNECTION) {
+        if (g_connectCallback != NULL) {
+            g_connectCallback->OnDataReceived(
+                connectionId, (ConnModule) head->module, head->seq, (char *)value, head->len + connPktHeadLen);
+        }
+        return;
+    }
+    cJSON *data = cJSON_ParseWithLength(value + connPktHeadLen, head->len);
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "[receive data invalid]");
+        return;
+    }
+    RecvConnectedComd(connectionId, (const cJSON*)data);
+    cJSON_Delete(data);
+}
+static void BleNetReceived(int32_t halConnId, uint32_t len, const char *value)
+{
+    if (pthread_mutex_lock(&g_connectionLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "lock mutex failed");
+        return;
+    }
+    BleConnectionInfo *targetNode = GetBleConnInfoByHalConnId(halConnId);
+    if (targetNode == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived unknown device");
+        (void)pthread_mutex_unlock(&g_connectionLock);
+        return;
+    }
+    if (targetNode->state != BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED) {
+        if (PeerBasicInfoParse(targetNode, value, len) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "PeerBasicInfoParse failed");
+            (void)pthread_mutex_unlock(&g_connectionLock);
+            return;
+        }
+        targetNode->state = BLE_CONNECTION_STATE_BASIC_INFO_EXCHANGED;
+        SendSelfBasicInfo(targetNode->connId);
+        (void)pthread_mutex_unlock(&g_connectionLock);
+        return;
+    }
+    (void)pthread_mutex_unlock(&g_connectionLock);
+    g_connectCallback->OnDataReceived(targetNode->connId, MODULE_BLE_NET, 0, (char *)value, len);
+}
+
+static void BleOnDataReceived(int32_t handle, int32_t halConnId, uint32_t len, const char *value)
+{
+    if (value == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "BleOnDataReceived invalid data");
+        return;
+    }
+    handle == g_gattService.bleConnCharaId ? BleConnectionReceived(halConnId, len, value) : BleNetReceived(halConnId, len, value);
 }
 
 static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
