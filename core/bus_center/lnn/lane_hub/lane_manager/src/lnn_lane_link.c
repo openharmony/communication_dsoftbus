@@ -166,6 +166,7 @@ NO_SANITIZE("cfi") void LnnLanePendingDeinit(void)
     ConnRequestItem *item = NULL;
     while (!IsListEmpty(&g_pendingList->list)) {
         item = LIST_ENTRY(GET_LIST_HEAD(&g_pendingList->list), ConnRequestItem, node);
+        ListDelete(&item->node);
         (void)SoftBusCondDestroy(&item->cond);
         SoftBusFree(item);
     }

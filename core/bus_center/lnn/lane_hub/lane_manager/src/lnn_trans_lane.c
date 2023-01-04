@@ -102,6 +102,7 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
 {
     if (linkInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "linkSuccess param invalid");
+        return;
     }
     LaneLinkInfo *linkParam = (LaneLinkInfo *)SoftBusCalloc(sizeof(LaneLinkInfo));
     if (linkParam == NULL) {
@@ -140,7 +141,8 @@ static void DeleteLaneLinkNode(uint32_t laneId)
         return;
     }
     LaneLinkNodeInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_multiLinkList, LaneLinkNodeInfo, node) {
+    LaneLinkNodeInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_multiLinkList, LaneLinkNodeInfo, node) {
         if (item->laneId == laneId) {
             ListDelete(&item->node);
             SoftBusFree(item->linkList);
@@ -207,11 +209,12 @@ static void DeleteRequestNode(uint32_t laneId)
     if (Lock() != SOFTBUS_OK) {
         return;
     }
-    TransReqInfo *infoNode = NULL;
-    LIST_FOR_EACH_ENTRY(infoNode, &g_requestList->list, TransReqInfo, node) {
-        if (infoNode->laneId == laneId) {
-            ListDelete(&infoNode->node);
-            SoftBusFree(infoNode);
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneId == laneId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
             g_requestList->cnt--;
             break;
         }
@@ -281,15 +284,16 @@ static int32_t Free(uint32_t laneId)
     if (Lock() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    TransReqInfo *infoNode = NULL;
-    LIST_FOR_EACH_ENTRY(infoNode, &g_requestList->list, TransReqInfo, node) {
-        if (infoNode->laneId == laneId) {
-            ListDelete(&infoNode->node);
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneId == laneId) {
+            ListDelete(&item->node);
             g_requestList->cnt--;
             Unlock();
-            DestroyLink(laneId, infoNode->type, infoNode->info.pid, infoNode->p2pMac, infoNode->info.networkId);
-            UnbindLaneId(laneId, infoNode);
-            SoftBusFree(infoNode);
+            DestroyLink(laneId, item->type, item->info.pid, item->p2pMac, item->info.networkId);
+            UnbindLaneId(laneId, item);
+            SoftBusFree(item);
             return SOFTBUS_OK;
         }
     }
@@ -392,10 +396,12 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocFail(uint32_t laneId, int32_t reas
         return;
     }
     TransReqInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == laneId) {
             ListDelete(&item->node);
             SoftBusFree(item);
+            g_requestList->cnt--;
             break;
         }
     }

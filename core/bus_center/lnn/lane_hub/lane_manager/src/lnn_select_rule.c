@@ -50,12 +50,12 @@ static int32_t GetWlanLinkedFrequency(void)
 static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
 {
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
-    if (ret < 0 || *local < 0) {
+    if (ret != SOFTBUS_OK || *local < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalNumInfo err, ret = %d, local = %d", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, remote);
-    if (ret < 0 || *remote < 0) {
+    if (ret != SOFTBUS_OK || *remote < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo err, ret = %d, remote = %d", ret, *remote);
         return false;
     }

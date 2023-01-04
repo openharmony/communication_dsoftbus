@@ -175,7 +175,8 @@
     #define EVENT_NODE_STATE_ONLINE 0x1
     #define EVENT_NODE_STATE_OFFLINE 0x02
     #define EVENT_NODE_STATE_INFO_CHANGED 0x04
-    #define EVENT_NODE_STATE_MASK 0x07
+    #define EVENT_NODE_STATUS_CHANGED 0x08
+    #define EVENT_NODE_STATE_MASK 0x15
     
     // 节点信息
     typedef struct {
@@ -190,6 +191,7 @@
         void (*onNodeOnline)(NodeBasicInfo *info);   // 节点上线事件回调
         void (*onNodeOffline)(NodeBasicInfo *info);  // 节点下线事件回调
         void (*onNodeBasicInfoChanged)(NodeBasicInfoType type, NodeBasicInfo *info); // 节点信息变化事件回调
+        void (*onNodeStatusChanged)(NodeStatusType type, NodeStatus *status); // 设备运行状态变化事件回调
     } INodeStateCb;
     
     //  注册节点状态事件回调

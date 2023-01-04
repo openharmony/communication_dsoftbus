@@ -49,10 +49,12 @@ NO_SANITIZE("cfi") static int32_t PostMessageToHandler(SoftBusMessage *msg)
 {
     if (g_notifyHandler.looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "NotifyHandler not initialized.");
+        FreeMessage(msg);
         return SOFTBUS_NO_INIT;
     }
     if (g_notifyHandler.looper->PostMessage == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid looper.");
+        FreeMessage(msg);
         return SOFTBUS_ERR;
     }
     g_notifyHandler.looper->PostMessage(g_notifyHandler.looper, msg);
@@ -154,8 +156,7 @@ static bool IsRepeatEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     LnnEventHandlerItem *item = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node) {
         if (item->handler == handler) {
             return true;
         }
@@ -183,8 +184,7 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed in notify event");
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node)
-    {
+    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node) {
         item->handler(info);
     }
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
@@ -437,6 +437,7 @@ NO_SANITIZE("cfi") int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventH
 NO_SANITIZE("cfi") void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     LnnEventHandlerItem *item = NULL;
+    LnnEventHandlerItem *next = NULL;
 
     if (event == LNN_EVENT_TYPE_MAX || handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid event handler params");
@@ -446,8 +447,7 @@ NO_SANITIZE("cfi") void LnnUnregisterEventHandler(LnnEventType event, LnnEventHa
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hold lock failed in unregister event handler");
         return;
     }
-    LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node)
-    {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_eventCtrl.handlers[event], LnnEventHandlerItem, node) {
         if (item->handler == handler) {
             ListDelete(&item->node);
             SoftBusFree(item);
