@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OPENSESSION_FUZZER_H
-#define OPENSESSION_FUZZER_H
+#ifndef STREAMADAPTOR_FUZZER_H
+#define STREAMADAPTOR_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "streamadaptor_fuzzer"
 
