@@ -23,6 +23,7 @@
 #include "auth_p2p.h"
 #include "auth_sessionkey.h"
 #include "auth_socket.h"
+#include "device_auth_defines.h"
 #include "lnn_connection_addr_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -51,6 +52,8 @@ static bool g_isAuthInit = false;
 #define INITIAL_STATE 0
 #define RECV_ENCRYPT_DATA_STATE 1
 #define KEY_GENERATEG_STATE 2
+#define RETRY_TIMES 16
+#define RETRY_MILLSECONDS 500
 
 #define AUTH_CLOSE_CONN_DELAY_TIME 10000
 
@@ -632,13 +635,25 @@ static void StartAuth(AuthManager *auth, char *groupId, bool isDeviceLevel, bool
         return;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start auth device, enter hichain process");
-    if (auth->hichain->authDevice(ANY_OS_ACCOUNT, auth->authId, authParams, &g_hichainCallback) != 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "authDevice failed");
-        cJSON_free(authParams);
-        AuthHandleFail(auth, SOFTBUS_AUTH_HICHAIN_AUTH_DEVICE_FAILED);
-        return;
+    int32_t ret;
+    for (int i = 0; i < RETRY_TIMES; i++) {
+        ret = auth->hichain->authDevice(ANY_OS_ACCOUNT, auth->authId, authParams, &g_hichainCallback);
+        if (ret == HC_SUCCESS) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain authDevice sucess, time = %d", i+1);
+            cJSON_free(authParams);
+            return;
+        }
+        if (ret == HC_ERR_INVALID_PARAMS) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+                "hichain authDevice need account service, retry time = %d, err = %d", i+1, ret);
+            (void)SoftBusSleepMs(RETRY_MILLSECONDS);
+        } else {
+            break;
+        }
     }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "hichain authDevice fail, err = %d", ret);
     cJSON_free(authParams);
+    AuthHandleFail(auth, SOFTBUS_AUTH_HICHAIN_AUTH_DEVICE_FAILED);
 }
 
 static void VerifyDeviceDevLvl(AuthManager *auth)
