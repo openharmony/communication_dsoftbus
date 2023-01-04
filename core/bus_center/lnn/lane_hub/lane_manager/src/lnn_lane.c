@@ -176,7 +176,8 @@ NO_SANITIZE("cfi") void UnregisterLaneIdListener(const ILaneIdStateListener *lis
         return;
     }
     LaneIdListenerNode *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_laneListenerList.list, LaneIdListenerNode, node) {
+    LaneIdListenerNode *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneListenerList.list, LaneIdListenerNode, node) {
         if (memcmp(&item->listener, listener, sizeof(ILaneIdStateListener)) == 0) {
             ListDelete(&item->node);
             SoftBusFree(item);

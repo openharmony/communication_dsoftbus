@@ -168,8 +168,9 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
 static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgName)
 {
     StartTimeSyncReq *item = NULL;
+    StartTimeSyncReq *next = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &info->startReqList, StartTimeSyncReq, node) {
         if (strcmp(pkgName, item->pkgName) != 0) {
             continue;
         }

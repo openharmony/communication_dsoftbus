@@ -98,7 +98,7 @@ static LnnLocalConfigInit g_lnnLocalConfigInit = {
 static void ReadDelayConfig(void)
 {
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN,
-        (unsigned char*)&g_lnnLocalConfigInit.delayLen, sizeof(g_lnnLocalConfigInit.delayLen)) != SOFTBUS_OK) {
+        (unsigned char *)&g_lnnLocalConfigInit.delayLen, sizeof(g_lnnLocalConfigInit.delayLen)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn delay init len fail, use default value");
         g_lnnLocalConfigInit.delayLen = DEFAULT_DELAY_LEN;
     }

@@ -22,7 +22,7 @@ NO_SANITIZE("cfi") void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
 {
     int32_t val;
     val = MAX_BYTES_LENGTH;
-    sets->SetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char*)&val, sizeof(val));
+    sets->SetConfig(SOFTBUS_INT_MAX_BYTES_LENGTH, (unsigned char *)&val, sizeof(val));
     val = 0x1;
-    sets->SetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, (unsigned char*)&val, sizeof(val));
+    sets->SetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, (unsigned char *)&val, sizeof(val));
 }

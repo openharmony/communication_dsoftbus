@@ -398,7 +398,7 @@ void BusCenterClientDeinit(void)
 int BusCenterClientInit(void)
 {
     if (SoftbusGetConfig(SOFTBUS_INT_MAX_NODE_STATE_CB_CNT,
-        (unsigned char*)&g_maxNodeStateCbCount, sizeof(g_maxNodeStateCbCount)) != SOFTBUS_OK) {
+        (unsigned char *)&g_maxNodeStateCbCount, sizeof(g_maxNodeStateCbCount)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get NodeStateCbCount from config file");
         g_maxNodeStateCbCount = DEFAULT_NODE_STATE_CB_CNT;
     }

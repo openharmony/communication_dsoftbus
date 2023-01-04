@@ -91,11 +91,12 @@ static void AddLaneIdNode(uint32_t laneId, LaneModel *laneModel)
 
 static void DeleteLaneIdNode(uint32_t laneId, LaneModel *laneModel)
 {
-    LaneIdInfo *infoNode = NULL;
-    LIST_FOR_EACH_ENTRY(infoNode, &laneModel->laneIdList, LaneIdInfo, node) {
-        if (infoNode->laneId == laneId) {
-            ListDelete(&infoNode->node);
-            SoftBusFree(infoNode);
+    LaneIdInfo *item = NULL;
+    LaneIdInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &laneModel->laneIdList, LaneIdInfo, node) {
+        if (item->laneId == laneId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
             laneModel->ref--;
             return;
         }

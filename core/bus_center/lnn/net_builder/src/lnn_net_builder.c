@@ -55,11 +55,6 @@
 #define NOT_TRUSTED_DEVICE_MSG_DELAY 5000
 
 typedef enum {
-    LNN_MSG_ID_ELECT,
-    LNN_MSG_ID_MAX
-} LnnMsgType;
-
-typedef enum {
     MSG_TYPE_JOIN_LNN = 0,
     MSG_TYPE_DISCOVERY_DEVICE,
     MSG_TYPE_CLEAN_CONN_FSM,
@@ -174,7 +169,7 @@ static void NetBuilderConfigInit(void)
         g_netBuilder.maxConnCount = DEFAULT_MAX_LNN_CONNECTION_COUNT;
     }
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM,
-        (unsigned char *)&g_netBuilder.maxConcurrentCount, sizeof(g_netBuilder.maxConnCount)) != SOFTBUS_OK) {
+        (unsigned char *)&g_netBuilder.maxConcurrentCount, sizeof(g_netBuilder.maxConcurrentCount)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn max conncurent count fail, use default value");
         g_netBuilder.maxConcurrentCount = 0;
     }
@@ -493,8 +488,9 @@ static int32_t PostJoinRequestToMetaNode(MetaJoinRequestNode *metaJoinNode, cons
 static void TryRemovePendingJoinRequest(void)
 {
     PendingJoinRequestNode *item = NULL;
+    PendingJoinRequestNode *next = NULL;
 
-    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.pendingList, PendingJoinRequestNode, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_netBuilder.pendingList, PendingJoinRequestNode, node) {
         if (NeedPendingJoinRequest()) {
             return;
         }

@@ -208,7 +208,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
 
 int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
 {
-    if (SoftBusGenerateRandomArray((unsigned char*)key, len) != SOFTBUS_OK) {
+    if (SoftBusGenerateRandomArray((unsigned char *)key, len) != SOFTBUS_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "generate sessionKey error.");
         return SOFTBUS_ENCRYPT_ERR;
     }
