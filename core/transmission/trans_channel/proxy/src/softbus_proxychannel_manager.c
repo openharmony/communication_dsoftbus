@@ -783,7 +783,7 @@ NO_SANITIZE("cfi") void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 
     if (OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnProxyChannelOpened  fail");
-        (void)TransProxyCloseConnChannel(msg->connId);
+        (void)TransProxyCloseConnChannelReset(msg->connId, false);
         TransProxyDelChanByChanId(chan->channelId);
         return;
     }
