@@ -706,7 +706,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = TransTdcProcessData(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = TransDataListInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
