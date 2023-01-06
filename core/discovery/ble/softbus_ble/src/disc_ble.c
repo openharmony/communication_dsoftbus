@@ -236,16 +236,21 @@ static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums
     DLOGI("old= %u, new= %u", *srcCap, *dstCap);
 }
 
-static void ResetInfoUpdate(int adv)
+static void UpdateInfoManager(int adv, bool needUpdate)
 {
     DLOGI("enter");
-    if (adv == NON_ADV_ID) {
-        g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate = false;
-        g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdate = false;
-    } else {
-        g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate = false;
-        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdate = false;
+    if (SoftBusMutexLock(&g_bleInfoLock) != 0) {
+        DLOGE("lock failed");
+        return;
     }
+    if (adv == NON_ADV_ID) {
+        g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate = needUpdate;
+        g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdate = needUpdate;
+    } else {
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate = needUpdate;
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdate = needUpdate;
+    }
+    SoftBusMutexUnlock(&g_bleInfoLock);
 }
 
 static int32_t GetNeedUpdateAdvertiser(int32_t adv)
@@ -824,7 +829,7 @@ NO_SANITIZE("cfi") static int32_t StartAdvertiser(int32_t adv)
         DLOGE("start adv adv=%d failed", adv);
         return SOFTBUS_ERR;
     }
-    ResetInfoUpdate(adv);
+    UpdateInfoManager(adv, false);
     DestroyBleConfigAdvData(&advData);
     return SOFTBUS_OK;
 }
@@ -872,7 +877,7 @@ NO_SANITIZE("cfi") static int32_t UpdateAdvertiser(int32_t adv)
         DLOGE("UpdateAdv failed");
         return SOFTBUS_ERR;
     }
-    ResetInfoUpdate(adv);
+    UpdateInfoManager(adv, false);
     DestroyBleConfigAdvData(&advData);
     return SOFTBUS_OK;
 }
@@ -1380,6 +1385,18 @@ static void RemoveTimeout(const char *key)
                                                  (void *)key);
 }
 
+static uint32_t RecvMsgAggregateCap(void)
+{
+    RecvMessage *msg = NULL;
+    uint32_t revMessageCap = 0;
+    LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
+        for (uint32_t index = 0; index < CAPABILITY_NUM; index++) {
+            revMessageCap = msg->capBitMap[index] | revMessageCap;
+        }
+    }
+    return revMessageCap;
+}
+
 static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool needBrMac)
 {
     DLOGI("enter");
@@ -1387,6 +1404,7 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         DLOGE("lock failed");
         return SOFTBUS_LOCK_ERR;
     }
+    uint32_t oldAggregateCap = RecvMsgAggregateCap();
     RecvMessage *recvMsg = GetRecvMessage(key);
     if (recvMsg == NULL) {
         DLOGI("key is not exit");
@@ -1409,6 +1427,10 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
         g_recvMessageInfo.numNeedBrMac++;
         g_recvMessageInfo.numNeedResp++;
         ListTailInsert(&g_recvMessageInfo.node, &recvMsg->node);
+        uint32_t newAggregateCap = RecvMsgAggregateCap();
+        if (oldAggregateCap != newAggregateCap) {
+            UpdateInfoManager(NON_ADV_ID, true);
+        }
         SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     } else {
         SoftBusMutexUnlock(&g_recvMessageInfo.lock);
