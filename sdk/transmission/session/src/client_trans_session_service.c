@@ -83,7 +83,8 @@ NO_SANITIZE("cfi") static int32_t OpenSessionWithExistSession(int32_t sessionId,
     ISessionListener listener = {0};
     if (ClientGetSessionCallbackById(sessionId, &listener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session listener failed");
-        return sessionId;
+        CloseSession(sessionId);
+        return INVALID_SESSION_ID;
     }
 
     if (listener.OnSessionOpened(sessionId, SOFTBUS_OK) != 0) {
@@ -492,7 +493,7 @@ void CloseSession(int sessionId)
     }
     ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err: ret=%d", ret);
         return;
     }
     ret = ClientTransCloseChannel(channelId, type);
@@ -502,7 +503,7 @@ void CloseSession(int sessionId)
     }
     ret = ClientDeleteSession(sessionId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseSession delete session err");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseSession delete session err: ret=%d", ret);
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CloseSession ok");
     return;
