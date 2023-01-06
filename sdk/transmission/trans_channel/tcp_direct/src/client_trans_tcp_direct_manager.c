@@ -185,38 +185,31 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     if (ClientTransCheckTdcChannelExist(channel->channelId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
-        return SOFTBUS_ERR;
-    }
     TcpDirectChannelInfo *item = TransGetNewTcpChannel(channel);
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get new channel[%d] err.", channel->channelId);
-        goto EXIT_ERR;
+        return SOFTBUS_ERR;
     }
-
     if (TransAddDataBufNode(channel->channelId, channel->fd) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
             "add cId[%d] fd[%d] data buf node fail.", channel->channelId, channel->fd);
         SoftBusFree(item);
-        goto EXIT_ERR;
+        return SOFTBUS_ERR;
     }
     if (TransTdcCreateListener(channel->fd) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans tdc fd[%d] create listener failed.", channel->fd);
-        TransDelDataBufNode(channel->channelId);
-        SoftBusFree(item);
         goto EXIT_ERR;
     }
     if (ConnSetTcpKeepAlive(channel->fd, HEART_TIME) != SOFTBUS_OK) {
-        TransDelDataBufNode(channel->channelId);
-        SoftBusFree(item);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnSetTcpKeepAlive failed, fd[%d].", channel->fd);
         goto EXIT_ERR;
     }
     if (ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT) != SOFTBUS_OK) {
-        TransDelDataBufNode(channel->channelId);
-        SoftBusFree(item);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnSetTcpUserTimeOut failed, fd[%d].", channel->fd);
+        goto EXIT_ERR;
+    }
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] lock failed.", __func__);
         goto EXIT_ERR;
     }
     ListAdd(&g_tcpDirectChannelInfoList->list, &item->node);
@@ -228,7 +221,8 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     }
     return SOFTBUS_OK;
 EXIT_ERR:
-    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+    TransDelDataBufNode(channel->channelId);
+    SoftBusFree(item);
     return SOFTBUS_ERR;
 }
 
