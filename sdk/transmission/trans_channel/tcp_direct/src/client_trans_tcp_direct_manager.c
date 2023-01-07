@@ -176,6 +176,36 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
     return SOFTBUS_OK;
 }
 
+static void TransTdcDelChannelInfo(int32_t channelId)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client]TransDelTcpDirectChannelInfo, cId [%d].", channelId);
+
+    TcpDirectChannelInfo *item = NULL;
+    TcpDirectChannelInfo *nextNode = NULL;
+    if (g_tcpDirectChannelInfoList == NULL) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client]TransTdcDelChannelInfo lock failed");
+        return;
+    }
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
+        if (item->channelId == channelId) {
+            TransTdcReleaseFd(item->detail.fd);
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            item = NULL;
+            (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client]Delete Tdc chanel info[%d] item success.", channelId);
+            return;
+        }
+    }
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client]Target channel info[%d] item not exist.", channelId);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+}
+
 int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
@@ -223,6 +253,8 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
     if (ClientTransTdcOnSessionOpened(sessionName, channel) != SOFTBUS_OK) {
+        TransDelDataBufNode(channel->channelId);
+        TransTdcDelChannelInfo(channel->channelId);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify on session opened err.");
         return SOFTBUS_ERR;
     }
