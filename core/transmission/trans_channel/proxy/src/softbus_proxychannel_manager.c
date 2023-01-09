@@ -1003,7 +1003,6 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
     }
 
     if (TransProxyGetChanByChanId(chanId, chan) != SOFTBUS_OK) {
-        (void)TransProxyCloseConnChannel(chan->connId);
         SoftBusFree(chan);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "disconnect device chanId %d", chanId);
         return;
