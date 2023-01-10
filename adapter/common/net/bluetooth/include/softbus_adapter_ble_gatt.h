@@ -195,6 +195,8 @@ int SoftBusStopAdv(int advId);
 
 int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param);
 
+int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
