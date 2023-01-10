@@ -55,8 +55,10 @@ net_ledger_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (defined(ohos_lite)) {
   bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c" ]
-  bus_center_ledger_deps +=
-      [ "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk" ]
+  if (ohos_kernel_type != "liteos_m") {
+    bus_center_ledger_deps +=
+        [ "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk" ]
+  }
 } else {
   if (net_ledger_enhanced) {
     bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c" ]
