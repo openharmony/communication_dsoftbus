@@ -34,6 +34,7 @@
 
 static int32_t g_p2pSessionPort = -1;
 static char g_p2pSessionIp[IP_LEN] = {0};
+static SoftBusMutex g_p2pLock;
 
 static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 {
@@ -57,6 +58,7 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
         return SOFTBUS_ERR;
     }
     *port = listenerPort;
+    g_p2pSessionPort = *port;
     return SOFTBUS_OK;
 }
 
@@ -122,25 +124,32 @@ static void ClearP2pSessionConn(void)
 static int32_t StartP2pListener(const char *ip, int32_t *port)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener: port=%d", *port);
+    if (SoftBusMutexLock(&g_p2pLock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        return SOFTBUS_ERR;
+    }
     if (g_p2pSessionPort > 0 && strcmp(ip, g_p2pSessionIp) != 0) {
         ClearP2pSessionConn();
         StopP2pSessionListener();
     }
     if (g_p2pSessionPort > 0) {
         *port = g_p2pSessionPort;
+        (void)SoftBusMutexUnlock(&g_p2pLock);
         return SOFTBUS_OK;
     }
 
     if (StartNewP2pListener(ip, port) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartP2pListener start new listener fail");
+        (void)SoftBusMutexUnlock(&g_p2pLock);
         return SOFTBUS_ERR;
     }
 
-    g_p2pSessionPort = *port;
     if (strcpy_s(g_p2pSessionIp, sizeof(g_p2pSessionIp), ip) != EOK) {
         StopP2pSessionListener();
+        (void)SoftBusMutexUnlock(&g_p2pLock);
         return SOFTBUS_MEM_ERR;
     }
+    (void)SoftBusMutexUnlock(&g_p2pLock);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartP2pListener end: port=%d", *port);
     return SOFTBUS_OK;
 }
@@ -497,6 +506,10 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 int32_t P2pDirectChannelInit(void)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "P2pDirectChannelInit");
+    if (SoftBusMutexInit(&g_p2pLock, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init lock failed");
+        return SOFTBUS_ERR;
+    }
     AuthTransListener p2pTransCb = {
         .onDataReceived = OnAuthDataRecv,
         .onDisconnected = OnAuthChannelClose,
