@@ -68,8 +68,13 @@ if (defined(ohos_lite)) {
         "-fdata-sections",
         "-Os",
       ]
-      cflags_cc = cflags
+    } else {
+      cflags = [
+        "--diag_suppress",
+        "Pe186",
+      ]
     }
+    cflags_cc = cflags
   }
 
   target(build_type, "softbus_utils") {
