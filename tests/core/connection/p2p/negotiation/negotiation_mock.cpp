@@ -16,6 +16,7 @@
 #include "negotiation_mock.h"
 #include "softbus_error_code.h"
 #include "p2plink_device.h"
+#include "softbus_adapter_mem.h"
 
 /* implement related global function of Adapter */
 bool P2pLinkIsEnable()
@@ -80,6 +81,47 @@ void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32_t msgType, void *p
     return NegotiationMock::GetMock()->P2pLinkFsmMsgProcDelay(fsm, msgType, param, delayMs);
 }
 
+void P2pLinkRemoveGcGroup(void)
+{
+    return NegotiationMock::GetMock()->P2pLinkRemoveGcGroup();
+}
+
+int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data)
+{
+    return NegotiationMock::GetMock()->P2pLinkPackRequestMsg(request, type, data);
+}
+
+int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data)
+{
+    return NegotiationMock::GetMock()->P2plinkPackRepsonseMsg(response, type, data);
+}
+
+int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
+{
+    return NegotiationMock::GetMock()->P2pLinkSendMessage(authId, data, len);
+}
+
+int32_t P2pLinkGetSelfWifiCfgInfo(char *cfgData, int32_t len)
+{
+    return NegotiationMock::GetMock()->P2pLinkGetSelfWifiCfgInfo(cfgData, len);
+}
+
+char *P2pLinkGetGroupConfigInfo()
+{
+    return NegotiationMock::GetMock()->P2pLinkGetGroupConfigInfo();
+}
+
+P2pLink5GList *P2pLinkGetChannelListFor5G()
+{
+    return NegotiationMock::GetMock()->P2pLinkGetChannelListFor5G();
+}
+
+int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
+                                   int32_t len)
+{
+    return NegotiationMock::GetMock()->P2plinkChannelListToString(channelList, channelString, len);
+}
+
 /* definition for class AdapterMock */
 NegotiationMock::NegotiationMock()
 {
@@ -135,9 +177,55 @@ bool NegotiationMock::ActionOfP2pLinkGetDhcpState()
 }
 
 void NegotiationMock::ActionOfP2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32_t msgType, void *param,
-                            uint64_t delayMs)
+                                                     uint64_t delayMs)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ActionOfP2pLinkFsmMsgProcDelay Start");
+}
+
+void NegotiationMock::ActionOfP2pLinkRemoveGcGroup()
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ActionOfP2pLinkRemoveGcGroup Start");
+}
+
+int32_t NegotiationMock::ActionOfP2pLinkGetSelfWifiCfgInfo(char *cfgData, int32_t len)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t NegotiationMock::ActionOfP2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t NegotiationMock::ActionOfP2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t NegotiationMock::ActionOfP2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
+{
+    return SOFTBUS_OK;
+}
+
+char* NegotiationMock::ActionOfP2pLinkGetGroupConfigInfo()
+{
+    char *groupCfgStr = (char *)SoftBusCalloc(sizeof(char));
+    if (groupCfgStr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "calloc group config str fail.");
+        return nullptr;
+    }
+    return groupCfgStr;
+}
+
+P2pLink5GList* NegotiationMock::ActionOfP2pLinkGetChannelListFor5G()
+{
+    return nullptr;
+}
+
+int32_t NegotiationMock::ActionOfP2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
+                                                            int32_t len)
+{
+    return SOFTBUS_OK;
 }
 
 void NegotiationMock::SetupSuccessStub()
@@ -151,4 +239,12 @@ void NegotiationMock::SetupSuccessStub()
     EXPECT_CALL(*this, P2pLinkRemoveGroup).WillRepeatedly(NegotiationMock::ActionOfP2pLinkRemoveGroup);
     EXPECT_CALL(*this, P2pLinkGetDhcpState).WillRepeatedly(NegotiationMock::ActionOfP2pLinkGetDhcpState);
     EXPECT_CALL(*this, P2pLinkFsmMsgProcDelay).WillRepeatedly(NegotiationMock::ActionOfP2pLinkFsmMsgProcDelay);
+    EXPECT_CALL(*this, P2pLinkRemoveGcGroup).WillRepeatedly(NegotiationMock::ActionOfP2pLinkRemoveGcGroup);
+    EXPECT_CALL(*this, P2pLinkPackRequestMsg).WillRepeatedly(NegotiationMock::ActionOfP2pLinkPackRequestMsg);
+    EXPECT_CALL(*this, P2plinkPackRepsonseMsg).WillRepeatedly(NegotiationMock::ActionOfP2plinkPackRepsonseMsg);
+    EXPECT_CALL(*this, P2pLinkSendMessage).WillRepeatedly(NegotiationMock::ActionOfP2pLinkSendMessage);
+    EXPECT_CALL(*this, P2pLinkGetSelfWifiCfgInfo).WillRepeatedly(NegotiationMock::ActionOfP2pLinkGetSelfWifiCfgInfo);
+    EXPECT_CALL(*this, P2pLinkGetGroupConfigInfo).WillRepeatedly(NegotiationMock::ActionOfP2pLinkGetGroupConfigInfo);
+    EXPECT_CALL(*this, P2pLinkGetChannelListFor5G).WillRepeatedly(NegotiationMock::ActionOfP2pLinkGetChannelListFor5G);
+    EXPECT_CALL(*this, P2plinkChannelListToString).WillRepeatedly(NegotiationMock::ActionOfP2plinkChannelListToString);
 }
