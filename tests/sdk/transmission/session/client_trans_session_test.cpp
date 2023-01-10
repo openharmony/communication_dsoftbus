@@ -274,7 +274,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest01, TestSize.Level1)
     EXPECT_EQ(ret, TRANS_TEST_SESSION_ID);
     isEnabled = true;
     ret = OpenSessionWithExistSession(TRANS_TEST_SESSION_ID, isEnabled);
-    EXPECT_EQ(ret, TRANS_TEST_SESSION_ID);
+    EXPECT_EQ(ret, INVALID_SESSION_ID);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
