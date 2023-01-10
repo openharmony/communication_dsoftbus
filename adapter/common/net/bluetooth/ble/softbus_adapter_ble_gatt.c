@@ -602,7 +602,8 @@ static bool CheckScanChannelInUsed(int listenerId)
         return false;
     }
     if (!g_scanListener[listenerId].isUsed) {
-        CLOGE("listenerId %d is ready released", listenerId);
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
+            "listenerId %d is ready released", listenerId);
         return false;
     }
     return true;
