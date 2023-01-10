@@ -703,7 +703,7 @@ HWTEST_F(P2pNegotiationMockTest, PostConnRequestTest001, TestSize.Level1)
     NegotiationMock negotiationMock;
     negotiationMock.SetupSuccessStub();
     int64_t authId = 0;
-    const char *peerMac = NULL;
+    const char *peerMac = nullptr;
     int32_t expectRole = ROLE_NONE;
     int32_t myRole = ROLE_GC;
     int32_t ret = PostConnRequest(authId, peerMac, expectRole, myRole);

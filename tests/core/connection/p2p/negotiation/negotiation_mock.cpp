@@ -210,16 +210,16 @@ int32_t NegotiationMock::ActionOfP2pLinkSendMessage(int64_t authId, char *data, 
 char* NegotiationMock::ActionOfP2pLinkGetGroupConfigInfo()
 {
     char *groupCfgStr = (char *)SoftBusCalloc(sizeof(char));
-    if (groupCfgStr == NULL) {
+    if (groupCfgStr == nullptr) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "calloc group config str fail.");
-        return NULL;
+        return nullptr;
     }
     return groupCfgStr;
 }
 
 P2pLink5GList* NegotiationMock::ActionOfP2pLinkGetChannelListFor5G()
 {
-    return NULL;
+    return nullptr;
 }
 
 int32_t NegotiationMock::ActionOfP2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
