@@ -91,6 +91,8 @@ typedef struct {
 
     uint8_t *encryptDevData;
     uint32_t encryptLen;
+    bool isValid;
+    uint64_t timeStamp;
 
     ListNode node;
 } AuthManager;
