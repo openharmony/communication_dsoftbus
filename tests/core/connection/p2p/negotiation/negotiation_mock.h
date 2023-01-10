@@ -21,6 +21,8 @@
 #include "softbus_json_utils.h"
 #include "p2plink_state_machine.h"
 #include "p2plink_adapter.h"
+#include "p2plink_message.h"
+#include "p2plink_channel_freq.h"
 
 class NegotiationInterface {
 public:
@@ -37,7 +39,16 @@ public:
     virtual void P2pLinkRemoveGroup() = 0;
     virtual bool P2pLinkGetDhcpState() = 0;
     virtual void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32_t msgType, void *param,
-                                         uint64_t delayMs) = 0;
+                                        uint64_t delayMs) = 0;
+    virtual void P2pLinkRemoveGcGroup() = 0;
+    virtual int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data) = 0;
+    virtual int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data) = 0;
+    virtual int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len) = 0;
+    virtual int32_t P2pLinkGetSelfWifiCfgInfo(char *cfgData, int32_t len) = 0;
+    virtual char *P2pLinkGetGroupConfigInfo() = 0;
+    virtual P2pLink5GList *P2pLinkGetChannelListFor5G() = 0;
+    virtual int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
+                                               int32_t len) = 0;
 };
 
 class NegotiationMock : public NegotiationInterface {
@@ -78,7 +89,26 @@ public:
                 uint64_t delayMs), (override));
     static void ActionOfP2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32_t msgType, void *param,
                                                uint64_t delayMs);
-
+    MOCK_METHOD(void, P2pLinkRemoveGcGroup, (), (override));
+    static void ActionOfP2pLinkRemoveGcGroup();
+    MOCK_METHOD(int32_t, P2pLinkPackRequestMsg, (const P2pRequestMsg *request, P2pContentType type, cJSON *data),
+               (override));
+    static int32_t ActionOfP2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data);
+    MOCK_METHOD(int32_t, P2plinkPackRepsonseMsg, (const P2pRespMsg *response, P2pContentType type, cJSON *data),
+               (override));
+    static int32_t ActionOfP2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data);
+    MOCK_METHOD(int32_t, P2pLinkSendMessage, (int64_t authId, char *data, uint32_t len), (override));
+    static int32_t ActionOfP2pLinkSendMessage(int64_t authId, char *data, uint32_t len);
+    MOCK_METHOD(int32_t, P2pLinkGetSelfWifiCfgInfo, (char *cfgData, int32_t len), (override));
+    static int32_t ActionOfP2pLinkGetSelfWifiCfgInfo(char *cfgData, int32_t len);
+    MOCK_METHOD(char *, P2pLinkGetGroupConfigInfo, (), (override));
+    static char *ActionOfP2pLinkGetGroupConfigInfo();
+    MOCK_METHOD(P2pLink5GList *, P2pLinkGetChannelListFor5G, (), (override));
+    static P2pLink5GList *ActionOfP2pLinkGetChannelListFor5G();
+    MOCK_METHOD(int32_t, P2plinkChannelListToString, (const P2pLink5GList *channelList, char *channelString,
+                                                      int32_t len), (override));
+    static int32_t ActionOfP2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
+                                                      int32_t len);
 private:
     static inline std::atomic<NegotiationMock*> mock = nullptr;
 };
