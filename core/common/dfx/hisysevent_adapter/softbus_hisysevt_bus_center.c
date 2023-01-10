@@ -78,6 +78,7 @@ SoftBusEvtReportMsg g_coapSuccessRate;
 SoftBusEvtReportMsg g_bleSuccessRate;
 SoftBusEvtReportMsg g_coapDuration;
 SoftBusEvtReportMsg g_bleDuration;
+static bool g_isBusCenterInit = false;
 
 static int32_t InitDurationMsgDefault(SoftBusEvtReportMsg *msg)
 {
@@ -457,12 +458,16 @@ int32_t ReportBusCenterFaultEvt(SoftBusEvtReportMsg *msg)
     int32_t ret = SoftbusWriteHisEvt(msg);
     if (msg->paramArray != NULL) {
         SoftBusFree(msg->paramArray);
+        msg->paramArray = NULL;
     }
     return ret;
 }
 
 int32_t InitBusCenterDfx(void)
 {
+    if (g_isBusCenterInit) {
+        return SOFTBUS_OK;
+    }
     if (InitStatisticMsg() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -482,5 +487,6 @@ int32_t InitBusCenterDfx(void)
         != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    g_isBusCenterInit = true;
     return SOFTBUS_OK;
 }
