@@ -238,6 +238,7 @@ NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo
 
     if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType,
         &connInfo, laneId, &appInfo->myData) != SOFTBUS_OK) {
+        TransCloseChannel(transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
 
@@ -249,9 +250,6 @@ EXIT_ERR:
     SoftBusFree(appInfo);
     if (laneId != 0) {
         LnnFreeLane(laneId);
-    }
-    if (transInfo->channelId != INVALID_CHANNEL_ID) {
-        (void)TransCloseChannel(transInfo->channelId, transInfo->channelType);
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel err");
     return INVALID_CHANNEL_ID;
