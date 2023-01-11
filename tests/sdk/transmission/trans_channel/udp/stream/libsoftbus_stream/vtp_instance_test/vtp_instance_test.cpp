@@ -130,7 +130,8 @@ HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
     vtpInstance->DestroyVtp(pkgName);
 
     vtpInstance->isDestroyed_ = false;
-    vtpInstance->DestroyVtp(pkgName);
+    std::string packageName = "Test";
+    vtpInstance->DestroyVtp(packageName);
 
     bool add = true;
     vtpInstance->UpdateSocketStreamCount(add);
@@ -145,10 +146,11 @@ HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
     vtpInstance->isDestroyed_ = false;
     bool ret = vtpInstance->InitVtp(pkgName);
     EXPECT_TRUE(ret);
+    vtpInstance->DestroyVtp(pkgName);
 
     vtpInstance->isDestroyed_ = true;
-    ret = vtpInstance->InitVtp(pkgName);
+    ret = vtpInstance->InitVtp(packageName);
     EXPECT_TRUE(ret);
-    EXPECT_EQ(true, ret);
+    vtpInstance->DestroyVtp(packageName);
 }
 } // OHOS
