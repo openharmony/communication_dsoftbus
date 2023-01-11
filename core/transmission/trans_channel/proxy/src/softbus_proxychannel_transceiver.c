@@ -664,16 +664,21 @@ static int32_t TransProxyOpenNewConnChannel(
 NO_SANITIZE("cfi") int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
 {
+    int ret = SOFTBUS_ERR;
     ProxyConnInfo conn;
     int32_t chanNewId = TransProxyGetNewMyId();
-    *channelId = chanNewId;
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
-        return TransProxyConnExistProc(&conn, appInfo, chanNewId);
+        ret = TransProxyConnExistProc(&conn, appInfo, chanNewId);
     } else {
         ListenerModule module = PROXY;
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
-        return TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
+        ret = TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
     }
+    if (ret == SOFTBUS_OK) {
+        *channelId = chanNewId;
+    }
+
+    return ret;
 }
 
 static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,

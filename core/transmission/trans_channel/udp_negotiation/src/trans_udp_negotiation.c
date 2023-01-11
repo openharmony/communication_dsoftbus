@@ -145,26 +145,13 @@ NO_SANITIZE("cfi") int32_t NotifyUdpChannelClosed(const AppInfo *info)
 NO_SANITIZE("cfi") int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel open failed.");
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    int32_t ret = g_channelCb->GetPkgNameBySessionName(info->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
-        return SOFTBUS_ERR;
-    }
-    int32_t uid = 0;
-    int32_t pid = 0;
-    ret = g_channelCb->GetUidAndPidBySessionName(info->myData.sessionName, &uid, &pid);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uid and pid err.");
-        return SOFTBUS_ERR;
-    }
 
-    ret = g_channelCb->OnChannelOpenFailed(pkgName, pid, (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);
+    int ret = g_channelCb->OnChannelOpenFailed(info->myData.pkgName, info->myData.pid,
+        (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify udp channel open failed err.");
-        return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 NO_SANITIZE("cfi") int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList)
@@ -249,7 +236,6 @@ static int32_t CloseUdpChannel(AppInfo *appInfo)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "process udp channel close state");
     if (TransDelUdpChannel(appInfo->myData.channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "delete udp channel failed.");
-        return SOFTBUS_ERR;
     }
     if (NotifyUdpChannelClosed(appInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "notify app udp channel closed failed.");
@@ -453,7 +439,7 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
     int32_t errCode = SOFTBUS_OK;
     if (TransUnpackReplyErrInfo(msg, &errCode) == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive err reply info");
-        ProcessAbnormalUdpChannelState(&(channel.info), errCode, false);
+        ProcessAbnormalUdpChannelState(&(channel.info), errCode, true);
         return;
     }
     if (TransUnpackReplyUdpInfo(msg, &(channel.info)) != SOFTBUS_OK) {
@@ -573,6 +559,9 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
         ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_HANDSHAKE_ERROR, true);
         SoftBusFree(channel);
         goto EXIT_ERR;
+    }
+    if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
+        (void)TransDelUdpChannel(channel->info.myData.channelId);
     }
 
     SoftBusFree(channel);
