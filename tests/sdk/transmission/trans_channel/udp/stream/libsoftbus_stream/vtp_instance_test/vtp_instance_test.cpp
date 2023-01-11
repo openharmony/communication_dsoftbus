@@ -103,6 +103,7 @@ HWTEST_F(VtpInstanceTest, PreSetFillpCoreParams001, TestSize.Level1)
     std::string pkgName = "CryptoRandTest";
     bool ret = vtpInstance->InitVtp(pkgName);
     EXPECT_EQ(true, ret);
+    vtpInstance->DestroyVtp(pkgName);
 }
 
 /**
@@ -120,18 +121,21 @@ HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
 
     vtpInstance->PreSetFillpCoreParams();
 
-    std::string pkgName = "CryptoRandTest";
+    std::string pkgName = "0111test";
     const int delayTimes =  1;
 
     vtpInstance->WaitForDestroy(delayTimes);
     EXPECT_TRUE(vtpInstance->isDestroyed_);
 
     vtpInstance->isDestroyed_ = true;
+    bool res = vtpInstance->InitVtp(pkgName);
+    ASSERT_TRUE(res);
     vtpInstance->DestroyVtp(pkgName);
 
     vtpInstance->isDestroyed_ = false;
     std::string packageName = "Test";
-    vtpInstance->DestroyVtp(packageName);
+    res = vtpInstance->InitVtp(packageName);
+    ASSERT_TRUE(res);
 
     bool add = true;
     vtpInstance->UpdateSocketStreamCount(add);
@@ -143,14 +147,6 @@ HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
     vtpInstance->socketStreamCount_ = 1;
     vtpInstance->UpdateSocketStreamCount(add);
 
-    vtpInstance->isDestroyed_ = false;
-    bool ret = vtpInstance->InitVtp(pkgName);
-    EXPECT_TRUE(ret);
-    vtpInstance->DestroyVtp(pkgName);
-
-    vtpInstance->isDestroyed_ = true;
-    ret = vtpInstance->InitVtp(packageName);
-    EXPECT_TRUE(ret);
     vtpInstance->DestroyVtp(packageName);
 }
 } // OHOS
