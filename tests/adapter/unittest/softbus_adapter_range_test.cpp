@@ -22,23 +22,23 @@ using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
-class SoftbusAdapterRangeTest : public testing::Test {
+class AdapterDsoftbusRangeTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
-void SoftbusAdapterRangeTest::SetUpTestCase(void)
+void AdapterDsoftbusRangeTest::SetUpTestCase(void)
 {
 }
-void SoftbusAdapterRangeTest::TearDownTestCase(void)
+void AdapterDsoftbusRangeTest::TearDownTestCase(void)
 {
 }
-void SoftbusAdapterRangeTest::SetUp()
+void AdapterDsoftbusRangeTest::SetUp()
 {
 }
-void SoftbusAdapterRangeTest::TearDown()
+void AdapterDsoftbusRangeTest::TearDown()
 {
 }
 /*
@@ -47,7 +47,7 @@ void SoftbusAdapterRangeTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5OHDE
 */
-HWTEST_F(SoftbusAdapterRangeTest, SoftBusBleRange001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusRangeTest, SoftBusBleRange001, TestSize.Level0)
 {
     int32_t range = -1;
     SoftBusRangeParam param = {
@@ -71,7 +71,7 @@ HWTEST_F(SoftbusAdapterRangeTest, SoftBusBleRange001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5OHDE
 */
-HWTEST_F(SoftbusAdapterRangeTest, SoftBusGetBlePower001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusRangeTest, SoftBusGetBlePower001, TestSize.Level0)
 {
     int8_t power = 0;
     int ret = SoftBusGetBlePower(NULL);

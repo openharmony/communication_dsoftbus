@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-module_output_path = "dsoftbus/test"
+module_output_path = "dsoftbus/LNN"
 
 ohos_unittest("HeartBeatMediumTest") {
   module_out_path = module_output_path
@@ -76,7 +76,7 @@ ohos_unittest("HeartBeatMediumTest") {
   }
 }
 
-ohos_unittest("HeartFsmTest") {
+ohos_unittest("HeartBeatFSMTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_ble_heartbeat_virtual.c",
@@ -139,7 +139,7 @@ ohos_unittest("HeartFsmTest") {
 }
 
 ohos_unittest("ClientProxyTest") {
-  module_out_path = module_output_path
+  module_out_path = "dsoftbus/bus_center"
   sources = [
     "$dsoftbus_root_path/tests/core/bus_center/test/ipc/client_proxy_test.cpp",
   ]
@@ -241,7 +241,7 @@ group("unittest") {
   deps = [
     ":BusCenterIpcTest",
     ":ClientProxyTest",
+    ":HeartBeatFSMTest",
     ":HeartBeatMediumTest",
-    ":HeartFsmTest",
   ]
 }

@@ -151,7 +151,7 @@ ohos_unittest("AuthTestMock") {
   }
 }
 
-ohos_unittest("AuthTestCallBack") {
+ohos_unittest("AuthTestCallBackTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/authentication/src/auth_common.c",
@@ -412,7 +412,7 @@ group("unittest") {
     ":AuthOtherTest",
     ":AuthTcpConnectionTest",
     ":AuthTest",
-    ":AuthTestCallBack",
+    ":AuthTestCallBackTest",
     ":AuthTestMock",
   ]
 }

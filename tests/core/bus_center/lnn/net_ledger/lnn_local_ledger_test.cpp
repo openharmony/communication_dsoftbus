@@ -33,7 +33,7 @@ namespace OHOS {
 using namespace testing::ext;
 constexpr uint32_t CAPABILTY = 17;
 using namespace testing;
-class LocalLedgerTest : public testing::Test {
+class LNNLedgerMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -41,20 +41,20 @@ public:
     void TearDown();
 };
 
-void LocalLedgerTest::SetUpTestCase()
+void LNNLedgerMockTest::SetUpTestCase()
 {
 }
 
-void LocalLedgerTest::TearDownTestCase()
+void LNNLedgerMockTest::TearDownTestCase()
 {
 }
 
-void LocalLedgerTest::SetUp()
+void LNNLedgerMockTest::SetUp()
 {
-    LOG_INFO("LocalLedgerTest start.");
+    LOG_INFO("LNNLedgerMockTest start.");
 }
 
-void LocalLedgerTest::TearDown()
+void LNNLedgerMockTest::TearDown()
 {
 }
 
@@ -64,7 +64,7 @@ void LocalLedgerTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
@@ -78,7 +78,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
@@ -101,7 +101,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -115,7 +115,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
@@ -132,7 +132,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
@@ -148,7 +148,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
@@ -165,7 +165,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
@@ -183,7 +183,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -197,7 +197,7 @@ HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LocalLedgerTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));

@@ -33,7 +33,7 @@ using namespace testing;
 #define TEST_RET_CODE      0
 #define TEST_TYPE          1
 
-class BusCenterClientProxyTest : public testing::Test {
+class ClientProxyTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -41,13 +41,13 @@ public:
     void TearDown();
 };
 
-void BusCenterClientProxyTest::SetUpTestCase() { }
+void ClientProxyTest::SetUpTestCase() { }
 
-void BusCenterClientProxyTest::TearDownTestCase() { }
+void ClientProxyTest::TearDownTestCase() { }
 
-void BusCenterClientProxyTest::SetUp() { }
+void ClientProxyTest::SetUp() { }
 
-void BusCenterClientProxyTest::TearDown() { }
+void ClientProxyTest::TearDown() { }
 
 /*
  * @tc.name: OnJoinLNNResult
@@ -55,7 +55,7 @@ void BusCenterClientProxyTest::TearDown() { }
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnJoinLNNResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnJoinLNNResultTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -79,7 +79,7 @@ HWTEST_F(BusCenterClientProxyTest, OnJoinLNNResultTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnJoinMetaNodeResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnJoinMetaNodeResultTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -103,7 +103,7 @@ HWTEST_F(BusCenterClientProxyTest, OnJoinMetaNodeResultTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnLeaveLNNResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnLeaveLNNResultTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -123,7 +123,7 @@ HWTEST_F(BusCenterClientProxyTest, OnLeaveLNNResultTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnLeaveMetaNodeResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnLeaveMetaNodeResultTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -143,7 +143,7 @@ HWTEST_F(BusCenterClientProxyTest, OnLeaveMetaNodeResultTest_01, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnNodeOnlineStateChangedTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnNodeOnlineStateChangedTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -166,7 +166,7 @@ HWTEST_F(BusCenterClientProxyTest, OnNodeOnlineStateChangedTest_01, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnNodeBasicInfoChangedTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnNodeBasicInfoChangedTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -188,7 +188,7 @@ HWTEST_F(BusCenterClientProxyTest, OnNodeBasicInfoChangedTest_01, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnTimeSyncResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnTimeSyncResultTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -210,7 +210,7 @@ HWTEST_F(BusCenterClientProxyTest, OnTimeSyncResultTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnPublishLNNResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnPublishLNNResultTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -227,7 +227,7 @@ HWTEST_F(BusCenterClientProxyTest, OnPublishLNNResultTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnRefreshLNNResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnRefreshLNNResultTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -244,7 +244,7 @@ HWTEST_F(BusCenterClientProxyTest, OnRefreshLNNResultTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, OnRefreshDeviceFoundTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, OnRefreshDeviceFoundTest_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();

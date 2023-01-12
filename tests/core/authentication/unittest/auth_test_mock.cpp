@@ -206,7 +206,7 @@ NodeInfo CreateInfo(NodeInfo &nodeInfo)
     return nodeInfo;
 }
 
-class AuthTestCallBack : public testing::Test {
+class AuthTestCallBackTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -214,7 +214,7 @@ public:
     void TearDown();
 };
 
-void AuthTestCallBack::SetUpTestCase()
+void AuthTestCallBackTest::SetUpTestCase()
 {
     AuthNetLedgertInterfaceMock::isRuned = false;
     RegAuthVerifyListener(&g_listener);
@@ -222,20 +222,20 @@ void AuthTestCallBack::SetUpTestCase()
     SoftBusCondInit(&LnnHichainInterfaceMock::cond);
 }
 
-void AuthTestCallBack::TearDownTestCase()
+void AuthTestCallBackTest::TearDownTestCase()
 {
     AuthNetLedgertInterfaceMock::isRuned = false;
     SoftBusCondDestroy(&LnnHichainInterfaceMock::cond);
     SoftBusMutexDestroy(&LnnHichainInterfaceMock::mutex);
 }
 
-void AuthTestCallBack::SetUp()
+void AuthTestCallBackTest::SetUp()
 {
     LooperInit();
-    ALOGI("AuthTestCallBack start.");
+    ALOGI("AuthTestCallBackTest start.");
 }
 
-void AuthTestCallBack::TearDown()
+void AuthTestCallBackTest::TearDown()
 {
     LooperDeinit();
 }
@@ -246,7 +246,7 @@ void AuthTestCallBack::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestCallBack, CLINET_ON_DATA_RECEVIED_Test_001, TestSize.Level1)
+HWTEST_F(AuthTestCallBackTest, CLINET_ON_DATA_RECEVIED_Test_001, TestSize.Level1)
 {
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
@@ -278,7 +278,7 @@ HWTEST_F(AuthTestCallBack, CLINET_ON_DATA_RECEVIED_Test_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestCallBack, onTransmit_Test_001, TestSize.Level1)
+HWTEST_F(AuthTestCallBackTest, onTransmit_Test_001, TestSize.Level1)
 {
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
@@ -316,7 +316,7 @@ HWTEST_F(AuthTestCallBack, onTransmit_Test_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestCallBack, OnFinish_Test_002, TestSize.Level1)
+HWTEST_F(AuthTestCallBackTest, OnFinish_Test_002, TestSize.Level1)
 {
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;

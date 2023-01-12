@@ -20,14 +20,123 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/adapter"
 
-ohos_unittest("AdapterBluetoothTest") {
+ohos_unittest("AdapterBleGattTest") {
   module_out_path = module_output_path
   sources = [
-    "adapter_bt_utils_test.cpp",
+    "bluetooth_mock.cpp",
+    "softbus_adapter_ble_gatt_test.cpp",
+  ]
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  sources += adapter_ble_src
+  include_dirs += adapter_ble_inc
+  deps += adapter_ble_deps
+}
+
+ohos_unittest("AdapterBleGattServerTest") {
+  module_out_path = module_output_path
+  sources = [
+    "bluetooth_mock.cpp",
+    "softbus_adapter_ble_gatt_server_test.cpp",
+  ]
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  sources += adapter_ble_src
+  include_dirs += adapter_ble_inc
+  deps += adapter_ble_deps
+}
+
+ohos_unittest("AdapterBleGattClientTest") {
+  module_out_path = module_output_path
+  sources = [
     "bluetooth_mock.cpp",
     "softbus_adapter_ble_gatt_client_test.cpp",
-    "softbus_adapter_ble_gatt_server_test.cpp",
-    "softbus_adapter_ble_gatt_test.cpp",
+  ]
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  sources += adapter_ble_src
+  include_dirs += adapter_ble_inc
+  deps += adapter_ble_deps
+}
+
+ohos_unittest("AdapterBtUtilsTest") {
+  module_out_path = module_output_path
+  sources = [ "adapter_bt_utils_test.cpp" ]
+
+  include_dirs = [
+    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  sources += adapter_ble_src
+  include_dirs += adapter_ble_inc
+  deps += adapter_ble_deps
+}
+
+ohos_unittest("AdapterBtCommonTest") {
+  module_out_path = module_output_path
+  sources = [
+    "bluetooth_mock.cpp",
     "softbus_adapter_bt_common_test.cpp",
   ]
 
@@ -55,5 +164,11 @@ ohos_unittest("AdapterBluetoothTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":AdapterBluetoothTest" ]
+  deps = [
+    ":AdapterBleGattClientTest",
+    ":AdapterBleGattServerTest",
+    ":AdapterBleGattTest",
+    ":AdapterBtCommonTest",
+    ":AdapterBtUtilsTest",
+  ]
 }

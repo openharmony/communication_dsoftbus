@@ -36,7 +36,7 @@ using namespace testing;
 #define TEST_RET_CODE      0
 #define TEST_TYPE          1
 
-class BusCenterClientProxyTest : public testing::Test {
+class BusCenterIpcTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -44,9 +44,9 @@ public:
     void TearDown();
 };
 
-void BusCenterClientProxyTest::SetUpTestCase() { }
+void BusCenterIpcTest::SetUpTestCase() { }
 
-void BusCenterClientProxyTest::TearDownTestCase()
+void BusCenterIpcTest::TearDownTestCase()
 {
     g_joinLNNRequestInfo.clear();
     g_joinMetaNodeRequestInfo.clear();
@@ -54,9 +54,9 @@ void BusCenterClientProxyTest::TearDownTestCase()
     g_leaveMetaNodeRequestInfo.clear();
 }
 
-void BusCenterClientProxyTest::SetUp() { }
+void BusCenterIpcTest::SetUp() { }
 
-void BusCenterClientProxyTest::TearDown() { }
+void BusCenterIpcTest::TearDown() { }
 
 /*
  * @tc.name: LnnIpcServerJoin
@@ -64,7 +64,7 @@ void BusCenterClientProxyTest::TearDown() { }
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, LnnIpcServerJoinTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, LnnIpcServerJoinTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;
@@ -90,7 +90,7 @@ HWTEST_F(BusCenterClientProxyTest, LnnIpcServerJoinTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcServerJoinTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, MetaNodeIpcServerJoinTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     EXPECT_CALL(busCenterIpcMock, LnnIsSameConnectionAddr)
@@ -119,7 +119,7 @@ HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcServerJoinTest_01, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, LnnIpcServerLeaveTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ON_CALL(busCenterIpcMock, LnnServerLeave).WillByDefault(Return(SOFTBUS_OK));
@@ -139,7 +139,7 @@ HWTEST_F(BusCenterClientProxyTest, LnnIpcServerLeaveTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcServerLeaveTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, MetaNodeIpcServerLeaveTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ON_CALL(busCenterIpcMock, MetaNodeServerLeave).WillByDefault(Return(SOFTBUS_OK));
@@ -159,7 +159,7 @@ HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcServerLeaveTest_01, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, LnnIpcGetAllOnlineNodeInfoTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, LnnIpcGetAllOnlineNodeInfoTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ON_CALL(busCenterIpcMock, LnnGetAllOnlineNodeInfo).WillByDefault(Return(SOFTBUS_OK));
@@ -175,7 +175,7 @@ HWTEST_F(BusCenterClientProxyTest, LnnIpcGetAllOnlineNodeInfoTest_01, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, LnnIpcNotifyJoinResultTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, LnnIpcNotifyJoinResultTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;
@@ -196,7 +196,7 @@ HWTEST_F(BusCenterClientProxyTest, LnnIpcNotifyJoinResultTest_01, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcNotifyJoinResultTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, MetaNodeIpcNotifyJoinResultTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;
@@ -220,7 +220,7 @@ HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcNotifyJoinResultTest_01, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, LnnIpcNotifyLeaveResultTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, LnnIpcNotifyLeaveResultTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     AddLeaveLNNInfo(TEST_PKGNAME, TEST_NETWORK_ID);
@@ -237,7 +237,7 @@ HWTEST_F(BusCenterClientProxyTest, LnnIpcNotifyLeaveResultTest_01, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcNotifyLeaveResultTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, MetaNodeIpcNotifyLeaveResultTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     AddLeaveLNNInfo(TEST_PKGNAME, TEST_NETWORK_ID);
@@ -256,7 +256,7 @@ HWTEST_F(BusCenterClientProxyTest, MetaNodeIpcNotifyLeaveResultTest_01, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, RemoveJoinRequestInfoByPkgNameTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, RemoveJoinRequestInfoByPkgNameTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;
@@ -273,7 +273,7 @@ HWTEST_F(BusCenterClientProxyTest, RemoveJoinRequestInfoByPkgNameTest_01, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterClientProxyTest, RemoveLeaveRequestInfoByPkgNameTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, RemoveLeaveRequestInfoByPkgNameTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;

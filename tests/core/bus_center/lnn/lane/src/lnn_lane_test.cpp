@@ -53,7 +53,7 @@ static ILaneListener g_listener = {
     .OnLaneStateChange = OnLaneStateChange,
 };
 
-class LNNLaneTestMock : public testing::Test {
+class LNNLaneMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -61,29 +61,29 @@ public:
     void TearDown();
 };
 
-void LNNLaneTestMock::SetUpTestCase()
+void LNNLaneMockTest::SetUpTestCase()
 {
     int32_t ret = LooperInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = InitLane();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    GTEST_LOG_(INFO) << "LNNLaneTestMock start";
+    GTEST_LOG_(INFO) << "LNNLaneMockTest start";
 }
 
-void LNNLaneTestMock::TearDownTestCase()
+void LNNLaneMockTest::TearDownTestCase()
 {
     DeinitLane();
     LooperDeinit();
-    GTEST_LOG_(INFO) << "LNNLaneTestMock end";
+    GTEST_LOG_(INFO) << "LNNLaneMockTest end";
 }
 
-void LNNLaneTestMock::SetUp()
+void LNNLaneMockTest::SetUp()
 {
     (void)SoftBusMutexInit(&g_lock, nullptr);
     (void)SoftBusCondInit(&g_cond);
 }
 
-void LNNLaneTestMock::TearDown()
+void LNNLaneMockTest::TearDown()
 {
     (void)SoftBusCondDestroy(&g_cond);
     (void)SoftBusCondDestroy(&g_lock);
@@ -161,7 +161,7 @@ static void OnLaneLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_001, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = ApplyLaneId(laneType);
@@ -194,7 +194,7 @@ HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_002, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_002, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = ApplyLaneId(laneType);
@@ -227,7 +227,7 @@ HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_003, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_003, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = ApplyLaneId(laneType);
@@ -260,7 +260,7 @@ HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_003, TestSize.Level1)
 * @tc.type: FAILUE
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_004, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_004, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = ApplyLaneId(laneType);
@@ -286,7 +286,7 @@ HWTEST_F(LNNLaneTestMock, LANE_REQUEST_Test_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_FREE_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_FREE_001, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_BUTT;
     uint32_t laneId = ApplyLaneId(laneType);
@@ -313,7 +313,7 @@ static void LaneIdEnabled(uint32_t laneId, uint32_t laneProfileId)
 * @tc.type: FAILUE
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_REGISTER_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_REGISTER_001, TestSize.Level1)
 {
     RegisterLaneIdListener(nullptr);
 
@@ -344,7 +344,7 @@ HWTEST_F(LNNLaneTestMock, LANE_REGISTER_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_INFO_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_INFO_001, TestSize.Level1)
 {
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -363,7 +363,7 @@ HWTEST_F(LNNLaneTestMock, LANE_INFO_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_INFO_002, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_INFO_002, TestSize.Level1)
 {
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -382,7 +382,7 @@ HWTEST_F(LNNLaneTestMock, LANE_INFO_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_INFO_003, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_INFO_003, TestSize.Level1)
 {
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -401,7 +401,7 @@ HWTEST_F(LNNLaneTestMock, LANE_INFO_003, TestSize.Level1)
 * @tc.type: FAILUE
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LANE_INFO_004, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_INFO_004, TestSize.Level1)
 {
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -427,7 +427,7 @@ HWTEST_F(LNNLaneTestMock, LANE_INFO_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LNN_DATA_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_DATA_001, TestSize.Level1)
 {
     int32_t ret = LnnCreateData(nullptr, 32, nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -441,7 +441,7 @@ HWTEST_F(LNNLaneTestMock, LNN_DATA_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LNN_GET_TIME_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_GET_TIME_001, TestSize.Level1)
 {
     LnnGetSysTimeMs();
 }
@@ -452,7 +452,7 @@ HWTEST_F(LNNLaneTestMock, LNN_GET_TIME_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LNN_LANE_PROFILE_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
 {
     uint32_t laneId = 0x10000001;
     int32_t ret = BindLaneIdToProfile(laneId, nullptr);
@@ -501,7 +501,7 @@ HWTEST_F(LNNLaneTestMock, LNN_LANE_PROFILE_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LNN_SELECT_LANE_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
 {
     LaneLinkType *recommendList = nullptr;
     uint32_t listNum = 0;
@@ -545,7 +545,7 @@ HWTEST_F(LNNLaneTestMock, LNN_SELECT_LANE_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LNN_SELECT_LANE_002, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
 {
     LaneLinkType *recommendList = nullptr;
     uint32_t listNum = 0;
@@ -583,7 +583,7 @@ HWTEST_F(LNNLaneTestMock, LNN_SELECT_LANE_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LNN_LANE_QUERY_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_LANE_QUERY_001, TestSize.Level1)
 {
     QueryResult ret = LnnQueryLaneResource(nullptr);
     EXPECT_EQ(ret, QUERY_RESULT_REQUEST_ILLEGAL);
@@ -600,7 +600,7 @@ HWTEST_F(LNNLaneTestMock, LNN_LANE_QUERY_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneTestMock, LNN_BUILD_LINK_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
 {
     LinkRequest reqInfo;
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
