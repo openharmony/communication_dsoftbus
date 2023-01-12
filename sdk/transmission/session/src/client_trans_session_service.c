@@ -504,9 +504,9 @@ void CloseSession(int sessionId)
     ret = ClientDeleteSession(sessionId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseSession delete session err: ret=%d", ret);
+        return;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CloseSession ok");
-    return;
 }
 
 int GetMySessionName(int sessionId, char *sessionName, unsigned int len)

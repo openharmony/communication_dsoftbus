@@ -308,20 +308,9 @@ NO_SANITIZE("cfi") int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t er
     }
 
     if (conn.serverSide == false) {
-        int32_t uid = 0;
-        int32_t pid = 0;
-        char pkgName[PKG_NAME_SIZE_MAX] = {0};
-        if (TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail.");
-            return SOFTBUS_ERR;
-        }
-        if (TransTdcGetUidAndPid(conn.appInfo.myData.sessionName, &uid, &pid) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get uid and pid fail.");
-            return SOFTBUS_ERR;
-        }
-        int ret = TransTdcOnChannelOpenFailed(pkgName, pid, channelId, errCode);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "TCP direct channel failed, channelId = %d, ret = %d", channelId, ret);
+        AppInfoData *myData = &conn.appInfo.myData;
+        int ret = TransTdcOnChannelOpenFailed(myData->pkgName, myData->pid, channelId, errCode);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channelId = %d, ret = %d", channelId, ret);
         return ret;
     }
     return SOFTBUS_OK;
