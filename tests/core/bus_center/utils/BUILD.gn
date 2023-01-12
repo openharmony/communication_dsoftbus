@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 module_output_path = "dsoftbus/LNN"
-ohos_unittest("LNNBusCenterUtils") {
+ohos_unittest("LNNConnAddrUtilsTest") {
   module_out_path = module_output_path
   sources = [ "lnn_bus_center_utils_test.cpp" ]
   include_dirs = [
@@ -77,5 +77,5 @@ ohos_unittest("LNNBusCenterUtils") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":LNNBusCenterUtils" ]
+  deps = [ ":LNNConnAddrUtilsTest" ]
 }

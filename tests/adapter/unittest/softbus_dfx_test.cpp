@@ -22,7 +22,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
-class DsoftbusDfxTest : public testing::Test {
+class AdapterDsoftbusDfxTest : public testing::Test {
 protected:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
@@ -36,7 +36,7 @@ protected:
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest001, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -58,7 +58,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest002, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest002, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -80,7 +80,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest003, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest003, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -102,7 +102,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest004, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest004, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -124,7 +124,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest005, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest005, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -146,7 +146,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest006, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest006, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -168,7 +168,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest007, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest007, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -190,7 +190,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest008, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest008, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -212,7 +212,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest009, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest009, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -234,7 +234,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest009, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest010, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest010, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -256,7 +256,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest010, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest021, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest021, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -279,7 +279,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest021, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest022, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest022, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -302,7 +302,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest022, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest023, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest023, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -325,7 +325,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest023, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest024, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest024, TestSize.Level1)
 {
     SoftBusEvtParam evtParam;
     strcpy_s(evtParam.paramName, sizeof(evtParam.paramName), "testParamName");
@@ -347,7 +347,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest024, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest031, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest031, TestSize.Level1)
 {
     int32_t paramNum = -1;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
@@ -362,7 +362,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusWriteHisEvtTest031, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest001, TestSize.Level1)
 {
     int32_t paramNum = -1;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
@@ -376,7 +376,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest002, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest002, TestSize.Level1)
 {
     int32_t paramNum = SOFTBUS_EVT_PARAM_ZERO;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
@@ -390,7 +390,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest003, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest003, TestSize.Level1)
 {
     int32_t paramNum = INT32_MAX;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
@@ -404,7 +404,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest004, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest004, TestSize.Level1)
 {
     int32_t paramNum = SOFTBUS_EVT_PARAM_BUTT;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
@@ -419,7 +419,7 @@ HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusDfxTest, SoftbusCreateEvtReportMsgTest005, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest005, TestSize.Level1)
 {
     int32_t paramNum = SOFTBUS_EVT_PARAM_ONE;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);

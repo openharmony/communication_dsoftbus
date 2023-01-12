@@ -34,17 +34,17 @@ namespace OHOS {
 #define TEST_ACL_STATE2   1
 using namespace testing::ext;
 using namespace testing;
-class DsoftbusNetworkTest : public testing::Test {
+class AdapterDsoftbusNetworkTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
-void DsoftbusNetworkTest::SetUpTestCase(void) { }
-void DsoftbusNetworkTest::TearDownTestCase(void) { }
-void DsoftbusNetworkTest::SetUp() { }
-void DsoftbusNetworkTest::TearDown() { }
+void AdapterDsoftbusNetworkTest::SetUpTestCase(void) { }
+void AdapterDsoftbusNetworkTest::TearDownTestCase(void) { }
+void AdapterDsoftbusNetworkTest::SetUp() { }
+void AdapterDsoftbusNetworkTest::TearDown() { }
 
 /*
  * @tc.name: CreateNetlinkSocket
@@ -52,7 +52,7 @@ void DsoftbusNetworkTest::TearDown() { }
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1)
 {
     NiceMock<NetworkInterfaceMock> networkMock;
     ON_CALL(networkMock, SoftBusSocketCreate).WillByDefault(Return(SOFTBUS_OK));
@@ -81,7 +81,7 @@ HWTEST_F(DsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusNetworkTest, ProcessAddrEventTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusNetworkTest, ProcessAddrEventTest001, TestSize.Level1)
 {
     void *para = nullptr;
     nlmsghdr nlh1 = {
@@ -109,7 +109,7 @@ HWTEST_F(DsoftbusNetworkTest, ProcessAddrEventTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1)
 {
     NiceMock<NetworkInterfaceMock> networkMock;
     ON_CALL(networkMock, LnnAsyncCallbackHelper).WillByDefault(Return(SOFTBUS_OK));

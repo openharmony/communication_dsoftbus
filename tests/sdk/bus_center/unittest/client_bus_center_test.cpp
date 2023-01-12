@@ -64,12 +64,14 @@ HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
         .type = CONNECTION_ADDR_SESSION,
         .info.session.sessionId = 2,
     };
-    IsSameConnectionAddr(&addr1, &addr2);
+    int32_t ret = IsSameConnectionAddr(&addr1, &addr2);
+    EXPECT_TRUE(ret == false);
     const ConnectionAddr addr3 = {
         .type = CONNECTION_ADDR_SESSION,
         .info.session.sessionId = 1,
     };
-    IsSameConnectionAddr(&addr3, &addr2);
+    ret = IsSameConnectionAddr(&addr3, &addr2);
+    EXPECT_TRUE(ret == false);
 }
 
 /*
@@ -91,7 +93,8 @@ HWTEST_F(ClientBusMangerTest, JOIN_METANODE_Test_001, TestSize.Level1)
     int32_t ret = JoinMetaNodeInner(pkgName, &connAddr, &customData, cb);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     g_busCenterClient.isInit = true;
-    JoinMetaNodeInner(pkgName, &connAddr, &customData, cb);
+    ret = JoinMetaNodeInner(pkgName, &connAddr, &customData, cb);
+    EXPECT_TRUE(ret == SOFTBUS_IPC_ERR);
 }
 
 /*
@@ -101,15 +104,16 @@ HWTEST_F(ClientBusMangerTest, JOIN_METANODE_Test_001, TestSize.Level1)
 * @tc.require: AR000FN5VC
 */
 HWTEST_F(ClientBusMangerTest, LEAVE_META_NODE_INNER_Test_001, TestSize.Level1)
-{   
+{
     char pkgName[] = "test"; 
     char networkId[] = "222";
     OnLeaveMetaNodeResult cb = nullptr;
     g_busCenterClient.isInit = false;
-    LeaveMetaNodeInner(pkgName, networkId, cb);
-
+    int32_t ret = LeaveMetaNodeInner(pkgName, networkId, cb);
+    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     g_busCenterClient.isInit = true;
-    LeaveMetaNodeInner(pkgName, networkId, cb);
+    ret = LeaveMetaNodeInner(pkgName, networkId, cb);
+    EXPECT_TRUE(ret == SOFTBUS_IPC_ERR);
 }
 
 /*
@@ -119,18 +123,19 @@ HWTEST_F(ClientBusMangerTest, LEAVE_META_NODE_INNER_Test_001, TestSize.Level1)
 * @tc.require: AR000FN5VC
 */
 HWTEST_F(ClientBusMangerTest, META_NODE_ON_JOIN_Test_001, TestSize.Level1)
-{   
+{
     g_busCenterClient.isInit = false;
     void *addr = nullptr;
     char networkId[] = "3333";
     int32_t retCod = 111;
-    MetaNodeOnJoinResult(addr, networkId, retCod);
-
+    int32_t ret = MetaNodeOnJoinResult(addr, networkId, retCod);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     g_busCenterClient.isInit = true;
     ConnectionAddr connAddr;
     (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     addr = (void*)&connAddr;
-    MetaNodeOnJoinResult(addr, networkId, retCod);
+    ret = MetaNodeOnJoinResult(addr, networkId, retCod);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -140,13 +145,14 @@ HWTEST_F(ClientBusMangerTest, META_NODE_ON_JOIN_Test_001, TestSize.Level1)
 * @tc.require: AR000FN5VC
 */
 HWTEST_F(ClientBusMangerTest, META_NODE_ON_LEAVE_Test_001, TestSize.Level1)
-{   
+{
     g_busCenterClient.isInit = false;
     char networkId[] = "3333";
     int32_t retCod = 111;
-    MetaNodeOnLeaveResult(networkId, retCod);
+    int32_t ret = MetaNodeOnLeaveResult(networkId, retCod);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     g_busCenterClient.isInit = true;
-    MetaNodeOnLeaveResult(networkId, retCod);
+    ret = MetaNodeOnLeaveResult(networkId, retCod);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
-
 }

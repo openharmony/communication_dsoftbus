@@ -57,7 +57,7 @@ using namespace testing::ext;
 constexpr uint8_t DEFAULT_LEN = 32;
 constexpr uint8_t DEFAULT_SIZE = 5;
 
-class LnnBusCenterIpcTest : public testing::Test {
+class LNNBusCenterIpcTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -65,19 +65,19 @@ public:
     void TearDown();
 };
 
-void LnnBusCenterIpcTest::SetUpTestCase()
+void LNNBusCenterIpcTest::SetUpTestCase()
 {
 }
 
-void LnnBusCenterIpcTest::TearDownTestCase()
+void LNNBusCenterIpcTest::TearDownTestCase()
 {
 }
 
-void LnnBusCenterIpcTest::SetUp()
+void LNNBusCenterIpcTest::SetUp()
 {
 }
 
-void LnnBusCenterIpcTest::TearDown()
+void LNNBusCenterIpcTest::TearDown()
 {
 }
 
@@ -87,7 +87,7 @@ void LnnBusCenterIpcTest::TearDown()
 * @tc.type: FUNC
  * @tc.require:
 */
-HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_JOIN_Test_001, TestSize.Level0)
+HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_SERVER_JOIN_Test_001, TestSize.Level0)
 {
     char *pkgName = nullptr;
     void *addr = nullptr;
@@ -111,7 +111,7 @@ HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_JOIN_Test_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Level0)
+HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Level0)
 {
     char *pkgName = nullptr;
     char *networkId = nullptr;
@@ -133,7 +133,7 @@ HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001, TestSize.Level0)
+HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001, TestSize.Level0)
 {
     void *addr = nullptr;
     uint32_t addrTypeLen = 0;
@@ -156,7 +156,7 @@ HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001, TestSiz
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001, TestSize.Level0)
+HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001, TestSize.Level0)
 {
     char networkIdValue[DEFAULT_LEN] = "123";
     const char *pkgName = "000";
@@ -177,7 +177,7 @@ HWTEST_F(LnnBusCenterIpcTest, META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001, TestSize.Level0)
+HWTEST_F(LNNBusCenterIpcTest, IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001, TestSize.Level0)
 {
     const char *pkgName1 = "000";
     const char *pkgName2 = "001";
@@ -209,7 +209,7 @@ HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001, TestSiz
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnBusCenterIpcTest, IS_REPEAT_LEAVE_META_NODE_REQUEST_Test_001, TestSize.Level0)
+HWTEST_F(LNNBusCenterIpcTest, IS_REPEAT_LEAVE_META_NODE_REQUEST_Test_001, TestSize.Level0)
 {
     const char *pkgName1 = "000";
     const char *pkgName2 = "001";

@@ -35,7 +35,7 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
-class LnnBtNetworkImplTest : public testing::Test {
+class LNNBtNetworkImplMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -43,21 +43,21 @@ public:
     void TearDown();
 };
 
-void LnnBtNetworkImplTest::SetUpTestCase()
+void LNNBtNetworkImplMockTest::SetUpTestCase()
 {
     LooperInit();
 }
 
-void LnnBtNetworkImplTest::TearDownTestCase()
+void LNNBtNetworkImplMockTest::TearDownTestCase()
 {
     LooperDeinit();
 }
 
-void LnnBtNetworkImplTest::SetUp()
+void LNNBtNetworkImplMockTest::SetUp()
 {
 }
 
-void LnnBtNetworkImplTest::TearDown()
+void LNNBtNetworkImplMockTest::TearDown()
 {
 }
 
@@ -67,7 +67,7 @@ void LnnBtNetworkImplTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnRegisterEventHandler(_, _)).WillOnce(Return(SOFTBUS_ERR)).
@@ -84,7 +84,7 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_002, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnVisitNetif).WillRepeatedly(Return(false));
@@ -102,7 +102,7 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_003, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_003, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
@@ -130,7 +130,7 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_004, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_004, TestSize.Level1)
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnNotifyPhysicalSubnetStatusChanged).WillRepeatedly(Return());
@@ -158,7 +158,7 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_005, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_005, TestSize.Level1)
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillRepeatedly(LnnBtNetworkImplInterfaceMock::
@@ -182,7 +182,7 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1)
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnRequestLeaveByAddrType).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -203,7 +203,7 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_007, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_007, TestSize.Level1)
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     LnnPhysicalSubnet subnet = {
@@ -239,7 +239,7 @@ HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnBtNetworkImplTest, LNN_BT_NETWORK_IMPL_TEST_008, TestSize.Level1)
+HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_008, TestSize.Level1)
 {
     char macStr[] = "123456789";
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;

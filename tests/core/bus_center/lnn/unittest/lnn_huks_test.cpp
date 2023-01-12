@@ -29,7 +29,7 @@ static constexpr char RANDOM_KEY[] = "b0d8bfed90d1e018c84f0a1abd4cbcc7f33481b424
 
 static struct HksBlob g_keyAlias = {0};
 
-class LnnHuksUtilsTest : public testing::Test {
+class LNNHuksUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -37,7 +37,7 @@ public:
     void TearDown();
 };
 
-void LnnHuksUtilsTest::SetUpTestCase()
+void LNNHuksUtilsTest::SetUpTestCase()
 {
     g_keyAlias.size = strlen(KEY_ALIAS);
     g_keyAlias.data = (uint8_t *)KEY_ALIAS;
@@ -45,16 +45,16 @@ void LnnHuksUtilsTest::SetUpTestCase()
     EXPECT_EQ(LnnInitHuksInterface(), SOFTBUS_OK);
 }
 
-void LnnHuksUtilsTest::TearDownTestCase()
+void LNNHuksUtilsTest::TearDownTestCase()
 {
     LnnDeinitHuksInterface();
 }
 
-void LnnHuksUtilsTest::SetUp()
+void LNNHuksUtilsTest::SetUp()
 {
 }
 
-void LnnHuksUtilsTest::TearDown()
+void LNNHuksUtilsTest::TearDown()
 {
     (void)LnnDeleteKeyByHuks(&g_keyAlias);
 }
@@ -65,7 +65,7 @@ void LnnHuksUtilsTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5RHYE
 */
-HWTEST_F(LnnHuksUtilsTest, Generate_Key_Test_01, TestSize.Level0)
+HWTEST_F(LNNHuksUtilsTest, Generate_Key_Test_01, TestSize.Level0)
 {
     struct HksBlob keyAlias = {0};
     keyAlias.size = strlen(KEY_ALIAS);
@@ -80,7 +80,7 @@ HWTEST_F(LnnHuksUtilsTest, Generate_Key_Test_01, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5RHYE
 */
-HWTEST_F(LnnHuksUtilsTest, Generate_Key_Test_02, TestSize.Level0)
+HWTEST_F(LNNHuksUtilsTest, Generate_Key_Test_02, TestSize.Level0)
 {
     struct HksBlob keyAlias = {0};
     keyAlias.size = strlen(KEY_ALIAS);
@@ -96,7 +96,7 @@ HWTEST_F(LnnHuksUtilsTest, Generate_Key_Test_02, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5RHYE
 */
-HWTEST_F(LnnHuksUtilsTest, Generate_Random_Test_01, TestSize.Level0)
+HWTEST_F(LNNHuksUtilsTest, Generate_Random_Test_01, TestSize.Level0)
 {
     uint8_t randomKey[LNN_HUKS_AES_COMMON_SIZE] = {0};
 
@@ -109,7 +109,7 @@ HWTEST_F(LnnHuksUtilsTest, Generate_Random_Test_01, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5RHYE
 */
-HWTEST_F(LnnHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
+HWTEST_F(LNNHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
 {
     struct HksBlob inData = {0};
     inData.size = strlen(RANDOM_KEY);
@@ -131,7 +131,7 @@ HWTEST_F(LnnHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5RHYE
 */
-HWTEST_F(LnnHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
+HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
 {
     struct HksBlob plainData = {0};
     plainData.size = strlen(RANDOM_KEY);

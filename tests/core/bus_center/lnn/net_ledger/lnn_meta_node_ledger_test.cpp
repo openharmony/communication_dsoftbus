@@ -41,7 +41,7 @@ constexpr uint32_t ADDR_NUM = 6;
 constexpr int32_t INFO_NUM = 0;
 constexpr int32_t INVALID_INFO_NUM = -1;
 using namespace testing;
-class MetaNodeLedgerTest : public testing::Test {
+class LNNMetaNodeLedgerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -49,23 +49,23 @@ public:
     void TearDown();
 };
 
-void MetaNodeLedgerTest::SetUpTestCase()
+void LNNMetaNodeLedgerTest::SetUpTestCase()
 {
 }
 
-void MetaNodeLedgerTest::TearDownTestCase()
+void LNNMetaNodeLedgerTest::TearDownTestCase()
 {
 }
 
-void MetaNodeLedgerTest::SetUp()
+void LNNMetaNodeLedgerTest::SetUp()
 {
-    LOG_INFO("MetaNodeLedgerTest start.");
+    LOG_INFO("LNNMetaNodeLedgerTest start.");
     LnnInitMetaNodeLedger();
 }
 
-void MetaNodeLedgerTest::TearDown()
+void LNNMetaNodeLedgerTest::TearDown()
 {
-    LOG_INFO("MetaNodeLedgerTest finish.");
+    LOG_INFO("LNNMetaNodeLedgerTest finish.");
     LnnDeinitMetaNodeLedger();
 }
 
@@ -75,7 +75,7 @@ void MetaNodeLedgerTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
+HWTEST_F(LNNMetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
 {
     MetaNodeConfigInfo info;
     (void)memset_s(&info, sizeof(MetaNodeConfigInfo), 0, sizeof(MetaNodeConfigInfo));
@@ -98,7 +98,7 @@ HWTEST_F(MetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Level1)
 {
     MetaNodeInfo infos[MAX_META_NODE_NUM];
     int32_t infoNum1 = INFO_NUM;
@@ -116,7 +116,7 @@ HWTEST_F(MetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1)
+HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnDeactiveMetaNode(META_NODE_ID);
     EXPECT_TRUE(ret == SOFTBUS_ERR);

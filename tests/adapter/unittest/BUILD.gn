@@ -75,7 +75,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("AdapterDfxTest") {
+  ohos_unittest("AdapterDsoftbusDfxTest") {
     module_out_path = module_output_path
     sources = [ "softbus_dfx_test.cpp" ]
     include_dirs = [
@@ -102,7 +102,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("AdapterOtherTest") {
+  ohos_unittest("AdapterDsoftbusOtherTest") {
     module_out_path = module_output_path
     sources = [ "dsoftbus_other_test.cpp" ]
     include_dirs = [
@@ -129,7 +129,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("AdapterRangeTest") {
+  ohos_unittest("AdapterDsoftbusRangeTest") {
     module_out_path = module_output_path
     sources = [ "softbus_adapter_range_test.cpp" ]
     include_dirs = [
@@ -156,7 +156,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("AdapterSocketTest") {
+  ohos_unittest("AdapterDsoftbusSocketTest") {
     module_out_path = module_output_path
     sources = [ "softbus_socket_test.cpp" ]
     include_dirs = [
@@ -182,6 +182,7 @@ if (defined(ohos_lite)) {
       ]
     }
   }
+
   ohos_unittest("AdapterThreadTest") {
     module_out_path = module_output_path
     sources = [ "softbus_thread_test.cpp" ]
@@ -233,6 +234,7 @@ if (defined(ohos_lite)) {
       ]
     }
   }
+
   ohos_unittest("AdapterFileTest") {
     module_out_path = module_output_path
     sources = [ "softbus_file_test.cpp" ]
@@ -257,7 +259,8 @@ if (defined(ohos_lite)) {
       ]
     }
   }
-  ohos_unittest("AdapterWifiTest") {
+
+  ohos_unittest("AdapterDsoftbusWifiTest") {
     module_out_path = module_output_path
     sources = [
       "$dsoftbus_root_path/adapter/common/net/wifi/common/softbus_wifi_api_adapter.c",
@@ -299,7 +302,8 @@ if (defined(ohos_lite)) {
       ]
     }
   }
-  ohos_unittest("AdapterNetworkTest") {
+
+  ohos_unittest("AdapterDsoftbusNetworkTest") {
     module_out_path = module_output_path
     sources = [
       "$dsoftbus_root_path/adapter/common/kernel/liteos_m/softbus_adapter_mem.c",
@@ -347,24 +351,25 @@ if (defined(ohos_lite)) {
       ]
     }
   }
+
   group("unittest") {
     testonly = true
     deps = [
       ":AdapterCryptTest",
-      ":AdapterDfxTest",
+      ":AdapterDsoftbusDfxTest",
+      ":AdapterDsoftbusOtherTest",
+      ":AdapterDsoftbusRangeTest",
+      ":AdapterDsoftbusSocketTest",
       ":AdapterFileTest",
-      ":AdapterOtherTest",
-      ":AdapterRangeTest",
-      ":AdapterSocketTest",
       ":AdapterThreadTest",
       ":AdapterTimeTest",
     ]
     if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
-      deps += [ ":AdapterWifiTest" ]
+      deps += [ ":AdapterDsoftbusWifiTest" ]
     }
     if (!defined(ohos_lite) && dsoftbus_feature_lnn_net == true &&
         dsoftbus_feature_conn_ble) {
-      deps += [ ":AdapterNetworkTest" ]
+      deps += [ ":AdapterDsoftbusNetworkTest" ]
     }
   }
 }

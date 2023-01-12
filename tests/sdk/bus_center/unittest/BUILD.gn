@@ -136,7 +136,7 @@ if (defined(ohos_lite)) {
     }
   }
   if (ohos_build_type == "debug") {
-    unittest("ClientBusCenterMgrTest") {
+    unittest("ClientBusCentManagerTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = client_bus_center_manager_test_src
@@ -175,7 +175,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("SetDataChangeTest") {
+  ohos_unittest("ClientBusCenterSdkTest") {
     module_out_path = module_output_path
     sources = softbus_center_sdk_test_src
     include_dirs = bus_center_sdk_test_inc
@@ -279,7 +279,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("ClientBusCenterMgrTest") {
+  ohos_unittest("ClientBusCentManagerTest") {
     module_out_path = module_output_path
     sources = client_bus_center_manager_test_src
     include_dirs = client_bus_center_manager_test_inc
@@ -338,9 +338,9 @@ if (defined(ohos_lite)) {
       ":BusCenterMetaNodeSdkTest",
       ":BusCenterSdkTest",
       ":BusCenterServerTest",
-      ":ClientBusCenterMgrTest",
+      ":ClientBusCentManagerTest",
+      ":ClientBusCenterSdkTest",
       ":ClientBusMangerTest",
-      ":SetDataChangeTest",
     ]
   }
 }
