@@ -32,7 +32,7 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
-class LNNTransLaneTest : public testing::Test {
+class LNNTransLaneMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -40,21 +40,21 @@ public:
     void TearDown();
 };
 
-void LNNTransLaneTest::SetUpTestCase()
+void LNNTransLaneMockTest::SetUpTestCase()
 {
-    GTEST_LOG_(INFO) << "LNNTransLaneTest start";
+    GTEST_LOG_(INFO) << "LNNTransLaneMockTest start";
 }
 
-void LNNTransLaneTest::TearDownTestCase()
+void LNNTransLaneMockTest::TearDownTestCase()
 {
-    GTEST_LOG_(INFO) << "LNNTransLaneTest end";
+    GTEST_LOG_(INFO) << "LNNTransLaneMockTest end";
 }
 
-void LNNTransLaneTest::SetUp()
+void LNNTransLaneMockTest::SetUp()
 {
 }
 
-void LNNTransLaneTest::TearDown()
+void LNNTransLaneMockTest::TearDown()
 {
 }
 
@@ -79,7 +79,7 @@ static void LaneStateChange(uint32_t laneId, LaneState state)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNTransLaneTest, LNN_TRANS_LANE_001, TestSize.Level1)
+HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_001, TestSize.Level1)
 {
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
@@ -108,7 +108,7 @@ HWTEST_F(LNNTransLaneTest, LNN_TRANS_LANE_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNTransLaneTest, LNN_TRANS_LANE_002, TestSize.Level1)
+HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_002, TestSize.Level1)
 {
     TransLaneDepsInterfaceMock laneMock;
     int32_t ret = LnnInitLaneLooper();

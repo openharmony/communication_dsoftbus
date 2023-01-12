@@ -29,17 +29,17 @@ using namespace testing;
 #define TEST_SER_TYPE       2
 #define TEST_IS_HIDDEN_SSID 0
 #define TEST_CONFIG_SIZE    1
-class DsoftbusWifiTest : public testing::Test {
+class AdapterDsoftbusWifiTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
-void DsoftbusWifiTest::SetUpTestCase(void) { }
-void DsoftbusWifiTest::TearDownTestCase(void) { }
-void DsoftbusWifiTest::SetUp() { }
-void DsoftbusWifiTest::TearDown() { }
+void AdapterDsoftbusWifiTest::SetUpTestCase(void) { }
+void AdapterDsoftbusWifiTest::TearDownTestCase(void) { }
+void AdapterDsoftbusWifiTest::SetUp() { }
+void AdapterDsoftbusWifiTest::TearDown() { }
 void onSoftBusWifiScanResult(int state, int size) { }
 /*
  * @tc.name: SoftBusGetWifiDeviceConfig
@@ -47,7 +47,7 @@ void onSoftBusWifiScanResult(int state, int size) { }
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusGetWifiDeviceConfigTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiDeviceConfigTest001, TestSize.Level1)
 {
     SoftBusWifiDevConf configList;
     NiceMock<WifiInterfaceMock> wifiMock;
@@ -80,7 +80,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusGetWifiDeviceConfigTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusConnectToDeviceTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusConnectToDeviceTest001, TestSize.Level1)
 {
     SoftBusWifiDevConf configList;
     NiceMock<WifiInterfaceMock> wifiMock;
@@ -107,7 +107,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusConnectToDeviceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusStartWifiScanTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusStartWifiScanTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     EXPECT_CALL(wifiMock, Scan).WillOnce(Return(WIFI_SUCCESS)).WillRepeatedly(Return(ERROR_WIFI_INVALID_ARGS));
@@ -123,7 +123,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusStartWifiScanTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, ScanResultCbTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, ScanResultCbTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     ISoftBusScanResult cb = {
@@ -144,7 +144,7 @@ HWTEST_F(DsoftbusWifiTest, ScanResultCbTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusGetWifiScanListTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiScanListTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     ON_CALL(wifiMock, GetScanInfoList).WillByDefault(Return(WIFI_SUCCESS));
@@ -167,7 +167,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusGetWifiScanListTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusUnRegisterWifiEventTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusUnRegisterWifiEventTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
 
@@ -189,7 +189,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusUnRegisterWifiEventTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusGetChannelListFor5GTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetChannelListFor5GTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     int32_t channelList = TEST_CONFIG_SIZE;
@@ -211,7 +211,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusGetChannelListFor5GTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusGetLinkBandTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetLinkBandTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     WifiLinkedInfo result = {
@@ -244,7 +244,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusGetLinkBandTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusGetLinkedInfoTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetLinkedInfoTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     SoftBusWifiLinkedInfo info;
@@ -261,7 +261,7 @@ HWTEST_F(DsoftbusWifiTest, SoftBusGetLinkedInfoTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusWifiTest, SoftBusGetCurrentGroupTest001, TestSize.Level1)
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetCurrentGroupTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     SoftBusWifiP2pGroupInfo groupInfo;

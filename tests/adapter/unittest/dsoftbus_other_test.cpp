@@ -30,27 +30,27 @@ using namespace testing::ext;
 namespace OHOS {
 const char *g_FileName = "example.txt";
 
-class DsoftbusOtherTest : public testing::Test {
+class AdapterDsoftbusOtherTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
-void DsoftbusOtherTest::SetUpTestCase(void)
+void AdapterDsoftbusOtherTest::SetUpTestCase(void)
 {
 }
-void DsoftbusOtherTest::TearDownTestCase(void)
+void AdapterDsoftbusOtherTest::TearDownTestCase(void)
 {
     int32_t ret = remove(g_FileName);
     if (ret == 0) {
         return;
     }
 }
-void DsoftbusOtherTest::SetUp(void)
+void AdapterDsoftbusOtherTest::SetUp(void)
 {
 }
-void DsoftbusOtherTest::TearDown(void)
+void AdapterDsoftbusOtherTest::TearDown(void)
 {
 }
 
@@ -60,7 +60,7 @@ void DsoftbusOtherTest::TearDown(void)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
     char netmask[] = "abcdefd";
@@ -76,7 +76,7 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
     char netmask[] = "abcdefd";
@@ -95,7 +95,7 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
 {
     const char *ifName = "abcdefgh";
     char ip[32] = "0";
@@ -110,7 +110,7 @@ HWTEST_F(DsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
 {
     const char *writeBuf = "abcdef";
     char readbuf[1024] = {"\0"};
@@ -127,7 +127,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest002, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest002, TestSize.Level0)
 {
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 100;
@@ -144,7 +144,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest003, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest003, TestSize.Level0)
 {
     char readbuf[1024] = {"\0"};
     int32_t maxLen = 0;
@@ -158,7 +158,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusReadFullFileTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest001, TestSize.Level0)
 {
     const char *writeBuf = "abcdef";
     int32_t ret = SoftBusWriteFile(g_FileName, writeBuf, strlen(writeBuf));
@@ -171,7 +171,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest002, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest002, TestSize.Level0)
 {
     const char *writeBuf = "abcdef";
     int32_t ret = SoftBusWriteFile(nullptr, writeBuf, strlen(writeBuf));
@@ -187,7 +187,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
 {
     const char *writeBuf = "abcdef";
     int32_t len = 0;
@@ -205,7 +205,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(0);
     EXPECT_TRUE(ret != NULL);
@@ -218,7 +218,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(MAX_MALLOC_SIZE + 1);
     EXPECT_EQ(NULL, ret);
@@ -230,7 +230,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(-1);
     EXPECT_EQ(NULL, ret);
@@ -242,7 +242,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(12);
     EXPECT_TRUE(ret != NULL);
@@ -255,7 +255,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(256);
     EXPECT_TRUE(ret != NULL);
@@ -268,7 +268,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(0);
     EXPECT_TRUE(ret != NULL);
@@ -281,7 +281,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(22);
     EXPECT_TRUE(ret != NULL);
@@ -294,7 +294,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(-1);
     EXPECT_EQ(NULL, ret);
@@ -306,7 +306,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest004, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(MAX_MALLOC_SIZE + 1);
     EXPECT_EQ(NULL, ret);
@@ -318,7 +318,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusCallocTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest001, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusOutPrintTest001, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_DBG);
@@ -330,7 +330,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest002, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusOutPrintTest002, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_INFO);
@@ -342,7 +342,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest003, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusOutPrintTest003, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_WARN);
@@ -354,7 +354,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest004, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusOutPrintTest004, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_ERROR);
@@ -366,7 +366,7 @@ HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: 1
  */
-HWTEST_F(DsoftbusOtherTest, SoftBusOutPrintTest005, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusOtherTest, SoftBusOutPrintTest005, TestSize.Level0)
 {
     const char buf[20] = "123";
     SoftBusOutPrint(buf, SOFTBUS_LOG_LEVEL_MAX);

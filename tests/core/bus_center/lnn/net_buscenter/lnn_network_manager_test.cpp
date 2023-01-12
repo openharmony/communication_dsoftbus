@@ -51,7 +51,7 @@ LnnNetIfMgr g_netIfMgr4 = {
     .type = LNN_NETIF_TYPE_BLE,
     .ifName = "BLE",
 };
-class LnnNetworkManagerImplTest : public testing::Test {
+class LNNNetworkManagerMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -59,7 +59,7 @@ public:
     void TearDown();
 };
 
-void LnnNetworkManagerImplTest::SetUpTestCase()
+void LNNNetworkManagerMockTest::SetUpTestCase()
 {
     LooperInit();
     ListTailInsert(&g_netIfNameList, &g_netIfMgr1.node);
@@ -68,16 +68,16 @@ void LnnNetworkManagerImplTest::SetUpTestCase()
     ListTailInsert(&g_netIfNameList, &g_netIfMgr4.node);
 }
 
-void LnnNetworkManagerImplTest::TearDownTestCase()
+void LNNNetworkManagerMockTest::TearDownTestCase()
 {
     LooperDeinit();
 }
 
-void LnnNetworkManagerImplTest::SetUp()
+void LNNNetworkManagerMockTest::SetUp()
 {
 }
 
-void LnnNetworkManagerImplTest::TearDown()
+void LNNNetworkManagerMockTest::TearDown()
 {
 }
 
@@ -112,7 +112,7 @@ static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnNetworkManagerImplTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level1)
+HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     NiceMock<LnnAuthtInterfaceMock> authMock;
@@ -144,7 +144,7 @@ HWTEST_F(LnnNetworkManagerImplTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnNetworkManagerImplTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level1)
+HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level1)
 {
     int32_t ret = LnnGetAddrTypeByIfName(nullptr, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -178,7 +178,7 @@ HWTEST_F(LnnNetworkManagerImplTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnNetworkManagerImplTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level1)
+HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level1)
 {
     int ret = LnnRegistProtocol(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -233,7 +233,7 @@ HWTEST_F(LnnNetworkManagerImplTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnNetworkManagerImplTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level1)
+HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level1)
 {
     int len = 0;
     char buf[] = "nullptr";

@@ -40,7 +40,7 @@ constexpr uint8_t MSG[] = "123456BNHFCF";
 namespace OHOS {
 using namespace testing::ext;
 
-class LnnNetBuilderTest : public testing::Test {
+class LNNNetBuilderTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -48,21 +48,21 @@ public:
     void TearDown();
 };
 
-void LnnNetBuilderTest::SetUpTestCase()
+void LNNNetBuilderTest::SetUpTestCase()
 {
     LooperInit();
 }
 
-void LnnNetBuilderTest::TearDownTestCase()
+void LNNNetBuilderTest::TearDownTestCase()
 {
     LooperDeinit();
 }
 
-void LnnNetBuilderTest::SetUp()
+void LNNNetBuilderTest::SetUp()
 {
 }
 
-void LnnNetBuilderTest::TearDown()
+void LNNNetBuilderTest::TearDown()
 {
     LnnDeinitNetBuilder();
 }
@@ -73,7 +73,7 @@ void LnnNetBuilderTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level0)
 {
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_WLAN,
@@ -91,7 +91,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Level0)
 {
     const bool type[CONNECTION_ADDR_MAX] = {true, true, true, true, true};
     int32_t ret = LnnRequestLeaveByAddrType(type, CONNECTION_ADDR_MAX);
@@ -110,7 +110,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0)
 {
     char *networkId = nullptr;
     int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN);
@@ -129,7 +129,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -145,7 +145,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Le
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnRequestCleanConnFsm(CONN_FSM_ID);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -161,7 +161,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Level0)
 {
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_WLAN,
@@ -183,7 +183,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnNotifyMasterElect(NETWORKID, MASTER_UDID, MASTER_WEIGHT);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -202,7 +202,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
 {
     char *addr = nullptr;
     int32_t ret = LnnUpdateNodeAddr(addr);
@@ -223,7 +223,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
 {
     ConnectionAddr addr = {
         .type = CONNECTION_ADDR_WLAN,
@@ -248,7 +248,7 @@ HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_LEAVE_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, META_NODE_SERVER_LEAVE_TEST_001, TestSize.Level0)
 {
     const char *networkId = "1234";
     int32_t ret;
@@ -267,7 +267,7 @@ HWTEST_F(LnnNetBuilderTest, META_NODE_SERVER_LEAVE_TEST_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
 {
     uint32_t len = TYPE_LEN;
     LnnSyncOfflineComplete(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, len);
@@ -282,7 +282,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnServerLeave(NETWORKID);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
@@ -298,7 +298,7 @@ HWTEST_F(LnnNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
+HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
 {
     ConnectionAddr addr = {
         .type = CONNECTION_ADDR_WLAN,

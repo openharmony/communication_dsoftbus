@@ -74,7 +74,7 @@ constexpr uint32_t LOCAL_CAPACITY = 3;
 constexpr int32_t MASTER_WEIGHT = 10;
 constexpr int32_t P2P_ROLE = 1;
 using namespace testing;
-class NetLedgerCommonTest : public testing::Test {
+class LNNNetLedgerCommonTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -82,20 +82,20 @@ public:
     void TearDown();
 };
 
-void NetLedgerCommonTest::SetUpTestCase()
+void LNNNetLedgerCommonTest::SetUpTestCase()
 {
 }
 
-void NetLedgerCommonTest::TearDownTestCase()
+void LNNNetLedgerCommonTest::TearDownTestCase()
 {
 }
 
-void NetLedgerCommonTest::SetUp()
+void LNNNetLedgerCommonTest::SetUp()
 {
-    LOG_INFO("NetLedgerCommonTest start.");
+    LOG_INFO("LNNNetLedgerCommonTest start.");
 }
 
-void NetLedgerCommonTest::TearDown()
+void LNNNetLedgerCommonTest::TearDown()
 {
 }
 
@@ -105,7 +105,7 @@ void NetLedgerCommonTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
 {
     DeviceBasicInfo info;
     uint16_t typeId = 0;
@@ -136,7 +136,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
 {
     struct HksBlob keyAlias;
     (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
@@ -154,7 +154,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
 {
     uint32_t capability = 0;
     EXPECT_TRUE(LnnSetNetCapability(nullptr, BIT_COUNT) == SOFTBUS_INVALID_PARAM);
@@ -168,7 +168,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnHasDiscoveryType(nullptr, DISCOVERY_TYPE_WIFI) == false);
     EXPECT_TRUE(LnnGetDeviceUdid(nullptr) == nullptr);
@@ -207,7 +207,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_001, TestSize.Level1)
 {
     int32_t i;
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
@@ -231,7 +231,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
@@ -247,7 +247,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
 {
     static int32_t nodeKeyInfoLenTable[] = {
         UDID_BUF_LEN,
@@ -275,7 +275,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_DEV_UDID, LOCAL_UDID) == SOFTBUS_OK);
@@ -299,7 +299,7 @@ HWTEST_F(NetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     static InfoKey getLocalStringInfoKeyTable[] = {
@@ -340,7 +340,7 @@ HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     int32_t ret = LnnSetLocalStrInfo(STRING_KEY_DEV_UDID, LOCAL_UDID);
@@ -370,7 +370,7 @@ HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     static InfoKey getLocalNumInfoKeyTable[] = {
@@ -399,7 +399,7 @@ HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT);
@@ -423,7 +423,7 @@ HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(NetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
 {
     int64_t info;
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
