@@ -32,7 +32,7 @@ constexpr int DATA_CHANGE_FLAG_BUF_NUM = 2;
 namespace OHOS {
 using namespace testing::ext;
 
-class SetDataChangeTest : public testing::Test {
+class ClientBusCenterSdkTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -41,20 +41,20 @@ public:
     void AddPermission();
 };
 
-void SetDataChangeTest::SetUpTestCase()
+void ClientBusCenterSdkTest::SetUpTestCase()
 {
     SetAceessTokenPermission("busCenterTest");
 }
 
-void SetDataChangeTest::TearDownTestCase()
+void ClientBusCenterSdkTest::TearDownTestCase()
 {
 }
 
-void SetDataChangeTest::SetUp()
+void ClientBusCenterSdkTest::SetUp()
 {
 }
 
-void SetDataChangeTest::TearDown()
+void ClientBusCenterSdkTest::TearDown()
 {
 }
 
@@ -64,7 +64,7 @@ void SetDataChangeTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5TQW0
 */
-HWTEST_F(SetDataChangeTest, SOFTBUS_CENTER_SDK_TEST_001, TestSize.Level0)
+HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_001, TestSize.Level0)
 {
     NodeBasicInfo info;
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -82,7 +82,7 @@ HWTEST_F(SetDataChangeTest, SOFTBUS_CENTER_SDK_TEST_001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5TQW0
 */
-HWTEST_F(SetDataChangeTest, SOFTBUS_CENTER_SDK_TEST_002, TestSize.Level0)
+HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_002, TestSize.Level0)
 {
     NodeBasicInfo info;
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -97,7 +97,7 @@ HWTEST_F(SetDataChangeTest, SOFTBUS_CENTER_SDK_TEST_002, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: I5TQW0
 */
-HWTEST_F(SetDataChangeTest, SOFTBUS_CENTER_SDK_TEST_003, TestSize.Level0)
+HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_003, TestSize.Level0)
 {
     NodeBasicInfo *info = nullptr;
     int32_t infoNum = 0;

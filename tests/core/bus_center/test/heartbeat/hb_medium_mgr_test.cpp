@@ -38,7 +38,7 @@ using namespace testing;
 #define TEST_DISC_TYPE      5321
 #define TEST_UDID_HASH      "1111222233334444"
 
-class HeartBeatMgrTest : public testing::Test {
+class HeartBeatMediumTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -46,19 +46,19 @@ public:
     void TearDown();
 };
 
-void HeartBeatMgrTest::SetUpTestCase()
+void HeartBeatMediumTest::SetUpTestCase()
 {
     HbInitRecvList();
 }
 
-void HeartBeatMgrTest::TearDownTestCase()
+void HeartBeatMediumTest::TearDownTestCase()
 {
     HbDeinitRecvList();
 }
 
-void HeartBeatMgrTest::SetUp() { }
+void HeartBeatMediumTest::SetUp() { }
 
-void HeartBeatMgrTest::TearDown() { }
+void HeartBeatMediumTest::TearDown() { }
 
 int32_t onUpdateSendInfo1(LnnHeartbeatUpdateInfoType type)
 {
@@ -76,7 +76,7 @@ int32_t onUpdateSendInfo2(LnnHeartbeatUpdateInfoType type)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
 {
     DeviceInfo device;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -93,7 +93,7 @@ HWTEST_F(HeartBeatMgrTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
 {
     DeviceInfo device1;
     (void)memset_s(&device1, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -124,7 +124,7 @@ HWTEST_F(HeartBeatMgrTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
 {
     DeviceInfo device;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -150,7 +150,7 @@ HWTEST_F(HeartBeatMgrTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
 {
     NodeInfo nodeInfo = {
         .discoveryType = TEST_DISC_TYPE,
@@ -182,7 +182,7 @@ HWTEST_F(HeartBeatMgrTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
 {
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
@@ -218,7 +218,7 @@ HWTEST_F(HeartBeatMgrTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
 {
     DeviceInfo device;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -265,7 +265,7 @@ HWTEST_F(HeartBeatMgrTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrategyMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -305,7 +305,7 @@ HWTEST_F(HeartBeatMgrTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, HbMediumMgrRelayProcess, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess, TestSize.Level1)
 {
     HeartBeatStategyInterfaceMock hbStrategyMock;
     EXPECT_CALL(hbStrategyMock, LnnStartHbByTypeAndStrategy)
@@ -322,7 +322,7 @@ HWTEST_F(HeartBeatMgrTest, HbMediumMgrRelayProcess, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, LnnDumpHbMgrRecvList_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, LnnDumpHbMgrRecvList_TEST01, TestSize.Level1)
 {
     DeviceInfo device1;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -353,7 +353,7 @@ HWTEST_F(HeartBeatMgrTest, LnnDumpHbMgrRecvList_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
 {
     NodeInfo nodeInfo = {
         .discoveryType = TEST_DISC_TYPE,
@@ -383,7 +383,7 @@ HWTEST_F(HeartBeatMgrTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
 {
     bool ret = VisitHbMediumMgrSendBegin(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
@@ -413,7 +413,7 @@ HWTEST_F(HeartBeatMgrTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
 {
     LnnHeartbeatCustSendData data = {
         .hbType = HEARTBEAT_TYPE_MAX,
@@ -433,7 +433,7 @@ HWTEST_F(HeartBeatMgrTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
 {
     bool ret = VisitHbMediumMgrSendEnd(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
@@ -454,7 +454,7 @@ HWTEST_F(HeartBeatMgrTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, VisitHbMediumMgrStop_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrStop_TEST01, TestSize.Level1)
 {
     LnnHeartbeatMediumMgr medMgr1 = {
         .supportType = HEARTBEAT_TYPE_BLE_V1,
@@ -482,7 +482,7 @@ HWTEST_F(HeartBeatMgrTest, VisitHbMediumMgrStop_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
 {
     int id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
     int32_t ret = LnnHbMediumMgrSetParam(nullptr);
@@ -504,7 +504,7 @@ HWTEST_F(HeartBeatMgrTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, LnnHbMediumMgrUpdateSendInfo_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrUpdateSendInfo_TEST01, TestSize.Level1)
 {
     int id = LnnConvertHbTypeToId(HEARTBEAT_TYPE_BLE_V1);
     int32_t ret = LnnHbMediumMgrUpdateSendInfo(UPDATE_HB_NETWORK_INFO);
@@ -535,7 +535,7 @@ HWTEST_F(HeartBeatMgrTest, LnnHbMediumMgrUpdateSendInfo_TEST01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, VisitUnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, VisitUnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1)
 {
     bool ret = VisitUnRegistHeartbeatMediumMgr(nullptr, HEARTBEAT_TYPE_BLE_V1, nullptr);
     EXPECT_TRUE(ret);
@@ -550,7 +550,7 @@ void DeInit(void) { }
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatMgrTest, UnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1)
+HWTEST_F(HeartBeatMediumTest, UnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1)
 {
     int32_t ret = LnnUnRegistHeartbeatMediumMgr(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);

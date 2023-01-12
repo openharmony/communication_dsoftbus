@@ -25,7 +25,7 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
-class LNNLaneLinkTest : public testing::Test {
+class LNNLaneLinkMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -33,21 +33,21 @@ public:
     void TearDown();
 };
 
-void LNNLaneLinkTest::SetUpTestCase()
+void LNNLaneLinkMockTest::SetUpTestCase()
 {
-    GTEST_LOG_(INFO) << "LNNLaneLinkTest start";
+    GTEST_LOG_(INFO) << "LNNLaneLinkMockTest start";
 }
 
-void LNNLaneLinkTest::TearDownTestCase()
+void LNNLaneLinkMockTest::TearDownTestCase()
 {
-    GTEST_LOG_(INFO) << "LNNLaneLinkTest end";
+    GTEST_LOG_(INFO) << "LNNLaneLinkMockTest end";
 }
 
-void LNNLaneLinkTest::SetUp()
+void LNNLaneLinkMockTest::SetUp()
 {
 }
 
-void LNNLaneLinkTest::TearDown()
+void LNNLaneLinkMockTest::TearDown()
 {
 }
 
@@ -57,7 +57,7 @@ void LNNLaneLinkTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
+HWTEST_F(LNNLaneLinkMockTest, LNN_LANE_LINK_001, TestSize.Level1)
 {
     int32_t ret = LnnConnectP2p(nullptr, 0, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -77,7 +77,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
+HWTEST_F(LNNLaneLinkMockTest, LNN_LANE_LINK_002, TestSize.Level1)
 {
     int32_t ret = LnnDisconnectP2p(nullptr, 0, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -97,7 +97,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
+HWTEST_F(LNNLaneLinkMockTest, LNN_LANE_LINK_003, TestSize.Level1)
 {
     (void)LnnLanePendingInit();
     LaneDepsInterfaceMock linkMock;
@@ -144,7 +144,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
+HWTEST_F(LNNLaneLinkMockTest, LNN_LANE_LINK_004, TestSize.Level1)
 {
     (void)LnnLanePendingInit();
     const char *network = "network_123";
@@ -173,7 +173,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_005, TestSize.Level1)
+HWTEST_F(LNNLaneLinkMockTest, LNN_LANE_LINK_005, TestSize.Level1)
 {
     (void)LnnLanePendingInit();
 

@@ -618,7 +618,8 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_Test002, TestSize.Lev
     char pkgName[] = "pkgname";
     char networkId[] = "12313"; 
     uint16_t dataChangeFlag = 11;
-    ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -656,9 +657,11 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_Test002, TestSize.Level1)
     void *addr = nullptr; 
     CustomData *customData = nullptr;
     unsigned int addrTypeLen = 2;
-    ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
+    int32_t ret = ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     BusCenterServerProxyInit();
-    ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
+    ret = ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -691,8 +694,10 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_LEAVE_META_Test002, TestSize.Level1)
 {
     char pkgName[] = "pkgname";
     char networkId[] = "111";
-    ServerIpcLeaveMetaNode(pkgName, networkId);
+    int32_t ret = ServerIpcLeaveMetaNode(pkgName, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     BusCenterServerProxyInit();
-    ServerIpcLeaveMetaNode(pkgName, networkId);
+    ret = ServerIpcLeaveMetaNode(pkgName, networkId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

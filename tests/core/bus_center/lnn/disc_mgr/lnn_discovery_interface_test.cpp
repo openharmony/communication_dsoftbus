@@ -28,7 +28,7 @@ namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
 
-class LnnDiscoveryInterfaceTest : public testing::Test {
+class LNNDiscoveryInterfaceTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -36,19 +36,19 @@ public:
     void TearDown();
 };
 
-void LnnDiscoveryInterfaceTest::SetUpTestCase()
+void LNNDiscoveryInterfaceTest::SetUpTestCase()
 {
 }
 
-void LnnDiscoveryInterfaceTest::TearDownTestCase()
+void LNNDiscoveryInterfaceTest::TearDownTestCase()
 {
 }
 
-void LnnDiscoveryInterfaceTest::SetUp()
+void LNNDiscoveryInterfaceTest::SetUp()
 {
 }
 
-void LnnDiscoveryInterfaceTest::TearDown()
+void LNNDiscoveryInterfaceTest::TearDown()
 {
 }
 
@@ -78,7 +78,7 @@ static int32_t LnnCoapFuncTest(void)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, DEVICE_FOUND_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, DEVICE_FOUND_TEST_001, TestSize.Level1)
 {
     DeviceInfo device;
     InnerDeviceInfoAddtions addtions;
@@ -103,7 +103,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, DEVICE_FOUND_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
     PublishInfo info;
@@ -133,7 +133,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
     int32_t publishId = 0;
@@ -162,7 +162,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
     SubscribeInfo info;
@@ -200,7 +200,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
     int32_t subscribeId = 0;
@@ -229,7 +229,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
 {
     g_discoveryImpl[0].StartPublishImpl = nullptr;
     int32_t ret = LnnStartPublish();
@@ -248,7 +248,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_STOP_PUBLISH_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_PUBLISH_TEST_001, TestSize.Level1)
 {
     g_discoveryImpl[0].StopPublishImpl = nullptr;
     LnnStopPublish();
@@ -264,7 +264,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, LNN_STOP_PUBLISH_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level1)
 {
     g_discoveryImpl[0].StartDiscoveryImpl = nullptr;
     int32_t ret = LnnStartDiscovery();
@@ -283,7 +283,7 @@ HWTEST_F(LnnDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDiscoveryInterfaceTest, LNN_STOP_DISCOVERY_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISCOVERY_TEST_001, TestSize.Level1)
 {
     g_discoveryImpl[0].StopDiscoveryImpl = nullptr;
     LnnStopDiscovery();

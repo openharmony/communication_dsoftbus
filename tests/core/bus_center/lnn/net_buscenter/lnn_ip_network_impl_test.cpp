@@ -44,7 +44,7 @@ LnnNetIfMgr netifMgr;
 char IP1[] = "127.0.0.1";
 char IP2[] = "127.0.0.2";
 
-class LnnIpNetworkImplTest : public testing::Test {
+class LNNIpNetworkImplMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -52,21 +52,21 @@ public:
     void TearDown();
 };
 
-void LnnIpNetworkImplTest::SetUpTestCase()
+void LNNIpNetworkImplMockTest::SetUpTestCase()
 {
     LooperInit();
 }
 
-void LnnIpNetworkImplTest::TearDownTestCase()
+void LNNIpNetworkImplMockTest::TearDownTestCase()
 {
     LooperDeinit();
 }
 
-void LnnIpNetworkImplTest::SetUp()
+void LNNIpNetworkImplMockTest::SetUp()
 {
 }
 
-void LnnIpNetworkImplTest::TearDown()
+void LNNIpNetworkImplMockTest::TearDown()
 {
 }
 
@@ -76,7 +76,7 @@ void LnnIpNetworkImplTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1)
+HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -124,7 +124,7 @@ HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1)
+HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -182,7 +182,7 @@ HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1)
+HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -220,7 +220,7 @@ HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1)
+HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -268,7 +268,7 @@ HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnIpNetworkImplTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1)
+HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> ipMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
