@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_002, TestSize.Level0)
 
 /*
 * @tc.name: SOFTBUS_CENTER_SDK_TEST_003
-* @tc.desc: after joinLNN test get remote adtaChangeFlag
+* @tc.desc: after joinLNN test get remote dataChangeFlag
 * @tc.type: FUNC
 * @tc.require: I5TQW0
 */

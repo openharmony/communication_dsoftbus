@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ constexpr int32_t WEIGHT = 10;
 constexpr int32_t WEIGHT2 = 5;
 constexpr int32_t WEIGHT3 = 5;
 
-class LnnNodeWeightTest : public testing::Test {
+class LNNNodeWeightTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -38,19 +38,19 @@ public:
     void TearDown();
 };
 
-void LnnNodeWeightTest::SetUpTestCase()
+void LNNNodeWeightTest::SetUpTestCase()
 {
 }
 
-void LnnNodeWeightTest::TearDownTestCase()
+void LNNNodeWeightTest::TearDownTestCase()
 {
 }
 
-void LnnNodeWeightTest::SetUp()
+void LNNNodeWeightTest::SetUp()
 {
 }
 
-void LnnNodeWeightTest::TearDown()
+void LNNNodeWeightTest::TearDown()
 {
 }
 
@@ -60,7 +60,7 @@ void LnnNodeWeightTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
+HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 {
     char *masterUdid = nullptr;
     int32_t ret = LnnCompareNodeWeight(WEIGHT, UDID1, WEIGHT2, UDID2);

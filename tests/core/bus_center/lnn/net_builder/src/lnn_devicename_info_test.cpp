@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
 
-class LnnDeviceNameInfoTest : public testing::Test {
+class LNNDeviceNameInfoTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -44,19 +44,19 @@ public:
     void TearDown();
 };
 
-void LnnDeviceNameInfoTest::SetUpTestCase()
+void LNNDeviceNameInfoTest::SetUpTestCase()
 {
 }
 
-void LnnDeviceNameInfoTest::TearDownTestCase()
+void LNNDeviceNameInfoTest::TearDownTestCase()
 {
 }
 
-void LnnDeviceNameInfoTest::SetUp()
+void LNNDeviceNameInfoTest::SetUp()
 {
 }
 
-void LnnDeviceNameInfoTest::TearDown()
+void LNNDeviceNameInfoTest::TearDown()
 {
 }
 
@@ -66,7 +66,7 @@ void LnnDeviceNameInfoTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -96,7 +96,7 @@ HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LnnDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_002, TestSize.Level1)
+HWTEST_F(LNNDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, LnnInitGetDeviceName).WillRepeatedly(

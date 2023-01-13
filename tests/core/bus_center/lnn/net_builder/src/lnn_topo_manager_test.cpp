@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ constexpr char UUID[] = "91a0183f4b68272902e7411f8e122fafd59969cd088e22d296be164
 constexpr char PEER_UDID[] = "dac6f8016d28d6cefa0671a1cdaba4928a53fa4e3b3a6b749c3887deda620564";
 constexpr int32_t CHANNELID = 0;
 
-class LnnTopoManagerTest : public testing::Test {
+class LNNTopoManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -48,21 +48,21 @@ public:
     void TearDown();
 };
 
-void LnnTopoManagerTest::SetUpTestCase()
+void LNNTopoManagerTest::SetUpTestCase()
 {
     LooperInit();
 }
 
-void LnnTopoManagerTest::TearDownTestCase()
+void LNNTopoManagerTest::TearDownTestCase()
 {
     LooperDeinit();
 }
 
-void LnnTopoManagerTest::SetUp()
+void LNNTopoManagerTest::SetUp()
 {
 }
 
-void LnnTopoManagerTest::TearDown()
+void LNNTopoManagerTest::TearDown()
 {
 }
 
@@ -100,7 +100,7 @@ void DeinitMock(LnnTransInterfaceMock &transMock, LnnServicetInterfaceMock &serv
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
 {
     uint8_t relation[CONNECTION_ADDR_MAX + 1];
     (void)memset_s(relation, sizeof(relation), 0, sizeof(relation));
@@ -114,7 +114,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_002, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -133,7 +133,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_RELATION_TEST_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_001, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_GET_ALL_RELATION_TEST_001, TestSize.Level1)
 {
     uint32_t *relationNum = nullptr;
     LnnRelation *relation = nullptr;
@@ -147,7 +147,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_002, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_GET_ALL_RELATION_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -172,7 +172,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_GET_ALL_RELATION_TEST_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, LnnRegisterEventHandler(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -186,7 +186,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -246,7 +246,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -319,7 +319,7 @@ static void AssambleSyncMsg(const char *localUdid, const char *peerUdid, uint8_t
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_004, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_004, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -360,7 +360,7 @@ HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LnnTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_005, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_005, TestSize.Level1)
 {
     EXPECT_STRNE(UDID, LnnNetLedgertInterfaceMock::localId.c_str());
     EXPECT_STRNE(PEER_UDID, LnnNetLedgertInterfaceMock::peerId.c_str());

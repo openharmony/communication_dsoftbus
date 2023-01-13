@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ static ConnectionAddr target = {
     .info.ip.port = PORT,
 };
 static LnnConnectionFsm *connFsm2 = nullptr;
-class LnnConnectionFsmTest : public testing::Test {
+class LNNConnectionFsmTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -48,7 +48,7 @@ public:
     void TearDown();
 };
 
-void LnnConnectionFsmTest::SetUpTestCase()
+void LNNConnectionFsmTest::SetUpTestCase()
 {
     LooperInit();
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
@@ -57,17 +57,17 @@ void LnnConnectionFsmTest::SetUpTestCase()
     EXPECT_TRUE(connFsm2 != nullptr);
 }
 
-void LnnConnectionFsmTest::TearDownTestCase()
+void LNNConnectionFsmTest::TearDownTestCase()
 {
     LooperDeinit();
     LnnDestroyConnectionFsm(connFsm2);
 }
 
-void LnnConnectionFsmTest::SetUp()
+void LNNConnectionFsmTest::SetUp()
 {
 }
 
-void LnnConnectionFsmTest::TearDown()
+void LNNConnectionFsmTest::TearDown()
 {
 }
 
@@ -81,7 +81,7 @@ void FsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 * @tc.type: FUNC
 * @tc.require:I5PRUD
 */
-HWTEST_F(LnnConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Level1)
+HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     ConnectionAddr *target1 = nullptr;
     LnnConnectionFsm *fsm = LnnCreateConnectionFsm(target1);
@@ -94,7 +94,7 @@ HWTEST_F(LnnConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnConnectionFsmTest, LNN_DESTROY_CONNECTION_FSM_TEST_001, TestSize.Level1)
+HWTEST_F(LNNConnectionFsmTest, LNN_DESTROY_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *fsm = nullptr;
     LnnDestroyConnectionFsm(fsm);
@@ -106,7 +106,7 @@ HWTEST_F(LnnConnectionFsmTest, LNN_DESTROY_CONNECTION_FSM_TEST_001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level1)
+HWTEST_F(LNNConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -122,7 +122,7 @@ HWTEST_F(LnnConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSize.Level1)
+HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
     int32_t ret = LnnStartConnectionFsm(connFsm2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
