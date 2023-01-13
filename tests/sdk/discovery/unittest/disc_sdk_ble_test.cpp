@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,11 +32,11 @@ static const char *g_pkgName = "Softbus_Kits";
 static const char *g_pkgName1 = "Softbus_Kits_1";
 static const char *g_erroPkgName = "Softbus_Erro_Kits";
 
-class DiscSdkTestBle : public testing::Test {
+class DiscSdkBleTest : public testing::Test {
 public:
-    DiscSdkTestBle()
+    DiscSdkBleTest()
     {}
-    ~DiscSdkTestBle()
+    ~DiscSdkBleTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -46,10 +46,10 @@ public:
     {}
 };
 
-void DiscSdkTestBle::SetUpTestCase(void)
+void DiscSdkBleTest::SetUpTestCase(void)
 {}
 
-void DiscSdkTestBle::TearDownTestCase(void)
+void DiscSdkBleTest::TearDownTestCase(void)
 {}
 
 static int GetSubscribeId(void)
@@ -152,7 +152,7 @@ static IPublishCallback g_publishCb = {
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest001, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest001, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -197,7 +197,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest002, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest002, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -242,7 +242,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest003, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest003, TestSize.Level1)
 {
     int ret;
 
@@ -260,7 +260,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest004, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest004, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -292,7 +292,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest005, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -337,7 +337,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest006, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -382,7 +382,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest007, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest007, TestSize.Level1)
 {
     int ret;
     g_pInfo.publishId = GetPublishId();
@@ -398,7 +398,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest008, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest008, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -430,7 +430,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest009, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest009, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -491,7 +491,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The PublishService and UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, PublishServiceTest010, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, PublishServiceTest010, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -552,7 +552,7 @@ HWTEST_F(DiscSdkTestBle, PublishServiceTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest001, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest001, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -599,7 +599,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest002, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest002, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -646,7 +646,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest003, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest003, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -693,7 +693,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest004, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest004, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -727,7 +727,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest005, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest005, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -774,7 +774,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest006, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -821,7 +821,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest007, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -884,7 +884,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartDiscovery and StopDiscovery operates normally.
  */
-HWTEST_F(DiscSdkTestBle, StartDiscoveryTest008, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StartDiscoveryTest008, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -947,7 +947,7 @@ HWTEST_F(DiscSdkTestBle, StartDiscoveryTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, UnpublishServiceTest001, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnpublishServiceTest001, TestSize.Level1)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -973,7 +973,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, UnpublishServiceTest002, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnpublishServiceTest002, TestSize.Level1)
 {
     int ret;
     int tmpId1 = GetPublishId();
@@ -998,7 +998,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, UnpublishServiceTest003, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnpublishServiceTest003, TestSize.Level1)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -1019,7 +1019,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, UnpublishServiceTest004, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnpublishServiceTest004, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1060,7 +1060,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, UnpublishServiceTest005, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnpublishServiceTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1101,7 +1101,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, UnpublishServiceTest006, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnpublishServiceTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1162,7 +1162,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkTestBle, UnpublishServiceTest007, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnpublishServiceTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1223,7 +1223,7 @@ HWTEST_F(DiscSdkTestBle, UnpublishServiceTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StopDiscovery operates normally
  */
-HWTEST_F(DiscSdkTestBle, StopDiscoveryTest001, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StopDiscoveryTest001, TestSize.Level1)
 {
     int ret;
     int tmpId = GetSubscribeId();
@@ -1249,7 +1249,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StopDiscovery operates normally
  */
-HWTEST_F(DiscSdkTestBle, StopDiscoveryTest002, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StopDiscoveryTest002, TestSize.Level1)
 {
     int ret;
     int tmpId1 = GetSubscribeId();
@@ -1275,7 +1275,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StopDiscovery operates normally
  */
-HWTEST_F(DiscSdkTestBle, StopDiscoveryTest003, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StopDiscoveryTest003, TestSize.Level1)
 {
     int ret;
     int tmpId = GetSubscribeId();
@@ -1296,7 +1296,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StopDiscovery operates normally
  */
-HWTEST_F(DiscSdkTestBle, StopDiscoveryTest004, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StopDiscoveryTest004, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1338,7 +1338,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StopDiscovery operates normally
  */
-HWTEST_F(DiscSdkTestBle, StopDiscoveryTest005, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StopDiscoveryTest005, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1380,7 +1380,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The StopDiscovery operates normally
  */
-HWTEST_F(DiscSdkTestBle, StopDiscoveryTest006, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StopDiscoveryTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1443,7 +1443,7 @@ HWTEST_F(DiscSdkTestBle, StopDiscoveryTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The StopDiscovery operates normally
  */
-HWTEST_F(DiscSdkTestBle, StopDiscoveryTest007, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, StopDiscoveryTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {

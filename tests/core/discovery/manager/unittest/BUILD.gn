@@ -19,7 +19,7 @@ import("//foundation/communication/dsoftbus/tests/utils/utils.gni")
 
 module_output_path = "dsoftbus/discovery"
 
-ohos_unittest("Disc_ManagerTest") {
+ohos_unittest("DiscManagerTest") {
   module_out_path = module_output_path
   sources = [ "disc_manager_test.cpp" ]
 
@@ -104,6 +104,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":DiscManagerMockTest",
-    ":Disc_ManagerTest",
+    ":DiscManagerTest",
   ]
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -312,11 +312,11 @@ static SubscribeOption g_sOption3 = {
     .dataLen = 0
 };
 
-class DiscoveryBleDispatcherTest : public testing::Test {
+class DiscBleDispatcherTest : public testing::Test {
 public:
-    DiscoveryBleDispatcherTest()
+    DiscBleDispatcherTest()
     {}
-    ~DiscoveryBleDispatcherTest()
+    ~DiscBleDispatcherTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -360,16 +360,16 @@ static DiscoveryBleDispatcherInterface g_interfaceB = {
     .mediumInterface = &g_discoveryFuncB,
 };
 
-void DiscoveryBleDispatcherTest::SetUpTestCase(void)
+void DiscBleDispatcherTest::SetUpTestCase(void)
 {}
 
-void DiscoveryBleDispatcherTest::TearDownTestCase(void)
+void DiscBleDispatcherTest::TearDownTestCase(void)
 {}
 
-void DiscoveryBleDispatcherTest::SetUp(void)
+void DiscBleDispatcherTest::SetUp(void)
 {}
 
-void DiscoveryBleDispatcherTest::TearDown(void)
+void DiscBleDispatcherTest::TearDown(void)
 {}
 
 /*
@@ -378,7 +378,7 @@ void DiscoveryBleDispatcherTest::TearDown(void)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 {
     printf("testDiscPublish001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -431,7 +431,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testDiscovery001, TestSize.Level1)
 {
     printf("testDiscovery001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -484,7 +484,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 {
     printf("testDiscPublish002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -537,7 +537,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testDiscovery002, TestSize.Level1)
 {
     printf("testDiscovery002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -590,7 +590,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 {
     printf("testDiscDispatcher003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -643,7 +643,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testDiscovery003, TestSize.Level1)
 {
     printf("testDiscovery003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -696,7 +696,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testDiscovery003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
 {
     printf("testLinkStatusChanged001\r\n");
     static LinkStatus status = LINK_STATUS_UP;
@@ -715,7 +715,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
 {
     printf("testUpdateLocalDeviceInfo001\r\n");
     static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
@@ -734,7 +734,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchPublishOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -748,7 +748,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchSubscribeOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
@@ -762,7 +762,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, DiscBleInit001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, DiscBleInit001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleInit001");
     DiscoveryFuncInterface *interface = DiscBleInit(nullptr);
@@ -775,7 +775,7 @@ HWTEST_F(DiscoveryBleDispatcherTest, DiscBleInit001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscoveryBleDispatcherTest, DiscBleInit002, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, DiscBleInit002, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleInit002");
     DiscInnerCallback g_discMgrMediumCb;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ static const int32_t TEST_CHAN_LIST = 10;
 static const int32_t ERR_CHAN_LIST = 22;
 using namespace testing::ext;
 namespace OHOS {
-class ConnectionP2PFuncTest : public testing::Test {
+class ConnectionP2pTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
@@ -80,10 +80,11 @@ static P2pLinkNegoCb g_testP2pLinkNegoCb = {
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, testP2pLinkLoopDisconnectDev001, TestSize.Level1)
 {
+    int32_t ret = P2pLoopInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
     P2pLinkLoopDisconnectDev(P2PLOOP_P2PAUTHCHAN_OK, nullptr);
-    EXPECT_EQ(true, true);
 }
 
 /*
@@ -92,16 +93,16 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev002, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, testP2pLinkLoopDisconnectDev002, TestSize.Level1)
 {
     auto *info = static_cast<P2pLinkDisconnectInfo *>(SoftBusMalloc(sizeof(P2pLinkDisconnectInfo)));
     ASSERT_TRUE(info != nullptr);
     info->pid = 11;
     info->authId = 11;
-    (void)strcpy_s(info->peerMac, sizeof(info->peerMac), "abc");
+    int32_t ret = strcpy_s(info->peerMac, sizeof(info->peerMac), "abc");
+    ASSERT_EQ(EOK, ret);
 
     P2pLinkLoopDisconnectDev(P2PLOOP_P2PAUTHCHAN_OK, info);
-    EXPECT_EQ(true, true);
 }
 
 /*
@@ -110,10 +111,11 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkLoopDisconnectDev002, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNeoDataProcess001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, testP2pLinkNeoDataProcess001, TestSize.Level1)
 {
+    int32_t ret = P2pLinkMessageInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
     P2pLinkNeoDataProcess(P2PLOOP_P2PAUTHCHAN_OK, nullptr);
-    EXPECT_EQ(true, true);
 }
 
 /*
@@ -122,12 +124,13 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNeoDataProcess001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoDataRecv001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, testP2pLinkNegoDataRecv001, TestSize.Level1)
 {
     int64_t authId = 11;
     AuthTransData *data = nullptr;
+    int32_t ret = P2pLinkMessageInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
     P2pLinkNegoDataRecv(authId, data);
-    EXPECT_EQ(true, true);
 }
 
 /*
@@ -136,7 +139,7 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkNegoDataRecv001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, testP2pLinkSendMessage001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, testP2pLinkSendMessage001, TestSize.Level1)
 {
     char data[] = "data";
     int ret = P2pLinkSendMessage(11, data, strlen(data));
@@ -149,7 +152,7 @@ HWTEST_F(ConnectionP2PFuncTest, testP2pLinkSendMessage001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2plinkChannelListToStringTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2plinkChannelListToStringTest001, TestSize.Level1)
 {
     P2pLink5GList *testChannelList = (P2pLink5GList *)SoftBusCalloc(sizeof(P2pLink5GList) +
         sizeof(int32_t) * TEST_DATA_NUM);
@@ -186,7 +189,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2plinkChannelListToStringTest001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkUpateAndGetStationFreqTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkUpateAndGetStationFreqTest001, TestSize.Level1)
 {
     P2pLink5GList *testChannelList = (P2pLink5GList *)SoftBusCalloc(sizeof(P2pLink5GList) +
         sizeof(int32_t) * TEST_DATA_NUM);
@@ -213,7 +216,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkUpateAndGetStationFreqTest001, TestSize.L
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkParseItemDataByDelimitTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkParseItemDataByDelimitTest001, TestSize.Level1)
 {
     char *testList[MAX_STRING_NUM] = {nullptr};
     int32_t testOutNum = 0;
@@ -247,7 +250,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkParseItemDataByDelimitTest001, TestSize.L
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkUnpackRequestMsgTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkUnpackRequestMsgTest001, TestSize.Level1)
 {
     cJSON *testData = cJSON_CreateObject();
     ASSERT_TRUE(testData != nullptr);
@@ -296,7 +299,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkUnpackRequestMsgTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2plinkUnpackRepsonseMsgTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2plinkUnpackRepsonseMsgTest001, TestSize.Level1)
 {
     cJSON *testData = cJSON_CreateObject();
     ASSERT_TRUE(testData != nullptr);
@@ -345,7 +348,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2plinkUnpackRepsonseMsgTest001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoInitTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkNegoInitTest001, TestSize.Level1)
 {
     int32_t ret = P2pLinkNegoInit(nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -360,7 +363,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoInitTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoStartTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkNegoStartTest001, TestSize.Level1)
 {
     P2pLinkNegoConnInfo testConnInfo = {
         .authId = 1,
@@ -382,7 +385,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoStartTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, GetP2pLinkNegoStatusTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, GetP2pLinkNegoStatusTest001, TestSize.Level1)
 {
     int32_t ret = P2pLinkNegoInit(&g_testP2pLinkNegoCb);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -397,7 +400,7 @@ HWTEST_F(ConnectionP2PFuncTest, GetP2pLinkNegoStatusTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoMsgProcTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkNegoMsgProcTest001, TestSize.Level1)
 {
     cJSON *testData = cJSON_CreateObject();
     ASSERT_TRUE(testData != nullptr);
@@ -419,7 +422,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoMsgProcTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoOnGroupChangedTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkNegoOnGroupChangedTest001, TestSize.Level1)
 {
     P2pLinkGroup group;
 
@@ -436,7 +439,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoOnGroupChangedTest001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoOnConnectStateTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkNegoOnConnectStateTest001, TestSize.Level1)
 {
     P2pLinkConnState testState = P2PLINK_CONNECTING;
 
@@ -452,7 +455,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoOnConnectStateTest001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoGetFinalRoleTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkNegoGetFinalRoleTest001, TestSize.Level1)
 {
     P2pLinkRole testMyRole = ROLE_GO;
     P2pLinkRole testPeerRole = ROLE_GO;
@@ -488,7 +491,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkNegoGetFinalRoleTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmInitTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkFsmInitTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -506,7 +509,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmInitTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmDeinitTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkFsmDeinitTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -526,7 +529,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmDeinitTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmStartTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkFsmStartTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -557,7 +560,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmStartTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmTransactStateTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkFsmTransactStateTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
@@ -584,7 +587,7 @@ HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmTransactStateTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ConnectionP2PFuncTest, P2pLinkFsmMsgProcTest001, TestSize.Level1)
+HWTEST_F(ConnectionP2pTest, P2pLinkFsmMsgProcTest001, TestSize.Level1)
 {
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);

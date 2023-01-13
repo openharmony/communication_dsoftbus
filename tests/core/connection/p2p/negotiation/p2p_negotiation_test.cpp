@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ using namespace testing::ext;
 using testing::Return;
 
 namespace OHOS {
-class P2pNegotiationMockTest : public testing::Test {
+class P2pNegotiationTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
@@ -42,7 +42,7 @@ public:
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pLinkNeoConnRequestProcTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pLinkNeoConnRequestProcTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkNeoConnRequestProcTest001, Start");
     NegotiationMock negotiationMock;
@@ -90,7 +90,7 @@ bool ActionOfGetJsonObjectNumberItemTwo(const cJSON *json, const char * const st
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pLinkNeoConnResponseProcTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pLinkNeoConnResponseProcTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pLinkNeoConnResponseProcTest001, Start");
     NegotiationMock negotiationMock;
@@ -125,7 +125,7 @@ HWTEST_F(P2pNegotiationMockTest, P2pLinkNeoConnResponseProcTest001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, RoleNegoStateProcessTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, RoleNegoStateProcessTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RoleNegoStateProcessTest001, Start");
     NegotiationMock negotiationMock;
@@ -163,7 +163,7 @@ HWTEST_F(P2pNegotiationMockTest, RoleNegoStateProcessTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, IsSamePeerDeviceTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, IsSamePeerDeviceTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "IsSamePeerDeviceTest001, Start");
     NegotiationMock negotiationMock;
@@ -186,7 +186,7 @@ HWTEST_F(P2pNegotiationMockTest, IsSamePeerDeviceTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, RoleNegoStateOnResponseRecvTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, RoleNegoStateOnResponseRecvTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "RoleNegoStateOnResponseRecvTest001, Start");
     NegotiationMock negotiationMock;
@@ -216,7 +216,7 @@ HWTEST_F(P2pNegotiationMockTest, RoleNegoStateOnResponseRecvTest001, TestSize.Le
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, ConnectingStateProcessTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, ConnectingStateProcessTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectingStateProcessTest001, Start");
     NegotiationMock negotiationMock;
@@ -251,7 +251,7 @@ HWTEST_F(P2pNegotiationMockTest, ConnectingStateProcessTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, ConnectingStateOnConnectStateChangedTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, ConnectingStateOnConnectStateChangedTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ConnectingStateOnConnectStateChangedTest001, Start");
     NegotiationMock negotiationMock;
@@ -282,7 +282,7 @@ HWTEST_F(P2pNegotiationMockTest, ConnectingStateOnConnectStateChangedTest001, Te
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, GroupCreateStateProcessTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, GroupCreateStateProcessTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "GroupCreateStateProcessTest001, Start");
     NegotiationMock negotiationMock;
@@ -324,7 +324,7 @@ HWTEST_F(P2pNegotiationMockTest, GroupCreateStateProcessTest001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, WaitConnectStateProcessTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, WaitConnectStateProcessTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WaitConnectStateProcessTest001, Start");
     NegotiationMock negotiationMock;
@@ -362,16 +362,16 @@ HWTEST_F(P2pNegotiationMockTest, WaitConnectStateProcessTest001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation001, Start");
     ExceptionBranchChecker checkerOne("idle state enter");
     IdleStateEnter();
     EXPECT_EQ(checkerOne.GetResult(), true);
     ExceptionBranchChecker checkerTwo("idle state exit");
     IdleStateExit();
     EXPECT_EQ(checkerTwo.GetResult(), true);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation001, End");
 }
 
 /*
@@ -380,16 +380,16 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation002, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation002, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation002, Start");
     ExceptionBranchChecker checkerOne("role negotiation state enter");
     RoleNegoStateEnter();
     EXPECT_EQ(checkerOne.GetResult(), true);
     ExceptionBranchChecker checkerTwo("role negotiation state exit");
     RoleNegoStateExit();
     EXPECT_EQ(checkerTwo.GetResult(), true);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation002, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation002, End");
 }
 
 /*
@@ -398,16 +398,16 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation003, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation003, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation003, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation003, Start");
     ExceptionBranchChecker checkerOne("group create state enter");
     GroupCreateStateEnter();
     EXPECT_EQ(checkerOne.GetResult(), true);
     ExceptionBranchChecker checkerTwo("group create state exit");
     GroupCreateStateExit();
     EXPECT_EQ(checkerTwo.GetResult(), true);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation003, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation003, End");
 }
 
 /*
@@ -416,16 +416,16 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation004, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation004, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation004, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation004, Start");
     ExceptionBranchChecker checkerOne("wait connect state enter");
     WaitConnectStateEnter();
     EXPECT_EQ(checkerOne.GetResult(), true);
     ExceptionBranchChecker checkerTwo("wait connect state enter");
     WaitConnectStateEnter();
     EXPECT_EQ(checkerTwo.GetResult(), true);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation004, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation004, End");
 }
 
 /*
@@ -434,16 +434,16 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation005, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation005, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation005, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation005, Start");
     ExceptionBranchChecker checkerOne("connecting state enter");
     ConnectingStateEnter();
     EXPECT_EQ(checkerOne.GetResult(), true);
     ExceptionBranchChecker checkerTwo("connecting state exit");
     ConnectingStateExit();
     EXPECT_EQ(checkerTwo.GetResult(), true);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation005, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation005, End");
 }
 
 /*
@@ -452,16 +452,16 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation006, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation006, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation006, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation006, Start");
     ExceptionBranchChecker checkerOne("dhcp state enter");
     DhcpStateEnter();
     EXPECT_EQ(checkerOne.GetResult(), true);
     ExceptionBranchChecker checkerTwo("dhcp state exit");
     DhcpStateExit();
     EXPECT_EQ(checkerTwo.GetResult(), true);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation006, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation006, End");
 }
 
 /*
@@ -470,9 +470,9 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation007, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation007, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation007, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation007, Start");
     NegotiationMock negotiationMock;
     negotiationMock.SetupSuccessStub();
     EXPECT_CALL(negotiationMock, P2pLinkGetDhcpState).WillRepeatedly(Return(true));
@@ -482,7 +482,7 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation007, TestSize.Level1)
     EXPECT_CALL(negotiationMock, P2pLinkGetDhcpState).WillRepeatedly(Return(false));
     ret = GetConnectTimeout();
     EXPECT_EQ(P2PLINK_NEG_TIMEOUT, ret);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation007, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation007, End");
 }
 
 /*
@@ -491,9 +491,9 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation008, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation008, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation008, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation008, Start");
     char myGoMac[P2P_MAC_LEN] = {0};
     char peerGoMac[P2P_MAC_LEN] = {1};
     int32_t ret = DecideMyRoleAsGO(ROLE_GO, ROLE_GO, myGoMac, peerGoMac, false);
@@ -508,7 +508,7 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation008, TestSize.Level1)
     EXPECT_EQ(ERROR_AVAILABLE_WITH_MISMATCHED_ROLE, ret);
     ret = DecideMyRoleAsGO(ROLE_NONE, ROLE_NONE, nullptr, nullptr, false);
     EXPECT_EQ(ROLE_GO, ret);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation008, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation008, End");
 }
 
 /*
@@ -517,9 +517,9 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation009, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation009, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation009, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation009, Start");
     char myGoMac[P2P_MAC_LEN] = {0};
     char peerGoMac[P2P_MAC_LEN] = {1};
     int32_t ret = DecideMyRoleAsGC(ROLE_GO, ROLE_GO, myGoMac, myGoMac, false);
@@ -536,7 +536,7 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation009, TestSize.Level1)
     EXPECT_EQ(ROLE_BRIDGE_GC, ret);
     ret = DecideMyRoleAsGC(ROLE_NONE, ROLE_GO, nullptr, nullptr, true);
     EXPECT_EQ(ERROR_AVAILABLE_WITH_MISMATCHED_ROLE, ret);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation009, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation009, End");
 }
 
 /*
@@ -545,9 +545,9 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation009, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, P2pNegotiation010, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, P2pNegotiation010, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation010, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation010, Start");
     int32_t ret = DecideMyRoleAsNone(ROLE_GO, ROLE_GC, nullptr, nullptr, false);
     EXPECT_EQ(ERROR_AVAILABLE_WITH_MISMATCHED_ROLE, ret);
     ret = DecideMyRoleAsNone(ROLE_GO, ROLE_GO, nullptr, nullptr, false);
@@ -560,7 +560,7 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation010, TestSize.Level1)
     EXPECT_EQ(ROLE_GO, ret);
     ret = DecideMyRoleAsNone(ROLE_NONE, ROLE_GO, nullptr, nullptr, true);
     EXPECT_EQ(ROLE_GC, ret);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationMockTest, P2pNegotiation010, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pNegotiationTest, P2pNegotiation010, End");
 }
 
 /*
@@ -569,7 +569,7 @@ HWTEST_F(P2pNegotiationMockTest, P2pNegotiation010, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, DhcpStateProcessTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, DhcpStateProcessTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "DhcpStateProcessTest001, Start");
     NegotiationMock negotiationMock;
@@ -602,7 +602,7 @@ HWTEST_F(P2pNegotiationMockTest, DhcpStateProcessTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, PackAndSendMsgTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, PackAndSendMsgTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "PackAndSendMsgTest001, Start");
     NegotiationMock negotiationMock;
@@ -635,7 +635,7 @@ HWTEST_F(P2pNegotiationMockTest, PackAndSendMsgTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, FillResponseInfoTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, FillResponseInfoTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "FillResponseInfoTest001, Start");
     NegotiationMock negotiationMock;
@@ -668,7 +668,7 @@ HWTEST_F(P2pNegotiationMockTest, FillResponseInfoTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, FillRequestInfoTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, FillRequestInfoTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "FillRequestInfoTest001, Start");
     NegotiationMock negotiationMock;
@@ -697,7 +697,7 @@ HWTEST_F(P2pNegotiationMockTest, FillRequestInfoTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, PostConnRequestTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, PostConnRequestTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "PostConnRequestTest001, Start");
     NegotiationMock negotiationMock;
@@ -729,7 +729,7 @@ HWTEST_F(P2pNegotiationMockTest, PostConnRequestTest001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pNegotiationMockTest, IdleStateProcessTest001, TestSize.Level1)
+HWTEST_F(P2pNegotiationTest, IdleStateProcessTest001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "IdleStateProcessTest001, Start");
     NegotiationMock negotiationMock;

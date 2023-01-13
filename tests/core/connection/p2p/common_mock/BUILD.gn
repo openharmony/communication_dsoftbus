@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import("//foundation/communication/dsoftbus/tests/utils/utils.gni")
 
 module_output_path = "dsoftbus/connection"
 
-ohos_unittest("P2pCommonMockTest") {
+ohos_unittest("P2pCommonTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/connection/p2p/common/src/p2plink_common.c",
@@ -86,5 +86,5 @@ ohos_unittest("P2pCommonMockTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":P2pCommonMockTest" ]
+  deps = [ ":P2pCommonTest" ]
 }
