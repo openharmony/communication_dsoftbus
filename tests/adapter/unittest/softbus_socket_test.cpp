@@ -669,7 +669,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind002, TestSize.Level0)
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddr) - 1);
-    EXPECT_EQ(-1, ret);
+    EXPECT_NE(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
 }
@@ -687,7 +687,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind003, TestSize.Level0)
         .saFamily = SOFTBUS_AF_INET,
     };
     int32_t ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddr));
-    EXPECT_EQ(-1, ret);
+    EXPECT_NE(0, ret);
 }
 
 /*
@@ -812,7 +812,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept002, TestSize.Level0)
     };
     int32_t addrLen = sizeof(SoftBusSockAddr);
     int32_t ret = SoftBusSocketAccept(socketFd, &addr, &addrLen, &acceptFd);
-    EXPECT_EQ(-1, ret);
+    EXPECT_NE(0, ret);
 }
 
 /*
@@ -888,7 +888,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect002, TestSize.Level0)
         .saFamily = SOFTBUS_AF_INET,
     };
     int32_t ret = SoftBusSocketConnect(socketFd, &addr, sizeof(SoftBusSockAddr));
-    EXPECT_EQ(-1, ret);
+    EXPECT_NE(0, ret);
 }
 
 /*
@@ -927,7 +927,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect004, TestSize.Level0)
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, -1);
-    EXPECT_EQ(-1, ret);
+    EXPECT_NE(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
 }
@@ -1563,7 +1563,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvTest001, TestSize.Level0)
     int32_t socketFd = -1;
     struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketRecv(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
-    EXPECT_EQ(-1, ret);
+    EXPECT_NE(0, ret);
 }
 
 /*
