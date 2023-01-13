@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ static char *GetP2pInfoMsgTest(const P2pInfo *info)
     return msg;
 }
 
-class LnnP2pInfoTest : public testing::Test {
+class LNNP2pInfoTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -87,7 +87,7 @@ public:
     void TearDown();
 };
 
-void LnnP2pInfoTest::SetUpTestCase()
+void LNNP2pInfoTest::SetUpTestCase()
 {
     LooperInit();
     NiceMock<LnnTransInterfaceMock> transMock;
@@ -97,18 +97,18 @@ void LnnP2pInfoTest::SetUpTestCase()
     LnnInitP2p();
 }
 
-void LnnP2pInfoTest::TearDownTestCase()
+void LNNP2pInfoTest::TearDownTestCase()
 {
     LooperDeinit();
     LnnDeinitSyncInfoManager();
     LnnDeinitP2p();
 }
 
-void LnnP2pInfoTest::SetUp()
+void LNNP2pInfoTest::SetUp()
 {
 }
 
-void LnnP2pInfoTest::TearDown()
+void LNNP2pInfoTest::TearDown()
 {
 }
 
@@ -118,7 +118,7 @@ void LnnP2pInfoTest::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
+HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     ON_CALL(netLedgerMock, LnnSetP2pRole).WillByDefault(Return(SOFTBUS_OK));
@@ -149,7 +149,7 @@ HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_002, TestSize.Level1)
+HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnTransInterfaceMock> transMock;
@@ -196,7 +196,7 @@ HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnP2pInfoTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
+HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnTransInterfaceMock> transMock;

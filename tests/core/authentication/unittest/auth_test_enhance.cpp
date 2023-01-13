@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@ const AuthVerifyCallback g_callback = {
 };
 static const int MILLIS = 15;
 
-class AuthTestEnhance : public testing::Test {
+class AuthEnhanceMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -62,26 +62,26 @@ public:
     void TearDown();
 };
 
-void AuthTestEnhance::SetUpTestCase()
+void AuthEnhanceMockTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("AuthTestEnhance");
+    SetAceessTokenPermission("AuthEnhanceMockTest");
     LooperInit();
     AuthCommonInit();
 }
 
-void AuthTestEnhance::TearDownTestCase()
+void AuthEnhanceMockTest::TearDownTestCase()
 {
     SoftBusSleepMs(MILLIS);
     AuthCommonDeinit();
     LooperDeinit();
 }
 
-void AuthTestEnhance::SetUp()
+void AuthEnhanceMockTest::SetUp()
 {
     LOG_INFO("AuthTest start.");
 }
 
-void AuthTestEnhance::TearDown() {}
+void AuthEnhanceMockTest::TearDown() {}
 
 void AuthInitMock(LnnConnectInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock, GroupAuthManager authManager,
     DeviceGroupManager groupManager)
@@ -101,7 +101,7 @@ void AuthInitMock(LnnConnectInterfaceMock &connMock, LnnHichainInterfaceMock &hi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, AUTH_START_LISTENING_Test_001, TestSize.Level0)
+HWTEST_F(AuthEnhanceMockTest, AUTH_START_LISTENING_Test_001, TestSize.Level0)
 {
     LnnConnectInterfaceMock connMock;
     {
@@ -126,7 +126,7 @@ HWTEST_F(AuthTestEnhance, AUTH_START_LISTENING_Test_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
+HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
 {
     const char *udid = "1111222233334444";
     const char *uid = "8888";
@@ -146,7 +146,7 @@ HWTEST_F(AuthTestEnhance, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, AUTH_HICHAIN_GET_JOINED_GROUPS_Test_001, TestSize.Level1)
+HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_GET_JOINED_GROUPS_Test_001, TestSize.Level1)
 {
     LnnHichainInterfaceMock hichainMock;
     DeviceGroupManager groupManager;
@@ -165,7 +165,7 @@ HWTEST_F(AuthTestEnhance, AUTH_HICHAIN_GET_JOINED_GROUPS_Test_001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, AUTH_INIT_Test_001, TestSize.Level0)
+HWTEST_F(AuthEnhanceMockTest, AUTH_INIT_Test_001, TestSize.Level0)
 {
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
@@ -182,7 +182,7 @@ HWTEST_F(AuthTestEnhance, AUTH_INIT_Test_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1)
+HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1)
 {
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
@@ -205,7 +205,7 @@ HWTEST_F(AuthTestEnhance, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1)
+HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1)
 {
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
@@ -231,7 +231,7 @@ HWTEST_F(AuthTestEnhance, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1)
+HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1)
 {
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
@@ -261,7 +261,7 @@ HWTEST_F(AuthTestEnhance, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTestEnhance, CLINET_CONN_FAILED_001, TestSize.Level1)
+HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
 {
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;

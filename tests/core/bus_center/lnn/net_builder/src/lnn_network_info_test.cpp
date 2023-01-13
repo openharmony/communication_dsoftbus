@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ constexpr int32_t CHANNELID = 2;
 constexpr uint32_t LEN = 10;
 constexpr char UUID[SHA_256_HEX_HASH_LEN] = "abc";
 
-class LnnNetworkInfoTest : public testing::Test {
+class LNNNetworkInfoTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -48,7 +48,7 @@ public:
     void TearDown();
 };
 
-void LnnNetworkInfoTest::SetUpTestCase()
+void LNNNetworkInfoTest::SetUpTestCase()
 {
     LooperInit();
     NiceMock<LnnTransInterfaceMock> transMock;
@@ -59,17 +59,17 @@ void LnnNetworkInfoTest::SetUpTestCase()
     EXPECT_EQ(LnnInitSyncInfoManager(), SOFTBUS_OK);
 }
 
-void LnnNetworkInfoTest::TearDownTestCase()
+void LNNNetworkInfoTest::TearDownTestCase()
 {
     LnnDeinitSyncInfoManager();
     LooperDeinit();
 }
 
-void LnnNetworkInfoTest::SetUp()
+void LNNNetworkInfoTest::SetUp()
 {
 }
 
-void LnnNetworkInfoTest::TearDown()
+void LNNNetworkInfoTest::TearDown()
 {
 }
 
@@ -101,7 +101,7 @@ void InitMock(LnnNetLedgertInterfaceMock &netLedgerMock, LnnServicetInterfaceMoc
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level1)
+HWTEST_F(LNNNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock>  netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -144,7 +144,7 @@ HWTEST_F(LnnNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require: I5PRUD
 */
-HWTEST_F(LnnNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_001, TestSize.Level1)
+HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock>  netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;

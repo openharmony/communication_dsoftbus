@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ namespace OHOS {
 using namespace testing::ext;
 constexpr char NODE_UDID[] = "123456ABCDEF";
 using namespace testing;
-class DecisionDbTest : public testing::Test {
+class LNNDbMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -38,22 +38,22 @@ public:
     void TearDown();
 };
 
-void DecisionDbTest::SetUpTestCase()
+void LNNDbMockTest::SetUpTestCase()
 {
 }
 
-void DecisionDbTest::TearDownTestCase()
+void LNNDbMockTest::TearDownTestCase()
 {
 }
 
-void DecisionDbTest::SetUp()
+void LNNDbMockTest::SetUp()
 {
-    LOG_INFO("DecisionDbTest start.");
+    LOG_INFO("LNNDbMockTest start.");
 }
 
-void DecisionDbTest::TearDown()
+void LNNDbMockTest::TearDown()
 {
-    LOG_INFO("DecisionDbTest finish.");
+    LOG_INFO("LNNDbMockTest finish.");
 }
 
 /*
@@ -62,7 +62,7 @@ void DecisionDbTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -76,7 +76,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -92,7 +92,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_003, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_003, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -109,7 +109,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_004, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_004, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -128,7 +128,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_005, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_005, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -148,7 +148,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_006, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_006, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -169,7 +169,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_007, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_007, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -191,7 +191,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_008, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_008, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -210,7 +210,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_009, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_009, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -230,7 +230,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_009, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_010, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_010, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -251,7 +251,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_010, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_011, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_011, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -272,7 +272,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_011, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -294,7 +294,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_013, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_013, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -320,7 +320,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_013, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_014, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_014, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -347,7 +347,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_014, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_015, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_015, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -375,7 +375,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_015, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGenerateKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -403,7 +403,7 @@ HWTEST_F(DecisionDbTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnInsertSpecificTrustedDevInfo(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -419,7 +419,7 @@ HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -433,7 +433,7 @@ HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -449,7 +449,7 @@ HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -466,7 +466,7 @@ HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -484,7 +484,7 @@ HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -504,7 +504,7 @@ HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -524,7 +524,7 @@ HWTEST_F(DecisionDbTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
 {
     int32_t ret = LnnDeleteSpecificTrustedDevInfo(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -540,7 +540,7 @@ HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -554,7 +554,7 @@ HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -570,7 +570,7 @@ HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -588,7 +588,7 @@ HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -606,7 +606,7 @@ HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -626,7 +626,7 @@ HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
 {
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
@@ -646,7 +646,7 @@ HWTEST_F(DecisionDbTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
 {
     char *udid = nullptr;
     uint32_t num = 0;
@@ -664,7 +664,7 @@ HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
 {
     char *udid = nullptr;
     uint32_t num = 0;
@@ -681,7 +681,7 @@ HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
 {
     char *udid = nullptr;
     uint32_t num = 0;
@@ -699,7 +699,7 @@ HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
 {
     char *udid = nullptr;
     uint32_t num = 0;
@@ -719,7 +719,7 @@ HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
 {
     char *udid = nullptr;
     uint32_t num = 0;
@@ -744,7 +744,7 @@ HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
 {
     char *udid = nullptr;
     uint32_t num = 0;
@@ -770,7 +770,7 @@ HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DecisionDbTest, LNN_GET_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
+HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
 {
     char *udid = nullptr;
     uint32_t num = 0;
