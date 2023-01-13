@@ -69,11 +69,11 @@ const int32_t TEST_SUBSCRIBEINNER_ID1 = 7;
 const int32_t TEST_SUBSCRIBE_ID1 = 8;
 const int32_t TEST_BITMAP_CAP = 127;
 
-class Disc_ManagerTest : public testing::Test {
+class DiscManagerTest : public testing::Test {
 public:
-    Disc_ManagerTest()
+    DiscManagerTest()
     {}
-    ~Disc_ManagerTest()
+    ~DiscManagerTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -83,10 +83,10 @@ public:
     {}
 };
 
-void Disc_ManagerTest::SetUpTestCase(void)
+void DiscManagerTest::SetUpTestCase(void)
 {}
 
-void Disc_ManagerTest::TearDownTestCase(void)
+void DiscManagerTest::TearDownTestCase(void)
 {}
 
 static int32_t TestDeviceFound(const char *packageName, const DeviceInfo *device,
@@ -294,7 +294,7 @@ static SubscribeInfo g_sInfo1 = {
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscPublish(MODULE_CONN, &g_pInnerInfo);
@@ -309,7 +309,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest002, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -359,7 +359,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -381,7 +381,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -403,7 +403,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -428,7 +428,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -473,7 +473,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -518,7 +518,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest008, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -563,7 +563,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest009, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -608,7 +608,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest010, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -653,7 +653,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest011, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest011, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -698,7 +698,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest012, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest012, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -740,7 +740,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest013, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest013, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -782,7 +782,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest014, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest014, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -824,7 +824,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest014, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscPublishTest015, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscPublishTest015, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISHINNER_ID,
@@ -867,7 +867,7 @@ HWTEST_F(Disc_ManagerTest, DiscPublishTest015, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscStartScan(MODULE_CONN, &g_pInnerInfo);
@@ -882,7 +882,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest002, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISHINNER_ID,
@@ -930,7 +930,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -949,7 +949,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -968,7 +968,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -993,7 +993,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1035,7 +1035,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1077,7 +1077,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStartScan operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartScanTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartScanTest008, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1119,7 +1119,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartScanTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscStartAdvertise(MODULE_CONN, &g_sInnerInfo);
@@ -1134,7 +1134,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1184,7 +1184,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -1203,7 +1203,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -1222,7 +1222,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest005, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1264,7 +1264,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1306,7 +1306,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1348,7 +1348,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest008, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1373,7 +1373,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest009, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1418,7 +1418,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest010, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1463,7 +1463,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest011, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest011, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1508,7 +1508,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest012, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest012, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1553,7 +1553,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest013, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest013, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1598,7 +1598,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest014, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest014, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1643,7 +1643,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest014, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest015, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest015, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1688,7 +1688,7 @@ HWTEST_F(Disc_ManagerTest, DiscStartAdvertiseTest015, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscSubscribe(MODULE_CONN, &g_sInnerInfo);
@@ -1703,7 +1703,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest002, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -1753,7 +1753,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -1772,7 +1772,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -1791,7 +1791,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest005, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -1811,7 +1811,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1855,7 +1855,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1899,7 +1899,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscSubscribe operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSubscribeTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSubscribeTest008, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -1926,7 +1926,7 @@ HWTEST_F(Disc_ManagerTest, DiscSubscribeTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscUnpublish(MODULE_CONN, TEST_PUBLISHINNER_ID);
@@ -1941,7 +1941,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest002, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -1961,7 +1961,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -1981,7 +1981,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2003,7 +2003,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUppublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest005, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2023,7 +2023,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest006, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2040,7 +2040,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2085,7 +2085,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest008, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2130,7 +2130,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest009, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2175,7 +2175,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest010, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2220,7 +2220,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest011, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest011, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2265,7 +2265,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnpublish operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscUnpublishTest012, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscUnpublishTest012, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2310,7 +2310,7 @@ HWTEST_F(Disc_ManagerTest, DiscUnpublishTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscStopAdvertise(MODULE_CONN, TEST_SUBSCRIBEINNER_ID);
@@ -2325,7 +2325,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest002, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2345,7 +2345,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2365,7 +2365,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2386,7 +2386,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest005, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2406,7 +2406,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest006, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2423,7 +2423,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -2470,7 +2470,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest008, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -2517,7 +2517,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest009, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -2564,7 +2564,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest010, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -2611,7 +2611,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest011, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest011, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -2658,7 +2658,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:The DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest012, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest012, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -2705,7 +2705,7 @@ HWTEST_F(Disc_ManagerTest, DiscStopAdvertiseTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscPublishService("pkgname1", &g_pInfo);
@@ -2720,7 +2720,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest002, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISH_ID,
@@ -2782,7 +2782,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2807,7 +2807,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -2827,7 +2827,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2863,7 +2863,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2899,7 +2899,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2935,7 +2935,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest008, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -2980,7 +2980,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest009, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -3025,7 +3025,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest010, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -3070,7 +3070,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest011, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest011, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -3115,7 +3115,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest012, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest012, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -3160,7 +3160,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, PublishServiceTest013, TestSize.Level1)
+HWTEST_F(DiscManagerTest, PublishServiceTest013, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -3205,7 +3205,7 @@ HWTEST_F(Disc_ManagerTest, PublishServiceTest013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscStartDiscovery("pkgname1", &g_sInfo, &g_subscribeCb);
@@ -3220,7 +3220,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest002, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBEINNER_ID,
@@ -3284,7 +3284,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -3309,7 +3309,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -3329,7 +3329,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest005, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -3367,7 +3367,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -3405,7 +3405,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -3443,7 +3443,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest008, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -3490,7 +3490,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest009, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -3537,7 +3537,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest010, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -3584,7 +3584,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest011, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest011, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBE_ID,
@@ -3630,7 +3630,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest012, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest012, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBE_ID,
@@ -3675,7 +3675,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StartDiscoveryTest013, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StartDiscoveryTest013, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {.subscribeId = TEST_SUBSCRIBE_ID,
@@ -3720,7 +3720,7 @@ HWTEST_F(Disc_ManagerTest, StartDiscoveryTest013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscUnPublishService("pkgname1", TEST_PUBLISH_ID);
@@ -3735,7 +3735,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest002, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -3761,7 +3761,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -3789,7 +3789,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -3810,7 +3810,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISH_ID,
@@ -3853,7 +3853,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISH_ID,
@@ -3896,7 +3896,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISH_ID,
@@ -3939,7 +3939,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest008, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISH_ID,
@@ -3982,7 +3982,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest009, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISH_ID,
@@ -4025,7 +4025,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscUnPublishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, UnPublishServiceTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, UnPublishServiceTest010, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {.publishId = TEST_PUBLISH_ID,
@@ -4068,7 +4068,7 @@ HWTEST_F(Disc_ManagerTest, UnPublishServiceTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest001, TestSize.Level1)
 {
     int ret;
     ret = DiscStopDiscovery("pkgname1", TEST_SUBSCRIBE_ID);
@@ -4083,7 +4083,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest002, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -4109,7 +4109,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest003, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -4137,7 +4137,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest004, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -4158,7 +4158,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest005, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -4205,7 +4205,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest006, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -4252,7 +4252,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest007, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest007, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -4299,7 +4299,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest008, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest008, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -4346,7 +4346,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest009, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest009, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -4393,7 +4393,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, StopDiscoveryTest010, TestSize.Level1)
+HWTEST_F(DiscManagerTest, StopDiscoveryTest010, TestSize.Level1)
 {
     int ret;
     SubscribeInfo testInfo = {
@@ -4440,7 +4440,7 @@ HWTEST_F(Disc_ManagerTest, StopDiscoveryTest010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: DiscSetDiscoverCallback and DiscStartAdvertise and DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest001, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -4465,7 +4465,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: DiscStartAdvertise and DiscSetDiscoverCallback and DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest002, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -4490,7 +4490,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
 {
     int ret;
     DeviceInfo devInfo;
@@ -4511,7 +4511,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: DiscStartAdvertise and DiscSetDiscoverCallback and DiscStopAdvertise operates normally
  */
-HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
 {
     int ret;
     DeviceInfo devInfo;
@@ -4540,7 +4540,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: DiscStartAdvertise and DiscStopAdvertise operates normally
  */
-HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
 {
     int ret;
     DeviceInfo devInfo;
@@ -4566,7 +4566,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: DiscStartAdvertise and DiscSetDiscoverCallback and DiscStopAdvertise operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest006, TestSize.Level1)
 {
     int ret;
     DiscMgrInit();
@@ -4591,7 +4591,7 @@ HWTEST_F(Disc_ManagerTest, DiscSetDiscoverCallbackTest006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_SendMsgDirect operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_SendMsgDirectTest001, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
     ASSERT_TRUE(muduleName != nullptr);
@@ -4620,7 +4620,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_SendMsgDirect operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_SendMsgDirectTest002, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
     ASSERT_TRUE(muduleName != nullptr);
@@ -4647,7 +4647,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_SendMsgDirect operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_SendMsgDirectTest003, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
     ASSERT_TRUE(muduleName != nullptr);
@@ -4673,7 +4673,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgDirectTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_SendMsg operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_SendMsgTest001, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
     ASSERT_TRUE(muduleName != nullptr);
@@ -4699,7 +4699,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_SendMsg operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_SendMsgTest002, TestSize.Level1)
 {
     NSTACKX_Parameter g_parameter;
     int32_t ret;
@@ -4718,7 +4718,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_SendMsg operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_SendMsgTest003, TestSize.Level1)
 {
     const char *muduleName = (const char *)malloc(sizeof(char));
     ASSERT_TRUE(muduleName != nullptr);
@@ -4741,7 +4741,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_SendMsgTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapStopDiscoveryTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapStopDiscoveryTest001, TestSize.Level1)
 {
     int ret;
     const uint32_t cap_bitmap_1 = 1;
@@ -4761,7 +4761,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapStopDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapStopDiscoveryTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapStopDiscoveryTest002, TestSize.Level1)
 {
     int ret;
     const uint32_t cap_bitmap_1 = 1;
@@ -4780,7 +4780,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapStopDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapStopDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapStopDiscoveryTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapStopDiscoveryTest003, TestSize.Level1)
 {
     int ret;
     const uint32_t cap_bitmap_1 = 1;
@@ -4798,7 +4798,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapStopDiscoveryTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDevice operates normally.
  */
-HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, RegisterDeviceInfoTest001, TestSize.Level1)
 {
     int ret;
     const char *device_name = "TEST";
@@ -4834,7 +4834,7 @@ HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDevice operates normally.
  */
-HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, RegisterDeviceInfoTest002, TestSize.Level1)
 {
     int ret;
     NSTACKX_LocalDeviceInfo *localDevInfo = (NSTACKX_LocalDeviceInfo *)malloc(sizeof(NSTACKX_LocalDeviceInfo));
@@ -4853,7 +4853,7 @@ HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDevice operates normally.
  */
-HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, RegisterDeviceInfoTest003, TestSize.Level1)
 {
     int ret;
     const char *device_name = "TEST";
@@ -4889,7 +4889,7 @@ HWTEST_F(Disc_ManagerTest, RegisterDeviceInfoTest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapUnpulbishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapPulbishServiceTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapPulbishServiceTest001, TestSize.Level1)
 {
     int ret;
     const uint32_t pub_cap_bitmap_2 = 6;
@@ -4909,7 +4909,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapPulbishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapUnpulbishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapPulbishServiceTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapPulbishServiceTest002, TestSize.Level1)
 {
     int ret;
     const uint32_t pub_cap_bitmap_1 = 1;
@@ -4929,7 +4929,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapPulbishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapStartDiscoveryTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapStartDiscoveryTest001, TestSize.Level1)
 {
     int ret;
     const uint32_t filter_cap_bitmap_2 = 4;
@@ -4949,7 +4949,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapStartDiscoveryTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapStartDiscovery operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapStartDiscoveryTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapStartDiscoveryTest002, TestSize.Level1)
 {
     int ret;
     const uint32_t filter_cap_bitmap_1 = 1;
@@ -4969,7 +4969,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapStartDiscoveryTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapUnpulbishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapUnpulbishServiceTest001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest001, TestSize.Level1)
 {
     int ret;
     const uint32_t pub_cap_bitmap_2 = 6;
@@ -4989,7 +4989,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapUnpulbishServiceTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DiscCoapUnpulbishService operates normally.
  */
-HWTEST_F(Disc_ManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
 {
     int ret;
     const uint32_t pub_cap_bitmap_1 = 1;
@@ -5009,7 +5009,7 @@ HWTEST_F(Disc_ManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_GetDeviceList operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_Test001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_Test001, TestSize.Level1)
 {
     NSTACKX_DeviceInfo deviceList;
     uint32_t deviceCountPtr = 0;
@@ -5036,7 +5036,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_Test001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_GetDeviceList operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_Test002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_Test002, TestSize.Level1)
 {
     NSTACKX_DeviceInfo deviceList;
     uint32_t deviceCountPtr = NSTACKX_MAX_DEVICE_NUM;
@@ -5064,7 +5064,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_Test002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDeviceAn operates normally.
  */
-HWTEST_F(Disc_ManagerTest, testNSTACKX_RegisterDeviceAn001, TestSize.Level1)
+HWTEST_F(DiscManagerTest, testNSTACKX_RegisterDeviceAn001, TestSize.Level1)
 {
     int32_t ret;
     NSTACKX_Parameter g_parameter;
@@ -5083,7 +5083,7 @@ HWTEST_F(Disc_ManagerTest, testNSTACKX_RegisterDeviceAn001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDeviceAn operates normally.
  */
-HWTEST_F(Disc_ManagerTest, testNSTACKX_RegisterDeviceAn002, TestSize.Level1)
+HWTEST_F(DiscManagerTest, testNSTACKX_RegisterDeviceAn002, TestSize.Level1)
 {
     int32_t ret;
 
@@ -5099,7 +5099,7 @@ HWTEST_F(Disc_ManagerTest, testNSTACKX_RegisterDeviceAn002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDeviceAn operates normally.
  */
-HWTEST_F(Disc_ManagerTest, testNSTACKX_RegisterDeviceAn003, TestSize.Level1)
+HWTEST_F(DiscManagerTest, testNSTACKX_RegisterDeviceAn003, TestSize.Level1)
 {
     int32_t ret;
     NSTACKX_Parameter g_parameter;
@@ -5119,7 +5119,7 @@ HWTEST_F(Disc_ManagerTest, testNSTACKX_RegisterDeviceAn003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDeviceAn operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_RegisterCapability004, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_RegisterCapability004, TestSize.Level1)
 {
     int32_t ret;
     uint32_t mapNum = 3;
@@ -5141,7 +5141,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_RegisterCapability004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDeviceAn operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_RegisterCapability005, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_RegisterCapability005, TestSize.Level1)
 {
     int32_t ret;
 
@@ -5157,7 +5157,7 @@ HWTEST_F(Disc_ManagerTest, NSTACKX_RegisterCapability005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The NSTACKX_RegisterDeviceAn operates normally.
  */
-HWTEST_F(Disc_ManagerTest, NSTACKX_RegisterCapability006, TestSize.Level1)
+HWTEST_F(DiscManagerTest, NSTACKX_RegisterCapability006, TestSize.Level1)
 {
     int32_t ret;
     uint32_t mapNum = 3;
