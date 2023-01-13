@@ -175,7 +175,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
       "$softbus_adapter_common/log/softbus_adapter_log.c",
     ]
-    public_deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+    public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
     native_source_path = rebase_path("$dsoftbus_root_path")
 

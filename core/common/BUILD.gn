@@ -169,7 +169,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "//third_party/cJSON:cjson_static",
+      "//third_party/cJSON:cjson",
       "//third_party/sqlite:sqlite",
     ]
     if (!enhanced) {
