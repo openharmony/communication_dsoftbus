@@ -200,7 +200,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**

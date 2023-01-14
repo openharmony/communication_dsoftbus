@@ -77,8 +77,6 @@ NO_SANITIZE("cfi") static int32_t ClientTdcOnDataEvent(ListenerModule module, in
         }
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client cId[%d] process data fail,", channelId);
-            TransDelDataBufNode(channelId);
-            TransTdcCloseChannel(channelId);
             ClientTransTdcOnSessionClosed(channelId);
             return SOFTBUS_ERR;
         }
