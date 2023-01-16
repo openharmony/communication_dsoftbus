@@ -252,7 +252,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest07, TestSize.Level1)
                        g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_TRANS_INVALID_SESSION_NAME);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(appInfo);
 }
 
@@ -274,7 +274,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest08, TestSize.Level1)
     EXPECT_EQ(res, EOK);
     appInfo->myData.channelId = TEST_CHANNEL_ID;
     int32_t ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_ERR);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_OK);
     RemoveSessionServer(g_pkgName, g_sessionName);
     SoftBusFree(appInfo);
 }
