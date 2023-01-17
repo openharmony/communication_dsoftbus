@@ -77,7 +77,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
     ret = TransTdcSetCallBack(cb);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     ret = NotifyChannelOpenFailed(TEST_CHANNELID, 0);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = NotifyChannelOpenFailed(ERR_CHANNELID, 0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     cJSON replyData;

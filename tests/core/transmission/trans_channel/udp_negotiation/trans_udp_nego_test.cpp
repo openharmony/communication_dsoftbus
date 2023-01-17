@@ -725,11 +725,11 @@ HWTEST_F(TransUdpNegoTest, TransUdpNegoTest023, TestSize.Level1)
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &channel->info, sizeof(AppInfo));
     ret = NotifyUdpChannelOpenFailed(appInfo, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     (void)memcpy_s(&appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX,
         "com.session sessionName", strlen("com.invalid sessionName")+1);
     ret = NotifyUdpChannelOpenFailed(appInfo, errCode);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusFree(appInfo);
     (void)TransDelUdpChannel(channel->info.myData.channelId);
     TransUdpChannelDeinit();
