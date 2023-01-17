@@ -17,7 +17,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 ohos_unittest("TransIpcStandardTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/trans_ipc_test.cpp" ]
+  sources = [ "trans_ipc_test.cpp" ]
   include_dirs = [
     "$dsoftbus_root_path/core/common/inner_communication",
     "$dsoftbus_root_path/core/common/include",
@@ -36,6 +36,7 @@ ohos_unittest("TransIpcStandardTest") {
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "unittest/common/",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
   ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
