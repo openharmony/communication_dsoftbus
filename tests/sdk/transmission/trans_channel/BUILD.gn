@@ -181,7 +181,7 @@ if (defined(ohos_lite)) {
   }
 
   module_output_path = "dsoftbus/transmission"
-  ohos_unittest("ClientTransProxyTest") {
+  ohos_unittest("ClientTransPendingTest") {
     module_out_path = module_output_path
     sources = [ "proxy/client_trans_pending_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -405,10 +405,10 @@ if (defined(ohos_lite)) {
     deps = [
       ":ClientTransChannelCallbackTest",
       ":ClientTransChannelManagerTest",
+      ":ClientTransPendingTest",
       ":ClientTransProxyFileCommonTest",
       ":ClientTransProxyFileManagerTest",
       ":ClientTransProxyManagerTest",
-      ":ClientTransProxyTest",
       ":ClientTransSessionImplTest",
       ":ClientTransUdpManagerStaticTest",
       ":ClientTransUdpManagerTest",

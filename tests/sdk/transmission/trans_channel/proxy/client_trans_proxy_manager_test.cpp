@@ -250,6 +250,8 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize.Level0)
 {
+    int32_t ret = ClinetTransProxyInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t channelId = 1;
     ClientTransProxyCloseChannel(TEST_CHANNEL_ID);
 

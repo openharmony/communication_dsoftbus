@@ -55,8 +55,6 @@ void ClientTransStreamTest::TearDownTestCase(void)
 HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
 {
     RegisterStreamCb(NULL);
-    EXPECT_EQ(SOFTBUS_ERR, SOFTBUS_ERR);
-
     UnregisterStreamCb();
     int32_t channelId = 12;
     int32_t status = 2;

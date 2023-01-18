@@ -75,7 +75,9 @@ HWTEST_F(StreamAdaptorTest, InitAdaptorTest001, TestSize.Level0)
     int32_t channelId = 1;
     std::shared_ptr<StreamAdaptor> adaptor = std::make_shared<StreamAdaptor>(g_pkgName);
     adaptor->InitAdaptor(channelId, &g_param, true, &g_callback);
+    EXPECT_EQ(adaptor->GetChannelId(), channelId);
     adaptor->InitAdaptor(channelId, &g_param, false, &g_callback);
+    EXPECT_EQ(adaptor->GetChannelId(), channelId);
     adaptor->ReleaseAdaptor();
 }
 

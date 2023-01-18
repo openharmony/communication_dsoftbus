@@ -32,17 +32,17 @@ using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
-class ClientTransProxyTest : public testing::Test {
+class ClientTransPendingTest : public testing::Test {
 public:
-    ClientTransProxyTest() {}
-    ~ClientTransProxyTest() {}
+    ClientTransPendingTest() {}
+    ~ClientTransPendingTest() {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override {}
     void TearDown() override {}
 };
 
-void ClientTransProxyTest::SetUpTestCase(void)
+void ClientTransPendingTest::SetUpTestCase(void)
 {
     int ret = InitPendingPacket();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -50,7 +50,7 @@ void ClientTransProxyTest::SetUpTestCase(void)
     ret = TransClientInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-void ClientTransProxyTest::TearDownTestCase(void) {}
+void ClientTransPendingTest::TearDownTestCase(void) {}
 
 /**
  * @tc.name: TransPendingTest001
@@ -58,7 +58,7 @@ void ClientTransProxyTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyTest, TransPendingTest, TestSize.Level0)
+HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level0)
 {
     uint32_t id = 1;
     uint64_t seq = 0;
