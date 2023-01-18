@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,6 +272,7 @@ HWTEST_F(ConnectionBleTest, BleConnectionRemoveMessageFunc, TestSize.Level1)
     SoftBusMessage *message = MallocMessage();
     message->what = BLE_CONNECTION_DISCONNECT_OUT;
     message->arg1 = clientId;
-    BleConnectionRemoveMessageFunc(message, &clientId);
+    int32_t ret = BleConnectionRemoveMessageFunc(message, &clientId);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 }

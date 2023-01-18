@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@ if (defined(ohos_lite)) {
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
   if (ohos_build_type == "debug") {
-    unittest("SeqVerificationTest") {
+    unittest("SequenceVerificationTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/tests/unittest/dsoftbus"
       sources = [ "unittest/sequence_verification_test.cpp" ]
@@ -34,7 +34,7 @@ if (defined(ohos_lite)) {
   import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
   module_output_path = "dsoftbus/common"
-  ohos_unittest("SeqVerificationTest") {
+  ohos_unittest("SequenceVerificationTest") {
     module_out_path = module_output_path
     sources = [ "unittest/sequence_verification_test.cpp" ]
 
@@ -48,6 +48,6 @@ if (defined(ohos_lite)) {
 
   group("unittest") {
     testonly = true
-    deps = [ ":SeqVerificationTest" ]
+    deps = [ ":SequenceVerificationTest" ]
   }
 }
