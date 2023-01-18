@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ using testing::NotNull;
 using testing::NiceMock;
 
 namespace OHOS {
-class DiscBleMockTest : public testing::Test {
+class DiscBleTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
@@ -58,7 +58,7 @@ public:
 static void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     DLOGI("OnDeviceFound: %s", device->devId);
-    DiscBleMockTest::g_foundDeviceInfo = *device;
+    DiscBleTest::g_foundDeviceInfo = *device;
 }
 
 static DiscInnerCallback g_discInnerCallback = {
@@ -71,8 +71,8 @@ static PublishOption GetPublishOptionForCastPlus()
 {
     PublishOption option {};
     option.freq = LOW;
-    option.capabilityData = reinterpret_cast<uint8_t *>(DiscBleMockTest::g_customCapData.data());
-    option.dataLen = DiscBleMockTest::g_customCapData.length();
+    option.capabilityData = reinterpret_cast<uint8_t *>(DiscBleTest::g_customCapData.data());
+    option.dataLen = DiscBleTest::g_customCapData.length();
 
     SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
     return option;
@@ -84,8 +84,8 @@ static SubscribeOption GetSubscribeOptionForCastPlus()
     option.freq = LOW;
     option.isSameAccount = false;
     option.isWakeRemote = false;
-    option.capabilityData = reinterpret_cast<uint8_t *>(DiscBleMockTest::g_customCapData.data());
-    option.dataLen = DiscBleMockTest::g_customCapData.length();
+    option.capabilityData = reinterpret_cast<uint8_t *>(DiscBleTest::g_customCapData.data());
+    option.dataLen = DiscBleTest::g_customCapData.length();
 
     SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
     return option;
@@ -97,8 +97,8 @@ static SubscribeOption GetSubscribeOptionForOsd()
     option.freq = LOW;
     option.isSameAccount = false;
     option.isWakeRemote = false;
-    option.capabilityData = reinterpret_cast<uint8_t *>(DiscBleMockTest::g_customCapData.data());
-    option.dataLen = DiscBleMockTest::g_customCapData.length();
+    option.capabilityData = reinterpret_cast<uint8_t *>(DiscBleTest::g_customCapData.data());
+    option.dataLen = DiscBleTest::g_customCapData.length();
 
     SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, OSD_CAPABILITY_BITMAP);
     return option;
@@ -110,7 +110,7 @@ static SubscribeOption GetSubscribeOptionForOsd()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, DiscBleInit001, TestSize.Level1)
+HWTEST_F(DiscBleTest, DiscBleInit001, TestSize.Level1)
 {
     DLOGI("DiscBleInit001 begin ----");
     BleMock bleMock;
@@ -132,7 +132,7 @@ HWTEST_F(DiscBleMockTest, DiscBleInit001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, DiscBleInit002, TestSize.Level1)
+HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
 {
     DLOGI("DiscBleInit002 begin ----");
     {
@@ -179,7 +179,7 @@ HWTEST_F(DiscBleMockTest, DiscBleInit002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, DiscBleInit003, TestSize.Level1)
+HWTEST_F(DiscBleTest, DiscBleInit003, TestSize.Level1)
 {
     DLOGI("DiscBleInit003 begin ----");
     BleMock bleMock;
@@ -196,7 +196,7 @@ HWTEST_F(DiscBleMockTest, DiscBleInit003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StartActiveDiscovery001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StartActiveDiscovery001, TestSize.Level1)
 {
     DLOGI("StartActiveDiscovery001 begin ----");
     NiceMock<BleMock> bleMock;
@@ -226,7 +226,7 @@ HWTEST_F(DiscBleMockTest, StartActiveDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StartActiveDiscovery002, TestSize.Level1)
+HWTEST_F(DiscBleTest, StartActiveDiscovery002, TestSize.Level1)
 {
     DLOGI("StartActiveDiscovery002 begin ----");
     BleMock bleMock;
@@ -250,7 +250,7 @@ HWTEST_F(DiscBleMockTest, StartActiveDiscovery002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, UpdateLocalDeviceInfo001, TestSize.Level1)
+HWTEST_F(DiscBleTest, UpdateLocalDeviceInfo001, TestSize.Level1)
 {
     DLOGI("UpdateLocalDeviceInfo001 begin ----");
     BleMock bleMock;
@@ -274,7 +274,7 @@ HWTEST_F(DiscBleMockTest, UpdateLocalDeviceInfo001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, ReceivePassivePublishPacket001, TestSize.Level1)
+HWTEST_F(DiscBleTest, ReceivePassivePublishPacket001, TestSize.Level1)
 {
     DLOGI("ReceivePassivePublishPacket001 begin ----");
     BleMock bleMock;
@@ -297,7 +297,7 @@ HWTEST_F(DiscBleMockTest, ReceivePassivePublishPacket001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StopActiveDiscovery001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StopActiveDiscovery001, TestSize.Level1)
 {
     DLOGI("StopActiveDiscovery001 begin ----");
     BleMock bleMock;
@@ -321,7 +321,7 @@ HWTEST_F(DiscBleMockTest, StopActiveDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StartPassiveDiscovery001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StartPassiveDiscovery001, TestSize.Level1)
 {
     DLOGI("StartPassiveDiscovery001 begin ----");
     BleMock bleMock;
@@ -349,7 +349,7 @@ HWTEST_F(DiscBleMockTest, StartPassiveDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StopPassiveDiscovery001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StopPassiveDiscovery001, TestSize.Level1)
 {
     DLOGI("StopPassiveDiscovery001 begin ----");
     BleMock bleMock;
@@ -374,7 +374,7 @@ HWTEST_F(DiscBleMockTest, StopPassiveDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StartActivePublish001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StartActivePublish001, TestSize.Level1)
 {
     DLOGI("StartActivePublish001 begin ----");
     BleMock bleMock;
@@ -397,7 +397,7 @@ HWTEST_F(DiscBleMockTest, StartActivePublish001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StopActivePublish001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StopActivePublish001, TestSize.Level1)
 {
     DLOGI("StopActivePublish001 begin ----");
     BleMock bleMock;
@@ -419,7 +419,7 @@ HWTEST_F(DiscBleMockTest, StopActivePublish001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StartPassivePublish001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StartPassivePublish001, TestSize.Level1)
 {
     DLOGI("StartPassivePublish001 begin ----");
     BleMock bleMock;
@@ -441,7 +441,7 @@ HWTEST_F(DiscBleMockTest, StartPassivePublish001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
+HWTEST_F(DiscBleTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
 {
     DLOGI("ReceiveActiveDiscoveryPacket001 begin ----");
     BleMock bleMock;
@@ -465,7 +465,7 @@ HWTEST_F(DiscBleMockTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, StopPassivePublish001, TestSize.Level1)
+HWTEST_F(DiscBleTest, StopPassivePublish001, TestSize.Level1)
 {
     DLOGI("StopPassivePublish001 begin ----");
     BleMock bleMock;
@@ -487,7 +487,7 @@ HWTEST_F(DiscBleMockTest, StopPassivePublish001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, IsConcernCapability001, TestSize.Level1)
+HWTEST_F(DiscBleTest, IsConcernCapability001, TestSize.Level1)
 {
     DLOGI("IsConcernCapability001 begin ----");
     uint32_t capability = 0;
@@ -511,7 +511,7 @@ HWTEST_F(DiscBleMockTest, IsConcernCapability001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DiscBleMockTest, DiscBleDeInit001, TestSize.Level1)
+HWTEST_F(DiscBleTest, DiscBleDeInit001, TestSize.Level1)
 {
     DLOGI("DiscBleDeInit001 begin ----");
     BleMock bleMock;
