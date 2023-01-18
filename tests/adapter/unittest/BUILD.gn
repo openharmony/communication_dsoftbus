@@ -48,7 +48,7 @@ if (defined(ohos_lite)) {
   defines += [ "HAVE_PRO = 0" ]
   module_output_path = "dsoftbus/adapter"
 
-  ohos_unittest("AdapterCryptTest") {
+  ohos_unittest("AdaptorDsoftbusCryptTest") {
     module_out_path = module_output_path
     sources = [ "dsoftbus_crypto_test.cpp" ]
     include_dirs = [
@@ -235,7 +235,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("AdapterFileTest") {
+  ohos_unittest("AdaptorDsoftbusFileTest") {
     module_out_path = module_output_path
     sources = [ "softbus_file_test.cpp" ]
     include_dirs = [
@@ -355,14 +355,14 @@ if (defined(ohos_lite)) {
   group("unittest") {
     testonly = true
     deps = [
-      ":AdapterCryptTest",
       ":AdapterDsoftbusDfxTest",
       ":AdapterDsoftbusOtherTest",
       ":AdapterDsoftbusRangeTest",
       ":AdapterDsoftbusSocketTest",
-      ":AdapterFileTest",
       ":AdapterThreadTest",
       ":AdapterTimeTest",
+      ":AdaptorDsoftbusCryptTest",
+      ":AdaptorDsoftbusFileTest",
     ]
     if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
       deps += [ ":AdapterDsoftbusWifiTest" ]

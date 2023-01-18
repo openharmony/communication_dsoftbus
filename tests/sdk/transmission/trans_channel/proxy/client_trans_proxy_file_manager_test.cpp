@@ -578,6 +578,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileRecipientInfoTest0
 
     info.fileListener.recvListener.OnFileTransError = OnFileTransError;
     SetRecipientRecvState(&info, TRANS_FILE_RECV_IDLE_STATE);
+    EXPECT_EQ(info.recvFileInfo.fileFd, INVALID_FD);
     ClearRecipientResources(&info);
 
     info.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
@@ -585,7 +586,9 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileRecipientInfoTest0
 
     info.recvState = TRANS_FILE_RECV_IDLE_STATE;
     SetRecipientRecvState(&info, TRANS_FILE_RECV_IDLE_STATE);
+    EXPECT_EQ(info.recvFileInfo.fileFd, INVALID_FD);
     SetRecipientRecvState(&info, TRANS_FILE_RECV_PROCESS_STATE);
+    EXPECT_EQ(info.recvFileInfo.fileFd, INVALID_FD);
     ClearRecipientResources(&info);
 
     info.recvFileInfo.fileFd = INVALID_FD;
