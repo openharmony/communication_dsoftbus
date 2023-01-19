@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -183,11 +183,11 @@ void ConnectFailedCB(unsigned int requestId, int reason)
     return;
 }
 
-class SoftbusConnmangerFuncTest : public testing::Test {
+class ConnectionManagerTest : public testing::Test {
 public:
-    SoftbusConnmangerFuncTest()
+    ConnectionManagerTest()
     {}
-    ~SoftbusConnmangerFuncTest()
+    ~ConnectionManagerTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -195,19 +195,19 @@ public:
     void TearDown();
 };
 
-void SoftbusConnmangerFuncTest::SetUpTestCase(void)
+void ConnectionManagerTest::SetUpTestCase(void)
 {
     SoftbusConfigInit();
     ConnServerInit();
 }
 
-void SoftbusConnmangerFuncTest::TearDownTestCase(void)
+void ConnectionManagerTest::TearDownTestCase(void)
 {}
 
-void SoftbusConnmangerFuncTest::SetUp(void)
+void ConnectionManagerTest::SetUp(void)
 {}
 
-void SoftbusConnmangerFuncTest::TearDown(void)
+void ConnectionManagerTest::TearDown(void)
 {}
 
 /*
@@ -216,7 +216,7 @@ void SoftbusConnmangerFuncTest::TearDown(void)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger001, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger001, TestSize.Level1)
 {
     int ret;
     printf("testConnmanger001\r\n");
@@ -242,7 +242,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger002, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger002, TestSize.Level1)
 {
     printf("test begin testConnmanger002 \r\n");
     ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
@@ -259,7 +259,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger003, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger003, TestSize.Level1)
 {
     int ret;
     int reqId;
@@ -312,7 +312,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger004, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger004, TestSize.Level1)
 {
     printf("test begin ConnManagerTest004 \r\n");
     int ret;
@@ -360,7 +360,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger005, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger005, TestSize.Level1)
 {
     int ret;
     ConnectCallback connCb;
@@ -385,7 +385,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger006, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger006, TestSize.Level1)
 {
     uint32_t reqId = 1;
     int32_t ret;
@@ -427,7 +427,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnSetConnectCallback operates normally.
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger007, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger007, TestSize.Level1)
 {
     ConnectCallback connCb;
     connCb.OnConnected = ConnectedCB;
@@ -452,7 +452,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnConnectDevice operates normally.
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger008, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger008, TestSize.Level1)
 {
     const char *testBleMac = "11:22:33:44:55:66";
     ConnectResult connRet;
@@ -483,7 +483,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnStartLocalListening operates normally.
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger009, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger009, TestSize.Level1)
 {
     LocalListenerInfo info;
     info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
@@ -499,7 +499,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger009, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnStopLocalListening operates normally.
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger010, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger010, TestSize.Level1)
 {
     LocalListenerInfo info;
     info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
@@ -515,7 +515,7 @@ HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger010, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnTypeIsSupport operates normally.
 */
-HWTEST_F(SoftbusConnmangerFuncTest, testConnmanger011, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, testConnmanger011, TestSize.Level1)
 {
     int ret = ConnTypeIsSupport(CONNECT_TYPE_MAX);
     EXPECT_EQ(SOFTBUS_CONN_INVALID_CONN_TYPE, ret);

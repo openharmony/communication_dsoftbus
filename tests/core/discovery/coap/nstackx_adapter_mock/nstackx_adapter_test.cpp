@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ using testing::_;
 using testing::NotNull;
 
 namespace OHOS {
-class AdapterMockTest : public testing::Test {
+class NstackxAdapterTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
@@ -38,7 +38,7 @@ public:
     void TearDown() override {}
 };
 
-HWTEST_F(AdapterMockTest, DiscCoapRegisterServiceData002, TestSize.Level1)
+HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
 {
     DLOGI("DiscCoapRegisterServiceData002 begin ----");
     DiscNstackxInit();
