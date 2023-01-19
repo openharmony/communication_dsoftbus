@@ -26,23 +26,23 @@ using namespace testing::ext;
 namespace OHOS {
 const int32_t DEFAULT_NEW_PATH_AUTHORITY = 750;
 
-class DsoftbusFileTest : public testing::Test {
+class AdaptorDsoftbusFileTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
-void DsoftbusFileTest::SetUpTestCase(void)
+void AdaptorDsoftbusFileTest::SetUpTestCase(void)
 {
 }
-void DsoftbusFileTest::TearDownTestCase(void)
+void AdaptorDsoftbusFileTest::TearDownTestCase(void)
 {
 }
-void DsoftbusFileTest::SetUp()
+void AdaptorDsoftbusFileTest::SetUp()
 {
 }
-void DsoftbusFileTest::TearDown()
+void AdaptorDsoftbusFileTest::TearDown()
 {
 }
 
@@ -52,7 +52,7 @@ void DsoftbusFileTest::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusFileTest, SoftBusReadFileTest001, TestSize.Level1)
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusReadFileTest001, TestSize.Level1)
 {
     int32_t fd = 0;
     uint32_t value = 0;
@@ -77,7 +77,7 @@ HWTEST_F(DsoftbusFileTest, SoftBusReadFileTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusFileTest, SoftBusOpenFileWithPermsTest001, TestSize.Level1)
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusOpenFileWithPermsTest001, TestSize.Level1)
 {
     int32_t fd = 0;
     int32_t ret = SoftBusOpenFileWithPerms(NULL, SOFTBUS_O_WRONLY | SOFTBUS_O_CREATE,
@@ -95,7 +95,7 @@ HWTEST_F(DsoftbusFileTest, SoftBusOpenFileWithPermsTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusFileTest, SoftBusPreadFileTest001, TestSize.Level1)
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusPreadFileTest001, TestSize.Level1)
 {
     int32_t fd = 0;
     uint32_t value = 0;
@@ -119,7 +119,7 @@ HWTEST_F(DsoftbusFileTest, SoftBusPreadFileTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
 {
     int32_t ret = SoftBusMakeDir(NULL, DEFAULT_NEW_PATH_AUTHORITY);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -131,7 +131,7 @@ HWTEST_F(DsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
+HWTEST_F(AdaptorDsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
 {
     uint64_t fileSize = 0;
     int32_t ret = SoftBusGetFileSize(NULL, &fileSize);

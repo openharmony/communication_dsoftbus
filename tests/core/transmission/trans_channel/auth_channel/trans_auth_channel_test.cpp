@@ -323,7 +323,9 @@ HWTEST_F(TransAuthChannelTest, OnAuthMsgDataRecvTest001, TestSize.Level1)
 {
     int32_t authId = -1;
     AuthChannelData data;
-
+    IServerChannelCallBack cb;
+    int32_t ret = TransAuthInit(&cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     OnAuthMsgDataRecv(authId, NULL);
 
     data.data = NULL;
@@ -331,7 +333,7 @@ HWTEST_F(TransAuthChannelTest, OnAuthMsgDataRecvTest001, TestSize.Level1)
 
     data.data = (uint8_t *)"test data";
     OnAuthMsgDataRecv(authId, &data);
-    EXPECT_TRUE(true);
+    TransAuthDeinit();
 }
 
 /**
@@ -364,10 +366,12 @@ HWTEST_F(TransAuthChannelTest, TransPostAuthChannelErrMsgTest001, TestSize.Level
     int32_t authId = -1;
     int32_t errcode = 0;
     const char *errMsg = "test error msg.";
-
+    IServerChannelCallBack cb;
+    int32_t ret = TransAuthInit(&cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     TransPostAuthChannelErrMsg(authId, errcode, NULL);
     TransPostAuthChannelErrMsg(authId, errcode, errMsg);
-    EXPECT_TRUE(true);
+    TransAuthDeinit();
 }
 
 /**

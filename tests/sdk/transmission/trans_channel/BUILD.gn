@@ -181,7 +181,7 @@ if (defined(ohos_lite)) {
   }
 
   module_output_path = "dsoftbus/transmission"
-  ohos_unittest("ClientTransProxyTest") {
+  ohos_unittest("ClientTransPendingTest") {
     module_out_path = module_output_path
     sources = [ "proxy/client_trans_pending_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
@@ -353,7 +353,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("TransSdkUdpStreamInterfaceTest") {
+  ohos_unittest("ClientTransUdpStreamInterfaceTest") {
     module_out_path = module_output_path
     sources = [ "udp/stream/client_trans_udp_stream_interface_test.cpp" ]
     include_dirs = trans_udp_channel_sdk_inc
@@ -387,7 +387,7 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("TransSdkUdpStreamAdaptorTest") {
+  ohos_unittest("StreamAdaptorTest") {
     module_out_path = module_output_path
     sources = [ "udp/stream/stream_adaptor_test.cpp" ]
     include_dirs = trans_udp_channel_sdk_inc
@@ -405,10 +405,10 @@ if (defined(ohos_lite)) {
     deps = [
       ":ClientTransChannelCallbackTest",
       ":ClientTransChannelManagerTest",
+      ":ClientTransPendingTest",
       ":ClientTransProxyFileCommonTest",
       ":ClientTransProxyFileManagerTest",
       ":ClientTransProxyManagerTest",
-      ":ClientTransProxyTest",
       ":ClientTransSessionImplTest",
       ":ClientTransUdpManagerStaticTest",
       ":ClientTransUdpManagerTest",
@@ -427,8 +427,8 @@ if (defined(ohos_lite)) {
         if (!defined(ohos_lite)) {
           deps += [
             ":ClientTransStreamTest",
-            ":TransSdkUdpStreamAdaptorTest",
-            ":TransSdkUdpStreamInterfaceTest",
+            ":ClientTransUdpStreamInterfaceTest",
+            ":StreamAdaptorTest",
             "udp/stream/libsoftbus_stream:unittest",
           ]
         }

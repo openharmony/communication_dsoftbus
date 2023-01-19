@@ -43,7 +43,7 @@ if (defined(ohos_lite)) {
     deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
   }
 
-  ohos_unittest("SqliteTest") {
+  ohos_unittest("Sqlite3UtilsTest") {
     module_out_path = module_output_path
     sources = [ "unittest/sqlite3_utils_test.cpp" ]
 
@@ -79,7 +79,7 @@ if (defined(ohos_lite)) {
     testonly = true
     deps = [
       ":SoftbusUtilsTest",
-      ":SqliteTest",
+      ":Sqlite3UtilsTest",
       "permission_state_test:PermissionStateTest",
     ]
   }
