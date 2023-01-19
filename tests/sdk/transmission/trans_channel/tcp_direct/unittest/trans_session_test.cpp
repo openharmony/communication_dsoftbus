@@ -228,8 +228,9 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level0)
  */
 HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level0)
 {
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t sessionId = 1;
-
     NotifyAuthSuccess(sessionId);
 }
 
@@ -335,8 +336,10 @@ HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize
 
     int32_t sessionId = INVALID_SESSION_ID;
     bool isEnabled = false;
-    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
-    (void)ClientAddSession(&param, &sessionId, &isEnabled);
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = ClientAddSession(&param, &sessionId, &isEnabled);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     ClientCleanAllSessionWhenServerDeath();
     EXPECT_TRUE(true);
 }

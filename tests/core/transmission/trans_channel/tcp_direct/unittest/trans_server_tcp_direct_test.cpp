@@ -638,7 +638,8 @@ HWTEST_F(TransServerTcpDirectTest, OnAuthDataRecvTest002, TestSize.Level1)
 {
     int64_t authId = 0;
     AuthTransData dataInfo;
-    (void)memset_s(&dataInfo, sizeof(AuthTransData), 0, sizeof(AuthTransData));
+    int32_t ret = memset_s(&dataInfo, sizeof(AuthTransData), 0, sizeof(AuthTransData));
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     dataInfo.len = 1;
     dataInfo.data = NULL;
 
@@ -660,6 +661,8 @@ HWTEST_F(TransServerTcpDirectTest, OnAuthDataRecvTest002, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, TransDelSessionConnByIdTest001, TestSize.Level1)
 {
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(SOFTBUS_OK == ret);
     int32_t channelId = g_conn->channelId;
     TransDelSessionConnById(channelId);
 }
@@ -675,6 +678,8 @@ HWTEST_F(TransServerTcpDirectTest, OnSessionOpenFailProcTest001, TestSize.Level1
     SessionConn sessionConn = {
         .channelId = 1,
     };
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(SOFTBUS_OK == ret);
     OnSessionOpenFailProc(&sessionConn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
 }
 

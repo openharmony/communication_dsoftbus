@@ -18,7 +18,7 @@ module_output_path = "dsoftbus/transmission"
 
 ohos_unittest("TransServerTcpDirectTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/trans_tcp_direct_test.cpp" ]
+  sources = [ "unittest/trans_server_tcp_direct_test.cpp" ]
 
   include_dirs = [
     "$softbus_adapter_common/include",

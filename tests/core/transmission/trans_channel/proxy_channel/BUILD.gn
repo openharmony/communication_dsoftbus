@@ -18,7 +18,7 @@ import(
 
 module_output_path = "dsoftbus/transmission"
 
-ohos_unittest("TransProxyChannelCoreTest") {
+ohos_unittest("TransProxyChannelTest") {
   module_out_path = module_output_path
   sources = [ "trans_proxy_channel_test.cpp" ]
 
@@ -95,7 +95,7 @@ import(
 import(
     "//foundation/communication/dsoftbus/core/transmission/trans_channel/proxy/proxy.gni")
 
-ohos_unittest("TransProxyChannelCoreMockTest") {
+ohos_unittest("TransProxyChannelMockTest") {
   module_out_path = module_output_path
   sources = trans_comm_mock_src
 
@@ -176,7 +176,7 @@ ohos_unittest("TransProxyChannelCoreMockTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":TransProxyChannelCoreMockTest",
-    ":TransProxyChannelCoreTest",
+    ":TransProxyChannelMockTest",
+    ":TransProxyChannelTest",
   ]
 }

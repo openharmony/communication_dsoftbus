@@ -53,11 +53,11 @@ static SessionAttribute g_sessionAttr[] = {
     {.dataType = LANE_T_BUTT},
 };
 
-class TransLanePendingTest : public testing::Test {
+class TransLaneTest : public testing::Test {
 public:
-    TransLanePendingTest()
+    TransLaneTest()
     {}
-    ~TransLanePendingTest()
+    ~TransLaneTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -67,7 +67,7 @@ public:
     {}
 };
 
-void TransLanePendingTest::SetUpTestCase(void)
+void TransLaneTest::SetUpTestCase(void)
 {
     InitSoftBusServer();
     int32_t ret = TransReqLanePendingInit();
@@ -76,7 +76,7 @@ void TransLanePendingTest::SetUpTestCase(void)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-void TransLanePendingTest::TearDownTestCase(void)
+void TransLaneTest::TearDownTestCase(void)
 {
     TransReqLanePendingDeinit();
 }
@@ -114,12 +114,12 @@ SessionParam* GenerateParamTest(SessionAttribute *sessionAttr)
 }
 
 /**
- * @tc.name: TransLanePendingTest001
+ * @tc.name: TransLaneTest001
  * @tc.desc: trans lane pending init and deinit.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest001, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest001, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     int32_t ret = TransReqLanePendingInit();
@@ -129,12 +129,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest002
+ * @tc.name: TransLaneTest002
  * @tc.desc: add trans lane pending and delete trans lane pending.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest002, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest002, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneId = 1;
@@ -158,12 +158,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest003
+ * @tc.name: TransLaneTest003
  * @tc.desc: trans get lane Reqitem by laneId.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest003, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
 {
     uint32_t laneId = 1;
     uint32_t invalidId = 111;
@@ -200,12 +200,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest004
+ * @tc.name: TransLaneTest004
  * @tc.desc: trans update lane connInfo by laneId.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest004, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneId = 1;
@@ -238,12 +238,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest005
+ * @tc.name: TransLaneTest005
  * @tc.desc: trans lane request success by laneId.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest005, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneId = 1;
@@ -265,12 +265,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest006
+ * @tc.name: TransLaneTest006
  * @tc.desc: trans lane request fail by laneId.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest006, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneId = 1;
@@ -293,12 +293,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest007
+ * @tc.name: TransLaneTest007
  * @tc.desc: trans lane state change and get stream lane type.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest007, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
 {
     uint32_t laneId = 1;
     LaneState state = LANE_STATE_EXCEPTION;
@@ -318,12 +318,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest008
+ * @tc.name: TransLaneTest008
  * @tc.desc: trans get lane by session.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest008, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest008, TestSize.Level1)
 {
     int32_t ret = TransGetLaneTransTypeBySession(NULL);
     EXPECT_TRUE(ret == LANE_T_BUTT);
@@ -361,12 +361,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest008, TestSize.Level1)
 
 
 /**
- * @tc.name: TransLanePendingTest009
+ * @tc.name: TransLaneTest009
  * @tc.desc: trans get lane linkType by session linkType.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest009, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest009, TestSize.Level1)
 {
     LinkType type = (LinkType)LINK_TYPE_WIFI_WLAN_5G;
     LaneLinkType ret = TransGetLaneLinkTypeBySessionLinkType(type);
@@ -390,12 +390,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest010
+ * @tc.name: TransLaneTest010
  * @tc.desc: transform session perferred to lane perferred.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest010, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
 {
     int32_t ret = TransReqLanePendingInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -414,12 +414,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest011
+ * @tc.name: TransLaneTest011
  * @tc.desc: trans softbus condwait.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest011, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest011, TestSize.Level1)
 {
     SoftBusCond *cond = 0;
     SoftBusMutex *mutex = 0;
@@ -433,12 +433,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest012
+ * @tc.name: TransLaneTest012
  * @tc.desc: trans req lane pending init.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest012, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest012, TestSize.Level1)
 {
     uint32_t laneId = 1;
     uint32_t invalidId = 111;
@@ -472,12 +472,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest013
+ * @tc.name: TransLaneTest013
  * @tc.desc: trans add laneReq to pending and waitting.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest013, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
 {
     (void)LnnInitDistributedLedger();
     TransOption trans = {
@@ -518,12 +518,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest014
+ * @tc.name: TransLaneTest014
  * @tc.desc: trans get lane info by option.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest014, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneId = 1;
@@ -553,12 +553,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest015
+ * @tc.name: TransLaneTest015
  * @tc.desc: trans add session server item.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest015, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneId = 1;
@@ -593,12 +593,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest016
+ * @tc.name: TransLaneTest016
  * @tc.desc: trans set wlan connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest016, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest016, TestSize.Level1)
 {
     WlanConnInfo connInfo;
     ConnectOption connOpt;
@@ -607,12 +607,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest017
+ * @tc.name: TransLaneTest017
  * @tc.desc: trans set br connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest017, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest017, TestSize.Level1)
 {
     BrConnInfo brInfo;
     ConnectOption connOpt;
@@ -621,12 +621,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest018
+ * @tc.name: TransLaneTest018
  * @tc.desc: trans set ble connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest018, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest018, TestSize.Level1)
 {
     BleConnInfo bleInfo;
     ConnectOption connOpt;
@@ -635,12 +635,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest019
+ * @tc.name: TransLaneTest019
  * @tc.desc: trans get connect opt by connect info.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest019, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest019, TestSize.Level1)
 {
     LaneConnInfo info = {
         .type = LANE_P2P,
@@ -671,12 +671,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest020
+ * @tc.name: TransLaneTest020
  * @tc.desc: trans get auth type by network id.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest020, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest020, TestSize.Level1)
 {
     const char* peerNetWorkId = "peer networkId";
     bool ret = TransGetAuthTypeByNetWorkId(peerNetWorkId);
@@ -688,12 +688,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest021
+ * @tc.name: TransLaneTest021
  * @tc.desc: trans check session name invalid on auth channel.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest021, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest021, TestSize.Level1)
 {
     const char *emptyName  = nullptr;
     const char *invalidName  = "invalid name";
@@ -707,12 +707,12 @@ HWTEST_F(TransLanePendingTest, TransLanePendingTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransLanePendingTest022
+ * @tc.name: TransLaneTest022
  * @tc.desc: transform session perferred to lane perferred use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, TransLanePendingTest022, TestSize.Level1)
+HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
 {
     int32_t ret = TransReqLanePendingInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);

@@ -127,7 +127,7 @@ ohos_unittest("TransUdpNegotiationTest") {
   }
 }
 
-ohos_unittest("TransUdpNegotiationExTest") {
+ohos_unittest("TransUdpNegotiationExchangeTest") {
   module_out_path = module_output_path
   sources = [ "trans_udp_negotiation_exchange_test.cpp" ]
 
@@ -235,7 +235,7 @@ group("unittest") {
   deps = [
     ":TransUdpManagerTest",
     ":TransUdpNegoTest",
-    ":TransUdpNegotiationExTest",
+    ":TransUdpNegotiationExchangeTest",
     ":TransUdpNegotiationTest",
   ]
 }
