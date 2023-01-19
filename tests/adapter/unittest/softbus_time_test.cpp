@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,23 +25,23 @@ using namespace testing::ext;
 namespace OHOS {
 const int32_t TIMER_TIMEOUT = 1000;
 
-class DsoftbusTimeTest : public testing::Test {
+class SoftbusTimeTest : public testing::Test {
 protected:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
-void DsoftbusTimeTest::SetUpTestCase(void)
+void SoftbusTimeTest::SetUpTestCase(void)
 {
 }
-void DsoftbusTimeTest::TearDownTestCase(void)
+void SoftbusTimeTest::TearDownTestCase(void)
 {
 }
-void DsoftbusTimeTest::SetUp()
+void SoftbusTimeTest::SetUp()
 {
 }
-void DsoftbusTimeTest::TearDown()
+void SoftbusTimeTest::TearDown()
 {
 }
 /*
@@ -50,7 +50,7 @@ void DsoftbusTimeTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(DsoftbusTimeTest, SoftBusTimerTest001, TestSize.Level1)
+HWTEST_F(SoftbusTimeTest, SoftBusTimerTest001, TestSize.Level1)
 {
     void *timerId = NULL;
     SoftBusSysTime times = {0};

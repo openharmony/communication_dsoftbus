@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ using namespace testing::ext;
 using testing::Return;
 
 namespace OHOS {
-class P2pCommonMockTest : public testing::Test {
+class P2pCommonTest : public testing::Test {
 public:
     void SetUp() override {}
     void TearDown() override {}
@@ -38,13 +38,13 @@ public:
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetRole001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetRole001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetRole001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetRole001, Start");
     P2pLinkSetRole(ROLE_GO);
     P2pLinkRole p2pLinkRole = P2pLinkGetRole();
     EXPECT_EQ(p2pLinkRole, ROLE_GO);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetRole001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetRole001, End");
 }
 
 /*
@@ -53,16 +53,16 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetRole001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkCommonInit001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkCommonInit001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkCommonInit001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkCommonInit001, Start");
     P2pLinkSetRole(ROLE_GO);
     P2pLinkRole p2pLinkRole = P2pLinkGetRole();
     EXPECT_EQ(p2pLinkRole, ROLE_GO);
     P2pLinkCommonInit();
     p2pLinkRole = P2pLinkGetRole();
     EXPECT_EQ(p2pLinkRole, ROLE_NONE);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkCommonInit001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkCommonInit001, End");
 }
 
 /*
@@ -71,16 +71,16 @@ HWTEST_F(P2pCommonMockTest, P2pLinkCommonInit001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkCommonClean001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkCommonClean001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkCommonClean001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkCommonClean001, Start");
     P2pLinkSetRole(ROLE_GO);
     P2pLinkRole p2pLinkRole = P2pLinkGetRole();
     EXPECT_EQ(p2pLinkRole, ROLE_GO);
     P2pLinkCommonClean();
     p2pLinkRole = P2pLinkGetRole();
     EXPECT_EQ(p2pLinkRole, ROLE_NONE);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkCommonClean001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkCommonClean001, End");
 }
 
 /*
@@ -89,9 +89,9 @@ HWTEST_F(P2pCommonMockTest, P2pLinkCommonClean001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetMyMacExpired001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetMyMacExpired001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetMyMacExpired001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetMyMacExpired001, Start");
     AdapterMock adapterMock;
     adapterMock.SetupSuccessStub();
     bool isExpired = false;
@@ -108,7 +108,7 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetMyMacExpired001, TestSize.Level1)
     EXPECT_CALL(adapterMock, P2pLinkGetBaseMacAddress).WillRepeatedly(Return(SOFTBUS_ERR));
     myMac = P2pLinkGetMyMac();
     EXPECT_EQ(myMac[0], 't');
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetMyMacExpired001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetMyMacExpired001, End");
 }
 
 /*
@@ -117,16 +117,16 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetMyMacExpired001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetMyIp001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetMyIp001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetMyIp001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetMyIp001, Start");
     AdapterMock adapterMock;
     adapterMock.SetupSuccessStub();
     char myIpTest[P2P_IP_LEN] = {0};
     P2pLinkSetMyIp(myIpTest);
     char *myIpTestRes = P2pLinkGetMyIp();
     EXPECT_EQ(myIpTestRes[0], myIpTest[0]);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetMyIp001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetMyIp001, End");
 }
 
 /*
@@ -135,9 +135,9 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetMyIp001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetGoIp001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetGoIp001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoIp001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGoIp001, Start");
     char goIpTest[P2P_IP_LEN] = {0};
     goIpTest[0] = 't';
     goIpTest[1] = '\0';
@@ -151,7 +151,7 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetGoIp001, TestSize.Level1)
     P2pLinkSetMyIp(myIpTest);
     goIp = P2pLinkGetGoIp();
     EXPECT_EQ(goIp[0], myIpTest[0]);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoIp001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGoIp001, End");
 }
 
 /*
@@ -160,9 +160,9 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetGoIp001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetGoMac001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetGoMac001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoMac001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGoMac001, Start");
     char goMacTest[P2P_MAC_LEN] = {0};
     goMacTest[0] = 't';
     goMacTest[1] = '\0';
@@ -178,7 +178,7 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetGoMac001, TestSize.Level1)
     P2pLinkSetMyMacExpired(isExpired);
     goMac = P2pLinkGetGoMac();
     EXPECT_EQ(goMac[0], myMacTest[0]);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoMac001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGoMac001, End");
 }
 
 /*
@@ -187,14 +187,14 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetGoMac001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetGoPort001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetGoPort001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoPort001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGoPort001, Start");
     int32_t portTest = 1;
     P2pLinkSetGoPort(portTest);
     int32_t port = P2pLinkGetGoPort();
     EXPECT_EQ(port, portTest);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGoPort001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGoPort001, End");
 }
 
 /*
@@ -203,14 +203,14 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetGoPort001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetGcPort001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetGcPort001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGcPort001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGcPort001, Start");
     int32_t portTest = 1;
     P2pLinkSetGcPort(portTest);
     int32_t port = P2pLinkGetGcPort();
     EXPECT_EQ(port, portTest);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetGcPort001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetGcPort001, End");
 }
 
 /*
@@ -219,14 +219,14 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetGcPort001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetState001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetState001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetState001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetState001, Start");
     bool stateTest = true;
     P2pLinkSetState(stateTest);
     bool state = P2pLinkIsEnable();
     EXPECT_EQ(state, stateTest);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetState001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetState001, End");
 }
 
 /*
@@ -235,14 +235,14 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetState001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetDhcpState001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetDhcpState001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetDhcpState001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetDhcpState001, Start");
     bool isNeedDhcpTest = true;
     P2pLinkSetDhcpState(isNeedDhcpTest);
     bool isNeedDhcp = P2pLinkGetDhcpState();
     EXPECT_EQ(isNeedDhcp, isNeedDhcpTest);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkGetDhcpState001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkGetDhcpState001, End");
 }
 
 /*
@@ -251,13 +251,13 @@ HWTEST_F(P2pCommonMockTest, P2pLinkSetDhcpState001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pCommonMockTest, P2pLinkSetDisconnectState001, TestSize.Level1)
+HWTEST_F(P2pCommonTest, P2pLinkSetDisconnectState001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetDisconnectState001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetDisconnectState001, Start");
     bool stateTest = true;
     P2pLinkSetDisconnectState(stateTest);
     bool state = P2pLinkIsDisconnectState();
     EXPECT_EQ(state, stateTest);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonMockTest, P2pLinkSetDisconnectState001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pCommonTest, P2pLinkSetDisconnectState001, End");
 }
 };

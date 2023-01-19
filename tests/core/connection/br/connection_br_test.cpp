@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -295,6 +295,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger006, TestSize.Level1)
     connCb.OnConnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     g_connId = 0;
 };

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,8 +17,8 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 group("unittest") {
   testonly = true
   deps = [
-    "common/unittest:SoftbusCommonTest",
-    "manager:SoftbusConnmangerFuncTest",
+    "common/unittest:SoftbusConnCommonTest",
+    "manager:ConnectionManagerTest",
   ]
   if (dsoftbus_feature_conn_br) {
     deps += [
@@ -31,16 +31,16 @@ group("unittest") {
   }
   if (dsoftbus_feature_conn_p2p) {
     deps += [
-      "p2p:ConnectionP2PFuncTest",
+      "p2p:ConnectionP2pTest",
       "p2p:P2pDeviceTest",
       "p2p:P2pManagerTest",
-      "p2p/common_mock:P2pCommonMockTest",
-      "p2p/interface_mock:P2pInterfaceMockTest",
-      "p2p/negotiation:P2pNegotiationMockTest",
+      "p2p/common_mock:P2pCommonTest",
+      "p2p/interface_mock:P2pInterfaceTest",
+      "p2p/negotiation:P2pNegotiationTest",
     ]
   }
   if (dsoftbus_feature_conn_tcp) {
-    deps += [ "tcp:SoftbusTcpManagerTest" ]
+    deps += [ "tcp:TcpManagerTest" ]
   }
 }
 

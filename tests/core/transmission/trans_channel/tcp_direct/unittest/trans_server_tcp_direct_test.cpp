@@ -665,7 +665,6 @@ HWTEST_F(TransServerTcpDirectTest, TransDelSessionConnByIdTest001, TestSize.Leve
     EXPECT_TRUE(SOFTBUS_OK == ret);
     int32_t channelId = g_conn->channelId;
     TransDelSessionConnById(channelId);
-    AuthCommonDeinit();
 }
 
 /**
@@ -682,7 +681,6 @@ HWTEST_F(TransServerTcpDirectTest, OnSessionOpenFailProcTest001, TestSize.Level1
     int32_t ret = AuthCommonInit();
     EXPECT_TRUE(SOFTBUS_OK == ret);
     OnSessionOpenFailProc(&sessionConn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
-    AuthCommonDeinit();
 }
 
 /**

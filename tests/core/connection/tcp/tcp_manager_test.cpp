@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,11 +85,11 @@ void TcpOnConnectionFailed(uint32_t requestId, int32_t reason)
     printf("OnConnectionFailed with requestId:%u reason:%d\n", requestId, reason);
 }
 
-class SoftbusTcpManagerTest : public testing::Test {
+class TcpManagerTest : public testing::Test {
 public:
-    SoftbusTcpManagerTest()
+    TcpManagerTest()
     {}
-    ~SoftbusTcpManagerTest()
+    ~TcpManagerTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -97,13 +97,13 @@ public:
     void TearDown();
 };
 
-void SoftbusTcpManagerTest::SetUpTestCase(void)
+void TcpManagerTest::SetUpTestCase(void)
 {}
 
-void SoftbusTcpManagerTest::TearDownTestCase(void)
+void TcpManagerTest::TearDownTestCase(void)
 {}
 
-void SoftbusTcpManagerTest::SetUp(void)
+void TcpManagerTest::SetUp(void)
 {
     g_cb.OnConnected = TcpOnConnected;
     g_cb.OnDataReceived = TcpDataReceived;
@@ -116,7 +116,7 @@ void SoftbusTcpManagerTest::SetUp(void)
     g_connServerInit = ConnServerInit();
 }
 
-void SoftbusTcpManagerTest::TearDown(void)
+void TcpManagerTest::TearDown(void)
 {
     g_interface = nullptr;
     g_connServerInit = 0;
@@ -178,7 +178,7 @@ void CreateServer(void *arg)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager001, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager001, TestSize.Level1)
 {
     EXPECT_EQ(0, TcpGetConnNum());
 };
@@ -189,7 +189,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager002, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager002, TestSize.Level1)
 {
     int port = CLIENTPORT;
     uint32_t requestId = 1;
@@ -213,7 +213,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager003, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager003, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_ERR, TcpDisconnectDevice(g_connectionId));
 };
@@ -224,7 +224,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager004, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager004, TestSize.Level1)
 {
     ConnectionInfo info = {};
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpGetConnectionInfo(g_connectionId, nullptr));
@@ -238,7 +238,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager005, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager005, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -263,7 +263,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager006, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager006, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -296,7 +296,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
 {
     pthread_t pid;
 
@@ -350,7 +350,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager008, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -394,7 +394,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -447,7 +447,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager009, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpConnectDevice operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager010, TestSize.Level1)
 {
     int port = CLIENTPORT;
     uint32_t requestId = 1;
@@ -491,7 +491,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager010, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpConnectDevice operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager011, TestSize.Level1)
 {
     int port = CLIENTPORT;
     uint32_t requestId = 1;
@@ -534,7 +534,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager011, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpConnectDevice operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager012, TestSize.Level1)
 {
     int port = CLIENTPORT;
     uint32_t requestId = 1;
@@ -578,7 +578,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager012, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpConnectDevice operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager013, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager013, TestSize.Level1)
 {
     int port = CLIENTPORT;
     uint32_t requestId = 1;
@@ -621,7 +621,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager013, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager014, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager014, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -649,7 +649,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager014, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager015, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager015, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -678,7 +678,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager015, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager016, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager016, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -706,7 +706,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager016, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager017, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager017, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -734,7 +734,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager017, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager018, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager018, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -762,7 +762,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager018, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager019, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager019, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -791,7 +791,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager019, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager020, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager020, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -819,7 +819,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager020, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager021, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -848,7 +848,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager021, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The GetTcpSockPort operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager022, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -883,7 +883,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager022, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The SetIpTos operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager023, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -917,7 +917,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager023, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnToggleNonBlockMode operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager024, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -948,7 +948,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager024, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager025, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -984,7 +984,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager025, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The OpenTcpClientSocket and ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager026, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1024,7 +1024,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager026, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnGetSocketError and operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager027, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1056,7 +1056,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager027, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager028, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1084,7 +1084,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager028, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager029, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1112,7 +1112,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager029, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager030, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1140,7 +1140,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager030, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager031, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1169,7 +1169,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager031, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager032, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1197,7 +1197,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager032, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager033, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1226,7 +1226,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager033, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager034, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1254,7 +1254,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager034, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager035, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1282,7 +1282,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager035, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The TcpStartListening and TcpStopListening operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager036, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1310,7 +1310,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager036, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The SetIpTos operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager037, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1336,7 +1336,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager037, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The OpenTcpServerSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager038, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1359,7 +1359,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager038, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The SetIpTos and OpenTcpClientSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager039, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1399,7 +1399,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager039, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The SetIpTos and ConnToggleNonBlockMode operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager040, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1425,7 +1425,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager040, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The GetTcpSockPort operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager041, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1449,7 +1449,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager041, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager042, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1478,7 +1478,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager042, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The OpenTcpClientSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager043, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1503,7 +1503,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager043, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnSendSocketData operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager044, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1532,7 +1532,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager044, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnShutdownSocket and OpenTcpClientSocket operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager045, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1557,7 +1557,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager045, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnSetTcpKeepAlive operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager046, TestSize.Level1)
 {
     int port = CLIENTPORT;
     LocalListenerInfo info = {};
@@ -1577,7 +1577,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager046, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: The ConnSetTcpKeepAlive operates normally.
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpManager047, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1599,7 +1599,7 @@ HWTEST_F(SoftbusTcpManagerTest, testTcpManager047, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusTcpManagerTest, testTcpDisconnectDeviceNow001, TestSize.Level1)
+HWTEST_F(TcpManagerTest, testTcpDisconnectDeviceNow001, TestSize.Level1)
 {
     int ret = TcpDisconnectDeviceNow(nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,11 @@ static int g_count = 0;
 static int g_port = 6666;
 
 namespace OHOS {
-class SoftbusCommonTest : public testing::Test {
+class SoftbusConnCommonTest : public testing::Test {
 public:
-    SoftbusCommonTest()
+    SoftbusConnCommonTest()
     {}
-    ~SoftbusCommonTest()
+    ~SoftbusConnCommonTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -56,26 +56,26 @@ int ThreadPoolTask(void* arg)
     return SOFTBUS_OK;
 }
 
-void SoftbusCommonTest::SetUpTestCase(void)
+void SoftbusConnCommonTest::SetUpTestCase(void)
 {
     pthread_mutex_init(&g_isInitedLock, nullptr);
-    GTEST_LOG_(INFO) << "SoftbusCommonTestSetUp";
+    GTEST_LOG_(INFO) << "SoftbusConnCommonTestSetUp";
     ConnServerInit();
 }
 
-void SoftbusCommonTest::TearDownTestCase(void)
+void SoftbusConnCommonTest::TearDownTestCase(void)
 {
     g_count = 0;
     g_port++;
     GTEST_LOG_(INFO) << "+-------------------------------------------+";
 }
 
-void SoftbusCommonTest::SetUp(void)
+void SoftbusConnCommonTest::SetUp(void)
 {
     g_count = 0;
 }
 
-void SoftbusCommonTest::TearDown(void)
+void SoftbusConnCommonTest::TearDown(void)
 {
     g_count = 0;
 }
@@ -101,7 +101,7 @@ SocketAddr g_socketAddr = {
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener001, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener001, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(PROXY, nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(AUTH, nullptr));
@@ -115,7 +115,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5HSOL
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener002, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener002, TestSize.Level1)
 {
     int i;
     int port = 6666;
@@ -155,7 +155,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener003, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener003, TestSize.Level1)
 {
     ListenerModule module = PROXY;
     int port = 6666;
@@ -196,7 +196,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener004, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener004, TestSize.Level1)
 {
     ListenerModule module = DIRECT_CHANNEL_SERVER_WIFI;
     EXPECT_EQ(SOFTBUS_OK, StopBaseListener(module));
@@ -218,7 +218,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener005, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener005, TestSize.Level1)
 {
     int ret;
     int module;
@@ -261,7 +261,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener006, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener006, TestSize.Level1)
 {
     int module;
     int triggerType;
@@ -286,7 +286,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener007, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener007, TestSize.Level1)
 {
     int module;
     int triggerType;
@@ -307,7 +307,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testBaseListener008, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
 {
     int module;
     int triggerType;
@@ -352,7 +352,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The GetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener009, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(AUTH_P2P, nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, GetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_P2P, nullptr));
@@ -367,7 +367,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The GetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener010, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener010, TestSize.Level1)
 {
     SoftbusBaseListener getListener;
     EXPECT_EQ(SOFTBUS_NOT_FIND, GetSoftbusBaseListener(static_cast<ListenerModule>(UNUSE_BUTT), &getListener));
@@ -382,7 +382,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The GetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener011, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener011, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(AUTH_P2P, nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, SetSoftbusBaseListener(DIRECT_CHANNEL_SERVER_P2P, nullptr));
@@ -401,7 +401,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener012, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener012, TestSize.Level1)
 {
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     if (setListener == nullptr) {
@@ -424,7 +424,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener013, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener013, TestSize.Level1)
 {
     int i;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
@@ -445,7 +445,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The GetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener014, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener014, TestSize.Level1)
 {
     int i;
     SoftbusBaseListener getListener = {0};
@@ -462,7 +462,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener014, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener015, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener015, TestSize.Level1)
 {
     int i;
     for (i = PROXY; i <= LISTENER_MODULE_DYNAMIC_START; i++) {
@@ -490,7 +490,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener015, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseClient operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener016, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener016, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(PROXY - 1)));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(DIRECT_CHANNEL_SERVER_WIFI + 1)));
@@ -504,7 +504,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener016, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseClient operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener017, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener017, TestSize.Level1)
 {
     int i;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
@@ -520,7 +520,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener017, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener and StartBaseClient operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener018, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener018, TestSize.Level1)
 {
     int i;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
@@ -543,7 +543,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener018, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseClient and SetSoftbusBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener019, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener019, TestSize.Level1)
 {
     int i;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
@@ -568,7 +568,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener019, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener020, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener020, TestSize.Level1)
 {
     LocalListenerInfo info = {
         .type = CONNECT_TCP,
@@ -590,7 +590,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener020, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener021, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener021, TestSize.Level1)
 {
     LocalListenerInfo info = {
         .type = CONNECT_TCP,
@@ -614,7 +614,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener021, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener022, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener022, TestSize.Level1)
 {
     LocalListenerInfo info = {
         .type = CONNECT_TCP,
@@ -639,7 +639,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener022, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener023, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener023, TestSize.Level1)
 {
     LocalListenerInfo info = {
         .type = CONNECT_TCP,
@@ -663,7 +663,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener023, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener and StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener024, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener024, TestSize.Level1)
 {
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
@@ -694,7 +694,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener024, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener and StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener025, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener025, TestSize.Level1)
 {
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
@@ -728,7 +728,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener025, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StopBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener026, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener026, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_NOT_FIND, StopBaseListener(static_cast<ListenerModule>(PROXY - 1)));
     EXPECT_EQ(SOFTBUS_NOT_FIND, StopBaseListener(static_cast<ListenerModule>(UNUSE_BUTT)));
@@ -742,7 +742,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener026, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StopBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener027, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener027, TestSize.Level1)
 {
     int i;
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
@@ -759,7 +759,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener027, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener and StopBaseListener and StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener028, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener028, TestSize.Level1)
 {
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
     ASSERT_TRUE(setListener != nullptr);
@@ -797,7 +797,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener028, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The SetSoftbusBaseListener and StartBaseClient and StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener029, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener029, TestSize.Level1)
 {
     int i;
     SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
@@ -837,7 +837,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener029, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The AddTrigger and DelTrigger operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener030, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener030, TestSize.Level1)
 {
     int module;
     int fd = 1;
@@ -882,7 +882,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener030, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DestroyBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener031, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener031, TestSize.Level1)
 {
     ListenerModule module = PROXY;
     LocalListenerInfo info = {
@@ -913,7 +913,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener031, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DestroyBaseListener and StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener032, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener032, TestSize.Level1)
 {
     const int port = 6666;
     LocalListenerInfo info = {
@@ -966,7 +966,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener032, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The StartBaseListener operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener033, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener033, TestSize.Level1)
 {
     ListenerModule module = PROXY;
     const int port = 6666;
@@ -997,7 +997,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener033, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The AddTrigger operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener034, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener034, TestSize.Level1)
 {
     ListenerModule module = PROXY;
     int triggerType = READ_TRIGGER;
@@ -1031,7 +1031,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener034, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The DelTrigger operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testBaseListener035, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testBaseListener035, TestSize.Level1)
 {
     int module = PROXY;
     int triggerType = READ_TRIGGER;
@@ -1063,7 +1063,7 @@ HWTEST_F(SoftbusCommonTest, testBaseListener035, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testTcpSocket001, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1103,7 +1103,7 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testTcpSocket002, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testTcpSocket002, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1140,7 +1140,7 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testTcpSocket003, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testTcpSocket003, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1156,7 +1156,7 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testTcpSocket004, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testTcpSocket004, TestSize.Level1)
 {
     const SocketInterface *tcp = GetTcpProtocol();
     ASSERT_NE(tcp, nullptr);
@@ -1175,7 +1175,7 @@ HWTEST_F(SoftbusCommonTest, testTcpSocket004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testThreadPool001, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool001, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1197,7 +1197,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testThreadPool002, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool002, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1220,7 +1220,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testThreadPool003, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool003, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ThreadPoolDestroy(nullptr));
 }
@@ -1231,7 +1231,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testThreadPool004, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool004, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1267,7 +1267,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testThreadPool005, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool005, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1300,7 +1300,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: ThreadPoolAddJob and ThreadPoolDestroy and ThreadPoolInit operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool006, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool006, TestSize.Level1)
 {
     int threadNum = 1;
     int queueMaxNum = 2;
@@ -1329,7 +1329,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: ThreadPoolInit and ThreadPoolAddJob and ThreadPoolDestroy operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool007, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool007, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1360,7 +1360,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The testGThreadPool operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool008, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool008, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1390,7 +1390,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool008, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The testGThreadPool operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool009, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool009, TestSize.Level1)
 {
     int threadNum = -1;
     int queueMaxNum = -1;
@@ -1418,7 +1418,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool009, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The testGThreadPool operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool010, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool010, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1446,7 +1446,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool010, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolAddJob operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool011, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool011, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1475,7 +1475,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool011, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolRemoveJob operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool012, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool012, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1507,7 +1507,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool012, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolRemoveJob operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool013, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool013, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1534,7 +1534,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool013, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolRemoveJob operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool014, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool014, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1571,7 +1571,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool014, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolRemoveJob operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool015, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool015, TestSize.Level1)
 {
     int threadNum = -1;
     int queueMaxNum = -1;
@@ -1602,7 +1602,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool015, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolRemoveJob operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool016, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool016, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1638,7 +1638,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool016, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The testGThreadPool operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool017, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool017, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1661,7 +1661,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool017, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolDestroy operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool018, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool018, TestSize.Level1)
 {
     int threadNum = -1;
     int queueMaxNum = -1;
@@ -1682,7 +1682,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool018, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolDestroy operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool019, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool019, TestSize.Level1)
 {
     int threadNum = 1;
     int queueMaxNum = 4;
@@ -1705,7 +1705,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool019, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolDestroy operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testThreadPool020, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testThreadPool020, TestSize.Level1)
 {
     int threadNum = 2;
     int queueMaxNum = 4;
@@ -1731,7 +1731,7 @@ HWTEST_F(SoftbusCommonTest, testThreadPool020, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5PC1B
 */
-HWTEST_F(SoftbusCommonTest, testSocket001, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testSocket001, TestSize.Level1)
 {
     int ret;
     ret = ConnGetLocalSocketPort(INVALID_FD);
@@ -1747,7 +1747,7 @@ HWTEST_F(SoftbusCommonTest, testSocket001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5PC1B
 */
-HWTEST_F(SoftbusCommonTest, testSocket002, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 {
     int ret;
     ret = ConnGetPeerSocketAddr(INVALID_FD, &g_socketAddr);
@@ -1768,7 +1768,7 @@ HWTEST_F(SoftbusCommonTest, testSocket002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolDestroy operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
 {
     int32_t fd = -1;
     uint32_t millSec= 1;
@@ -1784,7 +1784,7 @@ HWTEST_F(SoftbusCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: The ThreadPoolDestroy operates normally.
  */
-HWTEST_F(SoftbusCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
 {
     int32_t fd = 1;
     uint32_t millSec= 321;
@@ -1798,7 +1798,7 @@ HWTEST_F(SoftbusCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testSocket003, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testSocket003, TestSize.Level1)
 {
     int ret;
     SocketAddr socketAddr;
@@ -1812,7 +1812,7 @@ HWTEST_F(SoftbusCommonTest, testSocket003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SoftbusCommonTest, testSocket004, TestSize.Level1)
+HWTEST_F(SoftbusConnCommonTest, testSocket004, TestSize.Level1)
 {
     int ret;
     ret = ConnGetLocalSocketPort(INVALID_FD);

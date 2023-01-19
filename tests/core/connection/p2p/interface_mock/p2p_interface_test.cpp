@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ using namespace testing::ext;
 using testing::Return;
 
 namespace OHOS {
-class P2pInterfaceMockTest : public testing::Test {
+class P2pInterfaceTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
@@ -70,9 +70,9 @@ static const P2pLinkPeerDevStateCb g_p2pLinkPeerDevStateCb = {
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkConnectDevice001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkConnectDevice001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkConnectDevice001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkConnectDevice001, Start");
     P2pLinkConnectInfo infoTest {
         .requestId = 101,
         .authId = -2859304981150826472,
@@ -86,7 +86,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkConnectDevice001, TestSize.Level1)
     int32_t ret = P2pLinkConnectDevice(&infoTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkConnectDevice001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkConnectDevice001, End");
 }
 
 /*
@@ -95,12 +95,12 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkConnectDevice001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkConnectDevice002, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkConnectDevice002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkConnectDevice002, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkConnectDevice002, Start");
     int32_t ret = P2pLinkConnectDevice(nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkConnectDevice002, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkConnectDevice002, End");
 }
 
 /*
@@ -109,12 +109,12 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkConnectDevice002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkGetRequestId001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkGetRequestId001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetRequestId001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetRequestId001, Start");
     int32_t ret = P2pLinkGetRequestId();
     EXPECT_EQ(ret, 1);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetRequestId001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetRequestId001, End");
 }
 
 /*
@@ -123,9 +123,9 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetRequestId001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkDisconnectDevice001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkDisconnectDevice001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkDisconnectDevice001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkDisconnectDevice001, Start");
     P2pLinkDisconnectInfo infoTest {
         .authId = -2859304981150826472,
         .peerMac = "e8:b2:a0:19:a6:b3",
@@ -137,7 +137,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkDisconnectDevice001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkDisconnectDevice001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkDisconnectDevice001, End");
 }
 
 /*
@@ -146,12 +146,12 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkDisconnectDevice001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkDisconnectDevice002, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkDisconnectDevice002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkDisconnectDevice002, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkDisconnectDevice002, Start");
     int32_t ret = P2pLinkDisconnectDevice(nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkDisconnectDevice002, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkDisconnectDevice002, End");
 }
 
 /*
@@ -160,14 +160,14 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkDisconnectDevice002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkManagerInit001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkManagerInit001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkManagerInit001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkManagerInit001, Start");
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
     int32_t ret = P2pLinkInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkManagerInit001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkManagerInit001, End");
 }
 
 /*
@@ -176,15 +176,15 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkManagerInit001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkRegPeerDevStateChange001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkRegPeerDevStateChange001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkRegPeerDevStateChange001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkRegPeerDevStateChange001, Start");
     P2pLinkRegPeerDevStateChange(nullptr);
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
     P2pLinkRegPeerDevStateChange(&g_p2pLinkPeerDevStateCb);
     EXPECT_EQ(managerMock.p2pLinkPeerDevStateCb, &g_p2pLinkPeerDevStateCb);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkRegPeerDevStateChange001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkRegPeerDevStateChange001, End");
 }
 
 /*
@@ -193,16 +193,16 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkRegPeerDevStateChange001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkGetLocalIp001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkGetLocalIp001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetLocalIp001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetLocalIp001, Start");
     char localIpTest[P2P_MAC_LEN] = {0};
     int32_t localIpLenTest = P2P_MAC_LEN;
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
     int32_t ret = P2pLinkGetLocalIp(localIpTest, localIpLenTest);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetLocalIp001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetLocalIp001, End");
 }
 
 /*
@@ -211,9 +211,9 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetLocalIp001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkIsRoleConflict001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict001, Start");
     RoleIsConflictInfo roleIsConflictInfoTest;
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
@@ -233,7 +233,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict001, TestSize.Level1)
     ret =P2pLinkIsRoleConflict(&roleIsConflictInfoTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict001, End");
 }
 
 /*
@@ -242,14 +242,14 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict002, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkIsRoleConflict002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict002, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict002, Start");
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
     int32_t ret = P2pLinkIsRoleConflict(nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict002, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict002, End");
 }
 
 /*
@@ -258,9 +258,9 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict003, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkIsRoleConflict003, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict003, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict003, Start");
     RoleIsConflictInfo roleIsConflictInfoTest;
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
@@ -268,7 +268,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict003, TestSize.Level1)
     int32_t ret =P2pLinkIsRoleConflict(&roleIsConflictInfoTest);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict003, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict003, End");
 }
 
 /*
@@ -277,9 +277,9 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict004, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkIsRoleConflict004, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict004, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict004, Start");
     RoleIsConflictInfo roleIsConflictInfoTest;
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
@@ -287,7 +287,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict004, TestSize.Level1)
     int32_t ret = P2pLinkIsRoleConflict(&roleIsConflictInfoTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkIsRoleConflict004, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkIsRoleConflict004, End");
 }
 
 /*
@@ -296,9 +296,9 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkIsRoleConflict004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkGetPeerMacByPeerIp001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetPeerMacByPeerIp001, Start");
     char peerIp[P2P_IP_LEN] = {0};
     char peerMac[P2P_MAC_LEN] = {0};
     int32_t macLen = P2P_MAC_LEN;
@@ -315,7 +315,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetPeerMacByPeerIp001, End");
 }
 
 /*
@@ -324,9 +324,9 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkGetPeerMacByPeerIp002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetPeerMacByPeerIp002, Start");
     char peerIp[P2P_IP_LEN] = {0};
     char peerMac[P2P_MAC_LEN] = {0};
     int32_t macLen = P2P_MAC_LEN;
@@ -346,7 +346,7 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkGetPeerMacByPeerIp002, End");
 }
 
 /*
@@ -355,9 +355,9 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkGetPeerMacByPeerIp002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pInterfaceMockTest, P2pLinkQueryDevIsOnline001, TestSize.Level1)
+HWTEST_F(P2pInterfaceTest, P2pLinkQueryDevIsOnline001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkQueryDevIsOnline001, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkQueryDevIsOnline001, Start");
     char peerMac[P2P_MAC_LEN] = {0};
     ManagerMock managerMock;
     managerMock.SetupSuccessStub();
@@ -376,6 +376,6 @@ HWTEST_F(P2pInterfaceMockTest, P2pLinkQueryDevIsOnline001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceMockTest, P2pLinkQueryDevIsOnline001, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "P2pInterfaceTest, P2pLinkQueryDevIsOnline001, End");
 }
 };
