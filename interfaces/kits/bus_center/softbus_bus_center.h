@@ -197,7 +197,7 @@ typedef enum {
  * @version 1.0
  */
 typedef enum {
-    LOW_ACCURACY = 10,
+    LOW_ACCURACY = 0,
     NORMAL_ACCURACY,
     HIGH_ACCURACY,
     SUPER_HIGH_ACCURACY,
