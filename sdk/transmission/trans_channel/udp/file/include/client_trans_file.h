@@ -25,7 +25,7 @@ extern "C" {
 
 void RegisterFileCb(const UdpChannelMgrCb *fileCb);
 
-int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort);
+int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort);
 
 void TransCloseFileChannel(int32_t dfileId);
 

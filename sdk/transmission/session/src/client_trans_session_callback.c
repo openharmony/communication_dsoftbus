@@ -169,9 +169,9 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
 static int32_t ProcessReceivedFileData(int32_t sessionId, const char *data, uint32_t len, SessionPktType type)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
-    if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_PEER_SESSION_NAME)
+    if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME)
         != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get peer session name failed");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session name failed");
         return SOFTBUS_ERR;
     }
 

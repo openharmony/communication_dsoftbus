@@ -46,7 +46,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
     FileListener fileListener = {0};
-    if (TransGetFileListener(udpChannel.info.peerSessionName, &fileListener) != SOFTBUS_OK) {
+    if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
         return;
     }
 
@@ -94,7 +94,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         return;
     }
     FileListener fileListener = {0};
-    if (TransGetFileListener(udpChannel.info.peerSessionName, &fileListener) != SOFTBUS_OK) {
+    if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
         return;
     }
     int32_t sessionId = -1;
@@ -131,7 +131,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
     }
 }
 
-int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
+int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
 {
     if (channel == NULL || filePort == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
@@ -141,7 +141,7 @@ int32_t TransOnFileChannelOpened(const ChannelInfo *channel, int32_t *filePort)
     (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, NSTACKX_WLAN_CAT_TCP);
     if (channel->isServer) {
         FileListener fileListener = {0};
-        if (TransGetFileListener(channel->peerSessionName, &fileListener) != SOFTBUS_OK) {
+        if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
             return SOFTBUS_ERR;
         }
