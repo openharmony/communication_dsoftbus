@@ -51,7 +51,7 @@ ohos_unittest("LNNConnAddrUtilsTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
