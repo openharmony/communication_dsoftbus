@@ -363,9 +363,8 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
         if (!CheckCapBitMapExist(CAPABILITY_NUM, foundInfo->capabilityBitmap, pos)) {
             continue;
         }
-        if ((g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] |
-            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[pos]) == false) {
-            DLOGI("isSameAccount = false");
+        if (!(g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] ||
+            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[pos])) {
             return true;
         }
         uint8_t accountIdHash[SHORT_USER_ID_HASH_LEN] = {0};
@@ -380,7 +379,7 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
         if (memcmp(accountIdHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
             return true;
         }
-        DLOGE("not the same account.");
+        DLOGE("err: not the same account.");
         return false;
     }
     return false;
