@@ -25,9 +25,9 @@ ohos_executable("softbus_test_server") {
   subsystem_name = "communication"
 }
 
-ohos_unittest("softbus_file_testsuite") {
+ohos_unittest("DeviceManagerTest") {
   module_out_path = module_output_path
-  sources = [ "device_manager.cpp" ]
+  sources = [ "device_manager_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -61,7 +61,7 @@ ohos_unittest("softbus_file_testsuite") {
 group("integration_test") {
   testonly = true
   deps = [
-    ":softbus_file_testsuite",
+    ":DeviceManagerTest",
     ":softbus_test_server",
   ]
 }
