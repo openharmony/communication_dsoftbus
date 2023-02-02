@@ -31,6 +31,7 @@
 #include "softbus_log.h"
 #include "softbus_access_token_test.h"
 #include "trans_server_proxy.h"
+#include "softbus_base_listener.h"
 
 using namespace testing::ext;
 
@@ -97,6 +98,8 @@ void TransSdkTcpDirectTest::SetUpTestCase(void)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
+    ret = InitBaseListener();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 void TransSdkTcpDirectTest::TearDownTestCase(void)
