@@ -363,7 +363,9 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
         if (!CheckCapBitMapExist(CAPABILITY_NUM, foundInfo->capabilityBitmap, pos)) {
             continue;
         }
-        if (g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] == false) {
+        if ((g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] |
+            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[pos]) == false) {
+            DLOGI("isSameAccount = false");
             return true;
         }
         uint8_t accountIdHash[SHORT_USER_ID_HASH_LEN] = {0};
@@ -372,11 +374,13 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
             return false;
         }
         if (LnnIsDefaultOhosAccount()) {
+            DLOGE("LnnIsDefaultOhosAccount, not the same account.");
             return false;
         }
         if (memcmp(accountIdHash, foundInfo->accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
             return true;
         }
+        DLOGE("not the same account.");
         return false;
     }
     return false;
@@ -421,7 +425,7 @@ NO_SANITIZE("cfi") static void ProcessDisNonPacket(const uint8_t *advData, uint3
     DeviceInfo *foundInfo)
 {
     DeviceWrapper device = {
-        .info=foundInfo,
+        .info = foundInfo,
         .power = SOFTBUS_ILLEGAL_BLE_POWER
     };
     if (GetDeviceInfoFromDisAdvData(&device, advData, advLen) != SOFTBUS_OK) {
@@ -453,7 +457,7 @@ NO_SANITIZE("cfi") static void ProcessDisNonPacket(const uint8_t *advData, uint3
     add.medium = BLE;
 
     if (ProcessHashAccount(foundInfo)) {
-        DLOGI("same account");
+        DLOGI("start report found device");
         uint32_t tempCap = 0;
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         if (tempCap == 0) {
