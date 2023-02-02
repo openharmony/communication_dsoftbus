@@ -42,15 +42,13 @@
 #include "trans_tcp_direct_p2p.c"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
+#include "softbus_tcp_socket.h"
 
 using namespace testing::ext;
 
 namespace OHOS {
-
 #define TEST_TRANS_UDID "1234567"
-#define TRANS_SEQ_STEP 2
 #define AUTH_TRANS_DATA_LEN 32
-#define DEVICE_ID_SIZE_MAX_LEN 65
 #define DC_MSG_PACKET_HEAD_SIZE_LEN 24
 #define MODULE_P2P_LISTEN 16
 #define MSG_FLAG_REQUEST 0
@@ -211,147 +209,35 @@ static void TestDelSessionConnNode(int32_t channelId)
 }
 
 /**
- * @tc.name: StartSessionListenerTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
+ * trans_tcp_direct_listener.c
+ * @tc.name: SwitchAuthLinkTypeToFlagType001
+ * @tc.desc: SwitchAuthLinkTypeToFlagType, transmission tcp direct listener switch auth link type to flag type with
+ *           different.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, StartSessionListenerTest001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, SwitchAuthLinkTypeToFlagType001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
-    LocalListenerInfo info;
-    info.type = CONNECT_TCP;
-    (void)memset_s(info.socketOption.addr, sizeof(info.socketOption.addr), 0, sizeof(info.socketOption.addr));
-    info.socketOption.port = TEST_SOCKET_PORT;
-    info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
-    info.socketOption.protocol = LNN_PROTOCOL_IP;
-    ret = TransTdcStartSessionListener(UNUSE_BUTT, &info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    uint32_t ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BR);
+    EXPECT_EQ(ret, FLAG_BR);
 
-    (void)strcpy_s(info.socketOption.addr, strlen(TEST_SOCKET_ADDR) + 1, TEST_SOCKET_ADDR);
-    info.socketOption.port = TEST_SOCKET_INVALID_PORT;
-    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BLE);
+    EXPECT_EQ(ret, FLAG_BLE);
 
-    (void)memset_s(info.socketOption.addr, sizeof(info.socketOption.addr), 0, sizeof(info.socketOption.addr));
-    info.socketOption.port = TEST_SOCKET_INVALID_PORT;
-    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_P2P);
+    EXPECT_EQ(ret, FLAG_P2P);
+
+    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_WIFI);
+    EXPECT_EQ(ret, FLAG_WIFI);
 }
 
 /**
- * @tc.name: StoptSessionListenerTest001
- * @tc.desc: extern module active publish, stop session whitout start.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, StoptSessionListenerTest001, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_WIFI);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: OpenTcpDirectChannelTest001
- * @tc.desc: extern module active publish, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenTcpDirectChannelTest001, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-
-    ConnectOption connInfo;
-    connInfo.type = CONNECT_TCP;
-    (void)memset_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr),
-        0, sizeof(connInfo.socketOption.addr));
-    connInfo.socketOption.port = TEST_SOCKET_PORT;
-    connInfo.socketOption.moduleId = MODULE_MESSAGE_SERVICE;
-    connInfo.socketOption.protocol = LNN_PROTOCOL_IP;
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR) != EOK) {
-        return;
-    }
-    int32_t fd = 1;
-
-    ret = TransOpenDirectChannel(NULL, &connInfo, &fd);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransOpenDirectChannel(&appInfo, NULL, &fd);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransOpenDirectChannel(&appInfo, &connInfo, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransOpenDirectChannel(&appInfo, &connInfo, &fd);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: OpenTcpDirectChannelTest002
- * @tc.desc: extern module active publish, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenTcpDirectChannelTest002, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    ConnectOption connInfo;
-    connInfo.type = CONNECT_TCP;
-    (void)memset_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr),
-        0, sizeof(connInfo.socketOption.addr));
-    connInfo.socketOption.port = TEST_SOCKET_PORT;
-    connInfo.socketOption.moduleId = MODULE_MESSAGE_SERVICE;
-    connInfo.socketOption.protocol = LNN_PROTOCOL_IP;
-    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR) != EOK) {
-        return;
-    }
-    int32_t channelId = 0;
-    ret = OpenTcpDirectChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: TransTdcPostBytesTest001
- * @tc.desc: TransTdcPostBytesTest, start with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, TransTdcPostBytesTest001, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    const char *bytes = "Get Message";
-    TdcPacketHead packetHead = {
-        .magicNumber = MAGIC_NUMBER,
-        .module = MODULE_SESSION,
-        .seq = 0,
-        .flags = FLAG_REQUEST,
-        .dataLen = strlen(bytes), /* reset after encrypt */
-    };
-    int32_t channelId = 0;
-
-    ret = TransTdcPostBytes(channelId, NULL, bytes);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransTdcPostBytes(channelId, &packetHead, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    packetHead.dataLen = 0;
-    ret = TransTdcPostBytes(channelId, &packetHead, bytes);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: GetCipherFlagByAuthIdTest001
+ * @tc.name: GetCipherFlagByAuthId001
  * @tc.desc: GetCipherFlagByAuthId, start channel with wrong parms.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthIdTest001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
 {
     int64_t authId = 0;
     uint32_t flag = 0;
@@ -362,415 +248,18 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthIdTest001, TestSize.Level1
 }
 
 /**
- * @tc.name: SessionConnListTest001
- * @tc.desc: SessionConnListTest001, start channel with wrong parms.
+ * @tc.name: GetCipherFlagByAuthId002
+ * @tc.desc: GetCipherFlagByAuthId, transmission tcp direct listener get cipher flag by auth id.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, SessionConnListTest001, TestSize.Level1)
-{
-    AppInfo appInfo;
-    int32_t authId = AUTH_INVALID_ID;
-    
-    int32_t ret = GetAppInfoById(g_conn->channelId, &appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    authId = GetAuthIdByChanId(g_conn->channelId);
-    EXPECT_TRUE(authId != AUTH_INVALID_ID);
-
-    ret = SetAuthIdByChanId(g_conn->channelId, AUTH_INVALID_ID);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    authId = GetAuthIdByChanId(g_conn->channelId);
-    EXPECT_TRUE(authId == AUTH_INVALID_ID);
-}
-
-/**
- * @tc.name: StartVerifySessionTest001
- * @tc.desc: start verify session, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, StartVerifySessionTest001, TestSize.Level1)
-{
-    int64_t authSeq = 0;
-    AuthSessionInfo info;
-    SessionKey sessionKey;
-
-    int32_t ret = StartVerifySession(g_conn);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = StartVerifySession(g_conn);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: PackBytesTest001
- * @tc.desc: validate packaging with error parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, PackBytesTest001, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    const char *data = TEST_MESSAGE;
-    const char *bytes = TEST_MESSAGE;
-    int32_t channelId = g_conn->channelId;
-    TdcPacketHead packetHead;
-    packetHead.magicNumber = MAGIC_NUMBER;
-    packetHead.module = MODULE_SESSION;
-    packetHead.seq = 0;
-    packetHead.flags = FLAG_REQUEST;
-    packetHead.dataLen = strlen(bytes);
-    char buffer[DC_MSG_PACKET_HEAD_SIZE_LEN] = {0};
-
-    ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = SetAuthIdByChanId(channelId, 1);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = PackBytes(-1, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: OpenAuthConnTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
- 
-HWTEST_F(TransServerTcpDirectTest, OpenAuthConnTest001, TestSize.Level1)
-{
-    const char* uuid = TEST_TRANS_UDID;
-    uint32_t reqId = 1;
-
-    int32_t ret = OpenAuthConn(uuid, reqId, false);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-/**
- * @tc.name: OpenDataBusReplyTest002
- * @tc.desc: Open the data channel for reply with error parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenDataBusReplyTest002, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    int32_t channelId = g_conn->channelId;
-    uint64_t seq = 0;
-    int32_t errCode = SOFTBUS_ERR;
-    char *msg = PackError(errCode, TEST_MESSAGE);
-    cJSON *reply = cJSON_Parse(msg);
-
-    ret = OpenDataBusReply(channelId, seq, reply);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = OpenDataBusReply(0, seq, reply);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    cJSON_Delete(reply);
-}
-
-/**
- * @tc.name: OpenDataBusRequestErrorTest003
- * @tc.desc: open dsofutbus data erro request with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenDataBusRequestErrorTest003, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    int32_t channelId = 0;
-    uint64_t seq = 0;
-    int32_t errCode = 0;
-    uint32_t flags = 0;
-    ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: GetUuidByChanIdTest004
- * @tc.desc: get uuid by channelId with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, GetUuidByChanIdTest004, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    int32_t channelId = 0;
-    uint32_t len = 0;
-    ret = GetUuidByChanId(channelId, NULL, len);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = GetUuidByChanId(g_conn->channelId, NULL, len);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: OpenDataBusRequestTest005
- * @tc.desc: OpenDataBusRequestTest005, start with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenDataBusRequestTest005, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_OK;
-    uint32_t flags = 0;
-    uint64_t seq = 0;
-    ret = OpenDataBusRequest(0, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = OpenDataBusRequest(g_conn->channelId, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: ProcessMessageTest006
- * @tc.desc: ProcessMessageTest006, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, ProcessMessageTest006, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    uint32_t flags = 0;
-    uint64_t seq = 0;
-    int32_t ret = ProcessMessage(channelId, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    channelId = g_conn->channelId;
-    ret = ProcessMessage(channelId, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = ProcessMessage(channelId, flags, seq, TEST_MESSAGE);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: GetAuthIdByChannelInfoTest007
- * @tc.desc: GetAuthIdByChannelInfoTest007, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChannelInfoTest007, TestSize.Level1)
-{
-    int32_t channelId = g_conn->channelId;
-    uint64_t seq = 0;
-    uint32_t cipherFlag = 0;
-    int32_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: DecryptMessageTest008
- * @tc.desc: DecryptMessageTest008, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, DecryptMessageTest008, TestSize.Level1)
-{
-    int32_t channelId = g_conn->channelId;
-    uint8_t* outData = nullptr;
-    uint32_t dataLen = DC_MSG_PACKET_HEAD_SIZE_LEN;
-    const char *bytes = TEST_MESSAGE;
-    TdcPacketHead packetHead = {
-        .magicNumber = MAGIC_NUMBER,
-        .module = MODULE_SESSION,
-        .seq = 0,
-        .flags = FLAG_REQUEST,
-        .dataLen = strlen(bytes), /* reset after encrypt */
-    };
-    int32_t ret = DecryptMessage(channelId, &packetHead, NULL, &outData, &dataLen);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: ProcessReceivedDataTest009
- * @tc.desc: The process of receiving data.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, ProcessReceivedDataTest009, TestSize.Level1)
-{
-    int32_t channelId = g_conn->channelId;
-    int32_t fd = 1;
-
-    int32_t ret = ProcessReceivedData(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransSrvAddDataBufNode(channelId, fd);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = ProcessReceivedData(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: SendAuthDataTest001
- * @tc.desc: sending authentication data.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, SendAuthDataTest001, TestSize.Level1)
-{
-    int64_t authId = 1;
-    int64_t seq = 0;
-    const char *data = TEST_MESSAGE;
-    int32_t ret = SendAuthData(authId, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: OnAuthDataRecvTest002
- * @tc.desc: receiving authentication data.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OnAuthDataRecvTest002, TestSize.Level1)
-{
-    int64_t authId = 0;
-    AuthTransData dataInfo;
-    int32_t ret = memset_s(&dataInfo, sizeof(AuthTransData), 0, sizeof(AuthTransData));
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    dataInfo.len = 1;
-    dataInfo.data = NULL;
-
-    OnAuthDataRecv(authId, NULL);
-    OnAuthDataRecv(authId, &dataInfo);
-
-    dataInfo.data = (const uint8_t *)TEST_RECV_DATA;
-    OnAuthDataRecv(authId, &dataInfo);
-
-    dataInfo.len = AUTH_TRANS_DATA_LEN;
-    OnAuthDataRecv(authId, &dataInfo);
-}
-
-/**
- * @tc.name: TransDelSessionConnByIdTest001
- * @tc.desc: delete the session by channelId, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, TransDelSessionConnByIdTest001, TestSize.Level1)
-{
-    int32_t ret = AuthCommonInit();
-    EXPECT_TRUE(SOFTBUS_OK == ret);
-    int32_t channelId = g_conn->channelId;
-    TransDelSessionConnById(channelId);
-}
-
-/**
- * @tc.name: OnSessionOpenFailProcTest001
- * @tc.desc: delete the session by channelId, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OnSessionOpenFailProcTest001, TestSize.Level1)
-{
-    SessionConn sessionConn = {
-        .channelId = 1,
-    };
-    int32_t ret = AuthCommonInit();
-    EXPECT_TRUE(SOFTBUS_OK == ret);
-    OnSessionOpenFailProc(&sessionConn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
-}
-
-/**
- * @tc.name: UnpackReplyErrCodeTest001
- * @tc.desc: UnpackReplyErrCodeTest001, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, UnpackReplyErrCodeTest001, TestSize.Level1)
-{
-    int32_t errCode = SOFTBUS_ERR;
-    int32_t ret = UnpackReplyErrCode(NULL, &errCode);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = UnpackReplyErrCode(NULL, NULL);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    string str = TEST_JSON;
-    cJSON *msg = cJSON_Parse(str.c_str());
-    ret = UnpackReplyErrCode(msg, NULL);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    cJSON_Delete(msg);
-
-    string errDesc = TEST_JSON;
-    str = PackError(SOFTBUS_ERR, errDesc.c_str());
-    cJSON *json = cJSON_Parse(str.c_str());
-    ret = UnpackReplyErrCode(json, &errCode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    cJSON_Delete(json);
-}
-
-/**
- * @tc.name: TransServerOnChannelOpenFailedTest001
- * @tc.desc: TransServerOnChannelOpenFailedTest001, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, TransServerOnChannelOpenFailedTest001, TestSize.Level1)
-{
-    const char *pkgName = TEST_PKG_NAME;
-    int32_t ret = TransServerOnChannelOpenFailed(pkgName, 0, -1, 0, SOFTBUS_ERR);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransServerOnChannelOpenFailed(NULL, 0, -1, 0, SOFTBUS_ERR);
-    EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: TransGetAuthTypeByNetWorkIdTest001
- * @tc.desc: TransGetAuthTypeByNetWorkIdTest001, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, TransGetAuthTypeByNetWorkIdTest001, TestSize.Level1)
-{
-    string networkId = TEST_NETWORK_ID;
-    bool ret = TransGetAuthTypeByNetWorkId(networkId.c_str());
-    EXPECT_NE(true, ret);
-}
-
-/**
- * @tc.name: SwitchAuthLinkTypeToFlagTypeTest001
- * @tc.desc: transmission tcp direct listener switch auth link type to flag type with different.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, SwitchAuthLinkTypeToFlagTypeTest001, TestSize.Level1)
-{
-    uint32_t ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BR);
-    EXPECT_EQ(ret, FLAG_BR);
-    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BLE);
-    EXPECT_EQ(ret, FLAG_BLE);
-    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_P2P);
-    EXPECT_EQ(ret, FLAG_P2P);
-    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_WIFI);
-    EXPECT_EQ(ret, FLAG_WIFI);
-}
-
-/**
- * @tc.name: GetCipherFlagByAuthIdTest002
- * @tc.desc: transmission tcp direct listener get cipher flag by auth id.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthIdTest002, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
 {
     int32_t ret = TestAddAuthManager(TRANS_TEST_AUTH_SEQ, g_sessionKey, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
     uint32_t flag = 0;
     bool isAuthServer = false;
+
     ret = GetCipherFlagByAuthId(TRANS_TEST_AUTH_SEQ, &flag, &isAuthServer);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(ret, FLAG_WIFI);
@@ -779,29 +268,72 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthIdTest002, TestSize.Level1
 }
 
 /**
- * @tc.name: StartVerifySessionTest002
- * @tc.desc: transmission tcp direct listener start verify session with different parameters.
+ * @tc.name: StartVerifySession001
+ * @tc.desc: StartVerifySession, start verify session, with wrong parms.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, StartVerifySessionTest002, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
 {
+    int64_t authSeq = 0;
+    AuthSessionInfo *info = (AuthSessionInfo *)SoftBusMalloc(sizeof(AuthSessionInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    SessionKey sessionKey;
+
     int32_t ret = StartVerifySession(g_conn);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    ret = TestAddAuthManager(g_conn->authId, g_sessionKey, false);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
     ret = StartVerifySession(g_conn);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    TestDelAuthManager(g_conn->authId);
 }
 
 /**
- * @tc.name: CreateSessionConnNodeTest001
- * @tc.desc: transmission tcp direct listener create session node of connection without local strInfo.
+ * @tc.name: StartVerifySession002
+ * @tc.desc: StartVerifySession, transmission tcp direct listener start verify session with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, CreateSessionConnNodeTest001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, StartVerifySession002, TestSize.Level1)
+{
+    static SessionConn *tmpSessionConn = NULL;
+    tmpSessionConn = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, false);
+    if (tmpSessionConn == NULL) {
+        printf("create session conn failed.\n");
+        return;
+    }
+    tmpSessionConn->channelId = 1;
+    tmpSessionConn->authId = 1;
+    tmpSessionConn->serverSide = false;
+    if (TransTdcAddSessionConn(tmpSessionConn) != SOFTBUS_OK) {
+        printf("add session conn failed.\n");
+    }
+
+    static const char *tmpSessionKeyTest = "www.test.com";
+
+    int32_t ret = StartVerifySession(tmpSessionConn);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TestAddAuthManager(tmpSessionConn->authId, tmpSessionKeyTest, false);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = StartVerifySession(tmpSessionConn);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    TestDelAuthManager(tmpSessionConn->authId);
+}
+
+/**
+ * @tc.name: CreateSessionConnNode001
+ * @tc.desc: CreateSessionConnNode, transmission tcp direct listener create session node of connection without local
+ *           strInfo.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, CreateSessionConnNode001, TestSize.Level1)
 {
     ConnectOption connInfo = {
         .type = CONNECT_TCP,
@@ -818,6 +350,7 @@ HWTEST_F(TransServerTcpDirectTest, CreateSessionConnNodeTest001, TestSize.Level1
     ret = CreateSessionConnNode(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, TRANS_TEST_FD,
                                 TRANS_TEST_CHCANNEL_ID, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_ERR);
+
     TransProcDataRes(DIRECT_CHANNEL_SERVER_WIFI, ret, TRANS_TEST_CHCANNEL_ID, TRANS_TEST_FD);
 
     ret = TestAddSessionConn(true);
@@ -826,12 +359,12 @@ HWTEST_F(TransServerTcpDirectTest, CreateSessionConnNodeTest001, TestSize.Level1
 }
 
 /**
- * @tc.name: TdcOnConnectEventTest001
- * @tc.desc: transmission tcp direct listener Tdc on connect event with different parameters.
+ * @tc.name: TdcOnConnectEvent001
+ * @tc.desc: TdcOnConnectEvent, transmission tcp direct listener Tdc on connect event with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, TdcOnConnectEventTest001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, TdcOnConnectEvent001, TestSize.Level1)
 {
     ConnectOption connInfo = {
         .type = CONNECT_TCP,
@@ -866,7 +399,7 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnConnectEventTest001, TestSize.Level1)
 
 /**
  * @tc.name: TdcOnDataEvent001
- * @tc.desc: transmission tcp direct listener Tdc on data event.
+ * @tc.desc: TdcOnDataEvent, transmission tcp direct listener Tdc on data event.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -908,7 +441,7 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent001, TestSize.Level1)
 
 /**
  * @tc.name: TdcOnDataEvent002
- * @tc.desc: transmission tcp direct listener Tdc on data event.
+ * @tc.desc: TdcOnDataEvent, transmission tcp direct listener Tdc on data event.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -934,36 +467,406 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUpdAppInfoTest001
- * @tc.desc: TransUpdAppInfo, with wrong parms.
+ * @tc.name: TransTdcStartSessionListener001
+ * @tc.desc: TransTdcStartSessionListener, extern module active publish, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, TransUpdAppInfoTest001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, TransTdcStartSessionListener001, TestSize.Level1)
 {
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    ConnectOption *connInfo = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    (void)memset_s(connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    connInfo->type = CONNECT_TCP;
-    connInfo->socketOption.port = TEST_SOCKET_PORT;
-    connInfo->socketOption.moduleId = MODULE_MESSAGE_SERVICE;
-    connInfo->socketOption.protocol = LNN_PROTOCOL_NIP;
-    (void)strcpy_s(connInfo->socketOption.addr, sizeof(connInfo->socketOption.addr), TEST_SOCKET_ADDR);
-    (void)strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), TEST_SOCKET_ADDR);
-    int32_t ret = TransUpdAppInfo(appInfo, connInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusFree(appInfo);
-    SoftBusFree(connInfo);
+    LocalListenerInfo *info = (LocalListenerInfo *)SoftBusMalloc(sizeof(LocalListenerInfo));
+    ASSERT_TRUE(info != nullptr);
+
+    info->type = CONNECT_TCP;
+    (void)memset_s(info->socketOption.addr, sizeof(info->socketOption.addr), 0, sizeof(info->socketOption.addr));
+    info->socketOption.port = TEST_SOCKET_PORT;
+    info->socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info->socketOption.protocol = LNN_PROTOCOL_IP;
+    int32_t ret = TransTdcStartSessionListener(UNUSE_BUTT, info);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    (void)strcpy_s(info->socketOption.addr, strlen(TEST_SOCKET_ADDR) + 1, TEST_SOCKET_ADDR);
+    info->socketOption.port = TEST_SOCKET_INVALID_PORT;
+    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, info);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    (void)memset_s(info->socketOption.addr, sizeof(info->socketOption.addr), 0, sizeof(info->socketOption.addr));
+    info->socketOption.port = TEST_SOCKET_INVALID_PORT;
+    ret = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, info);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    SoftBusFree(info);
 }
 
 /**
- * @tc.name: TransTdcStopSessionProcTest001
+ * @tc.name: TransTdcStopSessionListener001
+ * @tc.desc: TransTdcStopSessionListener, extern module active publish, stop session whitout start.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionListener001, TestSize.Level1)
+{
+    int32_t ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_WIFI);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * trans_tcp_direct_wifi.c
+ * @tc.name: OpenTcpDirectChannel001
+ * @tc.desc: OpenTcpDirectChannel, extern module active publish, start channel with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, OpenTcpDirectChannel001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+    (void)memset_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr),
+        0, sizeof(connInfo.socketOption.addr));
+    connInfo.socketOption.port = TEST_SOCKET_PORT;
+    connInfo.socketOption.moduleId = MODULE_MESSAGE_SERVICE;
+    connInfo.socketOption.protocol = LNN_PROTOCOL_IP;
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR) != EOK) {
+        return;
+    }
+    int32_t channelId = 0;
+
+    int32_t ret = OpenTcpDirectChannel(&appInfo, &connInfo, &channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * trans_tcp_direct_message.c
+ * @tc.name: PackBytes001
+ * @tc.desc: PackBytes, validate packaging with error parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, PackBytes001, TestSize.Level1)
+{
+    const char *data = TEST_MESSAGE;
+    const char *bytes = TEST_MESSAGE;
+    int32_t channelId = g_conn->channelId;
+    TdcPacketHead packetHead;
+    packetHead.magicNumber = MAGIC_NUMBER;
+    packetHead.module = MODULE_SESSION;
+    packetHead.seq = 0;
+    packetHead.flags = FLAG_REQUEST;
+    packetHead.dataLen = strlen(bytes);
+    char buffer[DC_MSG_PACKET_HEAD_SIZE_LEN] = {0};
+
+    int32_t ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = SetAuthIdByChanId(channelId, 1);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = PackBytes(-1, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransTdcPostBytes001
+ * @tc.desc: TransTdcPostBytes, start with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransTdcPostBytes001, TestSize.Level1)
+{
+    const char *bytes = "Get Message";
+    TdcPacketHead packetHead = {
+        .magicNumber = MAGIC_NUMBER,
+        .module = MODULE_SESSION,
+        .seq = 0,
+        .flags = FLAG_REQUEST,
+        .dataLen = strlen(bytes), /* reset after encrypt */
+    };
+    int32_t channelId = 0;
+
+    int32_t ret = TransTdcPostBytes(channelId, NULL, bytes);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransTdcPostBytes(channelId, &packetHead, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    packetHead.dataLen = 0;
+    ret = TransTdcPostBytes(channelId, &packetHead, bytes);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OpenDataBusReply001
+ * @tc.desc: OpenDataBusReply, Open the data channel for reply with error parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, OpenDataBusReply001, TestSize.Level1)
+{
+    int32_t channelId = g_conn->channelId;
+    uint64_t seq = 0;
+    int32_t errCode = SOFTBUS_ERR;
+    char *msg = PackError(errCode, TEST_MESSAGE);
+    cJSON *reply = cJSON_Parse(msg);
+
+    int32_t ret = OpenDataBusReply(channelId, seq, reply);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenDataBusReply(0, seq, reply);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    cJSON_Delete(reply);
+}
+
+/**
+ * @tc.name: OpenDataBusRequestError001
+ * @tc.desc: OpenDataBusRequestError, open dsofutbus data erro request with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, OpenDataBusRequestError001, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    uint64_t seq = 0;
+    int32_t errCode = 0;
+    uint32_t flags = 0;
+    int32_t ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: GetUuidByChanId001
+ * @tc.desc: GetUuidByChanId, get uuid by channelId with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, GetUuidByChanId001, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    uint32_t len = 0;
+    int32_t ret = GetUuidByChanId(channelId, NULL, len);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = GetUuidByChanId(g_conn->channelId, NULL, len);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OpenDataBusRequest001
+ * @tc.desc: OpenDataBusRequest, start with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, OpenDataBusRequest001, TestSize.Level1)
+{
+    uint32_t flags = 0;
+    uint64_t seq = 0;
+    int32_t ret = OpenDataBusRequest(0, flags, seq, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = OpenDataBusRequest(g_conn->channelId, flags, seq, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ProcessMessage001
+ * @tc.desc: ProcessMessage, start channel with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, ProcessMessage001, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    uint32_t flags = 0;
+    uint64_t seq = 0;
+    int32_t ret = ProcessMessage(channelId, flags, seq, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    channelId = g_conn->channelId;
+    ret = ProcessMessage(channelId, flags, seq, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = ProcessMessage(channelId, flags, seq, TEST_MESSAGE);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: GetAuthIdByChannelInfo001
+ * @tc.desc: GetAuthIdByChannelInfo, start channel with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChannelInfo001, TestSize.Level1)
+{
+    int32_t channelId = g_conn->channelId;
+    uint64_t seq = 0;
+    uint32_t cipherFlag = 0;
+    int32_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: DecryptMessage001
+ * @tc.desc: DecryptMessage, start channel with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, DecryptMessage001, TestSize.Level1)
+{
+    int32_t channelId = g_conn->channelId;
+    uint8_t* outData = nullptr;
+    uint32_t dataLen = DC_MSG_PACKET_HEAD_SIZE_LEN;
+    const char *bytes = TEST_MESSAGE;
+    TdcPacketHead packetHead = {
+        .magicNumber = MAGIC_NUMBER,
+        .module = MODULE_SESSION,
+        .seq = 0,
+        .flags = FLAG_REQUEST,
+        .dataLen = strlen(bytes), /* reset after encrypt */
+    };
+    int32_t ret = DecryptMessage(channelId, &packetHead, NULL, &outData, &dataLen);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ProcessReceivedData001
+ * @tc.desc: ProcessReceivedData, The process of receiving data.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, ProcessReceivedData001, TestSize.Level1)
+{
+    int32_t channelId = g_conn->channelId;
+    int32_t fd = 1;
+
+    int32_t ret = ProcessReceivedData(channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransSrvAddDataBufNode(channelId, fd);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = ProcessReceivedData(channelId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * trans_tcp_direct_sessionconn.c
+ * @tc.name: GetAuthIdByChanId001
+ * @tc.desc: GetAuthIdByChanId, start channel with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChanId001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    int32_t authId = AUTH_INVALID_ID;
+    
+    int32_t ret = GetAppInfoById(g_conn->channelId, &appInfo);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    authId = GetAuthIdByChanId(g_conn->channelId);
+    EXPECT_TRUE(authId != AUTH_INVALID_ID);
+
+    ret = SetAuthIdByChanId(g_conn->channelId, AUTH_INVALID_ID);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    authId = GetAuthIdByChanId(g_conn->channelId);
+    EXPECT_TRUE(authId == AUTH_INVALID_ID);
+}
+
+/**
+ * @tc.name: TransDelSessionConnById001
+ * @tc.desc: TransDelSessionConnById, delete the session by channelId, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransDelSessionConnById001, TestSize.Level1)
+{
+    int32_t channelId = g_conn->channelId;
+    TransDelSessionConnById(channelId);
+}
+
+/**
+ * trans_tcp_direct_p2p.c
+ * @tc.name: SendAuthData001
+ * @tc.desc: SendAuthData, sending authentication data.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, SendAuthData001, TestSize.Level1)
+{
+    int64_t authId = 1;
+    int64_t seq = 0;
+    const char *data = TEST_MESSAGE;
+    int32_t ret = SendAuthData(authId, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OpenAuthConn001
+ * @tc.desc: OpenAuthConn, improve branch coverage, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, OpenAuthConn001, TestSize.Level1)
+{
+    const char* uuid = TEST_TRANS_UDID;
+    uint32_t reqId = 1;
+
+    int32_t ret = OpenAuthConn(uuid, reqId, false);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnAuthDataRecv001
+ * @tc.desc: OnAuthDataRecv, receiving authentication data.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, OnAuthDataRecv001, TestSize.Level1)
+{
+    int64_t authId = 0;
+    AuthTransData dataInfo;
+    (void)memset_s(&dataInfo, sizeof(AuthTransData), 0, sizeof(AuthTransData));
+    dataInfo.len = 1;
+    dataInfo.data = NULL;
+
+    OnAuthDataRecv(authId, NULL);
+    OnAuthDataRecv(authId, &dataInfo);
+
+    dataInfo.data = (const uint8_t *)TEST_RECV_DATA;
+    OnAuthDataRecv(authId, &dataInfo);
+
+    dataInfo.len = AUTH_TRANS_DATA_LEN;
+    OnAuthDataRecv(authId, &dataInfo);
+}
+
+/**
+ * trans_tcp_direct_manager.c
+ * @tc.name: OnSessionOpenFailProc001
+ * @tc.desc: OnSessionOpenFailProc, delete the session by channelId, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, OnSessionOpenFailProc001, TestSize.Level1)
+{
+    SessionConn sessionConn = {
+        .channelId = 1,
+    };
+    OnSessionOpenFailProc(&sessionConn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+}
+
+/**
+ * @tc.name: TransTdcStopSessionProc001
  * @tc.desc: TransTdcStopSessionProc, with wrong parms.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProcTest001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
 {
     int32_t channelId = 1;
     SessionConn *conn = (SessionConn*)SoftBusMalloc(sizeof(SessionConn));
@@ -989,5 +892,132 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProcTest001, TestSize.Leve
 
     TransDelSessionConnById(channelId);
     SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: TransUpdAppInfo001
+ * @tc.desc: TransUpdAppInfo, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransUpdAppInfo001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    ConnectOption *connInfo = (ConnectOption*)SoftBusMalloc(sizeof(ConnectOption));
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connInfo->type = CONNECT_TCP;
+    connInfo->socketOption.port = TEST_SOCKET_PORT;
+    connInfo->socketOption.moduleId = MODULE_MESSAGE_SERVICE;
+    connInfo->socketOption.protocol = LNN_PROTOCOL_NIP;
+    (void)strcpy_s(connInfo->socketOption.addr, sizeof(connInfo->socketOption.addr), TEST_SOCKET_ADDR);
+    (void)strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), TEST_SOCKET_ADDR);
+
+    int32_t ret = TransUpdAppInfo(appInfo, connInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(appInfo);
+    SoftBusFree(connInfo);
+}
+
+/**
+ * @tc.name: TransOpenDirectChannel001
+ * @tc.desc: TransOpenDirectChannel, extern module active publish, start channel with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransOpenDirectChannel001, TestSize.Level1)
+{
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+    (void)memset_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr),
+        0, sizeof(connInfo.socketOption.addr));
+    connInfo.socketOption.port = TEST_SOCKET_PORT;
+    connInfo.socketOption.moduleId = MODULE_MESSAGE_SERVICE;
+    connInfo.socketOption.protocol = LNN_PROTOCOL_IP;
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    if (strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR) != EOK) {
+        return;
+    }
+    int32_t fd = 1;
+
+    int32_t ret = TransOpenDirectChannel(NULL, &connInfo, &fd);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransOpenDirectChannel(&appInfo, NULL, &fd);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransOpenDirectChannel(&appInfo, &connInfo, NULL);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    ret = TransOpenDirectChannel(&appInfo, &connInfo, &fd);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * softbus_message_open_channel.c
+ * @tc.name: UnpackReplyErrCode001
+ * @tc.desc: UnpackReplyErrCode, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, UnpackReplyErrCode001, TestSize.Level1)
+{
+    int32_t errCode = SOFTBUS_ERR;
+    int32_t ret = UnpackReplyErrCode(NULL, &errCode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = UnpackReplyErrCode(NULL, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    std::string str = TEST_JSON;
+    cJSON *msg = cJSON_Parse(str.c_str());
+    ret = UnpackReplyErrCode(msg, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    cJSON_Delete(msg);
+
+    std::string errDesc = TEST_JSON;
+    str = PackError(SOFTBUS_ERR, errDesc.c_str());
+    cJSON *json = cJSON_Parse(str.c_str());
+    ret = UnpackReplyErrCode(json, &errCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    cJSON_Delete(json);
+}
+
+/**
+ * trans_channel_callback.c
+ * @tc.name: TransServerOnChannelOpenFailed001
+ * @tc.desc: TransServerOnChannelOpenFailed, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransServerOnChannelOpenFailed001, TestSize.Level1)
+{
+    const char *pkgName = TEST_PKG_NAME;
+    int32_t pid = 0;
+    int32_t channelId = -1;
+    int32_t channelType = 0;
+    int32_t errCode = -1;
+    int32_t ret = TransServerOnChannelOpenFailed(pkgName, pid, channelId, channelType, errCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransServerOnChannelOpenFailed(NULL, pid, channelId, channelType, errCode);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * trans_lane_pending_ctl.c
+ * @tc.name: TransGetAuthTypeByNetWorkId001
+ * @tc.desc: TransGetAuthTypeByNetWorkId, with wrong parms.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransGetAuthTypeByNetWorkId001, TestSize.Level1)
+{
+    std::string networkId = TEST_NETWORK_ID;
+    bool ret = TransGetAuthTypeByNetWorkId(networkId.c_str());
+    EXPECT_NE(true, ret);
 }
 } // namespace OHOS
