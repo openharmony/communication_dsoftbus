@@ -51,7 +51,6 @@ bus_center_unittest_dirs = [
   "$dsoftbus_root_path/core/discovery/manager/include",
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/interfaces/kits/discovery",
-  "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
@@ -913,7 +912,6 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 
   deps = [
@@ -934,6 +932,7 @@ ohos_unittest("LNNLedgerMockTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "huks:libhukssdk",
     ]
   }
 }
@@ -974,7 +973,6 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 
   deps = [
@@ -1000,6 +998,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "huks:libhukssdk",
     ]
   }
 }
@@ -1040,7 +1039,6 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 
   deps = [
@@ -1066,6 +1064,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "huks:libhukssdk",
     ]
   }
 }
@@ -1110,7 +1109,6 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 
   deps = [
@@ -1136,6 +1134,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "huks:libhukssdk",
     ]
   }
 }
@@ -1434,7 +1433,6 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/interfaces/kits/discovery",
       "$dsoftbus_root_path/core/bus_center/service/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     ]
 
@@ -1456,6 +1454,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       external_deps = [
         "c_utils:utils",
         "hilog:libhilog",
+        "huks:libhukssdk",
       ]
     }
   }
