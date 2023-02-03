@@ -34,6 +34,7 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
 
     "//commonlibrary/c_utils/base/include",
     "unittest/common/",
