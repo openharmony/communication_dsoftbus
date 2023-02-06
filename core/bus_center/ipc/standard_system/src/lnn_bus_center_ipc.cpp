@@ -24,7 +24,6 @@
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_ipc_utils.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
@@ -144,9 +143,12 @@ int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
 
-    (void)addrTypeLen;
     if (pkgName == nullptr || connAddr == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (addrTypeLen != sizeof(ConnectionAddr)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
@@ -209,13 +211,10 @@ int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
-int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    (void)infoTypeLen;
-    PublishInfo pubInfo;
-    ConvertVoidToPublishInfo(info, &pubInfo);
-    int32_t ret = LnnPublishService(pkgName, &pubInfo, false);
-    (void)ClientOnPublishLNNResult(pkgName, pubInfo.publishId, PublishResultTransfer(ret));
+    int32_t ret = LnnPublishService(pkgName, info, false);
+    (void)ClientOnPublishLNNResult(pkgName, info->publishId, PublishResultTransfer(ret));
     return ret;
 }
 
@@ -224,17 +223,14 @@ int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t LnnIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    (void)infoTypeLen;
-    SubscribeInfo subInfo;
-    ConvertVoidToSubscribeInfo(info, &subInfo);
     SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    int32_t ret = LnnStartDiscDevice(pkgName, &subInfo, &callback, false);
-    (void)ClientOnRefreshLNNResult(pkgName, subInfo.subscribeId, DiscoveryResultTransfer(ret));
+    int32_t ret = LnnStartDiscDevice(pkgName, info, &callback, false);
+    (void)ClientOnRefreshLNNResult(pkgName, info->subscribeId, DiscoveryResultTransfer(ret));
     return ret;
 }
 

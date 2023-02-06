@@ -160,7 +160,7 @@ ERR_EXIT:
 
 int32_t InitSoftBus(const char *pkgName)
 {
-    if (pkgName == NULL || strlen(pkgName) >= PKG_NAME_SIZE_MAX) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init softbus sdk fail.");
         return SOFTBUS_ERR;
     }

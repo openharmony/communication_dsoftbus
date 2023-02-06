@@ -35,9 +35,9 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
-int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen);
+int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info);
 int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId);
-int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info);
 int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
 int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId);
 int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId);
