@@ -211,7 +211,8 @@ const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *h
     offset += sizeof(uint32_t);
     head->len = SoftBusLtoHl(*(uint32_t *)(data + offset));
     offset += sizeof(uint32_t);
-    if (len < GetAuthDataSize(head->len)) {
+    uint32_t dataLen = GetAuthDataSize(head->len);
+    if (len < dataLen || dataLen < GetAuthDataSize(0)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthData: data not enough.");
         return NULL;
     }
