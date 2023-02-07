@@ -20,6 +20,7 @@
 #include "client_trans_session_callback.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_manager.h"
+#include "client_trans_tcp_direct_callback.h"
 #include "client_trans_udp_manager.h"
 #include "session.h"
 #include "softbus_errcode.h"
@@ -101,6 +102,7 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
         case CHANNEL_TYPE_UDP:
             return TransOnUdpChannelClosed(channelId);
         case CHANNEL_TYPE_TCP_DIRECT:
+            return ClientTransTdcOnSessionClosed(channelId);
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }

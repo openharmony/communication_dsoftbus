@@ -21,6 +21,8 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "client_trans_tcp_direct_manager.h"
+#include "client_trans_tcp_direct_message.h"
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -41,6 +43,8 @@ NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionOpened(const char *sessionName
 
 NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionClosed(int32_t channelId)
 {
+    (void)TransDelDataBufNode(channelId);
+    (void)TransTdcCloseChannel(channelId);
     return g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT);
 }
 
