@@ -135,9 +135,9 @@ ohos_unittest("LaneTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("NetLedgerTest") {
@@ -155,9 +155,9 @@ ohos_unittest("NetLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("NetBuilderTest") {
@@ -175,9 +175,9 @@ ohos_unittest("NetBuilderTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LNNHuksUtilsTest") {
@@ -195,9 +195,9 @@ ohos_unittest("LNNHuksUtilsTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LedgerLaneHubTest") {
@@ -215,9 +215,9 @@ ohos_unittest("LedgerLaneHubTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LNNBusCenterIpcTest") {
@@ -235,9 +235,9 @@ ohos_unittest("LNNBusCenterIpcTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("BusCenterClientProxyTest") {
@@ -255,9 +255,9 @@ ohos_unittest("BusCenterClientProxyTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("BusCenterClientProxyStandardTest") {
@@ -275,9 +275,9 @@ ohos_unittest("BusCenterClientProxyStandardTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LNNNetBuilderTest") {
@@ -932,9 +932,9 @@ ohos_unittest("LNNLedgerMockTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LNNNetLedgerCommonTest") {
@@ -998,9 +998,9 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LNNDisctributedLedgerTest") {
@@ -1064,9 +1064,9 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LNNMetaNodeLedgerTest") {
@@ -1134,9 +1134,9 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "huks:libhukssdk",
     ]
   }
+  external_deps += [ "huks:libhukssdk"]
 }
 
 ohos_unittest("LNNLaneMockTest") {
@@ -1454,9 +1454,9 @@ if (!defined(ohos_lite) && enhanced_test) {
       external_deps = [
         "c_utils:utils",
         "hilog:libhilog",
-        "huks:libhukssdk",
       ]
     }
+    external_deps += [ "huks:libhukssdk"]
   }
 }
 
