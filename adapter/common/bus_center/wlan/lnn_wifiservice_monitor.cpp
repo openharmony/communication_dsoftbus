@@ -57,6 +57,9 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
         switch (code) {
+            case int(OHOS::Wifi::ConnState::OBTAINING_IPADDR):
+                state = SOFTBUS_WIFI_OBTAINING_IPADDR;
+                break;
             case int(OHOS::Wifi::ConnState::CONNECTED):
                 state = SOFTBUS_WIFI_CONNECTED;
                 break;
