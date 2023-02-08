@@ -753,14 +753,14 @@ NO_SANITIZE("cfi") int32_t TransCloseUdpChannel(int32_t channelId)
 
 static void UdpModuleCb(int64_t authId, const AuthTransData *data)
 {
-    if (data == NULL || data->data == NULL || data->len < 1 || data->data[data->len - 1] != 0) {
+    if (data == NULL || data->data == NULL || data->len < 1) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "udp module callback enter: module=%d, seq=%" PRId64 ", len=%u.", data->module, data->seq, data->len);
     AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "UdpModuleCb TransOnExchangeUdpInfo: ", (char *)data->data, data->len);
-    cJSON *json = cJSON_Parse((char *)data->data);
+    cJSON *json = cJSON_ParseWithLength((char *)data->data, data->len);
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cjson parse failed!");
         return;
