@@ -461,7 +461,6 @@ void AuthSessionTest::TransTestCase001(TransTestInfo &transInfo)
                 if (ret2 != SOFTBUS_OK && ret2 != SOFTBUS_TIMOUT) {
                     EXPECT_EQ(ret2, 0);
                 }
-                //Wsleep(10, 2);
             }
         }
     }
