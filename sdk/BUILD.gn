@@ -86,6 +86,7 @@ target(build_type, "softbus_client") {
     }
     ldflags = [ "-lstdc++" ]
   } else {
+    version_script = "libsoftbus_client_map"
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]
     if (is_standard_system) {
