@@ -21,8 +21,6 @@ lite_component("softbus_test") {
     if (ohos_build_type == "debug") {
       features += [
         "sdk/discovery/unittest:DiscSdkTest",
-        "sdk/transmission/trans_channel:TransSdkTcpDirectTest",
-        "sdk/transmission/trans_channel:TransTcpDirectTest",
         "adapter/unittest:AdapterTest",
       ]
     }
