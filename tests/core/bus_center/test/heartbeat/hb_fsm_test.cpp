@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ namespace OHOS {
 #define TEST_TIME1       450
 #define TEST_TIME2       500
 #define TEST_TIME3       2000000
+constexpr int32_t MSGTYPE = 2;
 using namespace testing::ext;
 using namespace testing;
 
@@ -329,18 +330,22 @@ HWTEST_F(HeartBeatFSMTest, OnStopHbByTypeTest_01, TestSize.Level1)
 }
 
 /*
- * @tc.name: TryAsMasterNodeNextLoop
+ * @tc.name: OnTransHbFsmState
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(HeartBeatFSMTest, TryAsMasterNodeNextLoopTest_01, TestSize.Level1)
+HWTEST_F(HeartBeatFSMTest, OnTransHbFsmStateTest_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
     ON_CALL(heartbeatFsmMock, LnnGetGearModeBySpecificType).WillByDefault(Return(SOFTBUS_ERR));
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     TryAsMasterNodeNextLoop(&hbFsm->fsm);
     LnnDestroyHeartbeatFsm(hbFsm);
+
+    int32_t msgType = MSGTYPE;
+    int32_t ret = OnTransHbFsmState(nullptr, msgType, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*

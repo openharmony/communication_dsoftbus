@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,12 +73,12 @@ static int32_t LnnCoapFuncTest(void)
 }
 
 /*
-* @tc.name: DEVICE_FOUND_TEST_001
+* @tc.name: LNN_PUBLISH_SERVICE_TEST_001
 * @tc.desc: device found test
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNDiscoveryInterfaceTest, DEVICE_FOUND_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level1)
 {
     DeviceInfo device;
     InnerDeviceInfoAddtions addtions;
@@ -95,15 +95,24 @@ HWTEST_F(LNNDiscoveryInterfaceTest, DEVICE_FOUND_TEST_001, TestSize.Level1)
     DeviceFound(&device, &addtions);
     device.addr[0].info.ip.port = 22;
     DeviceFound(&device, &addtions);
+
+    const char *pkgName = "testpkgName";
+    PublishInfo info;
+    bool isInnerRequest = false;
+    DiscManagerInterfaceMock discMock;
+    (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
+    EXPECT_CALL(discMock, DiscPublishService).WillRepeatedly(Return(SOFTBUS_ERR));
+    int32_t ret = LnnPublishService(pkgName, &info, isInnerRequest);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
-* @tc.name: LNN_PUBLISH_SERVICE_TEST_001
+* @tc.name: LNN_PUBLISH_SERVICE_TEST_002
 * @tc.desc: lnn publish service test
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level1)
+HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level1)
 {
     const char *pkgName = "testpkgName";
     PublishInfo info;
@@ -231,6 +240,13 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
 */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
 {
+    g_discoveryImpl[0].StopPublishImpl = nullptr;
+    LnnStopPublish();
+    g_discoveryImpl[0].StopPublishImpl = LnnCoapTest;
+    LnnStopPublish();
+    g_discoveryImpl[0].StopPublishImpl = LnnCoapFuncTest;
+    LnnStopPublish();
+
     g_discoveryImpl[0].StartPublishImpl = nullptr;
     int32_t ret = LnnStartPublish();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -243,22 +259,6 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_STOP_PUBLISH_TEST_001
-* @tc.desc: lnn stop publish test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_PUBLISH_TEST_001, TestSize.Level1)
-{
-    g_discoveryImpl[0].StopPublishImpl = nullptr;
-    LnnStopPublish();
-    g_discoveryImpl[0].StopPublishImpl = LnnCoapTest;
-    LnnStopPublish();
-    g_discoveryImpl[0].StopPublishImpl = LnnCoapFuncTest;
-    LnnStopPublish();
-}
-
-/*
 * @tc.name: LNN_START_DISCOVERY_TEST_001
 * @tc.desc: lnn start discovery test
 * @tc.type: FUNC
@@ -266,6 +266,13 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_PUBLISH_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level1)
 {
+    g_discoveryImpl[0].StopDiscoveryImpl = nullptr;
+    LnnStopDiscovery();
+    g_discoveryImpl[0].StopDiscoveryImpl = LnnCoapTest;
+    LnnStopDiscovery();
+    g_discoveryImpl[0].StopDiscoveryImpl = LnnCoapFuncTest;
+    LnnStopDiscovery();
+
     g_discoveryImpl[0].StartDiscoveryImpl = nullptr;
     int32_t ret = LnnStartDiscovery();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -275,21 +282,5 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level
     g_discoveryImpl[0].StartDiscoveryImpl = LnnCoapFuncTest;
     ret = LnnStartDiscovery();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
-* @tc.name: LNN_STOP_DISCOVERY_TEST_001
-* @tc.desc: lnn stop discovery test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISCOVERY_TEST_001, TestSize.Level1)
-{
-    g_discoveryImpl[0].StopDiscoveryImpl = nullptr;
-    LnnStopDiscovery();
-    g_discoveryImpl[0].StopDiscoveryImpl = LnnCoapTest;
-    LnnStopDiscovery();
-    g_discoveryImpl[0].StopDiscoveryImpl = LnnCoapFuncTest;
-    LnnStopDiscovery();
 }
 } // namespace OHOS
