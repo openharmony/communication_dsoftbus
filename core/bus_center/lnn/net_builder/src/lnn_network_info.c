@@ -159,6 +159,11 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "WifiStateEventHandler WifiState = %d", wifiState);
     bool isSend = false;
     switch (wifiState) {
+        case SOFTBUS_WIFI_OBTAINING_IPADDR:
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+            break;
         case SOFTBUS_WIFI_ENABLED:
             (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
             (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
