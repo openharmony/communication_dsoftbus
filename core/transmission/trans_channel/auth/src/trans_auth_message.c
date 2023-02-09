@@ -45,13 +45,13 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo)
+int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len)
 {
     if (msg == NULL || appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
-    cJSON *obj = cJSON_Parse(msg);
+    cJSON *obj = cJSON_ParseWithLength(msg, len);
     if (obj == NULL) {
         return SOFTBUS_PARSE_JSON_ERR;
     }

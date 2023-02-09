@@ -137,16 +137,16 @@ typedef struct {
     uint32_t outLen;
 } ProxyDataInfo;
 
-int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int* errCode);
-int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo);
+int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int* errCode, int32_t len);
+int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char* TransProxyPackHandshakeErrMsg(int32_t errCode);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
-int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
+int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char* TransProxyPackIdentity(const char *identity);
-int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize);
+int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus
