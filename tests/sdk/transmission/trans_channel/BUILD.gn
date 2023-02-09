@@ -43,57 +43,6 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/test.gni")
 
   if (ohos_build_type == "debug") {
-    unittest("TransTcpDirectTest") {
-      output_extension = "bin"
-      output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = [ "tcp_direct/unittest/trans_tcp_direct_test.cpp" ]
-      include_dirs = trans_sdk_test_common_inc
-      include_dirs += [
-        "$dsoftbus_root_path/core/common/softbus_property/include",
-        "$softbus_adapter_config/spec_config",
-        "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
-      ]
-      deps = trans_sdk_test_common_deps
-      deps += [
-        "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$hilog_lite_deps_path",
-      ]
-    }
-
-    unittest("TransSdkTcpDirectTest") {
-      output_extension = "bin"
-      output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = [ "tcp_direct/unittest/trans_sdk_tcp_direct_test.cpp" ]
-      include_dirs = trans_sdk_test_common_inc
-      include_dirs += [
-        "$dsoftbus_root_path/core/common/softbus_property/include",
-        "$softbus_adapter_config/spec_config",
-        "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
-      ]
-      deps = trans_sdk_test_common_deps
-      deps += [
-        "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$hilog_lite_deps_path",
-      ]
-    }
-
-    unittest("TransSessionTest") {
-      output_extension = "bin"
-      output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = [ "tcp_direct/unittest/trans_session_test.cpp" ]
-      include_dirs = trans_sdk_test_common_inc
-      include_dirs += [
-        "$dsoftbus_root_path/core/common/softbus_property/include",
-        "$softbus_adapter_config/spec_config",
-        "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
-      ]
-      deps = trans_sdk_test_common_deps
-      deps += [
-        "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$hilog_lite_deps_path",
-      ]
-    }
-
     unittest("TransSdkStreamTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
@@ -120,48 +69,6 @@ if (defined(ohos_lite)) {
   ]
 
   trans_sdk_proxy_test_deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
-
-  module_output_path = "dsoftbus/transmission"
-  ohos_unittest("TransTcpDirectTest") {
-    module_out_path = module_output_path
-    sources = [ "tcp_direct/unittest/trans_tcp_direct_test.cpp" ]
-    include_dirs = trans_sdk_test_common_inc
-    deps = trans_sdk_test_common_deps
-    deps += trans_sdk_proxy_test_deps
-    if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    } else {
-      external_deps = [ "hilog:libhilog" ]
-    }
-  }
-
-  module_output_path = "dsoftbus/transmission"
-  ohos_unittest("TransSdkTcpDirectTest") {
-    module_out_path = module_output_path
-    sources = [ "tcp_direct/unittest/trans_sdk_tcp_direct_test.cpp" ]
-    include_dirs = trans_sdk_test_common_inc
-    deps = trans_sdk_test_common_deps
-    deps += trans_sdk_proxy_test_deps
-    if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    } else {
-      external_deps = [ "hilog:libhilog" ]
-    }
-  }
-
-  module_output_path = "dsoftbus/transmission"
-  ohos_unittest("TransSessionTest") {
-    module_out_path = module_output_path
-    sources = [ "tcp_direct/unittest/trans_session_test.cpp" ]
-    include_dirs = trans_sdk_test_common_inc
-    deps = trans_sdk_test_common_deps
-    deps += trans_sdk_proxy_test_deps
-    if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-    } else {
-      external_deps = [ "hilog:libhilog" ]
-    }
-  }
 
   module_output_path = "dsoftbus/transmission"
   ohos_unittest("TransSdkStreamTest") {
@@ -441,9 +348,6 @@ if (defined(ohos_lite)) {
       ":ClientTransUdpManagerTest",
       ":TransSdkCommStreamTest",
       ":TransSdkStreamTest",
-      ":TransSdkTcpDirectTest",
-      ":TransSessionTest",
-      ":TransTcpDirectTest",
       "auth:unittest",
       "monitor_permission_test:CheckPermissionTest",
       "permission:TransDynamicPermissionTest",
@@ -458,6 +362,7 @@ if (defined(ohos_lite)) {
             ":ClientTransUdpStreamInterfaceTest",
             ":StreamAdaptorTest",
             "udp/stream/libsoftbus_stream:unittest",
+            "tcp_direct:unittest",
           ]
         }
       }
