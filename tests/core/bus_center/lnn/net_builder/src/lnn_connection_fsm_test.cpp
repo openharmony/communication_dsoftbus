@@ -86,17 +86,6 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
     ConnectionAddr *target1 = nullptr;
     LnnConnectionFsm *fsm = LnnCreateConnectionFsm(target1);
     EXPECT_TRUE(fsm == nullptr);
-}
-
-/*
-* @tc.name: LNN_DESTROY_CONNECTION_FSM_TEST_001
-* @tc.desc: test LnnDestroyConnectionFsm
-* @tc.type: FUNC
-* @tc.require: I5PRUD
-*/
-HWTEST_F(LNNConnectionFsmTest, LNN_DESTROY_CONNECTION_FSM_TEST_001, TestSize.Level1)
-{
-    LnnConnectionFsm *fsm = nullptr;
     LnnDestroyConnectionFsm(fsm);
 }
 
