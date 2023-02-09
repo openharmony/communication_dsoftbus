@@ -423,7 +423,7 @@ static void OnAuthMsgProc(int64_t authId, int32_t flags, int64_t seq, const cJSO
 
 static void OnAuthDataRecv(int64_t authId, const AuthTransData *data)
 {
-    if (data == NULL || data->data == NULL || data->len < 1 || data->data[data->len - 1] != 0) {
+    if (data == NULL || data->data == NULL || data->len < 1) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
@@ -434,7 +434,7 @@ static void OnAuthDataRecv(int64_t authId, const AuthTransData *data)
     }
     AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "OnAuthDataRecv data: ", (const char *)data->data, data->len);
 
-    cJSON *json = cJSON_Parse((const char *)(data->data));
+    cJSON *json = cJSON_ParseWithLength((const char *)(data->data), data->len);
     if (json == NULL) {
         return;
     }
