@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "bus_center_client_proxy.h"
 #include "bus_center_client_proxy_standard.h"
 #include "if_system_ability_manager.h"
 #include "iremote_object.h"
@@ -32,7 +33,11 @@ using namespace testing;
 #define TEST_ADDR_TYPE_LEN 17
 #define TEST_RET_CODE      0
 #define TEST_TYPE          1
-
+constexpr char TEST_PKGNAME[] = "testname";
+constexpr uint32_t DEVICELEN = 5;
+constexpr int32_t REFRESHID = 7;
+constexpr int32_t REASON = 8;
+constexpr int32_t PUBLISHID = 8;
 class ClientProxyTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -219,15 +224,18 @@ HWTEST_F(ClientProxyTest, OnPublishLNNResultTest_01, TestSize.Level1)
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
     clientProxy->OnPublishLNNResult(TEST_RET_CODE, TEST_RET_CODE);
+
+    int32_t ret = ClientOnRefreshLNNResult(TEST_PKGNAME, PUBLISHID, REASON);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
- * @tc.name: OnRefreshLNNResult
- * @tc.desc: bus center client proxy standard
+ * @tc.name: ClientOnRefreshLNNResult
+ * @tc.desc: bus center client proxy
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientProxyTest, OnRefreshLNNResultTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, ClientOnRefreshLNNResult_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -236,15 +244,18 @@ HWTEST_F(ClientProxyTest, OnRefreshLNNResultTest_01, TestSize.Level1)
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
     clientProxy->OnRefreshLNNResult(TEST_RET_CODE, TEST_RET_CODE);
+
+    int32_t ret = ClientOnRefreshLNNResult(TEST_PKGNAME, REFRESHID, REASON);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
- * @tc.name: OnRefreshDeviceFound
- * @tc.desc: bus center client proxy standard
+ * @tc.name: ClientOnRefreshDeviceFound
+ * @tc.desc: bus center client proxy
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientProxyTest, OnRefreshDeviceFoundTest_01, TestSize.Level1)
+HWTEST_F(ClientProxyTest, ClientOnRefreshDeviceFound_01, TestSize.Level1)
 {
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -255,5 +266,10 @@ HWTEST_F(ClientProxyTest, OnRefreshDeviceFoundTest_01, TestSize.Level1)
     char *addr = const_cast<char *>(TEST_ADDR);
     void *addrInput = reinterpret_cast<void *>(addr);
     clientProxy->OnRefreshDeviceFound(addrInput, TEST_ADDR_TYPE_LEN);
+
+    const void *device = "1234";
+    uint32_t deviceLen = DEVICELEN;
+    int32_t ret = ClientOnRefreshDeviceFound(TEST_PKGNAME, device, deviceLen);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
