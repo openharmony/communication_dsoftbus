@@ -226,7 +226,7 @@ HWTEST_F(TransUdpNegoTest, sendUdpInfo001, TestSize.Level1)
     int32_t ret = sendUdpInfo(NULL, authId, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = sendUdpInfo(replyMsg, NULL, NULL);
+    ret = sendUdpInfo(replyMsg, 0, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     cJSON_Delete(replyMsg);
 }
@@ -241,10 +241,10 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
 {
     int32_t errCode = 0;
     string errDesc = "ProcessMessage";
-    int32_t ret = SendReplyErrInfo(errCode, NULL, NULL, NULL);
+    int32_t ret = SendReplyErrInfo(errCode, NULL, 0, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = SendReplyErrInfo(errCode, (char *)errDesc.c_str(), NULL, NULL);
+    ret = SendReplyErrInfo(errCode, (char *)errDesc.c_str(), 0, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -265,7 +265,7 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
     int32_t ret = SendReplyUdpInfo(NULL, authId, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = SendReplyUdpInfo(&appInfo, NULL, seq);
+    ret = SendReplyUdpInfo(&appInfo, 0, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -387,11 +387,11 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
-    int32_t ret = StartExchangeUdpInfo(&channel, NULL, NULL);
+    int32_t ret = StartExchangeUdpInfo(&channel, 0, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
-    ret = StartExchangeUdpInfo(&channel, NULL, seq);
+    ret = StartExchangeUdpInfo(&channel, 0, seq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
