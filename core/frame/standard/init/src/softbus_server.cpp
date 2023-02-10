@@ -147,6 +147,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
                 return SOFTBUS_MEM_ERR;
             }
+            connOpt.bleOption.fastestConnectEnable = true;
             break;
         case CONNECT_BR:
             if (memcpy_s(connOpt.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
