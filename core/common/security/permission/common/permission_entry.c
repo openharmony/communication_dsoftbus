@@ -472,9 +472,10 @@ NO_SANITIZE("cfi") SoftBusPermissionItem *CreatePermissionItem(int32_t permType,
 NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
 {
     if (sessionName == NULL || pItem == NULL || g_permissionEntryList == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "some parameters are null");
         return SOFTBUS_INVALID_PARAM;
     }
-    int permType;
+    int permType = -1;
     SoftBusPermissionEntry *pe = NULL;
     bool isDynamicPermission = CheckDBinder(sessionName);
     SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
@@ -489,6 +490,7 @@ NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const S
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
                 (void)SoftBusMutexUnlock(&permissionList->lock);
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "permType is invalid,  permType = %d", permType);
                 return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
             }
             (void)SoftBusMutexUnlock(&permissionList->lock);
@@ -497,19 +499,23 @@ NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const S
     }
     if (pItem->permType != NORMAL_APP) {
         (void)SoftBusMutexUnlock(&permissionList->lock);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus permission warning,  permType = %d", permType);
         return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
     }
     if (pItem->actions == ACTION_CREATE) {
         if (IsValidPkgName(pItem->uid, pItem->pkgName) != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&permissionList->lock);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "invalid pkgName,  permType = %d", permType);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
         if (!StrStartWith(sessionName, pItem->pkgName)) {
             (void)SoftBusMutexUnlock(&permissionList->lock);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "sessionName is not suitable with pkgName,  permType = %d", permType);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
     }
     (void)SoftBusMutexUnlock(&permissionList->lock);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus permission denied");
     return SOFTBUS_PERMISSION_DENIED;
 }
 
