@@ -36,6 +36,11 @@ NO_SANITIZE("cfi") int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t 
     return g_channelCb.OnChannelOpened(pkgName, pid, sessionName, channel);
 }
 
+NO_SANITIZE("cfi") int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
+{
+    return g_channelCb.OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_TCP_DIRECT);
+}
+
 NO_SANITIZE("cfi") int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
     int32_t errCode)
 {

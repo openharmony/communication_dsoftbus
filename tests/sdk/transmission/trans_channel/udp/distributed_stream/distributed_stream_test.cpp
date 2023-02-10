@@ -326,7 +326,7 @@ void DistributeStreamTest::OpenAllSession(bool isRawStream, bool isP2P,
         (void)memset_s(&attribute, sizeof(attribute), 0, sizeof(attribute));
         // p2p link type session
         attribute.dataType = TYPE_STREAM;
-        attribute.linkTypeNum = 1;
+        attribute.linkTypeNum = 0;
         attribute.linkType[0] = isP2P ? LINK_TYPE_WIFI_P2P : LINK_TYPE_WIFI_WLAN_5G;
         attribute.attr.streamAttr.streamType = isRawStream ? RAW_STREAM : COMMON_VIDEO_STREAM;
 
@@ -355,7 +355,7 @@ void DistributeStreamTest::OpenCtrlSession(const string &mySessionName, const st
         (void)memset_s(&attribute, sizeof(attribute), 0, sizeof(attribute));
         // p2p link type session
         attribute.dataType = TYPE_BYTES;
-        attribute.linkTypeNum = 1;
+        attribute.linkTypeNum = 0;
         attribute.linkType[0] = LINK_TYPE_WIFI_WLAN_5G;
 
         int ret = OpenSession(mySessionName.c_str(), peerSessionName.c_str(), networkId.c_str(), "", &attribute);
