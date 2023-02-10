@@ -560,9 +560,6 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
         SoftBusFree(channel);
         goto EXIT_ERR;
     }
-    if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
-        (void)TransDelUdpChannel(channel->info.myData.channelId);
-    }
 
     SoftBusFree(channel);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpened end");

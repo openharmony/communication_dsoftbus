@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,31 +69,6 @@ HWTEST_F(AuthTcpConnectionTest, UNPACK_SOCKET_PKT_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NOTIFY_CONNECTED_TEST_001
- * @tc.desc: notify connected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTcpConnectionTest, NOTIFY_CONNECTED_TEST_001, TestSize.Level1)
-{
-    int32_t fd = 0;
-    bool isClient = true;
-    NotifyConnected(fd, isClient);
-}
-
-/*
- * @tc.name: NOTIFY_DISCONNECTED_TEST_001
- * @tc.desc: notify disconnected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTcpConnectionTest, NOTIFY_DISCONNECTED_TEST_001, TestSize.Level1)
-{
-    int32_t fd = 0;
-    NotifyDisconnected(fd);
-}
-
-/*
  * @tc.name: MODULE_TO_DATA_TYPE_TEST_001
  * @tc.desc: module to data type test
  * @tc.type: FUNC
@@ -113,26 +88,6 @@ HWTEST_F(AuthTcpConnectionTest, MODULE_TO_DATA_TYPE_TEST_001, TestSize.Level1)
     module = MODULE_MESSAGE_SERVICE;
     ret = ModuleToDataType(module);
     EXPECT_TRUE(ret == DATA_TYPE_CONNECTION);
-}
-
-/*
- * @tc.name: NOTIFY_DATA_RECEIVED_TEST_001
- * @tc.desc: notify data received test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
-{
-    int32_t fd = 0;
-    SocketPktHead pktHead;
-    uint8_t data[TEST_DATA_LEN] = { 0 };
-    (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
-    pktHead.module = MODULE_AUTH_CHANNEL;
-    NotifyDataReceived(fd, &pktHead, data);
-    pktHead.module = MODULE_AUTH_MSG;
-    NotifyDataReceived(fd, &pktHead, data);
-    pktHead.module = MODULE_CONNECTION;
-    NotifyDataReceived(fd, &pktHead, data);
 }
 
 /*
@@ -159,9 +114,19 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_001, TestSize.Level1)
 HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_001, TestSize.Level1)
 {
     int32_t fd = 0;
+    SocketPktHead pktHead;
+    uint8_t data[TEST_DATA_LEN] = { 0 };
+    (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
+    pktHead.module = MODULE_AUTH_CHANNEL;
+    NotifyDataReceived(fd, &pktHead, data);
+    pktHead.module = MODULE_AUTH_MSG;
+    NotifyDataReceived(fd, &pktHead, data);
+    pktHead.module = MODULE_CONNECTION;
+    NotifyDataReceived(fd, &pktHead, data);
+
     uint32_t len = TEST_DATA_LEN;
-    uint8_t *data = RecvPacketData(fd, len);
-    EXPECT_TRUE(data == nullptr);
+    uint8_t *packetData = RecvPacketData(fd, len);
+    EXPECT_TRUE(packetData == nullptr);
 }
 
 /*
@@ -173,6 +138,11 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_001, TestSize.Level1)
 HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Level1)
 {
     int32_t fd = 0;
+    bool isClient = true;
+    NotifyConnected(fd, isClient);
+    NotifyDisconnected(fd);
+    StopSocketListening();
+
     int32_t ret = ProcessSocketOutEvent(fd);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
@@ -186,6 +156,13 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Leve
 HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level1)
 {
     int32_t fd = 0;
+    int32_t channelId = 0;
+    SocketPktHead head;
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
+    (void)memset_s(&head, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
+    NotifyChannelDataReceived(channelId, &head, data);
+    NotifyChannelDisconnected(channelId);
+
     int32_t ret = ProcessSocketInEvent(fd);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
@@ -249,17 +226,6 @@ HWTEST_F(AuthTcpConnectionTest, START_SOCKET_LISTENING_TEST_001, TestSize.Level1
 }
 
 /*
- * @tc.name: STOP_SOCKET_LISTENING_TEST_001
- * @tc.desc: stop socket listening test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTcpConnectionTest, STOP_SOCKET_LISTENING_TEST_001, TestSize.Level1)
-{
-    StopSocketListening();
-}
-
-/*
  * @tc.name: SOCKET_GET_CONN_INFO_TEST_001
  * @tc.desc: socket get conn info test
  * @tc.type: FUNC
@@ -277,32 +243,5 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = SocketGetConnInfo(fd, &connInfo, &isServer);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-}
-
-/*
- * @tc.name: NOTIFY_CHANNEL_DATA_RECEIVED_TEST_001
- * @tc.desc: notify channel data received test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DATA_RECEIVED_TEST_001, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    SocketPktHead head;
-    const uint8_t data[TEST_DATA_LEN] = { 0 };
-    (void)memset_s(&head, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
-    NotifyChannelDataReceived(channelId, &head, data);
-}
-
-/*
- * @tc.name: NOTIFY_CHANNEL_DISCONNECTED_TEST_001
- * @tc.desc: notify channel disconnected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DISCONNECTED_TEST_001, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    NotifyChannelDisconnected(channelId);
 }
 } // namespace OHOS

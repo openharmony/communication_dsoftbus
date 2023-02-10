@@ -299,6 +299,14 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     return ret;
 }
 
+static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
+{
+    AppInfoData myData = appInfo->myData;
+    int ret = TransTdcOnChannelClosed(myData.pkgName, myData.pid, channelId);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channelId = %d, ret = %d", channelId, ret);
+    return ret;
+}
+
 NO_SANITIZE("cfi") int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     SessionConn conn;
@@ -475,6 +483,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     
     if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenDataBusRequest reply err");
+        (void)NotifyChannelClosed(&conn->appInfo, channelId);
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,12 +251,12 @@ HWTEST_F(BusCenterIpcTest, MetaNodeIpcNotifyLeaveResultTest_01, TestSize.Level1)
 }
 
 /*
- * @tc.name: RemoveJoinRequestInfoByPkgName
+ * @tc.name: LnnIpcServerLeave
  * @tc.desc: buscenter ipc test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterIpcTest, RemoveJoinRequestInfoByPkgNameTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_02, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;
@@ -265,15 +265,19 @@ HWTEST_F(BusCenterIpcTest, RemoveJoinRequestInfoByPkgNameTest_01, TestSize.Level
     AddJoinLNNInfo(TEST_PKGNAME2, &addr);
     RemoveJoinRequestInfoByPkgName(TEST_PKGNAME);
     RemoveJoinRequestInfoByPkgName(TEST_PKGNAME2);
+
+    ON_CALL(busCenterIpcMock, LnnServerLeave).WillByDefault(Return(SOFTBUS_OK));
+    int32_t ret = LnnIpcServerLeave(nullptr, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
- * @tc.name: RemoveLeaveRequestInfoByPkgName
+ * @tc.name: LnnIpcServerLeave
  * @tc.desc: buscenter ipc test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BusCenterIpcTest, RemoveLeaveRequestInfoByPkgNameTest_01, TestSize.Level1)
+HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_03, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ConnectionAddr addr;
@@ -283,6 +287,10 @@ HWTEST_F(BusCenterIpcTest, RemoveLeaveRequestInfoByPkgNameTest_01, TestSize.Leve
     RemoveLeaveRequestInfoByPkgName(TEST_PKGNAME);
     BusCenterServerDeathCallback(nullptr);
     BusCenterServerDeathCallback(TEST_PKGNAME);
+
+    ON_CALL(busCenterIpcMock, LnnServerLeave).WillByDefault(Return(SOFTBUS_OK));
+    int32_t ret = LnnIpcServerLeave(nullptr, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 } // namespace OHOS

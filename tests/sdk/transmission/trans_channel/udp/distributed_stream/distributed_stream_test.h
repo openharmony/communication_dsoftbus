@@ -28,9 +28,9 @@
 #define US_PER_MS (1000)
 #define NS_PER_MS (1000 * 1000)
 
-const std::string TEST_PKG_NAME = "com.huawei.plrdtest.dsoftbus";
-const std::string STREAM_SESSION_NAME = "com.huawei.plrdtest.dsoftbus.JtSendStream_10";
-const std::string CONTRL_SESSION_NAME = "com.huawei.plrdtest.dsoftbus.TestContrl";
+const std::string TEST_PKG_NAME = "dms";
+const std::string STREAM_SESSION_NAME = "ohos.distributedschedule.dms.JtSendStream_10";
+const std::string CONTRL_SESSION_NAME = "ohos.distributedschedule.dms.TestContrl";
 
 namespace OHOS {
 inline time_t GetCurrent(void)
