@@ -428,7 +428,7 @@ NO_SANITIZE("cfi") int32_t TcpConnectDevice(const ConnectOption *option, uint32_
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t fd = ConnOpenClientSocket(option, BIND_ADDR_ALL, false);
+    int32_t fd = ConnOpenClientSocket(option, BIND_ADDR_ALL, true);
     if (fd < 0) {
         CLOGE("OpenTcpClient failed.");
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
