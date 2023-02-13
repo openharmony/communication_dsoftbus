@@ -49,10 +49,7 @@ if (defined(ohos_lite)) {
 
     bus_center_core_adapter_deps += []
   } else {
-    bus_center_core_adapter_src += [
-      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp",
-      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
-    ]
+    bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp" ]
 
     bus_center_core_adapter_inc += [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
@@ -67,12 +64,21 @@ if (defined(ohos_lite)) {
       "${ability_base_path}:zuri",
       "${ability_runtime_inner_api_path}/dataobs_manager:dataobs_manager",
       "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-      "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
-      "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
       "//foundation/distributeddatamgr/data_share/interfaces/inner_api:datashare_consumer",
       "//foundation/distributeddatamgr/data_share/interfaces/inner_api/common:datashare_common",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability:native_dataability",
       "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
     ]
+  }
+  if (softbus_os_account == true) {
+    bus_center_core_adapter_src += [
+      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
+    ]
+    bus_center_core_adapter_deps += [
+      "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
+      "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
+    ]
+  } else {
+    bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp" ]
   }
 }

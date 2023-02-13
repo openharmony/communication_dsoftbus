@@ -33,6 +33,7 @@ declare_args() {
 declare_args() {
   dsoftbus_get_devicename = true
   softbus_communication_wifi_feature = true
+  softbus_os_account = true
 }
 
 if (defined(global_parts_info) &&
@@ -43,6 +44,11 @@ if (defined(global_parts_info) &&
 if (defined(global_parts_info) &&
     !defined(global_parts_info.ability_ability_runtime)) {
   dsoftbus_get_devicename = false
+}
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.account_os_account)) {
+  softbus_os_account = false
 }
 
 if (defined(ohos_lite)) {
