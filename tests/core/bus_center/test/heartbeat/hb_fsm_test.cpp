@@ -79,6 +79,7 @@ HWTEST_F(HeartBeatFSMTest, CheckHbFsmStateMsgArgsTest_01, TestSize.Level1)
     hbFsm->state = STATE_HB_INDEX_MAX;
     ret = CheckHbFsmStateMsgArgs(const_cast<const FsmStateMachine *>(&hbFsm->fsm));
     EXPECT_FALSE(ret);
+    SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
 
@@ -341,6 +342,7 @@ HWTEST_F(HeartBeatFSMTest, OnTransHbFsmStateTest_01, TestSize.Level1)
     ON_CALL(heartbeatFsmMock, LnnGetGearModeBySpecificType).WillByDefault(Return(SOFTBUS_ERR));
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     TryAsMasterNodeNextLoop(&hbFsm->fsm);
+    SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 
     int32_t msgType = MSGTYPE;
@@ -441,6 +443,7 @@ HWTEST_F(HeartBeatFSMTest, CheckDevStatusByNetworkIdTest_01, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_ERR));
     CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
+    SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
 
@@ -483,6 +486,7 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatusTest_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStopHeartbeatFsm(hbFsm);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+    SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
 /*
@@ -524,5 +528,7 @@ HWTEST_F(HeartBeatFSMTest, LnnPostNextSendOnceMsgToHbFsmTest_01, TestSize.Level1
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnPostCheckDevStatusMsgToHbFsm(hbFsm, nullptr, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusSleepMs(20);
+    LnnDestroyHeartbeatFsm(hbFsm);
 }
 } // namespace OHOS
