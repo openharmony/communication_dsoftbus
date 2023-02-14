@@ -34,10 +34,15 @@ void DiscClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
     MessageParcel data;
     DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
     DISC_CHECK_AND_RETURN_LOG(data.WriteBuffer(deviceInfo, sizeof(DeviceInfo)), "write device info failed");
-
+    
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_DISCOVERY_DEVICE_FOUND, data, reply, option) == ERR_OK,
+    DISC_CHECK_AND_RETURN_LOG(remote->SendRequest(CLIENT_DISCOVERY_DEVICE_FOUND, data, reply, option) == ERR_OK,
                               "send request failed");
 }
 
@@ -48,9 +53,14 @@ void DiscClientProxy::OnDiscoverFailed(int subscribeId, int reason)
     DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(subscribeId), "write subscribe id failed");
     DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(reason), "write reason failed");
 
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_DISCOVERY_FAIL, data, reply, option) == ERR_OK,
+    DISC_CHECK_AND_RETURN_LOG(remote->SendRequest(CLIENT_DISCOVERY_FAIL, data, reply, option) == ERR_OK,
                               "send request failed");
 }
 
@@ -60,9 +70,14 @@ void DiscClientProxy::OnDiscoverySuccess(int subscribeId)
     DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
     DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(subscribeId), "write subscribe id failed");
 
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_DISCOVERY_SUCC, data, reply, option) == ERR_OK,
+    DISC_CHECK_AND_RETURN_LOG(remote->SendRequest(CLIENT_DISCOVERY_SUCC, data, reply, option) == ERR_OK,
                               "send request failed");
 }
 
@@ -72,9 +87,14 @@ void DiscClientProxy::OnPublishSuccess(int publishId)
     DISC_CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write InterfaceToken failed");
     DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(publishId), "write publish id failed");
 
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option) == ERR_OK,
+    DISC_CHECK_AND_RETURN_LOG(remote->SendRequest(CLIENT_PUBLISH_SUCC, data, reply, option) == ERR_OK,
                               "send request failed");
 }
 
@@ -85,9 +105,14 @@ void DiscClientProxy::OnPublishFail(int publishId, int reason)
     DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(publishId), "write publish id failed");
     DISC_CHECK_AND_RETURN_LOG(data.WriteInt32(reason), "write reason failed");
 
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return;
+    }
     MessageParcel reply;
     MessageOption option{MessageOption::TF_ASYNC};
-    DISC_CHECK_AND_RETURN_LOG(Remote()->SendRequest(CLIENT_PUBLISH_FAIL, data, reply, option) == ERR_OK,
+    DISC_CHECK_AND_RETURN_LOG(remote->SendRequest(CLIENT_PUBLISH_FAIL, data, reply, option) == ERR_OK,
                               "send request failed");
 }
 }
