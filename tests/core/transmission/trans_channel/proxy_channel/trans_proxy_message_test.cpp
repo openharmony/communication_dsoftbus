@@ -151,11 +151,11 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeErrMsgTest001, TestSize.Level
     char* msg = TransProxyPackHandshakeErrMsg(SOFTBUS_ERR);
     ASSERT_TRUE(NULL != msg);
 
-    int32_t ret = TransProxyUnPackHandshakeErrMsg(msg, NULL);
+    int32_t ret = TransProxyUnPackHandshakeErrMsg(msg, NULL, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
     int32_t errCode = SOFTBUS_OK;
-    ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode);
+    ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, sizeof(msg));
     EXPECT_EQ(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
@@ -180,7 +180,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     chan.channelId = -1;
     msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(NULL != msg);
-    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
     chan.channelId = TEST_MESSAGE_CHANNEL_ID;
@@ -188,7 +188,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(NULL != msg);
     outChannel.myId = chan.channelId;
-    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
@@ -210,7 +210,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest002, TestSize.Level
     char *msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(NULL != msg);
 
-    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
@@ -244,16 +244,16 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
     ASSERT_TRUE(NULL != msg);
 
     TestCallbackFail();
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
     TestCallbackSuccess();
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
@@ -281,11 +281,11 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
 
     ProxyChannelInfo outChannel;
     TestCallbackFail();
-    int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TestCallbackSuccess();
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
@@ -317,12 +317,12 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
     ASSERT_TRUE(NULL != msg);
 
     ProxyChannelInfo outChannel;
-    int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
@@ -340,7 +340,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyIdentityMsgTest001, TestSize.Level1)
     char* msg = TransProxyPackIdentity(identity);
     ASSERT_TRUE(NULL != msg);
 
-    int32_t ret = TransProxyUnpackIdentity(msg, identity, TEST_CHANNEL_IDENTITY_LEN);
+    int32_t ret = TransProxyUnpackIdentity(msg, identity, TEST_CHANNEL_IDENTITY_LEN, sizeof(msg));
     EXPECT_EQ(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
