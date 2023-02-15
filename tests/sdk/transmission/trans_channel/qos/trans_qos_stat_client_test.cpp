@@ -22,6 +22,11 @@
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
 
+#define TEST_TMP_BUF "tmpBuf"
+#define TEST_TMP_BUF_LEN 10
+#define STR_LEN 100000
+#define TMP_NUM 97
+
 using namespace testing::ext;
 namespace OHOS {
 static const char *UDP_TEST_PKG_NAME = "com.plrdtest.dsoftbus.client";
@@ -179,15 +184,15 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
     EXPECT_NE(-1, sessionId);
     sleep(2);
 
-    char sendStringData[100000];
-    memset_s(sendStringData, sizeof(sendStringData), 97, sizeof(sendStringData));
+    char sendStringData[STR_LEN];
+    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
-        100000,
+        STR_LEN,
     };
     StreamData d2 = {
-        "maogeniubi",
-        10,
+        TEST_TMP_BUF,
+        TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
@@ -225,15 +230,15 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
     EXPECT_NE(-1, sessionId);
     sleep(2);
 
-    char sendStringData[100000];
-    memset_s(sendStringData, sizeof(sendStringData), 97, sizeof(sendStringData));
+    char sendStringData[STR_LEN];
+    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
-        100000,
+        STR_LEN,
     };
     StreamData d2 = {
-        "maogeniubi",
-        10,
+        TEST_TMP_BUF,
+        TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
@@ -275,15 +280,15 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
         EXPECT_NE(-1, sessionId);
     }
     sleep(2);
-    char sendStringData[100000];
-    memset_s(sendStringData, sizeof(sendStringData), 97, sizeof(sendStringData));
+    char sendStringData[STR_LEN];
+    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
-        100000,
+        STR_LEN,
     };
     StreamData d2 = {
-        "maogeniubi",
-        10,
+        TEST_TMP_BUF,
+        TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     std::map<int, int>::iterator iter;
@@ -333,15 +338,15 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
     sleep(2);
 
     // big speed
-    char sendStringData[100000];
-    memset_s(sendStringData, sizeof(sendStringData), 97, sizeof(sendStringData));
+    char sendStringData[STR_LEN];
+    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
-        100000,
+        STR_LEN,
     };
     StreamData d2 = {
-        "maogeniubi",
-        10,
+        TEST_TMP_BUF,
+        TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
@@ -393,15 +398,15 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     sleep(2);
 
     // small speed
-    char sendStringData[100000];
-    memset_s(sendStringData, sizeof(sendStringData), 97, sizeof(sendStringData));
+    char sendStringData[STR_LEN];
+    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
-        100000,
+        STR_LEN,
     };
     StreamData d2 = {
-        "maogeniubi",
-        10,
+        TEST_TMP_BUF,
+        TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
