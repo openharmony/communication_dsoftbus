@@ -262,6 +262,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
       "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
     ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
