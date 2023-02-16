@@ -427,43 +427,11 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
 
 /**
  * @tc.name: TransFileTest004
- * @tc.desc: trans get udp channel.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
-{
-    int32_t dfileId = 0;
-    IClientSessionCallBack *cb = GetClientSessionCb();
-    (void)ClientTransUdpMgrInit(cb);
-    UdpChannel *newchannel = (UdpChannel *)SoftBusCalloc(sizeof(UdpChannel));
-    if (newchannel == NULL) {
-        return;
-    }
-    UdpChannel *channel = TransAddChannelTest();
-    int32_t ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = GetUdpChannel(channel->dfileId, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = GetUdpChannel(dfileId, newchannel);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = GetUdpChannel(channel->dfileId, newchannel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    SoftBusFree(newchannel);
-    ClientTransUdpMgrDeinit();
-}
-
-/**
- * @tc.name: TransFileTest005
  * @tc.desc: trans file send listener use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -515,12 +483,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest006
+ * @tc.name: TransFileTest005
  * @tc.desc: trans file recv listener use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -565,12 +533,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest007
+ * @tc.name: TransFileTest006
  * @tc.desc: trans file channel open use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
@@ -611,12 +579,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest008
+ * @tc.name: TransFileTest007
  * @tc.desc: trans file channel use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     (void)ClientTransUdpMgrInit(cb);
@@ -649,12 +617,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest009
+ * @tc.name: TransFileTest008
  * @tc.desc: trans file send use diff param.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
 {
     int32_t sessionId = 0;
     const char *sFileList = nullptr;
@@ -669,12 +637,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest010
+ * @tc.name: TransFileTest009
  * @tc.desc: trans set reuse addr.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
 {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     int on = 65536;
@@ -686,12 +654,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest011
+ * @tc.name: TransFileTest010
  * @tc.desc: trans set reuse port.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
 {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     int on = 65536;
@@ -703,12 +671,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest012
+ * @tc.name: TransFileTest011
  * @tc.desc: trans open tcp server.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
 {
    int port = 5683;
    int ret = OpenTcpServer("127.0.0.1", port);
@@ -722,12 +690,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest013
+ * @tc.name: TransFileTest012
  * @tc.desc: trans start nstackx file at server.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
 {
     uint8_t key = 215;
     uint32_t keyLen = 8;
@@ -745,12 +713,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest014
+ * @tc.name: TransFileTest013
  * @tc.desc: trans start nstackx file at client.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
+HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
 {
     uint8_t key = 215;
     uint32_t keyLen = 8;

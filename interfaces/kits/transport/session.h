@@ -526,7 +526,6 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
  * It is the unique identifier of the upper-layer service. The value cannot be empty or exceed 64 characters.
  * @param sessionName Indicates the pointer to the session name. The value cannot be empty or exceed 255 characters.
  *
- *
  * @return Returns <b>0</b> if the operation is successful, returns <b>-1</b> otherwise.
  * @see CreateSessionServer
  * @since 1.0
