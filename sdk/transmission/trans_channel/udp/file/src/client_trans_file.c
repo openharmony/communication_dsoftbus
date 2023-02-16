@@ -30,8 +30,38 @@
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
+static void NotifySendResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData, FileListener *listener)
+{
+    if (msgData == NULL || listener == NULL) {
+        return;
+    }
+
+    switch (msgType) {
+        case DFILE_ON_FILE_SEND_SUCCESS:
+            if (listener->sendListener.OnSendFileFinished != NULL) {
+                listener->sendListener.OnSendFileFinished(sessionId, msgData->fileList.files[0]);
+            }
+            break;
+        case DFILE_ON_FILE_SEND_FAIL:
+            if (listener->sendListener.OnFileTransError != NULL) {
+                listener->sendListener.OnFileTransError(sessionId);
+            }
+            break;
+        case DFILE_ON_TRANS_IN_PROGRESS:
+            if (listener->sendListener.OnSendFileProcess != NULL) {
+                uint64_t bytesUpload = msgData->transferUpdate.bytesTransferred;
+                uint64_t bytesTotal = msgData->transferUpdate.totalBytes;
+                listener->sendListener.OnSendFileProcess(sessionId, bytesUpload, bytesTotal);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send dfileId=%d type=%d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         return;
@@ -45,11 +75,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
         return;
     }
-    if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send dfileId=%d type=%d fatal error.", dfileId, msgType);
-        TransOnUdpChannelClosed(udpChannel.channelId);
-        return;
-    }
+
     FileListener fileListener;
     (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
     if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
@@ -61,22 +87,47 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
 
+    if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
+        if (fileListener.sendListener.OnFileTransError != NULL) {
+                fileListener.sendListener.OnFileTransError(sessionId);
+            }
+        TransOnUdpChannelClosed(udpChannel.channelId);
+        return;
+    }
+
+    NotifySendResult(sessionId, msgType, msgData, &fileListener);
+    return;
+}
+
+static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData, FileListener *listener)
+{
+    if (msgData == NULL || listener == NULL) {
+        return;
+    }
+
+    const char *firstFile = msgData->fileList.files[0];
+    uint32_t fileNum = msgData->fileList.fileNum;
     switch (msgType) {
-        case DFILE_ON_FILE_SEND_SUCCESS:
-            if (fileListener.sendListener.OnSendFileFinished != NULL) {
-                fileListener.sendListener.OnSendFileFinished(sessionId, msgData->fileList.files[0]);
+        case DFILE_ON_FILE_LIST_RECEIVED:
+            if (listener->recvListener.OnReceiveFileStarted != NULL) {
+                listener->recvListener.OnReceiveFileStarted(sessionId, firstFile, fileNum);
             }
             break;
-        case DFILE_ON_FILE_SEND_FAIL:
-            if (fileListener.sendListener.OnFileTransError != NULL) {
-                fileListener.sendListener.OnFileTransError(sessionId);
+        case DFILE_ON_FILE_RECEIVE_SUCCESS:
+            if (listener->recvListener.OnReceiveFileFinished != NULL) {
+                listener->recvListener.OnReceiveFileFinished(sessionId, firstFile, fileNum);
+            }
+            break;
+        case DFILE_ON_FILE_RECEIVE_FAIL:
+            if (listener->recvListener.OnFileTransError != NULL) {
+                listener->recvListener.OnFileTransError(sessionId);
             }
             break;
         case DFILE_ON_TRANS_IN_PROGRESS:
-            if (fileListener.sendListener.OnSendFileProcess != NULL) {
+            if (listener->recvListener.OnReceiveFileProcess != NULL) {
                 uint64_t bytesUpload = msgData->transferUpdate.bytesTransferred;
                 uint64_t bytesTotal = msgData->transferUpdate.totalBytes;
-                fileListener.sendListener.OnSendFileProcess(sessionId, bytesUpload, bytesTotal);
+                listener->recvListener.OnReceiveFileProcess(sessionId, firstFile, bytesUpload, bytesTotal);
             }
             break;
         default:
@@ -84,33 +135,19 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     }
 }
 
-static int32_t GetUdpChannel(int32_t dfileId, UdpChannel *udpChannel)
-{
-    if (udpChannel == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    (void)memset_s(udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
-    if (TransGetUdpChannelByFileId(dfileId, udpChannel) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 NO_SANITIZE("cfi") static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv dfileId=%d type=%d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         return;
     }
     UdpChannel udpChannel;
-    if (GetUdpChannel(dfileId, &udpChannel) != SOFTBUS_OK) {
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
         return;
     }
-    if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv dfileId=%d type=%d fatal error.", dfileId, msgType);
-        TransOnUdpChannelClosed(udpChannel.channelId);
-        return;
-    }
+
     FileListener fileListener;
     (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
     if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
@@ -120,34 +157,16 @@ NO_SANITIZE("cfi") static void FileReceiveListener(int32_t dfileId, DFileMsgType
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
         return;
     }
-    const char *firstFile = msgData->fileList.files[0];
-    uint32_t fileNum = msgData->fileList.fileNum;
-    switch (msgType) {
-        case DFILE_ON_FILE_LIST_RECEIVED:
-            if (fileListener.recvListener.OnReceiveFileStarted != NULL) {
-                fileListener.recvListener.OnReceiveFileStarted(sessionId, firstFile, fileNum);
-            }
-            break;
-        case DFILE_ON_FILE_RECEIVE_SUCCESS:
-            if (fileListener.recvListener.OnReceiveFileFinished != NULL) {
-                fileListener.recvListener.OnReceiveFileFinished(sessionId, firstFile, fileNum);
-            }
-            break;
-        case DFILE_ON_FILE_RECEIVE_FAIL:
-            if (fileListener.recvListener.OnFileTransError != NULL) {
+    if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
+        if (fileListener.recvListener.OnFileTransError != NULL) {
                 fileListener.recvListener.OnFileTransError(sessionId);
             }
-            break;
-        case DFILE_ON_TRANS_IN_PROGRESS:
-            if (fileListener.recvListener.OnReceiveFileProcess != NULL) {
-                uint64_t bytesUpload = msgData->transferUpdate.bytesTransferred;
-                uint64_t bytesTotal = msgData->transferUpdate.totalBytes;
-                fileListener.recvListener.OnReceiveFileProcess(sessionId, firstFile, bytesUpload, bytesTotal);
-            }
-            break;
-        default:
-            break;
+        TransOnUdpChannelClosed(udpChannel.channelId);
+        return;
     }
+
+    NotifyRecvResult(sessionId, msgType, msgData, &fileListener);
+    return;
 }
 
 int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
