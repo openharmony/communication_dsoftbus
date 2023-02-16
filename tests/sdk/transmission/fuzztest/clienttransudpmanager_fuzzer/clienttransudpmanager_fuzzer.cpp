@@ -22,6 +22,9 @@
 #include "softbus_utils.h"
 #include "client_trans_udp_manager.h"
 
+#define STR_LEN 100000
+#define TEST_TMP_STR_LEN 50
+#define TEST_TMP_STR "testtmpStr"
 namespace OHOS {
     void TransOnUdpChannelOpenedTest(const uint8_t* data, size_t size)
     {
@@ -73,12 +76,12 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        char sendStringData[100000] = {0};
+        char sendStringData[STR_LEN] = {0};
         StreamData streamdata1 = {
             sendStringData,
             100000,
         };
-        char str[50] = "maogeniubi";
+        char str[TEST_TMP_STR_LEN] = TEST_TMP_STR;
         StreamData streamdata2 = {
             str,
             10,

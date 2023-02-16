@@ -14,25 +14,21 @@
  */
 
 #include <gtest/gtest.h>
-#include "securec.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "session.h"
-#include "trans_udp_channel_manager.h"
+#include "client_trans_channel_manager.h"
 #include "client_trans_session_callback.h"
 #include "client_trans_udp_manager.c"
+#include "securec.h"
+#include "session.h"
+#include "softbus_def.h"
+#include "softbus_errcode.h"
+#include "trans_udp_channel_manager.h"
 
 using namespace std;
 using namespace testing::ext;
 
-const char *g_sessionName = "ohos.distributedschedule.dms.test";
-const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-const char *g_groupid = "TEST_GROUP_ID";
-
 namespace OHOS {
 #define TEST_CHANNELID 5
 #define ERR_CHANNELID (-1)
-#define TEST_SESSIONID 1
 #define TEST_COUNT 2
 #define STREAM_DATA_LENGTH 10
 #define TEST_EVENT_ID 2
@@ -58,7 +54,6 @@ void ClientTransUdpManagerStaticTest::TearDownTestCase(void) {}
  */
 HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, TestSize.Level0)
 {
-    int32_t ret;
     char sendStringData[STREAM_DATA_LENGTH] = "diudiudiu";
     StreamData tmpData = {
         sendStringData,
@@ -75,7 +70,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     QosTv tvList;
     OnStreamReceived(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
 
-    ret = OnFileGetSessionId(TEST_CHANNELID, &sessionId);
+    int32_t ret = OnFileGetSessionId(TEST_CHANNELID, &sessionId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     OnUdpChannelOpened(TEST_CHANNELID);
@@ -101,7 +96,6 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
  */
 HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, TestSize.Level0)
 {
-    int32_t ret;
     int32_t sessionId = 0;
     char sendStringData[STREAM_DATA_LENGTH] = "diudiudiu";
     QosTv tvList;
@@ -117,7 +111,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, Te
 
     StreamFrameInfo tmpf = {};
 
-    ret = ClientTransUdpMgrInit(NULL);
+    int32_t ret = ClientTransUdpMgrInit(NULL);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     IClientSessionCallBack *cb = GetClientSessionCb();
@@ -143,9 +137,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, Te
  */
 HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestSize.Level0)
 {
-    int32_t ret;
-    IClientSessionCallBack *cb = GetClientSessionCb();
-    ret = ClientTransUdpMgrInit(cb);
+    int32_t ret = ClientTransChannelInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransAddUdpChannel(NULL);
@@ -160,34 +152,13 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
     ret = ClientTransAddUdpChannel(&udpChannel);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
+    OnUdpChannelOpened(TEST_CHANNELID);
+
     ret = TransSetUdpChannelEnable(TEST_CHANNELID, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransSetUdpChannelEnable(ERR_CHANNELID, false);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: OnUdpChannelOpenedTest001
- * @tc.desc: on udp channel opend test, use the wrong or normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientTransUdpManagerStaticTest, OnUdpChannelOpenedTest001, TestSize.Level0)
-{
-    int32_t ret;
-
-    IClientSessionCallBack *cb = GetClientSessionCb();
-    ret = ClientTransUdpMgrInit(cb);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    UdpChannel udpChannel;
-    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
-    udpChannel.channelId = TEST_CHANNELID;
-    ret = ClientTransAddUdpChannel(&udpChannel);
-    ASSERT_EQ(SOFTBUS_ERR, ret);
-
-    OnUdpChannelOpened(TEST_CHANNELID);
 }
 
 /**
@@ -198,13 +169,12 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnUdpChannelOpenedTest001, TestSize.Le
  */
 HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, TestSize.Level0)
 {
-    int32_t ret;
     UdpChannel channel;
     channel.businessType = BUSINESS_TYPE_STREAM;
     channel.channelId = ERR_CHANNELID;
     channel.dfileId = TEST_CHANNELID;
 
-    ret = TransDeleteBusinnessChannel(&channel);
+    int32_t ret = TransDeleteBusinnessChannel(&channel);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channel.channelId = TEST_CHANNELID;
