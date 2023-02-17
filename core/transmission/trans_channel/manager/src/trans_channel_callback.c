@@ -66,6 +66,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
     }
+    NotifyQosChannelClosed(channelId, channelType);
     if (ClientIpcOnChannelOpenFailed(pkgName, channelId, channelType, errCode, pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
