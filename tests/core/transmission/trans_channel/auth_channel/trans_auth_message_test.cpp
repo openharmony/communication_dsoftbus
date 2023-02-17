@@ -74,11 +74,11 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransAuthChannelMsgPack(msg, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransAuthChannelMsgUnpack(NULL, appInfo, NULL);
+    ret = TransAuthChannelMsgUnpack(NULL, appInfo, 0);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, NULL, NULL);
+    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, NULL, 0);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, appInfo, NULL);
+    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, appInfo, 0);
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
     char cJsonStr[ERR_MSG_MAX_LEN] = {0};
     ret = TransAuthChannelErrorPack(SOFTBUS_ERR, NULL, cJsonStr, ERR_MSG_MAX_LEN);
