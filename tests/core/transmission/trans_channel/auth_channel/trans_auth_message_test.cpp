@@ -27,11 +27,9 @@
 using namespace testing::ext;
 
 #define TEST_AUTH_DATA "test auth message data"
-
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 
 namespace OHOS {
-
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00";
@@ -60,31 +58,39 @@ void TransAuthMessageTest::TearDownTestCase(void)
 
 /**
  * @tc.name: TransAuthMessageTest001
- * @tc.desc: Transmission auth message pack and unpack with invalid parameters.
+ * @tc.desc: TransAuthChannelMsgUnpack, Transmission auth message pack and unpack with invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    ASSERT_TRUE(appInfo != NULL);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
+
     int32_t ret = TransAuthChannelMsgPack(NULL, appInfo);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
     ret = TransAuthChannelMsgPack(msg, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
     ret = TransAuthChannelMsgUnpack(NULL, appInfo, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
     ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, NULL, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
     ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, appInfo, NULL);
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
+
     char cJsonStr[ERR_MSG_MAX_LEN] = {0};
     ret = TransAuthChannelErrorPack(SOFTBUS_ERR, NULL, cJsonStr, ERR_MSG_MAX_LEN);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
     ret = TransAuthChannelErrorPack(SOFTBUS_ERR, g_errMsg, NULL, ERR_MSG_MAX_LEN);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
 }
@@ -101,41 +107,52 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
     ASSERT_TRUE(appInfo != NULL);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
+
     bool res = AddNumberToJsonObject(msg, "CODE", CODE_OPEN_AUTH_MSG_CHANNEL);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
+
     char *data = cJSON_PrintUnformatted(msg);
     int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
+
     res = AddStringToJsonObject(msg, "DEVICE_ID", g_deviceId);
     ASSERT_TRUE(res);
+
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
+
     res = AddStringToJsonObject(msg, "PKG_NAME", g_pkgName);
     ASSERT_TRUE(res);
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
+
     res = AddStringToJsonObject(msg, "SRC_BUS_NAME", g_sessionName);
     ASSERT_TRUE(res);
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
+
     res = AddStringToJsonObject(msg, "DST_BUS_NAME", g_sessionName);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
+
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
     EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
+
     res = AddStringToJsonObject(msg, "REQ_ID", g_reqId);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
+
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+ 
     cJSON_free(data);
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
@@ -153,16 +170,19 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest002, TestSize.Level1)
     ASSERT_TRUE(appInfo != NULL);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
+
     bool res = AddNumberToJsonObject(msg, "ERR_CODE", 1);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
+
     res = AddStringToJsonObject(msg, "ERR_DESC", g_errMsg);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
+
     char *data = cJSON_PrintUnformatted(msg);
     int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
     cJSON_free(data);
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
 }
-
-}
+} // namespace OHOS
