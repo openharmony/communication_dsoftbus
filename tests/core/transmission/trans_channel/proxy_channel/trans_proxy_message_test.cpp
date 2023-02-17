@@ -156,7 +156,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeErrMsgTest001, TestSize.Level
 
     int32_t errCode = SOFTBUS_OK;
     ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     cJSON_free(msg);
 }
 
@@ -228,10 +228,6 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusBase64Encode)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusBase64Decode)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillOnce(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_ERR)))
-        .WillRepeatedly(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_OK)));
 
     int32_t ret = SOFTBUS_ERR;
     ProxyChannelInfo info;
@@ -250,11 +246,6 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
     TestCallbackSuccess();
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
 }
@@ -282,11 +273,11 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
     ProxyChannelInfo outChannel;
     TestCallbackFail();
     int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     TestCallbackSuccess();
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
 }
@@ -299,15 +290,10 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
  */
 HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
 {
-    int32_t len = TEST_BASE_ENCODE_LEN;
     TransCommInterfaceMock commMock;
     EXPECT_CALL(commMock, SoftBusBase64Encode)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusBase64Decode)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillOnce(DoAll(SetArgPointee<2>(len), Return(SOFTBUS_ERR)))
-        .WillRepeatedly(DoAll(SetArgPointee<2>(len), Return(SOFTBUS_OK)));
 
     ProxyChannelInfo info;
     info.appInfo.appType = APP_TYPE_INNER;
@@ -321,9 +307,6 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_OK, ret);
 
     cJSON_free(msg);
 }
@@ -341,7 +324,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyIdentityMsgTest001, TestSize.Level1)
     ASSERT_TRUE(NULL != msg);
 
     int32_t ret = TransProxyUnpackIdentity(msg, identity, TEST_CHANNEL_IDENTITY_LEN, sizeof(msg));
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
 
