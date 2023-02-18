@@ -18,7 +18,6 @@
 #include <string.h>
 
 #include "auth_interface.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_strategy.h"
@@ -30,7 +29,9 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "lnn_net_builder.h"
 #include "softbus_utils.h"
+#include "lnn_heartbeat_utils.h"
 
 /*
 * This macro is used to control that the heartbeat can be started
@@ -41,7 +42,19 @@
 #endif
 
 #define HB_LOOPBACK_IP "127.0.0.1"
+SoftBusScreenState g_screenState = SOFTBUS_SCREEN_UNKNOWN;
+static int64_t g_lastScreenOnTime;
+static int64_t g_lastScreenOffTime;
 
+SoftBusScreenState GetScreenState(void)
+{
+    return g_screenState;
+}
+
+void SetScreenState(SoftBusScreenState state)
+{
+    g_screenState = state;
+}
 static void HbIpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
     char localIp[IP_LEN] = {0};
@@ -118,39 +131,123 @@ static void HbMasterNodeChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
-static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
+static void SendCheckOffLineMessage(SoftBusScreenState state, LnnHeartbeatType hbType)
 {
-    if (info == NULL || info->event != LNN_EVENT_SCREEN_STATE_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB screen state evt handler get invalid param");
+    int32_t i, infoNum;
+    NodeBasicInfo *info = NULL;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LLOGE("HB check dev status get online node info failed");
         return;
     }
+    if (info == NULL || infoNum == 0) {
+        LLOGE("HB check dev status get online node is 0");
+        return;
+    }
+    for (i = 0; i < infoNum; ++i) {
+        (void)LnnStopScreenChangeOfflineTiming(info[i].networkId, LnnConvertHbTypeToConnAddrType(hbType));
+        if (LnnStartScreenChangeOfflineTiming(info[i].networkId,
+            LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
+            LLOGE("send check offline target msg failed");
+        }
+    }
+    SoftBusFree(info);
+}
+
+static void RemoveCheckOffLineMessage(LnnHeartbeatType hbType)
+{
+    if (hbType <= HEARTBEAT_TYPE_MIN || hbType >= HEARTBEAT_TYPE_MAX) {
+        LLOGE("get invalid hbtype param");
+        return;
+    }
+    int32_t i, infoNum;
+    NodeBasicInfo *info = NULL;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LLOGE("HB check dev status get online node info failed");
+        return;
+    }
+    if (info == NULL || infoNum == 0) {
+        LLOGE("HB check dev status get online node is 0");
+        return;
+    }
+    for (i = 0; i < infoNum; ++i) {
+        if (LnnStopScreenChangeOfflineTiming(info[i].networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
+            LLOGE("stop check offline target msg failed,networkid:%s", AnonymizesNetworkID(info[i].networkId));
+        }
+    }
+    SoftBusFree(info);
+}
+
+static void ChangeMediumParamByState(SoftBusScreenState state)
+{
     LnnHeartbeatMediumParam param = {
         .type = HEARTBEAT_TYPE_BLE_V1,
     };
-    const LnnMonitorScreenStateChangedEvent *event = (LnnMonitorScreenStateChangedEvent *)info;
-    SoftBusScreenState state = (SoftBusScreenState)event->status;
     switch (state) {
         case SOFTBUS_SCREEN_ON:
             param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P10;
             param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P10;
             break;
         case SOFTBUS_SCREEN_OFF:
-            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P10;
-            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P10;
+            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P2;
+            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P2;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB ctrl reset ble scan medium param get invalid state");
             return;
     }
-    if (!LnnIsHeartbeatEnable(param.type)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB this hbType is not enabled yet", param.type);
-        return;
-    }
     if (LnnSetMediumParamBySpecificType(&param) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl reset ble scan medium param fail");
         return;
     }
+    LnnUpdateHeartbeatInfo(UPDATE_SCREEN_STATE_INFO);
 }
+
+static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
+{
+    int64_t nowTime;
+    SoftBusSysTime time = {0};
+    if (info == NULL || info->event != LNN_EVENT_SCREEN_STATE_CHANGED) {
+        LLOGE("HB screen state evt handler get invalid param");
+        return;
+    }
+    const LnnMonitorScreenStateChangedEvent *event = (LnnMonitorScreenStateChangedEvent *)info;
+    SoftBusScreenState oldstate = g_screenState;
+    if ((SoftBusScreenState)event->status == SOFTBUS_SCREEN_UNKNOWN) {
+        LLOGE("err screen state");
+        return;
+    }
+    g_screenState = (SoftBusScreenState)event->status;
+    SoftBusGetTime(&time);
+    nowTime = time.sec * HB_TIME_FACTOR + time.usec / HB_TIME_FACTOR;
+    if (g_screenState == SOFTBUS_SCREEN_ON) {
+        RemoveCheckOffLineMessage(HEARTBEAT_TYPE_BLE_V1);
+        ChangeMediumParamByState(g_screenState);
+        g_lastScreenOnTime = nowTime;
+        if (g_lastScreenOnTime - g_lastScreenOffTime >= HB_OFFLINE_TIME && g_lastScreenOffTime > 0) {
+            LLOGI("screen on & screen has been off > 5min");
+            int ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+            if (ret != SOFTBUS_OK) {
+                LLOGE("HB start ble heartbeat failed, ret = %d", ret);
+                return;
+            }
+        }
+    }
+    if (g_screenState == SOFTBUS_SCREEN_OFF) {
+        if (oldstate == SOFTBUS_SCREEN_ON) {
+            g_lastScreenOffTime = nowTime;
+            if (StopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
+                LLOGE("HB ctrl disable ble heartbeat failed");
+                return;
+            }
+            ChangeMediumParamByState(g_screenState);
+            SendCheckOffLineMessage(g_screenState, HEARTBEAT_TYPE_BLE_V1);
+        }
+        if (oldstate == SOFTBUS_SCREEN_OFF) {
+            LLOGI("screen off happen when screenoff");
+        }
+    }
+}
+
 
 static void HbToRecoveryNetwork(void)
 {
@@ -232,6 +329,15 @@ NO_SANITIZE("cfi") int32_t LnnShiftLNNGear(const char *pkgName, const char *call
     if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB ctrl start adjustable ble heatbeat fail");
         return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(targetNetworkId, CATEGORY_NETWORK_ID);
+    if (nodeInfo == NULL) {
+        LLOGE("HB get info by networkid failed");
+        return SOFTBUS_OK;
+    }
+    if (AuthFlushDevice(nodeInfo->uuid) != SOFTBUS_OK) {
+        LLOGI("HB tcp flush failed, wifi will offline");
+        return LnnRequestLeaveSpecific(targetNetworkId, CONNECTION_ADDR_WLAN);
     }
     return SOFTBUS_OK;
 }

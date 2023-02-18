@@ -950,6 +950,7 @@ NO_SANITIZE("cfi") int32_t AuthFlushDevice(const char *uuid)
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t num = 0;
+    int32_t ret = SOFTBUS_ERR;
     AuthManager *auth[2] = { NULL, NULL }; /* 2: WiFi * (Client + Server) */
     auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, false);
     auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, true);
@@ -957,10 +958,12 @@ NO_SANITIZE("cfi") int32_t AuthFlushDevice(const char *uuid)
         if (auth[i] == NULL) {
             continue;
         }
-        (void)PostVerifyDeviceMessage(auth[i]);
+        if (PostVerifyDeviceMessage(auth[i]) == SOFTBUS_OK) {
+            ret = SOFTBUS_OK;
+        }
     }
     ReleaseAuthLock();
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)

@@ -20,6 +20,8 @@
 #include "common_list.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_heartbeat_ctrl.h"
+#include "lnn_heartbeat_fsm.h"
 
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -28,6 +30,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "lnn_distributed_net_ledger.h"
 
 #define HB_GEARMODE_MAX_SET_CNT 100
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)
@@ -284,25 +287,28 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, const LnnProcessS
 {
     bool isRemoved = true;
     LnnHeartbeatType registedHbType = msgPara->hbType;
-
+    bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
+    if (GetScreenState() == SOFTBUS_SCREEN_OFF && !wakeupFlag && !msgPara->isRelay) {
+        LLOGW("screen state is off and not wakeup adv");
+        return SOFTBUS_OK;
+    }
     (void)LnnVisitHbTypeSet(VisitClearUnRegistedHbType, &registedHbType, NULL);
     if (registedHbType < HEARTBEAT_TYPE_MIN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB send once get hbType(%d) is not available", msgPara->hbType);
         return SOFTBUS_OK;
     }
-    LnnRemoveSendEndMsg(hbFsm, registedHbType, &isRemoved);
+    LnnRemoveSendEndMsg(hbFsm, registedHbType, &isRemoved, wakeupFlag);
     if (!isRemoved) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB send once is beginning, hbType:%d", msgPara->hbType);
         return SOFTBUS_OK;
     }
-    bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara->isRelay) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin fail, hbType:%d", registedHbType);
         return SOFTBUS_ERR;
     }
     bool isRelayV0 = msgPara->isRelay && registedHbType == HEARTBEAT_TYPE_BLE_V0;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, registedHbType, isRelayV0 ? HB_SEND_RELAY_LEN :
-        HB_SEND_ONCE_LEN) != SOFTBUS_OK) {
+        HB_SEND_ONCE_LEN, wakeupFlag) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", registedHbType);
         return SOFTBUS_ERR;
     }
@@ -322,7 +328,6 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, const LnnProcessS
 static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
-
     if (msgPara->strategyType != STRATEGY_HB_SEND_SINGLE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB single send get invaild strategy");
         return SOFTBUS_INVALID_PARAM;
@@ -642,6 +647,45 @@ NO_SANITIZE("cfi") int32_t LnnStopOfflineTimingStrategy(const char *networkId, C
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) {
+    LLOGI("start screen changed offline timing");
+    if (networkId == NULL || addrType >= CONNECTION_ADDR_MAX) {
+        LLOGE("invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnCheckDevStatusMsgPara msgPara = {0};
+    if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
+        LLOGE("HB start offline timing strcpy_s networkId fail");
+        return SOFTBUS_ERR;
+    }
+    msgPara.hasNetworkId = true;
+    msgPara.hbType = LnnConvertConnAddrTypeToHbType(addrType);
+
+    if (LnnPostScreenOffCheckDevMsgToHbFsm(g_hbFsm, &msgPara, 2 * HB_OFFLINE_TIME) != SOFTBUS_OK) {
+        LLOGE("post screen off check dev msg failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+{
+    if (networkId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnCheckDevStatusMsgPara msgPara = {
+        .hbType = LnnConvertConnAddrTypeToHbType(addrType),
+        .addrType = addrType,
+    };
+    if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop offline timing strcpy_s networkId fail");
+        return SOFTBUS_ERR;
+    }
+    msgPara.hasNetworkId = true;
+    LnnRemoveScreenOffCheckStatusMsg(g_hbFsm, &msgPara);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
     bool isRelay)
 {
@@ -672,6 +716,20 @@ NO_SANITIZE("cfi") int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
     if (type == (HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_TCP_FLUSH)) {
         return LnnPostTransStateMsgToHbFsm(g_hbFsm, EVENT_HB_IN_NONE_STATE);
     }
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType)
+{
+    if (registedHbType <= HEARTBEAT_TYPE_MIN || registedHbType >= HEARTBEAT_TYPE_MAX) {
+        LLOGE("HB send once get hbType(%d) is not available", registedHbType);
+        return SOFTBUS_ERR;
+    }
+    if (LnnPostSendEndMsgToHbFsm(g_hbFsm, registedHbType, 0, false) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", registedHbType);
+        return SOFTBUS_ERR;
+    }
+    (void)LnnFsmRemoveMessage(&g_hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS);
     return SOFTBUS_OK;
 }
 

@@ -18,11 +18,14 @@
 
 #include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_bus_center.h"
+#include "bus_center_event.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+SoftBusScreenState GetScreenState(void);
+void SetScreenState(SoftBusScreenState state);
 int32_t LnnStartHeartbeatFrameDelay(void);
 int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);

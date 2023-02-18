@@ -51,6 +51,11 @@ public:
         LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType) = 0;
     virtual int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param) = 0;
     virtual int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type) = 0;
+    virtual int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType) = 0;
+    virtual SoftBusScreenState GetScreenState(void) = 0;
+    virtual void SetScreenState(SoftBusScreenState state) = 0;
 };
 class HeartBeatFSMInterfaceMock : public HeartBeatFSMInterface {
 public:
@@ -77,6 +82,11 @@ public:
         LnnGetHbStrategyManager, int32_t(LnnHeartbeatStrategyManager *, LnnHeartbeatType, LnnHeartbeatStrategyType));
     MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(const LnnHeartbeatMediumParam *));
     MOCK_METHOD1(LnnHbMediumMgrUpdateSendInfo, int32_t(LnnHeartbeatUpdateInfoType));
+    MOCK_METHOD2(LnnStartScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD2(LnnStopScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD1(StopHeartBeatAdvByTypeNow, int32_t(LnnHeartbeatType));
+    MOCK_METHOD0(GetScreenState, SoftBusScreenState(void));
+    MOCK_METHOD1(SetScreenState, void(SoftBusScreenState));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
