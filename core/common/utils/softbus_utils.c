@@ -227,8 +227,8 @@ bool IsValidString(const char *input, uint32_t maxLen)
     if (input == NULL) {
         return false;
     }
-    uint32_t len = strnlen(input, maxLen);
-    if (len == maxLen) {
+    uint32_t len = strlen(input);
+    if (len == 0 || len > maxLen) {
         return false;
     }
     return true;
