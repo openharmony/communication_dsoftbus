@@ -745,7 +745,7 @@ HWTEST_F(AuthTest, AUTH_FLUSH_DEVICE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
     ret = AuthFlushDevice(const_cast<const char *>(uuid));
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*

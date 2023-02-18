@@ -36,6 +36,7 @@ public:
     virtual void UnregAuthTransListener(int32_t module) = 0;
     virtual int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo) = 0;
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
+    virtual int32_t AuthFlushDevice(const char *uuid) = 0;
 };
 class AuthInterfaceMock : public AuthInterface {
 public:
@@ -52,6 +53,7 @@ public:
     MOCK_METHOD1(UnregAuthTransListener, void (int32_t));
     MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
+    MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // AUTH_MOCK_H
