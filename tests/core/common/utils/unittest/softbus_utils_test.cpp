@@ -257,15 +257,19 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_GenerateRandomStr_001, TestSize.Leve
  */
 HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_IsValidString_001, TestSize.Level1)
 {
-    const char *input = NULL;
+    const char *input = nullptr;
     uint32_t maxLen = 4;
     EXPECT_FALSE(IsValidString(input, maxLen));
 
-    input = "ABCD";
+    input = "";
     maxLen = 4;
     EXPECT_FALSE(IsValidString(input, maxLen));
 
-    input = "ABCD";
+    input = "ABCDE";
+    maxLen = 4;
+    EXPECT_FALSE(IsValidString(input, maxLen));
+
+    input = "ABCDE";
     maxLen = 5;
     EXPECT_TRUE(IsValidString(input, maxLen));
 }
