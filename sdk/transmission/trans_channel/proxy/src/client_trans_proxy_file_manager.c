@@ -1565,6 +1565,24 @@ static FileRecipientInfo *GetRecipientInProcessRef(int32_t sessionId)
     return recipient;
 }
 
+static FileRecipientInfo *GetRecipientInfo(int32_t sessionId)
+{
+    if (SoftBusMutexLock(&g_recvFileInfoLock.lock) != SOFTBUS_OK) {
+        return NULL;
+    }
+    FileRecipientInfo *recipient = GetRecipientNoLock(sessionId);
+    if (recipient == NULL) {
+        SoftBusMutexUnlock(&g_recvFileInfoLock.lock);
+        return NULL;
+    }
+    if (recipient->recvState == TRANS_FILE_RECV_START_STATE) {
+        recipient->recvState = TRANS_FILE_RECV_PROCESS_STATE;
+    }
+    recipient->objRefCount++;
+    (void)SoftBusMutexUnlock(&g_recvFileInfoLock.lock);
+    return recipient;
+}
+
 NO_SANITIZE("cfi") static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const FileFrame *fileFrame)
 {
     FileRecipientInfo *recipient = GetRecipientInCreateFileRef(sessionId, channelId);
@@ -1763,7 +1781,7 @@ EXIT_ERR:
 
 NO_SANITIZE("cfi") static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
 {
-    FileRecipientInfo *recipient = GetRecipientInProcessRef(sessionId);
+    FileRecipientInfo *recipient = GetRecipientInfo(sessionId);
     if (recipient == NULL) {
         return SOFTBUS_NOT_FIND;
     }
