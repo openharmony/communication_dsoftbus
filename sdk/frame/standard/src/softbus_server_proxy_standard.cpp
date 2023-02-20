@@ -103,7 +103,7 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService read serverRet failed!");
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
+    return serverRet;
 }
 
 int32_t SoftBusServerProxyFrame::CreateSessionServer(const char *pkgName, const char *sessionName)
