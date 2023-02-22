@@ -509,9 +509,9 @@ static int32_t TransProxyUnpackAuthHandshakeMsg(cJSON *root, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len)
+NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t length)
 {
-    cJSON *root = cJSON_ParseWithLength(msg, len);
+    cJSON *root = cJSON_ParseWithLength(msg, length);
     if (root == NULL) {
         return SOFTBUS_ERR;
     }
