@@ -1179,7 +1179,7 @@ static int32_t UpdateAdvertiserDeviceInfo(int32_t adv)
     return SOFTBUS_OK;
 }
 
-static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
+NO_SANITIZE("cfi") static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     (void)type;
     if (UpdateAdvertiserDeviceInfo(NON_ADV_ID) != SOFTBUS_OK || UpdateAdvertiserDeviceInfo(CON_ADV_ID) != SOFTBUS_OK) {
