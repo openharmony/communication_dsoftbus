@@ -443,7 +443,7 @@ static void CoapUpdateLocalIp(LinkStatus status)
     DiscCoapUpdateLocalIp(status);
 }
 
-static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
+NO_SANITIZE("cfi") static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     if (type == TYPE_LOCAL_DEVICE_NAME) {
         DiscCoapUpdateDevName();
