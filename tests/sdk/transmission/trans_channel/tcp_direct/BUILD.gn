@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,12 +42,12 @@ ohos_unittest("TransSdkTcpDirectTest") {
   ]
 
   deps = [
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -89,8 +89,8 @@ ohos_unittest("TransSessionTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/sdk:softbus_client"
   ]
 
   if (is_standard_system) {
@@ -132,8 +132,8 @@ ohos_unittest("TransTcpDirectTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/sdk:softbus_client"
   ]
 
   if (is_standard_system) {
