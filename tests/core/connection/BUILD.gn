@@ -29,7 +29,7 @@ group("unittest") {
   if (dsoftbus_feature_conn_ble) {
     deps += [ "ble:ConnectionBleTest" ]
   }
-  if (dsoftbus_feature_conn_p2p) {
+  if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
     deps += [
       "p2p:ConnectionP2pTest",
       "p2p:P2pDeviceTest",
