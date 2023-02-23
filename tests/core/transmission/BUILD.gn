@@ -40,3 +40,8 @@ group("unittest") {
     deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/transmission/trans_channel:unittest" ]
   }
 }
+
+group("fuzztest") {
+  testonly = true
+  deps = [ "fuzztest:fuzztest" ]
+}
