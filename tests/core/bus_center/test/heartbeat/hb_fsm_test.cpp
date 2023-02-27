@@ -113,7 +113,7 @@ HWTEST_F(HeartBeatFSMTest, LnnRemoveSendEndMsgTest_01, TestSize.Level1)
 {
     bool isRemoved = true;
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
-    LnnRemoveSendEndMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, &isRemoved);
+    LnnRemoveSendEndMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, &isRemoved, false);
     LnnRemoveCheckDevStatusMsg(nullptr, nullptr);
     LnnRemoveProcessSendOnceMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
     HbMasterNodeStateEnter(nullptr);
@@ -505,9 +505,9 @@ HWTEST_F(HeartBeatFSMTest, LnnPostNextSendOnceMsgToHbFsmTest_01, TestSize.Level1
     hbFsm->fsm = fsm;
     ret = LnnPostNextSendOnceMsgToHbFsm(hbFsm, &para, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnPostSendEndMsgToHbFsm(nullptr, HEARTBEAT_TYPE_BLE_V1, TEST_TIME1);
+    ret = LnnPostSendEndMsgToHbFsm(nullptr, HEARTBEAT_TYPE_BLE_V1, TEST_TIME1, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnPostSendEndMsgToHbFsm(hbFsm, HEARTBEAT_TYPE_BLE_V1, TEST_TIME1);
+    ret = LnnPostSendEndMsgToHbFsm(hbFsm, HEARTBEAT_TYPE_BLE_V1, TEST_TIME1, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnPostStartMsgToHbFsm(nullptr, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);

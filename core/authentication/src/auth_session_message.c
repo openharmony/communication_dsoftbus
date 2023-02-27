@@ -27,6 +27,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
+#include "softbus_socket.h"
 
 /* DeviceId */
 #define CMD_TAG "TECmd"

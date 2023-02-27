@@ -122,5 +122,25 @@ int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type)
 {
     return HeartBeatFSMInterfaceInstance()->LnnHbMediumMgrUpdateSendInfo(type);
 }
+int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+{
+    return HeartBeatFSMInterfaceInstance()->LnnStartScreenChangeOfflineTiming(networkId, addrType);
+}
+int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+{
+    return HeartBeatFSMInterfaceInstance()->LnnStopScreenChangeOfflineTiming(networkId, addrType);
+}
+int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType)
+{
+    return HeartBeatFSMInterfaceInstance()->StopHeartBeatAdvByTypeNow(registedHbType);
+}
+SoftBusScreenState GetScreenState(void)
+{
+    return HeartBeatFSMInterfaceInstance()->GetScreenState();
+}
+void SetScreenState(SoftBusScreenState state)
+{
+    return HeartBeatFSMInterfaceInstance()->SetScreenState(state);
+}
 }
 } // namespace OHOS
