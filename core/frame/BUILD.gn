@@ -52,7 +52,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
         "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
         "$softbus_adapter_config/spec_config",
-        "//base/security/device_auth/interfaces/innerkits",
+        "//base/security/device_auth/interfaces/inner_api",
       ]
       sources = dsoftbus_server_common_src
       sources += [
@@ -97,7 +97,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
         "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-        "//base/security/device_auth/interfaces/innerkits",
+        "//base/security/device_auth/interfaces/inner_api",
         "//commonlibrary/utils_lite/include",
         "//third_party/bounds_checking_function/include",
       ]
