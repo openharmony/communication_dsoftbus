@@ -44,6 +44,9 @@ int32_t LnnStartHeartbeat(uint64_t delayMillis);
 int32_t LnnStopHeartbeatByType(LnnHeartbeatType type);
 int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
+int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType);
+int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType);
+int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType);
 int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type);
 
 bool LnnIsHeartbeatEnable(LnnHeartbeatType type);
