@@ -58,7 +58,7 @@ ohos_unittest("TransServerTcpDirectTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/coap/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
@@ -132,7 +132,7 @@ ohos_unittest("TransCoreTcpDirectTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/coap/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
@@ -204,7 +204,7 @@ ohos_unittest("TransTcpDirectMessageTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/coap/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 
@@ -277,7 +277,7 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
 
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
     "unittest/common/",
@@ -347,7 +347,7 @@ ohos_unittest("TransTcpDirectP2pTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/coap/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
 

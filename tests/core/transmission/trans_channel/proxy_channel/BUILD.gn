@@ -65,7 +65,7 @@ ohos_unittest("TransProxyChannelTest") {
 
     "$dsoftbus_root_path/third_party/dfinder/include",
 
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
     "unittest/common/",
@@ -145,7 +145,7 @@ ohos_unittest("TransProxyChannelMockTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
 
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//commonlibrary/c_utils/base/include",
     "//third_party/cJSON",
     "unittest/common/",

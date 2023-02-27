@@ -21,7 +21,7 @@ ohos_unittest("AuthTest") {
   sources = [ "unittest/auth_test.cpp" ]
 
   include_dirs = [
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -94,7 +94,7 @@ ohos_unittest("AuthEnhanceMockTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -176,7 +176,7 @@ ohos_unittest("AuthTestCallBackTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -237,7 +237,7 @@ ohos_unittest("AuthOtherTest") {
   sources = [ "unittest/auth_other_test.cpp" ]
 
   include_dirs = [
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -293,7 +293,7 @@ ohos_unittest("AuthTcpConnectionTest") {
   sources = [ "unittest/auth_tcp_connection_test.cpp" ]
 
   include_dirs = [
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -352,7 +352,7 @@ ohos_unittest("AuthHichainTest") {
   ]
 
   include_dirs = [
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
