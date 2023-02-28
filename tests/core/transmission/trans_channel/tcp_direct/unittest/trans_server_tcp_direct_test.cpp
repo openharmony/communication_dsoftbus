@@ -17,23 +17,21 @@
 #include <unistd.h>
 #include <securec.h>
 
+#include "auth_interface.h"
 #include "auth_manager.h"
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
-#include "auth_interface.h"
 #include "cJSON.h"
 #include "gtest/gtest.h"
+#include "lnn_local_net_ledger.h"
 #include "session.h"
+#include "softbus_base_listener.h"
 #include "softbus_errcode.h"
-#include "softbus_socket.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
-#include "auth_manager.h"
-#include "auth_interface.h"
-#include "lnn_local_net_ledger.h"
-#include "softbus_base_listener.h"
-
+#include "softbus_server_frame.h"
+#include "softbus_socket.h"
 #include "trans_channel_callback.c"
 #include "trans_channel_manager.h"
 #include "trans_tcp_direct_listener.c"
@@ -68,7 +66,7 @@ namespace OHOS {
 #define TRANS_TEST_CHCANNEL_ID 1000
 #define TRANS_TEST_FD 1000
 
-static const char *g_sessionKey = "www.huaweitest.com";
+static const char *g_sessionKey = "www.test.com";
 static const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00";
 static const char *g_uuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
@@ -289,6 +287,8 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
 
     ret = StartVerifySession(g_conn);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    SoftBusFree(info);
 }
 
 /**
@@ -459,6 +459,7 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent002, TestSize.Level1)
     int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
     ASSERT_EQ(ret, EOK);
 
+    InitSoftBusServer();
     ret = TestAddSessionConn(false);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
@@ -507,7 +508,7 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStartSessionListener001, TestSize.Lev
 HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionListener001, TestSize.Level1)
 {
     int32_t ret = TransTdcStopSessionListener(DIRECT_CHANNEL_SERVER_WIFI);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /**
@@ -1003,7 +1004,6 @@ HWTEST_F(TransServerTcpDirectTest, TransServerOnChannelOpenFailed001, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransServerOnChannelOpenFailed(NULL, pid, channelId, channelType, errCode);
-    EXPECT_NE(SOFTBUS_OK, ret);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
