@@ -114,6 +114,7 @@ lnn_mock_test_include_dirs = [
 lnn_mock_test_deps = [
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
+  "$dsoftbus_root_path/core/frame:softbus_server",
   "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
   "//base/security/device_auth/services:deviceauth_sdk",
   "//third_party/googletest:gmock",
@@ -716,6 +717,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
     "//base/security/device_auth/services:deviceauth_sdk",
     "//third_party/googletest:gmock",
@@ -848,6 +850,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
     "//base/security/device_auth/services:deviceauth_sdk",
     "//third_party/googletest:gmock",
@@ -1439,6 +1442,7 @@ if (!defined(ohos_lite) && enhanced_test) {
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
       "//base/security/device_auth/services:deviceauth_sdk",
       "//third_party/googletest:gmock",
