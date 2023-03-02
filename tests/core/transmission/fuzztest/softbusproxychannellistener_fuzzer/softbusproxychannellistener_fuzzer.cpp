@@ -22,24 +22,38 @@
 namespace OHOS {
 #define SESSION_NAME_SIZE_MAX 256
 #define DEVICE_ID_SIZE_MAX 65
+#define TEST_PEER_NETWORK_ID "com.test.trans.demo.peerNetworkId"
+#define TEST_SESSION_NAME "com.test.trans.demo.sessionname"
 
-void TransOpenNetWorkingChannelTest(const uint8_t* data, size_t size)
+void TransOpenNetWorkingChannelSessionNameTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < DEVICE_ID_SIZE_MAX)) {
+    if ((data == nullptr) || (size >= SESSION_NAME_SIZE_MAX) || (size < 0)) {
         return;
     }
 
     char mySessionName[SESSION_NAME_SIZE_MAX] = {0};
-    if (memcpy_s(mySessionName, SESSION_NAME_SIZE_MAX, data, sizeof(mySessionName) - 1)) {
+    if (memcpy_s(mySessionName, SESSION_NAME_SIZE_MAX, data, size)) {
+        return;
+    }
+
+    char peerNetworkId[DEVICE_ID_SIZE_MAX] = TEST_PEER_NETWORK_ID;
+
+    TransOpenNetWorkingChannel((const char *)mySessionName, peerNetworkId);
+}
+
+void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size >= DEVICE_ID_SIZE_MAX) || (size < 0)) {
         return;
     }
 
     char peerNetworkId[DEVICE_ID_SIZE_MAX] = {0};
-    if (memcpy_s(peerNetworkId, DEVICE_ID_SIZE_MAX, data, sizeof(peerNetworkId) - 1)) {
+    if (memcpy_s(peerNetworkId, DEVICE_ID_SIZE_MAX, data, size)) {
         return;
     }
 
-    TransOpenNetWorkingChannel((const char *)mySessionName, peerNetworkId);
+    const char *mySessionName = TEST_SESSION_NAME;
+    TransOpenNetWorkingChannel(mySessionName, peerNetworkId);
 }
 
 void TransCloseNetWorkingChannelTest(const uint8_t* data, size_t size)
@@ -93,7 +107,8 @@ void TransSendNetworkingMessageTest(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::TransOpenNetWorkingChannelTest(data, size);
+    OHOS::TransOpenNetWorkingChannelSessionNameTest(data, size);
+    OHOS::TransOpenNetWorkingChannelPeerNetworkIdTest(data, size);
     OHOS::TransCloseNetWorkingChannelTest(data, size);
     OHOS::TransSendNetworkingMessageTest(data, size);
     return 0;
