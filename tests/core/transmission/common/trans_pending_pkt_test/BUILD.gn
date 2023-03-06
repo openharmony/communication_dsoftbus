@@ -55,7 +55,7 @@ ohos_unittest("TransPendingPktTest") {
     "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite",
     "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//third_party/cJSON",
     "$dsoftbus_core_path/adapter/bus_center/include",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
