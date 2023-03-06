@@ -66,7 +66,7 @@ auth_server_deps = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    auth_server_inc += [ "//base/security/device_auth/interfaces/innerkits" ]
+    auth_server_inc += [ "//base/security/device_auth/interfaces/inner_api" ]
     if (dsoftbus_feature_lnn_net) {
       auth_server_deps += [ "//base/security/device_auth/services:deviceauth" ]
     }
@@ -78,5 +78,5 @@ if (defined(ohos_lite)) {
     }
   }
 } else {
-  auth_server_inc += [ "//base/security/device_auth/interfaces/innerkits" ]
+  auth_server_inc += [ "//base/security/device_auth/interfaces/inner_api" ]
 }

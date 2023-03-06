@@ -32,7 +32,7 @@ ohos_unittest("TransIpcStandardTest") {
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//utils/system/safwk/native/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "unittest/common/",

@@ -56,7 +56,7 @@ ohos_unittest("TransChannelCallbackTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/coap/include",
     "$dsoftbus_root_path/third_party/dfinder/include",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",

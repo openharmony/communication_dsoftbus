@@ -62,7 +62,7 @@ ohos_unittest("TransAuthChannelTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//base/security/device_auth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/inner_api",
     "//third_party/cJSON",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
