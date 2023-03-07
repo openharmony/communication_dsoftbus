@@ -61,7 +61,6 @@ public:
 
 void LNNNetworkManagerMockTest::SetUpTestCase()
 {
-    LooperInit();
     ListTailInsert(&g_netIfNameList, &g_netIfMgr1.node);
     ListTailInsert(&g_netIfNameList, &g_netIfMgr2.node);
     ListTailInsert(&g_netIfNameList, &g_netIfMgr3.node);
@@ -70,7 +69,6 @@ void LNNNetworkManagerMockTest::SetUpTestCase()
 
 void LNNNetworkManagerMockTest::TearDownTestCase()
 {
-    LooperDeinit();
 }
 
 void LNNNetworkManagerMockTest::SetUp()
@@ -146,6 +144,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
 */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level1)
 {
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnGetAddrTypeByIfName(nullptr, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
@@ -180,6 +180,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
 */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level1)
 {
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     int ret = LnnRegistProtocol(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
@@ -238,18 +240,18 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
     int len = 0;
     char buf[] = "nullptr";
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    EXPECT_CALL(managerMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
     bool ret = LnnIsAutoNetWorkingEnabled();
     EXPECT_TRUE(ret == true);
-    EXPECT_CALL(managerMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnIsAutoNetWorkingEnabled();
     EXPECT_TRUE(ret == false);
 
-    EXPECT_CALL(managerMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     int res = LnnInitManagerByConfig();
     EXPECT_TRUE(res == SOFTBUS_ERR);
 
-    EXPECT_CALL(managerMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
     res = LnnInitManagerByConfig();
     EXPECT_TRUE(res == SOFTBUS_OK);
 
