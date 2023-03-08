@@ -73,6 +73,7 @@ static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink
             break;
         case LANE_T_RAW_STREAM:
         case LANE_T_COMMON_VIDEO:
+        case LANE_T_COMMON_VOICE:
             GetStreamDefaultLink(defaultLink, &index);
             break;
         default:
