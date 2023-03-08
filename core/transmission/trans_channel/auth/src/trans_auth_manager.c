@@ -261,7 +261,7 @@ static void OnRecvAuthChannelRequest(int64_t authId, const char *data, int32_t l
     }
 
     AppInfo appInfo;
-    int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo); 
+    int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo, len); 
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpackRequest failed");
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
@@ -307,7 +307,7 @@ static void OnRecvAuthChannelReply(int64_t authId, const char *data, int32_t len
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not find channel info by auth id");
         return;
     }
-    int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo);
+    int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpackReply failed");
         goto EXIT_ERR;
