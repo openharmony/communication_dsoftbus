@@ -289,14 +289,14 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     return buf;
 }
 
-int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo)
+int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len)
 {
     cJSON *root = 0;
     AppInfo *appInfo = &(chanInfo->appInfo);
     if (appInfo == NULL) {
         return SOFTBUS_ERR;
     }
-    root = cJSON_Parse(msg);
+    root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
         return SOFTBUS_ERR;
     }
@@ -337,9 +337,9 @@ static int32_t UnpackHandshakeMsgForNormal(cJSON *root, AppInfo *appInfo, char *
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan)
+int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len)
 {
-    cJSON *root = cJSON_Parse(msg);
+    cJSON *root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
         return SOFTBUS_ERR;
     }
@@ -417,11 +417,11 @@ char *TransProxyPackIdentity(const char *identity)
     return buf;
 }
 
-int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize)
+int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len)
 {
     cJSON *root = NULL;
 
-    root = cJSON_Parse(msg);
+    root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
         return SOFTBUS_ERR;
     }
