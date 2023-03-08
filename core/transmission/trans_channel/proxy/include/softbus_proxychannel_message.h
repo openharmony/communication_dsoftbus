@@ -126,15 +126,15 @@ typedef struct {
     SliceProcessor processor[PROCESSOR_MAX];
 } ChannelSliceProcessor;
 
-int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo);
+int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, uint32_t connId,
     const char *payload, int32_t payloadLen, char **data, int32_t *dataLen);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
-int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan);
+int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char* TransProxyPackIdentity(const char *identity);
-int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize);
+int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

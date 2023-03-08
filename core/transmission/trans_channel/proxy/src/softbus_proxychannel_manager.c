@@ -572,17 +572,13 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, int
 
 void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 {
-    if (msg->data[msg->dateLen - 1] != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
-        return;
-    }
     ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "recv ack msg");
-    if (TransProxyUnpackHandshakeAckMsg(msg->data, info) != SOFTBUS_OK) {
+    if (TransProxyUnpackHandshakeAckMsg(msg->data, info, msg->dateLen) != SOFTBUS_OK) {
         SoftBusFree(info);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackHandshakeAckMsg fail");
         return;
@@ -629,10 +625,6 @@ static inline int32_t CheckAppTypeAndMsgHead(const ProxyMessageHead *msgHead, co
 
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
-    if (msg->data[msg->dateLen - 1] != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
-        return;
-    }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -640,7 +632,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         return;
     }
 
-    if (TransProxyUnpackHandshakeMsg(msg->data, chan) != SOFTBUS_OK) {
+    if (TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dateLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackHandshakeMsg fail");
         SoftBusFree(chan);
         return;
@@ -688,10 +680,6 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 
 void TransProxyProcessResetMsg(const ProxyMessage *msg)
 {
-    if (msg->data[msg->dateLen - 1] != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
-        return;
-    }
     ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
@@ -699,7 +687,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv reset myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
-    if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity)) != SOFTBUS_OK) {
+    if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dateLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "reset identity fail");
         SoftBusFree(info);
         return;
@@ -731,10 +719,6 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
 
 void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 {
-    if (msg->data[msg->dateLen - 1] != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
-        return;
-    }
     ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
@@ -742,7 +726,7 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv keepalive myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
-    if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity)) != SOFTBUS_OK) {
+    if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dateLen) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "keep alive unpack identity fail");
         SoftBusFree(info);
         return;
@@ -763,10 +747,6 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 
 void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 {
-    if (msg->data[msg->dateLen - 1] != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Received string has no end symbol");
-        return;
-    }
     ProxyChannelInfo *info = SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
         return;
@@ -774,7 +754,7 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv keepalive ack myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
-    if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity)) != SOFTBUS_OK) {
+    if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dateLen) != SOFTBUS_OK) {
         SoftBusFree(info);
         return;
     }
