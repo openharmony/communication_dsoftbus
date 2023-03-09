@@ -194,7 +194,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
         }
         if (NSTACKX_DFileSetStoragePath(fileSession, fileListener.rootDir) != SOFTBUS_OK) {
             NSTACKX_DFileClose(fileSession);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set storage path failed");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set storage path[%s] failed", fileListener.rootDir);
             return SOFTBUS_ERR;
         }
         g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
