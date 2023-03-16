@@ -22,6 +22,8 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_net_capability.h"
+#include "lnn_node_info.h"
+#include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
@@ -42,6 +44,36 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
     }
     return SOFTBUS_OK;
 }
+
+static void PostNetchangedInfo(const char *networkId, ConnectionAddrType type)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "start post offline, conntype=%d", type);
+    if (LnnRequestLeaveSpecific(networkId, type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send request to NetBuilder fail");
+    }
+}
+
+static void HandlePeerNetCapchanged(const char *networkId, uint32_t capability)
+{
+    if (!LnnHasCapability(capability, BIT_WIFI) || networkId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "only support close ble");
+        return;
+    }
+    NodeInfo *info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get node info fail!");
+        return;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && !LnnHasCapability(capability, BIT_BLE)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remote device lost ble, ble need offline");
+        PostNetchangedInfo(networkId, CONNECTION_ADDR_BLE);
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && !LnnHasCapability(capability, BIT_BR)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remote device lost br, br need offline");
+        PostNetchangedInfo(networkId, CONNECTION_ADDR_BR);
+    }
+}
+
 static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv capability info, type:%d, len: %d", type, len);
@@ -65,6 +97,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update conn capability fail.");
         return;
     }
+    HandlePeerNetCapchanged(networkId, capability);
 }
 
 static uint8_t *ConvertCapabilityToMsg(uint32_t localCapability)
