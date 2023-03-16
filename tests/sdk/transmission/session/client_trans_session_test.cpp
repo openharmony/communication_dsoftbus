@@ -58,7 +58,7 @@ const char *g_networkId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDE
 const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_groupId = "TEST_GROUP_ID";
 const char *g_deviceName = "rk3568test";
-const char *g_rootDir = "/data/local/test";
+const char *g_rootDir = "/data";
 static SessionAttribute g_sessionAttr = {
     .dataType = TYPE_BYTES,
 };
