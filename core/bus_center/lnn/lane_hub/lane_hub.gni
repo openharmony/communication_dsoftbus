@@ -39,7 +39,6 @@ if (dsoftbus_feature_lnn_net) {
     "$core_lane_hub_path/lane_manager/src/lnn_lane_link.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_common.c",
-    "$core_lane_hub_path/lane_manager/src/lnn_lane_link_proc.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_model.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_select.c",
     "$core_lane_hub_path/lane_manager/src/lnn_select_rule.c",
