@@ -139,7 +139,7 @@ int32_t ServerGetLocalDeviceInfo(const void *origin, IpcIo *req, IpcIo *reply)
     nodeInfo = SoftBusCalloc(infoTypeLen);
     if (nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetLocalDeviceInfo malloc info type length failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     int32_t ret = LnnIpcGetLocalDeviceInfo(pkgName, nodeInfo, infoTypeLen);
@@ -158,6 +158,11 @@ int32_t ServerGetNodeKeyInfo(const void *origin, IpcIo *req, IpcIo *reply)
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ServerGetNodeKeyInfo ipc server pop.");
     size_t length;
     const char *pkgName = (const char*)IpcIoPopString(req, &length);
+    int32_t callingUid = GetCallingUid(origin);
+    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo no permission.");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
     const char *networkId = (const char*)IpcIoPopString(req, &length);
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner read networkId failed!");
@@ -166,6 +171,7 @@ int32_t ServerGetNodeKeyInfo(const void *origin, IpcIo *req, IpcIo *reply)
     int32_t key = IpcIoPopInt32(req);
     int32_t infoLen  = LnnIpcGetNodeKeyInfoLen(key);
     if (infoLen == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetNodeKeyInfoInner get infoLen failed!");
         return SOFTBUS_ERR;
     }
     int32_t len = IpcIoPopInt32(req);
@@ -176,13 +182,7 @@ int32_t ServerGetNodeKeyInfo(const void *origin, IpcIo *req, IpcIo *reply)
     void *buf = SoftBusCalloc(infoLen);
     if (buf == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo malloc buffer failed!");
-        return SOFTBUS_ERR;
-    }
-    int32_t callingUid = GetCallingUid(origin);
-    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerGetNodeKeyInfo no permission.");
-        SoftBusFree(buf);
-        return SOFTBUS_PERMISSION_DENIED;
+        return SOFTBUS_MEM_ERR;
     }
     int32_t ret = LnnIpcGetNodeKeyInfo(pkgName, networkId, key, (unsigned char *)buf, infoLen);
     if (ret != SOFTBUS_OK) {
@@ -254,18 +254,39 @@ int32_t ServerPublishLNN(const void *origin, IpcIo *req, IpcIo *reply)
     size_t len;
     uint32_t size;
     const char *pkgName = (const char*)IpcIoPopString(req, &len);
-    uint32_t infoLen = IpcIoPopUint32(req);
-    void *info = (void*)IpcIoPopFlatObj(req, &size);
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN read info is null.");
-        return SOFTBUS_ERR;
-    }
     int32_t callingUid = GetCallingUid(origin);
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcPublishLNN(pkgName, info, infoLen);
+
+    PublishInfo info;
+    (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
+    info.publishId = IpcIoPopInt32(req);
+    int32_t mode = IpcIoPopInt32(req);
+    int32_t medium = IpcIoPopInt32(req);
+    int32_t freq = IpcIoPopInt32(req);
+    info.mode = (DiscoverMode)mode;
+    info.medium = (ExchanageMedium)medium;
+    info.freq = (ExchangeFreq)freq;
+    info.capability = (const char *)IpcIoPopString(req, &len);
+    if (info.capability == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN read capability is null.");
+        return SOFTBUS_ERR;
+    }
+    info.dataLen = IpcIoPopUint32(req);
+    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
+        info.capabilityData = (unsigned char *)IpcIoPopFlatObj(req, &size);
+        if (info.capabilityData == NULL) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN read capabilityData is null.");
+            return SOFTBUS_ERR;
+        }
+    } else {
+        info.capabilityData = NULL;
+        info.dataLen = 0;
+    }
+    int32_t ret = LnnIpcPublishLNN(pkgName, &info);
+    IpcIoPushInt32(reply, ret);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN failed.");
         return SOFTBUS_ERR;
@@ -306,18 +327,41 @@ int32_t ServerRefreshLNN(const void *origin, IpcIo *req, IpcIo *reply)
     size_t len;
     uint32_t size;
     const char *pkgName = (const char*)IpcIoPopString(req, &len);
-    uint32_t infoTypeLen = IpcIoPopUint32(req);
-    void *info = (void*)IpcIoPopFlatObj(req, &size);
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN read info is null.");
-        return SOFTBUS_ERR;
-    }
     int32_t callingUid = GetCallingUid(origin);
     if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcRefreshLNN(pkgName, info, infoTypeLen);
+
+    SubscribeInfo info;
+    (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
+    info.subscribeId = IpcIoPopInt32(req);
+    int32_t mode = IpcIoPopInt32(req);
+    int32_t medium = IpcIoPopInt32(req);
+    int32_t freq = IpcIoPopInt32(req);
+    info.mode = (DiscoverMode)mode;
+    info.medium = (ExchanageMedium)medium;
+    info.freq = (ExchangeFreq)freq;
+    info.isSameAccount = IpcIoPopBool(req);
+    info.isWakeRemote = IpcIoPopBool(req);
+    info.capability = (const char *)IpcIoPopString(req, &len);
+    if (info.capability == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN read capability is null.");
+        return SOFTBUS_ERR;
+    }
+    info.dataLen = IpcIoPopUint32(req);
+    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
+        info.capabilityData = (unsigned char *)IpcIoPopFlatObj(req, &size);
+        if (info.capabilityData == NULL) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN read capabilityData is null.");
+            return SOFTBUS_ERR;
+        }
+    } else {
+        info.capabilityData = NULL;
+        info.dataLen = 0;
+    }
+    int32_t ret = LnnIpcRefreshLNN(pkgName, &info);
+    IpcIoPushInt32(reply, ret);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN failed.");
         return SOFTBUS_ERR;

@@ -390,8 +390,8 @@ int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessagePa
         return SOFTBUS_ERR;
     }
     int32_t tvCount;
-    if (!data.ReadInt32(tvCount)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read tv count failed!");
+    if (!data.ReadInt32(tvCount) || tvCount <= 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read tv count:%d failed!", tvCount);
         return SOFTBUS_ERR;
     }
     QosTv *tvList = (QosTv *)data.ReadRawData(sizeof(QosTv) * tvCount);
