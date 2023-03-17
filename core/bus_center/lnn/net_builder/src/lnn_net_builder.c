@@ -125,6 +125,7 @@ typedef struct {
     char oldNetworkId[NETWORK_ID_BUF_LEN];
     ConnectionAddrType addrType;
     char newNetworkId[NETWORK_ID_BUF_LEN];
+    ConnectionAddrType newAddrType;
 } LeaveInvalidConnMsgPara;
 
 typedef struct {
@@ -1031,7 +1032,7 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]malloc invalid clena info failed", item->id);
             continue;
         }
-        item->connInfo.cleanInfo->addrType = msgPara->addrType;
+        item->connInfo.cleanInfo->addrType = msgPara->newAddrType;
         if (strncpy_s(item->connInfo.cleanInfo->networkId, NETWORK_ID_BUF_LEN,
             msgPara->newNetworkId, strlen(msgPara->newNetworkId)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]copy new networkId failed", item->id);
@@ -1052,7 +1053,7 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
             "send leave LNN msg to invalid connection fsm[id=%u] result: %d", item->id, rc);
     }
     if (count == 0) {
-        InitiateNewNetworkOnline(msgPara->addrType, msgPara->newNetworkId);
+        InitiateNewNetworkOnline(msgPara->newAddrType, msgPara->newNetworkId);
     }
     SoftBusFree((void *)msgPara);
     return rc;
@@ -2060,8 +2061,8 @@ NO_SANITIZE("cfi") int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType,
-    const char *newNetworkId)
+NO_SANITIZE("cfi") int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType oldAddrType,
+    const char *newNetworkId, ConnectionAddrType newAddrType)
 {
     LeaveInvalidConnMsgPara *para = NULL;
 
@@ -2080,7 +2081,8 @@ NO_SANITIZE("cfi") int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, 
         SoftBusFree(para);
         return SOFTBUS_MALLOC_ERR;
     }
-    para->addrType = addrType;
+    para->addrType = oldAddrType;
+    para->newAddrType = newAddrType;
     if (PostMessageToHandler(MSG_TYPE_LEAVE_INVALID_CONN, para) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post leave invalid connection message failed");
         SoftBusFree(para);
