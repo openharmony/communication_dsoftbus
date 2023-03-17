@@ -34,9 +34,9 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key
 int32_t LnnIpcGetNodeKeyInfoLen(int32_t key);
 int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
-int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info);
 int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId);
-int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+int32_t LnnIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info);
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId);
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId);
 int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId);

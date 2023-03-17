@@ -168,13 +168,13 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoLen)
+int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    int ret = g_serverProxy->PublishLNN(pkgName, info, infoLen);
+    int ret = g_serverProxy->PublishLNN(pkgName, info);
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN failed!");
         return ret;
@@ -196,13 +196,13 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return SOFTBUS_OK;
 }
 
-int32_t ServerIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
     if (g_serverProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    int ret = g_serverProxy->RefreshLNN(pkgName, info, infoTypeLen);
+    int ret = g_serverProxy->RefreshLNN(pkgName, info);
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN failed!");
     }

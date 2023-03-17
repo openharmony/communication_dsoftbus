@@ -21,7 +21,6 @@
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_ipc_utils.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
@@ -110,13 +109,10 @@ int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
-int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    (void)infoTypeLen;
-    PublishInfo pubInfo;
-    ConvertVoidToPublishInfo(info, &pubInfo);
-    int32_t ret = LnnPublishService(pkgName, &pubInfo, false);
-    LnnOnPublishLNNResult(pubInfo.publishId, PublishResultTransfer(ret));
+    int32_t ret = LnnPublishService(pkgName, info, false);
+    LnnOnPublishLNNResult(info->publishId, PublishResultTransfer(ret));
     return SOFTBUS_OK;
 }
 
@@ -125,17 +121,14 @@ int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t LnnIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    (void)infoTypeLen;
-    SubscribeInfo subInfo;
-    ConvertVoidToSubscribeInfo(info, &subInfo);
     SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    int32_t ret = LnnStartDiscDevice(pkgName, &subInfo, &callback, false);
-    LnnOnRefreshLNNResult(subInfo.subscribeId, DiscoveryResultTransfer(ret));
+    int32_t ret = LnnStartDiscDevice(pkgName, info, &callback, false);
+    LnnOnRefreshLNNResult(info->subscribeId, DiscoveryResultTransfer(ret));
     return SOFTBUS_OK;
 }
 

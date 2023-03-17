@@ -211,9 +211,9 @@ int32_t SoftBusServer::QosReport(int32_t channelId, int32_t chanType, int32_t ap
     return QosReportExecute(channelId, chanType, appType, quality);
 }
 
-int32_t SoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t SoftBusServer::PublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    return LnnIpcPublishLNN(pkgName, info, infoTypeLen);
+    return LnnIpcPublishLNN(pkgName, info);
 }
 
 int32_t SoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
@@ -221,9 +221,9 @@ int32_t SoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
     return LnnIpcStopPublishLNN(pkgName, publishId);
 }
 
-int32_t SoftBusServer::RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t SoftBusServer::RefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    return LnnIpcRefreshLNN(pkgName, info, infoTypeLen);
+    return LnnIpcRefreshLNN(pkgName, info);
 }
 
 int32_t SoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
