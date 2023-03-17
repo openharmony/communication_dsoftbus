@@ -17,7 +17,6 @@
 #define LNN_LANE_COMMON_H
 
 #include "lnn_map.h"
-#include "lnn_lane_link_proc.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_def.h"
 

@@ -19,7 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "lnn_lane_common.h"
-#include "lnn_lane_link_proc.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
 
