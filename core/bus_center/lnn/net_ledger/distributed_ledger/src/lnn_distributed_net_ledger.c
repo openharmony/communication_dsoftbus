@@ -869,7 +869,7 @@ NO_SANITIZE("cfi") int32_t LnnAddMetaInfo(NodeInfo *info)
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL) {
-        if (strcmp(oldInfo->networkid, info->networkid) != 0) {
+        if (strcmp(oldInfo->networkId, info->networkId) != 0) {
             LnnMapErase(&map->udidMap, udid);
         } else {
             MetaInfo temp = info->metaInfo;
