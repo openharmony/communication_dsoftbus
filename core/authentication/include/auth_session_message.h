@@ -29,7 +29,7 @@ extern "C" {
 #endif
 #endif
 
-char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth);
+char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *peerDiscoveryType);
 int32_t UnpackDeviceInfoMessage(const char *msg, int32_t linkType, SoftBusVersion version,
     NodeInfo *nodeInfo, bool isMetaAuth);
 
