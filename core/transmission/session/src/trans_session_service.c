@@ -75,8 +75,8 @@ NO_SANITIZE("cfi") void TransServerDeathCallback(const char *pkgName, int32_t pi
 NO_SANITIZE("cfi") int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid,
     int32_t pid)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) ||
-        !IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) ||
+        !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         return SOFTBUS_INVALID_PARAM;
     }
     char *anonyOut = NULL;
@@ -112,8 +112,8 @@ NO_SANITIZE("cfi") int32_t TransCreateSessionServer(const char *pkgName, const c
 
 NO_SANITIZE("cfi") int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) ||
-        !IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) ||
+        !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         return SOFTBUS_INVALID_PARAM;
     }
     return TransSessionServerDelItem(sessionName);
