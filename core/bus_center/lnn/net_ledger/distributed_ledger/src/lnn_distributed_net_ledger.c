@@ -868,19 +868,15 @@ NO_SANITIZE("cfi") int32_t LnnAddMetaInfo(NodeInfo *info)
         return SOFTBUS_LOCK_ERR;
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
-    if (oldInfo != NULL) {
-        if (strcmp(oldInfo->networkId, info->networkId) != 0) {
-            LnnMapErase(&map->udidMap, udid);
-        } else {
-            MetaInfo temp = info->metaInfo;
-            if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnAddMetaInfo copy fail!");
-                SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-                return SOFTBUS_MEM_ERR;
-            }
-            info->metaInfo.isMetaNode = true;
-            info->metaInfo.metaDiscType = info->metaInfo.metaDiscType | temp.metaDiscType;
+    if (oldInfo != NULL && strcmp(oldInfo->networkId, info->networkId) == 0) {
+        MetaInfo temp = info->metaInfo;
+        if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnAddMetaInfo copy fail!");
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_MEM_ERR;
         }
+        info->metaInfo.isMetaNode = true;
+        info->metaInfo.metaDiscType = info->metaInfo.metaDiscType | temp.metaDiscType;
     }
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
     LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
