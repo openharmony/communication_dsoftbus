@@ -824,13 +824,25 @@ NO_SANITIZE("cfi") int SoftBusRemoveScanListener(int listenerId)
 
 static bool CheckNeedReStartScan(void)
 {
+    bool isNeedReset = false;
+    bool isScanning = false;
     for (int listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
         if (g_scanListener[listenerId].isNeedReset) {
-            return true;
+            isNeedReset = true;
         }
         if (g_scanListener[listenerId].isScanning) {
+            isScanning = true;
+        }
+    }
+    if (isNeedReset && isScanning) {
+        if (BleOhosStatusToSoftBus(BleStopScan()) != SOFTBUS_BT_STATUS_SUCCESS) {
+            CLOGE("ble stop scan failed");
             return false;
         }
+        return true;
+    }
+    if (!isNeedReset && isScanning) {
+        return false;
     }
     return true;
 }
@@ -926,37 +938,6 @@ NO_SANITIZE("cfi") int SoftBusStopScan(int listenerId)
     if (CheckNeedStopScan(listenerId)) {
         status = BleOhosStatusToSoftBus(BleStopScan());
     }
-    if (status != SOFTBUS_BT_STATUS_SUCCESS) {
-        SoftBusMutexUnlock(&g_scanerLock);
-        return SOFTBUS_ERR;
-    }
-    g_scanListener[listenerId].isScanning = false;
-    if (g_scanListener[listenerId].listener != NULL &&
-        g_scanListener[listenerId].listener->OnScanStop != NULL) {
-        g_scanListener[listenerId].listener->OnScanStop(listenerId, status);
-    }
-    SoftBusMutexUnlock(&g_scanerLock);
-    if (status == SOFTBUS_BT_STATUS_SUCCESS) {
-        return SOFTBUS_OK;
-    }
-    return SOFTBUS_ERR;
-}
-
-NO_SANITIZE("cfi") int SoftBusStopScanForced(int listenerId)
-{
-    if (SoftBusMutexLock(&g_scanerLock) != 0) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    if (!CheckScanChannelInUsed(listenerId)) {
-        SoftBusMutexUnlock(&g_scanerLock);
-        return SOFTBUS_ERR;
-    }
-    if (!g_scanListener[listenerId].isScanning) {
-        SoftBusMutexUnlock(&g_scanerLock);
-        return SOFTBUS_OK;
-    }
-    int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
-    status = BleOhosStatusToSoftBus(BleStopScan());
     if (status != SOFTBUS_BT_STATUS_SUCCESS) {
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
