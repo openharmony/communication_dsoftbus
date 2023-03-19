@@ -24,7 +24,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-#define TIME_OUT 2
+#define TIME_OUT 20
 
 typedef struct {
     ListNode node;
