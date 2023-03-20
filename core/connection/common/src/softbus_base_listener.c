@@ -227,7 +227,7 @@ static int32_t CreateStaticModules(void)
     for (uint32_t i = 0; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         int32_t ret = CreateSpecifiedListenerModule((ListenerModule)i);
         if (ret != SOFTBUS_OK) {
-            CLOGE("create module %" PRIu32 " failed!ret=" PRId32, i, ret);
+            CLOGE("create module %" PRIu32 " failed!ret=%" PRId32, i, ret);
             return ret;
         }
     }
@@ -249,7 +249,7 @@ NO_SANITIZE("cfi") uint32_t CreateListenerModule(void)
         }
         ret = CreateSpecifiedListenerModule((ListenerModule)i);
         if (ret != SOFTBUS_OK) {
-            CLOGE("create module %" PRIu32 " failed!ret=" PRId32, i, ret);
+            CLOGE("create module %" PRIu32 " failed!ret=%" PRId32, i, ret);
             break;
         }
         moduleId = i;
