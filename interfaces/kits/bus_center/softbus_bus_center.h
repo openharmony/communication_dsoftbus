@@ -104,7 +104,7 @@ extern "C" {
  * @since 1.0
  * @version 1.0
  */
-#define EVENT_NODE_STATE_MASK 0x15
+#define EVENT_NODE_STATE_MASK 0xF
 
 /**
  * @brief The maximum length of meta node bypass info {@link MetaNodeConfigInfo.bypassInfo}.

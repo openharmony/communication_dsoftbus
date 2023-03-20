@@ -176,7 +176,7 @@
     #define EVENT_NODE_STATE_OFFLINE 0x02
     #define EVENT_NODE_STATE_INFO_CHANGED 0x04
     #define EVENT_NODE_STATUS_CHANGED 0x08
-    #define EVENT_NODE_STATE_MASK 0x15
+    #define EVENT_NODE_STATE_MASK 0xF
     
     // 节点信息
     typedef struct {
