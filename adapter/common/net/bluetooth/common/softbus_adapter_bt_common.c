@@ -82,8 +82,8 @@ static bool g_isRegCb = false;
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
     CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
-    int listenerId;
-    int st = ConvertBtState(transport, status);
+    int32_t listenerId;
+    int32_t st = ConvertBtState(transport, status);
     for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
         if (g_stateListener[listenerId].isUsed &&
             g_stateListener[listenerId].listener != NULL &&
@@ -102,9 +102,9 @@ static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState sta
 
     CLOGI("WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], state, reason);
-    int listenerId;
-    int aclState = ConvertAclState(state);
-    SoftBusBtAddr btAddr = ConvertBtAddr(bdAddr);
+    int32_t listenerId;
+    int32_t aclState = ConvertAclState(state);
+    const SoftBusBtAddr btAddr = ConvertBtAddr(bdAddr);
     for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
         if (g_stateListener[listenerId].isUsed &&
             g_stateListener[listenerId].listener != NULL &&

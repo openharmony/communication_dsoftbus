@@ -272,12 +272,12 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
-static void StubOnBtStateChanged(int listenerId, int state)
+static void StubOnBtStateChanged(int32_t listenerId, int32_t state)
 {
     g_btStateChangedCtx.Update(listenerId, state);
 }
 
-static void StubOnBtAclStateChanged(int listenerId, const SoftBusBtAddr *addr, int aclState)
+static void StubOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState)
 {
     g_btAclStateChangedCtx.Update(listenerId, addr, aclState);
 }

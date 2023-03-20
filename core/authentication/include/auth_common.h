@@ -105,7 +105,7 @@ typedef enum {
 typedef void(*EventHandler)(const void *obj);
 int32_t PostAuthEvent(EventType event, EventHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
-typedef int(*RemoveCompareFunc)(const void *obj, void *param);
+typedef int32_t(*RemoveCompareFunc)(const void *obj, void *param);
 int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param);
 
 /* Auth Lock */
