@@ -149,41 +149,31 @@ static bool StrStartWith(const char *string, const char *target)
     return true;
 }
 
-static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
+static int32_t GetAppInfoByJsonObject(cJSON *object, SoftBusAppInfo *appInfo)
 {
-    if (object == NULL) {
-        return NULL;
-    }
-
-    SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
-    if (appInfo == NULL) {
-        return NULL;
-    }
-    ListInit(&appInfo->node);
-    appInfo->type = UNKNOWN_VALUE;
-    appInfo->uid = UNKNOWN_VALUE;
-    appInfo->pid = UNKNOWN_VALUE;
-    appInfo->actions = 0;
-
     char mapKey[TEMP_STR_MAX_LEN];
-    char *actionStr = NULL;
-    if (!GetJsonObjectStringItem(object, APP_INFO_PKG_NAME_STR, appInfo->pkgName, PKG_NAME_SIZE_MAX)) {
+    int32_t ret = GetStringItemByJsonObject(object, APP_INFO_PKG_NAME_STR, appInfo->pkgName, PKG_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        if (ret == SOFTBUS_INVALID_PARAM) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pkgname is too long");
+            return SOFTBUS_INVALID_PARAM;
+        }
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "appInfo has no pkgname");
     }
     if (GetJsonObjectStringItem(object, APP_INFO_TYPE_STR, mapKey, TEMP_STR_MAX_LEN)) {
         appInfo->type = GetPeMapValue(mapKey);
         if (appInfo->type == UNKNOWN_VALUE) {
-            goto EXIT;
+            return SOFTBUS_ERR;
         }
     } else {
-        goto EXIT;
+        return SOFTBUS_ERR;
     }
     if (GetJsonObjectStringItem(object, APP_INFO_UID_STR, mapKey, TEMP_STR_MAX_LEN)) {
         appInfo->uid = atoi(mapKey);
     }
     if (GetJsonObjectStringItem(object, APP_INFO_ACTION_STR, mapKey, TEMP_STR_MAX_LEN)) {
         char *nextToken = NULL;
-        actionStr = strtok_s(mapKey, ACTIONS_SPLIT, &nextToken);
+        char *actionStr = strtok_s(mapKey, ACTIONS_SPLIT, &nextToken);
         while (actionStr != NULL) {
             if (strcmp(actionStr, "open") == 0) {
                 appInfo->actions |= ACTION_OPEN;
@@ -194,12 +184,33 @@ static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
         }
     }
     if (appInfo->actions == 0) {
-        goto EXIT;
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
+{
+    if (object == NULL) {
+        return NULL;
+    }
+    SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
+    if (appInfo == NULL) {
+        return NULL;
+    }
+    ListInit(&appInfo->node);
+    appInfo->type = UNKNOWN_VALUE;
+    appInfo->uid = UNKNOWN_VALUE;
+    appInfo->pid = UNKNOWN_VALUE;
+    appInfo->actions = 0;
+
+    int32_t ret = GetAppInfoByJsonObject(object, appInfo);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get appInfo from json failed[%d]", ret);
+        SoftBusFree(appInfo);
+        return NULL;
     }
     return appInfo;
-EXIT:
-    SoftBusFree(appInfo);
-    return NULL;
 }
 
 static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)

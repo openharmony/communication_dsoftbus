@@ -17,6 +17,31 @@
 
 #include <securec.h>
 #include "softbus_def.h"
+#include "softbus_error_code.h"
+
+int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, char *target,
+    uint32_t targetLen)
+{
+    if (json == NULL || string == NULL || target == NULL) {
+        return SOFTBUS_ERR;
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
+    if (item == NULL || !cJSON_IsString(item)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot find or invalid [%s]", string);
+        return SOFTBUS_ERR;
+    }
+    uint32_t length = strlen(item->valuestring);
+    if (length >= targetLen) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "the length [%d] is to long for [%s]", length, string);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = strcpy_s(target, targetLen, item->valuestring);
+    if (ret != 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy error %d\n", ret);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 NO_SANITIZE("cfi") bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
     uint32_t targetLen)
