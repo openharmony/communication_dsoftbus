@@ -85,8 +85,8 @@ typedef enum {
 } SoftBusBtConnectState;
 
 typedef struct {
-    void (*OnBtStateChanged)(int listenerId, int state);
-    void (*OnBtAclStateChanged)(int listenerId, const SoftBusBtAddr *addr, int aclState);
+    void (*OnBtStateChanged)(int32_t listenerId, int32_t state);
+    void (*OnBtAclStateChanged)(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState);
 } SoftBusBtStateListener;
 
 int SoftBusEnableBt(void);

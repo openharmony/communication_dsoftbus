@@ -1325,7 +1325,7 @@ static int BleQueueInit(void)
     return SOFTBUS_OK;
 }
 
-void BleConnOnBtStateChanged(int listenerId, int state)
+void BleConnOnBtStateChanged(int32_t listenerId, int32_t state)
 {
     CLOGI("[BleOnBtStateChanged] id:%d, state:%d", listenerId, state);
     SoftBusGattServerOnBtStateChanged(state);

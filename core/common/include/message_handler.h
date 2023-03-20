@@ -36,7 +36,7 @@ struct SoftBusLooper {
     void (*RemoveMessage)(const SoftBusLooper *looper, const SoftBusHandler *handler, int32_t what);
     // customFunc, when match, return 0
     void (*RemoveMessageCustom)(const SoftBusLooper *looper, const SoftBusHandler *handler,
-        int (*)(const SoftBusMessage*, void*), void *args);
+        int32_t (*)(const SoftBusMessage*, void*), void *args);
 };
 
 struct SoftBusHandler {

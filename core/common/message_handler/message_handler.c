@@ -323,7 +323,7 @@ static void LooperPostMessageDelay(const SoftBusLooper *looper, SoftBusMessage *
     PostMessageAtTime(looper, msg);
 }
 
-static int WhatRemoveFunc(const SoftBusMessage *msg, void *args)
+static int32_t WhatRemoveFunc(const SoftBusMessage *msg, void *args)
 {
     int32_t what = (int32_t)(intptr_t)args;
     if (msg->what == what) {
@@ -333,7 +333,7 @@ static int WhatRemoveFunc(const SoftBusMessage *msg, void *args)
 }
 
 NO_SANITIZE("cfi") static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
-    int (*customFunc)(const SoftBusMessage*, void*), void *args)
+    int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
     SoftBusLooperContext *context = looper->context;
     if (SoftBusMutexLock(&context->lock) != 0) {
