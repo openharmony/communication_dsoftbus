@@ -454,7 +454,7 @@ typedef struct {
 } MetaNodeConfigInfo;
 
 /**
- * @brief Defines a meta node information, see {@link GetAllMetaNodeInfo}.
+ * @brief Defines a meta node information, see {@link MetaNodeInfo}.
  *
  * @since 1.0
  * @version 1.0
@@ -490,7 +490,7 @@ typedef enum {
 } CustomType;
 
 /**
- * @brief Defines  parameter, see {@link GearMode}.
+ * @brief Defines  parameter, see {@link CustomData}.
  *
  * @since 1.0
  * @version 1.0
@@ -755,7 +755,7 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId);
  *
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param info Indicates the pointer to the service publishing information. For details, see {@link PublishInfo}.
- * @param cb Indicates the pointer to the service publishing callback {@link IPublishCallback}.
+ * @param cb Indicates the pointer to the service publishing callback {@link IPublishCb}.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
