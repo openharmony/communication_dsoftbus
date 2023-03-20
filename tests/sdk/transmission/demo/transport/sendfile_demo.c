@@ -61,7 +61,7 @@ static ISessionListener g_sessionlistenerA = {
 
 static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    printf("OnSendFileProcess sessionId = %d, bytesUpload = %u, total = %u\n",
+    printf("OnSendFileProcess sessionId = %d, bytesUpload = %llu, total = %llu\n",
         sessionId, bytesUpload, bytesTotal);
     return 0;
 }
@@ -161,7 +161,7 @@ static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
 
 static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    printf("File receive Process sessionId = %d, first file = %s, bytesUpload = %u, bytesTotal = %u\n",
+    printf("File receive Process sessionId = %d, first file = %s, bytesUpload = %llu, bytesTotal = %llu\n",
         sessionId, firstFile, bytesUpload, bytesTotal);
     return 0;
 }
