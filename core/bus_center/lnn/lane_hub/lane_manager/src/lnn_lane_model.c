@@ -23,7 +23,6 @@
 #include "lnn_lane_def.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -45,12 +44,12 @@ typedef struct {
 static Map g_profileMap;
 static SoftBusMutex g_laneModelMutex;
 
-static int32_t Lock(void)
+static int32_t ModelLock(void)
 {
     return SoftBusMutexLock(&g_laneModelMutex);
 }
 
-static void Unlock(void)
+static void ModelUnlock(void)
 {
     (void)SoftBusMutexUnlock(&g_laneModelMutex);
 }
@@ -91,12 +90,11 @@ static void AddLaneIdNode(uint32_t laneId, LaneModel *laneModel)
 
 static void DeleteLaneIdNode(uint32_t laneId, LaneModel *laneModel)
 {
-    LaneIdInfo *item = NULL;
-    LaneIdInfo *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &laneModel->laneIdList, LaneIdInfo, node) {
-        if (item->laneId == laneId) {
-            ListDelete(&item->node);
-            SoftBusFree(item);
+    LaneIdInfo *infoNode = NULL;
+    LIST_FOR_EACH_ENTRY(infoNode, &laneModel->laneIdList, LaneIdInfo, node) {
+        if (infoNode->laneId == laneId) {
+            ListDelete(&infoNode->node);
+            SoftBusFree(infoNode);
             laneModel->ref--;
             return;
         }
@@ -105,13 +103,13 @@ static void DeleteLaneIdNode(uint32_t laneId, LaneModel *laneModel)
 
 static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *laneProfile)
 {
-    if (Lock() != SOFTBUS_OK) {
+    if (ModelLock() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel != NULL) {
         AddLaneIdNode(laneId, laneModel);
-        Unlock();
+        ModelUnlock();
         return SOFTBUS_OK;
     }
 
@@ -119,12 +117,12 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
     (void)memset_s(&newModel, sizeof(LaneModel), 0, sizeof(LaneModel));
     if (memcpy_s(&newModel.profile, sizeof(LaneProfile), laneProfile, sizeof(LaneProfile)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addLaneModel memcpy fail");
-        Unlock();
+        ModelUnlock();
         return SOFTBUS_ERR;
     }
 
     if (LnnCreateData(&g_profileMap, profileId, &newModel, sizeof(LaneModel)) != SOFTBUS_OK) {
-        Unlock();
+        ModelUnlock();
         return SOFTBUS_ERR;
     }
     laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
@@ -132,7 +130,7 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
         ListInit(&(laneModel->laneIdList));
         AddLaneIdNode(laneId, laneModel);
     }
-    Unlock();
+    ModelUnlock();
     return SOFTBUS_OK;
 }
 
@@ -155,19 +153,19 @@ NO_SANITIZE("cfi") int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *pro
 
 NO_SANITIZE("cfi") void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
 {
-    if (Lock() != SOFTBUS_OK) {
+    if (ModelLock() != SOFTBUS_OK) {
         return;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel == NULL) {
-        Unlock();
+        ModelUnlock();
         return;
     }
     DeleteLaneIdNode(laneId, laneModel);
     if (laneModel->ref == 0) {
         LnnDeleteData(&g_profileMap, profileId);
     }
-    Unlock();
+    ModelUnlock();
 }
 
 NO_SANITIZE("cfi") int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
@@ -175,43 +173,43 @@ NO_SANITIZE("cfi") int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profi
     if (profile == NULL) {
         return SOFTBUS_ERR;
     }
-    if (Lock() != SOFTBUS_OK) {
+    if (ModelLock() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel == NULL) {
-        Unlock();
+        ModelUnlock();
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read laneModel fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(profile, sizeof(LaneProfile), &laneModel->profile, sizeof(LaneProfile)) != EOK) {
-        Unlock();
+        ModelUnlock();
         return SOFTBUS_ERR;
     }
-    Unlock();
+    ModelUnlock();
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listSize)
 {
-    if (Lock() != SOFTBUS_OK) {
+    if (ModelLock() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel == NULL) {
-        Unlock();
+        ModelUnlock();
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read laneModel fail");
         return SOFTBUS_ERR;
     }
     if (laneModel->ref == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ref count is zero");
-        Unlock();
+        ModelUnlock();
         return SOFTBUS_ERR;
     }
     *laneIdList = (uint32_t *)SoftBusCalloc(sizeof(uint32_t) * laneModel->ref);
     if (*laneIdList == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneIdList malloc fail");
-        Unlock();
+        ModelUnlock();
         return SOFTBUS_ERR;
     }
     uint32_t cnt = 0;
@@ -221,18 +219,18 @@ NO_SANITIZE("cfi") int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdLi
         cnt++;
     }
     *listSize = cnt;
-    Unlock();
+    ModelUnlock();
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") uint32_t GetActiveProfileNum(void)
 {
     uint32_t num = 0;
-    if (Lock() != SOFTBUS_OK) {
+    if (ModelLock() != SOFTBUS_OK) {
         return num;
     }
     num = g_profileMap.nodeSize;
-    Unlock();
+    ModelUnlock();
     return num;
 }
 
