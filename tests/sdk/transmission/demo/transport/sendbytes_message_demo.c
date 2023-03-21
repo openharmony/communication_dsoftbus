@@ -91,7 +91,6 @@ int main(void)
      /* 3. Device A calls SendBytes() to send byte data or calls SendMessage() to send messages to device B. */
     const char *data = "testdata";
     uint32_t len = strlen(data);
-    uint32_t maxLen = SOFTBUS_INT_MAX_BYTES_LENGTH;
     ret = SendBytes(sessionId, data, len);
     printf("send bytes result = %d\n", ret);
     

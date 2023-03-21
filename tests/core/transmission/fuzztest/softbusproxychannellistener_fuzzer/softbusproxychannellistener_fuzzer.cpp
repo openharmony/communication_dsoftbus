@@ -27,7 +27,7 @@ namespace OHOS {
 
 void TransOpenNetWorkingChannelSessionNameTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size >= SESSION_NAME_SIZE_MAX) || (size < 0)) {
+    if ((data == nullptr) || (size >= SESSION_NAME_SIZE_MAX)) {
         return;
     }
 
