@@ -777,11 +777,13 @@ HWTEST_F(TransProxyChannelTest, TransProxyUnPackHandshakeErrMsgTest001, TestSize
 {
     const char *msg = "";
     int32_t errCode = 1;
-    int32_t ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, sizeof(msg));
+    int32_t ret = TransProxyUnPackHandshakeErrMsg(msg, &errCode, strlen(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
     const char *err = TransProxyPackHandshakeErrMsg(SOFTBUS_ERR);
-    ret = TransProxyUnPackHandshakeErrMsg(err, &errCode, sizeof(msg));
+    ASSERT_TRUE(NULL != err);
+
+    ret = TransProxyUnPackHandshakeErrMsg(err, &errCode, strlen(err));
     EXPECT_TRUE(true);
 }
 
