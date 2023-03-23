@@ -131,6 +131,11 @@ if (defined(ohos_lite)) {
     include_dirs += conn_common_inc + trans_common_inc
   }
   ohos_shared_library("softbus_utils") {
+    sanitize = {
+      cfi = true
+      cfi_cross_so = true
+      debug = true
+    }
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/bus_center/utils/include",

@@ -104,6 +104,11 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
   ohos_shared_library("FillpSo.open") {
+    sanitize = {
+      cfi = true
+      cfi_cross_so = true
+      debug = true
+    }
     cflags = fillp_cflags
     cflags += [
       "-Wall",
