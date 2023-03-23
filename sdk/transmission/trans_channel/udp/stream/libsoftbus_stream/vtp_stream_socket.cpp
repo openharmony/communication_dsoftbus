@@ -69,7 +69,9 @@ void PrintOptionInfo(int type, const StreamAttr &value)
 std::shared_ptr<VtpInstance> VtpStreamSocket::vtpInstance_ = VtpInstance::GetVtpInstance();
 
 std::map<int, std::mutex &> VtpStreamSocket::g_streamSocketLockMap;
+std::mutex VtpStreamSocket::g_streamSocketLockMapLock_;
 std::map<int, std::shared_ptr<VtpStreamSocket>> VtpStreamSocket::g_streamSocketMap;
+std::mutex VtpStreamSocket::g_streamSocketMapLock_;
 
 static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo,
     const Communication::SoftBus::StreamFrameInfo* streamFrameInfo)
@@ -84,6 +86,7 @@ static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo,
 
 void VtpStreamSocket::AddStreamSocketLock(int fd, std::mutex &streamsocketlock)
 {
+    std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (!g_streamSocketLockMap.empty() && g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamsocketlock for fd = %d already exists", fd);
         return;
@@ -94,6 +97,7 @@ void VtpStreamSocket::AddStreamSocketLock(int fd, std::mutex &streamsocketlock)
 
 void VtpStreamSocket::AddStreamSocketListener(int fd, std::shared_ptr<VtpStreamSocket> streamreceiver)
 {
+    std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     if (!g_streamSocketMap.empty() && g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamreceiver for fd = %d already exists", fd);
         return;
@@ -104,6 +108,7 @@ void VtpStreamSocket::AddStreamSocketListener(int fd, std::shared_ptr<VtpStreamS
 
 void VtpStreamSocket::RemoveStreamSocketLock(int fd)
 {
+    std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
         g_streamSocketLockMap.erase(fd);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Remove streamsocketlock for fd = %d success", fd);
@@ -116,6 +121,7 @@ void VtpStreamSocket::RemoveStreamSocketLock(int fd)
 
 void VtpStreamSocket::RemoveStreamSocketListener(int fd)
 {
+    std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     if (g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
         g_streamSocketMap.erase(fd);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Remove streamreceiver for fd = %d success", fd);
@@ -198,6 +204,7 @@ int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
         return -1;
     }
 
+    std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     auto itListener = g_streamSocketMap.find(fd);
     if (itListener != g_streamSocketMap.end()) {
         if (itListener->second->streamReceiver_ != nullptr) {
@@ -221,6 +228,7 @@ int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RipplePolicy info memcpy fail");
         return -1;
     }
+    std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     auto itListener = g_streamSocketMap.find(fd);
     if (itListener != g_streamSocketMap.end()) {
         if (itListener->second->streamReceiver_ != nullptr) {
@@ -292,8 +300,10 @@ NO_SANITIZE("cfi") int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbk
         metricList.info.wifiChannelInfo = {};
         metricList.info.frameStatusInfo = {};
 
+        std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
         auto itLock = g_streamSocketLockMap.find(fd);
         if (itLock != g_streamSocketLockMap.end()) {
+            std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
             auto itListener = g_streamSocketMap.find(fd);
             if (itListener != g_streamSocketMap.end()) {
                 std::thread([itListener, eventId, tvCount, metricList, &itLock]() {
