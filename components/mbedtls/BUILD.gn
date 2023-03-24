@@ -93,11 +93,6 @@ config("mbedtls_config") {
 }
 
 ohos_shared_library("mbedtls_shared") {
-  sanitize = {
-    cfi = true
-    cfi_cross_so = true
-    debug = true
-  }
   sources = mbedtls_sources
   output_name = "mbedtls"
   public_configs = [ ":mbedtls_config" ]
