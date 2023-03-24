@@ -69,6 +69,11 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 
   ohos_shared_library("nstackx_congestion.open") {
+    sanitize = {
+      cfi = true
+      cfi_cross_so = true
+      debug = true
+    }
     cflags = [
       "-Wall",
       "-DMBEDTLS_INCLUDED",
