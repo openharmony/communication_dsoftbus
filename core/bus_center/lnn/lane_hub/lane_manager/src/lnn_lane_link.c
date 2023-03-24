@@ -121,7 +121,9 @@ static int32_t AddConnRequestItem(uint32_t reqId, int32_t requestId,
     item->requestId = requestId;
     item->pid = pid;
     item->authId = SOFTBUS_ERR;
-    item->cb = *callback;
+    if (callback != NULL) {
+        item->cb = *callback;
+    }
     item->linkReqId = reqId;
 
     if (SoftBusMutexLock(&g_pendingList->lock) != 0) {
