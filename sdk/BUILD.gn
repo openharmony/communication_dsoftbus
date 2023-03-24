@@ -86,13 +86,6 @@ target(build_type, "softbus_client") {
     }
     ldflags = [ "-lstdc++" ]
   } else {
-    if (build_type == "ohos_shared_library") {
-      sanitize = {
-        cfi = true
-        cfi_cross_so = true
-        debug = true
-      }
-    }
     version_script = "libsoftbus_client_map"
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]
