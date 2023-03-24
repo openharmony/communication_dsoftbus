@@ -26,7 +26,7 @@
 #include "softbus_utils.h"
 #include "trans_udp_negotiation.h"
 
-#define MAX_WAIT_CONNECT_TIME 5
+#define MAX_WAIT_CONNECT_TIME 15
 
 static SoftBusList *g_udpChannelMgr = NULL;
 
