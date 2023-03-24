@@ -167,7 +167,7 @@ static ChannelType TransGetChannelType(const SessionParam *param, const LaneConn
     if (connInfo->type == LANE_BR || connInfo->type == LANE_BLE) {
         return CHANNEL_TYPE_PROXY;
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO ||
-        transType == LANE_T_RAW_STREAM) {
+        transType == LANE_T_RAW_STREAM || transType == LANE_T_COMMON_VOICE) {
         return CHANNEL_TYPE_UDP;
     } else if ((transType == LANE_T_MSG) && (connInfo->type != LANE_P2P)) {
         return CHANNEL_TYPE_PROXY;
