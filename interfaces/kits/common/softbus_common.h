@@ -349,7 +349,7 @@ typedef struct {
     DiscoverMode mode;
     /** Service publishing medium. For details, see {@link ExchangeMedium}. */
     ExchangeMedium medium;
-    /** Service publishing frequency. For details, see {@link ExchangeFre}. */
+    /** Service publishing frequency. For details, see {@link ExchangeFreq}. */
     ExchangeFreq freq;
     /** Service publishing capabilities. For details, see {@link g_capabilityMap}. */
     const char *capability;
@@ -372,7 +372,7 @@ typedef struct {
     DiscoverMode mode;
     /** Service subscription medium. For details, see {@link ExchangeMedium}. */
     ExchangeMedium medium;
-    /** Service subscription frequency. For details, see {@link ExchangeFre}. */
+    /** Service subscription frequency. For details, see {@link ExchangeFreq}. */
     ExchangeFreq freq;
     /** only find the device with the same account */
     bool isSameAccount;
@@ -458,7 +458,7 @@ typedef struct {
     bool isOnline;
     /** Number of available connections */
     unsigned int addrNum;
-    /** Connection information. For details, see {@link ConnectAddr}. */
+    /** Connection information. For details, see {@link ConnectionAddr}. */
     ConnectionAddr addr[CONNECTION_ADDR_MAX];
     /** Number of capabilities */
     unsigned int capabilityBitmapNum;
@@ -468,12 +468,12 @@ typedef struct {
     unsigned int capabilityBitmap[DISC_MAX_CAPABILITY_NUM];
     /** Custom data. Its length is specified by {@link DISC_MAX_CUST_DATA_LEN}. */
     char custData[DISC_MAX_CUST_DATA_LEN];
-    /** The distance of dicovered device, in centimeters(cm)*/
+    /** The distance of discovered device, in centimeters(cm)*/
     int32_t range;
 } DeviceInfo;
 
 /**
- * @brief Defines device addtional info used by inner
+ * @brief Defines device additional info used by inner
  *
  */
 typedef struct {
