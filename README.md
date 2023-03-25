@@ -174,7 +174,8 @@ The main code directory structure of DSoftBus is as follows:
     #define EVENT_NODE_STATE_ONLINE 0x1
     #define EVENT_NODE_STATE_OFFLINE 0x02
     #define EVENT_NODE_STATE_INFO_CHANGED 0x04
-    #define EVENT_NODE_STATE_MASK 0x07
+    #define EVENT_NODE_STATUS_CHANGED 0x08
+    #define EVENT_NODE_STATE_MASK 0xF
     
     // Device information
     typedef struct {
@@ -189,6 +190,7 @@ The main code directory structure of DSoftBus is as follows:
         void (*onNodeOnline)(NodeBasicInfo *info);   // Called when the device gets online.
         void (*onNodeOffline)(NodeBasicInfo *info);  // Called when the device gets offline.
         void (*onNodeBasicInfoChanged)(NodeBasicInfoType type, NodeBasicInfo *info); // Called when the device information changes.
+        void (*onNodeStatusChanged)(NodeStatusType type, NodeStatus *status); // Called when the device status changed.
     } INodeStateCb;
     
     // Register the callback for device state events.
