@@ -123,6 +123,16 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalNumInfo(key, info);
 }
+
+NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
+{
+    return GetNetLedgerInterface()->LnnGetNodeInfoById(id, type);
+}
+
+bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetNetLedgerInterface()->LnnHasDiscoveryType(info, type);
+}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)

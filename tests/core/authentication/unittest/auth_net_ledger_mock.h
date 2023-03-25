@@ -25,6 +25,7 @@
 #include "cJSON.h"
 #include "lnn_hichain_mock.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info.h"
 #include "softbus_conn_manager.h"
 #include "softbus_json_utils.h"
@@ -50,6 +51,8 @@ public:
     virtual uint64_t LnnGetSupportedProtocols(const NodeInfo *info) = 0;
     virtual int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
+    virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -70,6 +73,8 @@ public:
     MOCK_METHOD1(LnnGetSupportedProtocols, uint64_t(const NodeInfo *));
     MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t(const char *, uint16_t *));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));
+    MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
+    MOCK_METHOD2(LnnHasDiscoveryType, bool(const NodeInfo *, DiscoveryType));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;
