@@ -138,7 +138,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
 
 int RemoveSessionServer(const char *pkgName, const char *sessionName)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -314,7 +314,7 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
 
 int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num, const char *mixAddr)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -541,11 +541,26 @@ int GetSessionSide(int sessionId)
     return ClientGetSessionSide(sessionId);
 }
 
+static bool IsValidFileReceivePath(const char *rootDir)
+{
+    if (!IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive path[%s] invalid.", rootDir);
+        return false;
+    }
+    char *absPath = realpath(rootDir, NULL);
+    if (absPath == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive path[%s] not exist,[%d].", rootDir, errno);
+        return false;
+    }
+    SoftBusFree(absPath);
+    return true;
+}
+
 int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX) || (recvListener == NULL)) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
+        !IsValidFileReceivePath(rootDir) || (recvListener == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file receive listener invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -558,7 +573,7 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
 
 int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         sendListener == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file send listener invalid param");
         return SOFTBUS_INVALID_PARAM;
