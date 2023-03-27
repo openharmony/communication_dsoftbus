@@ -231,7 +231,7 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
 
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
-    if (networkId == NULL || cb == NULL || pkgName == NULL) {
+    if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -240,7 +240,7 @@ int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb
 
 int32_t LeaveMetaNode(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb)
 {
-    if (networkId == NULL || cb == NULL || pkgName == NULL) {
+    if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }

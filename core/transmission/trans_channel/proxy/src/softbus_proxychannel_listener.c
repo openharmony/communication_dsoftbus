@@ -243,7 +243,7 @@ int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetw
     ConnectOption connOpt;
     int32_t channelId = INVALID_CHANNEL_ID;
 
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         return channelId;
     }
