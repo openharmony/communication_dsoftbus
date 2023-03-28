@@ -352,7 +352,8 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]begin join request", connFsm->id);
     connInfo->requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
-    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback()) != SOFTBUS_OK) {
+    const AuthVerifyCallback *verifyCb = LnnGetVerifyCallback();
+    if (AuthStartVerify(&authConn, connInfo->requestId, verifyCb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth verify device failed", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
         rc = SOFTBUS_ERR;
@@ -382,8 +383,9 @@ NO_SANITIZE("cfi") int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, Cus
             return SOFTBUS_ERR;
         }
         metaJoinNode->requestId = AuthGenRequestId();
+        const AuthVerifyCallback *metaVerifyCb = LnnGetMetaVerifyCallback();
         if (AuthMetaStartVerify(connId, customData->data, DATA_SIZE,
-            metaJoinNode->requestId, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
+            metaJoinNode->requestId, metaVerifyCb) != SOFTBUS_OK) {
                 rc = SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,

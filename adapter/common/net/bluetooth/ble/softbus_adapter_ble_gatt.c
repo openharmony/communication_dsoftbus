@@ -55,7 +55,7 @@ static SoftBusMutex g_scanerLock = {0};
 
 static volatile bool g_isRegCb = false;
 
-static void OnBtStateChanged(int listenerId, int state)
+static void OnBtStateChanged(int32_t listenerId, int32_t state)
 {
     (void)listenerId;
     if (state != SOFTBUS_BT_STATE_TURN_OFF) {
