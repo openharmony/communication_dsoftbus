@@ -96,7 +96,7 @@ extern "C" {
  * @since 1.0
  * @version 1.0
  */
-#define EVENT_NODE_STATUS_CHANGED 0x05
+#define EVENT_NODE_STATUS_CHANGED 0x08
 
 /**
  * @brief Indicates mask bits for {@link INodeStateCb.events}.
@@ -104,7 +104,7 @@ extern "C" {
  * @since 1.0
  * @version 1.0
  */
-#define EVENT_NODE_STATE_MASK 0x07
+#define EVENT_NODE_STATE_MASK 0xF
 
 /**
  * @brief The maximum length of meta node bypass info {@link MetaNodeConfigInfo.bypassInfo}.
@@ -121,6 +121,14 @@ extern "C" {
  * @version 1.0
  */
 #define CALLER_ID_MAX_LEN 128
+
+/**
+ * @brief Indicates the maximum length of the custom user data.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define USER_DATA_MAX_LEN 256
 
 /**
  * @brief The maximum of meta node {@link MetaNodeConfigInfo.bypassInfo}.
@@ -401,7 +409,7 @@ typedef struct {
      * @brief Called when the running status of a device changes.
      *
      * @param type Indicates the device type. For details, see {@link NodeStatusType}.
-     * @param info Indicates the pointer to the new status of the device.
+     * @param status Indicates the pointer to the new status of the device.
      * For details, see {@link NodeStatus}.
      *
      * @since 1.0
@@ -446,7 +454,7 @@ typedef struct {
 } MetaNodeConfigInfo;
 
 /**
- * @brief Defines a meta node infomation, see {@link GetAllMetaNodeInfo}.
+ * @brief Defines a meta node information, see {@link MetaNodeInfo}.
  *
  * @since 1.0
  * @version 1.0
@@ -482,14 +490,14 @@ typedef enum {
 } CustomType;
 
 /**
- * @brief Defines  parameter, see {@link GearMode}.
+ * @brief Defines  parameter, see {@link CustomData}.
  *
  * @since 1.0
  * @version 1.0
  */
 typedef struct {
-    CustomType type;        /**< user type */
-    uint8_t data[256];      /**< user data */
+    CustomType type;                  /**< user type */
+    uint8_t data[USER_DATA_MAX_LEN];  /**< user data */
 } CustomData;
 
 /**
@@ -599,8 +607,10 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 
 /**
- * @brief Removes the current device from the LNN.
+ * @brief Removes the current device from the MetaNode.
  *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
  * @param networkId Indicates the pointer to the network ID that is returned
  * after the device is added to the LNN via {@link JoinMetaNode}.
  * @param cb Indicates the callback for the result. If you set this parameter to <b>NULL</b>,
@@ -745,7 +755,7 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId);
  *
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param info Indicates the pointer to the service publishing information. For details, see {@link PublishInfo}.
- * @param cb Indicates the pointer to the service publishing callback {@link IPublishCallback}.
+ * @param cb Indicates the pointer to the service publishing callback {@link IPublishCb}.
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
@@ -797,7 +807,7 @@ int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
  * For the same caller, the value of this parameter must be the same for all functions.
- * @param info Meta node configuration infomation, see {@link MetaNodeConfigInfo}.
+ * @param info Meta node configuration information, see {@link MetaNodeConfigInfo}.
  * @param metaNodeId Save meta node ID when it is activated successfully, its buffer length must be not
  * less then NETWORK_ID_BUF_LEN
  *
