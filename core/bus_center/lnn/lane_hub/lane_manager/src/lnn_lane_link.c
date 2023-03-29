@@ -197,7 +197,7 @@ static void NotifyLinkSucc(int32_t requestId, LaneLinkInfo *linkInfo)
     cb.OnLaneLinkSuccess(linkReqId, linkInfo);
 }
 
-static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+NO_SANITIZE("cfi") static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -481,7 +481,7 @@ static void FillWlanLinkInfo(
     wlan->connInfo.port = port;
 }
 
-static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+NO_SANITIZE("cfi") static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
     int32_t port = 0;

@@ -48,7 +48,7 @@ NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionClosed(int32_t channelId)
     return g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT);
 }
 
-int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode)
+NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode)
 {
     return g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_TCP_DIRECT, errCode);
 }
