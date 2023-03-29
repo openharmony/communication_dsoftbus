@@ -246,7 +246,7 @@ static int32_t GetP2pMacAndPid(int32_t requestId, char *mac, uint32_t size, int3
 static void OnP2pConnected(int32_t requestId, const char *myIp, const char *peerIp)
 {
     LLOGI("requestId %d", requestId);
-    int errCode = SOFTBUS_OK;
+    __attribute__((unused))int errCode = SOFTBUS_OK;
     ConnRequestItem *item = GetConnRequestItem(requestId);
     if (item == NULL) {
         LLOGE("get connrequest item empty");
