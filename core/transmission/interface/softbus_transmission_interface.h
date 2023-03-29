@@ -35,7 +35,7 @@ typedef struct {
     * @return <b>SOFTBUS_ERR</b> the processing failed after the callback.
     * @return <b>SOFTBUS_OK</b> the processing success after the callback.
     */
-    int (*onChannelOpened)(int32_t channelId, const char *uuid, unsigned char isServer); // compatible nearby
+    int (*onChannelOpened)(int32_t channelId, const char *uuid, unsigned char isServer);
     /**
     * @brief callback after open channel failed.
     * @see {@link TransRegisterNetworkingChannelListener}
