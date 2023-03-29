@@ -99,7 +99,8 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     return;
 }
 
-static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData, FileListener *listener)
+NO_SANITIZE("cfi") static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData,
+    FileListener *listener)
 {
     if (msgData == NULL || listener == NULL) {
         return;
