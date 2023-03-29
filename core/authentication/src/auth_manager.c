@@ -790,7 +790,6 @@ static void HandleCloseAckData(
     if (head->seq != 0) {
         ret = AuthSessionProcessCloseAck(head->seq, data, head->len);
     } else {
-        /* To be compatible with nearby. */
         ret = AuthSessionProcessCloseAckByConnId(connId, !fromServer, data, head->len);
     }
     if (ret != SOFTBUS_OK) {
