@@ -92,7 +92,7 @@ public:
             &retStreamData, &extStreamData, &tmpf);
     }
 
-    void OnStreamStatus(int status) override
+    NO_SANITIZE("cfi") void OnStreamStatus(int status) override
     {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnStreamStatus(%d) in.", status);
 
