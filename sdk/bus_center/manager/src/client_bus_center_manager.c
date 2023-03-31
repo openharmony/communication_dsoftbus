@@ -792,7 +792,7 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
     return ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
-int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
@@ -860,7 +860,7 @@ int32_t MetaNodeOnJoinResult(void *addr, const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
 {
     LeaveLNNCbListItem *item = NULL;
 
