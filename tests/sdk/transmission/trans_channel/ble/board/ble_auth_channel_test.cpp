@@ -315,7 +315,7 @@ HWTEST_F(BleAuthChannelTest, ProcessActive001, TestSize.Level0)
         Wait();
         EXPECT_TRUE(g_testCount == TEST_DATARECEIVE);
         TestCloseSeeesion();
-        sleep(5);
+        sleep(3);
         EXPECT_TRUE(g_testCount == TEST_DATARECEIVE);
     }
     ret = TestRemoveSessionServer();

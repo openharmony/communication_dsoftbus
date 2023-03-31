@@ -265,7 +265,7 @@ HWTEST_F(BleAuthChannelPhoneTest, ProcessPhoneActive001, TestSize.Level0)
         EXPECT_TRUE(ret == 0);
         sleep(3);
         TestCloseSeeesion();
-        sleep(5);
+        sleep(3);
     }
     ret = TestRemoveSessionServer();
     EXPECT_TRUE(ret == 0);

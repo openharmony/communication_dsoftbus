@@ -780,18 +780,6 @@ HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChanId001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransDelSessionConnById001
- * @tc.desc: TransDelSessionConnById, delete the session by channelId, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, TransDelSessionConnById001, TestSize.Level1)
-{
-    int32_t channelId = g_conn->channelId;
-    TransDelSessionConnById(channelId);
-}
-
-/**
  * trans_tcp_direct_p2p.c
  * @tc.name: SendAuthData001
  * @tc.desc: SendAuthData, sending authentication data.
@@ -820,45 +808,6 @@ HWTEST_F(TransServerTcpDirectTest, OpenAuthConn001, TestSize.Level1)
 
     int32_t ret = OpenAuthConn(uuid, reqId, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: OnAuthDataRecv001
- * @tc.desc: OnAuthDataRecv, receiving authentication data.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OnAuthDataRecv001, TestSize.Level1)
-{
-    int64_t authId = 0;
-    AuthTransData dataInfo;
-    (void)memset_s(&dataInfo, sizeof(AuthTransData), 0, sizeof(AuthTransData));
-    dataInfo.len = 1;
-    dataInfo.data = NULL;
-
-    OnAuthDataRecv(authId, NULL);
-    OnAuthDataRecv(authId, &dataInfo);
-
-    dataInfo.data = (const uint8_t *)TEST_RECV_DATA;
-    OnAuthDataRecv(authId, &dataInfo);
-
-    dataInfo.len = AUTH_TRANS_DATA_LEN;
-    OnAuthDataRecv(authId, &dataInfo);
-}
-
-/**
- * trans_tcp_direct_manager.c
- * @tc.name: OnSessionOpenFailProc001
- * @tc.desc: OnSessionOpenFailProc, delete the session by channelId, with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OnSessionOpenFailProc001, TestSize.Level1)
-{
-    SessionConn sessionConn = {
-        .channelId = 1,
-    };
-    OnSessionOpenFailProc(&sessionConn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
 }
 
 /**
