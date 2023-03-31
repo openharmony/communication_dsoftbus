@@ -281,7 +281,7 @@ static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
     return SOFTBUS_OK;
 }
 
-int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
+NO_SANITIZE("cfi") int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     UdpChannel channel;
     bool isFind = true;
