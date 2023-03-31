@@ -289,7 +289,6 @@ HWTEST_F(AuthSessionTest, testPassiveOpenAuthSession001, TestSize.Level1)
 {
     if (g_testWay != PASSIVE_OPENAUTHSESSION_WAY) {
         printf("skip testPassiveOpenAuthSession001 test.");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
         return;
     }
     printf("test begin testPassiveOpenAuthSession001 \r\n");
@@ -320,7 +319,6 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
         printf("skip testActiveOpenAuthSession001 test.");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
         return;
     }
     printf("test begin testActiveOpenAuthSession001 \r\n");
@@ -363,7 +361,6 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
         SoftBusSleepMs(CLOSE_DELAY_TIME);
     }
     SoftBusFree(testData);
-    EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
 };
 
 /*
@@ -376,7 +373,6 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
         printf("skip testActiveOpenAuthSession002 test.");
-        EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
         return;
     }
     printf("test begin testActiveOpenAuthSession002 \r\n");
@@ -403,6 +399,5 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
     TestCloseSessionTwo();
     SoftBusSleepMs(CLOSE_DELAY_TIME);
     SoftBusFree(testData);
-    EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
 };
 } // namespace OHOS
