@@ -176,7 +176,7 @@ static LnnEventHandlerItem *CreateEventHandlerItem(LnnEventHandler handler)
     return item;
 }
 
-static void NotifyEvent(const LnnEventBasicInfo *info)
+NO_SANITIZE("cfi") static void NotifyEvent(const LnnEventBasicInfo *info)
 {
     LnnEventHandlerItem *item = NULL;
 
@@ -303,7 +303,7 @@ NO_SANITIZE("cfi") void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifyBtStateChangeEvent(void *state)
+NO_SANITIZE("cfi") void LnnNotifyBtStateChangeEvent(void *state)
 {
     SoftBusBtState *btState = (SoftBusBtState *)state;
     if (*btState < SOFTBUS_BLE_TURN_ON || *btState >= SOFTBUS_BT_UNKNOWN) {
