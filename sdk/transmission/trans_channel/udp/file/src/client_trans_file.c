@@ -30,7 +30,7 @@
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
-static void NotifySendResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData, FileListener *listener)
+NO_SANITIZE("cfi") static void NotifySendResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData, FileListener *listener)
 {
     if (msgData == NULL || listener == NULL) {
         return;
@@ -59,7 +59,7 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType, const DFil
     }
 }
 
-static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
+NO_SANITIZE("cfi") static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send dfileId=%d type=%d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||

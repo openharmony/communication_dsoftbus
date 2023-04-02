@@ -445,7 +445,7 @@ static int32_t BleClientRegisterOnce(int32_t clientId, SoftBusBtUuid *serverUuid
     return SOFTBUS_OK;
 }
 
-static void SearchedMsgHandler(int32_t clientId, int status)
+NO_SANITIZE("cfi") static void SearchedMsgHandler(int32_t clientId, int status)
 {
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
         BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);
@@ -535,7 +535,7 @@ static int32_t NotificatedTwiceHandler(BleGattcInfo *infoNode)
     return SOFTBUS_OK;
 }
 
-static void NotificatedMsgHandler(int32_t clientId, int status)
+NO_SANITIZE("cfi") static void NotificatedMsgHandler(int32_t clientId, int status)
 {
     g_bleClientAsyncHandler.looper->RemoveMessageCustom(g_bleClientAsyncHandler.looper, &g_bleClientAsyncHandler,
         BleCilentRemoveMessageFunc, (void *)(uintptr_t)clientId);

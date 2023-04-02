@@ -79,7 +79,7 @@ static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
 static StateListener g_stateListener[STATE_LISTENER_MAX_NUM];
 static bool g_isRegCb = false;
 
-static void WrapperStateChangeCallback(const int transport, const int status)
+NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, const int status)
 {
     CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
     int32_t listenerId;
