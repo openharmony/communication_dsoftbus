@@ -1013,7 +1013,7 @@ static int32_t UnpackFileCrcCheckSum(const FileRecipientInfo *info, FileFrame *f
     return SOFTBUS_OK;
 }
 
-static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
+NO_SANITIZE("cfi") static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
     const char *destFile, uint64_t fileSize)
 {
     FileFrame fileFrame = {0};
@@ -1184,7 +1184,7 @@ static bool IsValidFileString(const char *str[], uint32_t fileNum, uint32_t maxL
     return true;
 }
 
-static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *sFileList[],
+NO_SANITIZE("cfi") static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
     int32_t ret;
@@ -1279,7 +1279,7 @@ static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
     SoftBusFree(sendInfo);
 }
 
-int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+NO_SANITIZE("cfi") int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy send file trans start");
     if ((fileCnt == 0) || (fileCnt > MAX_SEND_FILE_NUM)) {
