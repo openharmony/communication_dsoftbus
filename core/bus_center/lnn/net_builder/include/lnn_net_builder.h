@@ -49,7 +49,8 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType);
-int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType, const char *newNetworkId);
+int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType oldAddrType,
+    const char *newNetworkId, ConnectionAddrType newAddrType);
 int32_t LnnRequestCleanConnFsm(uint16_t connFsmId);
 int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight);

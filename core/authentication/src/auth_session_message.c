@@ -24,6 +24,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
+#include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
@@ -48,6 +49,7 @@
 #define DEVICE_TYPE "DEVICE_TYPE"
 #define DEVICE_UDID "DEVICE_UDID"
 #define DEVICE_UUID "DEVICE_UUID"
+#define DISCOVERY_TYPE "DISCOVERY_TYPE"
 #define NETWORK_ID "NETWORK_ID"
 #define NODE_ADDR "NODE_ADDR"
 #define VERSION_TYPE "VERSION_TYPE"
@@ -76,6 +78,12 @@
 /* VerifyDevice */
 #define CODE_VERIFY_DEVICE 2
 #define DEVICE_ID "DEVICE_ID"
+
+DiscoveryTypeToId g_typeToIdMap[] = {
+    {PEER_DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_WIFI},
+    {PEER_DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BLE},
+    {PEER_DISCOVERY_TYPE_BR, DISCOVERY_TYPE_BR},
+};
 
 static char *PackDeviceIdMessage(int32_t linkType, bool isServer, int32_t softbusVersion)
 {
@@ -158,6 +166,64 @@ static int32_t UnpackDeviceIdMessage(const char *msg, AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
+static int32_t ConvertDiscoveryTypeToString(uint32_t typeId, char *type)
+{
+    uint32_t count = sizeof(g_typeToIdMap) / sizeof(DiscoveryTypeToId);
+    uint32_t i;
+    for (i = 0; i < count; i++) {
+        if (((1 << g_typeToIdMap[i].id) & typeId) != 0) {
+            if (LnnSetSupportDiscoveryType(type, g_typeToIdMap[i].type) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnSetSupportDiscoveryType fail");
+                return SOFTBUS_ERR;
+            }
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Set DiscoveryType=%s", type);
+    return SOFTBUS_OK;
+}
+
+static int32_t ConvertDiscoveryTypeToId(uint32_t *typeId, const char *type)
+{
+    if (type == NULL || type[0] == '\0') {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote not support");
+        return SOFTBUS_ERR;
+    }
+    *typeId = 0;
+    uint32_t count = sizeof(g_typeToIdMap) / sizeof(DiscoveryTypeToId);
+    for (uint32_t i = 0; i < count; i++) {
+        if (LnnHasSupportDiscoveryType(g_typeToIdMap[i].type, type)) {
+            *typeId |= (1 << (uint32_t)g_typeToIdMap[i].id);
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Set DiscoveryTypeId = %d", *typeId);
+    return SOFTBUS_OK;
+}
+
+static void LnnGetPeerDiscoveryType(char *type, const char *udid, uint32_t typeLen)
+{
+    if (type == NULL || udid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "err para");
+        return;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdid(udid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNetworkIdByUdid fail, now node is offline");
+        return;
+    }
+    uint32_t typeId = 0;
+    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&typeId) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote typeId fail");
+        return;
+    }
+    if (ConvertDiscoveryTypeToString(typeId, type) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConvertDiscoveryTypeToString fail");
+    }
+    if (strlen(type) > typeLen) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set type err, need clean");
+        (void)memset_s(type, typeLen, 0, typeLen);
+    }
+}
+
 static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -208,6 +274,15 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
     return SOFTBUS_OK;
 }
 
+static void SetDiscoveryTypeBothTrue(uint32_t *typeId)
+{
+    uint32_t id;
+    *typeId = 0;
+    for (id = DISCOVERY_TYPE_WIFI; id < DISCOVERY_TYPE_COUNT; id++) {
+        *typeId |= (1 << id);
+    }
+}
+
 static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -228,6 +303,13 @@ static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
     (void)GetJsonObjectStringItem(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
     if (GetJsonObjectStringItem(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
         (void)LnnConvertDeviceTypeToId(deviceType, &(info->deviceInfo.deviceTypeId));
+    }
+    char recvDiscoveryType[PEER_DISCOVERY_TYPE_LEN] = {0};
+    if (!GetJsonObjectStringItem(json, DISCOVERY_TYPE, recvDiscoveryType, PEER_DISCOVERY_TYPE_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "not support singleonline, set both true");
+        SetDiscoveryTypeBothTrue(&info->exchangeDiscoveryType);
+    } else if (ConvertDiscoveryTypeToId(&info->exchangeDiscoveryType, recvDiscoveryType) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "remote device not set discoveryType");
     }
     (void)GetJsonObjectStringItem(json, DEVICE_UDID, info->deviceInfo.deviceUdid, UDID_BUF_LEN);
     if (isMetaAuth) {
@@ -305,7 +387,8 @@ static int32_t UnpackWiFi(const cJSON *json, NodeInfo *info, SoftBusVersion vers
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth)
+NO_SANITIZE("cfi")
+char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *peerDiscoveryType)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "PackDeviceInfo: connType = %d.", linkType);
     const NodeInfo *info = LnnGetLocalNodeInfo();
@@ -318,6 +401,11 @@ NO_SANITIZE("cfi") char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion 
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "create cjson fail.");
         return NULL;
     }
+    if (peerDiscoveryType != NULL && !AddStringToJsonObject(json, DISCOVERY_TYPE, peerDiscoveryType)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject fail.");
+        return NULL;
+    }
+
     int32_t ret;
     if (linkType == AUTH_LINK_TYPE_WIFI) {
         ret = PackWiFi(json, info, version, isMetaAuth);
@@ -406,7 +494,9 @@ static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, Sess
 NO_SANITIZE("cfi") int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
-    char *msg = PackDeviceInfoMessage(info->connInfo.type, SOFTBUS_NEW_V1, false);
+    char peerDiscoveryType[PEER_DISCOVERY_TYPE_LEN] = {0};
+    LnnGetPeerDiscoveryType(peerDiscoveryType, info->udid, sizeof(peerDiscoveryType));
+    char *msg = PackDeviceInfoMessage(info->connInfo.type, SOFTBUS_NEW_V1, false, peerDiscoveryType);
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "pack device info fail.");
         return SOFTBUS_ERR;
