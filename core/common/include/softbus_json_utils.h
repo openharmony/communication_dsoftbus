@@ -28,6 +28,8 @@ extern "C" {
 #endif
 #endif
 
+int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, char *target, uint32_t targetLen);
+
 bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target, uint32_t targetLen);
 
 bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target);

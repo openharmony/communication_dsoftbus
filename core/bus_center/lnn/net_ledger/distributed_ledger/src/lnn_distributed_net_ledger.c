@@ -868,7 +868,7 @@ NO_SANITIZE("cfi") int32_t LnnAddMetaInfo(NodeInfo *info)
         return SOFTBUS_LOCK_ERR;
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
-    if (oldInfo != NULL) {
+    if (oldInfo != NULL && strcmp(oldInfo->networkId, info->networkId) == 0) {
         MetaInfo temp = info->metaInfo;
         if (memcpy_s(info, sizeof(NodeInfo), oldInfo, sizeof(NodeInfo)) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnAddMetaInfo copy fail!");

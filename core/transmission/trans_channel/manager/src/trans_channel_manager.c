@@ -167,7 +167,7 @@ static ChannelType TransGetChannelType(const SessionParam *param, const LaneConn
     if (connInfo->type == LANE_BR || connInfo->type == LANE_BLE) {
         return CHANNEL_TYPE_PROXY;
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO ||
-        transType == LANE_T_RAW_STREAM) {
+        transType == LANE_T_RAW_STREAM || transType == LANE_T_COMMON_VOICE) {
         return CHANNEL_TYPE_UDP;
     } else if ((transType == LANE_T_MSG) && (connInfo->type != LANE_P2P)) {
         return CHANNEL_TYPE_PROXY;
@@ -296,7 +296,7 @@ EXIT_ERR:
 NO_SANITIZE("cfi") int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt)
 {
     int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) || connOpt == NULL) {
         return channelId;
     }
 

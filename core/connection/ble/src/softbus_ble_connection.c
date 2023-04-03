@@ -438,6 +438,10 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
 static int32_t BlePostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
 {
     CLOGI("BlePostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
+    if (len > MAX_DATA_LEN) {
+        CLOGI("big msg, len:%u\n", len);
+        return SOFTBUS_ERR;
+    }
     if (data == NULL) {
         return SOFTBUS_ERR;
     }
@@ -1325,7 +1329,7 @@ static int BleQueueInit(void)
     return SOFTBUS_OK;
 }
 
-void BleConnOnBtStateChanged(int listenerId, int state)
+void BleConnOnBtStateChanged(int32_t listenerId, int32_t state)
 {
     CLOGI("[BleOnBtStateChanged] id:%d, state:%d", listenerId, state);
     SoftBusGattServerOnBtStateChanged(state);

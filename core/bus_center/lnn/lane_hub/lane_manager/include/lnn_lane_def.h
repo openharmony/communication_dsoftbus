@@ -53,6 +53,43 @@ typedef enum {
 } LaneTransPriority;
 
 typedef struct {
+    int32_t channel;
+    LaneBandwidth bw;
+    WlanConnInfo connInfo;
+} WlanLinkInfo;
+
+typedef struct {
+    int32_t channel;
+    LaneBandwidth bw;
+    P2pConnInfo connInfo;
+} P2pLinkInfo;
+
+typedef struct {
+    char brMac[BT_MAC_LEN];
+} BrLinkInfo;
+
+typedef struct {
+    char bleMac[BT_MAC_LEN];
+} BleLinkInfo;
+
+typedef struct {
+    LaneLinkType type;
+    union {
+        WlanLinkInfo wlan;
+        P2pLinkInfo p2p;
+        BrLinkInfo br;
+        BleLinkInfo ble;
+    } linkInfo;
+} LaneLinkInfo;
+
+typedef struct {
+    char peerNetworkId[NETWORK_ID_BUF_LEN];
+    int32_t pid;
+    LaneTransType transType;
+    LaneLinkType linkType;
+} LinkRequest;
+
+typedef struct {
     uint32_t serialNum;
     LaneLinkType linkType;
     int32_t phyChannel;
@@ -78,6 +115,12 @@ typedef enum {
     LNN_LINK_TYPE_P2P_MAX = LNN_LINK_TYPE_P2P + LNN_LANE_P2P_MAX_NUM,
     LNN_LINK_TYPE_BUTT,
 } LnnLaneLinkType;
+
+typedef struct {
+    void (*OnLaneLinkSuccess)(uint32_t reqId, const LaneLinkInfo *linkInfo);
+    void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason);
+    void (*OnLaneLinkException)(uint32_t reqId, int32_t reason);
+} LaneLinkCb;
 
 #ifdef __cplusplus
 }

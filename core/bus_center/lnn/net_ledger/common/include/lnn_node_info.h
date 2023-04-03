@@ -81,8 +81,8 @@ typedef struct {
 
 typedef struct {
     char softBusVersion[VERSION_MAX_LEN];
-    char versionType[VERSION_MAX_LEN]; // compatible nearby
-    char uuid[UUID_BUF_LEN]; // compatible nearby
+    char versionType[VERSION_MAX_LEN];
+    char uuid[UUID_BUF_LEN];
     char networkId[NETWORK_ID_BUF_LEN];
     char publicId[ID_MAX_LEN];
     char parentId[ID_MAX_LEN];

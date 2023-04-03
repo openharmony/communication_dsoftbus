@@ -175,7 +175,7 @@ The main code directory structure of DSoftBus is as follows:
     #define EVENT_NODE_STATE_OFFLINE 0x02
     #define EVENT_NODE_STATE_INFO_CHANGED 0x04
     #define EVENT_NODE_STATUS_CHANGED 0x08
-    #define EVENT_NODE_STATE_MASK 0x15
+    #define EVENT_NODE_STATE_MASK 0xF
     
     // Device information
     typedef struct {

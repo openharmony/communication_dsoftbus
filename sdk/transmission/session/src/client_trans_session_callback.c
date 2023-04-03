@@ -226,7 +226,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
     return SOFTBUS_OK;
 }
 
-int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
+NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     int32_t sessionId;

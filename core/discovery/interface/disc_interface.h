@@ -197,8 +197,7 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info);
  * @brief Stop the broadcast and clear the environment configured by the start broadcast.
  * @see {@link DiscStartAdvertise}.
  * @param[in] moduleId module ID. For details, see {@link DiscModule}.
- * @param[in] subscribeId Indicates the pointer to the service subscribe information.
- * For details, see {@link SubscribeInfo}.
+ * @param[in] subscribeId the subscribe ID which will be stop broadcast.
  * @return <b>SOFTBUS_INVALID_PARAM</b> Invalid moduleId or info parameter.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> Discovery manager is not initialised.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> Module to string failed.

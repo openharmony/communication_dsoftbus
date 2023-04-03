@@ -155,6 +155,11 @@ if (defined(ohos_lite)) {
     part_name = "dsoftbus"
   }
   ohos_shared_library("softbus_server") {
+    sanitize = {
+      cfi = true
+      cfi_cross_so = true
+      debug = false
+    }
     defines = AUTH_SERVER_DEFINES
     defines += [ "__STDC_FORMAT_MACROS" ]
     include_dirs = dsoftbus_server_common_inc
