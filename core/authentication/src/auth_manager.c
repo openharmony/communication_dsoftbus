@@ -25,6 +25,9 @@
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
 #include "lnn_decision_db.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_node_info.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
@@ -457,6 +460,80 @@ int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, S
     return SOFTBUS_OK;
 }
 
+static AuthManager *DupNewAuthManager(AuthManager *srcAuth, const NodeInfo *nodeInfo)
+{
+    AuthManager *auth = (AuthManager *)SoftBusCalloc(sizeof(AuthManager));
+    if (auth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
+        return NULL;
+    }
+    int64_t magicNum = 2;
+    unsigned char udidHash[UDID_HASH_LEN] = {0};
+    auth->authId = srcAuth->authId + magicNum;
+    auth->isServer = srcAuth->isServer;
+    if (!auth->isServer) {
+        (void)GenSeq(auth->isServer);
+    }
+    auth->connId = srcAuth->connId;
+    auth->connInfo.type = AUTH_LINK_TYPE_BLE;
+    if (strcpy_s(auth->udid, sizeof(auth->udid), srcAuth->udid) != EOK ||
+        strcpy_s(auth->uuid, sizeof(auth->uuid), srcAuth->uuid) != EOK ||
+        memcpy_s(auth->connInfo.info.bleInfo.bleMac, BT_MAC_LEN,
+                 srcAuth->connInfo.info.brInfo.brMac, BT_MAC_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy uuid/udid/mac fail.");
+        SoftBusFree(auth);
+        return NULL;
+    }
+    if (SoftBusGenerateStrHash((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), udidHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get udid hash err");
+        SoftBusFree(auth);
+        return NULL;
+    }
+    if (memcpy_s(auth->connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, udidHash, sizeof(udidHash)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get udid hash err");
+        SoftBusFree(auth);
+        return NULL;
+    }
+    auth->version = srcAuth->version;
+    auth->hasAuthPassed = false;
+    InitSessionKeyList(&auth->sessionKeyList);
+    if (auth->isServer) {
+        ListTailInsert(&g_authServerList, &auth->node);
+    } else {
+        ListTailInsert(&g_authClientList, &auth->node);
+    }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "Dup BLE auth manager, side=%s, authId=%" PRId64 ".",
+        GetAuthSideStr(auth->isServer), auth->authId);
+    return auth;
+}
+
+static int32_t DupAuthInfoFromBr(AuthManager *auth, const NodeInfo *nodeInfo, int64_t *dupAuthId)
+{
+    if (auth == NULL || nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "err para");
+        return SOFTBUS_ERR;
+    }
+    AuthManager *dupAuth = DupNewAuthManager(auth, nodeInfo);
+    if (dupAuth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "DupNewAuthManager fail");
+        return SOFTBUS_ERR;
+    }
+    *dupAuthId = dupAuth->authId;
+    dupAuth->lastVerifyTime = GetCurrentTimeMs();
+    dupAuth->lastActiveTime = GetCurrentTimeMs();
+    SessionKey sessionKey;
+    if (GetSessionKeyByIndex(&auth->sessionKeyList, TO_INT32(auth->authId), &sessionKey) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "GetSessionKeyByIndex fail.");
+        return SOFTBUS_ERR;
+    }
+    if (AddSessionKey(&dupAuth->sessionKeyList, TO_INT32(dupAuth->authId), &sessionKey) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddSessionKey fail.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") static void NotifyDeviceVerifyPassed(int64_t authId, const NodeInfo *nodeInfo)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
@@ -628,6 +705,40 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
     }
 }
 
+static int32_t DupBleInfo(int64_t authId, const NodeInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "para err");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *remoteInfo = LnnGetNodeInfoById(nodeInfo->networkId, CATEGORY_NETWORK_ID);
+    if (remoteInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "now ble not online, need dup info");
+    } else if (LnnHasDiscoveryType(remoteInfo, DISCOVERY_TYPE_BLE)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ble has online, no need dup info");
+        return SOFTBUS_OK;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (auth == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "GetAuthManagerByAuthId err");
+        return SOFTBUS_ERR;
+    }
+    int64_t dupAuthId;
+    if (DupAuthInfoFromBr(auth, nodeInfo, &dupAuthId) != SOFTBUS_OK) {
+        DelAuthManager(auth, false);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "DupAuthInfoFromBr err");
+        return SOFTBUS_ERR;
+    }
+    if (g_verifyListener.onDeviceVerifyPass == NULL) {
+        DelAuthManager(auth, false);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "onDeviceVerifyPass not set.");
+        return SOFTBUS_ERR;
+    }
+    g_verifyListener.onDeviceVerifyPass(dupAuthId, nodeInfo);
+    DelAuthManager(auth, false);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
 {
     int64_t authId;
@@ -653,7 +764,11 @@ NO_SANITIZE("cfi") void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSess
     }
     authId = auth->authId;
     ReleaseAuthLock();
-
+    if (info->connInfo.type == AUTH_LINK_TYPE_BR) {
+        if (DupBleInfo(authId, &info->nodeInfo) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "not support br dup info");
+        }
+    }
     if (info->isServer) {
         NotifyDeviceVerifyPassed(authId, &info->nodeInfo);
     } else {
