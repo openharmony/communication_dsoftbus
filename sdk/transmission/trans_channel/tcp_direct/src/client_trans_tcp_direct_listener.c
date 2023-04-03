@@ -51,7 +51,8 @@ static void TdcLockInit(void)
     }
     return;
 }
-static int32_t ClientTdcOnConnectEvent(ListenerModule module, int events, int cfd, const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t ClientTdcOnConnectEvent(ListenerModule module, int events, int cfd,
+    const ConnectOption *clientAddr)
 {
     (void)module;
     (void)events;
