@@ -109,7 +109,7 @@ NO_SANITIZE("cfi") void NstackxLog(const char *moduleName, uint32_t nstackLevel,
     return;
 }
 
-void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
+NO_SANITIZE("cfi") void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
     int lineNo, const char *fmt, ...)
 {
     uint32_t ulPos;
