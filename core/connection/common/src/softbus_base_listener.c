@@ -563,7 +563,7 @@ static int CreateFdArr(int32_t **fdArr, int32_t *fdArrLen, const ListNode *list)
     return SOFTBUS_OK;
 }
 
-static void ProcessNodeData(
+NO_SANITIZE("cfi") static void ProcessNodeData(
     SoftbusListenerNode *node, SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     if (SoftBusMutexLock(&node->lock) != SOFTBUS_OK) {
@@ -604,7 +604,7 @@ static void ProcessNodeData(
     SoftBusFree(fdArr);
 }
 
-static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
+NO_SANITIZE("cfi") static void ProcessData(SoftBusFdSet *readSet, SoftBusFdSet *writeSet, SoftBusFdSet *exceptSet)
 {
     for (int i = 0; i < UNUSE_BUTT; i++) {
         SoftbusListenerNode *node = RequestListenerNode((ListenerModule)i);
@@ -642,7 +642,7 @@ EXIT:
     return SOFTBUS_MEM_ERR;
 }
 
-static int32_t SelectThread(void *data)
+NO_SANITIZE("cfi") static int32_t SelectThread(void *data)
 {
     (void)data;
     SoftBusSockTimeOut tv = {0};

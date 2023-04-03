@@ -242,7 +242,7 @@ static int32_t ProcessSocketInEvent(int32_t fd)
     return SOFTBUS_OK;
 }
 
-static int32_t OnConnectEvent(ListenerModule module, int32_t events,
+NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module, int32_t events,
     int32_t cfd, const ConnectOption *clientAddr)
 {
     (void)module;
