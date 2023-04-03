@@ -72,7 +72,7 @@ static void ReleaseMeasResources(void)
     g_channelInfoList.buff = NULL;
 }
 
-static void ExcuteChannelMeas(void)
+NO_SANITIZE("cfi") static void ExcuteChannelMeas(void)
 {
     if (g_channelList.measNum >= g_channelList.num) {
         WlanChannelInfo *info = g_channelInfoList.buff;
@@ -152,7 +152,7 @@ NO_SANITIZE("cfi") int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uin
     return SOFTBUS_OK;
 }
 
-static void GetOneChannelMeasResult(void *para)
+NO_SANITIZE("cfi") static void GetOneChannelMeasResult(void *para)
 {
     (void)para;
     struct MeasChannelResult measChannelResult = {0};
