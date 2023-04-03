@@ -133,6 +133,31 @@ bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
     return GetNetLedgerInterface()->LnnHasDiscoveryType(info, type);
 }
+
+int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
+{
+    return GetNetLedgerInterface()->LnnGetNetworkIdByUdid(udid, buf, len);
+}
+
+int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
+{
+    return GetNetLedgerInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
+}
+
+int32_t LnnSetSupportDiscoveryType(char *info, const char *type)
+{
+    return GetNetLedgerInterface()->LnnSetSupportDiscoveryType(info, type);
+}
+
+bool LnnHasSupportDiscoveryType(const char *destType, const char *type)
+{
+    return GetNetLedgerInterface()->LnnHasSupportDiscoveryType(destType, type);
+}
+
+bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetNetLedgerInterface()->LnnPeerHasExchangeDiscoveryType(info, type);
+}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)

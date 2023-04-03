@@ -494,6 +494,66 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
     return true;
 }
 
+static bool IsWifiInfoChanged(const NodeInfo *newNodeInfo, const NodeInfo *oldNodeInfo)
+{
+    if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0 ||
+        newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort ||
+        newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort ||
+        newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer device info changed");
+        return true;
+    }
+    return false;
+}
+
+static bool IsBleSingleOnlineProc(bool newBleFlag, bool oldBleFlag)
+{
+    if (!newBleFlag && oldBleFlag) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble single online, need offline");
+        return true;
+    }
+    return false;
+}
+
+
+static bool IsWifiOnlineAgain(bool newWifiFlag, bool oldWifiFlag, const NodeInfo *newNodeInfo,
+    const NodeInfo *oldNodeInfo)
+{
+    if (!newWifiFlag && oldWifiFlag) {
+        return IsWifiInfoChanged(newNodeInfo, oldNodeInfo);
+    } else if (newWifiFlag && oldWifiFlag) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi online again, need offline");
+        return true;
+    }
+    return false;
+}
+
+static bool IsBleOnlineAgain(bool newBleFlag, bool oldBleFlag)
+{
+    return newBleFlag && oldBleFlag;
+}
+
+static bool IsWifiSingleOnlineProc(bool newWifiFlag, bool oldWifiFlag)
+{
+    if (!newWifiFlag && oldWifiFlag) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi single online, need offline");
+        return true;
+    }
+    return false;
+}
+
+static bool IsNeedReportOffline(bool isBleOffline, bool isWifiOffline, ConnectionAddrType *type)
+{
+    if (isBleOffline) {
+        *type = CONNECTION_ADDR_BLE;
+        return true;
+    } else if (isWifiOffline) {
+        *type = CONNECTION_ADDR_WLAN;
+        return true;
+    }
+    return false;
+}
+
 static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *oldNodeInfo,
     const NodeInfo *newNodeInfo, ConnectionAddrType *type)
 {
@@ -502,35 +562,24 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         *type = CONNECTION_ADDR_MAX;
         return true;
     }
-    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH && connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN) {
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_BR) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "br not support single online");
         return false;
     }
-    if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]oldNodeInfo not have wifi, discoveryType = %u",
-            connFsm->id, oldNodeInfo->discoveryType);
-        return false;
+    bool newWifiFlag = LnnPeerHasExchangeDiscoveryType(newNodeInfo, DISCOVERY_TYPE_WIFI);
+    bool newBleFlag = LnnPeerHasExchangeDiscoveryType(newNodeInfo, DISCOVERY_TYPE_BLE);
+    bool oldWifiFlag = LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI);
+    bool oldBleFlag = LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_BLE);
+    bool isWifiOffline = false;
+    bool isBleOffline = false;
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH || connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN) {
+        isBleOffline = IsBleSingleOnlineProc(newBleFlag, oldBleFlag);
+        isWifiOffline = IsWifiOnlineAgain(newWifiFlag, oldWifiFlag, newNodeInfo, oldNodeInfo);
+    } else if (connFsm->connInfo.addr.type == CONNECTION_ADDR_BLE) {
+        isBleOffline = IsBleOnlineAgain(newBleFlag, oldBleFlag);
+        isWifiOffline = IsWifiSingleOnlineProc(newWifiFlag, oldWifiFlag);
     }
-    if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer IP changed", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
-        return true;
-    }
-    if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer auth port changed", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
-        return true;
-    }
-    if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer proxy port changed", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
-        return true;
-    }
-    if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer session port changed", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
-        return true;
-    }
-    return false;
+    return IsNeedReportOffline(isBleOffline, isWifiOffline, type) ? true : false;
 }
 
 static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
@@ -545,9 +594,9 @@ static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
     }
     if (oldNodeInfo != NULL && LnnIsNodeOnline(oldNodeInfo)) {
         if (IsNodeInfoChanged(connFsm, oldNodeInfo, newNodeInfo, &addrType)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]node info changed, ready clean invalid connection",
-                connFsm->id);
-            LnnRequestLeaveInvalidConn(oldNodeInfo->networkId, addrType, newNodeInfo->networkId);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+                "[id=%u] node info changed, ready clean invalid connection, connType=%d", connFsm->id, addrType);
+            LnnRequestLeaveInvalidConn(oldNodeInfo->networkId, addrType, newNodeInfo->networkId, connInfo->addr.type);
             return;
         }
     }

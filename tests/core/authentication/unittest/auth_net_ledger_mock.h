@@ -53,6 +53,11 @@ public:
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
+    virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len) = 0;
+    virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
+    virtual int32_t LnnSetSupportDiscoveryType(char *info, const char *type);
+    virtual bool LnnHasSupportDiscoveryType(const char *destType, const char *type);
+    virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type);
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -75,6 +80,11 @@ public:
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
     MOCK_METHOD2(LnnHasDiscoveryType, bool(const NodeInfo *, DiscoveryType));
+    MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t(const char *, InfoKey, int32_t *));
+    MOCK_METHOD2(LnnSetSupportDiscoveryType, int32_t(char *, const char *));
+    MOCK_METHOD2(LnnHasSupportDiscoveryType, bool(const char *, const char *));
+    MOCK_METHOD2(LnnPeerHasExchangeDiscoveryType, bool(const NodeInfo *, DiscoveryType));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;
