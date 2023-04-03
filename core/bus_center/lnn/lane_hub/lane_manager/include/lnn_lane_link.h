@@ -22,10 +22,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int32_t LnnLanePendingInit(void);
-void LnnLanePendingDeinit(void);
-int32_t LnnConnectP2p(const char *networkId, int32_t pid, LnnLaneP2pInfo *p2pInfo);
-int32_t LnnDisconnectP2p(const char *networkId, int32_t pid, const char *mac);
+void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid, const char *mac, const char *networkId);
+int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback);
+int32_t InitLaneLink(void);
+void DeinitLaneLink(void);
 
 #ifdef __cplusplus
 }

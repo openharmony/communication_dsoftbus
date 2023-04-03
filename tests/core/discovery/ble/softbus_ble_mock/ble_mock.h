@@ -128,7 +128,7 @@ public:
 
     static constexpr int CON_ADV_ID = 0;
     static constexpr int NON_ADV_ID = 1;
-    static constexpr int BT_STATE_LISTENER_ID = 1;
+    static constexpr int32_t BT_STATE_LISTENER_ID = 1;
     static constexpr int SCAN_LISTENER_ID = 2;
     static constexpr int BLE_MSG_TIME_OUT_MS = 6000;
 

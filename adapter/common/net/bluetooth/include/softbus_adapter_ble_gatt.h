@@ -187,8 +187,6 @@ int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param);
 
 int SoftBusStopScan(int listenerId);
 
-int SoftBusStopScanForced(int listenerId);
-
 int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback);
 
 int SoftBusReleaseAdvChannel(int advId);

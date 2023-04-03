@@ -535,7 +535,7 @@ static void BleOnScanStop(int listenerId, int status)
     g_isScanning = false;
 }
 
-NO_SANITIZE("cfi") static void BleOnStateChanged(int listenerId, int state)
+NO_SANITIZE("cfi") static void BleOnStateChanged(int32_t listenerId, int32_t state)
 {
     (void)listenerId;
     SoftBusMessage *msg = NULL;
@@ -1684,7 +1684,7 @@ NO_SANITIZE("cfi") void DiscSoftBusBleDeinit(void)
     AdvertiserDeinit();
 }
 
-static int32_t BleInfoDump(int fd)
+NO_SANITIZE("cfi") static int32_t BleInfoDump(int fd)
 {
     if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
         DLOGE("lock failed.");

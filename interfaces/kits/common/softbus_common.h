@@ -185,7 +185,7 @@ extern "C" {
  */
 #define NODE_STATUS_MAX_NUM 32
 /**
- * @brief Enumerates {@link ConnectionAddr} types of a device that is added to a LNN.
+ * @brief Enumerates {@link ConnectionAddrType} types of a device that is added to a LNN.
  *
  * @since 1.0
  * @version 1.0
@@ -349,7 +349,7 @@ typedef struct {
     DiscoverMode mode;
     /** Service publishing medium. For details, see {@link ExchangeMedium}. */
     ExchangeMedium medium;
-    /** Service publishing frequency. For details, see {@link ExchangeFre}. */
+    /** Service publishing frequency. For details, see {@link ExchangeFreq}. */
     ExchangeFreq freq;
     /** Service publishing capabilities. For details, see {@link g_capabilityMap}. */
     const char *capability;
@@ -372,7 +372,7 @@ typedef struct {
     DiscoverMode mode;
     /** Service subscription medium. For details, see {@link ExchangeMedium}. */
     ExchangeMedium medium;
-    /** Service subscription frequency. For details, see {@link ExchangeFre}. */
+    /** Service subscription frequency. For details, see {@link ExchangeFreq}. */
     ExchangeFreq freq;
     /** only find the device with the same account */
     bool isSameAccount;
@@ -458,7 +458,7 @@ typedef struct {
     bool isOnline;
     /** Number of available connections */
     unsigned int addrNum;
-    /** Connection information. For details, see {@link ConnectAddr}. */
+    /** Connection information. For details, see {@link ConnectionAddr}. */
     ConnectionAddr addr[CONNECTION_ADDR_MAX];
     /** Number of capabilities */
     unsigned int capabilityBitmapNum;

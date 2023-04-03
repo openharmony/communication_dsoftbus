@@ -31,6 +31,6 @@ if (defined(ohos_lite) || (defined(global_parts_info) && !defined(
     adapter_hdi_src +=
         [ "$softbus_adapter_hdi_path/common/softbus_adapter_wlan_extend.c" ]
 
-    adapter_hdi_deps += [ "//drivers/interface/wlan/v1_0:libwlan_proxy_1.0" ]
+    adapter_hdi_deps += [ "//drivers/interface/wlan/v1_1:libwlan_proxy_1.1" ]
   }
 }

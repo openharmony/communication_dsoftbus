@@ -25,7 +25,6 @@
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
-#include "lnn_lane_link_proc.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
@@ -297,7 +296,7 @@ NO_SANITIZE("cfi") int32_t LnnFreeLane(uint32_t laneId)
 {
     uint32_t laneType = laneId >> LANE_ID_TYPE_SHIFT;
     if (laneType >= LANE_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[LnnFreeLane]laneType invalid");
+        LLOGE("[LnnFreeLane]laneType invalid");
         return SOFTBUS_ERR;
     }
     if (g_laneObject[laneType] == NULL) {
@@ -360,10 +359,6 @@ NO_SANITIZE("cfi") int32_t InitLane(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]laneDelayInit fail");
         return SOFTBUS_ERR;
     }
-    if (LnnLanePendingInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]LnnLanePendingInit fail");
-        return SOFTBUS_ERR;
-    }
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -381,7 +376,6 @@ NO_SANITIZE("cfi") int32_t InitLane(void)
 
 NO_SANITIZE("cfi") void DeinitLane(void)
 {
-    LnnLanePendingDeinit();
     DeinitLaneModel();
     DeinitLaneLink();
     LnnDeinitScore();
