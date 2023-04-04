@@ -28,7 +28,7 @@ using namespace testing::ext;
 #define LNN_MOCK_ONLINE_NODE_CNT 2
 
 namespace OHOS {
-    
+
 void *g_netLedgerinterface;
 LnnNetLedgertInterfaceMock::LnnNetLedgertInterfaceMock()
 {
@@ -273,6 +273,11 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
         dstIdType, dstIdBuf, dstIdBufLen);
 }
 
+bool LnnHasCapability(uint32_t capability, NetCapability type)
+{
+    return GetNetLedgerInterface()->LnnHasCapability(capability, type);
+}
+
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 {
     return GetNetLedgerInterface()->LnnSetNetCapability(capability, type);
@@ -376,6 +381,21 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
 void LnnRemoveNode(const char *udid)
 {
     return GetNetLedgerInterface()->LnnRemoveNode(udid);
+}
+
+int32_t LnnSetSupportDiscoveryType(char *info, const char *type)
+{
+    return GetNetLedgerInterface()->LnnSetSupportDiscoveryType(info, type);
+}
+
+bool LnnHasSupportDiscoveryType(const char *destType, const char *type)
+{
+    return GetNetLedgerInterface()->LnnHasSupportDiscoveryType(destType, type);
+}
+
+bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetNetLedgerInterface()->LnnPeerHasExchangeDiscoveryType(info, type);
 }
 
 const char *LnnGetDeviceUdid(const NodeInfo *info)
