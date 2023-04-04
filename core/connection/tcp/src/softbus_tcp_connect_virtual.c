@@ -47,13 +47,14 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_OK;
 }
 
-int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag)
+int32_t TcpPostBytes(uint32_t connectionId, const char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq)
 {
     (void)connectionId;
     (void)data;
     (void)len;
     (void)pid;
     (void)flag;
+    (void)seq;
     return SOFTBUS_OK;
 }
 

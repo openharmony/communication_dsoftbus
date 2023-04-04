@@ -74,7 +74,7 @@ static int32_t StartLocalListening(const LocalListenerInfo *info);
 
 static int32_t StopLocalListening(const LocalListenerInfo *info);
 
-static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag);
+static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq);
 
 static ConnectFuncInterface g_brInterface = {
     .ConnectDevice = ConnectDevice,
@@ -611,9 +611,9 @@ NO_SANITIZE("cfi") static uint32_t ServerOnBrConnect(int32_t socketFd)
     return connectionId;
 }
 
-static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
+static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq)
 {
-    CLOGI("PostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
+    CLOGI("PostBytes connectionId=%u,pid=%d,len=%d flag=%d seq=%" PRId64, connectionId, pid, len, flag, seq);
     int32_t state = GetBrConnStateByConnectionId(connectionId);
     if (state != BR_CONNECTION_STATE_CONNECTED) {
         CLOGI("connectionId(%u) device is not ready, state: %d", connectionId, state);
@@ -634,6 +634,7 @@ static int32_t PostBytes(uint32_t connectionId, char *data, int32_t len, int32_t
     node->data = data;
     node->isInner = ((pid == 0) ? true : false);
     node->listener = NULL;
+    node->dataSeq = seq;
     int32_t ret = BrEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         CLOGE("Br enqueue failed, ret: %d", ret);
@@ -777,6 +778,7 @@ NO_SANITIZE("cfi") void *SendHandlerLoop(void *arg)
             WaitAck(brConnInfo, brConnInfo->waitSeq);
             brConnInfo->waitSeq = 0;
         }
+        CLOGI("start send data, connId:%d, len:%d, seq:%" PRId64, connId, sendNode->len, sendNode->dataSeq);
         ret = BrTransSend(brConnInfo, g_sppDriver, g_brSendPeerLen, sendNode->data, sendNode->len);
         if (ret != SOFTBUS_OK) {
             CLOGE("BrTransSend fail. connId:%u, seq: %" PRIu64, connId, seq);

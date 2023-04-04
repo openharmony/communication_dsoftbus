@@ -48,7 +48,7 @@ typedef struct {
      * @param[in] flag Message send flag.
      * @return <b>SOFTBUS_OK</b> if sending by byte is successfully.
      */
-    int32_t (*PostBytes)(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag);
+    int32_t (*PostBytes)(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq);
 
     /**
      * @brief To disconnect the device, use the br/ble/tcp type of disconnect device logically to disconnect

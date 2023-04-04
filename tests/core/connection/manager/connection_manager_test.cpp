@@ -56,7 +56,7 @@ int ObjectConnectDevice(const ConnectOption *option, unsigned int requestId, con
     return 0;
 }
 
-int ObjectPostBytes(unsigned int connectionId, char *data, int len, int pid, int flag)
+int ObjectPostBytes(unsigned int connectionId, char *data, int len, int pid, int flag, int64_t seq)
 {
     int module;
     int bufLen = 15;
