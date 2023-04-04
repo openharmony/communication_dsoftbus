@@ -86,6 +86,9 @@ public:
         char *dstIdBuf, uint32_t dstIdBufLen);
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type);
     virtual bool LnnIsNodeOnline(const NodeInfo *info);
+    virtual int32_t LnnSetSupportDiscoveryType(char *info, const char *type) = 0;
+    virtual bool LnnHasSupportDiscoveryType(const char *destType, const char *type) = 0;
+    virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual const char *LnnGetDeviceUdid(const NodeInfo *info);
     virtual int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1,
         int32_t weight2, const char *masterUdid2);
@@ -179,6 +182,9 @@ public:
     MOCK_METHOD5(LnnConvertDlId, int32_t (const char *, IdCategory, IdCategory, char *, uint32_t));
     MOCK_METHOD2(LnnGetOnlineStateById, bool (const char *, IdCategory));
     MOCK_METHOD1(LnnIsNodeOnline, bool (const NodeInfo *));
+    MOCK_METHOD2(LnnSetSupportDiscoveryType, int32_t(char *, const char *));
+    MOCK_METHOD2(LnnHasSupportDiscoveryType, bool(const char *, const char *));
+    MOCK_METHOD2(LnnPeerHasExchangeDiscoveryType, bool(const NodeInfo *, DiscoveryType));
     MOCK_METHOD1(LnnGetDeviceUdid, const char * (const NodeInfo *));
     MOCK_METHOD4(LnnCompareNodeWeight, int32_t (int32_t, const char *, int32_t, const char *));
     MOCK_METHOD1(LnnNotifyAllTypeOffline, void (ConnectionAddrType));
