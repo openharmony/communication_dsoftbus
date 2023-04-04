@@ -96,7 +96,7 @@ static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
 
 int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         !IsValidListener(listener)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer invalid param");
         return SOFTBUS_INVALID_PARAM;

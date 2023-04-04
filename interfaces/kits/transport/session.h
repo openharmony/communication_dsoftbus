@@ -324,7 +324,7 @@ typedef struct {
  * @param pkgName Indicates the pointer to the package name, which can be used to check whether the
  * session server is in this package. The value cannot be empty and can contain a maximum of 64 characters.
  * @param sessionName Indicates the pointer to the session name, which is the unique ID of the session server.
- * The value cannot be empty and can contain a maximum of 64 characters.
+ * The value cannot be empty and can contain a maximum of 255 characters.
  * @param listener Indicates the pointer to the session callback structure, which cannot be empty.
  * The common error codes are as follows:
  * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
