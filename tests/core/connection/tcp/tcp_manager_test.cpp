@@ -332,7 +332,7 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
         }
         (void)memcpy_s(data, sizeof(head), (void*)&head, sizeof(head));
         (void)memcpy_s(data + sizeof(head), (unsigned int)head.len, g_data, (unsigned int)head.len);
-        EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, data, sizeof(ConnPktHead) + head.len, 0, 0));
+        EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, data, sizeof(ConnPktHead) + head.len, 0, 0, 0));
         sleep(1);
         EXPECT_EQ(int(sizeof(ConnPktHead) + head.len), g_receivedDatalength);
         g_receivedDatalength = 0;
@@ -432,7 +432,7 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
     EXPECT_EQ(2, TcpGetConnNum());
-    EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, data, sizeof(ConnPktHead) + head.len, 0, 0));
+    EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, data, sizeof(ConnPktHead) + head.len, 0, 0, 0));
     sleep(1);
     EXPECT_EQ(0, TcpGetConnNum());
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));

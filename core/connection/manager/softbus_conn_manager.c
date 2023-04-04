@@ -536,7 +536,8 @@ NO_SANITIZE("cfi") int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *da
     head->len = data->len - sizeof(ConnPktHead);
     head->seq = data->seq;
     PackConnPktHead(head);
-    return g_connManager[type]->PostBytes(connectionId, data->buf, (int32_t)(data->len), data->pid, data->flag);
+    return g_connManager[type]->PostBytes(connectionId, data->buf, (int32_t)(data->len),
+        data->pid, data->flag, data->seq);
 }
 
 NO_SANITIZE("cfi") int32_t ConnDisconnectDevice(uint32_t connectionId)
