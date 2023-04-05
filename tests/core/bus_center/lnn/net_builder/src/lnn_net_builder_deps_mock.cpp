@@ -209,6 +209,21 @@ bool LnnIsNodeOnline(const NodeInfo *info)
     return GetNetBuilderDepsInterface()->LnnIsNodeOnline(info);
 }
 
+int32_t LnnSetSupportDiscoveryType(char *info, const char *type)
+{
+    return GetNetBuilderDepsInterface()->LnnSetSupportDiscoveryType(info, type);
+}
+
+bool LnnHasSupportDiscoveryType(const char *destType, const char *type)
+{
+    return GetNetBuilderDepsInterface()->LnnHasSupportDiscoveryType(destType, type);
+}
+
+bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetNetBuilderDepsInterface()->LnnPeerHasExchangeDiscoveryType(info, type);
+}
+
 const char *LnnGetDeviceUdid(const NodeInfo *info)
 {
     return GetNetBuilderDepsInterface()->LnnGetDeviceUdid(info);
