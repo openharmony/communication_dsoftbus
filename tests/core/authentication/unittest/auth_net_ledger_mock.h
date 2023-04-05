@@ -55,9 +55,9 @@ public:
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
-    virtual int32_t LnnSetSupportDiscoveryType(char *info, const char *type);
-    virtual bool LnnHasSupportDiscoveryType(const char *destType, const char *type);
-    virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type);
+    virtual int32_t LnnSetSupportDiscoveryType(char *info, const char *type) = 0;
+    virtual bool LnnHasSupportDiscoveryType(const char *destType, const char *type) = 0;
+    virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:

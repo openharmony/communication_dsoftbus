@@ -45,6 +45,7 @@ public:
     virtual uint64_t LnnGetSupportedProtocols(const NodeInfo *info) = 0;
     virtual int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual bool LnnHasCapability(uint32_t capability, NetCapability type) = 0;
     virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type) = 0;
     virtual int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type) = 0;
     virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info) = 0;
@@ -67,6 +68,9 @@ public:
     virtual ReportCategory LnnAddOnlineNode(NodeInfo *info) = 0;
     virtual int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo) = 0;
     virtual int32_t LnnInsertSpecificTrustedDevInfo(const char *udid) = 0;
+    virtual int32_t LnnSetSupportDiscoveryType(char *info, const char *type) = 0;
+    virtual bool LnnHasSupportDiscoveryType(const char *destType, const char *type) = 0;
+    virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual const char *LnnGetDeviceUdid(const NodeInfo *info) = 0;
     virtual ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId) = 0;
     virtual void LnnRemoveNode(const char *udid) = 0;
@@ -93,6 +97,7 @@ public:
     MOCK_METHOD1(LnnGetSupportedProtocols, uint64_t (const NodeInfo *));
     MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t (const char *, uint16_t *));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t *));
+    MOCK_METHOD2(LnnHasCapability, bool (uint32_t, NetCapability));
     MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnClearNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnSetLocalNumInfo, int32_t (InfoKey, int32_t));
@@ -117,6 +122,9 @@ public:
     MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, char * (const NodeInfo *));
     MOCK_METHOD3(LnnSetNodeOffline, ReportCategory (const char *, ConnectionAddrType, int32_t));
     MOCK_METHOD1(LnnRemoveNode, void (const char *));
+    MOCK_METHOD2(LnnSetSupportDiscoveryType, int32_t(char *, const char *));
+    MOCK_METHOD2(LnnHasSupportDiscoveryType, bool(const char *, const char *));
+    MOCK_METHOD2(LnnPeerHasExchangeDiscoveryType, bool(const NodeInfo *, DiscoveryType));
     MOCK_METHOD1(LnnGetDeviceUdid, const char *(const NodeInfo *));
     MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t (const char *, char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalNum64Info, int32_t (InfoKey, int64_t));
