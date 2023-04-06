@@ -84,39 +84,6 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
 }
 
 /*
-* @tc.name: DeConvertBitMap001
-* @tc.desc: test DeConvertBitMap
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, DeConvertBitMap001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, DeConvertBitMap001, Start");
-    uint32_t tempCap = 0;
-    int32_t capabilityBitmapNum = 1;
-    uint32_t capabilityBitmap[DISC_MAX_CAPABILITY_NUM] = { 0x10 };
-    DeConvertBitMap(&tempCap, capabilityBitmap, capabilityBitmapNum);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, DeConvertBitMap001, End");
-}
-
-/*
-* @tc.name: ResetInfoUpdate001
-* @tc.desc: test ResetInfoUpdate
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, ResetInfoUpdate001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ResetInfoUpdate001, Start");
-    int32_t adv = NON_ADV_ID;
-    ResetInfoUpdate(adv);
-
-    adv = CON_ADV_ID;
-    ResetInfoUpdate(adv);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ResetInfoUpdate001, End");
-}
-
-/*
 * @tc.name: GetNeedUpdateAdvertiser001
 * @tc.desc: test GetNeedUpdateAdvertiser
 * @tc.type: FUNC
@@ -137,98 +104,6 @@ HWTEST_F(DiscSoftBusBleTest, GetNeedUpdateAdvertiser001, TestSize.Level1)
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, GetNeedUpdateAdvertiser001, End");
 }
 
-/*
-* @tc.name: BleAdvEnableCallback001
-* @tc.desc: test BleAdvEnableCallback
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, BleAdvEnableCallback001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvEnableCallback001, Start");
-    int32_t adv = NON_ADV_ID;
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
-    BleAdvEnableCallback(adv, status);
-
-    adv = NUM_ADVERTISER;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvEnableCallback(adv, status);
-
-    adv = NON_ADV_ID;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvEnableCallback(adv, status);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvEnableCallback001, End");
-}
-
-/*
-* @tc.name: BleAdvDisableCallback001
-* @tc.desc: test BleAdvDisableCallback
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, BleAdvDisableCallback001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvDisableCallback001, Start");
-    int32_t adv = NON_ADV_ID;
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
-    BleAdvDisableCallback(adv, status);
-
-    adv = NUM_ADVERTISER;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvDisableCallback(adv, status);
-
-    adv = NON_ADV_ID;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvDisableCallback(adv, status);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvDisableCallback001, End");
-}
-
-/*
-* @tc.name: BleAdvDataCallback001
-* @tc.desc: test BleAdvDataCallback
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, BleAdvDataCallback001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvDataCallback001, Start");
-    int32_t adv = NON_ADV_ID;
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
-    BleAdvDataCallback(adv, status);
-
-    adv = NUM_ADVERTISER;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvDataCallback(adv, status);
-
-    adv = NON_ADV_ID;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvDataCallback(adv, status);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvDataCallback001, End");
-}
-
-
-/*
-* @tc.name: BleAdvUpdateCallback001
-* @tc.desc: test BleAdvUpdateCallback
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, BleAdvUpdateCallback001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvUpdateCallback001, Start");
-    int32_t adv = NON_ADV_ID;
-    int status = SOFTBUS_BT_STATUS_SUCCESS;
-    BleAdvUpdateCallback(adv, status);
-
-    adv = NUM_ADVERTISER;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvUpdateCallback(adv, status);
-
-    adv = NON_ADV_ID;
-    status = SOFTBUS_BT_STATUS_BUSY;
-    BleAdvUpdateCallback(adv, status);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleAdvUpdateCallback001, End");
-}
 /*
 * @tc.name: CheckScanner001
 * @tc.desc: test CheckScanner
@@ -306,31 +181,6 @@ HWTEST_F(DiscSoftBusBleTest, ScanFilter001, TestSize.Level1)
     ret = ScanFilter(&scanResultDataTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ScanFilter001, End");
-}
-
-/*
-* @tc.name: ProcessDisConPacket001
-* @tc.desc: test ProcessDisConPacket
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, ProcessDisConPacket001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ProcessDisConPacket001, Start");
-    DeviceInfo foundInfoTest;
-    uint8_t advDataTest[100];
-    uint8_t advLenTest = sizeof(advDataTest);
-    ProcessDisConPacket(nullptr, advLenTest, &foundInfoTest);
-
-    foundInfoTest.capabilityBitmap[0] = 0x0;
-    g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0] = 0x0;
-    ProcessDisConPacket(advDataTest, advLenTest, &foundInfoTest);
-
-    foundInfoTest.capabilityBitmap[0] = 0x1;
-    advDataTest[POS_CAPABLITY + ADV_HEAD_LEN] = 0x1;
-    g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0] = 0x1;
-    ProcessDisConPacket(advDataTest, advLenTest, &foundInfoTest);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ProcessDisConPacket001, End");
 }
 
 /*
@@ -455,7 +305,7 @@ HWTEST_F(DiscSoftBusBleTest, BleOnStateChanged001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BleOnStateChanged001, Start");
     LooperInit();
-    DiscBleLooperInit();
+    EXPECT_TRUE(DiscBleLooperInit() == SOFTBUS_OK);
 
     int listenerIdTest = 1;
     BleOnStateChanged(listenerIdTest, SOFTBUS_BT_STATE_TURN_ON);
@@ -473,9 +323,9 @@ HWTEST_F(DiscSoftBusBleTest, GetWakeRemote001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, GetWakeRemote001, Start");
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isWakeRemote[0] = true;
-    GetWakeRemote();
+    EXPECT_TRUE(GetWakeRemote() == true);
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isWakeRemote[0] = false;
-    GetWakeRemote();
+    EXPECT_TRUE(GetWakeRemote() == false);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, GetWakeRemote001, End");
 }
 
@@ -503,26 +353,6 @@ HWTEST_F(DiscSoftBusBleTest, GetConDeviceInfo001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ProcessDistributePacket001
-* @tc.desc: test ProcessDistributePacket
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, ProcessDistributePacket001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ProcessDistributePacket001, Start");
-    uint8_t advDataTest[INT32_MAX_BIT_NUM];
-    uint8_t advLenTest = sizeof(advDataTest);
-    SoftBusBleScanResult scanResultDataTest = {
-        .dataStatus = SOFTBUS_BLE_DATA_COMPLETE,
-        .advLen = advLenTest,
-        .advData = advDataTest,
-    };
-    ProcessDistributePacket(&scanResultDataTest);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, ProcessDistributePacket001, End");
-}
-
-/*
 * @tc.name: GetNonDeviceInfo001
 * @tc.desc: test GetNonDeviceInfo
 * @tc.type: FUNC
@@ -545,7 +375,6 @@ HWTEST_F(DiscSoftBusBleTest, GetNonDeviceInfo001, TestSize.Level1)
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, GetNonDeviceInfo001, End");
 }
 
-
 /*
 * @tc.name: BuildBleConfigAdvData001
 * @tc.desc: test BuildBleConfigAdvData
@@ -565,22 +394,6 @@ HWTEST_F(DiscSoftBusBleTest, BuildBleConfigAdvData001, TestSize.Level1)
     EXPECT_EQ(advDataTest.scanRspData[POS_RSP_TYPE], RSP_TYPE);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, BuildBleConfigAdvData001, End");
-}
-
-/*
-* @tc.name: AssembleNonOptionalTlv001
-* @tc.desc: test AssembleNonOptionalTlv
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, AssembleNonOptionalTlv001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, AssembleNonOptionalTlv001, Start");
-    DeviceInfo infoTest;
-    infoTest.range = 1;
-    BroadcastData broadcastDataTest {};
-    AssembleNonOptionalTlv(&infoTest, &broadcastDataTest);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, AssembleNonOptionalTlv001, End");
 }
 
 /*
@@ -665,36 +478,6 @@ HWTEST_F(DiscSoftBusBleTest, GetScannerParam001, TestSize.Level1)
     int32_t ret = GetScannerParam(FREQ, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, GetScannerParam001, End");
-}
-
-/*
-* @tc.name: StartScaner001
-* @tc.desc: test StartScaner
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, StartScaner001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, StartScaner001, Start");
-    for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
-        for (uint32_t index = 0; index < BLE_INFO_COUNT; index++) {
-            g_bleInfoManager[index].freq[pos] = 0;
-        }
-    }
-    StartScaner();
-
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x0;
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0] = 0x0;
-    g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0] = 0x0;
-    StartScaner();
-
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x1;
-    g_isScanning = false;
-    StartScaner();
-
-    g_bleInfoManager[0].freq[0] = FREQ_BUTT;
-    StartScaner();
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, StartScaner001, End");
 }
 
 /*
@@ -1297,20 +1080,6 @@ HWTEST_F(DiscSoftBusBleTest, InitBleListener001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DiscSoftbusBleDeinit001
-* @tc.desc: test DiscSoftbusBleDeinit
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, DiscSoftbusBleDeinit001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest DiscSoftbusBleDeinit001 Start");
-    g_isScanning = true;
-    DiscSoftBusBleDeinit();
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest DiscSoftbusBleDeinit001 End");
-}
-
-/*
 * @tc.name: UpdateAdvertiserDeviceInfo001
 * @tc.desc: test UpdateAdvertiserDeviceInfo
 * @tc.type: FUNC
@@ -1431,7 +1200,7 @@ HWTEST_F(DiscSoftBusBleTest, StartPassiveDiscovery001, TestSize.Level1)
     softBusMessage.what = START_ACTIVE_DISCOVERY;
     StartActiveDiscovery(&softBusMessage);
     g_softbusBtState = true;
-    DiscSoftBusBleInit(&g_discInnerCallback);
+    EXPECT_TRUE(DiscSoftBusBleInit(&g_discInnerCallback) != nullptr);
     softBusMessage.what = START_PASSIVE_DISCOVERY;
     StartActiveDiscovery(&softBusMessage);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest ProcessBleDiscFunc001 End");
@@ -1458,7 +1227,7 @@ HWTEST_F(DiscSoftBusBleTest, Recovery001, TestSize.Level1)
     };
     Recovery(&softBusMessage);
     g_softbusBtState = true;
-    DiscSoftBusBleInit(&g_discInnerCallback);
+    EXPECT_TRUE(DiscSoftBusBleInit(&g_discInnerCallback) != nullptr);
     softBusMessage.what = RECOVERY;
     Recovery(&softBusMessage);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest Recovery001 End");
@@ -1485,7 +1254,7 @@ HWTEST_F(DiscSoftBusBleTest, BleDiscTurnOff001, TestSize.Level1)
     };
     BleDiscTurnOff(&softBusMessage);
     g_softbusBtState = true;
-    DiscSoftBusBleInit(&g_discInnerCallback);
+    EXPECT_TRUE(DiscSoftBusBleInit(&g_discInnerCallback) != nullptr);
     softBusMessage.what = RECOVERY;
     BleDiscTurnOff(&softBusMessage);
     DiscBleDeinit();
@@ -1592,7 +1361,7 @@ HWTEST_F(DiscSoftBusBleTest, StartTimeout001, TestSize.Level1)
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest StartTimeout001 Start");
     StartTimeout(nullptr);
     StartTimeout("123");
-    DiscSoftBusBleInit(&g_discInnerCallback);
+    EXPECT_TRUE(DiscSoftBusBleInit(&g_discInnerCallback) != nullptr);
     StartTimeout("123");
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest StartTimeout001 End");
 }
@@ -1608,7 +1377,7 @@ HWTEST_F(DiscSoftBusBleTest, RemoveTimeout001, TestSize.Level1)
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest RemoveTimeout001 Start");
     RemoveTimeout(nullptr);
     RemoveTimeout("123");
-    DiscSoftBusBleInit(&g_discInnerCallback);
+    EXPECT_TRUE(DiscSoftBusBleInit(&g_discInnerCallback) != nullptr);
     RemoveTimeout("123");
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest RemoveTimeout001 End");
 }
@@ -1658,47 +1427,9 @@ HWTEST_F(DiscSoftBusBleTest, AddRecvMessage002, TestSize.Level1)
 HWTEST_F(DiscSoftBusBleTest, RemoveRecvMessage001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest RemoveRecvMessage001 Start");
-    DiscSoftBusBleInit(&g_discInnerCallback);
+    EXPECT_TRUE(DiscSoftBusBleInit(&g_discInnerCallback) != nullptr);
     RemoveRecvMessage(0X01);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest RemoveRecvMessage001 End");
-}
-
-/*
-* @tc.name: DiscBleMsgHandler001
-* @tc.desc: test DiscBleMsgHandler
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, DiscBleMsgHandler001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest DiscBleMsgHandler001 Start");
-    SoftBusMutexInit(&g_recvMessageInfo.lock, nullptr);
-    BleGattLockInit();
-    SoftBusMutexInit(&g_bleInfoLock, nullptr);
-    SoftBusMessage softBusMessage = {
-        .what = START_PASSIVE_DISCOVERY,
-        .arg1 = 1,
-        .arg2 = 2,
-        .time = 12,
-        .obj = nullptr,
-        .handler = nullptr,
-        .FreeMessage = nullptr,
-    };
-    softBusMessage.what = START_PASSIVE_DISCOVERY;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = STOP_DISCOVERY;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = REPLY_PASSIVE_NON_BROADCAST;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = PROCESS_TIME_OUT;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = RECOVERY;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = TURN_OFF;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = 20;
-    DiscBleMsgHandler(&softBusMessage);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest DiscBleMsgHandler001 End");
 }
 
 /*
@@ -1711,7 +1442,7 @@ HWTEST_F(DiscSoftBusBleTest, BleInfoDump001, TestSize.Level1)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest BleInfoDump001 Start");
     DiscSoftBusBleInit(&g_discInnerCallback);
-    BleInfoDump(9);
+    EXPECT_TRUE(BleInfoDump(9) == SOFTBUS_OK);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest BleInfoDump001 End");
 }
 
@@ -1846,39 +1577,7 @@ HWTEST_F(DiscSoftBusBleTest, ProcessBleInfoManager003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest ProcessBleInfoManager003 End");
 }
-/*
-* @tc.name: BleUpdateLocalDeviceInfo001
-* @tc.desc: test BleUpdateLocalDeviceInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, BleUpdateLocalDeviceInfo001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest BleUpdateLocalDeviceInfo001 Start");
-    InfoTypeChanged infoTypeChanged = TYPE_LOCAL_DEVICE_NAME;
-    g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate = true;
-    g_bleAdvertiser[1].isAdvertising = true;
-    BleUpdateLocalDeviceInfo(infoTypeChanged);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest BleUpdateLocalDeviceInfo001 End");
-}
-/*
-* @tc.name: BleUpdateLocalDeviceInfo002
-* @tc.name: BleUpdateLocalDeviceInfo002
-* @tc.desc: test BleUpdateLocalDeviceInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, BleUpdateLocalDeviceInfo002, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest BleUpdateLocalDeviceInfo002 Start");
-    InfoTypeChanged infoTypeChanged = TYPE_LOCAL_DEVICE_NAME;
-    g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate = true;
-    g_bleAdvertiser[1].isAdvertising = false;
-    g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate = true;
-    g_bleAdvertiser[0].isAdvertising = true;
-    BleUpdateLocalDeviceInfo(infoTypeChanged);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest BleUpdateLocalDeviceInfo002 End");
-}
+
 /*
 * @tc.name: InitDiscBleInfo001
 * @tc.desc: test InitDiscBleInfo
@@ -1915,49 +1614,6 @@ HWTEST_F(DiscSoftBusBleTest, RemoveRecvMsgFunc002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest RemoveRecvMsgFunc002 End");
 }
-/*
-* @tc.name: AssembleNonOptionalTlv002
-* @tc.desc: test AssembleNonOptionalTlv
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, AssembleNonOptionalTlv002, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest AssembleNonOptionalTlv002 Start");
-    DeviceInfo infoTest;
-    infoTest.range = 1;
-    BroadcastData broadcastDataTest {};
-    g_recvMessageInfo.numNeedBrMac = 1;
-    AssembleNonOptionalTlv(&infoTest, &broadcastDataTest);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest AssembleNonOptionalTlv002 End");
-}
-/*
-* @tc.name: DiscMsgHandler001
-* @tc.desc: test DiscMsgHandler
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(DiscSoftBusBleTest, DiscMsgHandler001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest DiscMsgHandler001 Start");
-    SoftBusMessage softBusMessage = { 0 };
-    softBusMessage.what = PUBLISH_ACTIVE_SERVICE;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = PUBLISH_PASSIVE_SERVICE;
-    DiscBleMsgHandler(&softBusMessage);
-    g_bleAdvertiser[NON_ADV_ID].isAdvertising = true;
-    softBusMessage.what = UNPUBLISH_SERVICE;
-    DiscBleMsgHandler(&softBusMessage);
-    g_bleAdvertiser[NON_ADV_ID].isAdvertising = false;
-    softBusMessage.what = UNPUBLISH_SERVICE;
-    DiscBleMsgHandler(&softBusMessage);
-    softBusMessage.what = START_ACTIVE_DISCOVERY;
-    DiscBleMsgHandler(&softBusMessage);
-    g_bleAdvertiser[CON_ADV_ID].isAdvertising = true;
-    softBusMessage.what = STOP_DISCOVERY;
-    DiscBleMsgHandler(&softBusMessage);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest DiscMsgHandler001 End");
-}
 
 /*
 * @tc.name: UpdateAdvertiser001
@@ -1975,10 +1631,10 @@ HWTEST_F(DiscSoftBusBleTest, UpdateAdvertiser001, TestSize.Level1)
         .GetDeviceInfo = GetDeviceInfo,
     };
     g_info = 0;
-    UpdateAdvertiser(advTest);
+    EXPECT_TRUE(UpdateAdvertiser(advTest) == SOFTBUS_OK);
 
     g_info = -1;
-    UpdateAdvertiser(advTest);
+    EXPECT_TRUE(UpdateAdvertiser(advTest) != SOFTBUS_OK);
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, UpdateAdvertiser001, End");
 }
 

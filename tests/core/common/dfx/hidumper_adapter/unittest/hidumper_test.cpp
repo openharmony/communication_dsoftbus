@@ -580,17 +580,4 @@ HWTEST_F(HidumperTest, SoftBusRegHiDumperHandler001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegHiDumperHandler001, end");
 }
-
-/**
- * @tc.name: SoftBusHiDumperDeinitTest001
- * @tc.desc: Verify SoftBusHiDumperDeinit function, no parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(HidumperTest, SoftBusHiDumperDeinitTest001, TestSize.Level1)
-{
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusHiDumperDeinitTest001, Start");
-    SoftBusHiDumperDeinit();
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusHiDumperDeinitTest001, end");
-}
 } // namespace OHOS

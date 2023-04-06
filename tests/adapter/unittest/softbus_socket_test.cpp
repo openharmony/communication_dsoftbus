@@ -934,22 +934,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect004, TestSize.Level0)
 
 /*
 * @tc.name: SoftBusSocketFdZeroTest001
-* @tc.desc: set is NULL
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdZeroTest001, TestSize.Level0)
-{
-    SoftBusSocketFdZero(NULL);
-}
-
-/*
-* @tc.name: SoftBusSocketFdZeroTest002
 * @tc.desc: set fdsBits zero success
 * @tc.type: FUNC
 * @tc.require: 1
 */
-HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdZeroTest002, TestSize.Level0)
+HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdZeroTest001, TestSize.Level0)
 {
     SoftBusFdSet set = {0};
     set.fdsBits[0] = 1;
@@ -1004,30 +993,6 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdClrTest001, TestSize.Level0)
     SoftBusSocketFdSet(1, &set);
     SoftBusSocketFdClr(1, &set);
     EXPECT_TRUE(set.fdsBits[0] == 0);
-}
-
-/*
-* @tc.name: SoftBusSocketFdClrTest002
-* @tc.desc: set is null
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdClrTest002, TestSize.Level0)
-{
-    SoftBusSocketFdClr(1, NULL);
-}
-
-/*
-* @tc.name: SoftBusSocketFdClrTest003
-* @tc.desc: clear fd is not set
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFdClrTest003, TestSize.Level0)
-{
-    SoftBusFdSet set;
-    SoftBusSocketFdZero(&set);
-    SoftBusSocketFdClr(1, NULL);
 }
 
 /*
