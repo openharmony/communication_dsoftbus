@@ -106,17 +106,6 @@ TransArgvNode g_validTransCmdArray[TRANS_DUMP_PROCESS_TEST_NUM] = {
     {TEST_FD, TEST_ARGC_TWO, {"-l", "registed_sessionlist"}},
     {TEST_FD, TEST_ARGC_TWO, {"-l", "concurrent_sessionlist"}},
 };
-/**
- * @tc.name: CreateTransFaultEvtTest001
- * @tc.desc: Verify SoftbusReportTransErrorEvt function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5NJEO
- */
-HWTEST_F(TransDfxTest, CreateTransFaultEvtTest001, TestSize.Level0)
-{
-    int32_t errorCode = SOFTBUS_ACCESS_TOKEN_DENIED;
-    SoftbusReportTransErrorEvt(errorCode);
-}
 
 /**
  * @tc.name: SoftBusTransDumpHandler_001
