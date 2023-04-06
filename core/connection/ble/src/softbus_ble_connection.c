@@ -435,9 +435,9 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     return SOFTBUS_OK;
 }
 
-static int32_t BlePostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
+static int32_t BlePostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq)
 {
-    CLOGI("BlePostBytes connectionId=%u,pid=%d,len=%d flag=%d", connectionId, pid, len, flag);
+    CLOGI("BlePostBytes connectionId=%u,pid=%d,len=%d flag=%d seq=%" PRId64, connectionId, pid, len, flag, seq);
     if (len > MAX_DATA_LEN) {
         CLOGI("big msg, len:%u\n", len);
         return SOFTBUS_ERR;
@@ -472,6 +472,7 @@ static int32_t BlePostBytes(uint32_t connectionId, char *data, int32_t len, int3
     node->len = (uint32_t)len;
     node->data = data;
     node->isInner = 0;
+    node->seq = seq;
     int ret = BleEnqueueNonBlock((const void *)node);
     if (ret != SOFTBUS_OK) {
         CLOGE("BlePostBytes enqueue failed");
@@ -572,6 +573,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
     head.seq = 1;
     head.flag = 0;
     head.len = strlen(data) + 1;
+    int64_t seq = head.seq;
     PackConnPktHead(&head);
     if (memcpy_s(buf, dataLen, (void *)&head, headSize) != EOK) {
         CLOGE("memcpy_s head error");
@@ -587,7 +589,7 @@ static void SendRefMessage(int32_t delta, int32_t connectionId, int32_t count, i
     }
     cJSON_free(data);
     CLOGI("SendRefMessage BlePostBytes");
-    if (BlePostBytes(connectionId, buf, dataLen, 0, 0) != SOFTBUS_OK) {
+    if (BlePostBytes(connectionId, buf, dataLen, 0, 0, seq) != SOFTBUS_OK) {
         CLOGE("SendRefMessage BlePostBytes failed");
     }
     return;

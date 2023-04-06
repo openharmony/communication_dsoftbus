@@ -506,7 +506,7 @@ NO_SANITIZE("cfi") int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_OK;
 }
 
-int32_t TcpPostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag)
+int32_t TcpPostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq)
 {
     (void)pid;
     TcpConnInfoNode *item = NULL;
