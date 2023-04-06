@@ -31,6 +31,7 @@ typedef struct {
     bool isInner;
     int32_t module;
     uint64_t seq;
+    int64_t dataSeq;
     uint32_t len;
     const char *data;
     void (*listener)(uint32_t connId, uint64_t seq, int32_t module, int32_t result);
