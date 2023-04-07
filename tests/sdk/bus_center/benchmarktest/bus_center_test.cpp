@@ -15,6 +15,8 @@
 
 #include <benchmark/benchmark.h>
 #include <securec.h>
+
+#include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
@@ -44,6 +46,7 @@ void AddPermission()
         };
         tokenId = GetAccessTokenId(&infoInstance);
         SetSelfTokenID(tokenId);
+        OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
         flag = false;
     }
 }
