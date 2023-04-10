@@ -1184,7 +1184,7 @@ NO_SANITIZE("cfi") static void BrConnMsgHandler(SoftBusMessage *msg)
 
 static int32_t BrConnLooperInit(void)
 {
-    g_brAsyncHandler.looper = CreateNewLooper("brRecv_looper");
+    g_brAsyncHandler.looper = CreateNewLooper("BrRecvLooper");
     if (g_brAsyncHandler.looper == NULL) {
         CLOGE("BrConnLooperInit failed");
         return SOFTBUS_ERR;
