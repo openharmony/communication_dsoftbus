@@ -1342,6 +1342,7 @@ ohos_unittest("LNNTransLaneMockTest") {
 ohos_unittest("LNNDiscoveryInterfaceTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_interface.c",
     "disc_mgr/disc_manager_mock.cpp",
     "disc_mgr/lnn_discovery_interface_test.cpp",
   ]
@@ -1369,7 +1370,6 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
