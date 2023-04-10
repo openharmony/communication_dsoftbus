@@ -152,7 +152,6 @@ HWTEST_F(ConnectionBrTest, testConnmanger002, TestSize.Level1)
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ret = ConnStopLocalListening(nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
-    EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
 };
 
 /*
