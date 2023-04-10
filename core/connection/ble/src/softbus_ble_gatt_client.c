@@ -809,7 +809,7 @@ static void BleGattcNotificationReceiveCallback(int32_t clientId, SoftBusGattcNo
 
 static int BleConnClientLooperInit(void)
 {
-    g_bleClientAsyncHandler.looper = CreateNewLooper("ble_gattc_looper");
+    g_bleClientAsyncHandler.looper = CreateNewLooper("BleGattcLooper");
     if (g_bleClientAsyncHandler.looper == NULL) {
         return SOFTBUS_ERR;
     }
