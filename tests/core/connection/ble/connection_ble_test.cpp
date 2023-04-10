@@ -96,8 +96,6 @@ HWTEST_F(ConnectionBleTest, ManagerTest002, TestSize.Level1)
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ret = ConnStopLocalListening(nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
-    ConnUnSetConnectCallback(static_cast<ConnModule>(0));
-    EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
 }
 
 /*

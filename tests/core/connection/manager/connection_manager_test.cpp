@@ -245,12 +245,17 @@ HWTEST_F(ConnectionManagerTest, testConnmanger001, TestSize.Level1)
 HWTEST_F(ConnectionManagerTest, testConnmanger002, TestSize.Level1)
 {
     printf("test begin testConnmanger002 \r\n");
-    ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
-    ConnConnectDevice(nullptr, 0, nullptr);
-    ConnPostBytes(0, nullptr);
-    ConnStartLocalListening(nullptr);
-    ConnStopLocalListening(nullptr);
-    EXPECT_EQ(SOFTBUS_OK, SOFTBUS_OK);
+    int32_t ret;
+    ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ConnConnectDevice(nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ConnPostBytes(0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ConnStartLocalListening(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ConnStopLocalListening(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 };
 
 /*
