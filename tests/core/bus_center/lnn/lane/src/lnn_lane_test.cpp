@@ -301,11 +301,6 @@ HWTEST_F(LNNLaneMockTest, LANE_FREE_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-static void LaneIdEnabled(uint32_t laneId, uint32_t laneProfileId)
-{
-    return;
-}
-
 /*
 * @tc.name: LANE_INFO_001
 * @tc.desc: LaneInfoProcess BR
