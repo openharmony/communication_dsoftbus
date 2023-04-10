@@ -29,8 +29,6 @@ using namespace testing::ext;
 namespace OHOS {
 static std::string g_pkgName = "com.huawei.plrdtest.dsoftbus";
 static std::string g_permName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-static int32_t g_myPid = PID;
-static uint32_t g_callingTokenId = TOKENID;
 
 class PermissionStateTest : public testing::Test {
 public:
