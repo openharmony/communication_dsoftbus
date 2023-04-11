@@ -1302,7 +1302,7 @@ static void BleDiscTurnOff(SoftBusMessage *msg)
     DLOGI("end");
 }
 
-static int32_t ReplyPassiveNonBroadcast(void)
+NO_SANITIZE("cfi") static int32_t ReplyPassiveNonBroadcast(void)
 {
     DLOGI("enter");
     SoftBusMessage *msg = CreateBleHandlerMsg(REPLY_PASSIVE_NON_BROADCAST, 0, 0, NULL);

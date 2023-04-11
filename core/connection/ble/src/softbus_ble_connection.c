@@ -1408,7 +1408,7 @@ NO_SANITIZE("cfi") static int32_t BleConnectionRemoveMessageFunc(const SoftBusMe
     return SOFTBUS_ERR;
 }
 
-static int BleConnLooperInit(void)
+NO_SANITIZE("cfi") static int BleConnLooperInit(void)
 {
     g_bleConnectAsyncHandler.name = (char *)"ble_conn_handler";
     g_bleConnectAsyncHandler.HandleMessage = BleConnectionMsgHandler;
