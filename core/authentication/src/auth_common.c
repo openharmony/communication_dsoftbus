@@ -48,7 +48,7 @@ static SoftBusMutex g_authLock;
 static SoftBusHandler g_authHandler = { NULL, NULL, NULL };
 
 /* auth handler */
-static bool IsAuthHandlerInit(void)
+NO_SANITIZE("cfi") static bool IsAuthHandlerInit(void)
 {
     if (g_authHandler.looper == NULL || g_authHandler.looper->PostMessage == NULL ||
         g_authHandler.looper->PostMessageDelay == NULL || g_authHandler.looper->RemoveMessageCustom == NULL) {
