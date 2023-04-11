@@ -1323,14 +1323,7 @@ static int BleQueueInit(void)
         return SOFTBUS_ERR;
     }
     SoftBusThread tid;
-    SoftBusThreadAttr threadAttr;
-    const char *threadName = "BleSend";
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr, threadName);
-    if (ret != SOFTBUS_OK) {
-        CLOGE("thread[%s] attr init failed, ret=%d", threadName, ret);
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusThreadCreate(&tid, &threadAttr, BleSendTask, NULL) != 0) {
+    if (SoftBusThreadCreate(&tid, NULL, BleSendTask, NULL) != 0) {
         CLOGE("create BleSendTask failed");
         BleInnerQueueDeinit();
         return SOFTBUS_ERR;

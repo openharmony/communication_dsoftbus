@@ -944,7 +944,7 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB format fsm name fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLooper *looper = CreateNewLooper("HeartbeatLooper");
+    SoftBusLooper *looper = CreateNewLooper("Heartbeat-Looper");
     if (looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB create looper fail");
         return SOFTBUS_ERR;

@@ -205,14 +205,10 @@ static int StartNewLooperThread(SoftBusLooper *looper)
 #define MAINLOOP_STACK_SIZE 8192
 #endif
 #endif
+    int ret;
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr, looper->context->name);
-    if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "thread[%s] attr init failed, ret=%d",
-            looper->context->name, ret);
-        return -1;
-    }
+    SoftBusThreadAttrInit(&threadAttr);
 
     threadAttr.stackSize = MAINLOOP_STACK_SIZE;
     ret = SoftBusThreadCreate(&tid, &threadAttr, LoopTask, looper);
@@ -521,7 +517,7 @@ NO_SANITIZE("cfi") void DestroyLooper(SoftBusLooper *looper)
 
 int LooperInit(void)
 {
-    SoftBusLooper *looper = CreateNewLooper("BusCenterLooper");
+    SoftBusLooper *looper = CreateNewLooper("BusCenter");
     if (!looper) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init looper fail.");
         return -1;

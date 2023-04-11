@@ -73,7 +73,7 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex);
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex);
 
 /* pthread */
-int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr, const char *threadName);
+int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr);
 int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)(void *),
     void *arg);
 int32_t SoftBusThreadJoin(SoftBusThread thread, void **value);

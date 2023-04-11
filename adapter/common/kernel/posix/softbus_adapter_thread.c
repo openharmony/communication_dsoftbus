@@ -150,14 +150,10 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 }
 
 /* pthread */
-int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr, const char *threadName)
+int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr)
 {
     if (threadAttr == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "threadAttr is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (threadName == NULL || strlen(threadName) >= TASK_NAME_MAX_LEN) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "threadName is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -169,7 +165,7 @@ int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr, const char *threadN
     threadAttr->detachState = SOFTBUS_THREAD_JOINABLE;
     threadAttr->stackSize = 0;
     threadAttr->prior = SOFTBUS_PRIORITY_DEFAULT;
-    threadAttr->taskName = threadName;
+    threadAttr->taskName = NULL;
 
     return SOFTBUS_OK;
 }
@@ -298,33 +294,37 @@ NO_SANITIZE("cfi") int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThr
         return SOFTBUS_INVALID_PARAM;
     }
 
+    int32_t ret;
     if (threadAttr == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "threadAttr is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    pthread_attr_t attr;
-    int32_t ret = pthread_attr_init(&attr);
-    if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_attr_init failed, ret[%{public}d]", ret);
-        return SOFTBUS_ERR;
-    }
-    ret = SoftBusConfTransPthreadAttr(threadAttr, &attr);
-    if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusConfTransPthreadAttr failed, ret[%{public}d]", ret);
-        return SOFTBUS_ERR;
-    }
-    ret = pthread_create((pthread_t *)thread, &attr, threadEntry, arg);
-    if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread create failed, ret[%{public}d]", ret);
-        return SOFTBUS_ERR;
-    }
-
-    if (threadAttr->taskName != NULL) {
-        ret = SoftBusThreadSetName(*thread, threadAttr->taskName);
+        ret = pthread_create((pthread_t *)thread, NULL, threadEntry, arg);
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread set name failed, ret[%{public}d]", ret);
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread create failed, ret[%{public}d]", ret);
             return SOFTBUS_ERR;
+        }
+    } else {
+        pthread_attr_t attr;
+        ret = pthread_attr_init(&attr);
+        if (ret != 0) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_attr_init failed, ret[%{public}d]", ret);
+            return SOFTBUS_ERR;
+        }
+        ret = SoftBusConfTransPthreadAttr(threadAttr, &attr);
+        if (ret != 0) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusConfTransPthreadAttr failed, ret[%{public}d]", ret);
+            return SOFTBUS_ERR;
+        }
+        ret = pthread_create((pthread_t *)thread, &attr, threadEntry, arg);
+        if (ret != 0) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread create failed, ret[%{public}d]", ret);
+            return SOFTBUS_ERR;
+        }
+
+        if (threadAttr->taskName != NULL) {
+            ret = SoftBusThreadSetName(*thread, threadAttr->taskName);
+            if (ret != 0) {
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread set name failed, ret[%{public}d]", ret);
+                return SOFTBUS_ERR;
+            }
         }
     }
 

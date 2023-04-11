@@ -660,7 +660,7 @@ NO_SANITIZE("cfi") static void BleConnMsgHandler(SoftBusMessage *msg)
 
 static int BleConnLooperInit(void)
 {
-    g_bleAsyncHandler.looper = CreateNewLooper("BleLooper");
+    g_bleAsyncHandler.looper = CreateNewLooper("ble_looper");
     if (g_bleAsyncHandler.looper == NULL) {
         return SOFTBUS_ERR;
     }
