@@ -199,14 +199,7 @@ NO_SANITIZE("cfi") static void *NetlinkMonitorThread(void *para)
 int32_t LnnInitNetlinkMonitorImpl(void)
 {
     SoftBusThread tid;
-    SoftBusThreadAttr threadAttr;
-    const char *threadName = "NetlinkMonitor";
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr, threadName);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "thread[%s] attr init failed, ret=%d", threadName, ret);
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusThreadCreate(&tid, &threadAttr, NetlinkMonitorThread, NULL) != 0) {
+    if (SoftBusThreadCreate(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
     }
