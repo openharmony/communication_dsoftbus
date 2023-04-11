@@ -47,39 +47,6 @@ void AnonymizePacketTest::SetUp(void) {}
 void AnonymizePacketTest::TearDown(void) {}
 
 /**
- * @tc.name: AnonymizePacketNormalTest001
- * @tc.desc: Verify AnonymizePacket function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest001, TestSize.Level0)
-{
-    AnonyPacketPrintout(SOFTBUS_LOG_COMM, "AnonymizePacketNormalTest001: ", g_originPacket, strlen(g_originPacket));
-}
-
-/**
- * @tc.name: AnonymizePacketNormalTest002
- * @tc.desc: Verify AnonymizePacket function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AnonymizePacketTest, AnonymizePacketNormalTest002, TestSize.Level0)
-{
-    AnonyPacketPrintout(SOFTBUS_LOG_COMM, "AnonymizePacketNormalTest002: ", g_shortPacket, strlen(g_shortPacket));
-}
-
-/**
- * @tc.name: AnonymizePacketWrongTest001
- * @tc.desc: Verify AnonymizePacket function, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AnonymizePacketTest, AnonymizePacketWrongTest001, TestSize.Level0)
-{
-    AnonyPacketPrintout(SOFTBUS_LOG_COMM, "AnonymizePacketWrongTest001: ", NULL, strlen(g_originPacket));
-}
-
-/**
  * @tc.name: AnonySessionNameNormalTest001
  * @tc.desc: Verify AnonyDevId function, use the normal parameter.
  * @tc.type: FUNC

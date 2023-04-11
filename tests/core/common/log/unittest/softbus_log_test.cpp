@@ -50,40 +50,6 @@ void SoftBusLogTest::TearDown(void)
 }
 
 /**
- * @tc.name: NstackxLogTest001
- * @tc.desc: Verify nstackx log.
- * @tc.type: FUNC
- * @tc.require: I60DWN
- */
-HWTEST_F(SoftBusLogTest, NstackxLogTest001, TestSize.Level1)
-{
-    const char *moduleName = nullptr;
-    uint32_t nstackLevel = SOFTBUS_LOG_LEVEL_MAX;
-    NstackxLog(moduleName, nstackLevel, "nstackx log error.");
-
-    const char *moduleName2 = "nstackx";
-    uint32_t nstackLevel2 = SOFTBUS_LOG_LEVEL_MAX;
-    NstackxLog(moduleName2, nstackLevel2, "nstackx log error.");
-}
-
-/**
- * @tc.name: SoftBusLogTest001
- * @tc.desc: Verify softbus log.
- * @tc.type: FUNC
- * @tc.require: I60DWN
- */
-HWTEST_F(SoftBusLogTest, SoftBusLogTest001, TestSize.Level1)
-{
-    SoftBusLogModule module = SOFTBUS_LOG_MODULE_MAX;
-    SoftBusLogLevel level = SOFTBUS_LOG_LEVEL_MAX;
-    SoftBusLog(module, level, "softbus log error.");
-
-    SoftBusLogModule module2 = SOFTBUS_LOG_COMM;
-    SoftBusLogLevel level2 = SOFTBUS_LOG_LEVEL_MAX;
-    SoftBusLog(module2, level2, "softbus log error.");
-}
-
-/**
  * @tc.name: AnonymizesTest001
  * @tc.desc: Anonymize.
  * @tc.type: FUNC
@@ -108,80 +74,6 @@ HWTEST_F(SoftBusLogTest, AnonymizesTest001, TestSize.Level1)
     const char *expected2 = "TOOSHORT";
     const char *actual2 = Anonymizes(target2, expectAnonymizedLength2);
     EXPECT_STREQ(expected2, actual2);
-}
-
-/**
- * @tc.name: AnonyPacketPrintoutTest001
- * @tc.desc: Anonymize packet print out.
- * @tc.type: FUNC
- * @tc.require: I60DWN
- */
-HWTEST_F(SoftBusLogTest, AnonyPacketPrintoutTest001, TestSize.Level1)
-{
-    SetSignalingMsgSwitchOff();
-
-    SoftBusLogModule module = SOFTBUS_LOG_COMM;
-    const char *msg = nullptr;
-    const char *packet = nullptr;
-    size_t packetLen = 0;
-    AnonyPacketPrintout(module, msg, packet, packetLen);
-
-    const char *msg2 = "message";
-    const char *packet2 = nullptr;
-    size_t packetLen2 = 0;
-    AnonyPacketPrintout(module, msg2, packet2, packetLen2);
-
-    const char *msg3 = "message";
-    const char *packet3 = "packet";
-    size_t packetLen3 = 0;
-    AnonyPacketPrintout(module, msg3, packet3, packetLen3);
-
-    const char *msg4 = "message";
-    const char *packet4 = "packet";
-    size_t packetLen4 = SIZE_MAX;
-    AnonyPacketPrintout(module, msg4, packet4, packetLen4);
-
-    const char *msg5 = "message";
-    const char *packet5 = "packet";
-    size_t packetLen5 = 6;
-    AnonyPacketPrintout(module, msg5, packet5, packetLen5);
-}
-
-/**
- * @tc.name: AnonyPacketPrintoutTest002
- * @tc.desc: Anonymize packet print out.
- * @tc.type: FUNC
- * @tc.require: I60DWN
- */
-HWTEST_F(SoftBusLogTest, AnonyPacketPrintoutTest002, TestSize.Level1)
-{
-    SetSignalingMsgSwitchOn();
-
-    SoftBusLogModule module = SOFTBUS_LOG_COMM;
-    const char *msg = nullptr;
-    const char *packet = nullptr;
-    size_t packetLen = 0;
-    AnonyPacketPrintout(module, msg, packet, packetLen);
-
-    const char *msg2 = "message";
-    const char *packet2 = nullptr;
-    size_t packetLen2 = 0;
-    AnonyPacketPrintout(module, msg2, packet2, packetLen2);
-
-    const char *msg3 = "message";
-    const char *packet3 = "packet";
-    size_t packetLen3 = 0;
-    AnonyPacketPrintout(module, msg3, packet3, packetLen3);
-
-    const char *msg4 = "message";
-    const char *packet4 = "packet";
-    size_t packetLen4 = SIZE_MAX;
-    AnonyPacketPrintout(module, msg4, packet4, packetLen4);
-
-    const char *msg5 = "message";
-    const char *packet5 = "packet";
-    size_t packetLen5 = 6;
-    AnonyPacketPrintout(module, msg5, packet5, packetLen5);
 }
 
 /**
