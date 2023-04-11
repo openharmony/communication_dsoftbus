@@ -21,7 +21,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define P2P_LOOP_NAME "p2ploop"
+#define P2P_LOOP_NAME "P2pLooper"
 SoftBusLooper *g_p2pLooper = 0;
 static SoftBusHandler g_p2pcHandler = {
     .name ="g_p2pHandler"
