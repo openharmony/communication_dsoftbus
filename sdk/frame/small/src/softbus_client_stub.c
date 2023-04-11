@@ -145,7 +145,8 @@ static int StartDeathProcTask(void)
     int ret;
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
-    ret = SoftBusThreadAttrInit(&threadAttr);
+    const char *threadName = "DeathProc";
+    ret = SoftBusThreadAttrInit(&threadAttr, threadName);
     if (ret != 0) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Thread attr init failed, ret[%d]", ret);
         return SOFTBUS_ERR;

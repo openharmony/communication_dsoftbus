@@ -169,7 +169,7 @@ NO_SANITIZE("cfi") uint64_t LnnGetSysTimeMs(void)
 
 NO_SANITIZE("cfi") int32_t LnnInitLaneLooper(void)
 {
-    SoftBusLooper *looper = CreateNewLooper("Lane-looper");
+    SoftBusLooper *looper = CreateNewLooper("LaneLooper");
     if (!looper) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init laneLooper fail");
         return SOFTBUS_ERR;

@@ -692,6 +692,19 @@ void FreeNodeInfo(NodeBasicInfo *info);
  */
 int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
 
+/**
+ * @brief Set local db data change flag to the local device.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param networkId Indicates the pointer to the network ID of the device.
+ * @param dataChangeFlag Local db data change flag.
+ *
+ * @return Returns <b>0</b> if set successful, returns any other value if the request fails.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
 int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 
 /**
