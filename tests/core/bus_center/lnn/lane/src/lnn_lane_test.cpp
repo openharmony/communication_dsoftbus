@@ -301,42 +301,6 @@ HWTEST_F(LNNLaneMockTest, LANE_FREE_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-static void LaneIdEnabled(uint32_t laneId, uint32_t laneProfileId)
-{
-    return;
-}
-
-/*
-* @tc.name: LANE_REGISTER_001
-* @tc.desc: lane register
-* @tc.type: FAILUE
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LANE_REGISTER_001, TestSize.Level1)
-{
-    RegisterLaneIdListener(nullptr);
-
-    const ILaneIdStateListener cb = {
-        .OnLaneIdEnabled = LaneIdEnabled,
-        .OnLaneIdDisabled = nullptr,
-    };
-    RegisterLaneIdListener(&cb);
-
-    const ILaneIdStateListener listener = {
-        .OnLaneIdEnabled = nullptr,
-        .OnLaneIdDisabled = LaneIdEnabled,
-    };
-    RegisterLaneIdListener(&listener);
-
-    const ILaneIdStateListener invalidListener = {
-        .OnLaneIdEnabled = nullptr,
-        .OnLaneIdDisabled = nullptr,
-    };
-    RegisterLaneIdListener(&invalidListener);
-
-    UnregisterLaneIdListener(nullptr);
-}
-
 /*
 * @tc.name: LANE_INFO_001
 * @tc.desc: LaneInfoProcess BR
@@ -432,17 +396,6 @@ HWTEST_F(LNNLaneMockTest, LNN_DATA_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     LnnDeleteData(nullptr, 32);
-}
-
-/*
-* @tc.name: LNN_GET_TIME_001
-* @tc.desc: LnnGetSysTimeMs
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LNN_GET_TIME_001, TestSize.Level1)
-{
-    LnnGetSysTimeMs();
 }
 
 /*

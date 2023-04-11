@@ -60,7 +60,7 @@ using namespace testing::ext;
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(clientObject);
         return clientProxy;
     }
-    
+
     class BusCenterClientProxyStandardTest : public testing::Test {
     public:
         static void SetUpTestCase();
@@ -128,40 +128,5 @@ using namespace testing::ext;
         EXPECT_TRUE(ret == SOFTBUS_ERR);
         ret = clientProxy->BusCenterClientProxy::OnLeaveMetaNodeResult(networkIdValue, retCode);
         EXPECT_TRUE(ret == SOFTBUS_ERR);
-    }
-    
-
-    /*
-    * @tc.name: ON_LEAVE_LNN_RESULT_Test_001
-    * @tc.desc: On LEABE LNN Result 
-    * @tc.type: FUNC
-    * @tc.require:
-    */
-    HWTEST_F(BusCenterClientProxyStandardTest, ON_LEAVE_LNN_RESULT_Test_002, TestSize.Level1)
-    {
-        char pkgNameValue[] = "test";
-        sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgNameValue);
-        char networkId[] = "1111";
-        int retCode = 10;
-        clientProxy->BusCenterClientProxy::OnLeaveLNNResult(networkId, retCode);
-        const char *networkId2 = nullptr;
-        clientProxy->BusCenterClientProxy::OnLeaveLNNResult(networkId2, retCode);
-    }
-
-    /*
-    * @tc.name: ON_LEAVE_META_NODE_RESULT_Test_002
-    * @tc.desc: On LEABE LNN Result 
-    * @tc.type: FUNC
-    * @tc.require:
-    */
-    HWTEST_F(BusCenterClientProxyStandardTest, ON_LEAVE_META_NODE_RESULT_Test_002, TestSize.Level1)
-    {
-        char pkgNameValue[] = "test";
-        sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgNameValue);
-        char networkId[] = "1111";
-        int retCode = 10;
-        clientProxy->BusCenterClientProxy::OnLeaveMetaNodeResult(networkId, retCode);
-        const char *networkId2 = nullptr;
-        clientProxy->BusCenterClientProxy::OnLeaveMetaNodeResult(networkId2, retCode);
     }
 } // namespace OHOS

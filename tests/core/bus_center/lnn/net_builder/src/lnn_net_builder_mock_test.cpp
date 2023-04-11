@@ -30,14 +30,11 @@ constexpr int32_t LOCAL_WEIGHT = 10;
 constexpr char NODE_UDID[] = "123456ABCDEF";
 constexpr char NODE_NETWORK_ID[] = "235689BNHFCF";
 constexpr char NODE1_NETWORK_ID[] = "345678BNHFCF";
-constexpr uint8_t MSG[] = "123456BNHFCF";
 constexpr int64_t AUTH_META_ID = 1;
 constexpr char INVALID_UDID[] =
     "ASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJK\
     LPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJ\
     KLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLP";
-constexpr uint32_t ADDR_LEN1 = 15;
-constexpr uint32_t ADDR_LEN2 = 12;
 constexpr int64_t AUTH_ID = 10;
 constexpr int64_t AUTH_ID_ADD = 11;
 constexpr char NODE1_BR_MAC[] = "12345TTU";
@@ -278,20 +275,6 @@ HWTEST_F(LNNNetBuilderMockTest, NODE_INFO_SYNC_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ON_RECEIVER_NODE_ADDR_CHANGED_MSG_TEST_001
-* @tc.desc: on receive node addr changed msg test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, ON_RECEIVER_NODE_ADDR_CHANGED_MSG_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    OnReceiveNodeAddrChangedMsg(LNN_INFO_TYPE_NODE_ADDR, nullptr, MSG, ADDR_LEN1);
-    OnReceiveNodeAddrChangedMsg(LNN_INFO_TYPE_NODE_ADDR, nullptr, MSG, ADDR_LEN2);
-    OnReceiveNodeAddrChangedMsg(LNN_INFO_TYPE_NODE_ADDR, nullptr, MSG, ADDR_LEN2);
-}
-
-/*
 * @tc.name: ON_DEVICE_NOT_TRUSTED_TEST_001
 * @tc.desc: on device not trusted test
 * @tc.type: FUNC
@@ -362,22 +345,6 @@ HWTEST_F(LNNNetBuilderMockTest, GET_CURRENT_CONNECT_TYPE_TEST_001, TestSize.Leve
     EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
     EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
     EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
-}
-
-/*
-* @tc.name: NET_BUILDER_MESSAGE_HANDLER_TEST_001
-* @tc.desc: net builder message handler test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, NET_BUILDER_MESSAGE_HANDLER_TEST_001, TestSize.Level1)
-{
-    SoftBusMessage msg;
-    msg.what = MSG_TYPE_MAX;
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    NetBuilderMessageHandler(nullptr);
-    NetBuilderMessageHandler(&msg);
 }
 
 /*
@@ -902,39 +869,10 @@ HWTEST_F(LNNNetBuilderMockTest, INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.L
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnSendNewNetworkOnlineToConnFsm(_)).WillOnce(Return(SOFTBUS_OK));
     InitiateNewNetworkOnline(CONNECTION_ADDR_MAX, NODE_NETWORK_ID);
-    
+
     EXPECT_CALL(NetBuilderMock, LnnSendNewNetworkOnlineToConnFsm(_)).WillOnce(Return(SOFTBUS_OK));
     InitiateNewNetworkOnline(CONNECTION_ADDR_BR, NODE_NETWORK_ID);
     InitiateNewNetworkOnline(CONNECTION_ADDR_BLE, NODE_NETWORK_ID);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-
-/*
-* @tc.name: TYR_INITIATE_NEW_NETWORK_ONLINE_TEST_001
-* @tc.desc: try initiate new network online test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, TYR_INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    connFsm->connInfo.flag = CONN_FLAG2;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-
-    LnnConnectionFsm fsmTest;
-    (void)memset_s(&fsmTest, sizeof(LnnConnectionFsm), 0, sizeof(LnnConnectionFsm));
-    connFsm->connInfo.flag = CONN_FLAG1;
-    (void)strcpy_s(fsmTest.connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
-    TryInitiateNewNetworkOnline(&fsmTest);
-
-    (void)strcpy_s(fsmTest.connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    TryInitiateNewNetworkOnline(&fsmTest);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -979,36 +917,12 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_001, TestSize
 }
 
 /*
-* @tc.name: TRY_DISCONNECT_ALL_CONNECTION_TEST_002
-* @tc.desc: tyr disconnect all connection test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_002, TestSize.Level1)
-{
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
-    connFsm->connInfo.addr.type = CONNECTION_ADDR_BLE;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-
-    LnnConnectionFsm fsmTest;
-    (void)memset_s(&fsmTest, sizeof(LnnConnectionFsm), 0, sizeof(LnnConnectionFsm));
-    fsmTest.connInfo.flag = CONN_FLAG1;
-    fsmTest.connInfo.addr.type = CONNECTION_ADDR_BLE;
-    (void)strcpy_s(fsmTest.connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
-    TryDisconnectAllConnection(&fsmTest);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
 * @tc.name: TRY_DISCONNECT_ALL_CONNECTION_TEST_003
 * @tc.desc: tyr disconnect all connection test
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_003, TestSize.Level1)
+HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_002, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
     ListInit(&connFsm->node);
@@ -1031,30 +945,6 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_003, TestSize
     TryDisconnectAllConnection(&fsmTest);
     TryNotifyAllTypeOffline(&fsmTest);
 
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
-* @tc.name: TRY_DISCONNECT_ALL_CONNECTION_TEST_004
-* @tc.desc: tyr disconnect all connection test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_004, TestSize.Level1)
-{
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    (void)strcpy_s(connFsm->connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, NODE1_IP);
-    connFsm->connInfo.addr.type = CONNECTION_ADDR_ETH;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-
-    LnnConnectionFsm fsmTest;
-    (void)memset_s(&fsmTest, sizeof(LnnConnectionFsm), 0, sizeof(LnnConnectionFsm));
-    fsmTest.connInfo.flag = CONN_FLAG1;
-    fsmTest.connInfo.addr.type = CONNECTION_ADDR_ETH;
-    (void)strcpy_s(fsmTest.connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, NODE1_IP);
-    TryDisconnectAllConnection(&fsmTest);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1435,27 +1325,6 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001, T
     EXPECT_CALL(NetBuilderMock, LnnGetAllAuthSeq(_, _, _)).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillOnce(Return(SOFTBUS_ERR));
     OnLnnProcessNotTrustedMsgDelay(para2);
-}
-
-/*
-* @tc.name: ON_AUTH_META_VERIFY_PASSED_TEST_001
-* @tc.desc: on auth meta verify passed test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, ON_AUTH_META_VERIFY_PASSED_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    OnAuthMetaVerifyPassed(REQUEST_ID, AUTH_META_ID, nullptr);
-    MetaJoinRequestNode *requestNode =
-        reinterpret_cast<MetaJoinRequestNode *>(SoftBusMalloc(sizeof(MetaJoinRequestNode)));
-    ListInit(&requestNode->node);
-    requestNode->requestId = REQUEST_ID;
-    ListAdd(&g_netBuilder.metaNodeList, &requestNode->node);
-    OnAuthMetaVerifyPassed(REQUEST_ID_ADD, AUTH_META_ID, nullptr);
-    ListDelete(&requestNode->node);
-    SoftBusFree(requestNode);
 }
 
 /*

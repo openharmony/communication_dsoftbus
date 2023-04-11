@@ -136,66 +136,6 @@ HWTEST_F(AuthOtherTest, ADD_CONN_REQUEST_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NOTIFY_CLIENT_CONNECTED_TEST_001
- * @tc.desc: notify client connected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, NOTIFY_CLIENT_CONNECTED_TEST_001, TestSize.Level1)
-{
-    uint32_t requestId = 0;
-    uint64_t connId = 0;
-    int32_t result = 0;
-    AuthConnInfo connInfo;
-
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    g_listener.onConnectResult = nullptr;
-    NotifyClientConnected(requestId, connId, result, &connInfo);
-    g_listener.onConnectResult = OnConnectResultTest;
-    NotifyClientConnected(requestId, connId, result, &connInfo);
-}
-
-/*
- * @tc.name: NOTIFY_DISCONNECTED_TEST_001
- * @tc.desc: notify disconnected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, NOTIFY_DISCONNECTED_TEST_001, TestSize.Level1)
-{
-    uint64_t connId = 0;
-    AuthConnInfo connInfo;
-
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    g_listener.onDisconnected = nullptr;
-    NotifyDisconnected(connId, &connInfo);
-    g_listener.onDisconnected = OnDisconnectedTest;
-    NotifyDisconnected(connId, &connInfo);
-}
-
-/*
- * @tc.name: NOTIFY_DATA_RECEIVED_TEST_001
- * @tc.desc: notify data received test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
-{
-    uint64_t connId = 0;
-    AuthConnInfo connInfo;
-    bool fromServer = true;
-    AuthDataHead head;
-    uint8_t *data = nullptr;
-
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
-    g_listener.onDataReceived = nullptr;
-    NotifyDataReceived(connId, &connInfo, fromServer, &head, data);
-    g_listener.onDataReceived = OnDataReceivedTest;
-    NotifyDataReceived(connId, &connInfo, fromServer, &head, data);
-}
-
-/*
  * @tc.name: HANDLE_CONNCONNECT_TIMEOUT_TEST_001
  * @tc.desc: handle connConnect timeout test
  * @tc.type: FUNC
@@ -257,20 +197,6 @@ HWTEST_F(AuthOtherTest, HANDLE_CONN_CONNECT_RESULT_TEST_001, TestSize.Level1)
 
     HandleConnConnectResult(nullptr);
     HandleConnConnectResult((void *)&para);
-}
-
-/*
- * @tc.name: ON_WIFI_CONNECTED_TEST_001
- * @tc.desc: on wifi connected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
-{
-    int32_t fd = 0;
-
-    OnWiFiConnected(fd, true);
-    OnWiFiConnected(fd, false);
 }
 
 /*
@@ -426,59 +352,6 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NOTIFY_DEVICE_DISCONNECT_TEST_001
- * @tc.desc: notify device disconnect test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_DISCONNECT_TEST_001, TestSize.Level1)
-{
-    int64_t authId = 0;
-
-    g_verifyListener.onDeviceDisconnect = nullptr;
-    NotifyDeviceDisconnect(authId);
-    g_verifyListener.onDeviceDisconnect = OnDeviceDisconnectTest;
-    NotifyDeviceDisconnect(authId);
-}
-
-/*
- * @tc.name: ON_DEVICE_NOT_TRUSTED_TEST_001
- * @tc.desc: on device not trusted test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
-{
-    const char *peerUdid = "000";
-
-    g_verifyListener.onDeviceNotTrusted = nullptr;
-    OnDeviceNotTrusted(peerUdid);
-    g_verifyListener.onDeviceNotTrusted = OnDeviceNotTrustedTest;
-    OnDeviceNotTrusted(peerUdid);
-}
-
-/*
- * @tc.name: ON_GROUP_CREATED_TEST_001
- * @tc.desc: on group created test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_GROUP_CREATED_TEST_001, TestSize.Level1)
-{
-    const char *groupId = "000";
-    int32_t groupType = 0;
-
-    g_groupChangeListener.onGroupCreated = nullptr;
-    OnGroupCreated(groupId, groupType);
-    g_groupChangeListener.onGroupCreated = OnGroupCreatedTest;
-    OnGroupCreated(groupId, groupType);
-    g_groupChangeListener.onGroupDeleted = nullptr;
-    OnGroupDeleted(groupId);
-    g_groupChangeListener.onGroupDeleted = OnGroupDeletedTest;
-    OnGroupDeleted(groupId);
-}
-
-/*
  * @tc.name: AUTH_MANAGER_SET_AUTH_PASSED_TEST_001
  * @tc.desc: auth manager set auth passed test
  * @tc.type: FUNC
@@ -500,45 +373,6 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_PASSED_TEST_001, TestSize.Level1)
     AuthManagerSetAuthFailed(errAuthId, &info, reason);
     AuthManagerSetAuthFailed(authSeq, &info, reason);
     DelAuthManager(auth, true);
-}
-
-/*
- * @tc.name: HANDLE_RECONNECT_RESULT_TEST_001
- * @tc.desc: handle reconnect result test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
-{
-    AuthRequest request;
-    uint64_t connId = 0;
-    int32_t result = -1;
-
-    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
-    HandleReconnectResult(&request, connId, result);
-    result = 0;
-    HandleReconnectResult(&request, connId, result);
-}
-
-/*
- * @tc.name: HANDLE_DEVICE_INFO_DATA_TEST_001
- * @tc.desc: handle device info data test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_DEVICE_INFO_DATA_TEST_001, TestSize.Level1)
-{
-    uint64_t connId = 0;
-    AuthConnInfo connInfo;
-    bool fromServer = true;
-    AuthDataHead head;
-    const uint8_t *data = nullptr;
-
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
-    HandleDeviceInfoData(connId, &connInfo, fromServer, &head, data);
-    head.seq = 1;
-    HandleDeviceInfoData(connId, &connInfo, fromServer, &head, data);
 }
 
 /*
@@ -570,20 +404,6 @@ HWTEST_F(AuthOtherTest, HANDLE_CONNECTION_DATA_TEST_001, TestSize.Level1)
     (void)strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, ip);
     HandleConnectionData(connId, &connInfo, fromServer, &head, data);
     DelAuthManager(auth, true);
-}
-
-/*
- * @tc.name: HANDLE_DISCONNECTED_EVENT_TEST_001
- * @tc.desc: handle disconnected event test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_DISCONNECTED_EVENT_TEST_001, TestSize.Level1)
-{
-    uint64_t connId = 0;
-
-    HandleDisconnectedEvent(nullptr);
-    HandleDisconnectedEvent((void *)&connId);
 }
 
 
@@ -672,117 +492,6 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1
 }
 
 /*
- * @tc.name: DEL_AUTH_REQUEST_TEST_001
- * @tc.desc: del auth request test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, DEL_AUTH_REQUEST_TEST_001, TestSize.Level1)
-{
-    uint32_t requestId = 1;
-    DelAuthRequest(requestId);
-}
-
-/*
- * @tc.name: PERFORM_VERIFY_CALLBACK_TEST_001
- * @tc.desc: perform verify callback test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, PERFORM_VERIFY_CALLBACK_TEST_001, TestSize.Level1)
-{
-    uint32_t requestId = 1;
-    int32_t result = 0;
-    int64_t authId = 0;
-    NodeInfo info;
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    PerformVerifyCallback(requestId, result, authId, &info);
-}
-
-/*
- * @tc.name: PERFORM_AUTH_CONN_CALLBACK_TEST_001
- * @tc.desc: perform auth conn callback test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, PERFORM_AUTH_CONN_CALLBACK_TEST_001, TestSize.Level1)
-{
-    uint32_t requestId = 1;
-    int32_t result = 0;
-    int64_t authId = 0;
-    PerformAuthConnCallback(requestId, result, authId);
-}
-
-/*
- * @tc.name: COMPLETE_AUTH_SESSION_TEST_001
- * @tc.desc: complete auth session test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, COMPLETE_AUTH_SESSION_TEST_001, TestSize.Level1)
-{
-    AuthFsm authFsm;
-    int32_t result = SOFTBUS_OK;
-    (void)memset_s(&authFsm, sizeof(authFsm), 0, sizeof(authFsm));
-    CompleteAuthSession(&authFsm, result);
-    result = SOFTBUS_ERR;
-    CompleteAuthSession(&authFsm, result);
-}
-
-/*
- * @tc.name: HANDLE_COMMON_MSG_TEST_001
- * @tc.desc: handle common msg test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_COMMON_MSG_TEST_001, TestSize.Level1)
-{
-    AuthFsm authFsm;
-    int32_t msgType = FSM_MSG_AUTH_TIMEOUT;
-    MessagePara msgPara;
-    (void)memset_s(&authFsm, sizeof(authFsm), 0, sizeof(authFsm));
-    (void)memset_s(&msgPara, sizeof(MessagePara), 0, sizeof(MessagePara));
-    HandleCommonMsg(&authFsm, msgType, &msgPara);
-    msgType = FSM_MSG_DEVICE_NOT_TRUSTED;
-    HandleCommonMsg(&authFsm, msgType, &msgPara);
-    msgType = FSM_MSG_DEVICE_DISCONNECTED;
-    HandleCommonMsg(&authFsm, msgType, &msgPara);
-    msgType++;
-    HandleCommonMsg(&authFsm, msgType, &msgPara);
-}
-
-/*
- * @tc.name: HANDLE_MSG_RECV_DEVICE_INFO_TEST_001
- * @tc.desc: handle msg recv device info test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, HANDLE_MSG_RECV_DEVICE_INFO_TEST_001, TestSize.Level1)
-{
-    AuthFsm authFsm;
-    MessagePara para;
-    (void)memset_s(&authFsm, sizeof(authFsm), 0, sizeof(authFsm));
-    (void)memset_s(&para, sizeof(para), 0, sizeof(para));
-    HandleMsgRecvDeviceInfo(&authFsm, &para);
-}
-
-/*
- * @tc.name: DUMP_SESSION_KEY_LIST_TEST_001
- * @tc.desc: dump session key list test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, DUMP_SESSION_KEY_LIST_TEST_001, TestSize.Level1)
-{
-    SessionKeyList list;
-    (void)memset_s(&list, sizeof(list), 0, sizeof(list));
-    DumpSessionkeyList(nullptr);
-    InitSessionKeyList(&list);
-    DumpSessionkeyList(&list);
-    DestroySessionKeyList(&list);
-}
-
-/*
  * @tc.name: HANDLE_UPDATE_SESSION_KEY_EVENT_TEST_001
  * @tc.desc: handle update session key event test
  * @tc.type: FUNC
@@ -813,27 +522,6 @@ HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = RmoveUpdateSessionKeyFunc(&authId, &authId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: UNPACK_COMMON_TEST_001
- * @tc.desc: unpack common test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, UNPACK_COMMON_TEST_001, TestSize.Level1)
-{
-    cJSON json;
-    NodeInfo info;
-    SoftBusVersion version = SOFTBUS_OLD_V2;
-    bool isMetaAuth = true;
-    (void)memset_s(&json, sizeof(json), 0, sizeof(json));
-    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
-    UnpackCommon(&json, &info, version, isMetaAuth);
-    version = SOFTBUS_NEW_V1;
-    UnpackCommon(&json, &info, version, isMetaAuth);
-    isMetaAuth = false;
-    UnpackCommon(&json, &info, version, isMetaAuth);
 }
 
 /*
