@@ -46,7 +46,7 @@ static void ThreadPoolWorker(void *arg);
 NO_SANITIZE("cfi") static int32_t CreateThread(Runnable run, void *argv, const ThreadAttr *attr, uint32_t *threadId)
 {
     SoftBusThreadAttr threadAttrInfo;
-    SoftBusThreadAttrInit(&threadAttrInfo, THREAD_POOL_NAME);
+    SoftBusThreadAttrInit(&threadAttrInfo);
 
     threadAttrInfo.stackSize = (attr->stackSize | MIN_STACK_SIZE);
     threadAttrInfo.prior = attr->priority;

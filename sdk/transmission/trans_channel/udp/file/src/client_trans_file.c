@@ -224,8 +224,7 @@ void TransCloseFileChannel(int32_t dfileId)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start close file channel, dfile=%d.", dfileId);
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
-    const char *threadName = "CloseDFile";
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr, threadName);
+    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "thread attr init failed, ret=%d.", ret);
         return;
