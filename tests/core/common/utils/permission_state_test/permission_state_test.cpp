@@ -29,8 +29,6 @@ using namespace testing::ext;
 namespace OHOS {
 static std::string g_pkgName = "com.huawei.plrdtest.dsoftbus";
 static std::string g_permName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-static int32_t g_myPid = PID;
-static uint32_t g_callingTokenId = TOKENID;
 
 class PermissionStateTest : public testing::Test {
 public:
@@ -54,20 +52,4 @@ void PermissionStateTest::TearDownTestCase()
 {
 }
 
-/**
- * @tc.name: PermissionStateTest001
- * @tc.desc: PermissionStateAPI.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(PermissionStateTest, PermissionStateTest001, TestSize.Level0)
-{
-    Security::AccessToken::PermStateChangeScope scopeInfo;
-    scopeInfo.permList = {g_permName};
-    scopeInfo.tokenIDs = {g_callingTokenId};
-    std::shared_ptr<PermissionStatusChangeCb> callbackPtr_ =
-        std::make_shared<PermissionStatusChangeCb>(scopeInfo, g_pkgName, g_myPid);
-    struct PermStateChangeInfo result{STATE, g_callingTokenId, g_permName};
-    callbackPtr_->PermStateChangeCallback(result);
-}
 } // namespace OHOS

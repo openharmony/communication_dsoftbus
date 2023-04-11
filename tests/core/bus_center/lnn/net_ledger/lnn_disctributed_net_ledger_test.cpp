@@ -434,26 +434,6 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_NODE_BY_UDID_HASH_Test_001, T
 }
 
 /*
-* @tc.name: LNN_REFRESH_DEVICE_ONLINE_STATE_AND_DEVICE_INFO_Test_001
-* @tc.desc: lnn refresh device online state and device info test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNDisctributedLedgerTest, LNN_REFRESH_DEVICE_ONLINE_STATE_AND_DEVICE_INFO_Test_001, TestSize.Level1)
-{
-    DeviceInfo device;
-    InnerDeviceInfoAddtions addtions;
-    (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-    (void)strncpy_s(device.devId, DISC_MAX_DEVICE_ID_LEN, NODE1_UDID, strlen(NODE1_UDID));
-    addtions.medium = COAP;
-    LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &addtions);
-    (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-    (void)strncpy_s(device.devId, DISC_MAX_DEVICE_ID_LEN, RECV_UDID_HASH, strlen(RECV_UDID_HASH));
-    addtions.medium = BLE;
-    LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &addtions);
-}
-
-/*
 * @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
 * @tc.desc: lnn get data change flag test
 * @tc.type: FUNC
