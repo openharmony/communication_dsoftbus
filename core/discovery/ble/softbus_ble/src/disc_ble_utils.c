@@ -256,10 +256,9 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
 
 NO_SANITIZE("cfi") int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
-    if (dataLen == 0) {
-        DLOGE("dataLen is invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOG(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, "device is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOG(data != NULL, SOFTBUS_INVALID_PARAM, "data=NULL is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOG(dataLen != 0, SOFTBUS_INVALID_PARAM, "dataLen=0 is invalid");
     if (memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
         &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
         DLOGE("copy accountHash failed");
@@ -278,7 +277,9 @@ NO_SANITIZE("cfi") int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, co
     while (nextAdsPtr + 1 < dataLen) {
         if (data[nextAdsPtr + 1] == RSP_TYPE) {
             scanRspPtr = nextAdsPtr;
-            scanRspTlvLen = data[scanRspPtr] - RSP_HEAD_LEN + 1;
+            DISC_CHECK_AND_RETURN_RET_LOG(data[scanRspPtr] >= (RSP_HEAD_LEN - 1), SOFTBUS_ERR,
+                "rspLen[%hhu] is less than rsp head length", data[scanRspPtr]);
+            scanRspTlvLen = data[scanRspPtr] - (RSP_HEAD_LEN - 1);
             break;
         }
         nextAdsPtr += data[nextAdsPtr] + 1;
@@ -286,10 +287,7 @@ NO_SANITIZE("cfi") int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, co
 
     uint32_t advLen = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
     uint8_t *copyData = SoftBusCalloc(advLen + scanRspTlvLen);
-    if (copyData == NULL) {
-        DLOGE("malloc failed.");
-        return SOFTBUS_MEM_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOG(copyData != NULL, SOFTBUS_MEM_ERR, "malloc failed.");
     if (memcpy_s(copyData, advLen, data, advLen) != EOK) {
         DLOGE("memcpy_s adv failed, advLen: %u", advLen);
         SoftBusFree(copyData);
