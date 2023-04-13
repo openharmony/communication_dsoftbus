@@ -150,11 +150,6 @@ if (defined(ohos_lite)) {
   }
 
   ohos_shared_library("softbus_adapter") {
-    sanitize = {
-      cfi = true
-      cfi_cross_so = true
-      debug = false
-    }
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
