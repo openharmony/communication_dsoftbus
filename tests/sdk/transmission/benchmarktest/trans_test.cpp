@@ -22,6 +22,7 @@
 #include "nativetoken_kit.h"
 #include "session.h"
 #include "softbus_common.h"
+#include "accesstoken_kit.h"
 #include "token_setproc.h"
 
 
@@ -30,7 +31,7 @@ const char *g_pkgName = "dms";
 char g_sessionName[] = "ohos.distributedschedule.dms.test";
 char g_networkid[] = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 
-const char *RECV_ROOT_PATH = "/data/recv/";
+const char *RECV_ROOT_PATH = "/data/";
 static bool flag = true;
 
 static void AddPermission()
@@ -52,6 +53,7 @@ static void AddPermission()
         };
         tokenId = GetAccessTokenId(&infoInstance);
         SetSelfTokenID(tokenId);
+        OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
         flag = false;
     }
 }
