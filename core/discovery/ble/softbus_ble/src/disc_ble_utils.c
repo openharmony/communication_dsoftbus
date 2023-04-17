@@ -265,7 +265,6 @@ NO_SANITIZE("cfi") int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, co
         return SOFTBUS_MEM_ERR;
     }
     device->info->capabilityBitmap[0] = data[POS_CAPABLITY + ADV_HEAD_LEN];
-
     // ble scan data consists of multiple ADStructures
     // ADStructure format: <length (1 octet)> <type (1 octet)> <data(length octect - 1)>
     // More info about ADStructure, please ref Generic Access Profile Specification
@@ -280,11 +279,12 @@ NO_SANITIZE("cfi") int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, co
             DISC_CHECK_AND_RETURN_RET_LOG(data[scanRspPtr] >= (RSP_HEAD_LEN - 1), SOFTBUS_ERR,
                 "rspLen[%hhu] is less than rsp head length", data[scanRspPtr]);
             scanRspTlvLen = data[scanRspPtr] - (RSP_HEAD_LEN - 1);
+            DISC_CHECK_AND_RETURN_RET_LOG(scanRspPtr + data[scanRspPtr] + 1 <= dataLen, SOFTBUS_ERR,
+                "curScanLen(%u) > dataLen(%u)", scanRspPtr + data[scanRspPtr] + 1, dataLen);
             break;
         }
         nextAdsPtr += data[nextAdsPtr] + 1;
     }
-
     uint32_t advLen = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
     uint8_t *copyData = SoftBusCalloc(advLen + scanRspTlvLen);
     DISC_CHECK_AND_RETURN_RET_LOG(copyData != NULL, SOFTBUS_MEM_ERR, "malloc failed.");
