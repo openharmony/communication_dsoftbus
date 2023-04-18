@@ -14,12 +14,39 @@
  */
 
 #include <benchmark/benchmark.h>
+#include "accesstoken_kit.h"
 #include "discovery_service.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 static int g_subscribeId = 0;
 static int g_publishId = 0;
 static const char *g_pkgName = "Softbus_Kits";
+static bool g_flag = true;
+void AddPermission()
+{
+    if (g_flag) {
+        uint64_t tokenId;
+        const char *perms[2];
+        perms[0] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+        perms[1] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+        NativeTokenInfoParams infoInstance = {
+            .dcapsNum = 0,
+            .permsNum = 2,
+            .aclsNum = 0,
+            .dcaps = NULL,
+            .perms = perms,
+            .acls = NULL,
+            .processName = "Softbus_Kits",
+            .aplStr = "normal",
+        };
+        tokenId = GetAccessTokenId(&infoInstance);
+        SetSelfTokenID(tokenId);
+        OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+        g_flag = false;
+    }
+}
 
 class DiscoveryTest : public benchmark::Fixture {
 public:
@@ -33,7 +60,9 @@ public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp(const ::benchmark::State &state) override
-    {}
+    {
+        AddPermission();
+    }
     void TearDown(const ::benchmark::State &state) override
     {}
 
