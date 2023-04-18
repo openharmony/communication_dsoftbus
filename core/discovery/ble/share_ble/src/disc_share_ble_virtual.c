@@ -86,7 +86,7 @@ static DiscoveryFuncInterface g_fun = {
     .Unsubscribe = Unsubscribe,
     .StopAdvertise = StopAdvertise,
     .LinkStatusChanged = LinkStatusChanged,
-    .UpdateLocalDeviceInfo =UpdateLocalDeviceInfo,
+    .UpdateLocalDeviceInfo = UpdateLocalDeviceInfo,
 };
 
 static DiscoveryBleDispatcherInterface g_sharebleInterface = {
