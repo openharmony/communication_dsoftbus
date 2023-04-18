@@ -318,6 +318,8 @@ static int32_t ScanFilter(const SoftBusBleScanResult *scanResultData)
         "advLen[%u] is too short, less than adv header length", advLen);
 
     uint32_t broadcastAdvLen = advData[POS_PACKET_LENGTH];
+    DISC_CHECK_AND_RETURN_RET_LOG(broadcastAdvLen >= (ADV_HEAD_LEN + RSP_HEAD_LEN - 1), SOFTBUS_ERR,
+        "broadcastAdvLen[%u] is too short, less than adv header length", broadcastAdvLen);
     DISC_CHECK_AND_RETURN_RET_LOG(advLen > (POS_PACKET_LENGTH + broadcastAdvLen + 1), SOFTBUS_ERR,
         "advLen[%u] is too short, less than adv packet length", advLen);
     uint32_t broadcastRspLen = advData[POS_PACKET_LENGTH + broadcastAdvLen + 1];
@@ -668,9 +670,9 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     return SOFTBUS_OK;
 }
 
-static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const BroadcastData *boardcastData)
+static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const BroadcastData *broadcastData)
 {
-    if (advData == NULL || boardcastData == NULL) {
+    if (advData == NULL || broadcastData == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     advData->advData = (char *)SoftBusCalloc(ADV_DATA_MAX_LEN + ADV_HEAD_LEN);
@@ -685,7 +687,7 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Broadcast
         advData->advData = NULL;
         return SOFTBUS_MALLOC_ERR;
     }
-    unsigned short advLength = (boardcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : boardcastData->dataLen;
+    unsigned short advLength = (broadcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : broadcastData->dataLen;
     advData->advLength = advLength + ADV_HEAD_LEN;
     advData->advData[POS_FLAG_BYTE_LEN] = FLAG_BYTE_LEN;
     advData->advData[POS_FLAG_AD_TYPE] = FLAG_AD_TYPE;
@@ -695,17 +697,17 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Broadcast
     advData->advData[POS_UUID + 1] = (char)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK);
     advData->advData[POS_PACKET_LENGTH] = advData->advLength - POS_PACKET_LENGTH - 1;
     DLOGI("advData->advLength=%d advLength=%d", advData->advLength, advLength);
-    if (memcpy_s(&advData->advData[ADV_HEAD_LEN], advLength, boardcastData->data.advData, advLength) != EOK) {
+    if (memcpy_s(&advData->advData[ADV_HEAD_LEN], advLength, broadcastData->data.advData, advLength) != EOK) {
         DLOGE("memcpy err");
         return SOFTBUS_MEM_ERR;
     }
-    advData->scanRspLength = boardcastData->dataLen - advLength + RSP_HEAD_LEN;
+    advData->scanRspLength = broadcastData->dataLen - advLength + RSP_HEAD_LEN;
     advData->scanRspData[POS_RSP_TYPE] = RSP_TYPE;
     advData->scanRspData[POS_COMPANY_ID] = COMPANY_ID & BYTE_MASK;
     advData->scanRspData[POS_COMPANY_ID + 1] = (COMPANY_ID >> BYTE_SHIFT_BIT) & BYTE_MASK;
     if (advData->scanRspLength > RSP_HEAD_LEN) {
         if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], advData->scanRspLength,
-            boardcastData->data.rspData, advData->scanRspLength) != EOK) {
+            broadcastData->data.rspData, advData->scanRspLength) != EOK) {
             DLOGE("memcpy err");
             return SOFTBUS_MEM_ERR;
         }
@@ -740,37 +742,37 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
     }
 }
 
-static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *boardcastData)
+static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
 {
     bool isWakeRemote = GetWakeRemote();
-    if (memset_s(boardcastData->data.data, BROADCAST_MAX_LEN, 0x0, BROADCAST_MAX_LEN) != EOK) {
+    if (memset_s(broadcastData->data.data, BROADCAST_MAX_LEN, 0x0, BROADCAST_MAX_LEN) != EOK) {
         DLOGE("memset failed");
         return SOFTBUS_MEM_ERR;
     }
-    boardcastData->data.data[POS_VERSION] = BLE_VERSION & BYTE_MASK;
-    boardcastData->data.data[POS_BUSINESS] = DISTRIBUTE_BUSINESS & BYTE_MASK;
-    boardcastData->data.data[POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
+    broadcastData->data.data[POS_VERSION] = BLE_VERSION & BYTE_MASK;
+    broadcastData->data.data[POS_BUSINESS] = DISTRIBUTE_BUSINESS & BYTE_MASK;
+    broadcastData->data.data[POS_BUSINESS_EXTENSION] = BIT_CUST_DATA_TYPE;
     if (advId == CON_ADV_ID) {
-        boardcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_CON;
+        broadcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_CON;
         if (isWakeRemote) {
-            boardcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_WAKE_UP;
+            broadcastData->data.data[POS_BUSINESS_EXTENSION] |= BIT_WAKE_UP;
         }
-        if (memcpy_s(&boardcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
+        if (memcpy_s(&broadcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN,
             info->accountHash, SHORT_USER_ID_HASH_LEN) != EOK) {
             DLOGE("memcpy failed");
             return SOFTBUS_ERR;
         }
     } else {
-        DiscBleGetShortUserIdHash(&boardcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
+        DiscBleGetShortUserIdHash(&broadcastData->data.data[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
     }
-    boardcastData->data.data[POS_CAPABLITY] = info->capabilityBitmap[0] & BYTE_MASK;
-    boardcastData->data.data[POS_CAPABLITY_EXTENSION] = 0x0;
-    boardcastData->dataLen = POS_TLV;
+    broadcastData->data.data[POS_CAPABLITY] = info->capabilityBitmap[0] & BYTE_MASK;
+    broadcastData->data.data[POS_CAPABLITY_EXTENSION] = 0x0;
+    broadcastData->dataLen = POS_TLV;
     char deviceIdHash[SHORT_DEVICE_ID_HASH_LENGTH + 1] = {0};
     if (DiscBleGetDeviceIdHash((uint8_t *)deviceIdHash) != SOFTBUS_OK) {
         DLOGE("get deviceId Hash failed");
     }
-    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_ID_HASH, (const void *)deviceIdHash,
+    (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_ID_HASH, (const void *)deviceIdHash,
         SHORT_DEVICE_ID_HASH_LENGTH);
     uint16_t devType = info->devType;
     uint8_t sendDevType[DEVICE_TYPE_LEN] = {0};
@@ -780,11 +782,11 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
         sendDevType[1] = (devType >> ONE_BYTE_LENGTH) & DEVICE_TYPE_MASK;
         devTypeLen++;
     }
-    (void)AssembleTLV(boardcastData, TLV_TYPE_DEVICE_TYPE, (const void *)sendDevType, devTypeLen);
+    (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_TYPE, (const void *)sendDevType, devTypeLen);
     if (advId == NON_ADV_ID) {
-        AssembleNonOptionalTlv(info, boardcastData);
+        AssembleNonOptionalTlv(info, broadcastData);
     }
-    DLOGI("broadcastData->dataLen=%d", boardcastData->dataLen);
+    DLOGI("broadcastData->dataLen=%d", broadcastData->dataLen);
     return SOFTBUS_OK;
 }
 
