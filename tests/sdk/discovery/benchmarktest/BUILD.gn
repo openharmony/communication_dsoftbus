@@ -25,8 +25,14 @@ ohos_benchmarktest("DiscoveryTest") {
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/sdk/discovery/manager/include",
+    "//base/security/access_token/interfaces/innerkits/token_setproc/include",
+    "//base/security/access_token/interfaces/innerkits/nativetoken/include",
+    "//base/security/access_token/interfaces/innerkits/accesstoken/include",
   ]
   deps = [
+    "//base/security/access_token/interfaces/innerkits/accesstoken:libaccesstoken_sdk",
+    "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
+    "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
