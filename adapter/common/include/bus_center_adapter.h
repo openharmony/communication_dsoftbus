@@ -30,6 +30,14 @@ typedef enum {
     COMM_DEVICE_KEY_BUTT
 } CommonDeviceKey;
 
+#define GET_TYPE_UNKNOWN "default"
+#define GET_TYPE_PHONE "phone"
+#define GET_TYPE_PAD "tablet"
+#define GET_TYPE_TV "tv"
+#define GET_TYPE_CAR "car"
+#define GET_TYPE_WATCH "wearable"
+#define GET_TYPE_IPCAMERA "smartVision"
+
 #define TYPE_UNKNOWN "UNKNOWN"
 #define TYPE_PHONE "PHONE"
 #define TYPE_PAD "PAD"
