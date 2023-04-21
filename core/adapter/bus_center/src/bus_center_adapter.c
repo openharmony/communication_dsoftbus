@@ -20,6 +20,7 @@
 #include <securec.h>
 
 #include "bus_center_adapter.h"
+#include "bus_center_info_key.h"
 #include "parameter.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_log.h"
@@ -29,6 +30,23 @@
 #include "softbus_log.h"
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
+
+static void SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_t outLen)
+{
+    if (strcmp(inBuf, GET_TYPE_PHONE) == 0) {
+        (void)strcpy_s(outBuf, outLen, TYPE_PHONE);
+    } else if (strcmp(inBuf, GET_TYPE_PAD) == 0) {
+        (void)strcpy_s(outBuf, outLen, TYPE_PAD);
+    } else if (strcmp(inBuf, GET_TYPE_TV) == 0) {
+        (void)strcpy_s(outBuf, outLen, TYPE_TV);
+    } else if (strcmp(inBuf, GET_TYPE_WATCH) == 0) {
+        (void)strcpy_s(outBuf, outLen, TYPE_WATCH);
+    } else if (strcmp(inBuf, GET_TYPE_IPCAMERA) == 0) {
+        (void)strcpy_s(outBuf, outLen, TYPE_IPCAMERA);
+    }  else {
+        (void)strcpy_s(outBuf, outLen, TYPE_UNKNOWN);
+    }
+}
 
 NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
@@ -65,7 +83,9 @@ NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *val
                 HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDeviceType failed!");
                 return SOFTBUS_ERR;
             }
-            if (strncpy_s(value, len, devType, strlen(devType)) != EOK) {
+            char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
+            SoftBusConvertDeviceType(devType, softBusDevType, len);
+            if (strcpy_s(value, len, softBusDevType) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;
