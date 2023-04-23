@@ -79,13 +79,14 @@ NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *val
             break;
         case COMM_DEVICE_KEY_DEVTYPE:
             devType = GetDeviceType();
-            if (devType == NULL) {
+            if (devType != NULL) {
+                char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
+                SoftBusConvertDeviceType(devType, softBusDevType, len);
+                if (strcpy_s(value, len, softBusDevType) != EOK) {
+                    return SOFTBUS_ERR;
+                }
+            } else {
                 HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDeviceType failed!");
-                return SOFTBUS_ERR;
-            }
-            char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
-            SoftBusConvertDeviceType(devType, softBusDevType, len);
-            if (strcpy_s(value, len, softBusDevType) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;
