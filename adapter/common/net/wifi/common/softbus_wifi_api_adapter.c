@@ -235,7 +235,7 @@ static int32_t ConvertSoftBusWifiScanInfoFromWifi(WifiScanInfo *info, SoftBusWif
         result->band = (int32_t)(info->band);
         result->frequency = (int32_t)(info->frequency);
         result->channelWidth = (int32_t)(info->channelWidth);
-        result->centerFrequency0 =(int32_t)(info->centerFrequency0);
+        result->centerFrequency0 = (int32_t)(info->centerFrequency0);
         result->centerFrequency1 = (int32_t)(info->centerFrequency1);
         result->timestamp = info->timestamp;
         ++result;
