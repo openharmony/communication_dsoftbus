@@ -14,6 +14,7 @@
  */
 
 #include "disc_client_proxy.h"
+
 #include "client_disc_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
