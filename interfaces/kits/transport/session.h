@@ -262,12 +262,14 @@ typedef struct {
     uint64_t periodRecvRateBps;               /**< RX rate in a transmission period, in bit/s */
     uint32_t periodRtt;                       /**< Round-trip time (RTT), in ms */
 
-    /**< RX packet loss rate displayed for high precision. For example, if the packet loss rate is 1.10%, the value is <b>110</b>. */
+    /**< RX packet loss rate displayed for high precision.
+         For example, if the packet loss rate is 1.10%, the value is <b>110</b>. */
     uint32_t periodRecvPktLossHighPrecision;
     uint32_t periodSendLostPkts;              /**< Number of TX packets lost in a transmission period */
     uint32_t periodSendPkts;                  /**< Number of packets sent in a transmission period */
 
-    /**< TX packet loss rate displayed for high precision. For example, if the packet loss rate is 1.10%, the value is <b>110</b>. */
+    /**< TX packet loss rate displayed for high precision.
+         For example, if the packet loss rate is 1.10%, the value is <b>110</b>. */
     uint32_t periodSendPktLossHighPrecision;
     uint64_t periodSendBits;                  /**< Number of bits sent in a transmission period */
     uint64_t periodSendRateBps;               /**< TX rate in a transmission period, in bps */
@@ -694,7 +696,8 @@ int GetSessionSide(int sessionId);
  * @param rootDir Indicates the pointer to the root directory of the file. The length cannot exceed 255 bits.
  *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
- * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if the bundle specified by <b>pkgName</b> fails to be added.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if the bundle specified by <b>pkgName</b>
+ * fails to be added.
  * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
  * @since 1.0
  * @version 1.0
@@ -705,13 +708,14 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
 /**
  * @brief Sets a listener for file sending.
  *
- * @param pkgName Indicates the pointer to the service bundle name. It is the unique identifier of the upper-layer service.
- * The value cannot be empty or exceed 64 characters.
+ * @param pkgName Indicates the pointer to the service bundle name.
+ * It is the unique identifier of the upper-layer service. The value cannot be empty or exceed 64 characters.
  * @param sessionName Indicates the pointer to the buffer for storing the session name.
  * @param sendListener Indicates the pointer to the file send listener, which cannot be <b>NULL</b>.
  *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
- * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if the bundle specified by <b>pkgName</b> fails to be added.
+ * @return Returns <b>SOFTBUS_TRANS_SESSION_ADDPKG_FAILED</b> if the bundle specified by <b>pkgName</b>
+ * fails to be added.
  * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
  * @since 1.0
  * @version 1.0

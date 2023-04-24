@@ -150,6 +150,12 @@ NO_SANITIZE("cfi") int SoftBusGattsDeleteService(int srvcHandle)
     return SOFTBUS_OK;
 }
 
+int SoftBusGattsConnect(int connId)
+{
+    CLOGD("SoftBusGattsConnect stub is called, return success");
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {

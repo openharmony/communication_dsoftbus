@@ -129,7 +129,7 @@ void SoftBusReleaseDumpVar(ListNode *varList)
     ListNode *nextItem = NULL;
     LIST_FOR_EACH_SAFE(item, nextItem, varList) {
         SoftBusDumpVarNode *varNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
-        ListDelete(&varNode->node);;
+        ListDelete(&varNode->node);
         SoftBusFree(varNode);
     }
 }
@@ -163,7 +163,7 @@ void SoftBusHiDumperReleaseHandler(void)
     ListNode *nextItem = NULL;
     LIST_FOR_EACH_SAFE(item, nextItem, &g_hidumperhander_list) {
         HandlerNode *handlerNode = LIST_ENTRY(item, HandlerNode, node);
-        ListDelete(&handlerNode->node);;
+        ListDelete(&handlerNode->node);
         SoftBusFree(handlerNode);
     }
 }

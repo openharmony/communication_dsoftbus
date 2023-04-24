@@ -56,7 +56,7 @@ extern "C" {
  * The session name uniquely identifies a session service. The value cannot be empty or exceed 256 characters.
  * @param addrInfo Indicates the pointer to the address information for the connection between devices.
  * @param num Indicates the number of device connection records.
- * @param mixAddr Indicates the pointer to the connection address information. 
+ * @param mixAddr Indicates the pointer to the connection address information.
  * If the address information passed by <b>addrInfo</b> is invalid, this parameter can be used to obtain the connection information.
  *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.

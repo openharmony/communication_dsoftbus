@@ -135,14 +135,13 @@ NO_SANITIZE("cfi") static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, H
 static void ReportStatisticEvtPeriod(SoftBusMessage* msg)
 {
     ReportStatisticEvent(msg);
-    
     CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }
 
 int32_t InitSoftbusSysEvt(void)
 {
     InitStatisticEvtReportFunc();
-    
+
     if (InitTransStatisticSysEvt() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
