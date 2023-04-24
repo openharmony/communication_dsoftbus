@@ -358,7 +358,7 @@ int32_t SoftBusThreadSetName(SoftBusThread thread, const char *name)
         HILOG_ERROR(SOFTBUS_HILOG_ID, "name is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     if (strlen(name) >= TASK_NAME_MAX_LEN) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "set thread name length >= TASK_NAME_MAX_LEN");
         return SOFTBUS_INVALID_PARAM;
