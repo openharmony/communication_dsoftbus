@@ -24,21 +24,21 @@
 
 using namespace OHOS;
 
-static sptr<BusCenterClientProxy> GetClientProxy(const char *pkgName)
+static sptr<BusCenterClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 {
-    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(clientObject);
     return clientProxy;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(const char *pkgName, int32_t pid, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
@@ -46,14 +46,14 @@ NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr
     return clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(const char *pkgName, int32_t pid, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
@@ -61,13 +61,13 @@ NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void 
     return clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
@@ -75,13 +75,13 @@ NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(const char *pkgName, const cha
     return clientProxy->OnLeaveLNNResult(networkId, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode)
+NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
@@ -111,14 +111,14 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t inf
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen,
+NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen,
     int32_t retCode)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -126,13 +126,14 @@ NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, const voi
     return clientProxy->OnTimeSyncResult(info, infoTypeLen, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason)
+NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId,
+    int32_t reason)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -141,13 +142,14 @@ NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason)
+NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId,
+    int32_t reason)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -156,13 +158,13 @@ NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen)
+NO_SANITIZE("cfi") int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen)
 {
     if (pkgName == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName);
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;

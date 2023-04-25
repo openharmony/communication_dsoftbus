@@ -74,13 +74,13 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerJoinTest_01, TestSize.Level1)
     EXPECT_CALL(busCenterIpcMock, LnnServerJoin).WillRepeatedly(Return(SOFTBUS_OK));
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     AddJoinLNNInfo(TEST_PKGNAME, &addr);
-    int32_t ret = LnnIpcServerJoin(nullptr, &addr, TEST_ADDR_TYPE_LEN);
+    int32_t ret = LnnIpcServerJoin(nullptr, 0, &addr, TEST_ADDR_TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnIpcServerJoin(TEST_PKGNAME, nullptr, TEST_ADDR_TYPE_LEN);
+    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, nullptr, TEST_ADDR_TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnIpcServerJoin(TEST_PKGNAME, &addr, sizeof(ConnectionAddr));
+    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, &addr, sizeof(ConnectionAddr));
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnIpcServerJoin(TEST_PKGNAME, &addr, sizeof(ConnectionAddr));
+    ret = LnnIpcServerJoin(TEST_PKGNAME, 0, &addr, sizeof(ConnectionAddr));
     EXPECT_TRUE(ret == SOFTBUS_ALREADY_EXISTED);
 }
 
@@ -103,13 +103,13 @@ HWTEST_F(BusCenterIpcTest, MetaNodeIpcServerJoinTest_01, TestSize.Level1)
     (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
     AddJoinLNNInfo(TEST_PKGNAME, &addr);
     AddJoinMetaNodeInfo(TEST_PKGNAME, &addr);
-    int32_t ret = MetaNodeIpcServerJoin(nullptr, &addr, &customData, TEST_ADDR_TYPE_LEN);
+    int32_t ret = MetaNodeIpcServerJoin(nullptr, 0, &addr, &customData, TEST_ADDR_TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerJoin(TEST_PKGNAME, nullptr, &customData, TEST_ADDR_TYPE_LEN);
+    ret = MetaNodeIpcServerJoin(TEST_PKGNAME, 0, nullptr, &customData, TEST_ADDR_TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerJoin(TEST_PKGNAME, &addr, &customData, TEST_ADDR_TYPE_LEN);
+    ret = MetaNodeIpcServerJoin(TEST_PKGNAME, 0, &addr, &customData, TEST_ADDR_TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ALREADY_EXISTED);
-    ret = MetaNodeIpcServerJoin(TEST_PKGNAME, &addr, &customData, TEST_ADDR_TYPE_LEN);
+    ret = MetaNodeIpcServerJoin(TEST_PKGNAME, 0, &addr, &customData, TEST_ADDR_TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -123,13 +123,13 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_01, TestSize.Level1)
 {
     NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
     ON_CALL(busCenterIpcMock, LnnServerLeave).WillByDefault(Return(SOFTBUS_OK));
-    int32_t ret = LnnIpcServerLeave(nullptr, nullptr);
+    int32_t ret = LnnIpcServerLeave(nullptr, 0, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnIpcServerLeave(TEST_PKGNAME, nullptr);
+    ret = LnnIpcServerLeave(TEST_PKGNAME, 0, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnIpcServerLeave(TEST_PKGNAME, TEST_NETWORK_ID);
+    ret = LnnIpcServerLeave(TEST_PKGNAME, 0, TEST_NETWORK_ID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnIpcServerLeave(TEST_PKGNAME, TEST_NETWORK_ID);
+    ret = LnnIpcServerLeave(TEST_PKGNAME, 0, TEST_NETWORK_ID);
     EXPECT_TRUE(ret == SOFTBUS_ALREADY_EXISTED);
 }
 
@@ -145,11 +145,11 @@ HWTEST_F(BusCenterIpcTest, MetaNodeIpcServerLeaveTest_01, TestSize.Level1)
     ON_CALL(busCenterIpcMock, MetaNodeServerLeave).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = MetaNodeIpcServerLeave(nullptr, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerLeave(TEST_PKGNAME, nullptr);
+    ret = MetaNodeIpcServerLeave(TEST_PKGNAME, 0, ullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerLeave(TEST_PKGNAME, TEST_NETWORK_ID);
+    ret = MetaNodeIpcServerLeave(TEST_PKGNAME, 0, TEST_NETWORK_ID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = MetaNodeIpcServerLeave(TEST_PKGNAME, TEST_NETWORK_ID);
+    ret = MetaNodeIpcServerLeave(TEST_PKGNAME, 0, TEST_NETWORK_ID);
     EXPECT_TRUE(ret == SOFTBUS_ALREADY_EXISTED);
 }
 
@@ -267,7 +267,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_02, TestSize.Level1)
     RemoveJoinRequestInfoByPkgName(TEST_PKGNAME2);
 
     ON_CALL(busCenterIpcMock, LnnServerLeave).WillByDefault(Return(SOFTBUS_OK));
-    int32_t ret = LnnIpcServerLeave(nullptr, nullptr);
+    int32_t ret = LnnIpcServerLeave(nullptr, 0, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -289,7 +289,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_03, TestSize.Level1)
     BusCenterServerDeathCallback(TEST_PKGNAME);
 
     ON_CALL(busCenterIpcMock, LnnServerLeave).WillByDefault(Return(SOFTBUS_OK));
-    int32_t ret = LnnIpcServerLeave(nullptr, nullptr);
+    int32_t ret = LnnIpcServerLeave(nullptr, 0, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
