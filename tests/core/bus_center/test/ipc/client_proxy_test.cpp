@@ -225,7 +225,7 @@ HWTEST_F(ClientProxyTest, OnPublishLNNResultTest_01, TestSize.Level1)
     ASSERT_TRUE(clientProxy != nullptr);
     clientProxy->OnPublishLNNResult(TEST_RET_CODE, TEST_RET_CODE);
 
-    int32_t ret = ClientOnRefreshLNNResult(TEST_PKGNAME, PUBLISHID, REASON);
+    int32_t ret = ClientOnRefreshLNNResult(TEST_PKGNAME, 0, PUBLISHID, REASON);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -245,7 +245,7 @@ HWTEST_F(ClientProxyTest, ClientOnRefreshLNNResult_01, TestSize.Level1)
     ASSERT_TRUE(clientProxy != nullptr);
     clientProxy->OnRefreshLNNResult(TEST_RET_CODE, TEST_RET_CODE);
 
-    int32_t ret = ClientOnRefreshLNNResult(TEST_PKGNAME, REFRESHID, REASON);
+    int32_t ret = ClientOnRefreshLNNResult(TEST_PKGNAME, 0, REFRESHID, REASON);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -269,7 +269,7 @@ HWTEST_F(ClientProxyTest, ClientOnRefreshDeviceFound_01, TestSize.Level1)
 
     const void *device = "1234";
     uint32_t deviceLen = DEVICELEN;
-    int32_t ret = ClientOnRefreshDeviceFound(TEST_PKGNAME, device, deviceLen);
+    int32_t ret = ClientOnRefreshDeviceFound(TEST_PKGNAME, 0, device, deviceLen);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

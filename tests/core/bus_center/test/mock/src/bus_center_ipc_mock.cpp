@@ -77,10 +77,10 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     return BusCenterIpcInterfaceInstance()->LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
 }
 
-int32_t LnnStartTimeSync(
-    const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy, TimeSyncPeriod period)
+int32_t LnnStartTimeSync(const char *pkgName,
+    int32_t callingPid, const char *targetNetworkId, TimeSyncAccuracy accuracy, TimeSyncPeriod period)
 {
-    return BusCenterIpcInterfaceInstance()->LnnStartTimeSync(pkgName, targetNetworkId, accuracy, period);
+    return BusCenterIpcInterfaceInstance()->LnnStartTimeSync(pkgName, callingPid, targetNetworkId, accuracy, period);
 }
 
 int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
@@ -134,25 +134,25 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
 }
 
 int32_t ClientOnJoinLNNResult(
-    const char *pkgName, void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+    PkgNameAndPidInfo *info,  void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnJoinLNNResult(pkgName, addr, addrTypeLen, networkId, retCode);
+    return BusCenterIpcInterfaceInstance()->ClientOnJoinLNNResult(info, addr, addrTypeLen, networkId, retCode);
 }
 
-int32_t ClientOnJoinMetaNodeResult(
-    const char *pkgName, void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen, const char *networkId,
+    int32_t retCode)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnJoinMetaNodeResult(pkgName, addr, addrTypeLen, networkId, retCode);
+    return BusCenterIpcInterfaceInstance()->ClientOnJoinMetaNodeResult(info, addr, addrTypeLen, networkId, retCode);
 }
 
-int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode)
+int32_t ClientOnLeaveLNNResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnLeaveLNNResult(pkgName, networkId, retCode);
+    return BusCenterIpcInterfaceInstance()->ClientOnLeaveLNNResult(pkgName, pid, networkId, retCode);
 }
 
-int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode)
+int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnLeaveMetaNodeResult(pkgName, networkId, retCode);
+    return BusCenterIpcInterfaceInstance()->ClientOnLeaveMetaNodeResult(pkgName, pid, networkId, retCode);
 }
 
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
@@ -165,24 +165,25 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     return BusCenterIpcInterfaceInstance()->ClinetOnNodeBasicInfoChanged(info, infoTypeLen, type);
 }
 
-int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode)
+int32_t ClientOnTimeSyncResult(
+    const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
+    return BusCenterIpcInterfaceInstance()->ClientOnTimeSyncResult(pkgName, pid, info, infoTypeLen, retCode);
 }
 
-int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason)
+int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnPublishLNNResult(pkgName, publishId, reason);
+    return BusCenterIpcInterfaceInstance()->ClientOnPublishLNNResult(pkgName, pid, publishId, reason);
 }
 
-int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason)
+int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId, int32_t reason)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnRefreshLNNResult(pkgName, refreshId, reason);
+    return BusCenterIpcInterfaceInstance()->ClientOnRefreshLNNResult(pkgName, pid, refreshId, reason);
 }
 
-int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen)
+int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnRefreshDeviceFound(pkgName, device, deviceLen);
+    return BusCenterIpcInterfaceInstance()->ClientOnRefreshDeviceFound(pkgName, pid, device, deviceLen);
 }
 
 int32_t LnnServerJoin(ConnectionAddr *addr)
