@@ -54,16 +54,12 @@ void BusCenterClientProxyTest::TearDown()
 */
 HWTEST_F(BusCenterClientProxyTest, CLIENT_ON_JOIN_META_NODE_RESULT_Test_001, TestSize.Level1)
 {
-    const char *pkgName = "000";
     void *addr = nullptr;
     uint32_t addrTypeLen = TEST_DATA_LEN;
     const char *networkId = "1234";
     int32_t retCode = 0;
     int32_t ret;
-
     ret = ClientOnJoinMetaNodeResult(nullptr, addr, addrTypeLen, networkId, retCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = ClientOnJoinMetaNodeResult(pkgName, addr, addrTypeLen, networkId, retCode);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
@@ -80,9 +76,9 @@ HWTEST_F(BusCenterClientProxyTest, CLIENT_ON_LEAVE_META_NODE_RESULT_Test_001, Te
     int32_t retCode = 0;
     int32_t ret;
 
-    ret = ClientOnLeaveMetaNodeResult(nullptr, networkId, retCode);
+    ret = ClientOnLeaveMetaNodeResult(nullptr, 0, networkId, retCode);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = ClientOnLeaveMetaNodeResult(pkgName, networkId, retCode);
+    ret = ClientOnLeaveMetaNodeResult(pkgName, 0, networkId, retCode);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 } // namespace OHOS

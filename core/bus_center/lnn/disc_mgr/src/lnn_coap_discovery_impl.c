@@ -38,7 +38,7 @@ NO_SANITIZE("cfi") static void DeviceFound(const DeviceInfo *device, const Inner
 {
     ConnectionAddr addr;
     (void) addtions;
-    
+
     if (device == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device para is null");
         return;

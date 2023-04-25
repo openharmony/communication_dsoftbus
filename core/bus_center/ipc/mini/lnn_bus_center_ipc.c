@@ -48,16 +48,18 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
 {
     (void)pkgName;
+    (void)callingPid;
     (void)addrTypeLen;
     return LnnServerJoin((ConnectionAddr *)addr);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
+NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
 {
     (void)pkgName;
+    (void)callingPid;
     return LnnServerLeave(networkId);
 }
 
@@ -93,10 +95,10 @@ NO_SANITIZE("cfi") int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, cons
     return LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
-    int32_t period)
+NO_SANITIZE("cfi") int32_t LnnIpcStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
+    int32_t accuracy, int32_t period)
 {
-    return LnnStartTimeSync(pkgName, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
+    return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
@@ -114,8 +116,9 @@ NO_SANITIZE("cfi") int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t pub
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
+NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
 {
+    (void)callingPid;
     SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
@@ -189,10 +192,11 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t inf
     return LnnOnNodeBasicInfoChanged(info, type);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen,
-    int32_t retCode)
+NO_SANITIZE("cfi") int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
+    uint32_t infoTypeLen, int32_t retCode)
 {
     (void)pkgName;
+    (void)pid;
     (void)infoTypeLen;
     return LnnOnTimeSyncResult(info, retCode);
 }

@@ -273,14 +273,15 @@ NO_SANITIZE("cfi") void LnnNotifyLnnRelationChanged(const char *udid, Connection
     NotifyEvent((LnnEventBasicInfo *)&info);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode)
+NO_SANITIZE("cfi") void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncResultInfo *info,
+    int32_t retCode)
 {
     if (pkgName == NULL || info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid paramters");
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify time Sync result %d", retCode);
-    LnnIpcNotifyTimeSyncResult(pkgName, info, sizeof(TimeSyncResultInfo), retCode);
+    LnnIpcNotifyTimeSyncResult(pkgName, pid, info, sizeof(TimeSyncResultInfo), retCode);
 }
 
 NO_SANITIZE("cfi") void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
