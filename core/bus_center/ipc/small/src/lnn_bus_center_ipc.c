@@ -181,11 +181,12 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
         return SOFTBUS_ERR;
     }
     LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
-    return ClientOnRefreshDeviceFound(pkgName, &newDevice, sizeof(DeviceInfo));
+    return ClientOnRefreshDeviceFound(pkgName, 0, &newDevice, sizeof(DeviceInfo));
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uint32_t addrTypeLen)
+NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
 {
+    (void)callingPid;
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
 
     if (pkgName == NULL || connAddr == NULL) {
@@ -222,8 +223,9 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, void *addr, uin
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, const char *networkId)
+NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
 {
+    (void)callingPid;
     if (pkgName == NULL || networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
         return SOFTBUS_INVALID_PARAM;
@@ -291,10 +293,10 @@ int32_t LnnIpcGetNodeKeyInfoLen(int32_t key)
     return LnnGetNodeKeyInfoLen(key);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
-    int32_t period)
+NO_SANITIZE("cfi") int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char *targetNetworkId,
+    int32_t accuracy, int32_t period)
 {
-    return LnnStartTimeSync(pkgName, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
+    return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
@@ -428,10 +430,10 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t inf
     return ClinetOnNodeBasicInfoChanged(info, infoTypeLen, type);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen,
+NO_SANITIZE("cfi") int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen,
     int32_t retCode)
 {
-    return ClientOnTimeSyncResult(pkgName, info, infoTypeLen, retCode);
+    return ClientOnTimeSyncResult(pkgName, pid, info, infoTypeLen, retCode);
 }
 
 void BusCenterServerDeathCallback(const char *pkgName)

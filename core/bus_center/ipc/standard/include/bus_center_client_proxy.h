@@ -24,18 +24,18 @@ extern "C" {
 #endif
 #endif
 
-int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+int32_t ClientOnJoinLNNResult(const char *pkgName, int32_t pid, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode);
-int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+int32_t ClientOnJoinMetaNodeResult(const char *pkgName, int32_t pid, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode);
-int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode);
-int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode);
+int32_t ClientOnLeaveLNNResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode);
+int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode);
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
-int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode);
-int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason);
-int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason);
-int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen);
+int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode);
+int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason);
+int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId, int32_t reason);
+int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen);
 
 #ifdef __cplusplus
 #if __cplusplus
