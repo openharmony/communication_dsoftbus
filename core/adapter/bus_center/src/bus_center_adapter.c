@@ -31,21 +31,33 @@
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 
-static void SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_t outLen)
+typedef struct {
+    const char *inBuf;
+    const char *outBuf;
+} TypeInfo;
+
+static TypeInfo g_typeConvertMap[] = {
+    {GET_TYPE_UNKNOWN, TYPE_UNKNOWN},
+    {GET_TYPE_PHONE, TYPE_PHONE},
+    {GET_TYPE_PAD, TYPE_PAD},
+    {GET_TYPE_TV, TYPE_TV},
+    {GET_TYPE_CAR, TYPE_CAR},
+    {GET_TYPE_WATCH, TYPE_WATCH},
+    {GET_TYPE_IPCAMERA, TYPE_IPCAMERA},
+};
+
+static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_t outLen)
 {
-    if (strcmp(inBuf, GET_TYPE_PHONE) == 0) {
-        (void)strcpy_s(outBuf, outLen, TYPE_PHONE);
-    } else if (strcmp(inBuf, GET_TYPE_PAD) == 0) {
-        (void)strcpy_s(outBuf, outLen, TYPE_PAD);
-    } else if (strcmp(inBuf, GET_TYPE_TV) == 0) {
-        (void)strcpy_s(outBuf, outLen, TYPE_TV);
-    } else if (strcmp(inBuf, GET_TYPE_WATCH) == 0) {
-        (void)strcpy_s(outBuf, outLen, TYPE_WATCH);
-    } else if (strcmp(inBuf, GET_TYPE_IPCAMERA) == 0) {
-        (void)strcpy_s(outBuf, outLen, TYPE_IPCAMERA);
-    }  else {
-        (void)strcpy_s(outBuf, outLen, TYPE_UNKNOWN);
+    uint32_t id;
+    for (id = 0; id < sizeof(g_typeConvertMap) / sizeof(TypeInfo); id++) {
+        if (strcmp(g_typeConvertMap[id].inBuf, inBuf) == EOK) {
+            if (strcpy_s(outBuf, outLen, g_typeConvertMap[id].outBuf) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcps_s fail");
+                return SOFTBUS_ERR;
+            }
+        }
     }
+    return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
@@ -81,7 +93,10 @@ NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *val
             devType = GetDeviceType();
             if (devType != NULL) {
                 char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
-                SoftBusConvertDeviceType(devType, softBusDevType, len);
+                if (SoftBusConvertDeviceType(devType, softBusDevType, len) != SOFTBUS_OK) {
+                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert device type fail");
+                    return SOFTBUS_ERR;
+                }
                 if (strcpy_s(value, len, softBusDevType) != EOK) {
                     return SOFTBUS_ERR;
                 }
