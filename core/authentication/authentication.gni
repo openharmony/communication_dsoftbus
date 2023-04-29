@@ -61,6 +61,7 @@ if (dsoftbus_feature_lnn_net) {
 auth_server_inc = [
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
+  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
 auth_server_deps = []
 

@@ -161,3 +161,8 @@ int32_t InitSoftbusSysEvt(void)
 #endif
     return CreateAndPostMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), ReportStatisticEvtPeriod, MS_OF_DAY);
 }
+
+void DeinitSoftbusSysEvt(void)
+{
+    DeinitBusCenterDfx();
+}

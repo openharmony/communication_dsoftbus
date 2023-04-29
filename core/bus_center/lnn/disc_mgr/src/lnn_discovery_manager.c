@@ -24,6 +24,7 @@
 #include "lnn_net_builder.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_bus_center.h"
 #include "softbus_log.h"
 
 static void DeviceFound(const ConnectionAddr *addr);
@@ -55,12 +56,21 @@ static LnnDiscoveryImplCallback g_discoveryCallback = {
     .OnDeviceFound = DeviceFound,
 };
 
+static void ReportDeviceFoundResultEvt(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report device found result evt enter");
+    if (SoftBusRecordDiscoveryResult(DEVICE_FOUND, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report device found result fail");
+    }
+}
+
 NO_SANITIZE("cfi") static void DeviceFound(const ConnectionAddr *addr)
 {
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device addr is null\n");
         return;
     }
+    ReportDeviceFoundResultEvt();
     if (LnnNotifyDiscoveryDevice(addr) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify device found failed\n");
     }
@@ -114,6 +124,14 @@ NO_SANITIZE("cfi") void LnnStopPublish(void)
     }
 }
 
+static void ReportStartDiscoveryResultEvt(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report start discovery result evt enter");
+    if (SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report start discovery result fail");
+    }
+}
+
 NO_SANITIZE("cfi") int32_t LnnStartDiscovery(void)
 {
     uint32_t i;
@@ -128,6 +146,7 @@ NO_SANITIZE("cfi") int32_t LnnStartDiscovery(void)
             return SOFTBUS_ERR;
         }
     }
+    ReportStartDiscoveryResultEvt();
     return SOFTBUS_OK;
 }
 

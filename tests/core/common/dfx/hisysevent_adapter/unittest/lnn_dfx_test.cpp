@@ -30,9 +30,14 @@
 using namespace std;
 using namespace testing::ext;
 
-static const StatisticEvtType g_testType = (StatisticEvtType)(-1);
-static const int32_t SOFTBUS_HISYSEVT_COMMON_ERR_ERRCODE = -1;
-static const char *g_errBusCenterEvt = "BUS_CENTER_FAULT_EVT_TEST";
+static const char *g_businessName = "music";
+static const char *g_callerPackName = "kuwo";
+static const char *g_remoteBizUuid = "adafafaffafaga";
+static const char *g_softBusVer = "1.00.01";
+static const char *g_devName = "OpenHarmony";
+static const char *g_udid = "12345678";
+static const char *g_appName1 = "testApp1";
+static const char *g_appName2 = "testApp2";
 
 namespace OHOS {
 class LnnDfxTest : public testing::Test {
@@ -60,445 +65,205 @@ void LnnDfxTest::TearDown(void)
 {
 }
 
-static int32_t TestReportCommonFaultEvt()
-{
-    return SOFTBUS_OK;
-}
 /**
- * @tc.name: CreateBusCenterFaultEvtTest001
- * @tc.desc: Verify CreateBusCenterFaultEvt function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest001, TestSize.Level0)
-{
-    SoftBusEvtReportMsg msg;
-    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
-    int32_t errorCode = SOFTBUS_NETWORK_AUTH_TCP_ERR;
-    ConnectionAddr addr;
-    addr.type = CONNECTION_ADDR_WLAN;
-    int32_t ret = CreateBusCenterFaultEvt(&msg, errorCode, &addr);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-    ASSERT_NE(nullptr, msg.paramArray);
-}
-
-/**
- * @tc.name: CreateBusCenterFaultEvtTest002
- * @tc.desc: Verify CreateBusCenterFaultEvt function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, CreateBusCenterFaultEvtTest002, TestSize.Level0)
-{
-    SoftBusEvtReportMsg msg;
-    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
-    int32_t errorCode = SOFTBUS_NETWORK_GET_META_NODE_INFO_ERR + 1;
-    ConnectionAddr addr;
-    addr.type = CONNECTION_ADDR_WLAN;
-    int32_t ret = CreateBusCenterFaultEvt(&msg, errorCode, &addr);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-    ASSERT_EQ(nullptr, msg.paramArray);
-
-    ret = CreateBusCenterFaultEvt(nullptr, errorCode, &addr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    ret = CreateBusCenterFaultEvt(&msg, errorCode, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: ReportBusCenterFaultEvtTest001
- * @tc.desc: Verify ReportBusCenterFaultEvt function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest001, TestSize.Level0)
-{
-    SoftBusEvtReportMsg msg;
-    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
-    int32_t errorCode = SOFTBUS_NETWORK_AUTH_TCP_ERR;
-    ConnectionAddr addr;
-    addr.type = CONNECTION_ADDR_WLAN;
-    int32_t ret = CreateBusCenterFaultEvt(&msg, errorCode, &addr);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-    ASSERT_NE(nullptr, msg.paramArray);
-
-    ret = ReportBusCenterFaultEvt(&msg);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    ret = ReportBusCenterFaultEvt(nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = memcpy_s(msg.evtName, SOFTBUS_HISYSEVT_NAME_LEN, g_errBusCenterEvt, strlen(g_errBusCenterEvt));
-    ASSERT_EQ(EOK, ret);
-    ret = ReportBusCenterFaultEvt(&msg);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: ReportBusCenterFaultEvtTest002
- * @tc.desc:
+ * @tc.name: SoftBusRecordDiscoveryResult
+ * @tc.desc: Verify SoftBus Record Discovery Result function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnDfxTest, ReportBusCenterFaultEvtTest002, TestSize.Level1)
-{
-    SoftBusEvtReportMsg msg;
-    memset_s(&msg, sizeof(msg), 0, sizeof(msg));
-    int32_t errorCode = SOFTBUS_NETWORK_AUTH_TCP_ERR;
-    ConnectionAddr addr;
-    addr.type = CONNECTION_ADDR_WLAN;
-    int32_t ret = CreateBusCenterFaultEvt(&msg, errorCode, &addr);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-    ASSERT_NE(nullptr, msg.paramArray);
-
-    ret = ReportBusCenterFaultEvt(&msg);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: InitBusCenterDfxTest001
- * @tc.desc: Verify InitBusCenterDfx function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, InitBusCenterDfxTest001, TestSize.Level0)
-{
-    int32_t ret = InitBusCenterDfx();
-    ASSERT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: AddStatisticDurationTest001
- * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, AddStatisticDurationTest001, TestSize.Level0)
-{
-    LnnStatisticData *data = NULL;
-    int32_t ret = AddStatisticDuration(data);
-    ASSERT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: AddStatisticDurationTest002
- * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, AddStatisticDurationTest002, TestSize.Level0)
-{
-    LnnStatisticData data;
-    data.endTime = 202207301230;
-    data.beginTime = 202207301235;
-    int32_t ret = AddStatisticDuration(&data);
-    ASSERT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: AddStatisticDurationTest003
- * @tc.desc: Verify AddStatisticDuration function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, AddStatisticDurationTest003, TestSize.Level0)
-{
-    LnnStatisticData data;
-    data.type = CONNECTION_ADDR_ETH;
-    int32_t ret = AddStatisticDuration(&data);
-    ASSERT_EQ(SOFTBUS_ERR, ret);
-
-    data.retCode = SOFTBUS_ERR;
-    ret = AddStatisticDuration(&data);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: AddStatisticDurationTest004
- * @tc.desc: Verify AddStatisticDuration function, add the time to the statistics with the correct parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LnnDfxTest, AddStatisticDurationTest004, TestSize.Level1)
-{
-    LnnStatisticData data = {
-        .beginTime = 202207301230,
-        .authTime = 202207301233,
-        .endTime = 202207301235,
-        .retCode = SOFTBUS_OK,
-        .type = CONNECTION_ADDR_BLE,
-    };
-    int32_t ret = AddStatisticDuration(&data);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    data.type = CONNECTION_ADDR_WLAN;
-    ret = AddStatisticDuration(&data);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: AddStatisticRateOfSuccessTest001
- * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest001, TestSize.Level0)
-{
-    LnnStatisticData *data = NULL;
-    int32_t ret = AddStatisticRateOfSuccess(data);
-    ASSERT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: AddStatisticRateOfSuccessTest002
- * @tc.desc: Verify AddStatisticRateOfSuccess function, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest002, TestSize.Level0)
-{
-    LnnStatisticData data;
-    data.type = CONNECTION_ADDR_ETH;
-    int32_t ret = AddStatisticRateOfSuccess(&data);
-    ASSERT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: AddStatisticRateOfSuccessTest003
- * @tc.desc: use the correct parameters to transfer records to calculate the success rate.
- * @tc.type: FUNC
- * @tc.require: I5JQ1E
- */
-HWTEST_F(LnnDfxTest, AddStatisticRateOfSuccessTest003, TestSize.Level0)
-{
-    LnnStatisticData data;
-    data.beginTime = 202207301245;
-    data.authTime = 202207301230;
-    data.endTime = 202207301248;
-    data.retCode = SOFTBUS_OK;
-    data.type = CONNECTION_ADDR_WLAN;
-    int32_t ret = AddStatisticRateOfSuccess(&data);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    data.type = CONNECTION_ADDR_BLE;
-    ret = AddStatisticRateOfSuccess(&data);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: LnnDfxTest_SoftBusReportConnFaultEvt_001
- * @tc.desc: report error events generated by different media.
- * @tc.type: FUNC
- * @tc.require: SR000H04L1
- */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportConnFaultEvt_001, TestSize.Level1)
-{
-    int ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_INIT_FAIL);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_P2P, SOFTBUS_MEM_ERR);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/**
- * @tc.name: SoftBusReportConnFaultEvt_002
- * @tc.desc: report the wrong branch of the failed event in the connection with the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportConnFaultEvt_002, TestSize.Level1)
-{
-    SoftBusConnMedium testMedium = SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT;
-    SoftBusConnErrCode testErrCode = SOFTBUS_HISYSEVT_BLE_NOT_INIT;
-
-    int32_t ret = SoftBusReportConnFaultEvt(testMedium, testErrCode);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    testMedium = SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE;
-
-    testErrCode = (SoftBusConnErrCode)SOFTBUS_HISYSEVT_COMMON_ERR_ERRCODE;
-    ret = SoftBusReportConnFaultEvt(testMedium, testErrCode);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    testErrCode = SOFTBUS_HISYSEVT_CONN_ERRCODE_BUTT;
-    ret = SoftBusReportConnFaultEvt(testMedium, testErrCode);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-/**
- * @tc.name: LnnDfxTest_SoftbusRecordConnInfo_001
- * @tc.desc: send behavior msg to hiview system, we can see the result in log.
- * @tc.type: FUNC
- * @tc.require: SR000H04L1
- */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordConnInfo_001, TestSize.Level1)
+HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusRecordDiscoveryResult_001, TestSize.Level0)
 {
     int ret = SOFTBUS_ERR;
-    int32_t time = 10;
-    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_SUCC, time);
+    ret = SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordDiscoveryResult(SEND_BROADCAST, NULL);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordDiscoveryResult(RECV_BROADCAST, NULL);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordDiscoveryResult(DEVICE_FOUND, NULL);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    AppDiscNode node1 = {0};
+    node1.appDiscCnt = 1;
+    ret = memcpy_s(node1.appName, SOFTBUS_HISYSEVT_NAME_LEN, g_appName1, strlen(g_appName1));
+    EXPECT_EQ(EOK, ret);
+    ret = SoftBusRecordDiscoveryResult(BUSINESS_DISCOVERY, &node1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    AppDiscNode node2 = {0};
+    node2.appDiscCnt = 2;
+    ret = memcpy_s(node2.appName, SOFTBUS_HISYSEVT_NAME_LEN, g_appName2, strlen(g_appName2));
+    EXPECT_EQ(EOK, ret);
+    ret = SoftBusRecordDiscoveryResult(BUSINESS_DISCOVERY, &node2);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    StatisticEvtReportFunc reportFunc = GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_DEV_DISCOVERY);
+    ret = reportFunc();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, time);
+    reportFunc = GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_APP_DISCOVERY);
+    ret = reportFunc();
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    time = 15;
-    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_SUCC, time);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    time = 12;
-    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_SUCC, time);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT, SOFTBUS_EVT_CONN_SUCC, time);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
- * @tc.name: LnnDfxTest_SoftBusReportDiscStartupEvt_001
- * @tc.desc: Error register timeout callback test.
+ * @tc.name: SoftBusRecordDevOnlineDurResult001
+ * @tc.desc: Verify SoftBusRecordDevOnlineDurResult function.
  * @tc.type: FUNC
- * @tc.require: SR000H04L1
+ * @tc.require:
  */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusReportDiscStartupEvt_001, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_ERR;
-    char pkgName[] = "testPackage";
-    ret = SoftBusReportDiscStartupEvt(pkgName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = SoftBusReportDiscStartupEvt(nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-}
-
-/**
- * @tc.name: LnnDfxTest_SoftbusRecordDiscScanTimes_001
- * @tc.desc: Error register timeout callback test.
- * @tc.type: FUNC
- * @tc.require: SR000H04L1
- */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscScanTimes_001, TestSize.Level1)
+HWTEST_F(LnnDfxTest, SoftBusRecordDevOnlineDurResult001, TestSize.Level0)
 {
     int ret = SOFTBUS_ERR;
-    SoftBusDiscMedium testMedium = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE;
-    ret = SoftbusRecordDiscScanTimes((uint8_t)testMedium);
+    ret = SoftBusRecordDevOnlineDurResult(11);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    testMedium = SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT;
-    ret = SoftbusRecordDiscScanTimes((uint8_t)testMedium);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/**
- * @tc.name: LnnDfxTest_SoftbusRecordFirstDiscTime_001
- * @tc.desc: Error register timeout callback test.
- * @tc.type: FUNC
- * @tc.require: SR000H04L1
- */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordFirstDiscTime_001, TestSize.Level1)
-{
-    int32_t ret = SOFTBUS_ERR;
-    uint32_t time = 10;
-    SoftBusDiscMedium testMedium = SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT;
-
-    ret = SoftbusRecordFirstDiscTime((uint8_t)testMedium, time);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    testMedium = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE;
-    ret = SoftbusRecordFirstDiscTime((uint8_t)testMedium, time);
+    ret = SoftBusRecordDevOnlineDurResult(31);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordDevOnlineDurResult(301);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordDevOnlineDurResult(601);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordDevOnlineDurResult(901);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordDevOnlineDurResult(901);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    StatisticEvtReportFunc reportFunc = GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_ONLINE_DURATION);
+    ret = reportFunc();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: LnnDfxTest_SoftbusRecordDiscFault_001
- * @tc.desc: Error register timeout callback test.
+ * @tc.name: SoftBusRecordBusCenterResult001
+ * @tc.desc: Verify SoftBusRecordBusCenterResult function.
  * @tc.type: FUNC
- * @tc.require:SR000H04L1
+ * @tc.require:
  */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_001, TestSize.Level1)
+
+HWTEST_F(LnnDfxTest, SoftBusRecordBusCenterResult001, TestSize.Level0)
 {
     int ret = SOFTBUS_ERR;
-    uint32_t errCode = SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT;
-    ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE, errCode);
+    ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_BR, 900);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    errCode = SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL;
-    ret = SoftbusRecordDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, errCode);
+    ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_BLE, 1100);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_WLAN, 1300);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_P2P, 1600);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_HML, 1900);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordBusCenterResult(SOFTBUS_HISYSEVT_LINK_TYPE_HML, 900);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    StatisticEvtReportFunc reportFunc = GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_LNN_DURATION);
+    ret = reportFunc();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: LnnDfxTest_SoftbusRecordDiscFault_002
- * @tc.desc: failures during discovery are logged with different parameter.
+ * @tc.name: SoftBusRecordAuthResult001
+ * @tc.desc: Verify SoftBusRecordAuthResult function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SoftbusRecordDiscFault_002, TestSize.Level1)
+
+HWTEST_F(LnnDfxTest, SoftBusRecordAuthResult001, TestSize.Level0)
 {
-    int32_t ret = SOFTBUS_ERR;
-    uint32_t errCode = SOFTBUS_HISYSEVT_DISC_ERRCODE_TIMEOUT;
-    SoftBusDiscMedium testMedium = SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP;
-
-    ret = SoftbusRecordDiscFault(testMedium, errCode);
+    int ret = SOFTBUS_ERR;
+    ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_BR, 0, 2100, AUTH_STAGE_BUTT);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    testMedium = SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT;
-    ret = SoftbusRecordDiscFault(testMedium, errCode);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_BLE, 1, 2100, AUTH_CONNECT_STAGE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_WLAN, 0, 2600, AUTH_STAGE_BUTT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_P2P, 0, 2100, AUTH_STAGE_BUTT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_P2P, 1, 3600, AUTH_VERIFY_STAGE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_HML, 0, 2100, AUTH_STAGE_BUTT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRecordAuthResult(SOFTBUS_HISYSEVT_LINK_TYPE_HML, 1, 4100, AUTH_EXCHANGE_STAGE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    StatisticEvtReportFunc reportFunc = GetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_AUTH_KPI);
+    ret = reportFunc();
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: GetStatisticEvtReportFunc_001
- * @tc.desc: use the different event type parameters to get the event function for statistics.
+ * @tc.name: SoftBusReportBusCenterFaultEvt001
+ * @tc.desc: Verify SoftBusReportBusCenterFaultEvt function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnDfxTest, LnnDfxTest_GetStatisticEvtReportFunc_001, TestSize.Level1)
+
+HWTEST_F(LnnDfxTest, SoftBusReportBusCenterFaultEvt001, TestSize.Level0)
 {
-    InitSoftbusSysEvt();
-    StatisticEvtType testType = g_testType;
-    StatisticEvtReportFunc ret = GetStatisticEvtReportFunc(testType);
-    EXPECT_TRUE(ret == nullptr);
-
-    testType = SOFTBUS_STATISTIC_EVT_BUTT;
-    ret = GetStatisticEvtReportFunc(testType);
-    EXPECT_EQ(nullptr, ret);
-
-    testType = SOFTBUS_STATISTIC_EVT_DISC_FAULT;
-    int32_t res = SetStatisticEvtReportFunc(testType, TestReportCommonFaultEvt);
-    EXPECT_EQ(SOFTBUS_OK, res);
-
-    ret = GetStatisticEvtReportFunc(testType);
-    EXPECT_EQ(ret, TestReportCommonFaultEvt);
+    int ret = SOFTBUS_ERR;
+    SoftBusFaultEvtInfo info = {0};
+    info.moduleType = MODULE_TYPE_DISCOVERY;
+    info.linkType = SOFTBUS_HISYSEVT_LINK_TYPE_BLE;
+    info.channelQuality = 1.2;
+    info.errorCode = -1;
+    info.peerDevType = 11;
+    info.onLineDevNum = 5;
+    info.connNum = 4;
+    info.nightMode = 0;
+    info.wifiStatue = 1;
+    info.bleStatue = 1;
+    info.callerAppMode = 1;
+    info.subErrCode = 2;
+    info.connBrNum = 1;
+    info.connBleNum = 2;
+    info.bleBradStatus = true;
+    info.bleScanStatus = false;
+    ret = memcpy_s(info.businessName, SOFTBUS_HISYSEVT_NAME_LEN, g_businessName, strlen(g_businessName));
+    EXPECT_EQ(EOK, ret);
+    ret = memcpy_s(info.callerPackName, SOFTBUS_HISYSEVT_NAME_LEN, g_callerPackName, strlen(g_callerPackName));
+    EXPECT_EQ(EOK, ret);
+    ret = memcpy_s(info.remoteBizUuid, SOFTBUS_HISYSEVT_NAME_LEN, g_remoteBizUuid, strlen(g_remoteBizUuid));
+    EXPECT_EQ(EOK, ret);
+    ret = SoftBusReportBusCenterFaultEvt(&info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: SetStatisticEvtReportFunc_001
- * @tc.desc: Use different event type parameters to set the event function corresponding to the statistics.
+ * @tc.name: SoftBusReportDevOnlineEvt001
+ * @tc.desc: Verify SoftBusReportDevOnlineEvt function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnDfxTest, LnnDfxTest_SetStatisticEvtReportFunc_001, TestSize.Level1)
+
+HWTEST_F(LnnDfxTest, SoftBusReportDevOnlineEvt001, TestSize.Level0)
 {
-    InitSoftbusSysEvt();
-    StatisticEvtType testType = g_testType;
-    int32_t ret = SetStatisticEvtReportFunc(testType, TestReportCommonFaultEvt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    testType = SOFTBUS_STATISTIC_EVT_BUTT;
-    ret = SetStatisticEvtReportFunc(testType, TestReportCommonFaultEvt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    testType = SOFTBUS_STATISTIC_EVT_DISC_FAULT;
-    ret = SetStatisticEvtReportFunc(testType, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    testType = SOFTBUS_STATISTIC_EVT_DISC_FAULT;
-    ret = SetStatisticEvtReportFunc(testType, TestReportCommonFaultEvt);
+    int ret = SOFTBUS_ERR;
+    OnlineDeviceInfo devInfo = {0};
+    devInfo.onlineDevNum = 10;
+    devInfo.btOnlineDevNum = 10;
+    devInfo.wifiOnlineDevNum = 3;
+    devInfo.peerDevType = 3;
+    devInfo.insertFileResult = 1;
+    ret = memcpy_s(devInfo.peerSoftBusVer, SOFTBUS_HISYSEVT_NAME_LEN, g_softBusVer, strlen(g_softBusVer));
+    EXPECT_EQ(EOK, ret);
+    ret = memcpy_s(devInfo.peerDevName, SOFTBUS_HISYSEVT_NAME_LEN, g_devName, strlen(g_devName));
+    EXPECT_EQ(EOK, ret);
+    ret = memcpy_s(devInfo.localSoftBusVer, SOFTBUS_HISYSEVT_NAME_LEN, g_softBusVer, strlen(g_softBusVer));
+    EXPECT_EQ(EOK, ret);
+    ret = memcpy_s(devInfo.peerPackVer, SOFTBUS_HISYSEVT_NAME_LEN, g_softBusVer, strlen(g_softBusVer));
+    EXPECT_EQ(EOK, ret);
+    ret = memcpy_s(devInfo.localPackVer, SOFTBUS_HISYSEVT_NAME_LEN, g_softBusVer, strlen(g_softBusVer));
+    EXPECT_EQ(EOK, ret);
+    ret = SoftBusReportDevOnlineEvt(&devInfo, g_udid);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: InitBusCenterDfx001
+ * @tc.desc: Verify InitBusCenterDfx function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+
+HWTEST_F(LnnDfxTest, InitBusCenterDfx001, TestSize.Level0)
+{
+    int ret = InitBusCenterDfx();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeinitBusCenterDfx();
 }
 } // namespace OHOS
