@@ -445,11 +445,6 @@ LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target)
     return GetNetBuilderDepsInterface()->LnnCreateConnectionFsm(target);
 }
 
-int64_t LnnUpTimeMs(void)
-{
-    return GetNetBuilderDepsInterface()->LnnUpTimeMs();
-}
-
 int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
 {
     return GetNetBuilderDepsInterface()->LnnStartConnectionFsm(connFsm);

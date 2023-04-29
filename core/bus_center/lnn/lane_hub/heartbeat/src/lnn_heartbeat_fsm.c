@@ -33,6 +33,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_hisysevt_bus_center.h"
 #include "softbus_utils.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
@@ -499,6 +500,14 @@ static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *pa
     return ret;
 }
 
+static void ReportSendBroadcastResultEvt(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report send broadcast result evt enter");
+    if (SoftBusRecordDiscoveryResult(SEND_BROADCAST, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report send broadcast result fail");
+    }
+}
+
 static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)fsm;
@@ -516,6 +525,7 @@ static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *par
             break;
         }
         ret = SOFTBUS_OK;
+        ReportSendBroadcastResultEvt();
     } while (false);
     SoftBusFree(custData);
     return ret;
