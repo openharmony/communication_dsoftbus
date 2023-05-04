@@ -43,7 +43,7 @@ namespace OHOS {
         char *ext = new char[Communication::SoftBus::MAX_STREAM_LEN + 1];
         if (ext == nullptr) {
             delete []buf;
-            ext = nullptr;
+            buf = nullptr;
             return;
         }
         std::unique_ptr<char[]> inputext (ext);
