@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 
+#include "common_list.h"
 #include "softbus_adapter_hisysevent.h"
 #include "softbus_common.h"
 
@@ -24,20 +25,102 @@
 extern "C" {
 #endif
 
+typedef enum {
+    MODULE_TYPE_DISCOVERY = 1,
+    MODULE_TYPE_CONNECT = 2,
+    MODULE_TYPE_AUTH = 3,
+    MODULE_TYPE_BUS_CENTER = 4,
+    MODULE_TYPE_ONLINE = 5,
+    MODULE_TYPE_TRANSPORT = 6,
+    MODULE_TYPE_API_CALLED = 7,
+    MODULE_TYPE_BUTT = 8,
+} SoftBusModuleType;
+
+typedef enum {
+    SOFTBUS_HISYSEVT_LINK_TYPE_BR = 0,
+    SOFTBUS_HISYSEVT_LINK_TYPE_BLE = 1,
+    SOFTBUS_HISYSEVT_LINK_TYPE_WLAN = 2,
+    SOFTBUS_HISYSEVT_LINK_TYPE_P2P = 3,
+    SOFTBUS_HISYSEVT_LINK_TYPE_HML = 4,
+    SOFTBUS_HISYSEVT_LINK_TYPE_BUTT = 5,
+} SoftBusLinkType;
+
+typedef enum {
+    AUTH_CONNECT_STAGE = 1,
+    AUTH_VERIFY_STAGE = 2,
+    AUTH_EXCHANGE_STAGE = 3,
+    AUTH_STAGE_BUTT,
+} AuthFailStage;
+
+typedef enum {
+    START_DISCOVERY = 1,
+    SEND_BROADCAST = 2,
+    RECV_BROADCAST = 3,
+    DEVICE_FOUND = 4,
+    BUSINESS_DISCOVERY = 5,
+} DiscoveryStage;
+
 typedef struct {
-    int64_t beginTime;
-    int64_t authTime;
-    int64_t endTime;
-    int32_t retCode;
-    ConnectionAddrType type;
+    uint32_t onlineDevNum;
+    uint32_t btOnlineDevNum;
+    uint32_t wifiOnlineDevNum;
+    uint32_t peerDevType;
+    int32_t insertFileResult;
+    char peerSoftBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
+    char peerDevName[SOFTBUS_HISYSEVT_NAME_LEN];
+    char localSoftBusVer[SOFTBUS_HISYSEVT_NAME_LEN];
+    char peerPackVer[SOFTBUS_HISYSEVT_NAME_LEN];
+    char localPackVer[SOFTBUS_HISYSEVT_NAME_LEN];
+} OnlineDeviceInfo;
+
+typedef struct {
+    uint8_t moduleType;
+    uint8_t linkType;
+    float channelQuality;
+    int32_t errorCode;
+    int32_t peerDevType;
+    int32_t onLineDevNum;
+    int32_t connNum;
+    int32_t nightMode;
+    int32_t wifiStatue;
+    int32_t bleStatue;
+    int32_t callerAppMode;
+    int32_t subErrCode;
+    int32_t connBrNum;
+    int32_t connBleNum;
+    bool bleBradStatus;
+    bool bleScanStatus;
+    char businessName[SOFTBUS_HISYSEVT_NAME_LEN];
+    char callerPackName[SOFTBUS_HISYSEVT_NAME_LEN];
+    char remoteBizUuid[SOFTBUS_HISYSEVT_NAME_LEN];
+} SoftBusFaultEvtInfo;
+
+typedef struct {
+    int32_t appDiscCnt;
+    char appName[SOFTBUS_HISYSEVT_NAME_LEN];
+    ListNode node;
+} AppDiscNode;
+
+typedef struct {
+    int64_t startAuthTime;
+    int64_t endAuthTime;
+} AuthStatisticData;
+
+typedef struct {
+    int64_t beginJoinLnnTime;
+    int64_t beginOnlineTime;
+    int64_t offLineTime;
 } LnnStatisticData;
 
-int32_t CreateBusCenterFaultEvt(SoftBusEvtReportMsg *msg, int32_t errorCode, ConnectionAddr *addr);
-int32_t ReportBusCenterFaultEvt(SoftBusEvtReportMsg *msg);
+uint64_t LnnUpTimeMs(void);
+void DeinitBusCenterDfx(void);
 int32_t InitBusCenterDfx(void);
-int32_t AddStatisticDuration(LnnStatisticData *data);
-int32_t AddStatisticRateOfSuccess(LnnStatisticData *data);
-
+int32_t SoftBusRecordDiscoveryResult(DiscoveryStage stage, AppDiscNode *discNode);
+int32_t SoftBusReportBusCenterFaultEvt(SoftBusFaultEvtInfo *info);
+int32_t SoftBusReportDevOnlineEvt(OnlineDeviceInfo *info, const char *udid);
+int32_t SoftBusRecordDevOnlineDurResult(uint64_t constTime);
+int32_t SoftBusRecordBusCenterResult(SoftBusLinkType linkType, uint64_t constTime);
+int32_t SoftBusRecordAuthResult(SoftBusLinkType linkType, int32_t ret, uint64_t constTime, AuthFailStage stage);
 #ifdef __cplusplus
 }
 #endif

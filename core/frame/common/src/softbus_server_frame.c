@@ -49,6 +49,7 @@ static void ServerModuleDeinit(void)
     SoftBusTimerDeInit();
     LooperDeinit();
     SoftBusHiDumperDeinit();
+    DeinitSoftbusSysEvt();
 }
 
 NO_SANITIZE("cfi") bool GetServerIsInit(void)
