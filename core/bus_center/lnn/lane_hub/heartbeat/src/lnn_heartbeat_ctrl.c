@@ -15,6 +15,7 @@
 
 #include "lnn_heartbeat_ctrl.h"
 
+#include <securec.h>
 #include <string.h>
 
 #include "auth_interface.h"
@@ -28,6 +29,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_bus_center.h"
 #include "softbus_log.h"
 #include "lnn_net_builder.h"
 #include "softbus_utils.h"
@@ -308,6 +310,21 @@ NO_SANITIZE("cfi") int32_t LnnOfflineTimingByHeartbeat(const char *networkId, Co
     return SOFTBUS_OK;
 }
 
+static void ReportBusinessDiscoveryResultEvt(const char *pkgName, int32_t discCnt)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report business discovery result evt enter");
+    AppDiscNode appInfo;
+    (void)memset_s(&appInfo, sizeof(AppDiscNode), 0, sizeof(AppDiscNode));
+    appInfo.appDiscCnt = discCnt;
+    if (memcpy_s(appInfo.appName, SOFTBUS_HISYSEVT_NAME_LEN, pkgName, SOFTBUS_HISYSEVT_NAME_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy app name fail");
+        return;
+    }
+    if (SoftBusRecordDiscoveryResult(BUSINESS_DISCOVERY, &appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report business discovery result fail");
+    }
+}
+
 NO_SANITIZE("cfi") int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode)
 {
@@ -315,6 +332,7 @@ NO_SANITIZE("cfi") int32_t LnnShiftLNNGear(const char *pkgName, const char *call
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB shift lnn gear get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    ReportBusinessDiscoveryResultEvt(pkgName, 1);
     if (targetNetworkId != NULL && !LnnGetOnlineStateById(targetNetworkId, CATEGORY_NETWORK_ID)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB target networkId:%s is offline",
             AnonymizesNetworkID(targetNetworkId));

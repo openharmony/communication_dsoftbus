@@ -286,6 +286,11 @@ static LnnConnectionFsm *FindConnectionFsmByConnFsmId(uint16_t connFsmId)
     return NULL;
 }
 
+static void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm)
+{
+    connFsm->statisticData.beginJoinLnnTime = LnnUpTimeMs();
+}
+
 static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -300,12 +305,12 @@ static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create connection fsm failed");
         return NULL;
     }
-    connFsm->statisticData.beginTime = LnnUpTimeMs();
     if (LnnStartConnectionFsm(connFsm) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start connection fsm[id=%u] failed", connFsm->id);
         LnnDestroyConnectionFsm(connFsm);
         return NULL;
     }
+    SetBeginJoinLnnTime(connFsm);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
     ++g_netBuilder.connCount;
     return connFsm;

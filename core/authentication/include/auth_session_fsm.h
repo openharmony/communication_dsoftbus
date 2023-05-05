@@ -25,6 +25,7 @@
 #include "common_list.h"
 #include "lnn_node_info.h"
 #include "lnn_state_machine.h"
+#include "softbus_hisysevt_bus_center.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -56,6 +57,7 @@ typedef struct {
     char fsmName[AUTH_FSM_NAME_LEN];
     FsmStateMachine fsm;
     AuthSessionInfo info;
+    AuthStatisticData statisticData;
     bool isDead;
 } AuthFsm;
 
