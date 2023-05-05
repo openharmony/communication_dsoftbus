@@ -15,18 +15,18 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SessionCallbackMockFuzzTest") {
   module_out_path = "dsoftbus/transmission"
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/sessioncallbackmock_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/sessioncallbackmock_fuzzer"
 
   include_dirs = [
-    "//foundation/communication/dsoftbus/sdk/transmission/session/cpp/src",
-    "//foundation/communication/dsoftbus/sdk/transmission/session/cpp/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/transport",
-    "//foundation/communication/dsoftbus/interfaces/kits/common",
+    "../../../../../sdk/transmission/session/cpp/src",
+    "../../../../../sdk/transmission/session/cpp/include",
+    "../../../../../interfaces/kits/transport",
+    "../../../../../interfaces/kits/common",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
@@ -37,7 +37,7 @@ ohos_fuzztest("SessionCallbackMockFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "sessioncallbackmock_fuzzer.cpp" ]
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [ "../../../../../sdk:softbus_client" ]
 
   external_deps = [ "c_utils:utils" ]
 }

@@ -13,13 +13,13 @@
 
 #####################hydra-fuzz###################
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/auth"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("UnpackAuthDataFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/core/authentication/fuzztest/unpackauthdata_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/authentication/fuzztest/unpackauthdata_fuzzer"
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/core/authentication/include",

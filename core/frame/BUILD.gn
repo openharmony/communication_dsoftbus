@@ -11,17 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
-import(
-    "//foundation/communication/dsoftbus/core/authentication/authentication.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/bus_center_server.gni")
-import(
-    "//foundation/communication/dsoftbus/core/common/security/permission/permission.gni")
-import("//foundation/communication/dsoftbus/core/connection/conn.gni")
-import("//foundation/communication/dsoftbus/core/discovery/disc.gni")
-import("//foundation/communication/dsoftbus/core/transmission/trans.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../dsoftbus.gni")
+import("../adapter/core_adapter.gni")
+import("../authentication/authentication.gni")
+import("../bus_center/bus_center_server.gni")
+import("../common/security/permission/permission.gni")
+import("../connection/conn.gni")
+import("../discovery/disc.gni")
+import("../transmission/trans.gni")
 
 dsoftbus_server_common_src =
     auth_server_src + bus_center_server_src + conn_manager_src +

@@ -11,11 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import(
-    "//foundation/communication/dsoftbus/core/connection/common/conn_common.gni")
-import(
-    "//foundation/communication/dsoftbus/core/transmission/common/trans_common.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../dsoftbus.gni")
+import("../connection/common/conn_common.gni")
+import("../transmission/common/trans_common.gni")
 
 common_utils_src = [
   "bitmap/softbus_bitmap.c",

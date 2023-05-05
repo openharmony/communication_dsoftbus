@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/lite/config/component/lite_component.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 static_library("softbus_test_message_handler") {
   sources = [ "message_handler_test.c" ]

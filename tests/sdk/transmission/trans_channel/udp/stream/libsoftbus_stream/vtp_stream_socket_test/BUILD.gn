@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 

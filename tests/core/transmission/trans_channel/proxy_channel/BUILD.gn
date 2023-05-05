@@ -12,9 +12,8 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-import(
-    "//foundation/communication/dsoftbus/tests/core/transmission/common/mock/mock.gni")
+import("../../../../../dsoftbus.gni")
+import("../../common/mock/mock.gni")
 
 module_output_path = "dsoftbus/transmission"
 
@@ -90,10 +89,8 @@ ohos_unittest("TransProxyChannelTest") {
   }
 }
 
-import(
-    "//foundation/communication/dsoftbus/core/transmission/trans_channel/common/common.gni")
-import(
-    "//foundation/communication/dsoftbus/core/transmission/trans_channel/proxy/proxy.gni")
+import("../../../../../core/transmission/trans_channel/common/common.gni")
+import("../../../../../core/transmission/trans_channel/proxy/proxy.gni")
 
 ohos_unittest("TransProxyChannelMockTest") {
   module_out_path = module_output_path

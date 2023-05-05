@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/lite/config/component/lite_component.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 static_library("disc_test") {
   sources = [ "discover_test.c" ]

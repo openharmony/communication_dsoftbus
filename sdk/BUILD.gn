@@ -11,12 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-
-import("//foundation/communication/dsoftbus/sdk/bus_center/bus_center_sdk.gni")
-import("//foundation/communication/dsoftbus/sdk/discovery/disc_sdk.gni")
-import("//foundation/communication/dsoftbus/sdk/frame/frame_sdk.gni")
-import("//foundation/communication/dsoftbus/sdk/transmission/trans_sdk.gni")
+import("../dsoftbus.gni")
+import("bus_center/bus_center_sdk.gni")
+import("discovery/disc_sdk.gni")
+import("frame/frame_sdk.gni")
+import("transmission/trans_sdk.gni")
 
 common_client_src = bus_center_sdk_src + disc_sdk_src +
                     softbus_client_frame_src + trans_session_manager_sdk_src

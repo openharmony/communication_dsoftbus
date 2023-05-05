@@ -1,17 +1,18 @@
 {
     "name": "@openharmony/dsoftbus",
-    "version": "3.1.0",
+    "version": "4.0",
     "description": "dsoftbus",
     "publishAs": "code-segment",
+    "segment": {
+      "destPath": "foundation/communication/dsoftbus"
+    },
+    "dirs": {},
     "scripts": {
       "install": "DEST_PATH=${DEP_BUNDLE_BASE}/foundation/communication/dsoftbus && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
     },
     "author": {},
     "repository": "",
     "license": "Apache License 2.0",
-    "segment": {
-      "destPath": "foundation/communication/dsoftbus"
-    },
     "component": {
       "name": "dsoftbus",
       "subsystem": "communication",
@@ -39,8 +40,8 @@
         "dsoftbus_standard_feature_dfinder_support_multi_nif",
         "dsoftbus_feature_protocol_newip"
       ],
-      "rom": "967KB",
-      "ram": "28MB",
+      "rom": "3000KB",
+      "ram": "40MB",
       "deps": {
         "components": [
           "ability_base",

@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 bus_center_sdk_test_src = [ "bus_center_sdk_test.cpp" ]
 client_bus_center_test_src = [ "client_bus_center_test.cpp" ]
@@ -47,9 +47,9 @@ bus_center_sdk_test_deps = [
   "$dsoftbus_root_path/core/common:softbus_utils",
   "$dsoftbus_root_path/core/frame:softbus_server",
   "$dsoftbus_root_path/sdk:softbus_client",
+  "../../../../sdk:softbus_client",
   "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
   "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-  "//foundation/communication/dsoftbus/sdk:softbus_client",
   "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
   "//third_party/bounds_checking_function:libsec_static",
 ]
@@ -163,16 +163,14 @@ if (defined(ohos_lite)) {
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hiviewdfx_hilog_native:libhilog",
-      ]
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      external_deps = [ "hilog:libhilog" ]
     }
+    external_deps += [
+      "c_utils:utils",
+      "ipc:ipc_core",
+    ]
   }
 
   ohos_unittest("ClientBusCenterSdkTest") {
@@ -189,16 +187,14 @@ if (defined(ohos_lite)) {
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hiviewdfx_hilog_native:libhilog",
-      ]
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      external_deps = [ "hilog:libhilog" ]
     }
+    external_deps += [
+      "c_utils:utils",
+      "ipc:ipc_core",
+    ]
   }
 
   ohos_unittest("ClientBusMangerTest") {
@@ -215,16 +211,14 @@ if (defined(ohos_lite)) {
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hiviewdfx_hilog_native:libhilog",
-      ]
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      external_deps = [ "hilog:libhilog" ]
     }
+    external_deps += [
+      "c_utils:utils",
+      "ipc:ipc_core",
+    ]
   }
 
   ohos_unittest("BusCenterHeartbeatSdkTest") {
@@ -241,16 +235,14 @@ if (defined(ohos_lite)) {
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hiviewdfx_hilog_native:libhilog",
-      ]
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      external_deps = [ "hilog:libhilog" ]
     }
+    external_deps += [
+      "c_utils:utils",
+      "ipc:ipc_core",
+    ]
   }
 
   ohos_unittest("BusCenterMetaNodeSdkTest") {
@@ -267,16 +259,14 @@ if (defined(ohos_lite)) {
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hiviewdfx_hilog_native:libhilog",
-      ]
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      external_deps = [ "hilog:libhilog" ]
     }
+    external_deps += [
+      "c_utils:utils",
+      "ipc:ipc_core",
+    ]
   }
 
   ohos_unittest("ClientBusCentManagerTest") {
@@ -319,16 +309,14 @@ if (defined(ohos_lite)) {
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hiviewdfx_hilog_native:libhilog",
-      ]
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      external_deps = [ "hilog:libhilog" ]
     }
+    external_deps += [
+      "c_utils:utils",
+      "ipc:ipc_core",
+    ]
   }
 
   group("unittest") {
