@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
@@ -30,7 +30,6 @@ ohos_unittest("TransClientProxyTest") {
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/frame/standard/include",
-    "//foundation/communication/dsoftbus/tests/core/transmission/ipc/samgr/interfaces/innerkits/samgr_proxy/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include/",
     "//foundation/window/window_manager/previewer/mock",
     "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
@@ -40,23 +39,19 @@ ohos_unittest("TransClientProxyTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
-      "samgr:samgr_proxy",
-    ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "samgr:samgr_proxy",
-    ]
+    external_deps = [ "hilog:libhilog" ]
   }
+  external_deps += [
+    "c_utils:utils",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
 }
 
 ohos_unittest("TransClientProxyStandardTest") {
@@ -73,7 +68,6 @@ ohos_unittest("TransClientProxyStandardTest") {
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/frame/standard/include",
-    "//foundation/communication/dsoftbus/tests/core/transmission/ipc/samgr/interfaces/innerkits/samgr_proxy/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include/",
     "//foundation/window/window_manager/previewer/mock",
     "//foundation/communication/ipc/interfaces/innerkits/c/ipc/include",
@@ -83,23 +77,19 @@ ohos_unittest("TransClientProxyStandardTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
-      "samgr:samgr_proxy",
-    ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "samgr:samgr_proxy",
-    ]
+    external_deps = [ "hilog:libhilog" ]
   }
+  external_deps += [
+    "c_utils:utils",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
 }
 
 group("unittest") {

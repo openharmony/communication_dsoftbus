@@ -13,7 +13,7 @@
 
 import("//build/lite/config/component/lite_component.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 if (defined(ohos_lite)) {

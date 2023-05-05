@@ -15,20 +15,20 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("StreamCommonDataFuzzTest") {
   module_out_path = "dsoftbus/transmission"
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/streamcommondata_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/streamcommondata_fuzzer"
 
   include_dirs = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//foundation/communication/dsoftbus/adapter/common/include",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "../../../../../adapter/common/include",
+    "../../../../../core/common/include",
+    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
@@ -40,7 +40,7 @@ ohos_fuzztest("StreamCommonDataFuzzTest") {
     "-fstack-protector-strong",
   ]
   sources = [ "streamcommondata_fuzzer.cpp" ]
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [ "../../../../../sdk:softbus_client" ]
   external_deps = [ "c_utils:utils" ]
 }
 

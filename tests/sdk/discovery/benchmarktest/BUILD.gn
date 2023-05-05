@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/discovery"
 ohos_benchmarktest("DiscoveryTest") {
   module_out_path = module_output_path
@@ -30,10 +30,10 @@ ohos_benchmarktest("DiscoveryTest") {
     "//base/security/access_token/interfaces/innerkits/accesstoken/include",
   ]
   deps = [
+    "../../../../sdk:softbus_client",
     "//base/security/access_token/interfaces/innerkits/accesstoken:libaccesstoken_sdk",
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    "//foundation/communication/dsoftbus/sdk:softbus_client",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
   ]

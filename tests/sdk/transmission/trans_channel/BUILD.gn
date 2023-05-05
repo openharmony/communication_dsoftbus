@@ -11,9 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
+import("../../../../dsoftbus.gni")
+import("../../../../sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
 
 trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/core/common/include",

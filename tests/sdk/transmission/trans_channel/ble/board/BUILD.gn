@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 ohos_unittest("dsoftbus_auth_ble_board") {
   module_out_path = module_output_path

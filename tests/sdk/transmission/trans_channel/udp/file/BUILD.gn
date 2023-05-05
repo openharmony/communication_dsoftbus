@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
 
@@ -20,9 +20,9 @@ if (defined(ohos_lite)) {
   executable("dsoftbus_app_dfile") {
     sources = [ "dsoftbus_app_dfile.c" ]
     include_dirs = [
-      "//foundation/communication/dsoftbus/interfaces/kits/common",
-      "//foundation/communication/dsoftbus/interfaces/kits/bus_center",
-      "//foundation/communication/dsoftbus/interfaces/kits/common",
+      "../../../../../../interfaces/kits/common",
+      "../../../../../../interfaces/kits/bus_center",
+      "../../../../../../interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_root_path//core/common/include",
       "//third_party/bounds_checking_function/include",
@@ -42,9 +42,9 @@ if (defined(ohos_lite)) {
     sources = [ "dsoftbus_app_dfile.cpp" ]
 
     include_dirs = [
-      "//foundation/communication/dsoftbus/interfaces/kits/common",
-      "//foundation/communication/dsoftbus/interfaces/kits/bus_center",
-      "//foundation/communication/dsoftbus/interfaces/kits/common",
+      "../../../../../../interfaces/kits/common",
+      "../../../../../../interfaces/kits/bus_center",
+      "../../../../../../interfaces/kits/common",
       "$dsoftbus_root_path/interfaces/kits/transport",
     ]
 

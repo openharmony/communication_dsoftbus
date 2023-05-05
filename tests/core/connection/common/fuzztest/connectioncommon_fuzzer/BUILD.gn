@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ConnectionCommonFuzzTest") {
@@ -23,8 +23,8 @@ ohos_fuzztest("ConnectionCommonFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/common/fuzztest/connectioncommon_fuzzer"
 
   include_dirs = [
-    "//foundation/communication/dsoftbus/core/connection/common/include",
-    "//foundation/communication/dsoftbus/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
   ]
 
   cflags = [

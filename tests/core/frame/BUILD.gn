@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../dsoftbus.gni")
 
 config("softbus_frame_test_config") {
   include_dirs = [
@@ -25,7 +25,7 @@ config("softbus_frame_test_config") {
 
 ohos_executable("softbus_test") {
   install_enable = true
-  sources = [ "$dsoftbus_root_path/tests/core/frame/softbus_test.c" ]
+  sources = [ "softbus_test.c" ]
   configs = [ ":softbus_frame_test_config" ]
 
   if (is_standard_system) {
