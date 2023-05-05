@@ -22,6 +22,8 @@
 #include "trans_lane_manager.h"
 #include "trans_session_manager.h"
 #include "softbus_qos.h"
+#include "softbus_hisysevt_transreporter.h"
+#include "softbus_adapter_hitracechain.h"
 
 static IServerChannelCallBack g_channelCallBack;
 
@@ -37,6 +39,11 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "NotifyQosChannelOpened failed.");
         return SOFTBUS_ERR;
     }
+    int64_t timeStart = channel->timeStart;
+    int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
+    HiTraceIdStruct traceId = SoftbusHitraceChainGetId();
+    SoftbusHitraceChainEnd(&traceId);
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
 }
 
@@ -71,6 +78,8 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
+    HiTraceIdStruct traceId = SoftbusHitraceChainGetId();
+    SoftbusHitraceChainEnd(&traceId);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
         "trasn server on channel open failed.[pkgname=%s][channid=%d][type=%d]", pkgName, channelId, channelType);
     return SOFTBUS_OK;

@@ -80,6 +80,35 @@ CONN_FAULT:
   MEDIUM: {type: UINT8, desc: connection medium }
   ERROR_CODE: {type: INT32, desc: error code }
 
+TRANSPORT_KPI:
+  __BASE: {type: STATISTIC, level: MINOR, desc: success rate of establishing softbus transmission}
+  LINK_TYPE: {type: INT32, desc: linktype}
+  TOTAL_TIME: {type: INT64, desc: total duration ms}
+  TOTAL_COUNT: {type: INT32, desc: total count}
+  FAIL_TOTAL_TIME: {type: INT64, desc: fail total time ms}
+  FAIL_TOTAL_COUNT: {type: INT32, desc: fail total count}
+  PACKAGE_VERSION: {type: STRING, desc: package version}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version}
+  COUNT1: {type: INT32, desc: Number of times that the duration is longer than 1s}
+  COUNT2: {type: INT32, desc: Number of times that the duration is longer than 2s}
+  COUNT3: {type: INT32, desc: Number of times that the duration is longer than 4s}
+  COUNT4: {type: INT32, desc: Number of times that the duration is longer than 7s}
+  COUNT5: {type: INT32, desc: Number of times that the duration is longer than 11s}
+  CALLER_PACKAGE_NAME: {type: STRING, desc: caller package name}
+
+CALLED_API_INFO:
+  __BASE: {type: STATISTIC, level: MINOR, desc: api called APP infor}
+  APP_NAME: {type: STRING, desc: caller package name}
+  API_NAME: {type: STRING, desc: called api name}
+  TOTAL_COUNT: {type: INT32, desc: total count}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version}
+  PACKAGE_VERSION: {type: STRING, desc: package version}
+
+CALLED_API_CNT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: api called count}
+  API_NAME: {type: STRING, desc: called api name}
+  TOTAL_COUNT: {type: INT32, desc: total count}
+
 TRANS_OPEN_SESSION_CNT:
   __BASE: {type: STATISTIC, level: MINOR, desc: the success count and the fail count of open session }
   SUCCESS_CNT: {type: UINT32, desc: the success count of open session }

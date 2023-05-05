@@ -31,7 +31,8 @@
 #include "trans_lane_pending_ctl.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
-
+#include "softbus_hisysevt_transreporter.h"
+#include "softbus_adapter_hitracechain.h"
 #define MAX_CHANNEL_ID_COUNT 20
 #define ID_NOT_USED 0
 #define ID_USED 1
@@ -41,6 +42,7 @@
 
 #define FLAG_REQUEST 0
 #define FLAG_REPLY 1
+#define ID_OFFSET (1)
 
 static int64_t g_seq = 0;
 static uint64_t g_channelIdFlagBitsMap = 0;
@@ -106,6 +108,8 @@ NO_SANITIZE("cfi") static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo,
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
     info.groupId = (char*)appInfo->groupId;
+    info.timeStart = appInfo->timeStart;
+    info.linkType = appInfo->linkType;
     if (LnnGetNetworkIdByUuid((const char *)appInfo->peerData.deviceId, networkId,
         NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get network id by uuid failed.");
@@ -145,7 +149,9 @@ NO_SANITIZE("cfi") int32_t NotifyUdpChannelClosed(const AppInfo *info)
 NO_SANITIZE("cfi") int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify udp channel open failed.");
-
+    int64_t timeStart = info->timeStart;
+    int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    SoftbusRecordOpenSessionKpi(info->myData.pkgName, info->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     int ret = g_channelCb->OnChannelOpenFailed(info->myData.pkgName, info->myData.pid,
         (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);
     if (ret != SOFTBUS_OK) {
@@ -436,6 +442,9 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel by seq failed.");
         return;
     }
+    if (SoftbusHitraceChainIsValid(&channel.traceId)) {
+        SoftbusHitraceChainSetChainId(&channel.traceId, (uint64_t)(channel.info.myData.channelId + ID_OFFSET));
+    }
     int32_t errCode = SOFTBUS_OK;
     if (TransUnpackReplyErrInfo(msg, &errCode) == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive err reply info");
@@ -702,10 +711,22 @@ NO_SANITIZE("cfi") int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOp
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "prepare app info for opening udp channel.");
         return SOFTBUS_ERR;
     }
+    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenUdpChannel", HITRACE_FLAG_DEFAULT);
+    if (SoftbusHitraceChainIsValid(&traceId)) {
+        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(id + ID_OFFSET));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(id + ID_OFFSET));
+    }
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
     if (newChannel == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "new udp channel failed.");
         ReleaseUdpChannelId(id);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(&(newChannel->traceId), sizeof(newChannel->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenUdpChannel memcpy failed.");
+        ReleaseUdpChannelId(id);
+        SoftBusFree(newChannel);
         return SOFTBUS_MEM_ERR;
     }
     newChannel->seq = GenerateSeq(false);

@@ -53,6 +53,10 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
             dstParam->t = HISYSEVENT_UINT32;
             dstParam->v.ui32 = srcParam->paramValue.u32v;
             break;
+        case SOFTBUS_EVT_PARAMTYPE_INT64:
+            dstParam->t = HISYSEVENT_INT64;
+            dstParam->v.i64 = srcParam->paramValue.i64v;
+            break;
         case SOFTBUS_EVT_PARAMTYPE_UINT64:
             dstParam->t = HISYSEVENT_UINT64;
             dstParam->v.ui64 = srcParam->paramValue.u64v;

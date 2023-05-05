@@ -38,6 +38,9 @@
 #include "softbus_utils.h"
 #include "trans_channel_limit.h"
 #include "trans_pending_pkt.h"
+#include "softbus_adapter_hitracechain.h"
+
+#define ID_OFFSET (1)
 
 #define PROXY_CHANNEL_CONTROL_TIMEOUT 19
 #define PROXY_CHANNEL_BT_IDLE_TIMEOUT 240 // 4min
@@ -193,6 +196,9 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             (void)memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                            &(info->appInfo.peerData), sizeof(info->appInfo.peerData));
             (void)memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
+            if (SoftbusHitraceChainIsValid(&item->traceId)) {
+                SoftbusHitraceChainSetChainId(&item->traceId, (uint64_t)(item->channelId + ID_OFFSET));
+            }
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }

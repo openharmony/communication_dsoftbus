@@ -19,16 +19,31 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_hisysevt_common.h"
 #include "softbus_hisysevt_transreporter.h"
+#include "softbus_utils.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_ipc_def.h"
 
+#define STATISTIC_EVT_TRANSPORT_KPI "TRANSPORT_KPI"
+#define STATISTIC_EVT_CALLED_API_INFO "CALLED_API_INFO"
+#define STATISTIC_EVT_CALLED_API_CNT "CALLED_API_CNT"
 #define STATISTIC_EVT_TRANS_OPEN_SESSION_CNT "TRANS_OPEN_SESSION_CNT"
 #define STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST "TRANS_OPEN_SESSION_TIME_COST"
 
 #define FAULT_EVT_TRANS_FAULT "TRANS_FAULT"
 
+#define TRANS_PARAM_LINK_TYPE "LINK_TYPE"
+
+#define TRANS_PARAM_APP_NAME "APP_NAME"
+#define TRANS_PARAM_API_NAME "API_NAME"
+
+#define TRANS_PARAM_TOTAL_CNT "TOTAL_COUNT"
+#define TRANS_PARAM_FAIL_TOTAL_CNT "FAIL_TOTAL_COUNT"
 #define TRANS_PARAM_SUCCESS_CNT "SUCCESS_CNT"
 #define TRANS_PARAM_FAIL_CNT "FAIL_CNT"
 #define TRANS_PARAM_SUCCESS_RATE "SUCCESS_RATE"
 
+#define TRANS_PARAM_TOTAL_TIME "TOTAL_TIME"
+#define TRANS_PARAM_FAIL_TOTAL_TIME "FAIL_TOTAL_TIME"
 #define TRANS_PARAM_MAX_TIME_COST "MAX_TIME_COST"
 #define TRANS_PARAM_MIN_TIME_COST "MIN_TIME_COST"
 #define TRANS_PARAM_AVE_TIME_COST "AVE_TIME_COST"
@@ -36,12 +51,70 @@
 #define TRANS_PARAM_TIMES_BETWEEN_500MS_1S "TIMES_BETWEEN_500MS_1S"
 #define TRANS_PARAM_TIMES_BETWEEN_1S_2S "TIMES_BETWEEN_1S_2S"
 #define TRANS_PARAM_TIMES_ABOVE_2S "TIMES_ABOVE_2S"
+#define TRANS_OPEN_TIMES_ABOVE_1S "COUNT1"
+#define TRANS_OPEN_TIMES_ABOVE_2S "COUNT2"
+#define TRANS_OPEN_TIMES_ABOVE_4S "COUNT3"
+#define TRANS_OPEN_TIMES_ABOVE_7S "COUNT4"
+#define TRANS_OPEN_TIMES_ABOVE_11S "COUNT5"
+
+#define TRANS_PARAM_PACKAGE_VERSION "PACKAGE_VERSION"
+#define TRANS_PARAM_SOFTBUS_VERSION "SOFT_BUS_VERSION"
+#define TRANS_PARAM_CALLER_PACKAGE "CALLER_PACKAGE_NAME"
 
 #define TRANS_PARAM_ERRCODE "ERROR_CODE"
 
 #define TIME_COST_500MS (500)
 #define TIME_COST_1S (1000)
 #define TIME_COST_2S (2000)
+#define TIME_COST_4S (4000)
+#define TIME_COST_7S (7000)
+#define TIME_COST_11S (11000)
+#define API_TYPE_DEFAULT (1)
+#define API_CALLED_DEFAULT (1)
+
+static char g_softbusVersion[SOFTBUS_HISYSEVT_PARAM_LEN] = "softbusVersion1";
+static char g_pkgVersion[SOFTBUS_HISYSEVT_PARAM_LEN] = "packageVersion1";
+typedef struct {
+    uint32_t code;
+    char *apiName;
+}ApiNameIdMap;
+static ApiNameIdMap g_apiNameIdMapTbl[] = {
+    {SERVER_START_DISCOVERY, "StartDiscovery"},
+    {SERVER_STOP_DISCOVERY, "StopDiscovery"},
+    {SERVER_PUBLISH_SERVICE, "PublishService"},
+    {SERVER_UNPUBLISH_SERVICE, "UnPublishService"},
+    {MANAGE_REGISTER_SERVICE, "SoftbusRegisterService"},
+    {SERVER_CREATE_SESSION_SERVER, "CreateSessionServer"},
+    {SERVER_REMOVE_SESSION_SERVER, "RemoveSessionServer"},
+    {SERVER_OPEN_SESSION, "OpenSession"},
+    {SERVER_OPEN_AUTH_SESSION, "OpenAuthSession"},
+    {SERVER_NOTIFY_AUTH_SUCCESS, "NotifyAuthSuccess"},
+    {SERVER_CLOSE_CHANNEL, "CloseChannel"},
+    {SERVER_SESSION_SENDMSG, "SendMessage"},
+    {SERVER_JOIN_LNN, "JoinLNN"},
+    {SERVER_JOIN_METANODE, "JoinMetaNode"},
+    {SERVER_LEAVE_LNN, "LeaveLNN"},
+    {SERVER_LEAVE_METANODE, "LeaveMetaNode"},
+    {SERVER_GET_ALL_ONLINE_NODE_INFO, "GetAllOnlineNodeInfo"},
+    {SERVER_GET_LOCAL_DEVICE_INFO, "GetLocalDeviceInfo"},
+    {SERVER_GET_NODE_KEY_INFO, "GetNodeKeyInfo"},
+    {SERVER_SET_NODE_DATA_CHANGE_FLAG, "SetNodeDataChangeFlag"},
+    {SERVER_START_TIME_SYNC, "StartTimeSync"},
+    {SERVER_STOP_TIME_SYNC, "StopTimeSync"},
+    {SERVER_QOS_REPORT, "QosReport"},
+    {SERVER_STREAM_STATS, "StreamStats"},
+    {SERVER_GRANT_PERMISSION, "GrantPermission"},
+    {SERVER_REMOVE_PERMISSION, "RemovePermission"},
+    {SERVER_PUBLISH_LNN, "PublishLNN"},
+    {SERVER_STOP_PUBLISH_LNN, "StopPublishLNN"},
+    {SERVER_REFRESH_LNN, "RefreshLNN"},
+    {SERVER_STOP_REFRESH_LNN, "StopRefreshLNN"},
+    {SERVER_ACTIVE_META_NODE, "ActiveMetaNode"},
+    {SERVER_DEACTIVE_META_NODE, "DeactiveMetaNode"},
+    {SERVER_GET_ALL_META_NODE_INFO, "GetAllMetaNodeInfo"},
+    {SERVER_SHIFT_LNN_GEAR, "ShiftLNNGear"},
+    {SERVER_RIPPLE_STATS, "RippleStats"},
+};
 
 typedef struct {
     SoftBusMutex lock;
@@ -61,8 +134,51 @@ typedef struct {
     uint32_t timesOn2s;
 }OpenSessionTimeStruct;
 
+typedef struct {
+    SoftBusMutex lock;
+    int32_t linkType;
+    int64_t totalTime;
+    int32_t totalCnt;
+    int32_t successTotalCnt;
+    int64_t failTotalTime;
+    int32_t failTotalCnt;
+    char packageVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
+    char softbusVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
+    int32_t count1;
+    int32_t count2;
+    int32_t count3;
+    int32_t count4;
+    int32_t count5;
+    char callerPackageName[SOFTBUS_HISYSEVT_PARAM_LEN];
+}OpenSessionKpiStruct;
+
+typedef struct {
+    SoftBusMutex lock;
+    int32_t cnt; //app count
+    ListNode apiInfolist;
+}ApiInfoList;
+
+typedef struct {
+    ListNode node;
+    char appName[SOFTBUS_HISYSEVT_PARAM_LEN];
+    char softbusVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
+    char packageVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
+    int32_t cnt; //Api count
+    ListNode apiCntList;
+}CalledApiInfoStruct;
+
+typedef struct {
+    ListNode node;
+    char apiName[SOFTBUS_HISYSEVT_PARAM_LEN];
+    int32_t calledtotalCnt;
+}CalledApiCntStruct;
+
+
 static OpenSessionCntStruct g_openSessionCnt;
 static OpenSessionTimeStruct g_openSessionTime;
+static OpenSessionKpiStruct g_openSessionKpi;
+static ApiInfoList *g_calledApiInfoList = NULL;
+static ApiInfoList *g_calledApiCntlist = NULL;
 
 #define TIME_THOUSANDS_FACTOR (1000)
 
@@ -74,6 +190,249 @@ int64_t GetSoftbusRecordTimeMillis(void)
     SoftBusGetTime(&t);
     int64_t when = t.sec * TIME_THOUSANDS_FACTOR + (t.usec / TIME_THOUSANDS_FACTOR);
     return when;
+}
+
+static ApiInfoList *CreateApiInfoList(void)
+{
+    ApiInfoList *list = (ApiInfoList *)SoftBusMalloc(sizeof(ApiInfoList));
+    if (list == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc failed");
+        return NULL;
+    }
+    (void)memset_s(list, sizeof(ApiInfoList), 0, sizeof(ApiInfoList));
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&list->lock, &mutexAttr) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init lock failed");
+        SoftBusFree(list);
+        return NULL;
+    }
+    ListInit(&list->apiInfolist);
+    return list;
+}
+
+static void DetroyApiInfoList(ApiInfoList *list)
+{
+    ListDelInit(&list->apiInfolist);
+    SoftBusMutexDestroy(&list->lock);
+    SoftBusFree(list);
+    return;
+}
+
+static void ReleaseCalledApiInfoList(void)
+{
+    if (g_calledApiInfoList == NULL) {
+        MLOGE("list NULL");
+        return;
+    }
+    if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
+        MLOGE("ReleaseCalledApiInfoList lock failed");
+        return;
+    }
+    CalledApiInfoStruct *item = NULL;
+    CalledApiInfoStruct *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+        g_calledApiInfoList->cnt--;
+    }
+    ListInit(&g_calledApiInfoList->apiInfolist);
+    (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+    return;
+}
+
+static void ReleaseCalledApiCntList(void)
+{
+    if (g_calledApiCntlist == NULL) {
+        MLOGE("list NULL");
+        return;
+    }
+    if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
+        MLOGE("ReleaseCalledApiCntList lock failed");
+        return;
+    }
+    CalledApiCntStruct *item = NULL;
+    CalledApiCntStruct *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_calledApiCntlist->apiInfolist, CalledApiCntStruct, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+        g_calledApiCntlist->cnt--;
+    }
+    ListInit(&g_calledApiCntlist->apiInfolist);
+    (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
+    return;
+}
+
+static CalledApiCntStruct *GetNewApiCnt(char *apiName)
+{
+    CalledApiCntStruct *apiCnt = (CalledApiCntStruct *)SoftBusMalloc(sizeof(CalledApiCntStruct));
+    if (apiCnt == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiCnt malloc failed");
+        return NULL;
+    }
+    if (strcpy_s(apiCnt->apiName, SOFTBUS_HISYSEVT_PARAM_LEN, apiName) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiCnt strcpy failed");
+        SoftBusFree(apiCnt);
+        return NULL;
+    }
+    ListInit(&apiCnt->node);
+    apiCnt->calledtotalCnt = API_CALLED_DEFAULT;
+    return apiCnt;
+}
+
+static CalledApiInfoStruct *GetNewApiInfo(const char *appName, char *apiName)
+{
+    CalledApiInfoStruct *apiInfo = (CalledApiInfoStruct *)SoftBusMalloc(sizeof(CalledApiInfoStruct));
+    if (apiInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiInfo malloc failed");
+        return NULL;
+    }
+    if (strcpy_s(apiInfo->appName, SOFTBUS_HISYSEVT_PARAM_LEN, appName) != EOK ||
+        strcpy_s(apiInfo->softbusVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_softbusVersion) != EOK ||
+        strcpy_s(apiInfo->packageVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_pkgVersion) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiInfo strcpy failed");
+        SoftBusFree(apiInfo);
+        return NULL;
+    }
+    ListInit(&apiInfo->node);
+    ListInit(&apiInfo->apiCntList);
+    CalledApiCntStruct *apiCnt = GetNewApiCnt(apiName);
+    ListAdd(&apiInfo->apiCntList, &apiCnt->node);
+    apiInfo->cnt = API_TYPE_DEFAULT;
+    return apiInfo;
+}
+
+static char *GetApiNameByCode(uint32_t code)
+{
+    for (uint32_t i = 0; i < sizeof(g_apiNameIdMapTbl) / sizeof(ApiNameIdMap); i++) {
+        if (g_apiNameIdMapTbl[i].code == code) {
+            return g_apiNameIdMapTbl[i].apiName;
+        }
+    }
+    return NULL;
+}
+
+void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
+{
+    if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
+        MLOGE("SoftbusRecordCalledApiInfo lock fail");
+        return;
+    }
+    char *apiName = GetApiNameByCode(code);
+    if (apiName == NULL) {
+        (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+        return;
+    }
+    
+    CalledApiInfoStruct *apiInfoNode = NULL;
+    CalledApiCntStruct *apiCntNode = NULL;
+    bool isAppDiff = true;
+    bool isApiDiff = true;
+    LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+        if (strcmp(apiInfoNode->appName, appName) == 0) {
+            isAppDiff = false;
+            LIST_FOR_EACH_ENTRY(apiCntNode, &apiInfoNode->apiCntList, CalledApiCntStruct, node) {
+                if (strcmp(apiCntNode->apiName, apiName) == 0) {
+                    isApiDiff = false;
+                    apiCntNode->calledtotalCnt++;
+                    break;
+                }
+            }
+        }
+    }
+    if (isAppDiff) {
+        apiInfoNode = GetNewApiInfo(appName, apiName);
+        if (apiInfoNode == NULL) {
+            MLOGE("GetNewApiInfo fail");
+            (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+            return;
+        }
+        ListAdd(&g_calledApiInfoList->apiInfolist, &apiInfoNode->node);
+        g_calledApiInfoList->cnt++;
+    }
+    if ((isAppDiff == false) && (isApiDiff == true)) {
+        apiInfoNode = NULL;
+        LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+            if (strcmp(apiInfoNode->appName, appName) == 0) {
+                apiCntNode = GetNewApiCnt(apiName);
+                if (apiCntNode == NULL) {
+                    MLOGE("GetNewApiCnt fail");
+                    (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+                    return;
+                }
+                ListAdd(&apiInfoNode->apiCntList, &apiCntNode->node);
+                apiInfoNode->cnt++;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+}
+
+void SoftbusRecordCalledApiCnt(uint32_t code)
+{
+    if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
+        MLOGE("SoftbusRecordCalledApiCnt lock fail");
+        return;
+    }
+    char *apiName = GetApiNameByCode(code);
+    if (apiName == NULL) {
+        (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
+        return;
+    }
+    
+    CalledApiCntStruct *apiCntNode = NULL;
+    bool isDiff = true;
+    LIST_FOR_EACH_ENTRY(apiCntNode, &g_calledApiCntlist->apiInfolist, CalledApiCntStruct, node) {
+        if (strcmp(apiCntNode->apiName, apiName) == 0) {
+            isDiff = false;
+            apiCntNode->calledtotalCnt++;
+            break;
+        }
+    }
+    if (isDiff == true) {
+        apiCntNode = GetNewApiCnt(apiName);
+        if (apiCntNode == NULL) {
+            MLOGE("GetNewApiCnt fail");
+            (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
+            return;
+        }
+        ListAdd(&g_calledApiCntlist->apiInfolist, &apiCntNode->node);
+        g_calledApiCntlist->cnt++;
+    }
+    (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
+}
+
+void SoftbusRecordOpenSessionKpi(const char *pkgName, int32_t linkType, SoftBusOpenSessionStatus isSucc, int64_t time)
+{
+    if (SoftBusMutexLock(&g_openSessionKpi.lock) != SOFTBUS_OK) {
+        return;
+    }
+    g_openSessionKpi.linkType = linkType;
+
+    g_openSessionKpi.failTotalCnt += (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC);
+    g_openSessionKpi.successTotalCnt += (isSucc == SOFTBUS_EVT_OPEN_SESSION_SUCC);
+    g_openSessionKpi.totalCnt = g_openSessionKpi.failTotalCnt + g_openSessionKpi.successTotalCnt;
+
+    (void)strcpy_s(g_openSessionKpi.softbusVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_softbusVersion);
+    (void)strcpy_s(g_openSessionKpi.packageVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_pkgVersion);
+    (void)strcpy_s(g_openSessionKpi.callerPackageName, SOFTBUS_HISYSEVT_PARAM_LEN, pkgName);
+    g_openSessionKpi.totalTime = time;
+    if (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC) {
+        g_openSessionKpi.failTotalTime = time;
+    }
+
+    if (time > TIME_COST_1S) {
+        g_openSessionKpi.count1++;
+    } else if (time > TIME_COST_2S) {
+        g_openSessionKpi.count2++;
+    } else if (time > TIME_COST_4S) {
+        g_openSessionKpi.count3++;
+    } else if (time > TIME_COST_7S) {
+        g_openSessionKpi.count4++;
+    } else if (time > TIME_COST_11S) {
+        g_openSessionKpi.count5++;
+    }
+    (void)SoftBusMutexUnlock(&g_openSessionKpi.lock);
 }
 
 void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
@@ -119,6 +478,12 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     (void)SoftBusMutexUnlock(&g_openSessionTime.lock);
 }
 
+static inline void clearOpenSessionKpi(void)
+{
+    memset_s(&g_openSessionKpi.linkType, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex),
+        0, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex));
+}
+
 static inline void clearOpenSessionCnt(void)
 {
     memset_s(&g_openSessionCnt.failCnt, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex),
@@ -142,7 +507,142 @@ static inline int32_t InitOpenSessionEvtMutexLock(void)
         return SOFTBUS_ERR;
     }
 
+
+    if (SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+
     return SOFTBUS_OK;
+}
+
+static void CreateCalledApiInfoMsg(SoftBusEvtReportMsg* msg, CalledApiCntStruct *apiCntItem,
+    char *appName, char *softbusVersion, char *packageVersion)
+{
+    // event
+    (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_CALLED_API_INFO);
+    msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
+    msg->paramNum = SOFTBUS_EVT_PARAM_FIVE;
+    // param 0
+    SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_APP_NAME);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, appName);
+    // param 1
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_SOFTBUS_VERSION);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, softbusVersion);
+    // param 2
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_PACKAGE_VERSION);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, packageVersion);
+    // param 3
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_API_NAME);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, apiCntItem->apiName);
+    // param 4
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_FOUR];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TOTAL_CNT);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = apiCntItem->calledtotalCnt;
+}
+
+static void CreateCalledApiCntMsg(SoftBusEvtReportMsg* msg, CalledApiCntStruct *apiCntItem)
+{
+    // event
+   (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_CALLED_API_CNT);
+    msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
+    msg->paramNum = SOFTBUS_EVT_PARAM_TWO;
+    // param 0
+    SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_API_NAME);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, apiCntItem->apiName);
+    // param 1
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TOTAL_CNT);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = apiCntItem->calledtotalCnt;
+}
+
+static void CreateOpenSessionKpiMsg(SoftBusEvtReportMsg* msg)
+{
+     if (SoftBusMutexLock(&g_openSessionKpi.lock) != SOFTBUS_OK) {
+        return;
+    }
+    // event
+   (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_TRANSPORT_KPI);
+    msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
+    msg->paramNum = SOFTBUS_EVT_PARAM_THIRTEEN;
+    // param 0
+    SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_LINK_TYPE);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.linkType;
+    // param 1
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TOTAL_TIME);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT64;
+    param->paramValue.i64v = g_openSessionKpi.totalTime;
+    // param 2
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_TOTAL_CNT);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.totalCnt;
+    // param 3
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_FAIL_TOTAL_TIME);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT64;
+    param->paramValue.i64v = g_openSessionKpi.failTotalTime;
+    // param 4
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_FOUR];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_FAIL_TOTAL_CNT);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.failTotalCnt;
+    // param 5
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_FIVE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_PACKAGE_VERSION);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, g_openSessionKpi.packageVersion);
+    // param 6
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_SIX];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_SOFTBUS_VERSION);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, g_openSessionKpi.softbusVersion);
+    // param 7
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_SEVEN];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_OPEN_TIMES_ABOVE_1S);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.count1;
+    // param 8
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_EIGHT];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_OPEN_TIMES_ABOVE_2S);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.count2;
+    // param 9
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_NINE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_OPEN_TIMES_ABOVE_4S);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.count3;
+    // param 10
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_TEN];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_OPEN_TIMES_ABOVE_7S);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.count4;
+    // param 11
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_ELEVEN];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_OPEN_TIMES_ABOVE_11S);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_INT32;
+    param->paramValue.i32v = g_openSessionKpi.count5;
+    // param 12
+    param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWELVE];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_CALLER_PACKAGE);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, g_openSessionKpi.callerPackageName);
+    clearOpenSessionKpi();
+    (void)SoftBusMutexUnlock(&g_openSessionKpi.lock);
 }
 
 static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
@@ -179,6 +679,77 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
     (void)SoftBusMutexUnlock(&g_openSessionCnt.lock);
 }
 
+static int32_t SoftbusReportCalledAPIEvt(void)
+{
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
+    if (msg == NULL) {
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    char appName[SOFTBUS_HISYSEVT_PARAM_LEN];
+    char softbusVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
+    char packageVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
+    CalledApiInfoStruct *apiInfoItem = NULL;
+    CalledApiCntStruct *apiCntItem = NULL;
+    LIST_FOR_EACH_ENTRY(apiInfoItem, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+        (void)strcpy_s(appName, SOFTBUS_HISYSEVT_NAME_LEN, apiInfoItem->appName);
+        (void)strcpy_s(softbusVersion, SOFTBUS_HISYSEVT_NAME_LEN, apiInfoItem->softbusVersion);
+        (void)strcpy_s(packageVersion, SOFTBUS_HISYSEVT_NAME_LEN, apiInfoItem->packageVersion);
+        LIST_FOR_EACH_ENTRY(apiCntItem, &apiInfoItem->apiCntList, CalledApiCntStruct, node) {
+            CreateCalledApiInfoMsg(msg, apiCntItem, appName, softbusVersion, packageVersion);
+            int ret = SoftbusWriteHisEvt(msg);
+            if (ret != SOFTBUS_OK) {
+                SoftbusFreeEvtReporMsg(msg);
+                (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+                ReleaseCalledApiInfoList();
+                return SOFTBUS_ERR;
+            }
+        }
+    }
+    SoftbusFreeEvtReporMsg(msg);
+    (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+    ReleaseCalledApiInfoList();
+    return SOFTBUS_OK;
+}
+
+static int32_t SoftbusReportCalledAPICntEvt(void)
+{
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_TWO);
+    if (msg == NULL) {
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    CalledApiCntStruct *apiCntItem = NULL;
+    LIST_FOR_EACH_ENTRY(apiCntItem, &g_calledApiCntlist->apiInfolist, CalledApiCntStruct, node) {
+        CreateCalledApiCntMsg(msg, apiCntItem);
+        if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
+            SoftbusFreeEvtReporMsg(msg);
+            (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
+            ReleaseCalledApiCntList();
+            return SOFTBUS_ERR;
+        }
+    }
+    SoftbusFreeEvtReporMsg(msg);
+    (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
+    ReleaseCalledApiCntList();
+    return SOFTBUS_OK;
+}
+
+static int32_t SoftbusReportOpenSessionKpiEvt(void)
+{
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THIRTEEN);
+    if (msg == NULL) {
+        return SOFTBUS_ERR;
+    }
+    CreateOpenSessionKpiMsg(msg);
+    int ret = SoftbusWriteHisEvt(msg);
+    SoftbusFreeEvtReporMsg(msg);
+    return ret;
+}
 
 static int32_t SoftbusReportOpenSessionCntEvt(void)
 {
@@ -302,11 +873,23 @@ int32_t InitTransStatisticSysEvt(void)
         return SOFTBUS_ERR;
     }
     
+    g_calledApiInfoList = CreateApiInfoList();
+    g_calledApiCntlist = CreateApiInfoList();
     clearOpenSessionCnt();
+    clearOpenSessionKpi();
     clearOpenSessionTime();
 
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_CNT, SoftbusReportOpenSessionCntEvt);
+    SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_KPI, SoftbusReportOpenSessionKpiEvt);
+    SetStatisticEvtReportFunc(TRANSPORT_API_CALLED_INFO_STATISTIC_EVENT, SoftbusReportCalledAPIEvt);
+    SetStatisticEvtReportFunc(TRANSPORT_API_CALLED_CNT_STATISTIC_EVENT, SoftbusReportCalledAPICntEvt);
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST, SoftbusReportOpenSessionTimeEvt);
 
     return SOFTBUS_OK;
+}
+
+void DeinitTransStatisticSysEvt(void)
+{
+    DetroyApiInfoList(g_calledApiInfoList);
+    DetroyApiInfoList(g_calledApiCntlist);
 }
