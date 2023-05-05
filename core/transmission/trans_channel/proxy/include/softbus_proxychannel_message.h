@@ -19,6 +19,7 @@
 #include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
+#include "softbus_adapter_hitracechain.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -111,6 +112,7 @@ typedef struct {
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
     int64_t authId; /* for cipher */
+    HiTraceIdStruct traceId;
 } ProxyChannelInfo;
 
 typedef struct {
