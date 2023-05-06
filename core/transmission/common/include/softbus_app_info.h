@@ -95,6 +95,8 @@ typedef struct {
     int32_t algorithm;
     int32_t crc;
     int32_t fileProtocol;
+    int64_t timeStart;
+    int32_t linkType;
 } AppInfo;
 
 #ifdef __cplusplus

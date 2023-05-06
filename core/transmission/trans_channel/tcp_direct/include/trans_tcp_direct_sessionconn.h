@@ -21,6 +21,7 @@
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
+#include "softbus_adapter_hitracechain.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -50,6 +51,7 @@ typedef struct {
     int64_t authId;
     bool isMeta;
     ListenerModule listenMod;
+    HiTraceIdStruct traceId;
 } SessionConn;
 
 uint64_t TransTdcGetNewSeqId(void);

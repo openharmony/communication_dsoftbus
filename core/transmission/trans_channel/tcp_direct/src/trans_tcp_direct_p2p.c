@@ -31,6 +31,9 @@
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "softbus_adapter_hitracechain.h"
+
+#define ID_OFFSET (1)
 
 static int32_t g_p2pSessionPort = -1;
 static char g_p2pSessionIp[IP_LEN] = {0};
@@ -369,6 +372,9 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         ReleaseSessonConnLock();
         return SOFTBUS_NOT_FIND;
     }
+    if (SoftbusHitraceChainIsValid(&conn->traceId)) {
+        SoftbusHitraceChainSetChainId(&conn->traceId, (uint64_t)(conn->channelId + ID_OFFSET));
+    }
     channelId = conn->channelId;
 
     ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, IP_LEN, &conn->appInfo.peerData.port);
@@ -462,6 +468,17 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
 
     conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);
     if (conn == NULL) {
+        return SOFTBUS_MEM_ERR;
+    }
+    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenP2pDirectChannel", HITRACE_FLAG_DEFAULT);
+    if (SoftbusHitraceChainIsValid(&traceId)) {
+        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(conn->channelId + ID_OFFSET));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(conn->channelId + ID_OFFSET));
+    }
+    if (memcpy_s(&(conn->traceId), sizeof(conn->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenP2pDirectChannel memcpy failed.");
+        SoftBusFree(conn);
         return SOFTBUS_MEM_ERR;
     }
     newChannelId = conn->channelId;

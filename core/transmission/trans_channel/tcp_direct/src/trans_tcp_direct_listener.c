@@ -32,6 +32,9 @@
 #include "softbus_socket.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "softbus_adapter_hitracechain.h"
+
+#define ID_OFFSET (1)
 
 NO_SANITIZE("cfi") uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 {
@@ -233,6 +236,9 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
         SoftBusFree(conn);
         ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
+    }
+    if (SoftbusHitraceChainIsValid(&conn->traceId)) {
+        SoftbusHitraceChainSetChainId(&conn->traceId, (uint64_t)(conn->channelId + ID_OFFSET));
     }
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
