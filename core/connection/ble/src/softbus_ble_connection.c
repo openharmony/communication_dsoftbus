@@ -394,9 +394,9 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     BleConnectionInfo *server = NULL;
     BleConnectionInfo *client = NULL;
     if (GetBleConnInfoByAddr(option->bleOption.bleMac, &server, &client) != SOFTBUS_OK) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
         CLOGE("GetBleConnInfoByAddr failed, requestId: %d", requestId);
-        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_EVT_CONN_FAIL, 0);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL,
+                                0, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
@@ -409,7 +409,8 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     BleConnectionInfo *newConnectionInfo = NewBleConnection(option, requestId, result);
     if (newConnectionInfo == NULL) {
         CLOGE("ble client node create fail, requestId: %d", requestId);
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
@@ -425,8 +426,8 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         return SOFTBUS_ERR;
     }
     if (UpdataBleConnectionUnsafe(option, clientId, requestId) != SOFTBUS_OK) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
-        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_EVT_CONN_FAIL, 0);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_ERR;
     }
@@ -453,7 +454,8 @@ static int32_t BlePostBytes(uint32_t connectionId, char *data, int32_t len, int3
     BleConnectionInfo *connInfo = GetBleConnInfoByConnId(connectionId);
     if (connInfo == NULL) {
         CLOGE("BlePostBytes GetBleConnInfo failed");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
         SoftBusFree(data);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
@@ -761,7 +763,8 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
     ret = GetBleConnInfoByAddr(option->bleOption.bleMac, &server, &client);
     if ((ret != SOFTBUS_OK) || ((server == NULL) && (client == NULL))) {
         CLOGE("BleDisconnectDevice GetBleConnInfo failed");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_DISCONNECT_FAIL);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_DISCONNECT_FAIL);
         (void)SoftBusMutexUnlock(&g_connectionLock);
         return SOFTBUS_BLECONNECTION_GETCONNINFO_ERROR;
     }
@@ -1123,7 +1126,8 @@ NO_SANITIZE("cfi") static int32_t SendSelfBasicInfo(uint32_t connId, int32_t rol
     int ret = BlePostBytesInner(connId, &postData);
     if (ret != SOFTBUS_OK) {
         CLOGE("SendSelfBasicInfo BlePostBytesInner failed");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
         SoftBusFree(buf);
     }
     return ret;
@@ -1426,19 +1430,16 @@ NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitBle(const ConnectCallback *call
     }
     ret = SoftBusGattServerInit(&g_bleServerConnCalback);
     if (ret != SOFTBUS_OK) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_INIT_FAIL);
         CLOGE("SoftBusGattServerInit failed: %d", ret);
         return NULL;
     }
     ret = SoftBusGattClientInit(&g_bleClientConnCalback);
     if (ret != SOFTBUS_OK) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_INIT_FAIL);
         CLOGE("SoftBusGattClientInit failed: %d", ret);
         return NULL;
     }
     ret = BleTransInit(&g_bleTransCallback);
     if (ret != SOFTBUS_OK) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_TRANS_INIT_FAIL);
         CLOGE("BleTransInit failed: %d", ret);
         return NULL;
     }
@@ -1447,7 +1448,6 @@ NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitBle(const ConnectCallback *call
     SoftBusMutexInit(&g_connectionLock, &attr);
     ret = BleQueueInit();
     if (ret != SOFTBUS_OK) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_QUEUE_INIT_FAIL);
         CLOGE("BleQueueInit failed: %d", ret);
         return NULL;
     }

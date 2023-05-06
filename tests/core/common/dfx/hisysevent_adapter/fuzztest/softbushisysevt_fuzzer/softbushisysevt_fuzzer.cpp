@@ -26,7 +26,6 @@
 #include "softbus_hisysevt_transreporter.h"
 
 namespace OHOS {
-static constexpr int TEST_PKG_NAME_MAX_LEN = 65;
 int32_t ReportStatisticEvt()
 {
     return 0;
@@ -90,32 +89,6 @@ void SoftBusHiSysEvtCommonFuzzTest(const uint8_t *data, size_t size)
     GetStatisticEvtReportFunc(evtType);
 }
 
-void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t *data, size_t size)
-{
-    InitConnStatisticSysEvt();
-    SoftBusConnMedium connMedium = *(reinterpret_cast<const SoftBusConnMedium *>(data));
-    SoftBusConnErrCode errCode = *(reinterpret_cast<const SoftBusConnErrCode *>(data));
-    int32_t ret = SoftBusReportConnFaultEvt(connMedium, errCode);
-    if (ret == SOFTBUS_OK) {
-        SoftbusRecordConnInfo(connMedium, SOFTBUS_EVT_CONN_FAIL, 0);
-    }
-}
-
-void SoftBusHiSysEvtDiscReporterFuzzTest(const uint8_t *data, size_t size)
-{
-    InitDiscStatisticSysEvt();
-    uint8_t discMedium = *(reinterpret_cast<const uint8_t *>(data));
-    uint32_t discParam = *(reinterpret_cast<const uint32_t *>(data));
-    char tmpPkgName[TEST_PKG_NAME_MAX_LEN] = {0};
-    if (memcpy_s(tmpPkgName, sizeof(tmpPkgName) - 1, data, size) != EOK) {
-        return;
-    }
-    SoftbusRecordDiscScanTimes(discMedium);
-    SoftbusRecordFirstDiscTime(discMedium, discParam);
-    SoftbusRecordDiscFault(discMedium, discParam);
-    SoftBusReportDiscStartupEvt(tmpPkgName);
-}
-
 void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t *data, size_t size)
 {
     (void)data;
@@ -141,8 +114,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::SoftBusReportBusCenterFaultEvtFuzzTest(data, size);
     OHOS::SoftBusRecordDiscoveryResultFuzzTest(data, size);
     OHOS::SoftBusHiSysEvtCommonFuzzTest(data, size);
-    OHOS::SoftBusHiSysEvtConnReporterFuzzTest(data, size);
-    OHOS::SoftBusHiSysEvtDiscReporterFuzzTest(data, size);
     OHOS::SoftBusHiSysEvtTransReporterFuzzTest(data, size);
 
     return 0;

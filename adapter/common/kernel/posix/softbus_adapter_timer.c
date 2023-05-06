@@ -139,3 +139,16 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
     sysTime->usec = time.tv_nsec / NS_PER_USECOND;
     return SOFTBUS_OK;
 }
+
+uint64_t SoftBusGetSysTimeMs(void)
+{
+    struct timeval time;
+    time.tv_sec = 0;
+    time.tv_usec = 0;
+    if (gettimeofday(&time, NULL) != 0) {
+        HILOG_INFO(SOFTBUS_HILOG_ID, "get sys time fail");
+        return 0;
+    }
+    uint64_t ms = (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
+    return ms;
+}

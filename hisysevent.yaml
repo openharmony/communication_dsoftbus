@@ -39,46 +39,62 @@
 
 domain: DSOFTBUS
 
-DISC_STARTUP:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: start discovery}
-  PACKAGE_NAME: {type: STRING, desc: the appname which call softbus }
-
 FIRST_DISC_DURATION:
-  __BASE: {type: STATISTIC, level: MINOR, desc: first discovery device duration}
-  MEDIUM: {type: UINT8, desc: discovery medium }
-  MAX_DISC_DURATION: {type: UINT32, desc: max discovery time duration }
-  MIN_DISC_DURATION: {type: UINT32, desc: min discovery time duration }
-  AVG_DISC_DURATION: {type: UINT32, desc: average discovery time duration }
+  __BASE: {type: STATISTIC, level: MINOR, desc: first discovery device duration }
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version }
+  PACKAGE_VERSION: {type: STRING, desc: package version }
+  LINK_TYPE: {type: UINT32, desc: link type ble 1 wlan 2 }
+  TOTAL_TIME: {type: UINT64, desc: total duration ms }
+  TOTAL_COUNT: {type: UINT32, desc: total count }
+  COUNT1: { type: UINT32, desc: number of times that the duration is longer than 500ms }
+  COUNT2: { type: UINT32, desc: number of times that the duration is longer than 1000ms }
+  COUNT3: { type: UINT32, desc: number of times that the duration is longer than 1500ms }
+  COUNT4: { type: UINT32, desc: number of times that the duration is longer than 2000ms }
+  COUNT5: { type: UINT32, desc: number of times that the duration is longer than 2500ms }
 
-SCAN_TIMES:
-  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic scan times }
-  MEDIUM: {type: UINT8, desc: scan medium }
-  SCAN_COUNTER: {type: UINT32, desc: scan counter}
+DISCOVERY_DETAILS:
+  __BASE: {type: STATISTIC, level: MINOR, desc: ble discovery details }
+  MODULE: {type: STRING, desc: module }
+  DISCTYPE: {type: UINT32, desc: discovery type }
+  DURATION: {type: UINT64, desc: discovery duration }
+  REPTIMES: {type: UINT32, desc: report times }
+  DEVNUM: {type: UINT32, desc: report times }
+  DISCTIMES: {type: UINT32, desc: discovery times }
 
-DISC_FAULT:
-  __BASE: {type: STATISTIC, level: CRITICAL, desc: statistic all the exception in disc process }
-  MEDIUM: {type: UINT8, desc: disc medium }
-  ERROR_CODE: {type: INT32, desc: error code }
-  ERROR_COUNTER: {type: UINT32, desc: error counter }
+DISCOVERY_BLE_RSSI:
+  __BASE: {type: STATISTIC, level: MINOR, desc: ble discovery rssi }
+  RANGEID: {type: UINT32, arrsize: 52, desc: range id }
+  RANGEDATA: {type: UINT32, arrsize: 52, desc: range data }
 
 CONN_DURATION:
-  __BASE: {type: STATISTIC, level: MINOR, desc: statistic the connection duration}
-  MEDIUM: {type: UINT8, desc: connection medium }
-  MAX_CONN_DURATION: {type: UINT32, desc: max connection time duration }
-  MIN_CONN_DURATION: {type: UINT32, desc: min connection time duration }
-  AVG_CONN_DURATION: {type: UINT32, desc: average connection time duration }
+  __BASE: {type: STATISTIC, level: MINOR, desc: statistic the connection duration }
+  SOFT_BUS_VERSION: { type: STRING, desc: softbus version }
+  PACKAGE_VERSION: { type: STRING, desc: package version }
+  CALLER_PACKAGE_NAME: {type: STRING, desc: caller package name }
+  LINK_TYPE: { type: UINT32, desc: link type br 0 ble 1 wlan 2 p2p 3 hml 4 }
+  FAIL_TOTAL_TIME: { type: UINT64, desc: fail total duration ms }
+  FAIL_TOTAL_COUNT: { type: UINT32, desc: fail total count }
+  TOTAL_TIME: { type: UINT64, desc: total duration ms }
+  TOTAL_COUNT: { type: UINT32, desc: total count }
+  COUNT1: { type: UINT32, desc: number of times that the duration is longer than 1500ms }
+  COUNT2: { type: UINT32, desc: number of times that the duration is longer than 2000ms }
+  COUNT3: { type: UINT32, desc: number of times that the duration is longer than 2500ms }
+  COUNT4: { type: UINT32, desc: number of times that the duration is longer than 3000ms }
+  COUNT5: { type: UINT32, desc: number of times that the duration is longer than 4000ms }
 
-CONN_SUCC_RATE:
-  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic connect success rate }
-  MEDIUM: {type: UINT8, desc: connection medium }
-  SUCC_TIMES: {type: UINT32, desc: conn success times }
-  FAIL_TIMES: {type: UINT32, desc: conn fail times }
-  SUCC_RATE: {type: FLOAT, desc: connection success rate}
-
-CONN_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, desc: report the fault of connection }
-  MEDIUM: {type: UINT8, desc: connection medium }
-  ERROR_CODE: {type: INT32, desc: error code }
+PROCESS_STEP_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: statistic the p2p or hml process duration }
+  SOFT_BUS_VERSION: { type: STRING, desc: softbus version }
+  PACKAGE_VERSION: { type: STRING, desc: package version }
+  PROCESS_STEP: {type: UINT32, desc: process step }
+  LINK_TYPE: { type: UINT32, desc: link type br 0 ble 1 wlan 2 p2p 3 hml 4 }
+  TOTAL_TIME: { type: UINT64, desc: total duration ms }
+  TOTAL_COUNT: { type: UINT32, desc: total count }
+  COUNT1: { type: UINT32, desc: number of times that the duration is longer than 1500ms }
+  COUNT2: { type: UINT32, desc: number of times that the duration is longer than 2000ms }
+  COUNT3: { type: UINT32, desc: number of times that the duration is longer than 2500ms }
+  COUNT4: { type: UINT32, desc: number of times that the duration is longer than 3000ms }
+  COUNT5: { type: UINT32, desc: number of times that the duration is longer than 4000ms }
 
 TRANS_OPEN_SESSION_CNT:
   __BASE: {type: STATISTIC, level: MINOR, desc: the success count and the fail count of open session }

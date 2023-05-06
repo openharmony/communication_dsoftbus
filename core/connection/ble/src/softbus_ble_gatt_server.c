@@ -138,7 +138,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerStartService(void)
         int ret = SoftBusGattsStartService(g_gattService.svcId);
         if (ret != SOFTBUS_OK) {
             CLOGE("SoftBusGattsStartService failed");
-            SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_START_FAIL);
+            SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                    SOFTBUS_HISYSEVT_BLE_GATTSERVER_START_FAIL);
             g_gattService.state = BLE_GATT_SERVICE_ADDED;
         }
         (void)SoftBusMutexUnlock(&g_serviceStateLock);
@@ -172,7 +173,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGattServerStopService(void)
     }
     (void)SoftBusMutexUnlock(&g_serviceStateLock);
     CLOGE("stop gatt service wrong state:%d", g_gattService.state);
-    SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTSERVER_STOP_FAIL);
+    SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                            SOFTBUS_HISYSEVT_BLE_GATTSERVER_STOP_FAIL);
     return SOFTBUS_ERR;
 }
 

@@ -39,6 +39,7 @@ int SoftBusDeleteTimer(void *timerId);
 int SoftBusSleepMs(unsigned int ms);
 
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
+uint64_t SoftBusGetSysTimeMs(void);
 
 #ifdef __cplusplus
 #if __cplusplus
