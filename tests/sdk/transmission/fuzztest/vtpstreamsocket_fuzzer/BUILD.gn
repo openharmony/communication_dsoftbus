@@ -15,31 +15,31 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("VtpStreamSocketFuzzTest") {
   module_out_path = "dsoftbus/transmission"
   fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/vtpstreamsocket_fuzzer"
   include_dirs = [
-    "//foundation/communication/dsoftbus/core/common/inner_communication",
-    "//foundation/communication/dsoftbus/adapter/common/include",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/common",
-    "//foundation/communication/dsoftbus/interfaces/kits/transport",
-    "//foundation/communication/dsoftbus/interfaces/inner_kits/transport",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/common/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
-    "//foundation/communication/dsoftbus/components/nstackx/nstackx_core/dfile/interface/",
-    "//foundation/communication/dsoftbus/components/nstackx/nstackx_util/interface",
-    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/session/cpp/src",
-    "//foundation/communication/dsoftbus/components/nstackx/fillp/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/include",
-    "//foundation/communication/dsoftbus/core/transmission/common/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "../../../../../core/common/inner_communication",
+    "../../../../../adapter/common/include",
+    "../../../../../core/common/include",
+    "../../../../../interfaces/kits/common",
+    "../../../../../interfaces/kits/transport",
+    "../../../../../interfaces/inner_kits/transport",
+    "../../../../../sdk/transmission/trans_channel/udp/file/include",
+    "../../../../../sdk/transmission/trans_channel/udp/common/include",
+    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+    "../../../../../components/nstackx/nstackx_core/dfile/interface/",
+    "../../../../../components/nstackx/nstackx_util/interface",
+    "../../../../../sdk/transmission/session/include",
+    "../../../../../sdk/transmission/session/cpp/src",
+    "../../../../../components/nstackx/fillp/include",
+    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
+    "../../../../../sdk/transmission/trans_channel/udp/stream/include",
+    "../../../../../core/transmission/common/include",
+    "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
@@ -52,7 +52,7 @@ ohos_fuzztest("VtpStreamSocketFuzzTest") {
     "-DFILLP_LINUX",
   ]
   sources = [ "vtpstreamsocket_fuzzer.cpp" ]
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [ "../../../../../sdk:softbus_client" ]
 
   external_deps = [ "c_utils:utils" ]
 

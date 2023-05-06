@@ -15,7 +15,7 @@ defines = []
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
+  import("../../../dsoftbus.gni")
 
   defines += [ "HAVE_PRO = 0" ]
 
@@ -37,14 +37,14 @@ if (defined(ohos_lite)) {
         "//third_party/bounds_checking_function/include",
       ]
       deps = [
-        "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+        "../../../adapter:softbus_adapter",
         "//third_party/bounds_checking_function:libsec_static",
       ]
     }
   }
 } else {
   import("//build/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
+  import("../../../dsoftbus.gni")
   defines += [ "HAVE_PRO = 0" ]
   module_output_path = "dsoftbus/adapter"
 
@@ -58,7 +58,7 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
@@ -85,7 +85,7 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
@@ -112,7 +112,7 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
@@ -139,7 +139,7 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
@@ -166,7 +166,7 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
@@ -193,7 +193,7 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
@@ -219,7 +219,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include/",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
@@ -244,7 +244,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include/",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/googletest:gtest_main",
     ]
     if (is_standard_system) {
@@ -286,7 +286,7 @@ if (defined(ohos_lite)) {
     ]
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+      "../../../adapter:softbus_adapter",
       "//third_party/googletest:gmock",
       "//third_party/googletest:gtest_main",
     ]

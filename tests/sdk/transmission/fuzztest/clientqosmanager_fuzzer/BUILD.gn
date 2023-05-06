@@ -15,20 +15,20 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ClientQosManagerFuzzTest") {
   module_out_path = module_output_path
 
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clientqosmanager_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clientqosmanager_fuzzer"
 
   include_dirs = [
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/qos/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/ipc/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/common/include",
-    "//foundation/communication/dsoftbus/core/transmission/common/include",
+    "../../../../../sdk/transmission/trans_channel/qos/include",
+    "../../../../../sdk/transmission/ipc/include",
+    "../../../../../sdk/transmission/common/include",
+    "../../../../../core/transmission/common/include",
   ]
 
   cflags = [
@@ -40,7 +40,7 @@ ohos_fuzztest("ClientQosManagerFuzzTest") {
 
   sources = [ "clientqosmanager_fuzzer.cpp" ]
 
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [ "../../../../../sdk:softbus_client" ]
 
   external_deps = [ "c_utils:utils" ]
 }

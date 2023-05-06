@@ -14,9 +14,8 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import(
-    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/net_bluetooth.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../adapter/common/net/bluetooth/net_bluetooth.gni")
+import("../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/adapter"
 
@@ -27,9 +26,7 @@ ohos_unittest("AdapterBleGattTest") {
     "softbus_adapter_ble_gatt_test.cpp",
   ]
 
-  include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
-  ]
+  include_dirs = [ "../../../adapter/common/net/bluetooth/include" ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -56,9 +53,7 @@ ohos_unittest("AdapterBleGattServerTest") {
     "softbus_adapter_ble_gatt_server_test.cpp",
   ]
 
-  include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
-  ]
+  include_dirs = [ "../../../adapter/common/net/bluetooth/include" ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -85,9 +80,7 @@ ohos_unittest("AdapterBleGattClientTest") {
     "softbus_adapter_ble_gatt_client_test.cpp",
   ]
 
-  include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
-  ]
+  include_dirs = [ "../../../adapter/common/net/bluetooth/include" ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -111,9 +104,7 @@ ohos_unittest("AdapterBtUtilsTest") {
   module_out_path = module_output_path
   sources = [ "adapter_bt_utils_test.cpp" ]
 
-  include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
-  ]
+  include_dirs = [ "../../../adapter/common/net/bluetooth/include" ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -140,9 +131,7 @@ ohos_unittest("AdapterBtCommonTest") {
     "softbus_adapter_bt_common_test.cpp",
   ]
 
-  include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/include",
-  ]
+  include_dirs = [ "../../../adapter/common/net/bluetooth/include" ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",

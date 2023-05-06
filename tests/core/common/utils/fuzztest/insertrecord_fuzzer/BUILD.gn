@@ -14,13 +14,14 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/common"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("InsertRecordFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/core/common/utils/fuzztest/insertrecord_fuzzer"
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/core/common/utils/fuzztest/insertrecord_fuzzer"
   include_dirs = [ "$dsoftbus_root_path/adapter/common/include" ]
   cflags = [
     "-g",

@@ -11,10 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../../../../dsoftbus.gni")
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
   if (ohos_build_type == "debug") {
     unittest("DiscSdkTest") {
@@ -34,7 +34,6 @@ if (defined(ohos_lite)) {
   }
 } else {
   import("//build/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
   module_output_path = "dsoftbus/discovery"
   ohos_unittest("DiscSdkOnlyL2Test") {
     module_out_path = module_output_path

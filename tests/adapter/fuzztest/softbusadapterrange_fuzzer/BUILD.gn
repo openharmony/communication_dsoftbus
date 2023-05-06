@@ -13,12 +13,13 @@
 
 #####################hydra-fuzz###################
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SoftBusAdapterRangeFuzzTest") {
   module_out_path = "dsoftbus/adapter"
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/adapter/fuzztest/softbusadapterrange_fuzzer"
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/adapter/fuzztest/softbusadapterrange_fuzzer"
   include_dirs = [ "$dsoftbus_root_path/adapter/common/include" ]
   cflags = [
     "-g",
@@ -29,7 +30,7 @@ ohos_fuzztest("SoftBusAdapterRangeFuzzTest") {
   ]
   sources = [ "softbusadapterrange_fuzzer.cpp" ]
 
-  deps = [ "//foundation/communication/dsoftbus/adapter:softbus_adapter" ]
+  deps = [ "../../../../adapter:softbus_adapter" ]
 
   external_deps = [
     "c_utils:utils",

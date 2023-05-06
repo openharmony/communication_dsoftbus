@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 dep_dir = "dsoftbus_enhance/test/sdk/transmission"
