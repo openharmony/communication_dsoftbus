@@ -165,4 +165,6 @@ int32_t InitSoftbusSysEvt(void)
 void DeinitSoftbusSysEvt(void)
 {
     DeinitBusCenterDfx();
+    DeinitConnStatisticSysEvt();
+    DeinitDiscStatisticSysEvt();
 }

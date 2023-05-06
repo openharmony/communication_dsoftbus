@@ -348,6 +348,22 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
     return;
 }
 
+static SoftBusConnType ConvertConnType(const ConnectType *connectType)
+{
+    switch (*connectType) {
+        case CONNECT_TCP:
+            return SOFTBUS_HISYSEVT_CONN_TYPE_TCP;
+        case CONNECT_BR:
+            return SOFTBUS_HISYSEVT_CONN_TYPE_BR;
+        case CONNECT_BLE:
+            return SOFTBUS_HISYSEVT_CONN_TYPE_BLE;
+        case CONNECT_P2P:
+            return SOFTBUS_HISYSEVT_CONN_TYPE_P2P;
+        default:
+            return SOFTBUS_HISYSEVT_CONN_TYPE_BUTT;
+    }
+}
+
 static void ReportConnectTime(const ConnectionInfo *info)
 {
     if (info == NULL) {
@@ -362,7 +378,8 @@ static void ReportConnectTime(const ConnectionInfo *info)
         SoftBusGetTime(&time);
         uint32_t tmpTime = (uint32_t)time.sec * SEC_TIME + (uint32_t)time.usec / SEC_TIME;
         tmpTime -= timeNode->startTime;
-        int ret = SoftbusRecordConnInfo(info->type, SOFTBUS_EVT_CONN_SUCC, tmpTime);
+        int ret = SoftbusRecordConnResult(DEFAULT_PID, ConvertConnType(&info->type), SOFTBUS_EVT_CONN_SUCC, tmpTime,
+                                          SOFTBUS_OK);
         if (ret != SOFTBUS_OK) {
             CLOGE("ReportConnectTime:report conn time failed");
         }
@@ -496,7 +513,8 @@ NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t
     }
 
     if (g_connManager[info->type]->ConnectDevice == NULL) {
-        SoftBusReportConnFaultEvt(info->type, SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT);
+        SoftbusRecordConnResult(DEFAULT_PID, ConvertConnType(&info->type), SOFTBUS_EVT_CONN_SUCC, 0,
+                                SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT);
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     RecordStartTime(info);

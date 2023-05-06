@@ -47,6 +47,18 @@ NO_SANITIZE("cfi") void DiscServerDeathCallback(const char *pkgName)
     DiscMgrDeathCallback(pkgName);
 }
 
+static SoftBusDiscMedium ConvertDiscType(const ExchangeMedium *discType)
+{
+    switch (*discType) {
+        case BLE:
+            return SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE;
+        case COAP:
+            return SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP;
+        default:
+            return SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT;
+    }
+}
+
 static int32_t PublishErroCodeProcess(int32_t erroCode)
 {
     if (erroCode == SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM) {
@@ -68,7 +80,7 @@ NO_SANITIZE("cfi") int32_t DiscIpcPublishService(const char *packageName, const 
     int32_t ret = DiscPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerPublishService failed");
-        SoftbusRecordDiscFault(info->medium, ret);
+        SoftbusReportDiscFault(ConvertDiscType(&info->medium), ret);
         (void)ClientIpcOnPublishFail(packageName, info->publishId, PublishErroCodeProcess(ret));
         return ret;
     }
@@ -94,7 +106,7 @@ NO_SANITIZE("cfi") int32_t DiscIpcStartDiscovery(const char *packageName, const 
     int32_t ret = DiscStartDiscovery(packageName, info, &g_discInnerCb);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerStartDiscovery failed");
-        SoftbusRecordDiscFault(info->medium, ret);
+        SoftbusReportDiscFault(ConvertDiscType(&info->medium), ret);
         (void)ClientIpcOnDiscoverFailed(packageName, info->subscribeId, DiscoveryErroCodeProcess(ret));
         return ret;
     }

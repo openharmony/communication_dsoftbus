@@ -32,6 +32,7 @@ static HiSysEventParam g_dstParam[SOFTBUS_EVT_PARAM_BUTT];
 
 static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dstParam)
 {
+    uint32_t uint32ArraySize = sizeof(uint32_t) * SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE;
     switch (srcParam->paramType) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
             dstParam->t = HISYSEVENT_BOOL;
@@ -78,6 +79,19 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
                 return SOFTBUS_ERR;
             }
             break;
+        case SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY:
+            dstParam->t = HISYSEVENT_UINT32_ARRAY;
+            dstParam->v.array = (uint32_t *)SoftBusCalloc(uint32ArraySize);
+            if (dstParam->v.array == NULL) {
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam: SoftBusMalloc fail");
+                return SOFTBUS_ERR;
+            }
+            if (memcpy_s(dstParam->v.array, uint32ArraySize, srcParam->paramValue.u32a, uint32ArraySize) != EOK) {
+                SoftBusFree(dstParam->v.array);
+                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam:copy uint32 array var fail");
+                return SOFTBUS_ERR;
+            }
+            break;
         default:
             break;
     }
@@ -112,7 +126,7 @@ static void HiSysEventParamDeInit(uint32_t size)
             g_dstParam[i].v.s = NULL;
         }
     }
- }
+}
 
 static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
 {

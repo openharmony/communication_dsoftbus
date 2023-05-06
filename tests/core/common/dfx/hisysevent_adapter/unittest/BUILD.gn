@@ -31,6 +31,24 @@ if (defined(ohos_lite)) {
   import("//build/test.gni")
 
   module_output_path = "dsoftbus/common"
+  ohos_unittest("DiscConnDfxTest") {
+    module_out_path = module_output_path
+    sources = [ "disc_conn_dfx_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    ]
+    deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+    ]
+    if (is_standard_system) {
+      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+      external_deps = [ "hilog:libhilog" ]
+    }
+  }
+
   ohos_unittest("LnnDfxTest") {
     module_out_path = module_output_path
     sources = [ "lnn_dfx_test.cpp" ]
@@ -71,6 +89,7 @@ if (defined(ohos_lite)) {
   group("unittest") {
     testonly = true
     deps = [
+      ":DiscConnDfxTest",
       ":LnnDfxTest",
       ":TransDfxTest",
     ]
