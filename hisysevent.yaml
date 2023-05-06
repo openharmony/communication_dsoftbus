@@ -131,23 +131,99 @@ TRANS_FAULT:
 
 BUS_CENTER_FAULT_EVT:
   __BASE: {type: FAULT, level: CRITICAL, desc: bus center all the exception}
-  ERROR_CODE: {type: INT32, desc: error code}
-  ERROR_STR: {type: STRING, desc: error code string}
-  CONN_TYPE: {type: INT32, desc: connection type}
+  MODULE_TYPE: {type: UINT32, desc: module type}
+  LINK_TYPE: {type: UINT32, desc: connection type}
+  CHANNEL_QUALITY: {type: FLOAT, desc: channel quality}
+  ERROR_CODE: {type: UINT32, desc: error code}
+  PEER_DEVICE_TYPE: {type: UINT32, desc: peer device type}
+  ONLINE_DEVICE_NUM: {type: UINT32, desc: online device count}
+  CONNECTION_NUM: {type: UINT32, desc: connected device count}
+  NIGHT_MODE: {type: UINT32, desc: night mode}
+  WIFI_STATUS: {type: UINT32, desc: wifi status}
+  BLUETOOTH_STATUS: {type: UINT32, desc: bluetooth status}
+  CALLER_APP_MODE: {type: UINT32, desc: caller app mode}
+  SUB_ERROR_CODE: {type: UINT32, desc: sub error code}
+  CONN_BR_NUM: {type: UINT32, desc: the count of device connected by br}
+  CONN_BLE_NUM: {type: UINT32, desc: the count of device connected by ble}
+  BLUETOOTH_BROADCAST_STATUS: {type: BOOL, desc: bluetooth broadcast status}
+  BLUETOOTH_SCAN_STATUS: {type: BOOL, desc: bluetooth scan status}
+  BUSUNINESS_NAME: {type: STRING, desc: caller business name}
+  CALLER_PACKAGE_NAME: {type: STRING, desc: caller package name}
+  REMOTE_BIZ_TRUNCATED_UUID: {type: STRING, desc: remote biz truncated uuid}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version}
+  PACKAGE_VERSION: {type: STRING, desc: softbus package version}
 
-BUS_CENTER_SUCCESS_RATE:
-  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn rate of success}
-  TOTAL_COUNT: {type: INT32, desc: lnn total count}
-  SUCCESS_COUNT: {type: INT32, desc: lnn success count}
-  SUCCESS_RATE: {type: FLOAT, desc: lnn rate of success}
-  CONN_TYPE: {type: INT32, desc: connection type}
+ONLINE_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: the time comsuming of online}
+  TOTAL_TIME: {type: UINT64, desc: device online total time}
+  TOTAL_COUNT: {type: UINT32, desc: device online total count}
+  COUNT1: {type: UINT32, desc: the times above 10s of online}
+  COUNT2: {type: UINT32, desc: the times above 30s of online}
+  COUNT3: {type: UINT32, desc: the times above 5min of online}
+  COUNT4: {type: UINT32, desc: the times above 10min of online}
+  COUNT5: {type: UINT32, desc: the times above 15min of online}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version}
+  PACKAGE_VERSION: {type: STRING, desc: softbus package version}
+
+AUTH_DURATION:
+  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic auth rate and time cost}
+  LINK_TYPE: {type: UINT32, desc: connection type}
+  TOTAL_TIME: {type: UINT64, desc: the total time cost of auth}
+  TOTAL_COUNT: {type: UINT32, desc: device auth total count}
+  COUNT1: {type: UINT32, desc: the times above 2000ms of single auth}
+  COUNT2: {type: UINT32, desc: the times above 2500ms of single auth}
+  COUNT3: {type: UINT32, desc: the times above 3000ms of single auth}
+  COUNT4: {type: UINT32, desc: the times above 3500ms of single auth}
+  COUNT5: {type: UINT32, desc: the times above 4000ms of single auth}
+  FAIL_TOTAL_COUNT: {type: UINT32, desc: auth failed total count}
+  FAIL_TOTAL_TIME: {type: UINT64, desc: auth failed total time}
+  CONNECT_FAIL_TOTAL_COUNT: {type: UINT32, desc: connect failed total count}
+  AUTH_FAIL_TOTAL_COUNT: {type: UINT32, desc: auth failed total count}
+  EXCHANGE_FAIL_TOTAL_COUNT: {type: UINT32, desc: exchange info failed total count}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version}
+  PACKAGE_VERSION: {type: STRING, desc: softbus package version}
 
 BUS_CENTER_DURATION:
-  __BASE: {type: STATISTIC, level: MINOR, desc: bus center lnn duration}
-  AVG_DURATION: {type: INT32, desc: lnn average duration}
-  MAX_DURATION: {type: INT32, desc: lnn max duration}
-  MIN_DURATION: {type: INT32, desc: lnn min duration}
-  CONN_TYPE: {type: INT32, desc: connection type}
+  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic bus center lnn duration}
+  LINK_TYPE: {type: UINT32, desc: connection type}
+  TOTAL_TIME: {type: UINT64, desc: the total time cost of lnn}
+  TOTAL_COUNT: {type: UINT32, desc: lnn total count}
+  COUNT1: {type: UINT32, desc: the times above 800ms of single lnn}
+  COUNT2: {type: UINT32, desc: the times above 1000ms of single lnn}
+  COUNT3: {type: UINT32, desc: the times above 1200ms of single lnn}
+  COUNT4: {type: UINT32, desc: the times above 1500ms of single lnn}
+  COUNT5: {type: UINT32, desc: the times above 1800ms of single lnn}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version}
+  PACKAGE_VERSION: {type: STRING, desc: softbus package version}
+
+DEVICE_ONLINE_EVT:
+  __BASE: {type: STATISTIC, level: MINOR, desc: report the online device info}
+  ONLINE_DEVICE_NUM: {type: UINT32, desc: online device count}
+  BT_ONLINE_DEVICE_NUM: {type: UINT32, desc: online device count connection medium is bt}
+  WIFI_ONLINE_DEVICE_NUM: {type: UINT32, desc: online device count connection medium is wifi}
+  PEER_DEVICE_TYPE: {type: UINT32, desc: peer device type}
+  INSERT_PROFILE_RESULT: {type: UINT32, desc: the result of insert device info to profile}
+  PEER_SOFT_BUS_VERSION: {type: STRING, desc: softbus version of peer device}
+  PEER_DEVICE_NAME: {type: STRING, desc: device name of peer device}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version of local device}
+  PEER_PACKAGE_VERSION: {type: STRING, desc: softbus package version of peer device}
+  PACKAGE_VERSION: {type: STRING, desc: softbus package version of local device}
+
+DEVICE_DISCOVERY:
+  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic device discovery count}
+  START_DISCOVERY_COUNT: {type: UINT64, desc: start discovery count}
+  SEND_BROADCAST_COUNT: {type: UINT64, desc: send broadcast count}
+  RECEIVE_BROADCAST_COUNT: {type: UINT64, desc: receiver broadcast count}
+  DEVICE_FOUND_COUNT: {type: UINT64, desc: device found count}
+  BUSINESS_DISCOVERY_COUNT: {type: UINT64, desc: business discovery count}
+  BUSINESS_DISCOVERY_DETAIL: {type: STRING, desc: business discovery detail info}
+  SOFT_BUS_VERSION: {type: STRING, desc: softbus version}
+  PACKAGE_VERSION: {type: STRING, desc: softbus package version}
+
+APP_DISCOVERY:
+  __BASE: {type: STATISTIC, level: MINOR, desc: stastistic app discovery count}
+  APP_NAME: {type: STRING, desc: name of app who discovery device}
+  APP_DISCOVERY_COUNT: {type: UINT32, desc: app discovery count}
 
 DFILE_WAIT_HEADER_TIMEOUT_EVT:
   __BASE: {type: FAULT, level: CRITICAL, desc: wait file header time out}

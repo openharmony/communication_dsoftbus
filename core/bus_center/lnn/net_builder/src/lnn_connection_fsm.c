@@ -46,9 +46,6 @@ typedef enum {
     STATE_NUM_MAX,
 } ConnFsmStateIndex;
 
-#define SECOND_TO_MSENC 1000
-#define MILLISECOND_TO_MICRO 1000
-
 #define JOIN_LNN_TIMEOUT_LEN  (15 * 1000UL)
 #define LEAVE_LNN_TIMEOUT_LEN (5 * 1000UL)
 
@@ -158,6 +155,50 @@ static void FreeUnhandledMessage(int32_t msgType, void *para)
     }
 }
 
+static void ReportDeviceOnlineEvt(const char *udid, NodeBasicInfo *peerDevInfo)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report device online evt enter");
+    int32_t infoNum = 0;
+    NodeBasicInfo *basic = NULL;
+    NodeInfo *nodeInfo = NULL;
+    OnlineDeviceInfo info;
+    (void)memset_s(&info, sizeof(OnlineDeviceInfo), 0, sizeof(OnlineDeviceInfo));
+    if (LnnGetAllOnlineNodeInfo(&basic, &infoNum) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get online node fail");
+        return;
+    }
+    if (basic == NULL || infoNum == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report online evt get none online node");
+        return;
+    }
+    info.onlineDevNum = infoNum;
+    for (int32_t i = 0; i < infoNum; i++) {
+        nodeInfo = LnnGetNodeInfoById(basic[i].networkId, CATEGORY_NETWORK_ID);
+        if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_WIFI)) {
+            info.wifiOnlineDevNum++;
+        }
+        if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BR)) {
+            info.btOnlineDevNum++;
+        }
+    }
+    SoftBusFree(basic);
+    info.peerDevType = peerDevInfo->deviceTypeId;
+    if (LnnGetRemoteStrInfo(peerDevInfo->networkId, STRING_KEY_DEV_NAME, info.peerDevName,
+        SOFTBUS_HISYSEVT_NAME_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote device name fail");
+        return;
+    }
+    if (LnnGetRemoteStrInfo(peerDevInfo->networkId, STRING_KEY_HICE_VERSION, info.peerSoftBusVer,
+        SOFTBUS_HISYSEVT_NAME_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote softbus version fail");
+        return;
+    }
+    info.insertFileResult = true;
+    if (SoftBusReportDevOnlineEvt(&info, udid) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report device online fail");
+    }
+}
+
 static void ReportResult(const char *udid, ReportCategory report)
 {
     NodeBasicInfo basic;
@@ -174,6 +215,7 @@ static void ReportResult(const char *udid, ReportCategory report)
         case REPORT_ONLINE:
             LnnNotifyOnlineState(true, &basic);
             LnnInsertSpecificTrustedDevInfo(udid);
+            ReportDeviceOnlineEvt(udid, &basic);
             break;
         case REPORT_NONE:
             /* fall-through */
@@ -182,36 +224,49 @@ static void ReportResult(const char *udid, ReportCategory report)
     }
 }
 
-NO_SANITIZE("cfi") int64_t LnnUpTimeMs(void)
+static SoftBusLinkType ConvertAddrTypeToHisysEvtLinkType(ConnectionAddrType type)
 {
-    SoftBusSysTime t;
-    t.sec = 0;
-    t.usec = 0;
-    SoftBusGetTime(&t);
-    int64_t when = t.sec * SECOND_TO_MSENC + t.usec / MILLISECOND_TO_MICRO;
-    return when;
+    if (type < CONNECTION_ADDR_WLAN || type > CONNECTION_ADDR_MAX) {
+        return SOFTBUS_HISYSEVT_LINK_TYPE_BUTT;
+    }
+    switch (type) {
+        case CONNECTION_ADDR_WLAN:
+        case CONNECTION_ADDR_ETH:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_WLAN;
+        case CONNECTION_ADDR_BR:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_BR;
+        case CONNECTION_ADDR_BLE:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_BLE;
+        case CONNECTION_ADDR_SESSION:
+        case CONNECTION_ADDR_MAX:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_BUTT;
+        default:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_BUTT;
+    }
 }
 
-static void ReportLnnDfx(LnnConnectionFsm *connFsm, int32_t retCode)
+static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
 {
-    LnnConntionInfo *connInfo = &connFsm->connInfo;
-    connFsm->statisticData.type = connInfo->addr.type;
-    connFsm->statisticData.retCode = retCode;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report lnn result evt enter");
+    SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(connFsm->connInfo.addr.type);
+    if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
+        return;
+    }
     if (retCode == SOFTBUS_OK) {
-        connFsm->statisticData.endTime = LnnUpTimeMs();
-        if (AddStatisticDuration(&connFsm->statisticData) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add static duration");
+        connFsm->statisticData.beginOnlineTime = LnnUpTimeMs();
+        uint64_t constTime = connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime;
+        if (SoftBusRecordBusCenterResult(linkType, constTime) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report static lnn duration fail");
         }
+        return;
     }
-    if (AddStatisticRateOfSuccess(&connFsm->statisticData) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add rate success");
-    }
-    if (retCode != SOFTBUS_OK) {
-        SoftBusEvtReportMsg msg;
-        (void)memset_s(&msg, sizeof(SoftBusEvtReportMsg), 0, sizeof(SoftBusEvtReportMsg));
-        if (CreateBusCenterFaultEvt(&msg, retCode, &connInfo->addr) == SOFTBUS_OK && msg.paramArray != NULL) {
-            (void)ReportBusCenterFaultEvt(&msg);
-        }
+    SoftBusFaultEvtInfo info;
+    (void)memset_s(&info, sizeof(SoftBusFaultEvtInfo), 0, sizeof(SoftBusFaultEvtInfo));
+    info.moduleType = MODULE_TYPE_ONLINE;
+    info.linkType = linkType;
+    info.errorCode = retCode;
+    if (SoftBusReportBusCenterFaultEvt(&info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report buscenter fault evt fail");
     }
 }
 
@@ -226,9 +281,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     SetWatchdogFlag(true);
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
-    if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_AUTO) != 0) { // only report auto network
-        ReportLnnDfx(connFsm, retCode);
-    }
+    ReportLnnResultEvt(connFsm, retCode);
     if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
         report = LnnAddOnlineNode(connInfo->nodeInfo);
         NotifyJoinResult(connFsm, networkId, retCode);
@@ -292,12 +345,37 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     return needReportOffline;
 }
 
+static void ReportLeaveLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report leave lnn result enter");
+    if (retCode == SOFTBUS_OK) {
+        connFsm->statisticData.offLineTime = LnnUpTimeMs();
+        uint64_t constTime = connFsm->statisticData.offLineTime - connFsm->statisticData.beginOnlineTime;
+        if (SoftBusRecordDevOnlineDurResult(constTime) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report static device online duration dail");
+        }
+        return;
+    }
+    SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(connFsm->connInfo.addr.type);
+    if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
+        return;
+    }
+    SoftBusFaultEvtInfo info;
+    (void)memset_s(&info, sizeof(SoftBusFaultEvtInfo), 0, sizeof(SoftBusFaultEvtInfo));
+    info.moduleType = MODULE_TYPE_ONLINE;
+    info.linkType = linkType;
+    info.errorCode = retCode;
+    if (SoftBusReportBusCenterFaultEvt(&info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report buscenter fault evt fail");
+    }
+}
+
 static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     NodeBasicInfo basic;
     bool needReportOffline = false;
-
+    ReportLeaveLnnResultEvt(connFsm, retCode);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
