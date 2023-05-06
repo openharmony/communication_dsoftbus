@@ -27,43 +27,70 @@
 
 namespace OHOS {
 static constexpr int TEST_PKG_NAME_MAX_LEN = 65;
-static constexpr int TEST_STRING_MAX_LEN = 100;
 int32_t ReportStatisticEvt()
 {
     return 0;
 }
 
-void SoftBusHiSysEvtBusCenterFuzzTest(const uint8_t* data, size_t size)
+void SoftBusRecordAuthResultFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
-
-    LnnStatisticData statisticData = {0};
-    statisticData.retCode = *(reinterpret_cast<const int32_t *>(data));
-    AddStatisticDuration(&statisticData);
-    AddStatisticRateOfSuccess(&statisticData);
-    char tmpString[TEST_STRING_MAX_LEN] = {0};
-    if (memcpy_s(tmpString, sizeof(tmpString) - 1, data, size) != EOK) {
-        return;
-    }
-    int32_t tmpErrCode = *(reinterpret_cast<const int32_t *>(data));
-    SoftBusEvtReportMsg testMsg;
-    if (memset_s(&testMsg, sizeof(SoftBusEvtReportMsg), 0, sizeof(SoftBusEvtReportMsg)) != EOK) {
-        return;
-    }
-    int32_t ret = CreateBusCenterFaultEvt(&testMsg, tmpErrCode, reinterpret_cast<ConnectionAddr *>(tmpString));
-    if (ret == SOFTBUS_OK && testMsg.paramArray != nullptr) {
-        ReportBusCenterFaultEvt(&testMsg);
-    }
+    SoftBusLinkType linkType = *(reinterpret_cast<const SoftBusLinkType *>(data));
+    int32_t ret = *(reinterpret_cast<const int32_t *>(data));
+    uint64_t constTime = *(reinterpret_cast<const uint64_t *>(data));
+    AuthFailStage stage = *(reinterpret_cast<const AuthFailStage *>(data));
+    SoftBusRecordAuthResult(linkType, ret, constTime, stage);
 }
 
-void SoftBusHiSysEvtCommonFuzzTest(const uint8_t* data, size_t size)
+void SoftBusRecordBusCenterResultFuzzTest(const uint8_t *data, size_t size)
+{
+    InitBusCenterDfx();
+    SoftBusLinkType linkType = *(reinterpret_cast<const SoftBusLinkType *>(data));
+    uint64_t constTime = *(reinterpret_cast<const uint64_t *>(data));
+    SoftBusRecordBusCenterResult(linkType, constTime);
+}
+
+void SoftBusRecordDevOnlineDurResultFuzzTest(const uint8_t *data, size_t size)
+{
+    InitBusCenterDfx();
+    uint64_t constTime = *(reinterpret_cast<const uint64_t *>(data));
+    SoftBusRecordDevOnlineDurResult(constTime);
+}
+
+void SoftBusReportDevOnlineEvtFuzzTest(const uint8_t *data, size_t size)
+{
+    InitBusCenterDfx();
+    char udid[UDID_BUF_LEN] = {0};
+    if (memcpy_s(udid, sizeof(udid) - 1, data, size) != EOK) {
+        return;
+    }
+    OnlineDeviceInfo info = *(reinterpret_cast<const OnlineDeviceInfo *>(data));
+    SoftBusReportDevOnlineEvt(&info, udid);
+}
+
+void SoftBusReportBusCenterFaultEvtFuzzTest(const uint8_t *data, size_t size)
+{
+    InitBusCenterDfx();
+    SoftBusFaultEvtInfo info = *(reinterpret_cast<const SoftBusFaultEvtInfo *>(data));
+    SoftBusReportBusCenterFaultEvt(&info);
+}
+
+void SoftBusRecordDiscoveryResultFuzzTest(const uint8_t *data, size_t size)
+{
+    InitBusCenterDfx();
+    DiscoveryStage stage = *(reinterpret_cast<const DiscoveryStage *>(data));
+    AppDiscNode node = *(reinterpret_cast<const AppDiscNode *>(data));
+    SoftBusRecordDiscoveryResult(stage, &node);
+}
+
+void SoftBusHiSysEvtCommonFuzzTest(const uint8_t *data, size_t size)
 {
     StatisticEvtType evtType = *(reinterpret_cast<const StatisticEvtType *>(data));
     SetStatisticEvtReportFunc(evtType, ReportStatisticEvt);
     GetStatisticEvtReportFunc(evtType);
 }
 
-void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t* data, size_t size)
+void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t *data, size_t size)
 {
     InitConnStatisticSysEvt();
     SoftBusConnMedium connMedium = *(reinterpret_cast<const SoftBusConnMedium *>(data));
@@ -74,7 +101,7 @@ void SoftBusHiSysEvtConnReporterFuzzTest(const uint8_t* data, size_t size)
     }
 }
 
-void SoftBusHiSysEvtDiscReporterFuzzTest(const uint8_t* data, size_t size)
+void SoftBusHiSysEvtDiscReporterFuzzTest(const uint8_t *data, size_t size)
 {
     InitDiscStatisticSysEvt();
     uint8_t discMedium = *(reinterpret_cast<const uint8_t *>(data));
@@ -89,7 +116,7 @@ void SoftBusHiSysEvtDiscReporterFuzzTest(const uint8_t* data, size_t size)
     SoftBusReportDiscStartupEvt(tmpPkgName);
 }
 
-void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t* data, size_t size)
+void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t *data, size_t size)
 {
     (void)data;
     (void)size;
@@ -101,13 +128,18 @@ void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
         return 0;
     }
 
-    OHOS::SoftBusHiSysEvtBusCenterFuzzTest(data, size);
+    OHOS::SoftBusRecordAuthResultFuzzTest(data, size);
+    OHOS::SoftBusRecordBusCenterResultFuzzTest(data, size);
+    OHOS::SoftBusRecordDevOnlineDurResultFuzzTest(data, size);
+    OHOS::SoftBusReportDevOnlineEvtFuzzTest(data, size);
+    OHOS::SoftBusReportBusCenterFaultEvtFuzzTest(data, size);
+    OHOS::SoftBusRecordDiscoveryResultFuzzTest(data, size);
     OHOS::SoftBusHiSysEvtCommonFuzzTest(data, size);
     OHOS::SoftBusHiSysEvtConnReporterFuzzTest(data, size);
     OHOS::SoftBusHiSysEvtDiscReporterFuzzTest(data, size);

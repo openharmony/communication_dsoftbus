@@ -197,12 +197,76 @@ static void FreeMessagePara(MessagePara *para)
     }
 }
 
+static SoftBusLinkType ConvertAuthLinkTypeToHisysEvtLinkType(AuthLinkType type)
+{
+    switch (type) {
+        case AUTH_LINK_TYPE_WIFI:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_WLAN;
+        case AUTH_LINK_TYPE_BR:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_BR;
+        case AUTH_LINK_TYPE_BLE:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_BLE;
+        case AUTH_LINK_TYPE_P2P:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_P2P;
+        default:
+            return SOFTBUS_HISYSEVT_LINK_TYPE_BUTT;
+    }
+}
+
+static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
+{
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "report auth result evt enter");
+    SoftBusLinkType linkType = ConvertAuthLinkTypeToHisysEvtLinkType(authFsm->info.connInfo.type);
+    if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
+        return;
+    }
+    authFsm->statisticData.endAuthTime = LnnUpTimeMs();
+    uint64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
+    AuthFailStage stage;
+    switch (result) {
+        case SOFTBUS_OK:
+            if (SoftBusRecordAuthResult(linkType, SOFTBUS_OK, costTime, AUTH_STAGE_BUTT) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "report static auth result fail");
+            }
+            return;
+        case SOFTBUS_AUTH_SYNC_DEVID_FAIL:
+        case SOFTBUS_AUTH_SYNC_DEVINFO_FAIL:
+        case SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL:
+        case SOFTBUS_AUTH_SEND_FAIL:
+            stage = AUTH_EXCHANGE_STAGE;
+            break;
+        case SOFTBUS_AUTH_DEVICE_DISCONNECTED:
+            stage = AUTH_CONNECT_STAGE;
+            break;
+        case SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL:
+        case SOFTBUS_AUTH_HICHAIN_AUTH_ERROR:
+        case SOFTBUS_AUTH_TIMEOUT:
+        case SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED:
+            stage = AUTH_VERIFY_STAGE;
+            break;
+        default:
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unsupport reasn:%d.", result);
+            return;
+    }
+    if (SoftBusRecordAuthResult(linkType, SOFTBUS_ERR, costTime, stage) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "report static auth result fail");
+    }
+    SoftBusFaultEvtInfo info;
+    (void)memset_s(&info, sizeof(SoftBusFaultEvtInfo), 0, sizeof(SoftBusFaultEvtInfo));
+    info.moduleType = MODULE_TYPE_AUTH;
+    info.linkType = linkType;
+    info.errorCode = result;
+    if (SoftBusReportBusCenterFaultEvt(&info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "report buscenter fault evt fail");
+    }
+}
+
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth fsm[%" PRId64 "] complete: side=%s, result=%d",
         authFsm->authSeq, GetAuthSideStr(authFsm->info.isServer), result);
     LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-
+    ReportAuthResultEvt(authFsm, result);
     if (result == SOFTBUS_OK) {
         AuthManagerSetAuthPassed(authFsm->authSeq, &authFsm->info);
     } else {
@@ -604,6 +668,11 @@ static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bo
     return SOFTBUS_OK;
 }
 
+static void SetAuthStartTime(AuthFsm *authFsm)
+{
+    authFsm->statisticData.startAuthTime = LnnUpTimeMs();
+}
+
 NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
     uint64_t connId, const AuthConnInfo *connInfo, bool isServer)
 {
@@ -622,6 +691,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t reques
         ReleaseAuthLock();
         return SOFTBUS_ERR;
     }
+    SetAuthStartTime(authFsm);
     LnnFsmPostMessageDelay(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT, NULL, AUTH_TIMEOUT_MS);
     ReleaseAuthLock();
     return SOFTBUS_OK;

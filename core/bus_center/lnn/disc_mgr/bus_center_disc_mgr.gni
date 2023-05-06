@@ -23,6 +23,8 @@ if (dsoftbus_feature_lnn_net) {
 } else {
   bus_center_disc_mgr_src += [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_manager_virtual.c" ]
 }
-bus_center_disc_mgr_inc =
-    [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include" ]
+bus_center_disc_mgr_inc = [
+  "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+]
 bus_center_disc_mgr_deps = []
