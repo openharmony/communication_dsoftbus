@@ -307,16 +307,29 @@ static int32_t ScanFilter(const SoftBusBleScanResult *scanResultData)
 {
     uint32_t advLen = scanResultData->advLen;
     uint8_t *advData = scanResultData->advData;
-    if (scanResultData->dataStatus != SOFTBUS_BLE_DATA_COMPLETE || advLen < (POS_TLV + ADV_HEAD_LEN)) {
-        return SOFTBUS_ERR;
-    }
-    if (advData[POS_UUID] != (uint8_t)(BLE_UUID & BYTE_MASK) ||
-        advData[POS_UUID + 1] != (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK)) {
-        return SOFTBUS_ERR;
-    }
-    if (advData[POS_VERSION + ADV_HEAD_LEN] != BLE_VERSION) {
-        return SOFTBUS_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOG(scanResultData->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, SOFTBUS_ERR,
+        "dataStatus[%u] is invalid", scanResultData->dataStatus);
+    DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (POS_TLV + ADV_HEAD_LEN), SOFTBUS_ERR,
+        "advLen[%u] is too short, less than adv header length", advLen);
+
+    uint32_t broadcastAdvLen = advData[POS_PACKET_LENGTH];
+    DISC_CHECK_AND_RETURN_RET_LOG(broadcastAdvLen >= (ADV_HEAD_LEN + RSP_HEAD_LEN - 1), SOFTBUS_ERR,
+        "broadcastAdvLen[%u] is too short, less than adv header length", broadcastAdvLen);
+    DISC_CHECK_AND_RETURN_RET_LOG(advLen > (POS_PACKET_LENGTH + broadcastAdvLen + 1), SOFTBUS_ERR,
+        "advLen[%u] is too short, less than adv packet length", advLen);
+    uint32_t broadcastRspLen = advData[POS_PACKET_LENGTH + broadcastAdvLen + 1];
+    DISC_CHECK_AND_RETURN_RET_LOG(broadcastRspLen >= (RSP_HEAD_LEN - 1), SOFTBUS_ERR,
+        "broadcastRspLen[%u] is too short, less than rsp header length", broadcastRspLen);
+    DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (POS_PACKET_LENGTH + broadcastAdvLen + 1 + broadcastRspLen + 1),
+        SOFTBUS_ERR, "advLen[%u] is too short, less than adv+rsp packet length", advLen);
+
+    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID] == (uint8_t)(BLE_UUID & BYTE_MASK), SOFTBUS_ERR,
+        "uuid low byte[%hhu] is invalid", advData[POS_UUID]);
+    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID + 1] == (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK),
+        SOFTBUS_ERR, "uuid high byte[%hhu] is invalid", advData[POS_UUID + 1]);
+    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_VERSION + ADV_HEAD_LEN] == BLE_VERSION, SOFTBUS_ERR,
+        "adv version[%hhu] is invalid", advData[POS_VERSION + ADV_HEAD_LEN]);
+
     if (!CheckScanner()) {
         DLOGI("no need to scan");
         (void)StopScaner();
