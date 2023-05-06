@@ -14,7 +14,7 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/discovery"
 
@@ -23,11 +23,11 @@ ohos_unittest("DiscSoftBusBleTest") {
   sources = [ "disc_ble_softbus_test.cpp" ]
 
   include_dirs = [
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/core/discovery/ble/dispatcher/include",
-    "//foundation/communication/dsoftbus/core/discovery/manager/include",
-    "//foundation/communication/dsoftbus/core/discovery/interface",
-    "//foundation/communication/dsoftbus/core/discovery/ble/softbus_ble/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -51,9 +51,9 @@ ohos_unittest("DiscSoftBusBleTest") {
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//foundation/communication/dsoftbus/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "//third_party/googletest:gtest_main",
   ]
 

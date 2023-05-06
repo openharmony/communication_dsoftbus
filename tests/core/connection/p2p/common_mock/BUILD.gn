@@ -14,8 +14,8 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-import("//foundation/communication/dsoftbus/tests/utils/utils.gni")
+import("../../../../../dsoftbus.gni")
+import("../../../../utils/utils.gni")
 
 module_output_path = "dsoftbus/connection"
 

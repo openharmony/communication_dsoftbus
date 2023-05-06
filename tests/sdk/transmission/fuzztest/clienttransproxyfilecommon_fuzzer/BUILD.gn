@@ -15,19 +15,19 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ClientTransProxyFileCommonFuzzTest") {
   module_out_path = module_output_path
 
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransproxyfilecommon_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttransproxyfilecommon_fuzzer"
 
   include_dirs = [
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/proxy/include",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/adapter/common/include",
+    "../../../../../adapter/common/include",
+    "../../../../../core/common/include",
+    "../../../../../sdk/transmission/trans_channel/proxy/include",
     "//third_party/bounds_checking_function/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
   ]
@@ -41,7 +41,7 @@ ohos_fuzztest("ClientTransProxyFileCommonFuzzTest") {
 
   sources = [ "clienttransproxyfilecommon_fuzzer.cpp" ]
 
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [ "../../../../../sdk:softbus_client" ]
 
   external_deps = [ "c_utils:utils" ]
 }

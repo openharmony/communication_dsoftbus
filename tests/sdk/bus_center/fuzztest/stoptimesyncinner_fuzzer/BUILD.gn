@@ -13,13 +13,13 @@
 
 #####################hydra-fuzz###################
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/bus_center"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("StopTimeSyncInnerFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/bus_center/fuzztest/stoptimesyncinner_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/bus_center/fuzztest/stoptimesyncinner_fuzzer"
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",

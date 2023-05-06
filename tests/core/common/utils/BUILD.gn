@@ -14,7 +14,7 @@
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
+  import("../../../../dsoftbus.gni")
 
   if (ohos_build_type == "debug") {
     unittest("SoftbusUtilsTest") {
@@ -31,7 +31,7 @@ if (defined(ohos_lite)) {
   }
 } else {
   import("//build/test.gni")
-  import("//foundation/communication/dsoftbus/dsoftbus.gni")
+  import("../../../../dsoftbus.gni")
 
   module_output_path = "dsoftbus/common"
   ohos_unittest("SoftbusUtilsTest") {

@@ -15,29 +15,28 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/transmission"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ClientTransProxyManagerFuzzTest") {
   module_out_path = module_output_path
 
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransproxymanager_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttransproxymanager_fuzzer"
 
   include_dirs = [
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/proxy/include",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/adapter/common/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/tcp_direct/include",
-    "//foundation/communication/dsoftbus/core/transmission/common/include",
-    "//foundation/communication/dsoftbus/core/connection/interface",
-    "//foundation/communication/dsoftbus/sdk/transmission/ipc/include",
-    "//third_party/bounds_checking_function/include",
-    "//foundation/communication/dsoftbus/core/transmission/common/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
-    "//foundation/communication/dsoftbus/adapter/default_config/spec_config",
+    "../../../../../adapter/common/include",
+    "../../../../../adapter/default_config/spec_config",
+    "../../../../../core/common/include",
+    "../../../../../core/connection/interface",
+    "../../../../../core/transmission/common/include",
+    "../../../../../sdk/transmission/ipc/include",
+    "../../../../../sdk/transmission/session/include",
+    "../../../../../sdk/transmission/trans_channel/proxy/include",
+    "../../../../../sdk/transmission/trans_channel/tcp_direct/include",
+    "../../../../../sdk/transmission/trans_channel/udp/file/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//third_party/bounds_checking_function/include",
   ]
 
   cflags = [
@@ -49,7 +48,7 @@ ohos_fuzztest("ClientTransProxyManagerFuzzTest") {
 
   sources = [ "clienttransproxymanager_fuzzer.cpp" ]
 
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [ "../../../../../sdk:softbus_client" ]
 
   external_deps = [ "c_utils:utils" ]
 }

@@ -15,24 +15,24 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ClientTransFileFuzzTest") {
   module_out_path = "dsoftbus/transmission"
-  fuzz_config_file = "//foundation/communication/dsoftbus/tests/sdk/transmission/fuzztest/clienttransfile_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clienttransfile_fuzzer"
   include_dirs = [
-    "//foundation/communication/dsoftbus/core/common/inner_communication",
-    "//foundation/communication/dsoftbus/adapter/common/include",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/common",
-    "//foundation/communication/dsoftbus/interfaces/kits/transport",
-    "//foundation/communication/dsoftbus/interfaces/inner_kits/transport",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/file/include",
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/common/include",
-    "//foundation/communication/dsoftbus/components/nstackx/nstackx_core/dfile/interface/",
-    "//foundation/communication/dsoftbus/components/nstackx/nstackx_util/interface",
-    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
+    "../../../../../adapter/common/include",
+    "../../../../../components/nstackx/nstackx_core/dfile/interface/",
+    "../../../../../components/nstackx/nstackx_util/interface",
+    "../../../../../core/common/include",
+    "../../../../../core/common/inner_communication",
+    "../../../../../interfaces/inner_kits/transport",
+    "../../../../../interfaces/kits/common",
+    "../../../../../interfaces/kits/transport",
+    "../../../../../sdk/transmission/session/include",
+    "../../../../../sdk/transmission/trans_channel/udp/common/include",
+    "../../../../../sdk/transmission/trans_channel/udp/file/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]
@@ -45,7 +45,7 @@ ohos_fuzztest("ClientTransFileFuzzTest") {
     "-fstack-protector-strong",
   ]
   sources = [ "clienttransfile_fuzzer.cpp" ]
-  deps = [ "//foundation/communication/dsoftbus/sdk:softbus_client" ]
+  deps = [ "../../../../../sdk:softbus_client" ]
 
   external_deps = [ "c_utils:utils" ]
 }

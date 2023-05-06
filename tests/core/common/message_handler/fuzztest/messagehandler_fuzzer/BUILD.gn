@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("MessageHandlerFuzzTest") {

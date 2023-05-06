@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("DiscoveryServiceFuzzTest") {
@@ -23,14 +23,14 @@ ohos_fuzztest("DiscoveryServiceFuzzTest") {
   fuzz_config_file =
       "$dsoftbus_root_path/tests/sdk/discovery/fuzztest/discoveryservice_fuzzer"
   include_dirs = [
-    "//foundation/communication/dsoftbus/adapter/common/include",
-    "//foundation/communication/dsoftbus/core/common/inner_communication",
-    "//foundation/communication/dsoftbus/core/common/include",
-    "//foundation/communication/dsoftbus/interfaces/kits/discovery",
-    "//foundation/communication/dsoftbus/interfaces/kits/common",
-    "//foundation/communication/dsoftbus/sdk/discovery/include",
+    "../../../../../adapter/common/include",
+    "../../../../../core/common/include",
+    "../../../../../core/common/inner_communication",
+    "../../../../../interfaces/kits/common",
+    "../../../../../interfaces/kits/discovery",
+    "../../../../../sdk/discovery/include",
+    "../../../../../sdk/discovery/manager/include",
     "//commonlibrary/c_utils/base/include",
-    "//foundation/communication/dsoftbus/sdk/discovery/manager/include",
   ]
   cflags = [
     "-g",
