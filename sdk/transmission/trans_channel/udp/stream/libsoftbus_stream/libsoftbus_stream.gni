@@ -26,7 +26,6 @@ enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 libsoftbus_stream_inc = [
   "$libsoftbus_stream_sdk_path/include",
   "//third_party/cJSON",
-  "//third_party/openssl/include",
   "//third_party/bounds_checking_function/include",
 ]
 
@@ -57,6 +56,7 @@ if (defined(ohos_lite)) {
     libsoftbus_stream_deps =
         [ "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open" ]
   }
+  libsoftbus_stream_deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
 } else {
   if (enhanced) {
     libsoftbus_stream_deps = [
@@ -69,4 +69,5 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function:libsec_shared",
     ]
   }
+  libsoftbus_stream_deps += [ "//third_party/openssl:libcrypto_shared" ]
 }
