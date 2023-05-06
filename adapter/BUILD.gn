@@ -22,6 +22,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_config/spec_config",
       "$dsoftbus_root_path/core/common/include",
       "$hilog_lite_include_path",
+      "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include",
     ]
     if (board_name == "v200zr") {
       defines = [ "DSOFTBUS_V200ZR" ]
@@ -59,6 +60,7 @@ if (defined(ohos_lite)) {
       }
       sources = [
         "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
+        "$softbus_adapter_common/dfx/softbus_adapter_hitracechain_virtual.c",
         "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
@@ -73,6 +75,7 @@ if (defined(ohos_lite)) {
         sources = []
         sources = [
           "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
+          "$softbus_adapter_common/dfx/softbus_adapter_hitracechain_virtual.c",
           "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
@@ -111,6 +114,7 @@ if (defined(ohos_lite)) {
       cflags_cc = [ "-fPIC" ]
       sources = [
         "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
+        "$softbus_adapter_common/dfx/softbus_adapter_hitracechain_virtual.c",
         "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
@@ -146,6 +150,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include/OS_adapter_define/linux",
       "$dsoftbus_feature_product_config_path/spec_config",
       "$dsoftbus_root_path/core/common/include",
+      "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include",
     ]
   }
 
@@ -160,6 +165,7 @@ if (defined(ohos_lite)) {
     sources = [
       "$dsoftbus_feature_product_config_path/spec_config/softbus_config_adapter.c",
       "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
+      "$softbus_adapter_common/dfx/softbus_adapter_hitracechain.c",
       "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
@@ -200,6 +206,7 @@ if (defined(ohos_lite)) {
     if (is_standard_system) {
       external_deps = [
         "hisysevent_native:libhisysevent",
+        "hitrace_native:libhitracechain",
         "hiviewdfx_hilog_native:libhilog",
       ]
     }

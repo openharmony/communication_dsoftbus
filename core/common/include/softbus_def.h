@@ -144,6 +144,8 @@ typedef struct {
     int32_t algorithm;
     int32_t crc;
     bool isUdpFile;
+    int64_t timeStart;
+    int32_t linkType;
 } ChannelInfo;
 
 #ifdef __cplusplus

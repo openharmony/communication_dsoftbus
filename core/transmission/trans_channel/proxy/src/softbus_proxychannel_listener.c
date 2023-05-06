@@ -28,6 +28,7 @@
 #include "softbus_proxychannel_session.h"
 #include "softbus_utils.h"
 #include "trans_lane_pending_ctl.h"
+#include "softbus_hisysevt_transreporter.h"
 
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
@@ -61,6 +62,8 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.algorithm = appInfo->algorithm;
     info.crc = appInfo->crc;
     info.businessType = appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType;
+    info.timeStart = appInfo->timeStart;
+    info.linkType = appInfo->linkType;
 
     int32_t ret = SOFTBUS_ERR;
     if (appInfo->appType != APP_TYPE_AUTH) {
@@ -110,6 +113,9 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpenFailed(int32_t channelId, const App
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    int64_t timeStart = appInfo->timeStart;
+    int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "proxy channel openfailed: channelId=%d, appType=%d", channelId, appInfo->appType);
 

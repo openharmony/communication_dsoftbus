@@ -193,6 +193,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServerStub::OnReceived, code = %u", code);
+    SoftbusRecordCalledApiCnt(code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SOFTBUS_SERVER_NOT_INIT ReadInterfaceToken failed!");
         return SOFTBUS_ERR;
@@ -236,6 +237,9 @@ int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParce
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartDiscoveryInner read pkgName failed!");
         return SOFTBUS_ERR;
     }
+
+    uint32_t code = SERVER_START_DISCOVERY;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     subInfo.subscribeId = data.ReadInt32();
     subInfo.mode = (DiscoverMode)data.ReadInt32();
     subInfo.medium = (ExchangeMedium)data.ReadInt32();
@@ -273,6 +277,8 @@ int32_t SoftBusServerStub::StopDiscoveryInner(MessageParcel &data, MessageParcel
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopDiscoveryInner read pkgName failed!");
         return SOFTBUS_ERR;
     }
+    uint32_t code = SERVER_STOP_DISCOVERY;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     int32_t subscribeId = data.ReadInt32();
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "StopDiscoveryInner %s, %d!\n", pkgName, subscribeId);
     int32_t retReply = StopDiscovery(pkgName, subscribeId);
@@ -292,6 +298,8 @@ int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParce
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PublishServiceInner read pkgName failed!");
         return SOFTBUS_ERR;
     }
+    uint32_t code = SERVER_PUBLISH_SERVICE;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     pubInfo.publishId = data.ReadInt32();
     pubInfo.mode = (DiscoverMode)data.ReadInt32();
     pubInfo.medium = (ExchangeMedium)data.ReadInt32();
@@ -327,6 +335,8 @@ int32_t SoftBusServerStub::UnPublishServiceInner(MessageParcel &data, MessagePar
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "UnPublishServiceInner read pkgName failed!");
         return SOFTBUS_ERR;
     }
+    uint32_t code = SERVER_UNPUBLISH_SERVICE;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     int32_t publishId = data.ReadInt32();
     int32_t retReply = UnPublishService(pkgName, publishId);
     if (!reply.WriteInt32(retReply)) {
@@ -348,6 +358,8 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterServiceInner read pkgName failed!");
         return SOFTBUS_ERR;
     }
+    uint32_t code = MANAGE_REGISTER_SERVICE;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     int32_t retReply = SoftbusRegisterService(pkgName, remote);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterServiceInner write reply failed!");
@@ -363,6 +375,8 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     pid_t callingPid;
     const char *pkgName = data.ReadCString();
     const char *sessionName = data.ReadCString();
+    uint32_t code = SERVER_CREATE_SESSION_SERVER;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     if (pkgName == nullptr || sessionName == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
         goto EXIT;
@@ -389,6 +403,8 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
     pid_t callingPid;
     const char *pkgName = data.ReadCString();
     const char *sessionName = data.ReadCString();
+    uint32_t code = SERVER_REMOVE_SESSION_SERVER;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     if (pkgName == nullptr || sessionName == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
         goto EXIT;
@@ -814,6 +830,8 @@ int32_t SoftBusServerStub::StartTimeSyncInner(MessageParcel &data, MessageParcel
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read pkgName failed!");
         return SOFTBUS_IPC_ERR;
     }
+    uint32_t code = SERVER_START_TIME_SYNC;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     const char *targetNetworkId = data.ReadCString();
     if (targetNetworkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StartTimeSyncInner read targetNetworkId failed!");
@@ -844,6 +862,8 @@ int32_t SoftBusServerStub::StopTimeSyncInner(MessageParcel &data, MessageParcel 
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner read pkgName failed!");
         return SOFTBUS_IPC_ERR;
     }
+    uint32_t code = SERVER_STOP_TIME_SYNC;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     const char *targetNetworkId = data.ReadCString();
     if (targetNetworkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "StopTimeSyncInner read targetNetworkId failed!");
@@ -1190,6 +1210,8 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read pkgName failed!");
         return SOFTBUS_ERR;
     }
+    uint32_t code = SERVER_SHIFT_LNN_GEAR;
+    SoftbusRecordCalledApiInfo(pkgName, code);
     const char *callerId = data.ReadCString();
     if (callerId == nullptr || strnlen(callerId, CALLER_ID_MAX_LEN) >= CALLER_ID_MAX_LEN) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner read callerId failed!");

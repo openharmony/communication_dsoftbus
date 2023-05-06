@@ -28,11 +28,19 @@ typedef enum {
     SOFTBUS_EVT_OPEN_SESSION_FAIL,
 } SoftBusOpenSessionStatus;
 
+void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code);
+
+void SoftbusRecordCalledApiCnt(uint32_t code);
+
+void SoftbusRecordOpenSessionKpi(const char *pkgName, int32_t linkType, SoftBusOpenSessionStatus isSucc, int64_t time);
+
 void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
 
 void SoftbusReportTransErrorEvt(int32_t errcode);
 
 int32_t InitTransStatisticSysEvt(void);
+
+void DeinitTransStatisticSysEvt(void);
 
 int64_t GetSoftbusRecordTimeMillis(void);
 

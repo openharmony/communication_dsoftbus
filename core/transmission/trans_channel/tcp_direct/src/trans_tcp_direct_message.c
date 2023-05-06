@@ -34,6 +34,7 @@
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "softbus_hisysevt_transreporter.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
 
@@ -272,6 +273,8 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.routeType = conn.appInfo.routeType;
     info.businessType = conn.appInfo.businessType;
 
+    info.timeStart = conn.appInfo.timeStart;
+    info.linkType = conn.appInfo.linkType;
     char buf[NETWORK_ID_BUF_LEN] = {0};
     int32_t ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
@@ -314,7 +317,9 @@ NO_SANITIZE("cfi") int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t er
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_ERR;
     }
-
+    int64_t timeStart = conn.appInfo.timeStart;
+    int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName, conn.appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     if (conn.serverSide == false) {
         AppInfoData *myData = &conn.appInfo.myData;
         int ret = TransTdcOnChannelOpenFailed(myData->pkgName, myData->pid, channelId, errCode);

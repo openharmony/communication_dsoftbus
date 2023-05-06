@@ -26,6 +26,9 @@
 #include "softbus_socket.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "softbus_adapter_hitracechain.h"
+
+#define ID_OFFSET (1)
 
 NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
@@ -41,6 +44,17 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
     SessionConn *newConn = CreateNewSessinConn(module, false);
     if (newConn == NULL) {
         return SOFTBUS_MALLOC_ERR;
+    }
+    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenTcpDirectChannel", HITRACE_FLAG_DEFAULT);
+    if (SoftbusHitraceChainIsValid(&traceId)) {
+        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(newConn->channelId + ID_OFFSET));
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(newConn->channelId + ID_OFFSET));
+    }
+    if (memcpy_s(&(newConn->traceId), sizeof(newConn->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel memcpy failed.");
+        SoftBusFree(newConn);
+        return SOFTBUS_MEM_ERR;
     }
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
