@@ -90,13 +90,15 @@ NO_SANITIZE("cfi") char *BleTransRecv(BleHalConnInfo halConnInfo, char *value, u
 {
     if (value == NULL) {
         CLOGE("BleTransRecv invalid data");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DATA);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DATA);
         return NULL;
     }
     BleConnectionInfo *targetNode = g_softBusBleTransCb->GetBleConnInfoByHalConnId(halConnInfo);
     if (targetNode == NULL) {
         CLOGE("BleTransRecv unknown device");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DEVICE);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_RECV_INVALID_DEVICE);
         return NULL;
     }
     BleTransHeader header;
@@ -190,7 +192,8 @@ NO_SANITIZE("cfi") int32_t BleTransSend(BleConnectionInfo *connInfo, const char 
         CLOGI("BleTransSend  module:%d", module);
         ret = BleHalSend((const BleConnectionInfo *)connInfo, buff, sendLength + sizeof(BleTransHeader), module);
         if (ret != SOFTBUS_OK) {
-            SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
+            SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                    SOFTBUS_HISYSEVT_BLE_SEND_FAIL);
             CLOGI("BleTransSend BleHalSend failed");
             SoftBusFree(buff);
             return ret;

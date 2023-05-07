@@ -22,21 +22,33 @@
 extern "C" {
 #endif
 #endif
+
+#define DEFAULT_PID 0
+
 typedef enum {
     SOFTBUS_EVT_CONN_SUCC,
     SOFTBUS_EVT_CONN_FAIL,
 } SoftBusConnStatus;
 
 typedef enum {
-    SOFTBUS_HISYSEVT_CONN_MEDIUM_TCP = 1,
-    SOFTBUS_HISYSEVT_CONN_MEDIUM_BR,
-    SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE,
-    SOFTBUS_HISYSEVT_CONN_MEDIUM_P2P,
+    SOFTBUS_HISYSEVT_CONN_TYPE_BR = 0,
+    SOFTBUS_HISYSEVT_CONN_TYPE_BLE = 1,
+    SOFTBUS_HISYSEVT_CONN_TYPE_TCP = 2,
+    SOFTBUS_HISYSEVT_CONN_TYPE_P2P = 3,
+    SOFTBUS_HISYSEVT_CONN_TYPE_HML = 4,
 
-    SOFTBUS_HISYSEVT_CONN_MEDIUM_BUTT,
-} SoftBusConnMedium;
+    SOFTBUS_HISYSEVT_CONN_TYPE_BUTT = 5,
+} SoftBusConnType;
 
 typedef enum {
+    NEGOTIATION_STEP = 0,
+    GROUP_CREATE_STEP = 1,
+    CONN_GROUP_STEP = 2,
+    STEP_BUTT = 3,
+} ProcessStep;
+
+typedef enum {
+    SOFTBUS_HISYSEVT_CONN_OK,
     SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT,
     SOFTBUS_HISYSEVT_BLE_NOT_INIT,
     SOFTBUS_HISYSEVT_BLE_GATTSERVER_INIT_FAIL,
@@ -56,9 +68,31 @@ typedef enum {
     SOFTBUS_HISYSEVT_CONN_ERRCODE_BUTT,
 } SoftBusConnErrCode;
 
-int32_t SoftBusReportConnFaultEvt(uint8_t medium, int32_t errCode);
-int32_t SoftbusRecordConnInfo(uint8_t medium, SoftBusConnStatus isSucc, uint32_t time);
+typedef struct {
+    uint64_t totalTime;
+    uint64_t negotiationTime;
+    uint64_t groupCreateTime;
+    uint64_t connGroupTime;
+} ProcessStepTime;
+
+typedef struct {
+    uint64_t startTime;
+    uint32_t connectTraceId;
+} ConnectStatistics;
+
+int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName);
+
+int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusConnStatus status,
+                                uint64_t costTime, int32_t errCode);
+
+int32_t SoftbusRecordProccessDuration(uint32_t pId, SoftBusConnType connType, SoftBusConnStatus status,
+                                      ProcessStepTime *stepTime, int32_t errCode);
+
+uint32_t SoftbusGetConnectTraceId();
+
 int32_t InitConnStatisticSysEvt(void);
+
+void DeinitConnStatisticSysEvt(void);
 
 #ifdef __cplusplus
 #if __cplusplus

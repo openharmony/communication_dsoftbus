@@ -518,7 +518,8 @@ static int32_t ConnectDeviceFirstTime(const ConnectOption *option, uint32_t requ
     CLOGI("ConnectDeviceFirstTime connId:%d, requestId:%d", connId, requestId);
     if (ConnBrOnEvent(ADD_CONN_BR_CLIENT_CONNECTED_MSG, (int32_t)connId, (int32_t)connId) != SOFTBUS_OK) {
         ReleaseConnectionRef(newConnInfo);
-        SoftbusRecordConnInfo(SOFTBUS_HISYSEVT_CONN_MEDIUM_BR, SOFTBUS_EVT_CONN_FAIL, 0);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_CONN_FAIL);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -44,11 +44,25 @@ typedef enum {
     SOFTBUS_HISYSEVT_DISC_ERRCODE_BUTT,
 }SoftBusDiscErrCode;
 
-int32_t SoftbusRecordDiscScanTimes(uint8_t medium);
-int32_t SoftbusRecordFirstDiscTime(uint8_t medium, uint32_t time);
-int32_t SoftbusRecordDiscFault(uint8_t medium, int32_t errCode);
+typedef struct {
+    uint64_t startTime;
+    uint32_t repTimes;
+    uint32_t devNum;
+    uint32_t discTimes;
+} DiscoveryStatistics;
+
+int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime);
+
+int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_t repTimes, uint32_t devNum,
+                                    uint32_t discTimes);
+
+int32_t SoftbusRecordDiscBleRssi(int32_t rssi);
+
+int32_t SoftbusReportDiscFault(SoftBusDiscMedium medium, int32_t errCode);
+
 int32_t InitDiscStatisticSysEvt(void);
-int32_t SoftBusReportDiscStartupEvt(const char *packageName);
+
+void DeinitDiscStatisticSysEvt(void);
 
 #ifdef __cplusplus
 #if __cplusplus

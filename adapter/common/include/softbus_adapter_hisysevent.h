@@ -25,8 +25,9 @@ extern "C" {
 #endif
 #endif
 
-#define SOFTBUS_HISYSEVT_NAME_LEN  33
-#define SOFTBUS_HISYSEVT_PARAM_LEN 33
+#define SOFTBUS_HISYSEVT_NAME_LEN  65
+#define SOFTBUS_HISYSEVT_PARAM_LEN 65
+#define SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE 52
 
 typedef enum {
     SOFTBUS_EVT_PARAM_ZERO = 0,
@@ -79,6 +80,7 @@ typedef enum {
     SOFTBUS_EVT_PARAMTYPE_FLOAT,
     SOFTBUS_EVT_PARAMTYPE_DOUBLE,
     SOFTBUS_EVT_PARAMTYPE_STRING,
+    SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY,
 
     SOFTBUS_EVT_PARAMTYPE_BUTT
 } SoftBusEvtParamType;
@@ -94,6 +96,7 @@ typedef union {
     float f;
     double d;
     char str[SOFTBUS_HISYSEVT_PARAM_LEN];
+    uint32_t u32a[SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE];
 }SoftbusEvtParamValue;
 
 typedef struct {

@@ -20,17 +20,12 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_log.h"
 #include "softbus_hisysevt_discreporter.h"
 #include "softbus_utils.h"
-
-#define SEC_TIME_PARAM 1000LL
-
-static bool g_firstDiscFlag = false;
-static bool g_onDeviceFound = false;
-static int64_t g_currentTime = 0;
 
 static bool g_isInited = false;
 
@@ -84,6 +79,7 @@ typedef struct {
     InnerOption option;
     ListNode capNode;
     DiscItem *item;
+    DiscoveryStatistics statistics;
 } DiscInfo;
 
 typedef struct {
@@ -92,6 +88,31 @@ typedef struct {
     char *pkgName;
 } IdContainer;
 
+static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
+{
+    infoNode->statistics.startTime = SoftBusGetSysTimeMs();
+    infoNode->statistics.repTimes = 0;
+    infoNode->statistics.devNum = 0;
+    infoNode->statistics.discTimes = 0;
+}
+
+static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+{
+    DLOGI("record device found");
+    if (infoNode->statistics.repTimes == 0) {
+        uint64_t costTime = SoftBusGetSysTimeMs() - infoNode->statistics.startTime;
+        SoftbusRecordFirstDiscTime((SoftBusDiscMedium)addtions->medium, costTime);
+    }
+    infoNode->statistics.repTimes++;
+    infoNode->statistics.devNum++;
+}
+static void DfxRecordStopDiscoveryDevice(const char *packageName, DiscInfo *infoNode)
+{
+    DiscoveryStatistics *statistics = &infoNode->statistics;
+    uint64_t totalTime = SoftBusGetSysTimeMs() - statistics->startTime;
+    SoftbusRecordBleDiscDetails((char *)packageName, totalTime, statistics->repTimes, statistics->devNum,
+                                statistics->discTimes);
+}
 static void BitmapSet(uint32_t *bitMap, uint32_t pos)
 {
     *bitMap |= 1U << pos;
@@ -125,40 +146,8 @@ NO_SANITIZE("cfi") static int32_t CallSpecificInterfaceFunc(const InnerOption *o
     }
 }
 
-static int64_t GetCurrentTimeUs(void)
-{
-    SoftBusSysTime time;
-    SoftBusGetTime(&time);
-    return time.sec * SEC_TIME_PARAM + (time.usec / SEC_TIME_PARAM);
-}
-
-static void StartFirstDiscoveryTimeRecord(void)
-{
-    if (g_firstDiscFlag == false) {
-        g_currentTime = GetCurrentTimeUs();
-        g_firstDiscFlag = true;
-        g_onDeviceFound = false;
-        DLOGI("First discovery time record start");
-    }
-}
-
-static void FinishFirstDiscoveryTimeRecord(void)
-{
-    if (g_onDeviceFound == false) {
-        int64_t lastTime = g_currentTime;
-        g_currentTime = GetCurrentTimeUs();
-        g_currentTime -= lastTime;
-        g_onDeviceFound = true;
-        g_firstDiscFlag = false;
-        DLOGI("First discovery time record finish");
-    }
-}
-
 static int32_t CallInterfaceByMedium(const DiscInfo *info, const InterfaceFuncType type)
 {
-    SoftbusRecordDiscScanTimes(info->medium);
-    StartFirstDiscoveryTimeRecord();
-
     switch (info->medium) {
         case COAP:
             return CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
@@ -238,8 +227,8 @@ static bool IsInnerModule(const DiscInfo *infoNode)
     return false;
 }
 
-NO_SANITIZE("cfi") static void InnerDeviceFound(const DiscInfo *infoNode, const DeviceInfo *device,
-                             const InnerDeviceInfoAddtions *additions)
+NO_SANITIZE("cfi") static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
+                                                const InnerDeviceInfoAddtions *additions)
 {
     if (IsInnerModule(infoNode) == false) {
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
@@ -247,9 +236,8 @@ NO_SANITIZE("cfi") static void InnerDeviceFound(const DiscInfo *infoNode, const 
     }
 
     if (GetCallLnnStatus()) {
-        FinishFirstDiscoveryTimeRecord();
-        (void)SoftbusRecordFirstDiscTime(infoNode->medium, (uint32_t)g_currentTime);
         if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
+            DfxRecordDeviceFound(infoNode, device, additions);
             infoNode->item->callback.innerCb.OnDeviceFound(device, additions);
         }
     }
@@ -273,6 +261,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
         DiscInfo *infoNode = NULL;
         LIST_FOR_EACH_ENTRY(infoNode, &(g_capabilityList[tmp]), DiscInfo, capNode) {
             DLOGI("find callback id=%d", infoNode->id);
+            infoNode->statistics.discTimes++;
             InnerDeviceFound(infoNode, device, additions);
         }
         (void)SoftBusMutexUnlock(&(g_discoveryInfoList->lock));
@@ -419,7 +408,7 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
         return NULL;
     }
     BitmapSet(option->capabilityBitmap, (uint32_t)bimap);
-
+    DfxRecordStartDiscoveryDevice(infoNode);
     return infoNode;
 }
 
@@ -589,8 +578,6 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
     int32_t ret = AddDiscInfoToDiscoveryList(packageName, &callback, info, type);
     DISC_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "add info to list failed");
 
-    (void)SoftBusReportDiscStartupEvt(packageName);
-
     ret = CallInterfaceByMedium(info, STARTDISCOVERTY_FUNC);
     if (ret != SOFTBUS_OK) {
         DLOGE("DiscInterfaceByMedium failed");
@@ -610,6 +597,7 @@ static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, 
     int32_t ret = CallInterfaceByMedium(infoNode, STOPDISCOVERY_FUNC);
     DISC_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "DiscInterfaceByMedium failed");
 
+    DfxRecordStopDiscoveryDevice(packageName, infoNode);
     FreeDiscInfo(infoNode, type);
     return SOFTBUS_OK;
 }
