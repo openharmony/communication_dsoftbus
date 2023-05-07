@@ -479,6 +479,7 @@ NO_SANITIZE("cfi") static void ProcessDisNonPacket(const uint8_t *advData, uint3
         foundInfo->capabilityBitmap[0] = tempCap;
         foundInfo->capabilityBitmapNum = 1;
         g_discBleInnerCb->OnDeviceFound(foundInfo, &add);
+        SoftbusRecordDiscBleRssi(*(signed char *)(&rssi));
     }
 }
 
@@ -1551,7 +1552,6 @@ static int32_t DiscBleLooperInit(void)
     g_discBleHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_discBleHandler.looper == NULL) {
         DLOGE("get looper fail");
-        SoftbusRecordDiscFault(BLE, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
 
@@ -1603,7 +1603,6 @@ static int32_t InitBleListener(void)
     g_bleListener.scanListenerId = SoftBusAddScanListener(&g_scanListener);
     g_bleListener.stateListenerId = SoftBusAddBtStateListener(&g_stateChangedListener);
     if (g_bleListener.stateListenerId < 0 || g_bleListener.scanListenerId < 0) {
-        SoftbusRecordDiscFault(BLE, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
     DiscBleSetScanFilter(g_bleListener.scanListenerId);

@@ -271,7 +271,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr, bool
 {
     if (g_gattcIsInited != true) {
         CLOGE("gattc not init");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_NOT_INIT);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_NOT_INIT);
         return SOFTBUS_BLEGATTC_NONT_INIT;
     }
     if (bleAddr == NULL) {
@@ -300,7 +301,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientConnect(SoftBusBtAddr *bleAddr, bool
     }
     if (SoftbusGattcConnect(clientId, bleAddr) != SOFTBUS_OK) {
         CLOGE("SoftbusGattcConnect failed");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_CONNECT_FAIL);
         (void)SoftbusGattcUnRegister(clientId);
         (void)RemoveGattcInfoFromList(clientId);
         return SOFTBUS_ERR;
@@ -318,7 +320,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientDisconnect(int32_t clientId)
 {
     if (g_gattcIsInited != true) {
         CLOGE("gattc not init");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_INIT_FAIL);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_GATTCLIENT_INIT_FAIL);
         return SOFTBUS_BLEGATTC_NONT_INIT;
     }
 
@@ -335,7 +338,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGattClientDisconnect(int32_t clientId)
     if (infoNode == NULL) {
         (void)SoftBusMutexUnlock(&g_gattcInfoList->lock);
         CLOGE("GetBleGattcInfoByClientId not exist");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_DISCONNECT_FAIL);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_DISCONNECT_FAIL);
         return SOFTBUS_BLEGATTC_NODE_NOT_EXIST;
     }
     infoNode->state = BLE_GATT_CLIENT_STOPPING;
@@ -389,7 +393,8 @@ NO_SANITIZE("cfi") static void ConnectedMsgHandler(int32_t clientId, int status)
 
     if ((status != SOFTBUS_GATT_SUCCESS) || (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_STARTED) != true)) {
         CLOGE("ConnectedMsgHandler error");
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_UPDATA_STATE_ERR);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_GATTCLIENT_UPDATA_STATE_ERR);
         errCode = SOFTBUS_BLECONNECTION_CLIENT_UPDATA_STATE_ERR;
         goto EXIT;
     }
@@ -404,7 +409,8 @@ NO_SANITIZE("cfi") static void ConnectedMsgHandler(int32_t clientId, int status)
         goto EXIT;
     }
     if (UpdateBleGattcInfoStateInner(infoNode, BLE_GATT_CLIENT_SERVICE_SEARCHING) != true) {
-        SoftBusReportConnFaultEvt(SOFTBUS_HISYSEVT_CONN_MEDIUM_BLE, SOFTBUS_HISYSEVT_BLE_GATTCLIENT_UPDATA_STATE_ERR);
+        SoftbusRecordConnResult(DEFAULT_PID, SOFTBUS_HISYSEVT_CONN_TYPE_BLE, SOFTBUS_EVT_CONN_FAIL, 0,
+                                SOFTBUS_HISYSEVT_BLE_GATTCLIENT_UPDATA_STATE_ERR);
         errCode = SOFTBUS_BLECONNECTION_CLIENT_UPDATA_STATE_ERR;
         goto EXIT;
     }

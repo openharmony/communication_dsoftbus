@@ -269,7 +269,7 @@ NO_SANITIZE("cfi") int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmap
         return SOFTBUS_INVALID_PARAM;
     }
     if (NSTACKX_SetFilterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
-        SoftbusRecordDiscFault(COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
+        SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
     }
     return SOFTBUS_OK;
