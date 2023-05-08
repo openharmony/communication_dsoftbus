@@ -75,6 +75,7 @@ if (defined(ohos_lite)) {
         "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
         "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
         "//third_party/mbedtls",
+        "//third_party/openssl/ohos_lite:openssl_shared",
       ]
     } else if (ohos_kernel_type == "linux") {
       configs += [ ":dfile_linux_config" ]
@@ -110,6 +111,7 @@ if (defined(ohos_lite)) {
         "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
         "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
         "//third_party/mbedtls",
+        "//third_party/openssl/ohos_lite:openssl_shared",
       ]
     }
   }
@@ -159,6 +161,7 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/mbedtls",
+      "//third_party/openssl:libcrypto_shared",
     ]
     part_name = "dsoftbus"
     subsystem_name = "communication"

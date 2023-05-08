@@ -97,7 +97,7 @@ if (defined(ohos_lite)) {
       } else if (dsoftbus_feature_encrypt == 1) {
         sources +=
             [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
-        deps += [ "//third_party/openssl:libcrypto_shared" ]
+        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
@@ -138,7 +138,7 @@ if (defined(ohos_lite)) {
       } else if (dsoftbus_feature_encrypt == 1) {
         sources +=
             [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
-        deps += [ "//third_party/openssl:libcrypto_shared" ]
+        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
