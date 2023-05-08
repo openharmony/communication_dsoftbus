@@ -276,8 +276,10 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
                                   SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOG(info->freq >= LOW && info->freq <= SUPER_HIGH,
                                   SOFTBUS_INVALID_PARAM, "freq is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOG((info->capabilityData == NULL && info->dataLen == 0) ||
-                                  (info->capabilityData != NULL && info->dataLen <= MAX_CAPABILITYDATA_LEN),
+    DISC_CHECK_AND_RETURN_RET_LOG(info->capabilityData != NULL, SOFTBUS_INVALID_PARAM, "capabilityData is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOG((info->dataLen != 0) || (info->dataLen <= MAX_CAPABILITYDATA_LEN) ||
+                                  (info->capabilityData[info->dataLen] == '\0') ||
+                                  (strlen((char *)info->capabilityData) == info->dataLen),
                                   SOFTBUS_INVALID_PARAM, "data and length invalid");
     return SOFTBUS_OK;
 }
@@ -290,8 +292,10 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
                                   SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOG(info->freq >= LOW && info->freq <= SUPER_HIGH,
                                   SOFTBUS_INVALID_PARAM, "freq is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOG((info->capabilityData == NULL && info->dataLen == 0) ||
-                                  (info->capabilityData != NULL && info->dataLen <= MAX_CAPABILITYDATA_LEN),
+    DISC_CHECK_AND_RETURN_RET_LOG(info->capabilityData != NULL, SOFTBUS_INVALID_PARAM, "capabilityData is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOG((info->dataLen != 0) || (info->dataLen <= MAX_CAPABILITYDATA_LEN) ||
+                                  (info->capabilityData[info->dataLen] == '\0') ||
+                                  (strlen((char *)info->capabilityData) == info->dataLen),
                                   SOFTBUS_INVALID_PARAM, "data and length invalid");
     return SOFTBUS_OK;
 }
