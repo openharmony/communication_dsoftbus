@@ -22,7 +22,6 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_config/spec_config",
       "$dsoftbus_root_path/core/common/include",
       "$hilog_lite_include_path",
-      "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include",
     ]
     if (board_name == "v200zr") {
       defines = [ "DSOFTBUS_V200ZR" ]

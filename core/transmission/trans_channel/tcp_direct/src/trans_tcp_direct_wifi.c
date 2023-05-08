@@ -45,17 +45,9 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
     if (newConn == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenTcpDirectChannel", HITRACE_FLAG_DEFAULT);
-    if (SoftbusHitraceChainIsValid(&traceId)) {
-        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(newConn->channelId + ID_OFFSET));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(newConn->channelId + ID_OFFSET));
-    }
-    if (memcpy_s(&(newConn->traceId), sizeof(newConn->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel memcpy failed.");
-        SoftBusFree(newConn);
-        return SOFTBUS_MEM_ERR;
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(newConn->channelId + ID_OFFSET));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(newConn->channelId + ID_OFFSET));
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 

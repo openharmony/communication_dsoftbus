@@ -14,39 +14,13 @@
  */
 
 #include "softbus_adapter_hitracechain.h"
-#include "softbus_def.h"
 
-bool SoftbusHitraceChainIsValid(const HiTraceIdStruct *pId)
+void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
 {
-    (void)pId;
-    return false;
-}
-
-HiTraceIdStruct SoftbusHitraceChainBegin(const char *name, int flags)
-{
-    (void)name;
     (void)flags;
-    HiTraceIdStruct id = {0};
-    return id;
-}
-
-void SoftbusHitraceChainEnd(const HiTraceIdStruct *pId)
-{
-    (void)pId;
-}
-
-HiTraceIdStruct SoftbusHitraceChainGetId(void)
-{
-    HiTraceIdStruct id = {0};
-    return id;
-}
-
-void SoftbusHitraceChainSetChainId(HiTraceIdStruct *pId, uint64_t chainId)
-{
-    (void)pId;
     (void)chainId;
 }
 
-void SoftbusHitraceChainClearId(void)
+void SoftbusHitraceStop()
 {
 }

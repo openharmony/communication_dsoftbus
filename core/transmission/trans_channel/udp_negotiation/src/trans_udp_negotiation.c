@@ -442,9 +442,7 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udp channel by seq failed.");
         return;
     }
-    if (SoftbusHitraceChainIsValid(&channel.traceId)) {
-        SoftbusHitraceChainSetChainId(&channel.traceId, (uint64_t)(channel.info.myData.channelId + ID_OFFSET));
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(channel.info.myData.channelId + ID_OFFSET));
     int32_t errCode = SOFTBUS_OK;
     if (TransUnpackReplyErrInfo(msg, &errCode) == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive err reply info");
@@ -711,22 +709,13 @@ NO_SANITIZE("cfi") int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOp
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "prepare app info for opening udp channel.");
         return SOFTBUS_ERR;
     }
-    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenUdpChannel", HITRACE_FLAG_DEFAULT);
-    if (SoftbusHitraceChainIsValid(&traceId)) {
-        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(id + ID_OFFSET));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(id + ID_OFFSET));
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(id + ID_OFFSET));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(id + ID_OFFSET));
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
     if (newChannel == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "new udp channel failed.");
         ReleaseUdpChannelId(id);
-        return SOFTBUS_MEM_ERR;
-    }
-    if (memcpy_s(&(newChannel->traceId), sizeof(newChannel->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenUdpChannel memcpy failed.");
-        ReleaseUdpChannelId(id);
-        SoftBusFree(newChannel);
         return SOFTBUS_MEM_ERR;
     }
     newChannel->seq = GenerateSeq(false);

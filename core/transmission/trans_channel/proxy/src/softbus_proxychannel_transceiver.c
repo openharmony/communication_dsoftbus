@@ -589,21 +589,13 @@ NO_SANITIZE("cfi") int32_t TransProxyCloseConnChannelReset(uint32_t connectionId
 
 NO_SANITIZE("cfi") int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const AppInfo *appInfo, int32_t chanNewId)
 {
-    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenProxyChannel", HITRACE_FLAG_DEFAULT);
-    if (SoftbusHitraceChainIsValid(&traceId)) {
-        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(chanNewId + ID_OFFSET));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(chanNewId + ID_OFFSET));
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(chanNewId + ID_OFFSET));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(chanNewId + ID_OFFSET));
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
         return SOFTBUS_ERR;
-    }
-    if (memcpy_s(&(chan->traceId), sizeof(chan->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyConnExistProc memcpy failed.");
-        SoftBusFree(chan);
-        return SOFTBUS_MEM_ERR;
     }
     chan->type = conn->connInfo.type;
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
@@ -631,21 +623,13 @@ NO_SANITIZE("cfi") int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const Ap
 static int32_t TransProxyOpenNewConnChannel(
     ListenerModule moduleId, const AppInfo *appInfo, const ConnectOption *connInfo, int32_t channelId)
 {
-    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenProxyChannel", HITRACE_FLAG_DEFAULT);
-    if (SoftbusHitraceChainIsValid(&traceId)) {
-        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(channelId + ID_OFFSET));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(channelId + ID_OFFSET));
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(channelId + ID_OFFSET));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(channelId + ID_OFFSET));
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
         return SOFTBUS_ERR;
-    }
-    if (memcpy_s(&(chan->traceId), sizeof(chan->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyOpenNewConnChannel memcpy failed.");
-        SoftBusFree(chan);
-        return SOFTBUS_MEM_ERR;
     }
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     chan->reqId = (int32_t)reqId;

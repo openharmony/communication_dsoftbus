@@ -372,9 +372,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         ReleaseSessonConnLock();
         return SOFTBUS_NOT_FIND;
     }
-    if (SoftbusHitraceChainIsValid(&conn->traceId)) {
-        SoftbusHitraceChainSetChainId(&conn->traceId, (uint64_t)(conn->channelId + ID_OFFSET));
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     channelId = conn->channelId;
 
     ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, IP_LEN, &conn->appInfo.peerData.port);
@@ -470,17 +468,9 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
     if (conn == NULL) {
         return SOFTBUS_MEM_ERR;
     }
-    HiTraceIdStruct traceId = SoftbusHitraceChainBegin("OpenP2pDirectChannel", HITRACE_FLAG_DEFAULT);
-    if (SoftbusHitraceChainIsValid(&traceId)) {
-        SoftbusHitraceChainSetChainId(&traceId, (uint64_t)(conn->channelId + ID_OFFSET));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(conn->channelId + ID_OFFSET));
-    }
-    if (memcpy_s(&(conn->traceId), sizeof(conn->traceId), &traceId, sizeof(HiTraceIdStruct)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenP2pDirectChannel memcpy failed.");
-        SoftBusFree(conn);
-        return SOFTBUS_MEM_ERR;
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(conn->channelId + ID_OFFSET));
     newChannelId = conn->channelId;
     (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
