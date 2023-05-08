@@ -42,8 +42,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     int64_t timeStart = channel->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
-    HiTraceIdStruct traceId = SoftbusHitraceChainGetId();
-    SoftbusHitraceChainEnd(&traceId);
+    SoftbusHitraceStop();
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
 }
 
@@ -78,8 +77,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }
-    HiTraceIdStruct traceId = SoftbusHitraceChainGetId();
-    SoftbusHitraceChainEnd(&traceId);
+    SoftbusHitraceStop();
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
         "trasn server on channel open failed.[pkgname=%s][channid=%d][type=%d]", pkgName, channelId, channelType);
     return SOFTBUS_OK;

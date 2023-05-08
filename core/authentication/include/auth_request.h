@@ -36,6 +36,7 @@ typedef struct {
     AuthConnInfo connInfo;
     AuthVerifyCallback verifyCb;
     int64_t authId;
+    int64_t traceId;
     AuthConnCallback connCb;
     RequestType type;
     ListNode node;

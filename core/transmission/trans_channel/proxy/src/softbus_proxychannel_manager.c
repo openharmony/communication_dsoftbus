@@ -196,9 +196,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             (void)memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                            &(info->appInfo.peerData), sizeof(info->appInfo.peerData));
             (void)memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
-            if (SoftbusHitraceChainIsValid(&item->traceId)) {
-                SoftbusHitraceChainSetChainId(&item->traceId, (uint64_t)(item->channelId + ID_OFFSET));
-            }
+            SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(item->channelId + ID_OFFSET));
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
