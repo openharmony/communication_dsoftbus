@@ -22,6 +22,7 @@
 #include "auth_manager.h"
 #include "auth_session_message.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_hitracechain.h"
 #include "softbus_def.h"
 
 #define AUTH_TIMEOUT_MS (10 * 1000)
@@ -263,6 +264,7 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
 
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth fsm[%" PRId64 "] complete: side=%s, result=%d",
         authFsm->authSeq, GetAuthSideStr(authFsm->info.isServer), result);
     LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
@@ -272,10 +274,10 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
     } else {
         AuthManagerSetAuthFailed(authFsm->authSeq, &authFsm->info, result);
     }
-
     authFsm->isDead = true;
     LnnFsmStop(&authFsm->fsm);
     LnnFsmDeinit(&authFsm->fsm);
+    SoftbusHitraceStop();
 }
 
 static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgPara)
@@ -310,6 +312,7 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "authFsm is null");
         return;
     }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "SyncDevIdState: auth fsm[%" PRId64 "] enter", authFsm->authSeq);
     if (!authFsm->info.isServer) {
@@ -317,6 +320,7 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVID_FAIL);
         }
     }
+    SoftbusHitraceStop();
 }
 
 static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
@@ -358,6 +362,7 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
         FreeMessagePara(msgPara);
         return false;
     }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "SyncDevIdState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
     switch (msgType) {
@@ -369,6 +374,7 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
             break;
     }
     FreeMessagePara(msgPara);
+    SoftbusHitraceStop();
     return true;
 }
 
@@ -463,6 +469,7 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
         FreeMessagePara(msgPara);
         return false;
     }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "DeviceAuthState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
     switch (msgType) {
@@ -483,6 +490,7 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
             break;
     }
     FreeMessagePara(msgPara);
+    SoftbusHitraceStop();
     return true;
 }
 
@@ -543,6 +551,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
         FreeMessagePara(msgPara);
         return false;
     }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "SyncDevInfoState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
     switch (msgType) {
@@ -557,6 +566,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
             break;
     }
     FreeMessagePara(msgPara);
+    SoftbusHitraceStop();
     return true;
 }
 

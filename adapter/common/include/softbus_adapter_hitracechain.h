@@ -15,10 +15,7 @@
 
 #ifndef SOFTBUS_ADAPTER_HITRACECHAIN_H
 #define SOFTBUS_ADAPTER_HITRACECHAIN_H
-#include <stdbool.h>
-#include <stdlib.h>
 #include <stdint.h>
-#include "hitrace/tracechain.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -26,12 +23,13 @@ extern "C" {
 #endif
 #endif
 
-bool SoftbusHitraceChainIsValid(const HiTraceIdStruct *pId);
-HiTraceIdStruct SoftbusHitraceChainBegin(const char *name, int flags);
-void SoftbusHitraceChainEnd(const HiTraceIdStruct *pId);
-HiTraceIdStruct SoftbusHitraceChainGetId(void);
-void SoftbusHitraceChainSetChainId(HiTraceIdStruct *pId, uint64_t chainId);
-void SoftbusHitraceChainClearId(void);
+typedef enum SoftbusHiTraceIdValid {
+    SOFTBUS_HITRACE_ID_INVALID = 0,
+    SOFTBUS_HITRACE_ID_VALID = 1,
+} SoftbusHiTraceIdValid;
+
+void SoftbusHitraceStart(int32_t flags, uint64_t chainId);
+void SoftbusHitraceStop();
 
 #ifdef __cplusplus
 #if __cplusplus

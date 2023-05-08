@@ -112,7 +112,6 @@ typedef struct {
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
     int64_t authId; /* for cipher */
-    HiTraceIdStruct traceId;
 } ProxyChannelInfo;
 
 typedef struct {

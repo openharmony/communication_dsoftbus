@@ -15,40 +15,49 @@
 
 #include "softbus_adapter_hitracechain.h"
 
-#include "softbus_adapter_log.h"
-#include "softbus_def.h"
+#include <sys/time.h>
+#include "hitrace/tracechain.h"
 
-bool SoftbusHitraceChainIsValid(const HiTraceIdStruct *pId)
+typedef struct SoftbusHiTraceChainIdStruct {
+    union {
+        struct {
+            uint64_t reserved : 4;
+            uint64_t usecond : 20;
+            uint64_t second : 16;
+            uint64_t cpuId : 4;
+            uint64_t deviceId : 20;
+        };
+        struct {
+            uint64_t padding : 4;
+            uint64_t chainId : 60;
+        };
+    };
+} SoftbusHiTraceChainIdStruct;
+
+static uint64_t HiTraceCreateChainId(void)
 {
-    return (pId) && (pId->valid == HITRACE_ID_VALID);
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    SoftbusHiTraceChainIdStruct chainId = {
+        .padding = 0,
+        .chainId = 0
+    };
+    chainId.deviceId = (uint64_t)(tv.tv_sec);
+    chainId.cpuId = (uint64_t)(tv.tv_usec);
+    chainId.second = (uint64_t)(tv.tv_sec);
+    chainId.usecond = (uint64_t)(tv.tv_usec);
+    return chainId.chainId;
 }
 
-HiTraceIdStruct SoftbusHitraceChainBegin(const char *name, int flags)
+void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
 {
-    return HiTraceChainBegin(name, flags);
+    HiTraceIdStruct pId = HiTraceChainGetId();
+    pId.valid = flags;
+    pId.chainId = chainId > 0 ? chainId : HiTraceCreateChainId();
+    HiTraceChainSetId(&pId);
 }
 
-void SoftbusHitraceChainEnd(const HiTraceIdStruct *pId)
-{
-    HiTraceChainEnd(pId);
-}
-
-HiTraceIdStruct SoftbusHitraceChainGetId(void)
-{
-    return HiTraceChainGetId();
-}
-
-void SoftbusHitraceChainSetChainId(HiTraceIdStruct *pId, uint64_t chainId)
-{
-    if (!pId || chainId == 0) {
-        return;
-    }
-    pId->valid = HITRACE_ID_VALID;
-    pId->chainId = chainId;
-    HiTraceChainSetId(pId);
-}
-
-void SoftbusHitraceChainClearId(void)
+void SoftbusHitraceStop()
 {
     HiTraceChainClearId();
 }

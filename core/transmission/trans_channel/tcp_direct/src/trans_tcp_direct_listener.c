@@ -237,9 +237,7 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
         ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
     }
-    if (SoftbusHitraceChainIsValid(&conn->traceId)) {
-        SoftbusHitraceChainSetChainId(&conn->traceId, (uint64_t)(conn->channelId + ID_OFFSET));
-    }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
         ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
