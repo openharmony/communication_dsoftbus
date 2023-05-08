@@ -28,6 +28,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_hitracechain.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
@@ -593,6 +594,8 @@ NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupId)
 static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
     const AuthConnCallback *connCb)
 {
+    int64_t traceId = GenSeq(false);
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)traceId);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start verify device: requestId=%u.", requestId);
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
@@ -602,6 +605,7 @@ static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInf
     if (verifyCb != NULL) {
         request.verifyCb = *verifyCb;
     }
+    request.traceId = traceId;
     request.requestId = requestId;
     request.connInfo = *connInfo;
     request.authId = AUTH_INVALID_ID;
@@ -609,17 +613,21 @@ static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInf
     uint32_t waitNum = AddAuthRequest(&request);
     if (waitNum == 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add verify request to list fail, requestId=%u.", requestId);
+        SoftbusHitraceStop();
         return SOFTBUS_AUTH_INNER_ERR;
     }
     if (waitNum > 1) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "wait last verify request complete, waitNum=%u, requestId=%u.",
             waitNum, requestId);
+        SoftbusHitraceStop();
         return SOFTBUS_OK;
     }
     if (ConnectAuthDevice(requestId, connInfo, CONN_SIDE_ANY) != SOFTBUS_OK) {
         DelAuthRequest(requestId);
+        SoftbusHitraceStop();
         return SOFTBUS_AUTH_CONN_FAIL;
     }
+    SoftbusHitraceStop();
     return SOFTBUS_OK;
 }
 
@@ -826,24 +834,29 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "request not found, requestId=%u.", requestId);
         return;
     }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)request.traceId);
     if (request.type == REQUEST_TYPE_RECONNECT) {
         HandleReconnectResult(&request, connId, result);
+        SoftbusHitraceStop();
         return;
     }
 
     if (result != SOFTBUS_OK) {
         ReportAuthRequestFailed(requestId, result);
+        SoftbusHitraceStop();
         return;
     }
     /* connect success */
     (void)UpdateAuthRequestConnInfo(requestId, connInfo);
-    int32_t ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, connInfo, false);
+    int32_t ret = AuthSessionStartAuth(request.traceId, requestId, connId, connInfo, false);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "start auth session fail(=%d), requestId=%u.", ret, requestId);
         DisconnectAuthDevice(connId);
         ReportAuthRequestFailed(requestId, ret);
+        SoftbusHitraceStop();
         return;
     }
+    SoftbusHitraceStop();
 }
 
 static void HandleDeviceIdData(
@@ -951,6 +964,7 @@ static void OnDataReceived(
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
         return;
     }
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)head->seq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "auth recv data{type=0x%x, module=%d, seq=%" PRId64 ", flag=%d, len=%u} " CONN_INFO " from[%s]",
         head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId), GetAuthSideStr(fromServer));
@@ -973,6 +987,7 @@ static void OnDataReceived(
         default:
             break;
     }
+    SoftbusHitraceStop();
 }
 
 NO_SANITIZE("cfi") static void HandleDisconnectedEvent(const void *para)

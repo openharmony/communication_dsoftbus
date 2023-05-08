@@ -51,7 +51,6 @@ typedef struct {
     int64_t authId;
     bool isMeta;
     ListenerModule listenMod;
-    HiTraceIdStruct traceId;
 } SessionConn;
 
 uint64_t TransTdcGetNewSeqId(void);
