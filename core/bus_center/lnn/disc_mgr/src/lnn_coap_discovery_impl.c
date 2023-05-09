@@ -78,7 +78,7 @@ int32_t LnnStartCoapPublish(void)
         .freq = HIGH,
         .capability = LNN_DISC_CAPABILITY,
         .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
-        .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
+        .dataLen = strlen(LNN_DISC_CAPABILITY),
     };
     return LnnPublishService(NULL, &publishInfo, true);
 }
@@ -104,7 +104,7 @@ int32_t LnnStartCoapDiscovery(void)
         .isWakeRemote = false,
         .capability = LNN_DISC_CAPABILITY,
         .capabilityData = (unsigned char *)LNN_DISC_CAPABILITY,
-        .dataLen = strlen(LNN_DISC_CAPABILITY) + 1,
+        .dataLen = strlen(LNN_DISC_CAPABILITY),
     };
     InnerCallback callback = {
         .innerCb = g_discCb,
