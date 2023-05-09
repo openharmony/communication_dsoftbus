@@ -19,7 +19,6 @@
 #include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
-#include "softbus_adapter_hitracechain.h"
 
 #ifdef __cplusplus
 #if __cplusplus
