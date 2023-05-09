@@ -276,11 +276,32 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
                                   SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOG(info->freq >= LOW && info->freq <= SUPER_HIGH,
                                   SOFTBUS_INVALID_PARAM, "freq is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOG(info->capabilityData != NULL, SOFTBUS_INVALID_PARAM, "capabilityData is NULL");
-    DISC_CHECK_AND_RETURN_RET_LOG((info->dataLen != 0) || (info->dataLen <= MAX_CAPABILITYDATA_LEN) ||
-                                  (info->capabilityData[info->dataLen] == '\0') ||
-                                  (strlen((char *)info->capabilityData) == info->dataLen),
-                                  SOFTBUS_INVALID_PARAM, "data and length invalid");
+    if (info->capabilityData == NULL) {
+        if (info->dataLen == 0) {
+            return SOFTBUS_OK;
+        } else {
+            DLOGE("capabilityData is NULL, dataLen != 0");
+            return SOFTBUS_INVALID_PARAM;
+        }
+    } else {
+        if (info->dataLen == 0) {
+            DLOGE("capabilityData is not NULL, dataLen == 0");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        if (info->dataLen > MAX_CAPABILITYDATA_LEN) {
+            DLOGE("dataLen(%u) > max length", info->dataLen);
+            return SOFTBUS_INVALID_PARAM;
+        }
+        if (info->capabilityData[info->dataLen] != '\0') {
+            DLOGE("capabilityData is not c-string format");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        uint32_t len = strlen((char *)info->capabilityData);
+        if (len != info->dataLen) {
+            DLOGE("capabilityData len(%u) != dataLen(%u)", len, info->dataLen);
+            return SOFTBUS_INVALID_PARAM;
+        }
+    }
     return SOFTBUS_OK;
 }
 
@@ -292,11 +313,32 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
                                   SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOG(info->freq >= LOW && info->freq <= SUPER_HIGH,
                                   SOFTBUS_INVALID_PARAM, "freq is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOG(info->capabilityData != NULL, SOFTBUS_INVALID_PARAM, "capabilityData is NULL");
-    DISC_CHECK_AND_RETURN_RET_LOG((info->dataLen != 0) || (info->dataLen <= MAX_CAPABILITYDATA_LEN) ||
-                                  (info->capabilityData[info->dataLen] == '\0') ||
-                                  (strlen((char *)info->capabilityData) == info->dataLen),
-                                  SOFTBUS_INVALID_PARAM, "data and length invalid");
+    if (info->capabilityData == NULL) {
+        if (info->dataLen == 0) {
+            return SOFTBUS_OK;
+        } else {
+            DLOGE("capabilityData is NULL, dataLen != 0");
+            return SOFTBUS_INVALID_PARAM;
+        }
+    } else {
+        if (info->dataLen == 0) {
+            DLOGE("capabilityData is not NULL, dataLen == 0");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        if (info->dataLen > MAX_CAPABILITYDATA_LEN) {
+            DLOGE("dataLen(%u) > max length", info->dataLen);
+            return SOFTBUS_INVALID_PARAM;
+        }
+        if (info->capabilityData[info->dataLen] != '\0') {
+            DLOGE("capabilityData is not c-string format");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        uint32_t len = strlen((char *)info->capabilityData);
+        if (len != info->dataLen) {
+            DLOGE("capabilityData len(%u) != dataLen(%u)", len, info->dataLen);
+            return SOFTBUS_INVALID_PARAM;
+        }
+    }
     return SOFTBUS_OK;
 }
 
