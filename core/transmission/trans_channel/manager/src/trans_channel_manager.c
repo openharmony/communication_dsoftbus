@@ -229,7 +229,8 @@ NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo
 
     if (TransGetConnectOptByConnInfo(&connInfo, &connOpt) != SOFTBUS_OK) {
         timediff = GetSoftbusRecordTimeMillis() - timeStart;
-        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
+            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
         goto EXIT_ERR;
     }
 
@@ -240,14 +241,16 @@ NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo
         &(transInfo->channelId)) != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
         timediff = GetSoftbusRecordTimeMillis() - timeStart;
-        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
+            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
         goto EXIT_ERR;
     }
 
     if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType,
         &connInfo, laneId, &appInfo->myData) != SOFTBUS_OK) {
         timediff = GetSoftbusRecordTimeMillis() - timeStart;
-        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
+            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
         TransCloseChannel(transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
