@@ -353,7 +353,7 @@ typedef struct {
     ExchangeFreq freq;
     /** Service publishing capabilities. For details, see {@link g_capabilityMap}. */
     const char *capability;
-    /** Capability data for service publishing */
+    /** Capability data for service publishing, MUST be c-string format. */
     unsigned char *capabilityData;
     /** Maximum length of the capability data for service publishing (512 bytes) */
     unsigned int dataLen;
@@ -380,7 +380,7 @@ typedef struct {
     bool isWakeRemote;
     /** Service subscription capability. For details, see {@link g_capabilityMap}. */
     const char *capability;
-    /** Capability data for service subscription */
+    /** Capability data for service subscription, MUST be c-string format. */
     unsigned char *capabilityData;
     /** Maximum length of the capability data for service subscription (512 bytes) */
     unsigned int dataLen;
