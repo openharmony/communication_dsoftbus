@@ -478,19 +478,19 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     (void)SoftBusMutexUnlock(&g_openSessionTime.lock);
 }
 
-static inline void clearOpenSessionKpi(void)
+static inline void ClearOpenSessionKpi(void)
 {
     memset_s(&g_openSessionKpi.linkType, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex),
         0, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex));
 }
 
-static inline void clearOpenSessionCnt(void)
+static inline void ClearOpenSessionCnt(void)
 {
     memset_s(&g_openSessionCnt.failCnt, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex),
         0, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex));
 }
 
-static inline void clearOpenSessionTime(void)
+static inline void ClearOpenSessionTime(void)
 {
     memset_s(&g_openSessionTime.maxTimeCost, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex),
         0, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex));
@@ -552,7 +552,7 @@ static void CreateCalledApiInfoMsg(SoftBusEvtReportMsg* msg, CalledApiCntStruct 
 static void CreateCalledApiCntMsg(SoftBusEvtReportMsg* msg, CalledApiCntStruct *apiCntItem)
 {
     // event
-   (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_CALLED_API_CNT);
+    (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_CALLED_API_CNT);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_TWO;
     // param 0
@@ -569,11 +569,11 @@ static void CreateCalledApiCntMsg(SoftBusEvtReportMsg* msg, CalledApiCntStruct *
 
 static void CreateOpenSessionKpiMsg(SoftBusEvtReportMsg* msg)
 {
-     if (SoftBusMutexLock(&g_openSessionKpi.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_openSessionKpi.lock) != SOFTBUS_OK) {
         return;
     }
     // event
-   (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_TRANSPORT_KPI);
+    (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_TRANSPORT_KPI);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = SOFTBUS_EVT_PARAM_THIRTEEN;
     // param 0
@@ -641,7 +641,7 @@ static void CreateOpenSessionKpiMsg(SoftBusEvtReportMsg* msg)
     (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_CALLER_PACKAGE);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
     (void)strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, g_openSessionKpi.callerPackageName);
-    clearOpenSessionKpi();
+    ClearOpenSessionKpi();
     (void)SoftBusMutexUnlock(&g_openSessionKpi.lock);
 }
 
@@ -674,7 +674,7 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
     param->paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
     param->paramValue.f = g_openSessionCnt.successRate;
     
-    clearOpenSessionCnt();
+    ClearOpenSessionCnt();
 
     (void)SoftBusMutexUnlock(&g_openSessionCnt.lock);
 }
@@ -817,7 +817,7 @@ static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     param->paramValue.u32v = g_openSessionTime.timesOn2s;
 
-    clearOpenSessionTime();
+    ClearOpenSessionTime();
 
     (void)SoftBusMutexUnlock(&g_openSessionTime.lock);
 }
@@ -875,9 +875,9 @@ int32_t InitTransStatisticSysEvt(void)
     
     g_calledApiInfoList = CreateApiInfoList();
     g_calledApiCntlist = CreateApiInfoList();
-    clearOpenSessionCnt();
-    clearOpenSessionKpi();
-    clearOpenSessionTime();
+    ClearOpenSessionCnt();
+    ClearOpenSessionKpi();
+    ClearOpenSessionTime();
 
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_CNT, SoftbusReportOpenSessionCntEvt);
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_KPI, SoftbusReportOpenSessionKpiEvt);
