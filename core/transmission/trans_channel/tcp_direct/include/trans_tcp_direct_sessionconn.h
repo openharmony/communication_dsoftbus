@@ -21,7 +21,6 @@
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
-#include "softbus_adapter_hitracechain.h"
 
 #ifdef __cplusplus
 #if __cplusplus

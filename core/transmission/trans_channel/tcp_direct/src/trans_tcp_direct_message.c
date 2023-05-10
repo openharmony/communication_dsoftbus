@@ -319,7 +319,8 @@ NO_SANITIZE("cfi") int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t er
     }
     int64_t timeStart = conn.appInfo.timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
-    SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName, conn.appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+    SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName,
+        conn.appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     if (conn.serverSide == false) {
         AppInfoData *myData = &conn.appInfo.myData;
         int ret = TransTdcOnChannelOpenFailed(myData->pkgName, myData->pid, channelId, errCode);

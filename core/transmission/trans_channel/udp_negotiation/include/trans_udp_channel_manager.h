@@ -18,7 +18,6 @@
 
 #include <stdint.h>
 #include "softbus_app_info.h"
-#include "softbus_adapter_hitracechain.h"
 
 #ifdef __cplusplus
 extern "C" {
