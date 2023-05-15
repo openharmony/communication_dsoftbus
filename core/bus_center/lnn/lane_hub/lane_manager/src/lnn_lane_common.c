@@ -56,6 +56,21 @@ static int32_t BleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     return SOFTBUS_OK;
 }
 
+static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_BLE_DIRECT;
+    connInfo->connInfo.bleDirect.protoType = linkInfo->linkInfo.bleDirect.protoType;
+    connInfo->connInfo.bleDirect.psm = linkInfo->linkInfo.bleDirect.psm;
+    (void)memcpy_s(connInfo->connInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN,
+        linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN);
+    (void)memcpy_s(connInfo->connInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN,
+        linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN);
+    (void)memcpy_s(connInfo->connInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN,
+        linkInfo->linkInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN);
+    profile->linkType = LANE_BLE_DIRECT;
+    return SOFTBUS_OK;
+}
+
 static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_P2P;
@@ -101,6 +116,7 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_P2P] = P2pInfoProc,
     [LANE_WLAN_2P4G] = Wlan2P4GInfoProc,
     [LANE_WLAN_5G] = Wlan5GInfoProc,
+    [LANE_BLE_DIRECT] = BleDirectInfoProc,
 };
 
 NO_SANITIZE("cfi") int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)

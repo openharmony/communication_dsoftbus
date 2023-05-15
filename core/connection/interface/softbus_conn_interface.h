@@ -53,6 +53,7 @@ typedef enum {
     CONNECT_BR,
     CONNECT_BLE,
     CONNECT_P2P,
+    CONNECT_BLE_DIRECT,
     CONNECT_TYPE_MAX
 } ConnectType;
 
@@ -142,6 +143,14 @@ struct BleOption {
     bool fastestConnectEnable;
 };
 
+struct BleDirectOption {
+    BleProtocolType protoType;
+    int32_t psm;
+    unsigned char nodeIdHash[NODEID_SHORT_HASH_LEN];
+    unsigned char localUdidHash[UDID_SHORT_HASH_LEN];
+    unsigned char peerUdidHash[SHA_256_HASH_LEN];
+};
+
 struct SocketOption {
     char addr[IP_LEN];
     int32_t port;
@@ -156,6 +165,7 @@ typedef struct {
         struct BrOption brOption;
         struct BleOption bleOption;
         struct SocketOption socketOption;
+        struct BleDirectOption bleDirectOption;
     };
 } ConnectOption;
 
@@ -332,6 +342,19 @@ int32_t ConnStopLocalListening(const LocalListenerInfo *info);
  * @return <b>SOFTBUS_OK</b> if local listeners start successfully.
  */
 int32_t ConnStartLocalListening(const LocalListenerInfo *info);
+
+/**
+ * @ingroup Softbus_conn_manager
+ * @brief call this interface to initiate a ble direct connection to the remote end.
+ * @param[in] option Indicates a pointer to the connection option. For details, see {@link ConnectOption}.
+ * @param[in] requestId Request ID.
+ * @param[in] result Indicates a pointer to the connection request. For details, see {@link ConnectResult}.
+ * @return <b>SOFTBUS_INVALID_PARAM</b> if the info is null.
+ * @return <b>SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT</b> if the type is null or invalid.
+ * @return <b>SOFTBUS_ERR</b> if the connection device function of type is null.
+ * @return <b>SOFTBUS_OK</b> if the connection to the device is successfully.
+ */
+int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
 
 bool CheckActiveConnection(const ConnectOption *option);
 

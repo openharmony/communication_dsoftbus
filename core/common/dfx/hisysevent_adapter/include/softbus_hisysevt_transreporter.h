@@ -16,6 +16,7 @@
 #define HISYSEVENT_TRANS_REPORTER_H
 
 #include <stdint.h>
+#include "softbus_adapter_hisysevent.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -37,6 +38,8 @@ void SoftbusRecordOpenSessionKpi(const char *pkgName, int32_t linkType, SoftBusO
 void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time);
 
 void SoftbusReportTransErrorEvt(int32_t errcode);
+
+void SoftbusReportTransInfoEvt(const char*infoMsg);
 
 int32_t InitTransStatisticSysEvt(void);
 

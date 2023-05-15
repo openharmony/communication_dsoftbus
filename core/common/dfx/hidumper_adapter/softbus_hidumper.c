@@ -243,7 +243,10 @@ int32_t SoftBusHiDumperModuleInit(void)
         return SOFTBUS_ERR;
     }
 
-    SoftBusTransDumpHandlerInit();
+    if (SoftBusTransDumpHandlerInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Trans HiDumper fail!");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -252,5 +255,6 @@ void SoftBusHiDumperModuleDeInit(void)
     SoftBusHiDumperDiscDeInit();
     SoftBusHiDumperConnDeInit();
     SoftBusHiDumperBusCenterDeInit();
+    SoftBusHiDumperTransDeInit();
     SoftBusHiDumperReleaseHandler();
 }

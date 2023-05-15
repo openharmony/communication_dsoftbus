@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include "softbus_common.h"
 #include "softbus_def.h"
+#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,6 +34,7 @@ typedef enum {
     LANE_WLAN_2P4G,
     LANE_WLAN_5G,
     LANE_ETH,
+    LANE_BLE_DIRECT,
     LANE_LINK_TYPE_BUTT,
 } LaneLinkType;
 
@@ -68,6 +70,14 @@ typedef struct {
 } BleConnInfo;
 
 typedef struct {
+    BleProtocolType protoType;
+    int32_t psm;
+    unsigned char nodeIdHash[NODEID_SHORT_HASH_LEN];
+    unsigned char localUdidHash[UDID_SHORT_HASH_LEN];
+    unsigned char peerUdidHash[SHA_256_HASH_LEN];
+} BleDirectConnInfo;
+
+typedef struct {
     uint16_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
@@ -86,6 +96,7 @@ typedef struct {
         BleConnInfo ble;
         P2pConnInfo p2p;
         WlanConnInfo wlan;
+        BleDirectConnInfo bleDirect;
     } connInfo;
 } LaneConnInfo;
 

@@ -168,6 +168,18 @@ extern "C" {
 #define LNN_COMMON_LEN 4
 
 /**
+ * @brief Indicates the short hash length of the networkId.
+ *
+ */
+#define NODEID_SHORT_HASH_LEN 6
+
+/**
+ * @brief Indicates the short hash length of the udid.
+ *
+ */
+#define UDID_SHORT_HASH_LEN 6
+
+/**
  * @brief Indicates the maximum length of the device database status in <b>INodeStateCb</b>.
  *
  */

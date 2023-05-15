@@ -96,6 +96,7 @@ void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t *data, size_t size)
     InitTransStatisticSysEvt();
     GetSoftbusRecordTimeMillis();
     SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);
+    SoftbusReportTransInfoEvt(reinterpret_cast<const char *>(data));
     SoftbusRecordOpenSession(SOFTBUS_EVT_OPEN_SESSION_SUCC, 0);
 }
 } // namespace OHOS

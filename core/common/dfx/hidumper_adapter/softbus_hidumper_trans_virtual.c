@@ -14,19 +14,13 @@
  */
 #include <stdio.h>
 #include "softbus_hidumper_trans.h"
+#include "softbus_error_code.h"
 
-void SetShowRegisterSessionInfosFunc(ShowDumpInfosFunc func)
+int32_t SoftBusRegTransVarDump(const char* dumpVar, SoftBusVarDumpCb cb)
 {
-    (void)func;
-
-    return;
-}
-
-void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
-{
-    (void)func;
-
-    return;
+    (void)dumpVar;
+    (void)cb;
+    return SOFTBUS_OK;
 }
 
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
@@ -50,12 +44,11 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     return;
 }
 
-void SoftBusTransDumpHander(int fd, int32_t argc, const char **argv)
+int32_t SoftBusTransDumpHanderInit()
 {
-    (void)fd;
-    (void)argc;
-    (void)argv;
-
-    return;
+    return SOFTBUS_OK;
 }
 
+void SoftBusHiDumperTransDeInit()
+{
+}
