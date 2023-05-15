@@ -148,6 +148,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
+    memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -1233,6 +1234,23 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGearInner write reply failed!");
         return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GetSoftbusSpecObjectInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> object;
+    int32_t ret = GetSoftbusSpecObject(object);
+    if (!reply.WriteInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObjectInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    if (ret == SOFTBUS_OK) {
+        if (!reply.WriteRemoteObject(object)) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObjectInner write object failed!");
+            return SOFTBUS_ERR;
+        }
     }
     return SOFTBUS_OK;
 }

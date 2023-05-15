@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "mbedtls/base64.h"
+#include "mbedtls/cipher.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/gcm.h"
@@ -43,7 +44,35 @@
 #define MBEDTLS_ENTROPY_C
 #endif
 
+#ifndef MBEDTLS_CIPHER_MODE_CTR
+#define MBEDTLS_CIPHER_MODE_CTR
+#endif
+
+#ifndef MBEDTLS_AES_C
+#define MBEDTLS_AES_C
+#endif
+
+#ifndef MBEDTLS_CIPHER_C
+#define MBEDTLS_CIPHER_C
+#endif
+
+#define EVP_AES_128_KEYLEN 16
+#define EVP_AES_256_KEYLEN 32
+
 static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
+
+static mbedtls_cipher_type_t GetCtrAlgorithmByKeyLen(uint32_t keyLen)
+{
+    switch (keyLen) {
+        case EVP_AES_128_KEYLEN:
+            return MBEDTLS_CIPHER_ARIA_128_CTR;
+        case EVP_AES_256_KEYLEN:
+            return MBEDTLS_CIPHER_ARIA_256_CTR;
+        default:
+            return MBEDTLS_CIPHER_NONE;
+    }
+    return MBEDTLS_CIPHER_NONE;
+}
 
 static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned char *plainText,
     uint32_t plainTextSize, unsigned char *cipherText, uint32_t cipherTextLen)
@@ -117,6 +146,17 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
 
     mbedtls_gcm_free(&aesContext);
     return actualPlainLen;
+}
+
+static int32_t HandleError(mbedtls_cipher_context_t *ctx, const char *buf)
+{
+    if (buf != NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%{public}s", buf);
+    }
+    if (ctx != NULL) {
+        mbedtls_cipher_free(ctx);
+    }
+    return SOFTBUS_DECRYPT_ERR;
 }
 
 int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
@@ -300,4 +340,49 @@ uint32_t SoftBusCryptoRand(void)
     }
     SoftBusCloseFile(fd);
     return value;
+}
+
+int32_t SoftBusEncryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen)
+{
+    if (key == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    mbedtls_cipher_type_t type = GetCtrAlgorithmByKeyLen(key->keyLen);
+    if (type == MBEDTLS_CIPHER_NONE) {
+        return HandleError(NULL, "get cipher failed");
+    }
+    size_t len = 0;
+    *encryptLen = 0;
+    mbedtls_cipher_context_t ctx;
+    const mbedtls_cipher_info_t *info = NULL;
+    mbedtls_cipher_init(&ctx);
+    if (!(info = mbedtls_cipher_info_from_type(type))) {
+        return HandleError(&ctx, "mbedtls_cipher_info_from_type ctr failed");
+    }
+    if (mbedtls_cipher_setup(&ctx, info) != 0) {
+        return HandleError(&ctx, "mbedtls_cipher_setup ctr failed");
+    }
+    if (mbedtls_cipher_setkey(&ctx, key->key, key->keyLen * 8, MBEDTLS_ENCRYPT) != 0) {
+        return HandleError(&ctx, "mbedtls_cipher_setkey ctr failed");
+    }
+    if (mbedtls_cipher_set_iv(&ctx, key->iv, BLE_BROADCAST_IV_LEN) != 0) {
+        return HandleError(&ctx, "mbedtls_cipher_set_iv ctr failed");
+    }
+    if (mbedtls_cipher_update(&ctx, input, inLen, encryptData, &len) != 0) {
+        return HandleError(&ctx, "mbedtls_cipher_update ctr failed");
+    }
+    *encryptLen += len;
+    if (mbedtls_cipher_finish(&ctx, encryptData, &len) != 0) {
+        return HandleError(&ctx, "mbedtls_cipher_finish ctr failed");
+    }
+    *encryptLen += len;
+    mbedtls_cipher_free(&ctx);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusDecryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input, uint32_t inLen,
+    unsigned char *decryptData, uint32_t *decryptLen)
+{
+    return SoftBusEncryptDataByCtr(key, input, inLen, decryptData, decryptLen);
 }

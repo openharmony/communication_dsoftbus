@@ -145,6 +145,10 @@ TRANS_FAULT:
   __BASE: {type: FAULT, level: CRITICAL, desc: the transmission fail }
   ERROR_CODE: {type: INT32, desc: error code }
 
+TRANS_INFO:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: the transmission info }
+  ERROR_CODE: {type: STRING, desc: info msg or err msg }
+
 BUS_CENTER_FAULT_EVT:
   __BASE: {type: FAULT, level: CRITICAL, desc: bus center all the exception}
   MODULE_TYPE: {type: UINT32, desc: module type}

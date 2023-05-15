@@ -12,24 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "softbus_hidumper_trans.h"
+
 #include <stdio.h>
 #include <string.h>
 
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_hidumper.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_trans.h"
 
-#define MAX_HELP_INFO_LEN (100)
 #define MAX_ID_LEN (10)
-#define DEC (10)
-#define HIDUMPER_TRANS_ARG_NUM 2
 #define MODULE_NAME_TRAN "trans"
-#define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
-#define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
+#define SOFTBUS_TRANS_MODULE_HELP "List all the dump item of trans"
 
 const char* g_linkTypeList[DUMPER_LANE_LINK_TYPE_BUTT] = {
     "BR",
@@ -47,50 +43,15 @@ const char* g_dataTypeList[BUSINESS_TYPE_BUTT] = {
     "NotCare",
 };
 
-typedef struct {
-    const char* cmd;
-    ShowDumpInfosFunc *showDumpInfosFunc;
-}TransHiDumperCmd;
+static LIST_HEAD(g_trans_var_list);
 
-typedef enum {
-    TRANS_HIDUMPER_CMD_REGISTED_SESSION_LIST = 0,
-    TRANS_HIDUMPER_CMD_CONCURRENT_SESSION_LIST,
-
-    TRANS_HIDUMPER_CMD_BUTT
-}TransHiDumperCmdType;
-
-char g_transHelpInfo[MAX_HELP_INFO_LEN];
-
-void InitTranHelpInfo(void)
+int32_t SoftBusRegTransVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {
-    (void)sprintf_s(g_transHelpInfo, sizeof(g_transHelpInfo), "Usage: -l [%s] [%s]\n",
-        CMD_REGISTED_SESSION_LIST, CMD_CONCURRENT_SESSION_LIST);
-}
-
-void ShowTransDumpHelperInfo(int fd)
-{
-    SOFTBUS_DPRINTF(fd, "%s", g_transHelpInfo);
-}
-
-ShowDumpInfosFunc g_ShowRegisterSessionInfosFunc = NULL;
-
-void SetShowRegisterSessionInfosFunc(ShowDumpInfosFunc func)
-{
-    if (func == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is NULL");
-        return;
+    if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
+        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegTransVarDump invalid param");
+        return SOFTBUS_ERR;
     }
-    g_ShowRegisterSessionInfosFunc = func;
-}
-
-ShowDumpInfosFunc g_ShowRunningSessionInfosFunc = NULL;
-void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func)
-{
-    if (func == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is NULL");
-        return;
-    }
-    g_ShowRunningSessionInfosFunc = func;
+    return SoftBusAddDumpVarToList(dumpVar, cb, &g_trans_var_list);
 }
 
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
@@ -141,35 +102,48 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     SOFTBUS_DPRINTF(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
 }
 
-static TransHiDumperCmd g_transHiDumperCmdList[TRANS_HIDUMPER_CMD_BUTT] = {
-    {CMD_REGISTED_SESSION_LIST, &g_ShowRegisterSessionInfosFunc},
-    {CMD_CONCURRENT_SESSION_LIST, &g_ShowRunningSessionInfosFunc}
-};
-
-int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
+NO_SANITIZE("cfi") static int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argv == NULL || argc < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "param is invalid ");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid ");
         return SOFTBUS_ERR;
     }
-    if ((argc != HIDUMPER_TRANS_ARG_NUM) || (strcmp(argv[0], "-l") != 0)) {
-        ShowTransDumpHelperInfo(fd);
+    if (argc == 0 || ((argc == 1) && (strcmp(argv[0], "-h") == 0)) || (argc == 1 && strcmp(argv[0], "-l") == 0)) {
+        SoftBusDumpSubModuleHelp(fd, MODULE_NAME_TRAN, &g_trans_var_list);
         return SOFTBUS_OK;
     }
 
-    for (unsigned int i = 0; i < TRANS_HIDUMPER_CMD_BUTT; i++) {
-        if (strcmp(argv[1], g_transHiDumperCmdList[i].cmd) == 0) {
-            (*g_transHiDumperCmdList[i].showDumpInfosFunc)(fd);
-            return SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
+    int32_t isModuleExist = SOFTBUS_DUMP_NOT_EXIST;
+    if (argc > 1 && strcmp(argv[0], "-l") == 0) {
+        ListNode *item = NULL;
+        LIST_FOR_EACH(item, &g_trans_var_list) {
+            SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
+            if (strcmp(itemNode->varName, argv[1]) == 0 && itemNode->dumpCallback != NULL) {
+                ret = itemNode->dumpCallback(fd);
+                isModuleExist = SOFTBUS_DUMP_EXIST;
+                break;
+            }
+        }
+        if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
+            SoftBusDumpErrInfo(fd, argv[1]);
+            SoftBusDumpSubModuleHelp(fd, MODULE_NAME_TRAN, &g_trans_var_list);
         }
     }
-
-    ShowTransDumpHelperInfo(fd);
-    return SOFTBUS_OK;
+    return ret;
 }
 
-void SoftBusTransDumpHandlerInit(void)
+int32_t SoftBusTransDumpHandlerInit(void)
 {
-    InitTranHelpInfo();
-    SoftBusRegHiDumperHandler((char*)MODULE_NAME_TRAN, g_transHelpInfo, SoftBusTransDumpHandler);
+    int32_t ret = SoftBusRegHiDumperHandler((char*)MODULE_NAME_TRAN, SOFTBUS_TRANS_MODULE_HELP,
+        &SoftBusTransDumpHandler);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusTransDumpHander regist fail");
+    }
+    return ret;
+}
+
+void SoftBusHiDumperTransDeInit(void)
+{
+    SoftBusReleaseDumpVar(&g_trans_var_list);
 }

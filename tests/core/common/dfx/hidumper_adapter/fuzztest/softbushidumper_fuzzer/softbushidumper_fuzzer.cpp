@@ -39,9 +39,10 @@ int32_t SoftBusVarDumpCbFunc(int fd)
     return 0;
 }
 
-void TransSessionShowInfoFunc(int fd)
+int32_t TransSessionShowInfoFunc(int fd)
 {
     (void)fd;
+    return SOFTBUS_OK;
 }
 
 void SoftBusHiDumperFuzzTest(const uint8_t* data, size_t size)
@@ -150,8 +151,8 @@ void SoftBusHiDumperNstackFuzzTest(const uint8_t* data, size_t size)
 
 void SoftBusHiDumperTransFuzzTest(const uint8_t* data, size_t size)
 {
-    SetShowRegisterSessionInfosFunc(TransSessionShowInfoFunc);
-    SetShowRunningSessionInfosFunc(TransSessionShowInfoFunc);
+    SoftBusRegTransVarDump((const char*)data, TransSessionShowInfoFunc);
+    SoftBusRegTransVarDump((const char*)data, TransSessionShowInfoFunc);
     SoftBusTransDumpHandlerInit();
     int32_t tmpValue = *(reinterpret_cast<const int *>(data));
     char tmpPkgName[TEST_PKG_NAME_MAX_LEN] = {0};

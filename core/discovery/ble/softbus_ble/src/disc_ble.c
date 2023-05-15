@@ -69,6 +69,7 @@
 #define BIT_WAKE_UP 0x01
 #define BIT_CUST_DATA_TYPE 0x10
 #define BIT_HEART_BIT 0x20
+#define BIT_CONNECT_BIT 0x40
 #define BIT_CON 0x80
 #define BIT_CON_POS 7
 

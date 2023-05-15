@@ -69,6 +69,7 @@ public:
     virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
+    virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

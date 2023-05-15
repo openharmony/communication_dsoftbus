@@ -35,10 +35,21 @@ if (dsoftbus_feature_lnn_net) {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_item_info.c",
   ]
   if (!enhanced) {
-    bus_center_builder_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c" ]
+    bus_center_builder_src += [
+      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
+    ]
+  } else {
+    import(
+        "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/cipherkey/cipherkey.gni")
+
+    bus_center_builder_src += cipherkey_sources
   }
 } else {
-  bus_center_builder_src = [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c" ]
+  bus_center_builder_src = [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
+  ]
 }
 bus_center_builder_inc = [
   "$dsoftbus_root_path/core/adapter/bus_center/include",

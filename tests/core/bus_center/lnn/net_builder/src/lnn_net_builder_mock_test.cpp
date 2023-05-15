@@ -24,6 +24,12 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
+int32_t LnnInitCipherKeyManager(void)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lnn cipherkey manager");
+    return SOFTBUS_OK;
+}
+
 namespace OHOS {
 using namespace testing::ext;
 constexpr int32_t LOCAL_WEIGHT = 10;
@@ -49,6 +55,7 @@ constexpr int32_t CONN_COUNT = 10;
 constexpr int32_t CURRENT_COUNT = 11;
 constexpr uint32_t CONN_FLAG1 = 128;
 constexpr uint32_t CONN_FLAG2 = 255;
+
 using namespace testing;
 class LNNNetBuilderMockTest : public testing::Test {
 public:

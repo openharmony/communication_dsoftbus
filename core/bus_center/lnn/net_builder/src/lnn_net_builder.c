@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_devicename_info.h"
@@ -1866,6 +1867,10 @@ NO_SANITIZE("cfi") int32_t NodeInfoSync(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitOffline fail");
         return SOFTBUS_ERR;
     }
+    if (LnnInitCipherKeyManager() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitOffline fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1950,6 +1955,7 @@ NO_SANITIZE("cfi") void LnnDeinitNetBuilder(void)
     LnnDeinitSyncInfoManager();
     LnnDeinitFastOffline();
     LnnDeinitOffline();
+    LnnDeinitCipherKeyManager();
     g_netBuilder.isInit = false;
 }
 

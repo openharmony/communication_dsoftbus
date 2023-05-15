@@ -32,6 +32,7 @@
 #include "trans_channel_manager.h"
 #include "trans_session_service.h"
 #include "softbus_hidumper_interface.h"
+#include "trans_spec_object.h"
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -316,4 +317,14 @@ void SoftBusServer::OnStart()
 }
 
 void SoftBusServer::OnStop() {}
+
+int32_t SoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
+{
+    sptr<TransSpecObject> result = new(std::nothrow) TransSpecObject();
+    if (result == nullptr) {
+        return SOFTBUS_MEM_ERR;
+    }
+    object = result;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

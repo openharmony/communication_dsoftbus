@@ -28,23 +28,36 @@ static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
 #define OPENSSL_EVP_PADDING_FUNC_OPEN (1)
 #define OPENSSL_EVP_PADDING_FUNC_CLOSE (0)
 
-#define EVP_AES_128_GCM_KEYLEN 16
-#define EVP_AES_256_GCM_KEYLEN 32
+#define EVP_AES_128_KEYLEN 16
+#define EVP_AES_256_KEYLEN 32
 
-static EVP_CIPHER *GetSslAlgorithmByKeyLen(uint32_t keyLen)
+static EVP_CIPHER *GetGcmAlgorithmByKeyLen(uint32_t keyLen)
 {
     switch (keyLen) {
-        case EVP_AES_128_GCM_KEYLEN:
+        case EVP_AES_128_KEYLEN:
             return (EVP_CIPHER *)EVP_aes_128_gcm();
-        case EVP_AES_256_GCM_KEYLEN:
+        case EVP_AES_256_KEYLEN:
             return (EVP_CIPHER *)EVP_aes_256_gcm();
+    }
+    return NULL;
+}
+
+static EVP_CIPHER *GetCtrAlgorithmByKeyLen(uint32_t keyLen)
+{
+    switch (keyLen) {
+        case EVP_AES_128_KEYLEN:
+            return (EVP_CIPHER *)EVP_aes_128_ctr();
+        case EVP_AES_256_KEYLEN:
+            return (EVP_CIPHER *)EVP_aes_256_ctr();
+        default:
+            return NULL;
     }
     return NULL;
 }
 
 static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, const AesGcmCipherKey *cipherkey, bool mode)
 {
-    EVP_CIPHER *cipher = GetSslAlgorithmByKeyLen(cipherkey->keyLen);
+    EVP_CIPHER *cipher = GetGcmAlgorithmByKeyLen(cipherkey->keyLen);
     if (cipher == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "get cipher fail.");
         return SOFTBUS_DECRYPT_ERR;
@@ -198,6 +211,17 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
     outlen += plainLen;
     EVP_CIPHER_CTX_free(ctx);
     return outlen;
+}
+
+static int32_t HandleError(EVP_CIPHER_CTX *ctx, const char *buf)
+{
+    if (buf != NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "%{public}s", buf);
+    }
+    if (ctx != NULL) {
+        EVP_CIPHER_CTX_free(ctx);
+    }
+    return SOFTBUS_DECRYPT_ERR;
 }
 
 int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
@@ -396,4 +420,66 @@ uint32_t SoftBusCryptoRand(void)
     }
     SoftBusCloseFile(fd);
     return value;
+}
+
+int32_t SoftBusEncryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen)
+{
+    if (key == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    EVP_CIPHER_CTX *ctx = NULL;
+    int32_t len = 0;
+    *encryptLen = 0;
+    EVP_CIPHER *cipher = NULL;
+    if (!(cipher = GetCtrAlgorithmByKeyLen(key->keyLen))) {
+        return HandleError(ctx, "get cipher failed");
+    }
+    if (!(ctx = EVP_CIPHER_CTX_new())) {
+        return HandleError(ctx, "EVP_CIPHER_CTX_new ctr failed");
+    }
+    if (EVP_EncryptInit_ex(ctx, cipher, NULL, key->key, key->iv) != 1) {
+        return HandleError(ctx, "EVP_EncryptInit_ex ctr failed");
+    }
+    if (EVP_EncryptUpdate(ctx, encryptData, &len, input, inLen) != 1) {
+        return HandleError(ctx, "EVP_EncryptUpdate ctr failed");
+    }
+    *encryptLen += len;
+    if (EVP_EncryptFinal_ex(ctx, encryptData + len, &len) != 1) {
+        return HandleError(ctx, "EVP_EncryptFinal_ex ctr failed");
+    }
+    *encryptLen += len;
+    EVP_CIPHER_CTX_free(ctx);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusDecryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input, uint32_t inLen,
+    unsigned char *decryptData, uint32_t *decryptLen)
+{
+    if (key == NULL || input == NULL || inLen == 0 || decryptData == NULL || decryptLen == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    EVP_CIPHER_CTX *ctx = NULL;
+    int32_t len = 0;
+    *decryptLen = 0;
+    EVP_CIPHER *cipher = NULL;
+    if (!(cipher = GetCtrAlgorithmByKeyLen(key->keyLen))) {
+        return HandleError(ctx, "get cipher failed");
+    }
+    if (!(ctx = EVP_CIPHER_CTX_new())) {
+        return HandleError(ctx, "EVP_CIPHER_CTX_new ctr failed");
+    }
+    if (EVP_DecryptInit_ex(ctx, cipher, NULL, key->key, key->iv) != 1) {
+        return HandleError(ctx, "EVP_DecryptInit_ex ctr failed");
+    }
+    if (EVP_DecryptUpdate(ctx, decryptData, &len, input, inLen) != 1) {
+        return HandleError(ctx, "EVP_DecryptUpdate ctr failed");
+    }
+    *decryptLen += len;
+    if (EVP_DecryptFinal_ex(ctx, decryptData + len, &len) != 1) {
+        return HandleError(ctx, "EVP_DecryptFinal_ex ctr failed");
+    }
+    *decryptLen += len;
+    EVP_CIPHER_CTX_free(ctx);
+    return SOFTBUS_OK;
 }

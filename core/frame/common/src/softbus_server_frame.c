@@ -21,6 +21,7 @@
 #include "message_handler.h"
 #include "p2plink_interface.h"
 #include "softbus_conn_interface.h"
+#include "softbus_conn_ble_direct.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -105,7 +106,7 @@ NO_SANITIZE("cfi") void InitSoftBusServer(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
         goto ERR_EXIT;
     }
-
+    ConnBleDirectInit();
     if (TransServerInit() == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus trans server init failed.");
         goto ERR_EXIT;
