@@ -30,6 +30,7 @@
 #include "lnn_physical_subnet_manager.h"
 #include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -210,6 +211,63 @@ NO_SANITIZE("cfi") static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest
     linkInfo.type = LANE_BR;
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo,
+    const LaneLinkCb *callback)
+{
+    return SOFTBUS_ERR;
+}
+
+NO_SANITIZE("cfi") static int32_t LaneLinkOfBleDirect(uint32_t reqId,
+    const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    LaneLinkInfo linkInfo;
+    unsigned char deviceid[UDID_BUF_LEN];
+    unsigned char deviceidHash[SHA_256_HASH_LEN];
+
+    linkInfo.type = LANE_BLE_DIRECT;
+    linkInfo.linkInfo.bleDirect.protoType = BLE_GATT;
+    linkInfo.linkInfo.bleDirect.psm = -1;
+
+    int32_t ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, (char*)deviceid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK || strlen((char*)deviceid) == 0) {
+        LLOGE("get peer udid fail");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusGenerateStrHash(deviceid, UDID_BUF_LEN, linkInfo.linkInfo.bleDirect.peerUdidHash) != SOFTBUS_OK) {
+        LLOGE("generate peer udid hash fail");
+        return SOFTBUS_ERR;
+    }
+
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, (char*)deviceid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK || strlen((char*)deviceid) == 0) {
+        LLOGE("get peer udid fail");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusGenerateStrHash(deviceid, UDID_BUF_LEN, deviceidHash) != SOFTBUS_OK) {
+        LLOGE("generate peer udid hash fail");
+        return SOFTBUS_ERR;
+    }
+    (void)memcpy_s(linkInfo.linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN, deviceidHash, UDID_SHORT_HASH_LEN);
+
+    if (SoftBusGenerateStrHash((const unsigned char*)reqInfo->peerNetworkId,
+        NETWORK_ID_BUF_LEN, deviceidHash) != SOFTBUS_OK) {
+        LLOGE("generate peer udid hash fail");
+        return SOFTBUS_ERR;
+    }
+    (void)memcpy_s(linkInfo.linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN, deviceidHash, NODEID_SHORT_HASH_LEN);
+
+    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    if (LaneLinkOfBleReuse(reqId, reqInfo, callback) == SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return LaneLinkOfBleDirect(reqId, reqInfo, callback);
 }
 
 static int32_t GetExpectedP2pRole(void)
@@ -543,6 +601,8 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_P2P] = LaneLinkOfP2p,
     [LANE_WLAN_5G] = LaneLinkOfWlan,
     [LANE_WLAN_2P4G] = LaneLinkOfWlan,
+    [LANE_BLE] = LaneLinkOfBle,
+    [LANE_BLE_DIRECT] = LaneLinkOfBleDirect,
 };
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)

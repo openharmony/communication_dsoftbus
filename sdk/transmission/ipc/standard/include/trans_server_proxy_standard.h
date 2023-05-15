@@ -58,6 +58,7 @@ public:
     int32_t GrantPermission(int uid, int pid, const char *sessionName) override;
     int32_t RemovePermission(const char *sessionName) override;
     int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *statsData) override;
+    int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object) override;
 
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;

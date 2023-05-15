@@ -17,6 +17,7 @@
 #define SOFTBUS_HIDUMPER_TRANS_H
 
 #include "softbus_app_info.h"
+#include "softbus_hidumper.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,16 +36,16 @@ typedef enum {
 
 typedef void(*ShowDumpInfosFunc)(int fd);
 
-void SetShowRegisterSessionInfosFunc(ShowDumpInfosFunc func);
-
-void SetShowRunningSessionInfosFunc(ShowDumpInfosFunc func);
+int32_t SoftBusRegTransVarDump(const char* dumpVar, SoftBusVarDumpCb cb);
 
 void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* sessionName,
     int uid, int pid);
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo);
 
-void SoftBusTransDumpHandlerInit(void);
+int32_t SoftBusTransDumpHandlerInit(void);
+
+void SoftBusHiDumperTransDeInit(void);
 
 #ifdef __cplusplus
 #if __cplusplus

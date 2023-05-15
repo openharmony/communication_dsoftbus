@@ -641,4 +641,33 @@ int32_t TransServerProxy::StopTimeSync(const char *pkgName, const char *targetNe
     (void)targetNetworkId;
     return SOFTBUS_OK;
 }
+
+int32_t TransServerProxy::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is null");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_GET_SOFTBUS_SPEC_OBJECT, data, reply, option);
+    if (ret != ERR_NONE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject send request failed, ret=%d", ret);
+        return SOFTBUS_ERR;
+    }
+    if (!reply.ReadInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject send ret failed");
+        return SOFTBUS_ERR;
+    }
+    if (ret == SOFTBUS_OK) {
+        object = reply.ReadRemoteObject();
+    }
+    return ret;
+}
 } // namespace OHOS

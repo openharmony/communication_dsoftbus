@@ -26,18 +26,19 @@
 #include "softbus_hidumper_trans.h"
 
 #define MAX_SESSION_SERVER_NUM 32
+#define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
 
 static SoftBusList *g_sessionServerList = NULL;
 
-static void TransSessionForEachShowInfo(int fd)
+static int32_t TransSessionForEachShowInfo(int fd)
 {
     if (g_sessionServerList == NULL) {
-        return;
+        return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return;
+        return SOFTBUS_ERR;
     }
 
     SessionServer *pos = NULL;
@@ -46,6 +47,7 @@ static void TransSessionForEachShowInfo(int fd)
     }
     
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t TransSessionMgrInit(void)
@@ -58,8 +60,7 @@ NO_SANITIZE("cfi") int32_t TransSessionMgrInit(void)
         return SOFTBUS_ERR;
     }
 
-    SetShowRegisterSessionInfosFunc(TransSessionForEachShowInfo);
-    return SOFTBUS_OK;
+    return SoftBusRegTransVarDump(CMD_REGISTED_SESSION_LIST, TransSessionForEachShowInfo);
 }
 
 NO_SANITIZE("cfi") void TransSessionMgrDeinit(void)

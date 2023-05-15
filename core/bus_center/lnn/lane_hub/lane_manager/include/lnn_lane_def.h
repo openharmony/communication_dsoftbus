@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "lnn_lane_interface.h"
+#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,12 +74,21 @@ typedef struct {
 } BleLinkInfo;
 
 typedef struct {
+    BleProtocolType protoType;
+    int32_t psm;
+    unsigned char nodeIdHash[NODEID_SHORT_HASH_LEN];
+    unsigned char localUdidHash[UDID_SHORT_HASH_LEN];
+    unsigned char peerUdidHash[SHA_256_HASH_LEN];
+} BleDirectLinkInfo;
+
+typedef struct {
     LaneLinkType type;
     union {
         WlanLinkInfo wlan;
         P2pLinkInfo p2p;
         BrLinkInfo br;
         BleLinkInfo ble;
+        BleDirectLinkInfo bleDirect;
     } linkInfo;
 } LaneLinkInfo;
 

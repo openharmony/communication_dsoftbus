@@ -27,6 +27,7 @@
 #include "trans_channel_manager.h"
 #include "softbus_hidumper_trans.h"
 
+#define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
 typedef struct {
     ListNode node;
     int32_t channelId;
@@ -67,21 +68,21 @@ static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
     return DUMPER_LANE_LINK_TYPE_BUTT;
 }
 
-static void TransLaneChannelForEachShowInfo(int fd)
+static int32_t TransLaneChannelForEachShowInfo(int fd)
 {
     if (g_channelLaneList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
-        return;
+        return SOFTBUS_ERR;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransSessionInfoForEach malloc appInfo failed");
-        return;
+        return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         SoftBusFree(appInfo);
-        return;
+        return SOFTBUS_ERR;
     }
         
     TransLaneInfo *laneItem = NULL;
@@ -93,6 +94,7 @@ static void TransLaneChannelForEachShowInfo(int fd)
     
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     SoftBusFree(appInfo);
+    return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t TransLaneMgrInit(void)
@@ -106,10 +108,8 @@ NO_SANITIZE("cfi") int32_t TransLaneMgrInit(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane info manager init failed.");
         return SOFTBUS_MALLOC_ERR;
     }
-
-    SetShowRunningSessionInfosFunc(TransLaneChannelForEachShowInfo);
     
-    return SOFTBUS_OK;
+    return SoftBusRegTransVarDump(CMD_CONCURRENT_SESSION_LIST, TransLaneChannelForEachShowInfo);
 }
 
 NO_SANITIZE("cfi") void TransLaneMgrDeinit(void)

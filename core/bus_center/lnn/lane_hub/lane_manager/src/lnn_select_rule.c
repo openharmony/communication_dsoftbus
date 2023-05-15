@@ -143,6 +143,12 @@ static bool IsEnableBle(const char *networkId)
     return true;
 }
 
+static bool IsEnableBleDirect(const char *networkId)
+{
+    return IsEnableBle(networkId);
+}
+
+
 NO_SANITIZE("cfi") static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
@@ -203,6 +209,7 @@ static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_P2P] = {true, IsEnableP2p, GetP2pScore},
     [LANE_WLAN_2P4G] = {true, IsEnableWlan2P4G, GetWlan2P4GScore},
     [LANE_WLAN_5G] = {true, IsEnableWlan5G, GetWlan5GScore},
+    [LANE_BLE_DIRECT] = {true, IsEnableBleDirect, GetBleScore}
 };
 
 NO_SANITIZE("cfi") LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)

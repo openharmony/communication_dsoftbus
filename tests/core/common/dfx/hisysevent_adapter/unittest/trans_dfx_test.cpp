@@ -80,24 +80,28 @@ static AppInfo g_testAppInfo = {
     .fileProtocol = 1
 };
 
-static void TransRegisterSessionTest1(int fd)
+static int32_t TransRegisterSessionTest1(int fd)
 {
     SoftBusTransDumpRegisterSession(fd, g_testPkgName, g_testSessionName, TEST_TRANS_UID, TEST_TRANS_PID);
+    return SOFTBUS_OK;
 }
-static void TransRunningSessionInfo1(int fd)
+static int32_t TransRunningSessionInfo1(int fd)
 {
     SoftBusTransDumpRunningSession(fd, DUMPER_LANE_BR, &g_testAppInfo);
+    return SOFTBUS_OK;
 }
 
-static void TransRegisterSessionTest2(int fd)
+static int32_t TransRegisterSessionTest2(int fd)
 {
     SoftBusTransDumpRegisterSession(fd, nullptr, g_testSessionName, TEST_TRANS_UID, TEST_TRANS_PID);
+    return SOFTBUS_OK;
 }
 
 
-static void TransRunningSessionInfo2(int fd)
+static int32_t TransRunningSessionInfo2(int fd)
 {
     SoftBusTransDumpRunningSession(fd, DUMPER_LANE_BR, nullptr);
+    return SOFTBUS_OK;
 }
 
 TransArgvNode g_validTransCmdArray[TRANS_DUMP_PROCESS_TEST_NUM] = {
@@ -106,6 +110,18 @@ TransArgvNode g_validTransCmdArray[TRANS_DUMP_PROCESS_TEST_NUM] = {
     {TEST_FD, TEST_ARGC_TWO, {"-l", "registed_sessionlist"}},
     {TEST_FD, TEST_ARGC_TWO, {"-l", "concurrent_sessionlist"}},
 };
+
+/**
+ * @tc.name: SoftbusReportTransInfoEvt001
+ * @tc.desc: Verify SoftbusReportTransInfoEvt function.
+ * @tc.type: FUNC
+ * @tc.require: I5NJEO
+ */
+HWTEST_F(TransDfxTest, SoftbusReportTransInfoEvt001, TestSize.Level0)
+{
+    SoftbusReportTransInfoEvt("test");
+    SoftbusReportTransInfoEvt(NULL);
+}
 
 /**
  * @tc.name: SoftBusTransDumpHandler_001
@@ -130,15 +146,18 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler_001, TestSize.Level1)
  */
 HWTEST_F(TransDfxTest, SoftBusTransDumpHandler002, TestSize.Level0)
 {
-    SetShowRegisterSessionInfosFunc(TransRegisterSessionTest1);
-    SetShowRunningSessionInfosFunc(TransRunningSessionInfo1);
+    int32_t ret = SOFTBUS_ERR;
+    ret = SoftBusRegTransVarDump("registed_sessionlist", TransRegisterSessionTest1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRegTransVarDump("concurrent_sessionlist", TransRunningSessionInfo1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
-    int32_t ret;
     for (int32_t i = 0; i < TRANS_DUMP_PROCESS_TEST_NUM; i++) {
         ret = SoftBusTransDumpHandler(g_validTransCmdArray[i].fd, g_validTransCmdArray[i].argc,
             g_validTransCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_OK, ret);
     }
+    SoftBusHiDumperTransDeInit();
 }
 
 /**
@@ -150,14 +169,17 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler002, TestSize.Level0)
  */
 HWTEST_F(TransDfxTest, SoftBusTransDumpHandler003, TestSize.Level0)
 {
-    SetShowRegisterSessionInfosFunc(TransRegisterSessionTest2);
-    SetShowRunningSessionInfosFunc(TransRunningSessionInfo2);
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
+    ret = SoftBusRegTransVarDump("registed_sessionlist", TransRegisterSessionTest2);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusRegTransVarDump("concurrent_sessionlist", TransRunningSessionInfo2);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     for (int32_t i = 0; i < TRANS_DUMP_PROCESS_TEST_NUM; i++) {
         ret = SoftBusTransDumpHandler(g_validTransCmdArray[i].fd, g_validTransCmdArray[i].argc,
             g_validTransCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_OK, ret);
     }
+    SoftBusHiDumperTransDeInit();
 }
 
 /**
@@ -186,17 +208,20 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler004, TestSize.Level0)
 }
 
 /**
- * @tc.name: SetShowRegisterSessionInfosFunc001
- * @tc.desc: Verify SetShowRegisterSessionInfosFunc function, use hidumperHandler use valid param, return SOFTBUS_ERR.
+ * @tc.name: SoftBusRegTransVarDump001
+ * @tc.desc: Verify SoftBusRegTransVarDump function, use hidumperHandler use valid param, return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransDfxTest, SetShowRegisterSessionInfosFunc001, TestSize.Level0)
+HWTEST_F(TransDfxTest, SoftBusRegTransVarDump001, TestSize.Level0)
 {
-    SetShowRegisterSessionInfosFunc(nullptr);
-    SetShowRunningSessionInfosFunc(nullptr);
+    int32_t ret = SOFTBUS_OK;
+    ret = SoftBusRegTransVarDump("registed_sessionlist", nullptr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    ret = SoftBusRegTransVarDump(nullptr, TransRegisterSessionTest1);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    int32_t ret = SoftBusTransDumpHandler(TEST_FD, TEST_ARGC_ONE, nullptr);
+    ret = SoftBusRegTransVarDump("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", TransRegisterSessionTest1);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 

@@ -38,4 +38,10 @@ typedef uint64_t ProtocolType;
 
 #define BIND_ADDR_ALL "0"
 
+typedef enum {
+    BLE_GATT = 0,
+    BLE_COC,
+    BLE_PROTOCOL_MAX
+} BleProtocolType;
+
 #endif

@@ -42,6 +42,7 @@ public:
     int32_t CloseChannel(int32_t channelId, int32_t channelType) override;
     int32_t SendMessage(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t msgType) override;
+    int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object) override;
 
     int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) override;
     int32_t JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen) override;

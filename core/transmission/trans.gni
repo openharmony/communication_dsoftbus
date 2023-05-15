@@ -15,6 +15,16 @@ import(
     "//foundation/communication/dsoftbus/core/transmission/trans_channel/trans_channel.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
+native_source_path = rebase_path("$dsoftbus_root_path")
+broadcast_dep_dir =
+    "dsoftbus_enhance/core/transmission/trans_channel/ble_broadcast"
+enhanced_broadcast = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                 [
+                                   "$native_source_path",
+                                   "$broadcast_dep_dir",
+                                 ],
+                                 "value")
+
 trans_session_src = trans_channel_src
 trans_session_inc = trans_channel_inc
 trans_session_deps = trans_channel_deps
@@ -59,6 +69,17 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy.cpp",
     "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy_standard.cpp",
   ]
+  if (enhanced_broadcast) {
+    import(
+        "$dsoftbus_root_path/dsoftbus_enhance/core/transmission/trans_channel/ble_broadcast/ble_broadcast.gni")
+
+    trans_session_src += broadcast_sources
+    trans_session_inc += broadcast_include_dirs
+  } else {
+    trans_session_inc +=
+        [ "$dsoftbus_root_path/core/transmission/broadcast/include" ]
+    trans_session_src += [ "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object_stub.cpp" ]
+  }
   trans_session_deps +=
       [ "//third_party/bounds_checking_function:libsec_shared" ]
   trans_session_external_deps += [ "c_utils:utils" ]
