@@ -17,6 +17,7 @@
 #include "softbus_log.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_common.h"
 #include "softbus_hisysevt_common.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_utils.h"
@@ -30,6 +31,7 @@
 #define STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST "TRANS_OPEN_SESSION_TIME_COST"
 
 #define FAULT_EVT_TRANS_FAULT "TRANS_FAULT"
+#define BEHAVIOR_EVT_TRANS_INFO "TRANS_INFO"
 
 #define TRANS_PARAM_LINK_TYPE "LINK_TYPE"
 
@@ -62,6 +64,7 @@
 #define TRANS_PARAM_CALLER_PACKAGE "CALLER_PACKAGE_NAME"
 
 #define TRANS_PARAM_ERRCODE "ERROR_CODE"
+#define TRANS_PARAM_INFOMSG "INFO_MSG"
 
 #define TIME_COST_500MS (500)
 #define TIME_COST_1S (1000)
@@ -172,7 +175,6 @@ typedef struct {
     char apiName[SOFTBUS_HISYSEVT_PARAM_LEN];
     int32_t calledtotalCnt;
 }CalledApiCntStruct;
-
 
 static OpenSessionCntStruct g_openSessionCnt;
 static OpenSessionTimeStruct g_openSessionTime;
@@ -323,7 +325,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
         (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
         return;
     }
-    
+
     CalledApiInfoStruct *apiInfoNode = NULL;
     CalledApiCntStruct *apiCntNode = NULL;
     bool isAppDiff = true;
@@ -379,7 +381,7 @@ void SoftbusRecordCalledApiCnt(uint32_t code)
         (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
         return;
     }
-    
+
     CalledApiCntStruct *apiCntNode = NULL;
     bool isDiff = true;
     LIST_FOR_EACH_ENTRY(apiCntNode, &g_calledApiCntlist->apiInfolist, CalledApiCntStruct, node) {
@@ -440,7 +442,7 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     if (SoftBusMutexLock(&g_openSessionCnt.lock) != SOFTBUS_OK) {
         return;
     }
-    
+
     g_openSessionCnt.failCnt += (isSucc != SOFTBUS_EVT_OPEN_SESSION_SUCC);
     g_openSessionCnt.successCnt += (isSucc == SOFTBUS_EVT_OPEN_SESSION_SUCC);
     uint32_t totalCnt = g_openSessionCnt.failCnt + g_openSessionCnt.successCnt;
@@ -455,7 +457,7 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     if (SoftBusMutexLock(&g_openSessionTime.lock) != SOFTBUS_OK) {
         return;
     }
-    
+
     if (time > g_openSessionTime.maxTimeCost) {
         g_openSessionTime.maxTimeCost = time;
     } else if (time < g_openSessionTime.minTimeCost) {
@@ -506,7 +508,6 @@ static inline int32_t InitOpenSessionEvtMutexLock(void)
     if (SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-
 
     if (SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -650,7 +651,7 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
     if (SoftBusMutexLock(&g_openSessionCnt.lock) != SOFTBUS_OK) {
         return;
     }
-    
+
     // event
     (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_TRANS_OPEN_SESSION_CNT);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -673,7 +674,7 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
     (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_SUCCESS_RATE);
     param->paramType = SOFTBUS_EVT_PARAMTYPE_FLOAT;
     param->paramValue.f = g_openSessionCnt.successRate;
-    
+
     ClearOpenSessionCnt();
 
     (void)SoftBusMutexUnlock(&g_openSessionCnt.lock);
@@ -769,7 +770,7 @@ static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
     if (SoftBusMutexLock(&g_openSessionTime.lock) != SOFTBUS_OK) {
         return;
     }
-    
+
     // event
     (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -849,6 +850,20 @@ static inline void CreateTransErrMsg(SoftBusEvtReportMsg* msg, int32_t errcode)
     param->paramValue.i32v = errcode;
 }
 
+static inline void CreateTransInfoMsg(SoftBusEvtReportMsg* msg, const char *infoMsg)
+{
+    // event
+    (void)strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, BEHAVIOR_EVT_TRANS_INFO);
+    msg->evtType = SOFTBUS_EVT_TYPE_BEHAVIOR;
+    msg->paramNum = SOFTBUS_EVT_PARAM_ONE;
+
+    // param 0
+    SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
+    (void)strcpy_s(param->paramName, SOFTBUS_HISYSEVT_NAME_LEN, TRANS_PARAM_INFOMSG);
+    param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
+    (void)strcpy_s(param->paramValue.str, sizeof(param->paramValue.str), infoMsg);
+}
+
 void SoftbusReportTransErrorEvt(int32_t errcode)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
@@ -856,7 +871,6 @@ void SoftbusReportTransErrorEvt(int32_t errcode)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Alloc EvtReport Msg Fail!");
         return;
     }
-    
     CreateTransErrMsg(msg, errcode);
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);
@@ -866,13 +880,33 @@ void SoftbusReportTransErrorEvt(int32_t errcode)
     }
 }
 
+void SoftbusReportTransInfoEvt(const char *infoMsg)
+{
+    if (infoMsg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "infoMsg is null");
+        return;
+    }
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_ONE);
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Alloc EvtReport Msg Fail!");
+        return;
+    }
+    CreateTransInfoMsg(msg, infoMsg);
+    int ret = SoftbusWriteHisEvt(msg);
+    SoftbusFreeEvtReporMsg(msg);
+
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Sys Evt Witre ErrMsg %s FAIL!", infoMsg);
+    }
+}
+
 int32_t InitTransStatisticSysEvt(void)
 {
     if (InitOpenSessionEvtMutexLock() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Trans Statistic Evt Lock Init Fail!");
         return SOFTBUS_ERR;
     }
-    
+
     g_calledApiInfoList = CreateApiInfoList();
     g_calledApiCntlist = CreateApiInfoList();
     ClearOpenSessionCnt();
@@ -884,7 +918,6 @@ int32_t InitTransStatisticSysEvt(void)
     SetStatisticEvtReportFunc(TRANSPORT_API_CALLED_INFO_STATISTIC_EVENT, SoftbusReportCalledAPIEvt);
     SetStatisticEvtReportFunc(TRANSPORT_API_CALLED_CNT_STATISTIC_EVENT, SoftbusReportCalledAPICntEvt);
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_TRANS_OPEN_SESSION_TIME_COST, SoftbusReportOpenSessionTimeEvt);
-
     return SOFTBUS_OK;
 }
 

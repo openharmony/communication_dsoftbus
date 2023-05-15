@@ -282,6 +282,8 @@ static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
             return LANE_P2P;
         case LINK_TYPE_BR:
             return LANE_BR;
+        case LINK_TYPE_BLE:
+            return LANE_BLE;
         default:
             break;
     }
@@ -301,9 +303,9 @@ static void TransformSessionPreferredToLanePreferred(const SessionParam *param, 
         if (linkType == LANE_LINK_TYPE_BUTT) {
             continue;
         }
-        if (preferred->linkTypeNum >= LANE_LINK_TYPE_BUTT) {
+        if (preferred->linkTypeNum >= LINK_TYPE_MAX) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "session preferred linknum override lane maxcnt:%d.", LANE_LINK_TYPE_BUTT);
+                "session preferred linknum too much: %d.", preferred->linkTypeNum);
             break;
         }
         preferred->linkType[preferred->linkTypeNum] = linkType;
@@ -530,6 +532,20 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
     return SOFTBUS_OK;
 }
 
+static int32_t SetBleDirectConnInfo(const BleDirectConnInfo *bleInfo, ConnectOption *connOpt)
+{
+    connOpt->type = CONNECT_BLE_DIRECT;
+    connOpt->bleDirectOption.protoType = bleInfo->protoType;
+    connOpt->bleDirectOption.psm = bleInfo->psm;
+    (void)memcpy_s(connOpt->bleDirectOption.nodeIdHash, NODEID_SHORT_HASH_LEN,
+        bleInfo->nodeIdHash, NODEID_SHORT_HASH_LEN);
+    (void)memcpy_s(connOpt->bleDirectOption.localUdidHash, UDID_SHORT_HASH_LEN,
+        bleInfo->localUdidHash, UDID_SHORT_HASH_LEN);
+    (void)memcpy_s(connOpt->bleDirectOption.peerUdidHash, SHA_256_HASH_LEN,
+        bleInfo->peerUdidHash, SHA_256_HASH_LEN);
+
+    return SOFTBUS_OK;
+}
 NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
     if (info == NULL || connOpt == NULL) {
@@ -544,6 +560,8 @@ NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info
         return SetBrConnInfo(&(info->connInfo.br), connOpt);
     } else if (info->type == LANE_BLE) {
         return SetBleConnInfo(&(info->connInfo.ble), connOpt);
+    } else if (info->type == LANE_BLE_DIRECT) {
+        return SetBleDirectConnInfo(&(info->connInfo.bleDirect), connOpt);
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get conn opt err: type=%d", info->type);
     return SOFTBUS_ERR;

@@ -34,6 +34,8 @@
 #define GCM_KEY_BITS_LEN_256 256
 #define KEY_BITS_UNIT 8
 
+#define BLE_BROADCAST_IV_LEN 16
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -53,6 +55,12 @@ typedef struct {
     unsigned char key[SESSION_KEY_LENGTH];
     unsigned char iv[GCM_IV_LEN];
 } AesGcmCipherKey;
+
+typedef struct {
+    uint32_t keyLen;
+    unsigned char key[SESSION_KEY_LENGTH];
+    unsigned char iv[BLE_BROADCAST_IV_LEN];
+} AesCtrCipherKey;
 
 int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
     size_t *olen, const unsigned char *src, size_t slen);
@@ -77,8 +85,14 @@ int32_t SoftBusDecryptData(AesGcmCipherKey *key, const unsigned char *input, uin
 
 int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
     unsigned char *encryptData, uint32_t *encryptLen, int32_t seqNum);
-    
+
 uint32_t SoftBusCryptoRand(void);
+
+int32_t SoftBusEncryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen);
+
+int32_t SoftBusDecryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input, uint32_t inLen,
+    unsigned char *decryptData, uint32_t *decryptLen);
 
 #endif
 
