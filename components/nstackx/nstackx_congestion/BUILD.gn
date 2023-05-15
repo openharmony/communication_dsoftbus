@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+DSOFTBUS_ROOT_PATH = "./../../.."
+import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 
-NSTACKX_ROOT = "//foundation/communication/dsoftbus/components/nstackx"
+NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"
 
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
