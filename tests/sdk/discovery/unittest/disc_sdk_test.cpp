@@ -79,7 +79,7 @@ static SubscribeInfo g_sInfo = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
+    .dataLen = strlen("capdata3")
 };
 
 static PublishInfo g_pInfo = {
@@ -89,7 +89,7 @@ static PublishInfo g_pInfo = {
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata4",
-    .dataLen = sizeof("capdata4")
+    .dataLen = strlen("capdata4")
 };
 
 static PublishInfo g_pInfo1 = {
@@ -166,7 +166,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest001, TestSize.Level0)
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(NULL, &testInfo, &g_publishCb);
@@ -201,7 +201,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest001, TestSize.Level0)
     testInfo.dataLen = ERRO_CAPDATA_LEN;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
-    testInfo.dataLen = sizeof("capdata1");
+    testInfo.dataLen = strlen("capdata1");
 }
 
 /**
@@ -264,7 +264,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest004, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -309,7 +309,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest005, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -354,7 +354,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest006, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -415,7 +415,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest008, TestSize.Level1)
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -446,7 +446,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest009, TestSize.Level1)
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -478,7 +478,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest010, TestSize.Level1)
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -510,7 +510,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest011, TestSize.Level1)
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -542,7 +542,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest012, TestSize.Level1)
         .freq = MID,
         .capability = "dvKit",
         .capabilityData = (unsigned char*)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -574,7 +574,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest013, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -635,7 +635,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest014, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -696,7 +696,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest015, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -757,7 +757,7 @@ HWTEST_F(DiscSdkTest, PublishServiceTest016, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -818,7 +818,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest001, TestSize.Level0)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(NULL, &testInfo, &g_subscribeCb);
@@ -853,7 +853,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest001, TestSize.Level0)
     testInfo.dataLen = ERRO_CAPDATA_LEN;
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret != 0);
-    testInfo.dataLen = sizeof("capdata1");
+    testInfo.dataLen = strlen("capdata1");
 }
 
 /**
@@ -917,7 +917,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest004, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -964,7 +964,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest005, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1011,7 +1011,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest006, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1058,7 +1058,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest007, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1105,7 +1105,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest008, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1152,7 +1152,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest009, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1199,7 +1199,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest010, TestSize.Level0)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -1233,7 +1233,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest011, TestSize.Level0)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     testInfo.medium = (ExchangeMedium)(AUTO - 1);
@@ -1267,7 +1267,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest012, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1330,7 +1330,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest013, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1393,7 +1393,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest014, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1456,7 +1456,7 @@ HWTEST_F(DiscSdkTest, StartDiscoveryTest015, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -1575,7 +1575,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest004, TestSize.Level0)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -1616,7 +1616,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest005, TestSize.Level0)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -1657,7 +1657,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest006, TestSize.Level0)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -1698,7 +1698,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest007, TestSize.Level0)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -1739,7 +1739,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest008, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -1800,7 +1800,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest009, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -1861,7 +1861,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest010, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -1922,7 +1922,7 @@ HWTEST_F(DiscSdkTest, UnPublishServiceTest011, TestSize.Level1)
         .freq = LOW,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata2",
-        .dataLen = sizeof("capdata2")
+        .dataLen = strlen("capdata2")
     };
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
@@ -2043,7 +2043,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest004, TestSize.Level0)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
@@ -2085,7 +2085,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest005, TestSize.Level0)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
@@ -2127,7 +2127,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest006, TestSize.Level0)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
@@ -2169,7 +2169,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest007, TestSize.Level0)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
@@ -2211,7 +2211,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest008, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -2274,7 +2274,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest009, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -2337,7 +2337,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest011, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
@@ -2400,7 +2400,7 @@ HWTEST_F(DiscSdkTest, StopDiscoveryTest012, TestSize.Level1)
         .isWakeRemote = false,
         .capability = "dvKit",
         .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = sizeof("capdata3")
+        .dataLen = strlen("capdata3")
     };
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
