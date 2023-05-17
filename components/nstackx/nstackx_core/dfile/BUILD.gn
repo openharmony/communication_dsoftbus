@@ -164,6 +164,7 @@ if (defined(ohos_lite)) {
       "//third_party/mbedtls",
       "//third_party/openssl:libcrypto_shared",
     ]
+    innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }

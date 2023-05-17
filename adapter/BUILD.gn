@@ -209,6 +209,7 @@ if (defined(ohos_lite)) {
         "hiviewdfx_hilog_native:libhilog",
       ]
     }
+    innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }

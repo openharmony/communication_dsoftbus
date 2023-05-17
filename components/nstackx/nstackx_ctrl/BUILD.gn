@@ -193,6 +193,7 @@ if (defined(ohos_lite)) {
       "//third_party/libcoap:libcoap",
     ]
     subsystem_name = "communication"
+    innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
   }
 }
