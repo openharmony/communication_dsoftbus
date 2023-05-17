@@ -342,6 +342,13 @@
         "TransGetFileSchema";
         "TransUnRegistFileSchema";
         "_ZN13Communication7SoftBus15ISessionService11GetInstanceEv";
+        "SendEvent";
+        "StopEvent";
+        "RegisterEventListener";
+        "UnregisterEventListener";
+        "ClientTransOnScanResultCallback";
+        "ClientAddEventListener";
+        "ClientDeleteEventListener";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
@@ -354,6 +361,7 @@
             "VTT for OHOS::SoftBusClientStub";
             "VTT for OHOS::SoftBusServerProxyFrame";
             "VTT for OHOS::TransServerProxy";
+            "VTT for OHOS::TransSpecCallback";
             "construction vtable for OHOS::IPCObjectStub-in-OHOS::IRemoteStub<OHOS::ISoftBusClient>";
             "construction vtable for OHOS::IPCObjectStub-in-OHOS::SoftBusClientStub";
             "construction vtable for OHOS::IRemoteBroker-in-OHOS::BusCenterServerProxy";
@@ -432,6 +440,7 @@
             "vtable for OHOS::SoftBusServerProxyFrame";
             "vtable for OHOS::StreamAdaptorListener";
             "vtable for OHOS::TransServerProxy";
+            "vtable for OHOS::TransSpecCallback";
         };
     local:
         *;
