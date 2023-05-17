@@ -55,7 +55,7 @@ static SoftBusList *g_pendingList = NULL;
 
 static bool LinkTypeCheck(LaneLinkType type)
 {
-    LaneLinkType supportList[] = {LANE_P2P, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR};
+    LaneLinkType supportList[] = {LANE_P2P, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE, LANE_BLE_DIRECT};
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
