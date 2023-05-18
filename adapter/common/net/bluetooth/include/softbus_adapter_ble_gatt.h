@@ -26,7 +26,7 @@ extern "C" {
 
 // max adv and scan limit
 #define ADV_MAX_NUM 8
-#define SCAN_MAX_NUM 5
+#define SCAN_MAX_NUM 6
 
 // Bluetooth scan duty cycle, unit: ms
 #define SOFTBUS_BLE_SCAN_INTERVAL_P2 3000
