@@ -39,6 +39,7 @@ typedef enum {
 typedef struct {
     ListNode node;
     char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
     TimeSyncAccuracy accuracy;
     TimeSyncPeriod period;
 } StartTimeSyncReq;
@@ -61,6 +62,7 @@ typedef struct {
 
 typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
     char targetNetworkId[NETWORK_ID_BUF_LEN];
     TimeSyncAccuracy accuracy;
     TimeSyncPeriod period;
@@ -143,7 +145,7 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
     StartTimeSyncReq *item = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
-        if (strcmp(startReq->pkgName, item->pkgName) != 0) {
+        if (strcmp(startReq->pkgName, item->pkgName) != 0 || item->pid != startReq->pid) {
             continue;
         }
         if (item->accuracy < startReq->accuracy || item->period > startReq->period) {
@@ -322,7 +324,7 @@ static void NotifyTimeSyncResult(const TimeSyncReqInfo *info, double offset, int
         resultInfo.result.millisecond, resultInfo.result.microsecond, resultInfo.result.accuracy, resultInfo.flag);
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify time sync result to %s", item->pkgName);
-        LnnNotifyTimeSyncResult(item->pkgName, &resultInfo, retCode);
+        LnnNotifyTimeSyncResult(item->pkgName, item->pid, &resultInfo, retCode);
     }
 }
 
@@ -488,7 +490,7 @@ NO_SANITIZE("cfi") void LnnDeinitTimeSync(void)
     LnnTimeSyncImplDeinit();
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
+NO_SANITIZE("cfi") int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
     TimeSyncAccuracy accuracy, TimeSyncPeriod period)
 {
     StartTimeSyncReqMsgPara *para = NULL;
@@ -514,6 +516,7 @@ NO_SANITIZE("cfi") int32_t LnnStartTimeSync(const char *pkgName, const char *tar
     }
     para->accuracy = accuracy;
     para->period = period;
+    para->pid = callingPid;
     if (!CheckTimeSyncReqInfo(para)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check time sync request info fail");
         SoftBusFree(para);

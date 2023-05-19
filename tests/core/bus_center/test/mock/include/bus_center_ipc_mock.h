@@ -19,6 +19,7 @@
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "bus_center_client_proxy.h"
 #include <gmock/gmock.h>
 #include <mutex>
 
@@ -36,8 +37,8 @@ public:
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag) = 0;
-    virtual int32_t LnnStartTimeSync(
-        const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy, TimeSyncPeriod period) = 0;
+    virtual int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
+        TimeSyncAccuracy accuracy, TimeSyncPeriod period) = 0;
     virtual int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId) = 0;
     virtual int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest) = 0;
     virtual int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest) = 0;
@@ -50,19 +51,22 @@ public:
     virtual int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) = 0;
     virtual int32_t LnnShiftLNNGear(
         const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode) = 0;
-    virtual int32_t ClientOnJoinLNNResult(
-        const char *pkgName, void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode) = 0;
-    virtual int32_t ClientOnJoinMetaNodeResult(
-        const char *pkgName, void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode) = 0;
-    virtual int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode) = 0;
-    virtual int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode) = 0;
+    virtual int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
+        const char *networkId, int32_t retCode) = 0;
+    virtual int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
+        const char *networkId, int32_t retCode) = 0;
+    virtual int32_t ClientOnLeaveLNNResult(
+        const char *pkgName, int32_t pid, const char *networkId, int32_t retCode) = 0;
+    virtual int32_t ClientOnLeaveMetaNodeResult(
+        const char *pkgName, int32_t pid, const char *networkId, int32_t retCode) = 0;
     virtual int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) = 0;
     virtual int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) = 0;
     virtual int32_t ClientOnTimeSyncResult(
-        const char *pkgName, const void *info, uint32_t infoTypeLen, int32_t retCode) = 0;
-    virtual int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason) = 0;
-    virtual int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason) = 0;
-    virtual int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen) = 0;
+        const char *pkgName, int32_t pid, const void *info, uint32_t infoTypeLen, int32_t retCode) = 0;
+    virtual int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason) = 0;
+    virtual int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId, int32_t reason) = 0;
+    virtual int32_t ClientOnRefreshDeviceFound(
+        const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen) = 0;
     virtual int32_t LnnServerJoin(ConnectionAddr *addr) = 0;
 };
 class BusCenterIpcInterfaceMock : public BusCenterIpcInterface {
@@ -78,7 +82,7 @@ public:
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnSetNodeDataChangeFlag, int32_t(const char *, uint16_t));
-    MOCK_METHOD4(LnnStartTimeSync, int32_t(const char *, const char *, TimeSyncAccuracy, TimeSyncPeriod));
+    MOCK_METHOD5(LnnStartTimeSync, int32_t(const char *, int32_t, const char *, TimeSyncAccuracy, TimeSyncPeriod));
     MOCK_METHOD2(LnnStopTimeSync, int32_t(const char *, const char *));
     MOCK_METHOD3(LnnPublishService, int32_t(const char *, const PublishInfo *, bool));
     MOCK_METHOD3(LnnUnPublishService, int32_t(const char *, int32_t, bool));
@@ -89,16 +93,16 @@ public:
     MOCK_METHOD1(LnnDeactiveMetaNode, int32_t(const char *));
     MOCK_METHOD2(LnnGetAllMetaNodeInfo, int32_t(MetaNodeInfo *, int32_t *));
     MOCK_METHOD4(LnnShiftLNNGear, int32_t(const char *, const char *, const char *, const GearMode *));
-    MOCK_METHOD5(ClientOnJoinLNNResult, int32_t(const char *, void *, uint32_t, const char *, int32_t));
-    MOCK_METHOD5(ClientOnJoinMetaNodeResult, int32_t(const char *, void *, uint32_t, const char *, int32_t));
-    MOCK_METHOD3(ClientOnLeaveLNNResult, int32_t(const char *, const char *, int32_t));
-    MOCK_METHOD3(ClientOnLeaveMetaNodeResult, int32_t(const char *, const char *, int32_t));
+    MOCK_METHOD5(ClientOnJoinLNNResult, int32_t(PkgNameAndPidInfo *, void *, uint32_t, const char *, int32_t));
+    MOCK_METHOD5(ClientOnJoinMetaNodeResult, int32_t(PkgNameAndPidInfo *, void *, uint32_t, const char *, int32_t));
+    MOCK_METHOD4(ClientOnLeaveLNNResult, int32_t(const char *, int32_t, const char *, int32_t));
+    MOCK_METHOD4(ClientOnLeaveMetaNodeResult, int32_t(const char *, int32_t, const char *, int32_t));
     MOCK_METHOD3(ClinetOnNodeOnlineStateChanged, int32_t(bool, void *, uint32_t));
     MOCK_METHOD3(ClinetOnNodeBasicInfoChanged, int32_t(void *, uint32_t, int32_t));
-    MOCK_METHOD4(ClientOnTimeSyncResult, int32_t(const char *, const void *, uint32_t, int32_t));
-    MOCK_METHOD3(ClientOnPublishLNNResult, int32_t(const char *, int32_t, int32_t));
-    MOCK_METHOD3(ClientOnRefreshLNNResult, int32_t(const char *, int32_t, int32_t));
-    MOCK_METHOD3(ClientOnRefreshDeviceFound, int32_t(const char *, const void *, uint32_t));
+    MOCK_METHOD5(ClientOnTimeSyncResult, int32_t(const char *, int32_t, const void *, uint32_t, int32_t));
+    MOCK_METHOD4(ClientOnPublishLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
+    MOCK_METHOD4(ClientOnRefreshLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
+    MOCK_METHOD4(ClientOnRefreshDeviceFound, int32_t(const char *, int32_t, const void *, uint32_t));
     MOCK_METHOD1(LnnServerJoin,int32_t(ConnectionAddr *));
 };
 } // namespace OHOS

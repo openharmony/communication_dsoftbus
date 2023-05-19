@@ -56,7 +56,7 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
 
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
-    return LnnIpcServerJoin(pkgName, addr, addrTypeLen);
+    return LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
 }
 
 int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *customData, unsigned int addrTypeLen)
@@ -70,7 +70,7 @@ int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *custo
 
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
-    return LnnIpcServerLeave(pkgName, networkId);
+    return LnnIpcServerLeave(pkgName, 0, networkId);
 }
 
 int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
@@ -82,7 +82,7 @@ int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
 
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
 {
-    return LnnIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
+    return LnnIpcStartTimeSync(pkgName, 0, targetNetworkId, accuracy, period);
 }
 
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
@@ -102,7 +102,7 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 
 int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    return LnnIpcRefreshLNN(pkgName, info);
+    return LnnIpcRefreshLNN(pkgName, 0, info);
 }
 
 int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)

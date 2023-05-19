@@ -241,9 +241,10 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t inf
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, const void *info, uint32_t infoTypeLen,
-    int32_t retCode)
+NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
+    uint32_t infoTypeLen, int32_t retCode)
 {
+    (void)pid;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnTimeSyncResult callback ipc server push.");
     if (pkgName == NULL || info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
@@ -271,8 +272,10 @@ NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, const voi
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t publishId, int32_t reason)
+NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId,
+    int32_t reason)
 {
+    (void) pid;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnPublishLNNResult callback ipc server push.");
     if (pkgName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
@@ -299,8 +302,10 @@ NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t refreshId, int32_t reason)
+NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId,
+    int32_t reason)
 {
+    (void)pid;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnRefreshLNNResult callback ipc server push.");
     if (pkgName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
@@ -327,8 +332,10 @@ NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshDeviceFound(const char *pkgName, const void *device, uint32_t deviceLen)
+NO_SANITIZE("cfi") int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device,
+    uint32_t deviceLen)
 {
+    (void)pid;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnRefreshDeviceFound callback ipc server push.");
     if (pkgName == NULL || device == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");

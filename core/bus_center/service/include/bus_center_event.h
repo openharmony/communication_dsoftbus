@@ -154,7 +154,7 @@ void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state);
 void LnnNotifyAddressChangedEvent(const char* ifName);
 void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin);
 
-void LnnNotifyTimeSyncResult(const char *pkgName, const TimeSyncResultInfo *info, int32_t retCode);
+void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncResultInfo *info, int32_t retCode);
 
 void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
 
