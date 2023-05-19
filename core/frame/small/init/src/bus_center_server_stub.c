@@ -65,7 +65,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerJoinLNN no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcServerJoin(pkgName, addr, addrTypeLen);
+    int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerJoinLNN failed.");
         return SOFTBUS_ERR;
@@ -95,7 +95,7 @@ int32_t ServerLeaveLNN(IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerLeaveLNN no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcServerLeave(pkgName, networkId);
+    int32_t ret = LnnIpcServerLeave(pkgName, 0, networkId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerLeaveLNN failed.");
         return SOFTBUS_ERR;
@@ -264,7 +264,7 @@ int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStartTimeSync no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
+    int32_t ret = LnnIpcStartTimeSync(pkgName, 0, targetNetworkId, accuracy, period);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStartTimeSync start time sync failed.");
         return SOFTBUS_ERR;
@@ -413,7 +413,7 @@ int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply)
         info.capabilityData = NULL;
         info.dataLen = 0;
     }
-    int32_t ret = LnnIpcRefreshLNN(pkgName, &info);
+    int32_t ret = LnnIpcRefreshLNN(pkgName, 0, &info);
     WriteInt32(reply, ret);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN failed.");

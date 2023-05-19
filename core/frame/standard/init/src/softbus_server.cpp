@@ -179,22 +179,26 @@ int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const
 
 int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
 {
-    return LnnIpcServerJoin(pkgName, addr, addrTypeLen);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcServerJoin(pkgName, (int32_t)callingPid, addr, addrTypeLen);
 }
 
 int32_t SoftBusServer::JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
 {
-    return MetaNodeIpcServerJoin(pkgName, addr, customData, addrTypeLen);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return MetaNodeIpcServerJoin(pkgName, (int32_t)callingPid, addr, customData, addrTypeLen);
 }
 
 int32_t SoftBusServer::LeaveLNN(const char *pkgName, const char *networkId)
 {
-    return LnnIpcServerLeave(pkgName, networkId);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcServerLeave(pkgName, (int32_t)callingPid, networkId);
 }
 
 int32_t SoftBusServer::LeaveMetaNode(const char *pkgName, const char *networkId)
 {
-    return MetaNodeIpcServerLeave(pkgName, networkId);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return MetaNodeIpcServerLeave(pkgName, (int32_t)callingPid, networkId);
 }
 
 int32_t SoftBusServer::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
@@ -221,7 +225,8 @@ int32_t SoftBusServer::SetNodeDataChangeFlag(const char *pkgName, const char *ne
 int32_t SoftBusServer::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {
-    return LnnIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcStartTimeSync(pkgName, (int32_t)callingPid, targetNetworkId, accuracy, period);
 }
 
 int32_t SoftBusServer::StopTimeSync(const char *pkgName, const char *targetNetworkId)
@@ -256,7 +261,8 @@ int32_t SoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
 
 int32_t SoftBusServer::RefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    return LnnIpcRefreshLNN(pkgName, info);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcRefreshLNN(pkgName, (int32_t)callingPid, info);
 }
 
 int32_t SoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)

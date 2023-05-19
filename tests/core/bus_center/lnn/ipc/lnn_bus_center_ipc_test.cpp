@@ -97,11 +97,11 @@ HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_SERVER_JOIN_Test_001, TestSize.Level
     ConnectionAddr addrValue;
     (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     char pkgNameValue[DEFAULT_LEN] = "test";
-    int32_t ret = MetaNodeIpcServerJoin(pkgName, &addrValue, &customData, addrTypeLen);
+    int32_t ret = MetaNodeIpcServerJoin(pkgName, 0, &addrValue, &customData, addrTypeLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerJoin(pkgNameValue, addr, &customData, addrTypeLen);
+    ret = MetaNodeIpcServerJoin(pkgNameValue, 0, addr, &customData, addrTypeLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerJoin(pkgNameValue, (void *)&addrValue, &customData, addrTypeLen);
+    ret = MetaNodeIpcServerJoin(pkgNameValue, 0, (void *)&addrValue, &customData, addrTypeLen);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
 }
 
@@ -117,13 +117,13 @@ HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Leve
     char *networkId = nullptr;
     char pkgNameValue[DEFAULT_LEN] = "test";
     char networkIdValue[DEFAULT_LEN] = "12345";
-    int32_t ret = MetaNodeIpcServerLeave(pkgName, networkIdValue);
+    int32_t ret = MetaNodeIpcServerLeave(pkgName, 0, networkIdValue);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerLeave(pkgNameValue, networkId);
+    ret = MetaNodeIpcServerLeave(pkgNameValue, 0, networkId);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerLeave(pkgNameValue, networkId);
+    ret = MetaNodeIpcServerLeave(pkgNameValue, 0, networkId);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcServerLeave(pkgNameValue, networkIdValue);
+    ret = MetaNodeIpcServerLeave(pkgNameValue, 0, networkIdValue);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
 }
 
@@ -165,7 +165,7 @@ HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_NOTIFY_LEAVE_RESULT_Test_001, TestSi
 
     int32_t ret = MetaNodeIpcNotifyLeaveResult(nullptr, retCode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AddLeaveMetaNodeInfo(pkgName, networkId);
+    ret = AddLeaveMetaNodeInfo(pkgName, 0, networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = MetaNodeIpcNotifyLeaveResult(networkIdValue, retCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -193,13 +193,13 @@ HWTEST_F(LNNBusCenterIpcTest, IS_REPEAT_JOIN_META_NODE_REQUEST_Test_001, TestSiz
         .peerUid = "002"
     };
 
-    ret = AddJoinMetaNodeInfo(pkgName1, &addr1);
+    ret = AddJoinMetaNodeInfo(pkgName1, 0, &addr1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = IsRepeatJoinMetaNodeRequest(pkgName1, &addr1);
+    ret = IsRepeatJoinMetaNodeRequest(pkgName1, 0, &addr1);
     EXPECT_TRUE(ret == true);
-    ret = IsRepeatJoinMetaNodeRequest(pkgName2, &addr1);
+    ret = IsRepeatJoinMetaNodeRequest(pkgName2, 0, &addr1);
     EXPECT_TRUE(ret == false);
-    ret = IsRepeatJoinMetaNodeRequest(pkgName1, &addr2);
+    ret = IsRepeatJoinMetaNodeRequest(pkgName1, 0, &addr2);
     EXPECT_TRUE(ret == false);
 }
 
@@ -217,13 +217,13 @@ HWTEST_F(LNNBusCenterIpcTest, IS_REPEAT_LEAVE_META_NODE_REQUEST_Test_001, TestSi
     const char *errNetworkId = "124";
     int32_t ret;
 
-    ret = AddLeaveMetaNodeInfo(pkgName1, networkId);
+    ret = AddLeaveMetaNodeInfo(pkgName1, 0, networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = IsRepeatLeaveMetaNodeRequest(pkgName1, networkId);
+    ret = IsRepeatLeaveMetaNodeRequest(pkgName1, 0, networkId);
     EXPECT_TRUE(ret == true);
-    ret = IsRepeatLeaveMetaNodeRequest(pkgName2, networkId);
+    ret = IsRepeatLeaveMetaNodeRequest(pkgName2, 0, networkId);
     EXPECT_TRUE(ret == false);
-    ret = IsRepeatLeaveMetaNodeRequest(pkgName1, errNetworkId);
+    ret = IsRepeatLeaveMetaNodeRequest(pkgName1, 0, errNetworkId);
     EXPECT_TRUE(ret == false);
 }
 } // namespace OHOS
