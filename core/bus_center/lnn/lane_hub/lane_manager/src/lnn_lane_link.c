@@ -235,7 +235,8 @@ NO_SANITIZE("cfi") static int32_t LaneLinkOfBleDirect(uint32_t reqId,
         LLOGE("get peer udid fail");
         return SOFTBUS_ERR;
     }
-    if (SoftBusGenerateStrHash(deviceid, UDID_BUF_LEN, linkInfo.linkInfo.bleDirect.peerUdidHash) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash(deviceid, strlen((char*)deviceid),
+        linkInfo.linkInfo.bleDirect.peerUdidHash) != SOFTBUS_OK) {
         LLOGE("generate peer udid hash fail");
         return SOFTBUS_ERR;
     }
