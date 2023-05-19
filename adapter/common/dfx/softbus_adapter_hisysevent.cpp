@@ -110,7 +110,7 @@ static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < msg->paramNum; i++) {
-        if (strcpy_s(g_dstParam[i].name, SOFTBUS_HISYSEVT_NAME_LEN, msg->paramArray[i].paramName) != EOK) {
+        if (strcpy_s(g_dstParam[i].name, MAX_LENGTH_OF_PARAM_NAME, msg->paramArray[i].paramName) != EOK) {
             HILOG_ERROR(SOFTBUS_HILOG_ID, "copy param fail");
             return SOFTBUS_ERR;
         }
