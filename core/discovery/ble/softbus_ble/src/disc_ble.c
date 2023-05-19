@@ -1007,11 +1007,6 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
                 return SOFTBUS_MALLOC_ERR;
             }
         }
-        if (custDataLen > CUST_DATA_MAX_LEN) {
-            DLOGE("custDataLen(%u) larger than CUST_DATA_MAX_LEN", custDataLen);
-            SoftBusFree(info->capabilityData[pos]);
-            return SOFTBUS_INVALID_PARAM;
-        }
         if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
             SoftBusFree(info->capabilityData[pos]);
             return SOFTBUS_MEM_ERR;

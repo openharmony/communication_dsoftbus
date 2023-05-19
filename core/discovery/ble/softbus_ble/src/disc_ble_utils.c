@@ -172,10 +172,6 @@ NO_SANITIZE("cfi") int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dat
 /* A helper function for copying TLV value to destination */
 static int32_t CopyValue(void *dst, uint32_t dstLen, const void *src, uint32_t srcLen, const char *hint)
 {
-    if (srcLen > dstLen) {
-        DLOGE("srcLen(%u) > dstLen(%u)", srcLen, dstLen);
-        return SOFTBUS_INVALID_PARAM;  
-    }
     if (memcpy_s(dst, dstLen, src, srcLen) != EOK) {
         DLOGE("parse tlv memcpy failed, tlvType: %s, tlvLen: %u, dstLen: %u", hint, srcLen, dstLen);
         return SOFTBUS_MEM_ERR;
