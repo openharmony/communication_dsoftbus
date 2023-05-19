@@ -112,6 +112,18 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
                 return SOFTBUS_MEM_ERR;
             }
             break;
+        case CONNECT_BLE:
+            connInfo->type = AUTH_LINK_TYPE_BLE;
+            if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, info.bleInfo.bleMac) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy blemac fail.");
+                return SOFTBUS_MEM_ERR;
+            }
+            if (memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
+                info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy deviceIdHash fail.");
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unexpected connType: %d.", info.type);
             return SOFTBUS_ERR;
