@@ -348,7 +348,8 @@ HWTEST_F(AuthTestCallBackTest, OnFinish_Test_002, TestSize.Level1)
     LnnHichainInterfaceMock::g_devAuthCb.onFinish(SEQ_SERVER, OPER_CODE, g_retData);
     bool ret = WaitForSignal();
     EXPECT_TRUE(ret);
-    EXPECT_CALL(connMock, ConnPostBytes).WillOnce(DoAll(SendSignal, LnnConnectInterfaceMock::ActionOfConnPostBytes));
+    EXPECT_CALL(connMock, ConnPostBytes)
+        .WillRepeatedly(DoAll(SendSignal, LnnConnectInterfaceMock::ActionOfConnPostBytes));
     PostDeviceInfoMessage(SEQ_SERVER, &info2);
     WaitForSignal();
     LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER,
