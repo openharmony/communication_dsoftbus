@@ -187,11 +187,13 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     LnnSocketInterfaceMock socketMock;
+    AuthNetLedgertInterfaceMock ledgermock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
     int32_t ret = AuthInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback);
