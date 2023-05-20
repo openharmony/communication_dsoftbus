@@ -24,12 +24,9 @@ br_adapter_inc = [
 
 bus_center_core_adapter_src =
     [ "$dsoftbus_root_path/core/adapter/bus_center/src/bus_center_adapter.c" ]
-bus_center_core_adapter_inc = [
-  "$dsoftbus_root_path/adapter/common/include",
-  "//base/startup/init/interfaces/innerkits/include/syspara",
-]
-bus_center_core_adapter_deps =
-    [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
+bus_center_core_adapter_inc = [ "$dsoftbus_root_path/adapter/common/include" ]
+bus_center_core_adapter_deps = []
+bus_center_core_adapter_external_deps = [ "init:libbegetutil" ]
 
 if (defined(ohos_lite)) {
   bus_center_core_adapter_src += [
@@ -39,46 +36,42 @@ if (defined(ohos_lite)) {
   bus_center_core_adapter_inc += [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
+    "//base/startup/init/interfaces/innerkits/include/syspara",
   ]
 
-  bus_center_core_adapter_deps += []
+  bus_center_core_adapter_deps +=
+      [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
 } else {
   if (dsoftbus_get_devicename == false) {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
-
     bus_center_core_adapter_inc +=
         [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
-
-    bus_center_core_adapter_deps += []
   } else {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp" ]
 
     bus_center_core_adapter_inc += [
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
-      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb/include",
-      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability/include",
-      "//base/account/os_account/interfaces/innerkits/ohosaccount/native/include/",
     ]
 
-    bus_center_core_adapter_deps += [
-      "${ability_base_path}:want",
-      "${ability_base_path}:zuri",
-      "${ability_runtime_inner_api_path}/dataobs_manager:dataobs_manager",
-      "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-      "//foundation/distributeddatamgr/data_share/interfaces/inner_api:datashare_consumer",
-      "//foundation/distributeddatamgr/data_share/interfaces/inner_api/common:datashare_common",
-      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/dataability:native_dataability",
-      "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
+    bus_center_core_adapter_external_deps += [
+      "ability_base:want",
+      "ability_base:zuri",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:dataobs_manager",
+      "data_share:datashare_common",
+      "data_share:datashare_consumer",
+      "relational_store:native_dataability",
+      "relational_store:native_rdb",
     ]
   }
   if (softbus_os_account == true) {
     bus_center_core_adapter_src += [
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
     ]
-    bus_center_core_adapter_deps += [
-      "//base/account/os_account/frameworks/ohosaccount/native:libaccountkits",
-      "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits",
+    bus_center_core_adapter_external_deps += [
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
     ]
   } else {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp" ]

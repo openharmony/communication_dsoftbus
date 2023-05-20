@@ -157,7 +157,6 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//base/startup/init/interfaces/innerkits/include/syspara",
       "//commonlibrary/c_utils/base/include",
       "//third_party/bounds_checking_function/include",
     ]
@@ -174,7 +173,6 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/log/softbus_adapter_log.c",
     ]
     public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
-    deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
     native_source_path = rebase_path("$dsoftbus_root_path")
 
     ble_enhanced_impl =
@@ -207,6 +205,7 @@ if (defined(ohos_lite)) {
         "hisysevent_native:libhisysevent",
         "hitrace_native:libhitracechain",
         "hiviewdfx_hilog_native:libhilog",
+        "init:libbegetutil",
       ]
     }
     part_name = "dsoftbus"
