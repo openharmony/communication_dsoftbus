@@ -197,7 +197,8 @@ static void TransTdcDelChannelInfo(int32_t channelId)
             SoftBusFree(item);
             item = NULL;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client]Delete Tdc chanel info[%d] item success.", channelId);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "[client]Delete Tdc chanel info[%d] item success.", channelId);
             return;
         }
     }
