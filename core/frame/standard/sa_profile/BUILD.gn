@@ -14,7 +14,7 @@
 import("//build/ohos/sa_profile/sa_profile.gni")
 
 ohos_sa_profile("softbus_sa_profile") {
-  sources = [ "4700.xml" ]
+  sources = [ "softbus_server.json" ]
 
   part_name = "dsoftbus"
 }
