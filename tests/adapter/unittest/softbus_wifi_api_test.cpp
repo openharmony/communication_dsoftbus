@@ -51,7 +51,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetWifiDeviceConfigTest001, TestSize.Le
 {
     SoftBusWifiDevConf configList;
     NiceMock<WifiInterfaceMock> wifiMock;
-    ON_CALL(wifiMock, GetDeviceConfigs).WillByDefault(DoAll(SetArgPointee<1>(TEST_CONFIG_SIZE), Return(WIFI_SUCCESS)));
+    ON_CALL(wifiMock, GetDeviceConfigs).WillByDefault(Return(WIFI_SUCCESS));
     (void)memset_s(&configList, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
     (void)strcpy_s(configList.ssid, sizeof(TEST_SSID), TEST_SSID);
     (void)memcpy_s(configList.bssid, sizeof(TEST_BSSID), TEST_BSSID, sizeof(TEST_BSSID));

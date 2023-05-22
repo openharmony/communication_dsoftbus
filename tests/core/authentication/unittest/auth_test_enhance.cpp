@@ -16,7 +16,7 @@
 #include "auth_common.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
-#include "auth_manager.h"
+3#include "auth_manager.h"
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
 #include "lnn_connection_mock.h"
@@ -191,6 +191,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
     int32_t ret = AuthInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback);
