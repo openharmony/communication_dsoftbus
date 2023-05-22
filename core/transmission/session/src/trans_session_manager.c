@@ -126,7 +126,8 @@ NO_SANITIZE("cfi") int32_t TransSessionServerAddItem(SessionServer *newNode)
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 return SOFTBUS_SERVER_NAME_REPEATED;
             } else {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "sessionname [%s] has been used by other processes", newNode->sessionName);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                    "sessionname [%s] has been used by other processes", newNode->sessionName);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 return SOFTBUS_SERVER_NAME_USED;
             }
