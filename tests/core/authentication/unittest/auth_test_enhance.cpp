@@ -16,7 +16,7 @@
 #include "auth_common.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
-3#include "auth_manager.h"
+#include "auth_manager.h"
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
 #include "lnn_connection_mock.h"
