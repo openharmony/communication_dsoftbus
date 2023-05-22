@@ -258,7 +258,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::TransTdcCreateListenerTest(data, size);
     OHOS::TransTdcStopReadTest(data, size);
     OHOS::TransTdcSendBytesTest(data, size);
-    OHOS::TransTdcSendMessageTest(data, size);//
+    OHOS::TransTdcSendMessageTest(data, size);
     OHOS::TransAddDataBufNodeTest(data, size);
     OHOS::TransDelDataBufNodeTest(data, size);
     OHOS::TransTdcRecvDataTest(data, size);

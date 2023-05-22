@@ -57,12 +57,15 @@ void SoftBusMessageOpenChannelTest::TearDownTestCase(void)
 char *TestGetMsgPack()
 {
     cJSON *msg = cJSON_CreateObject();
-    if (msg == NULL) {
+    if (msg == nullptr) {
         cJSON_Delete(msg);
-        return NULL;
+        return nullptr;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-
+    if (appInfo == nullptr) {
+        cJSON_Delete(msg);
+        return nullptr;
+    }
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = 1;
@@ -72,12 +75,12 @@ char *TestGetMsgPack()
     (void)memcpy_s(appInfo->myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
     if (TransAuthChannelMsgPack(msg, appInfo) != SOFTBUS_OK) {
         cJSON_Delete(msg);
-        return NULL;
+        return nullptr;
     }
     char *data = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
 
-    if (appInfo != NULL) {
+    if (appInfo != nullptr) {
         SoftBusFree(appInfo);
     }
     return data;
