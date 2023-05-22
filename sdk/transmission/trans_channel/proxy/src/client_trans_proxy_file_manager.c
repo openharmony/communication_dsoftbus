@@ -375,10 +375,10 @@ static int32_t UnpackFileDataFrame(FileRecipientInfo *info, FileFrame *fileFrame
         fileFrame->crc = crc;
     } else {
         fileFrame->fileData = fileFrame->data;
-        fileFrame->seq = (*(uint32_t *)(fileFrame->fileData));
         if (fileFrame->frameLength <= FRAME_DATA_SEQ_OFFSET) {
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
+        fileFrame->seq = (*(uint32_t *)(fileFrame->fileData));
         *fileDataLen = fileFrame->frameLength;
     }
     return SOFTBUS_OK;
