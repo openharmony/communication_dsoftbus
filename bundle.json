@@ -1,6 +1,6 @@
 {
     "name": "@openharmony/dsoftbus",
-    "version": "4.0",
+    "version": "3.0",
     "description": "dsoftbus",
     "publishAs": "code-segment",
     "segment": {
@@ -49,6 +49,7 @@
           "bluetooth",
           "drivers_interface_wlan",
           "hiviewdfx_hilog_native",
+          "init",
           "ipc",
           "os_account",
           "relational_store",

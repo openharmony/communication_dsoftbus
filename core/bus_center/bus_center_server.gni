@@ -101,7 +101,8 @@ if (defined(ohos_lite)) {
     "//utils/system/safwk/native/include",
   ]
   bus_center_server_external_deps +=
-      bus_center_adapter_external_deps + bus_center_ledger_external_deps
+      bus_center_adapter_external_deps + bus_center_ledger_external_deps +
+      bus_center_core_adapter_external_deps
   bus_center_server_external_deps += [ "c_utils:utils" ]
 }
 
