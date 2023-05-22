@@ -1,0 +1,12 @@
+{
+    "process": "softbus_server",
+    "systemability": [
+        {
+            "name": 4700,
+            "libpath": "libsoftbus_server.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump_level": 1
+        }
+    ]
+}
