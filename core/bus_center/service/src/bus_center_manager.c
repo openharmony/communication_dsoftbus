@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
+#include "lnn_decision_center.h"
 #include "softbus_adapter_xcollie.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -191,12 +192,17 @@ NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start delay init fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start decision center init fail!");
+        return SOFTBUS_ERR;
+    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
 {
+    LnnDeinitDecisionCenter();
     DeinitNodeAddrAllocator();
     LnnDeinitLaneHub();
     LnnDeinitNetBuilder();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "lnn_net_builder.h"
 #include "softbus_utils.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_decision_center.h"
 
 /*
 * This macro is used to control that the heartbeat can be started
@@ -47,6 +48,7 @@
 SoftBusScreenState g_screenState = SOFTBUS_SCREEN_UNKNOWN;
 static int64_t g_lastScreenOnTime;
 static int64_t g_lastScreenOffTime;
+static DcTask g_dcTask;
 
 SoftBusScreenState GetScreenState(void)
 {
@@ -408,6 +410,19 @@ NO_SANITIZE("cfi") void LnnHbOnAuthGroupDeleted(void)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB send once ble broadcast to notify account group deleted.");
 }
 
+static int32_t LnnHbSubscribeTask(void)
+{
+    (void)memset_s(&g_dcTask, sizeof(DcTask), 0, sizeof(DcTask));
+    g_dcTask.preferredSystem = TASK_RULE_SYSTEM;
+    g_dcTask.optimizeStrategy = (void *)LnnHbMediumMgrSetParam;
+    return LnnDcSubscribe(&g_dcTask);
+}
+
+static void LnnHbUnsubscribeTask(void)
+{
+    LnnDcUnsubscribe(&g_dcTask);
+}
+
 NO_SANITIZE("cfi") int32_t LnnInitHeartbeat(void)
 {
     if (LnnHbStrategyInit() != SOFTBUS_OK) {
@@ -430,12 +445,17 @@ NO_SANITIZE("cfi") int32_t LnnInitHeartbeat(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist screen state change evt handler fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnHbSubscribeTask() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB subscribe task fail!");
+        return SOFTBUS_ERR;
+    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) init success");
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") void LnnDeinitHeartbeat(void)
 {
+    LnnHbUnsubscribeTask();
     LnnHbStrategyDeinit();
     LnnHbMediumMgrDeinit();
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);
