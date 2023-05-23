@@ -17,7 +17,7 @@ softbus_adapter_wifi_path = "$softbus_adapter_common/net/wifi"
 
 adapter_wifi_src = []
 adapter_wifi_inc = [ "$softbus_adapter_wifi_path/include" ]
-adapter_wifi_deps = []
+adapter_wifi_external_deps = []
 
 if (defined(ohos_lite) || softbus_communication_wifi_feature == false) {
   if (dsoftbus_feature_lnn_net) {
@@ -29,11 +29,6 @@ if (defined(ohos_lite) || softbus_communication_wifi_feature == false) {
   if (dsoftbus_feature_lnn_net) {
     adapter_wifi_src +=
         [ "$softbus_adapter_wifi_path/common/softbus_wifi_api_adapter.c" ]
-    adapter_wifi_inc += [
-      "//foundation/communication/wifi/wifi/interfaces/kits/c",
-      "//foundation/communication/wifi/wifi/frameworks/native/include",
-    ]
-    adapter_wifi_deps +=
-        [ "//foundation/communication/wifi/wifi/frameworks/native:wifi_sdk" ]
+    adapter_wifi_external_deps += [ "wifi:wifi_sdk" ]
   }
 }
