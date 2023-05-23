@@ -1071,11 +1071,9 @@ static void BrConnectedComdHandl(uint32_t connectionId, const cJSON *data)
     int32_t keyDelta = 0;
     int32_t keyReferenceNum = 0;
     int64_t peerConnectionId = 0;
-
     if (!GetJsonObjectNumberItem(data, KEY_METHOD, &keyMethod)) {
         return;
     }
-
     if (!GetJsonObjectNumber64Item(data, KEY_TRACE_IDENTIFIER, &peerConnectionId)) {
         CLOGW("parse br connection binding relation failed, maybe it is old version, method: %d", keyMethod);
     } else {

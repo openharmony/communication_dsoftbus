@@ -21,6 +21,6 @@ void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
     (void)chainId;
 }
 
-void SoftbusHitraceStop()
+void SoftbusHitraceStop(void)
 {
 }

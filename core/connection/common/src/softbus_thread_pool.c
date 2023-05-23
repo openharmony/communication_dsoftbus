@@ -121,7 +121,6 @@ NO_SANITIZE("cfi") ThreadPool *ThreadPoolInit(int32_t threadNum, int32_t queueMa
         CLOGE("lock failed");
         goto EXIT;
     }
-
     for (int32_t i = 0; i < pool->threadNum; ++i) {
         ThreadAttr attr = {"ThreadPoolWorker", 0, SOFTBUS_PRIORITY_LOWEST};
         CLOGI("create pthread now.");

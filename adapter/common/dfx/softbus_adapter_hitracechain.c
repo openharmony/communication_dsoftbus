@@ -57,7 +57,7 @@ void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
     HiTraceChainSetId(&pId);
 }
 
-void SoftbusHitraceStop()
+void SoftbusHitraceStop(void)
 {
     HiTraceChainClearId();
 }
