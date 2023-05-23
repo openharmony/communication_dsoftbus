@@ -11,11 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ability_base_path = "//foundation/ability/ability_base"
-ability_runtime_path = "//foundation/ability/ability_runtime"
-ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
-ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
-ability_runtime_services_path = "${ability_runtime_path}/services"
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
 dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "${dsoftbus_root_path}/sdk"
