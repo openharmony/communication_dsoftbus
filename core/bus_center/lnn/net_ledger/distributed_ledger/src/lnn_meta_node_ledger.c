@@ -51,6 +51,10 @@ static MetaNodeStorageInfo *FindMetaNodeStorageInfo(const char *id, bool isUdid)
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
         itemId = isUdid ? item->info.configInfo.udid : item->info.metaNodeId;
+        if (strlen(id) > strlen(itemId)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "FindMetaNodeStorageInfo: id is invalid");
+            return NULL;
+        }
         if (strncmp(itemId, id, strlen(id)) == 0) {
             return item;
         }
