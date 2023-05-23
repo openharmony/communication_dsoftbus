@@ -14,7 +14,7 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 p2p_connection_src = []
-p2p_connection_deps = []
+p2p_connection_external_deps = []
 
 p2p_connection_inc = [
   "$dsoftbus_root_path/core/connection/p2p/adapter",
@@ -47,8 +47,7 @@ if (dsoftbus_feature_conn_p2p == true &&
     "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface.c",
     "$dsoftbus_root_path/core/connection/p2p/adapter/p2plink_adapter.c",
   ]
-  p2p_connection_deps +=
-      [ "//foundation/communication/wifi/wifi/frameworks/native:wifi_sdk" ]
+  p2p_connection_external_deps += [ "wifi:wifi_sdk" ]
 } else {
   p2p_connection_src += [ "$dsoftbus_root_path/core/connection/p2p/interface/p2plink_interface_virtual.c" ]
 }
