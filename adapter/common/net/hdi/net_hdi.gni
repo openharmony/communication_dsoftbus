@@ -17,7 +17,7 @@ softbus_adapter_hdi_path = "$softbus_adapter_common/net/hdi"
 
 adapter_hdi_src = []
 adapter_hdi_inc = [ "$softbus_adapter_hdi_path/include" ]
-adapter_hdi_deps = []
+adapter_hdi_external_deps = []
 
 if (defined(ohos_lite) || (defined(global_parts_info) && !defined(
                                global_parts_info.hdf_drivers_interface_wlan))) {
@@ -31,6 +31,6 @@ if (defined(ohos_lite) || (defined(global_parts_info) && !defined(
     adapter_hdi_src +=
         [ "$softbus_adapter_hdi_path/common/softbus_adapter_wlan_extend.c" ]
 
-    adapter_hdi_deps += [ "//drivers/interface/wlan/v1_1:libwlan_proxy_1.1" ]
+    adapter_hdi_external_deps += [ "drivers_interface_wlan:libwlan_proxy_1.1" ]
   }
 }
