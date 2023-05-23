@@ -1715,6 +1715,16 @@ static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int
     } else {
         uint32_t frameDataLength = dataLen - FRAME_DATA_SEQ_OFFSET;
         fileInfo->seq = fileFrame->seq;
+
+        if(MAX_FILE_SIZE < frameDataLength){
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "frameDataLength is too large, frameDataLength:%" PRIu32, frameDataLength);
+            return SOFTBUS_ERR;
+        }
+
+        if(fileInfo->fileOffset > MAX_FILE_SIZE - frameDataLength) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%" PRIu64, fileInfo->fileOffset + frameDataLength);
+            return SOFTBUS_ERR;
+        }
         int64_t writeLength = SoftBusPwriteFile(fileInfo->fileFd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET,
             frameDataLength, fileInfo->fileOffset);
         if (writeLength != frameDataLength) {
