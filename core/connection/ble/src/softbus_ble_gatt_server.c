@@ -263,7 +263,6 @@ NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, SoftBusBtUuid *
         CLOGE("BleServiceAddCallback appUuid is null");
         return;
     }
-
     if (memcmp(uuid->uuid, SOFTBUS_SERVICE_UUID, uuid->uuidLen) == 0) {
         if (status != SOFTBUS_OK) {
             ResetGattService(&g_gattService);

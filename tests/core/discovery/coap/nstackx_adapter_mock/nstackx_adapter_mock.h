@@ -24,7 +24,7 @@
 class AdapterInterface {
 public:
     virtual int32_t NSTACKX_RegisterServiceData(const char *serviceData) = 0;
-};  
+};
 
 class AdapterMock : public AdapterInterface {
 public:
