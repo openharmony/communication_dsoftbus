@@ -1668,6 +1668,19 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     bit = ((bit == 0) ? (FILE_SEND_ACK_INTERVAL - 1) : (bit - 1));
     if (seq >= fileInfo->startSeq) {
         int32_t seqDiff = seq - fileInfo->seq - 1;
+
+        int64_t bytesToWrite =  seqDiff * fileInfo->oneFrameLen;
+        if (MAX_FILE_SIZE < bytesToWrite) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                "WriteEmptyFrame bytesToWrite is too large, bytesToWrite:%" PRIu64, bytesToWrite);
+            return SOFTBUS_ERR;
+        }
+        if (fileInfo->fileOffset > (uint64_t)MAX_FILE_SIZE - bytesToWrite) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%" PRIu64,
+                fileInfo->fileOffset + bytesToWrite);
+            return SOFTBUS_ERR;
+        }
+
         if (WriteEmptyFrame(fileInfo, seqDiff) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
