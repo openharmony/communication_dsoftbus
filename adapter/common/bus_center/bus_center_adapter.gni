@@ -104,14 +104,7 @@ if (defined(ohos_lite)) {
     if (dsoftbus_feature_lnn_wifiservice_dependence && has_ces_part) {
       bus_center_adapter_src +=
           [ "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor.cpp" ]
-      bus_center_adapter_inc += [
-        "//base/notification/common_event_service/interfaces/inner_api",
-        "//foundation/communication/wifi/wifi/interfaces/innerkits/native_cpp/wifi_standard/interfaces",
-        "//foundation/communication/wifi/wifi/services/wifi_standard/wifi_framework/common/net_helper",
-        "//foundation/communication/wifi/wifi/frameworks/native/interfaces",
-        "//foundation/communication/wifi/wifi/services/wifi_standard/wifi_framework/wifi_toolkit/net_helper",
-      ]
-      bus_center_adapter_deps += []
+      bus_center_adapter_external_deps += [ "wifi:wifi_sdk" ]
     } else {
       bus_center_adapter_src += [
         "$adapter_bus_center_path/wlan/lnn_wifiservice_monitor_virtual.cpp",

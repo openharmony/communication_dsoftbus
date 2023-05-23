@@ -46,7 +46,7 @@ bus_center_server_deps =
     bus_center_adapter_deps + bus_center_core_adapter_deps +
     bus_center_disc_mgr_deps + bus_center_hub_deps + bus_center_builder_deps +
     bus_center_net_mgr_deps + bus_center_ledger_deps + bus_center_monitor_deps +
-    bus_center_utils_deps + adapter_wifi_deps + adapter_hdi_deps
+    bus_center_utils_deps
 
 bus_center_server_src +=
     [ "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c" ]
@@ -102,7 +102,8 @@ if (defined(ohos_lite)) {
   ]
   bus_center_server_external_deps +=
       bus_center_adapter_external_deps + bus_center_ledger_external_deps +
-      bus_center_core_adapter_external_deps
+      bus_center_core_adapter_external_deps + adapter_wifi_external_deps +
+      adapter_hdi_external_deps
   bus_center_server_external_deps += [ "c_utils:utils" ]
 }
 
