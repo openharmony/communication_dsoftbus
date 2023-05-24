@@ -36,12 +36,12 @@ void StreamDepacketizer::DepacketizeHeader(const char *header)
     }
 }
 
-void StreamDepacketizer::DepacketizeBuffer(char *buffer)
+void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
 {
     char *ptr = buffer;
     uint32_t tlvTotalLen = 0;
     if (header_.GetExtFlag() != 0) {
-        tlvs_.Depacketize(ptr);
+        tlvs_.Depacketize(ptr, bufferSize);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
             "TLV version: %d, num = %d, extLen = %zd, checksum = %u", tlvs_.GetVersion(), tlvs_.GetTlvNums(),
             tlvs_.GetExtLen(), tlvs_.GetCheckSum());
