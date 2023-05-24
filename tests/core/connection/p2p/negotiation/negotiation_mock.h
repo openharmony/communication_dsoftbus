@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef NEGOTIATION_MOCK_H
+#define NEGOTIATION_MOCK_H
+
 #include <atomic>
 #include <mutex>
 #include <gmock/gmock.h>
@@ -112,3 +116,5 @@ public:
 private:
     static inline std::atomic<NegotiationMock*> mock = nullptr;
 };
+
+#endif /* NEGOTIATION_MOCK_H */
