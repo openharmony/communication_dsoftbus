@@ -258,5 +258,18 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": ".*ohos.collaborationcenter.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.InterConnection.collaborationFwk",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
