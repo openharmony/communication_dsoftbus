@@ -105,7 +105,7 @@ HWTEST_F(StreamDepacketizerTest, DepacketizeHeader001, TestSize.Level1)
     streamDepacketizer->streamType_ = Communication::SoftBus::COMMON_AUDIO_STREAM;
     streamDepacketizer->DepacketizeHeader((char *)header);
 
-    streamDepacketizer->DepacketizeBuffer((char *)buffer);
+    streamDepacketizer->DepacketizeBuffer((char *)buffer, sizeof(buffer));
 
     int ret = streamDepacketizer->GetDataLength();
     EXPECT_EQ(0, ret);

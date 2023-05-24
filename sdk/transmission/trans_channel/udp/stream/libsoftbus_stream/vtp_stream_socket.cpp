@@ -1084,6 +1084,11 @@ void VtpStreamSocket::DoStreamRecv()
             auto decryptedBuffer = std::move(dataBuffer);
 
             int plainDataLength = decryptedLength - GetEncryptOverhead();
+            if (plainDataLength <= sizeof(CommonHeader)) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid plainDataLength:%d", plainDataLength);
+                break;
+            }
+
             std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
             ssize_t decLen = Decrypt(decryptedBuffer.get(), decryptedLength, plainData.get(), plainDataLength);
             if (decLen != plainDataLength) {
@@ -1096,7 +1101,7 @@ void VtpStreamSocket::DoStreamRecv()
             decode.DepacketizeHeader(header);
 
             auto buffer = plainData.get() + sizeof(CommonHeader);
-            decode.DepacketizeBuffer(buffer);
+            decode.DepacketizeBuffer(buffer, plainDataLength - sizeof(CommonHeader));
 
             extBuffer = decode.GetUserExt();
             extLen = decode.GetUserExtSize();
