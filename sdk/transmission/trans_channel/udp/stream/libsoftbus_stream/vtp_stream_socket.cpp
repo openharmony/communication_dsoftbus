@@ -1101,7 +1101,7 @@ void VtpStreamSocket::DoStreamRecv()
             decode.DepacketizeHeader(header);
 
             auto buffer = plainData.get() + sizeof(CommonHeader);
-            decode.DepacketizeBuffer(buffer);
+            decode.DepacketizeBuffer(buffer, plainDataLength - sizeof(CommonHeader));
 
             extBuffer = decode.GetUserExt();
             extLen = decode.GetUserExtSize();
