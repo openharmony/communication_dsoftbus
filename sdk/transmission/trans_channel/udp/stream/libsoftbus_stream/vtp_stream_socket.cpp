@@ -1084,6 +1084,11 @@ void VtpStreamSocket::DoStreamRecv()
             auto decryptedBuffer = std::move(dataBuffer);
 
             int plainDataLength = decryptedLength - GetEncryptOverhead();
+            if (plainDataLength <= 0) {
+                SoftBusLog(
+                    SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt failed, invalid decryptedLen = %zd", decryptedLength);
+                break;
+            }
             std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
             ssize_t decLen = Decrypt(decryptedBuffer.get(), decryptedLength, plainData.get(), plainDataLength);
             if (decLen != plainDataLength) {
