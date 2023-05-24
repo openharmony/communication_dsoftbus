@@ -1702,6 +1702,21 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
         fileOffset = (seq - 1) * fileInfo->oneFrameLen;
         fileInfo->preSeqResult |= 0x01 << bit;
     }
+
+    uint32_t frameDataLength = dataLen - FRAME_DATA_SEQ_OFFSET;
+
+    if (MAX_FILE_SIZE < frameDataLength) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "frameDataLength is too large, frameDataLength:%" PRIu32,
+            frameDataLength);
+        return SOFTBUS_ERR;
+    }
+
+    if (fileOffset > MAX_FILE_SIZE - frameDataLength) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%" PRIu64,
+            fileOffset + frameDataLength);
+        return SOFTBUS_ERR;
+    }
+
     int64_t writeLength = SoftBusPwriteFile(fileInfo->fileFd, frame->fileData + FRAME_DATA_SEQ_OFFSET,
         dataLen - FRAME_DATA_SEQ_OFFSET, fileOffset);
     if (writeLength < 0 || (uint64_t)writeLength != dataLen - FRAME_DATA_SEQ_OFFSET) {
