@@ -212,7 +212,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
             continue;
         }
         LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
-        return ClientOnRefreshDeviceFound(pkgName, (*iter)->pid, &newDevice, sizeof(DeviceInfo));
+        (void)ClientOnRefreshDeviceFound(pkgName, (*iter)->pid, &newDevice, sizeof(DeviceInfo));
         delete *iter;
         iter = g_refreshLnnRequestInfo.erase(iter);
     }
@@ -255,7 +255,7 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcServerJoin(const char *pkgName, int32_t ca
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatJoinMetaNodeRequest(pkgName, callingPid, connAddr)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat meta join lnn request from: %s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
     int32_t ret = MetaNodeServerJoin(connAddr, customData);
@@ -390,7 +390,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t calling
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatRfreshLnnRequest(pkgName, callingPid, info->subscribeId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat refresh lnn request from: %s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
     (void)AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
