@@ -123,7 +123,7 @@ public:
         return 0;
     }
 
-    void Depacketize(char *data)
+    void Depacketize(char *data, uint32_t size)
     {
         auto tmp = reinterpret_cast<uint16_t *>(data);
         firstLevelHeader.type = ntohs(*tmp++);
@@ -134,7 +134,7 @@ public:
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
-            if (tl.length == 0) {
+            if (tl.length == 0 || sizeof(uint16_t) + sizeof(uint16_t) + tl.length != size) {
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);

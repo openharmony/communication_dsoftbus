@@ -30,7 +30,7 @@ public:
     virtual ~StreamDepacketizer() = default;
 
     void DepacketizeHeader(const char *header);
-    void DepacketizeBuffer(char *buffer);
+    void DepacketizeBuffer(char *buffer, uint32_t bufferSize);
 
     uint32_t GetHeaderDataLen() const
     {

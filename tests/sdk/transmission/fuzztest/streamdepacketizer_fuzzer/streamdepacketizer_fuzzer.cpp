@@ -51,7 +51,7 @@ namespace OHOS {
         }
 
         Communication::SoftBus::StreamDepacketizer decode(1);
-        decode.DepacketizeBuffer((char *)tmp);
+        decode.DepacketizeBuffer((char *)tmp, sizeof(tmp));
     }
 } // namespace OHOS
 
