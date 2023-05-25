@@ -38,7 +38,7 @@ void TransOpenNetWorkingChannelSessionNameTest(const uint8_t* data, size_t size)
 
     char peerNetworkId[DEVICE_ID_SIZE_MAX] = TEST_PEER_NETWORK_ID;
 
-    TransOpenNetWorkingChannel((const char *)mySessionName, peerNetworkId);
+    TransOpenNetWorkingChannel(mySessionName, peerNetworkId);
 }
 
 void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t size)
@@ -99,7 +99,7 @@ void TransSendNetworkingMessageTest(const uint8_t* data, size_t size)
         return;
     }
 
-    TransSendNetworkingMessage(channelId, (const char *)myData, dataLen, priority);
+    TransSendNetworkingMessage(channelId, myData, dataLen, priority);
 }
 } // namespace OHOS
 

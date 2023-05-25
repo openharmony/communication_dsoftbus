@@ -678,15 +678,15 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
 {
-   int port = 5683;
-   int ret = OpenTcpServer("127.0.0.1", port);
-   EXPECT_TRUE(ret != SOFTBUS_ERR);
+    int port = 5683;
+    int ret = OpenTcpServer("127.0.0.1", port);
+    EXPECT_TRUE(ret != SOFTBUS_ERR);
 
-   ret = OpenTcpServer("280567565", port);
-   EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = OpenTcpServer("280567565", port);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 
-   ret = OpenTcpServer("127.0.0.1", 0);
-   EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = OpenTcpServer("127.0.0.1", 0);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
