@@ -258,4 +258,4 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_008, TestSize.Level1
     ret = GetAvailableBtMac(macStr, BT_MAC_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
-}// namespace OHOS
+} // namespace OHOS

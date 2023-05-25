@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 #include <securec.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"

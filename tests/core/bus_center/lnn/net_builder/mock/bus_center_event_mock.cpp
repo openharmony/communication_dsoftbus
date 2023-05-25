@@ -40,6 +40,5 @@ void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t re
 {
     GetBusEventInterface()->LnnNotifyJoinResult(addr, networkId, retCode);
 }
-
 }
 }

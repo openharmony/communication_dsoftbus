@@ -222,11 +222,11 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
         return;
     }
     authFsm->statisticData.endAuthTime = LnnUpTimeMs();
-    uint64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
+    int64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
     AuthFailStage stage;
     switch (result) {
         case SOFTBUS_OK:
-            if (SoftBusRecordAuthResult(linkType, SOFTBUS_OK, costTime, AUTH_STAGE_BUTT) != SOFTBUS_OK) {
+            if (SoftBusRecordAuthResult(linkType, SOFTBUS_OK, (uint64_t)costTime, AUTH_STAGE_BUTT) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "report static auth result fail");
             }
             return;

@@ -172,7 +172,7 @@ public:
     MOCK_METHOD3(LnnConvertAuthConnInfoToAddr, bool (ConnectionAddr *, const AuthConnInfo *, ConnectionAddrType));
     MOCK_METHOD3(AddStringToJsonObject, bool (cJSON *, const char * const, const char *));
     MOCK_METHOD3(AddNumberToJsonObject, bool (cJSON *, const char * const, int));
-    MOCK_METHOD5(LnnSendSyncInfoMsg, int32_t (LnnSyncInfoType, const char *,const uint8_t *,
+    MOCK_METHOD5(LnnSendSyncInfoMsg, int32_t (LnnSyncInfoType, const char *, const uint8_t *,
         uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo * (const char *, IdCategory));
     MOCK_METHOD1(LnnUpdateNodeInfo, int32_t (NodeInfo *));

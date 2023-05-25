@@ -25,7 +25,7 @@ namespace OHOS {
 #define TEST_LEN          5
 #define TEST_LEN2         65
 #define TEST_LISTENER_ID  20
-#define TEST_LISTENER_ID2 -1
+#define TEST_LISTENER_ID2 (-1)
 #define TEST_STATE1       1
 #define TEST_STATE2       3
 #define TEST_STATE3       5

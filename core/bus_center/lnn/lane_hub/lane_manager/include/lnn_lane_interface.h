@@ -78,13 +78,13 @@ typedef struct {
 } BleDirectConnInfo;
 
 typedef struct {
-    uint16_t protocol;
+    uint32_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
 } P2pConnInfo;
 
 typedef struct {
-    uint16_t protocol;
+    uint32_t protocol;
     char addr[IP_LEN];
     uint16_t port;
 } WlanConnInfo;

@@ -618,7 +618,7 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_Test002, TestSize.Lev
 {
     BusCenterServerProxyInit();
     char pkgName[] = "pkgname";
-    char networkId[] = "12313"; 
+    char networkId[] = "12313";
     uint16_t dataChangeFlag = 11;
     int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
@@ -656,7 +656,7 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_NODE_Test001, TestSize.Level1)
 HWTEST_F(BusCenterSdkTest, SERVER_IPC_JOIN_META_Test002, TestSize.Level1)
 {
     char pkgName[] = "111";
-    void *addr = nullptr; 
+    void *addr = nullptr;
     CustomData *customData = nullptr;
     unsigned int addrTypeLen = 2;
     int32_t ret = ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);

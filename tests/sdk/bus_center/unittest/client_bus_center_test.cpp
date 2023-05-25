@@ -105,7 +105,7 @@ HWTEST_F(ClientBusMangerTest, JOIN_METANODE_Test_001, TestSize.Level1)
 */
 HWTEST_F(ClientBusMangerTest, LEAVE_META_NODE_INNER_Test_001, TestSize.Level1)
 {
-    char pkgName[] = "test"; 
+    char pkgName[] = "test";
     char networkId[] = "222";
     OnLeaveMetaNodeResult cb = nullptr;
     g_busCenterClient.isInit = false;
