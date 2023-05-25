@@ -14,7 +14,7 @@
 on post-fs-data
     start softbus_server
 
-service softbus_server /system/bin/sa_main /system/profile/softbus_server.xml
+service softbus_server /system/bin/sa_main /system/profile/softbus_server.json
     class z_core
     user system
     group system shell
