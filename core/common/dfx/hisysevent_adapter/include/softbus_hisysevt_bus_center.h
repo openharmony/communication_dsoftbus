@@ -112,7 +112,7 @@ typedef struct {
     int64_t offLineTime;
 } LnnStatisticData;
 
-uint64_t LnnUpTimeMs(void);
+int64_t LnnUpTimeMs(void);
 void DeinitBusCenterDfx(void);
 int32_t InitBusCenterDfx(void);
 int32_t SoftBusRecordDiscoveryResult(DiscoveryStage stage, AppDiscNode *discNode);

@@ -168,7 +168,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
     ret = LnnGetAddrTypeByIfName("BLE", &type4);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret =LnnGetNetIfTypeByName(nullptr, nullptr);
+    ret = LnnGetNetIfTypeByName(nullptr, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 

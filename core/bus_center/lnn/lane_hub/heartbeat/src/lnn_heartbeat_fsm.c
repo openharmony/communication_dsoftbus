@@ -901,7 +901,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             CheckDevStatusForScreenOff(hbFsm, msgPara->networkId, msgPara->hbType, nowTime);
             break;
         }
-        int32_t i, infoNum;
+        int32_t infoNum = 0;
         NodeBasicInfo *info = NULL;
         if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
             LLOGE("HB check dev status get online node info fail");
@@ -912,7 +912,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             LLOGI("HB check dev status get none online node");
             break;
         }
-        for (i = 0; i < infoNum; ++i) {
+        for (int32_t i = 0; i < infoNum; ++i) {
             CheckDevStatusForScreenOff(hbFsm, info[i].networkId, msgPara->hbType, nowTime);
         }
         SoftBusFree(info);

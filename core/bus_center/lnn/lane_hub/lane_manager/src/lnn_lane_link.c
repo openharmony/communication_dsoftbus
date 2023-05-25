@@ -507,7 +507,7 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
 
     struct SelectProtocolReq req = {
         .localIfType = ifType,
-        .remoteSupporttedProtocol = remoteNodeInfo->supportedProtocols & acceptableProtocols,
+        .remoteSupporttedProtocol = (uint32_t)remoteNodeInfo->supportedProtocols & acceptableProtocols,
         .selectedProtocol = 0,
         .currPri = 0,
     };

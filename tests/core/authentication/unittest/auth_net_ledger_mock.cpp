@@ -195,12 +195,12 @@ char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *
     cJSON_Delete(obj);
     head.len = static_cast<uint32_t>(strlen(msg) + 1);
     uint32_t size = GetAuthDataSize(head.len);
-    uint8_t *buf = (uint8_t *)SoftBusMalloc(size);
+    uint8_t *buf = reinterpret_cast<uint8_t *>(SoftBusMalloc(size));
     if (buf == nullptr) {
         cJSON_free(msg);
         return nullptr;
     }
-    int32_t ret = PackAuthData(&head, (uint8_t *)msg, buf, size);
+    int32_t ret = PackAuthData(&head, reinterpret_cast<uint8_t *>(msg), buf, size);
     if (ret == SOFTBUS_OK) {
         cJSON_free(msg);
         ALOGI("PackAuthData success.");

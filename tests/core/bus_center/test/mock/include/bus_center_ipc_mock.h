@@ -103,7 +103,7 @@ public:
     MOCK_METHOD4(ClientOnPublishLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
     MOCK_METHOD4(ClientOnRefreshLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
     MOCK_METHOD4(ClientOnRefreshDeviceFound, int32_t(const char *, int32_t, const void *, uint32_t));
-    MOCK_METHOD1(LnnServerJoin,int32_t(ConnectionAddr *));
+    MOCK_METHOD1(LnnServerJoin, int32_t(ConnectionAddr *));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

@@ -284,13 +284,13 @@ AuthResultRecord g_authResultRecord[SOFTBUS_HISYSEVT_LINK_TYPE_BUTT];
 DevOnlineDurRecord g_devOnlineDurRecord;
 DevDiscoveryRecord g_devDiscoveryRecord;
 
-NO_SANITIZE("cfi") uint64_t LnnUpTimeMs(void)
+NO_SANITIZE("cfi") int64_t LnnUpTimeMs(void)
 {
     SoftBusSysTime t;
     t.sec = 0;
     t.usec = 0;
     SoftBusGetTime(&t);
-    uint64_t when = t.sec * SECOND_TO_MSENC + t.usec / MILLISECOND_TO_MICRO;
+    int64_t when = t.sec * SECOND_TO_MSENC + t.usec / MILLISECOND_TO_MICRO;
     return when;
 }
 

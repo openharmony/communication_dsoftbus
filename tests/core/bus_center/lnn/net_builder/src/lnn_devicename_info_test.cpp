@@ -28,14 +28,12 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
-NodeInfo *info = {0};
-constexpr char *DEVICE_NAME1 = nullptr;
-constexpr char DEVICE_NAME2[] = "ABCDEFG";
-
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
-
+NodeInfo *info = {0};
+constexpr char *DEVICE_NAME1 = nullptr;
+constexpr char DEVICE_NAME2[] = "ABCDEFG";
 class LNNDeviceNameInfoTest : public testing::Test {
 public:
     static void SetUpTestCase();

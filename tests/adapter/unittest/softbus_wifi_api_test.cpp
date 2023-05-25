@@ -40,7 +40,7 @@ void AdapterDsoftbusWifiTest::SetUpTestCase(void) { }
 void AdapterDsoftbusWifiTest::TearDownTestCase(void) { }
 void AdapterDsoftbusWifiTest::SetUp() { }
 void AdapterDsoftbusWifiTest::TearDown() { }
-void onSoftBusWifiScanResult(int state, int size) { }
+void OnSoftBusWifiScanResult(int state, int size) { }
 /*
  * @tc.name: SoftBusGetWifiDeviceConfig
  * @tc.desc: softbus wifi test
@@ -127,7 +127,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, ScanResultCbTest001, TestSize.Level1)
 {
     NiceMock<WifiInterfaceMock> wifiMock;
     ISoftBusScanResult cb = {
-        .onSoftBusWifiScanResult = onSoftBusWifiScanResult,
+        .onSoftBusWifiScanResult = OnSoftBusWifiScanResult,
     };
     EXPECT_CALL(wifiMock, RegisterWifiEvent)
         .WillOnce(Return(WIFI_SUCCESS))
@@ -172,7 +172,7 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusUnRegisterWifiEventTest001, TestSize.Le
     NiceMock<WifiInterfaceMock> wifiMock;
 
     ISoftBusScanResult cb = {
-        .onSoftBusWifiScanResult = onSoftBusWifiScanResult,
+        .onSoftBusWifiScanResult = OnSoftBusWifiScanResult,
     };
     EXPECT_CALL(wifiMock, UnRegisterWifiEvent)
         .WillOnce(Return(WIFI_SUCCESS))

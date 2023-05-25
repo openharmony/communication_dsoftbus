@@ -30,20 +30,15 @@
 #include "softbus_log.h"
 
 #define BLE_DISABLE 0
+#define SIZE 20
 #define LNN_DEFAULT_IF_NAME_BR "br0"
 namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
-
 LnnProtocolManager self;
-
 LnnNetIfMgr netifMgr;
-
-#define SIZE 20
-
-char IP1[] = "127.0.0.1";
-char IP2[] = "127.0.0.2";
-
+constexpr char WLAN_IP1[] = "127.0.0.1";
+constexpr char WLAN_IP2[] = "127.0.0.2";
 class LNNIpNetworkImplMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -188,13 +183,13 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ipMock, LnnIsLinkReady).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = GetAvailableIpAddr(nullptr, IP1, SIZE);
+    int ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP1), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = GetAvailableIpAddr(nullptr, IP1, SIZE);
+    ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP1), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = GetAvailableIpAddr(nullptr, IP1, SIZE);
+    ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP1), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = GetAvailableIpAddr(nullptr, IP2, SIZE);
+    ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP2), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillRepeatedly(LnnIpNetworkImplInterfaceMock::
@@ -211,7 +206,6 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
     strcpy_s(subnet.ifName, sizeof("DeviceName"), "DeviceName");
     res = GetIpEventInRunning(&subnet);
     EXPECT_TRUE(ret != IP_SUBNET_MANAGER_EVENT_MAX);
-    
 }
 
 /*
@@ -293,4 +287,4 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1
     CloseProxyPort();
     CloseProxyPort();
 }
-}// namespace OHOS
+} // namespace OHOS

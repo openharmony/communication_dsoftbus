@@ -39,8 +39,6 @@ public:
     virtual WifiErrorCode Hid2dGetChannelListFor5G(int *chanList, int len) = 0;
     virtual WifiErrorCode GetLinkedInfo(WifiLinkedInfo *info) = 0;
     virtual WifiErrorCode GetCurrentGroup(WifiP2pGroupInfo* groupInfo) = 0;
-
-
 };
 class WifiInterfaceMock : public WifiInterface {
 public:

@@ -45,7 +45,7 @@ static LnnIpNetworkImplInterface *GetLnnIpNetworkImplInterface()
 int32_t LnnIpNetworkImplInterfaceMock::ActionOfGetNetworkIpByIfName(
     const char *ifName, char *ip, char *netmask, uint32_t len)
 {
-    if (ifName == NULL || netmask == NULL || len == 0) {
+    if (ifName == nullptr || netmask == nullptr || len == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "invalid para");
         return SOFTBUS_ERR;
     }
