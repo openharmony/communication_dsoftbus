@@ -286,7 +286,6 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
 
     ret = OpenAuthConn(g_udid, reqId, true);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-
 }
 
 /**
