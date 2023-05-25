@@ -56,13 +56,37 @@ NO_SANITIZE("cfi") void TransPermissionDeinit(void)
     DeinitPermissionJson();
 }
 
+NO_SANITIZE("cfi") int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
+{
+    using namespace AccessToken;
+    if (callingUid == (pid_t)getuid() && callingPid == getpid()) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "self app");
+        return SELF_APP;
+    }
+
+    uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag(callingToken);
+    if (tokenType == ATokenTypeEnum::TOKEN_NATIVE) {
+        return NATIVE_APP;
+    } else if (tokenType == ATokenTypeEnum::TOKEN_HAP) {
+        HapTokenInfo hapTokenInfo;
+        AccessTokenKit::GetHapTokenInfo(callingToken, hapTokenInfo);
+        if ((hapTokenInfo.apl == ATokenAplEnum::APL_SYSTEM_CORE) ||
+            (hapTokenInfo.apl == ATokenAplEnum::APL_SYSTEM_BASIC)) {
+            return SYSTEM_APP;
+        }
+    }
+    return NORMAL_APP;
+}
+
 NO_SANITIZE("cfi") int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     const char *pkgName, const char *sessionName, uint32_t actions)
 {
     if (sessionName == nullptr || pkgName == nullptr) {
         return SOFTBUS_PERMISSION_DENIED;
     }
-    SoftBusPermissionItem *pItem = CreatePermissionItem(NATIVE_APP, callingUid, callingPid, pkgName, actions);
+    int32_t permType = CalcPermType(callingUid, callingPid);
+    SoftBusPermissionItem *pItem = CreatePermissionItem(permType, callingUid, callingPid, pkgName, actions);
     if (pItem == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
