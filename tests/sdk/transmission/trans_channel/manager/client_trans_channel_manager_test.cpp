@@ -130,7 +130,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize
 HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, TestSize.Level0)
 {
     int channelId = 1;
-    const void *data = (const void *)"test";
+    const char *data = "test";
 
     int ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -157,7 +157,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
 HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, TestSize.Level0)
 {
     int channelId = 1;
-    const void *data = (const void *)"test";
+    const char *data = "test";
 
     int ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
