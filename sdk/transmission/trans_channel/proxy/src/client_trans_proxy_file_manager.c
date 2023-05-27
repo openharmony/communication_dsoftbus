@@ -691,7 +691,7 @@ static int32_t PackFileTransStartInfo(FileFrame *fileFrame, const char *destFile
     int32_t len = strlen(destFile);
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t);
-        fileFrame->frameLength = FRAME_HEAD_LEN + dataLen + sizeof(uint64_t);
+        fileFrame->frameLength = FRAME_HEAD_LEN + dataLen;
         if (fileFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
             return SOFTBUS_ERR;
         }
@@ -705,6 +705,7 @@ static int32_t PackFileTransStartInfo(FileFrame *fileFrame, const char *destFile
             return SOFTBUS_MEM_ERR;
         }
     } else {
+        // seq(4byte) + fileName
         fileFrame->frameLength = FRAME_DATA_SEQ_OFFSET + len;
         if (fileFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
             return SOFTBUS_ERR;
@@ -750,6 +751,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         file->startSeq = file->preStartSeq = 1;
         file->seqResult = file->preSeqResult = 0;
     } else {
+        // seq(4byte) + fileName
         if (fileFrame->frameLength < FRAME_DATA_SEQ_OFFSET) {
             return SOFTBUS_ERR;
         }
@@ -757,7 +759,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         fileNameLen = fileFrame->frameLength - FRAME_DATA_SEQ_OFFSET;
         file->seq = (*(uint32_t *)(fileFrame->fileData));
         if (fileNameLen > 0) {
-            fileNameData = fileFrame->fileData + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t);
+            fileNameData = fileFrame->fileData + FRAME_DATA_SEQ_OFFSET;
         }
     }
     if (fileNameLen > MAX_FILE_PATH_NAME_LEN) {
