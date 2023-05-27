@@ -44,7 +44,6 @@ ohos_unittest("TransProxyChannelTest") {
 
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/coap/include",
 
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
@@ -59,7 +58,6 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
 
     "$dsoftbus_root_path/third_party/dfinder/include",
