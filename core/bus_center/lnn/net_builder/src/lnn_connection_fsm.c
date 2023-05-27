@@ -254,8 +254,8 @@ static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
     }
     if (retCode == SOFTBUS_OK) {
         connFsm->statisticData.beginOnlineTime = LnnUpTimeMs();
-        uint64_t constTime = connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime;
-        if (SoftBusRecordBusCenterResult(linkType, constTime) != SOFTBUS_OK) {
+        int64_t constTime = connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime;
+        if (SoftBusRecordBusCenterResult(linkType, (uint64_t)constTime) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report static lnn duration fail");
         }
         return;
@@ -350,8 +350,8 @@ static void ReportLeaveLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report leave lnn result enter");
     if (retCode == SOFTBUS_OK) {
         connFsm->statisticData.offLineTime = LnnUpTimeMs();
-        uint64_t constTime = connFsm->statisticData.offLineTime - connFsm->statisticData.beginOnlineTime;
-        if (SoftBusRecordDevOnlineDurResult(constTime) != SOFTBUS_OK) {
+        int64_t constTime = connFsm->statisticData.offLineTime - connFsm->statisticData.beginOnlineTime;
+        if (SoftBusRecordDevOnlineDurResult((uint64_t)constTime) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report static device online duration dail");
         }
         return;

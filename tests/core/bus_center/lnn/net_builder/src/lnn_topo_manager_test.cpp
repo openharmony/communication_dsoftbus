@@ -310,7 +310,7 @@ static void AssambleSyncMsg(const char *localUdid, const char *peerUdid, uint8_t
     ASSERT_NE(*msg, nullptr);
     *(int32_t *)(*msg) = LNN_INFO_TYPE_TOPO_UPDATE;
     ASSERT_EQ(strcpy_s(*msg + sizeof(int32_t), msgRelationLen, msgRelation), EOK);
-    cJSON_free((void *)msgRelation);
+    cJSON_free(const_cast<char *>(msgRelation));
 }
 
 /*
