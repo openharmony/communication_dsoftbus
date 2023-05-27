@@ -209,8 +209,8 @@ HWTEST_F(BusCenterIpcTest, MetaNodeIpcNotifyJoinResultTest_01, TestSize.Level1)
     int32_t ret = MetaNodeIpcNotifyJoinResult(nullptr, TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    ret =
-        MetaNodeIpcNotifyJoinResult(reinterpret_cast<void *>(&addr), TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
+    ret = MetaNodeIpcNotifyJoinResult(reinterpret_cast<void *>(&addr),
+        TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

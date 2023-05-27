@@ -180,9 +180,9 @@ HWTEST_F(AuthOtherTest, HANDLE_CONN_CONNECT_CMD_TEST_001, TestSize.Level1)
 
     (void)memset_s(&info, sizeof(ConnCmdInfo), 0, sizeof(ConnCmdInfo));
     HandleConnConnectCmd(nullptr);
-    HandleConnConnectCmd((void *)&info);
+    HandleConnConnectCmd(reinterpret_cast<void *>(&info));
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
-    HandleConnConnectCmd((void *)&info);
+    HandleConnConnectCmd(reinterpret_cast<void *>(&info));
 }
 
 /*
@@ -196,7 +196,7 @@ HWTEST_F(AuthOtherTest, HANDLE_CONN_CONNECT_RESULT_TEST_001, TestSize.Level1)
     int32_t para = 0;
 
     HandleConnConnectResult(nullptr);
-    HandleConnConnectResult((void *)&para);
+    HandleConnConnectResult(reinterpret_cast<void *>(&para));
 }
 
 /*

@@ -33,8 +33,8 @@ typedef uint32_t LnnProtocolAbility;
 #define LNN_PROTOCOL_DMSG  (1L << 5)
 #define LNN_PROTOCOL_VTP   (1L << 6)
 #define LNN_PROTOCOL_NIP   (1L << 7)
-#define LNN_PROTOCOL_ALL   ((uint64_t)-1)
-typedef uint64_t ProtocolType;
+#define LNN_PROTOCOL_ALL   ((uint32_t)-1)
+typedef uint32_t ProtocolType;
 
 #define BIND_ADDR_ALL "0"
 

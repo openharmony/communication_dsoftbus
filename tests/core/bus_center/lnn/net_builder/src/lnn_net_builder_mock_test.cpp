@@ -135,16 +135,16 @@ HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
 HWTEST_F(LNNNetBuilderMockTest, LNN_FILL_NODE_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<NetBuilderDepsInterfaceMock> uuidMock;
-    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     MetaJoinRequestNode metaNode;
     NodeInfo info;
     info.uuid[0] = 'x';
     metaNode.addr.type = CONNECTION_ADDR_ETH;
     EXPECT_TRUE(FillNodeInfo(&metaNode, &info) == SOFTBUS_OK);
-    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     metaNode.addr.type = CONNECTION_ADDR_WLAN;
     EXPECT_TRUE(FillNodeInfo(&metaNode, &info) == SOFTBUS_OK);
-    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_,_,_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     metaNode.addr.type = CONNECTION_ADDR_BR;
     EXPECT_TRUE(FillNodeInfo(&metaNode, &info) == SOFTBUS_OK);
 }
@@ -1274,7 +1274,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_003, TestSize.L
 */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_002, TestSize.Level1)
 {
-    SpecificLeaveMsgPara *msgPara = reinterpret_cast<SpecificLeaveMsgPara *>(SoftBusMalloc(sizeof(SpecificLeaveMsgPara)));
+    SpecificLeaveMsgPara *msgPara =
+        reinterpret_cast<SpecificLeaveMsgPara *>(SoftBusMalloc(sizeof(SpecificLeaveMsgPara)));
     (void)strcpy_s(msgPara->networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
     msgPara->addrType = CONNECTION_ADDR_BLE;
 
