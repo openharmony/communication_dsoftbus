@@ -639,6 +639,7 @@ int32_t SoftBusRecordDiscoveryResult(DiscoveryStage stage, AppDiscNode *discNode
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
+    bool isNeedToDiscList = false;
     switch (stage) {
         case START_DISCOVERY:
             g_devDiscoveryRecord.startDiscoveryCnt++;
@@ -653,15 +654,16 @@ int32_t SoftBusRecordDiscoveryResult(DiscoveryStage stage, AppDiscNode *discNode
             g_devDiscoveryRecord.devFoundCnt++;
             break;
         case BUSINESS_DISCOVERY:
+            isNeedToDiscList = true;
             g_devDiscoveryRecord.businessDiscoveryCnt++;
-            if (discNode == NULL || AddAppDiscInfoNodeToList(discNode) != SOFTBUS_OK) {
-                ret = SOFTBUS_ERR;
-            }
             break;
         default:
             break;
     }
     (void)SoftBusMutexUnlock(&(g_devDiscoveryRecord.lock));
+    if (isNeedToDiscList && (discNode == NULL || AddAppDiscInfoNodeToList(discNode) != SOFTBUS_OK)) {
+        ret = SOFTBUS_ERR;
+    }
     return ret;
 }
 
