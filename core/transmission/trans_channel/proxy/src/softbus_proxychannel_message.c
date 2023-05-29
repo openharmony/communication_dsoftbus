@@ -90,6 +90,21 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     return SOFTBUS_OK;
 }
 
+static int32_t GetRemoteBtMacByUdidHash(const char *udidHash, char *brMac, int32_t len)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdidHash(udidHash, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetRemoteBtMacByUdidHash fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, len) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetRemoteBtMacByUdidHash UDID fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+
+}
+
 static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
 {
     ConnectionInfo info = {0};
@@ -131,6 +146,37 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
     return SOFTBUS_OK;
 }
 
+static int32_t ConvertBrConnInfo2BleConnInfo(AuthConnInfo *connInfo)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    if (GetRemoteUdidByBtMac(connInfo->info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udid by btmac fail");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid),
+        connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udid hash fail");
+        return SOFTBUS_ERR;
+    }
+    connInfo->type = AUTH_LINK_TYPE_BLE;
+    return SOFTBUS_OK;
+}
+
+static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
+{
+    char brMac[BT_MAC_LEN] = {0};
+    if (GetRemoteBtMacByUdidHash((char*)connInfo->info.bleInfo.deviceIdHash, brMac, BT_MAC_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get btmac by udid fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, brMac) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy br mac fail");
+        return SOFTBUS_ERR;
+    }
+    connInfo->type = AUTH_LINK_TYPE_BR;
+    return SOFTBUS_OK;
+}
+
 static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
 {
     AuthConnInfo connInfo;
@@ -140,17 +186,13 @@ static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
     }
     bool isBle = ((cipher & USE_BLE_CIPHER) != 0);
     if (isBle && connInfo.type == AUTH_LINK_TYPE_BR) {
-        char udid[UDID_BUF_LEN] = {0};
-        if (GetRemoteUdidByBtMac(connInfo.info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get udid by btmac fail");
+        if (ConvertBrConnInfo2BleConnInfo(&connInfo) != SOFTBUS_OK) {
             return AUTH_INVALID_ID;
         }
-        if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid),
-            connInfo.info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udid hash fail");
+    } else if (!isBle && connInfo.type == AUTH_LINK_TYPE_BLE) {
+        if (ConvertBleConnInfo2BrConnInfo(&connInfo) != SOFTBUS_OK) {
             return AUTH_INVALID_ID;
         }
-        connInfo.type = AUTH_LINK_TYPE_BLE;
     }
     bool isAuthServer = !((cipher & AUTH_SERVER_SIDE) != 0);
     return AuthGetIdByConnInfo(&connInfo, isAuthServer, false);
