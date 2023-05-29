@@ -483,6 +483,9 @@ static void P2pLinkNegoConnected(const P2pLinkNegoConnResult *conn)
     if (role == ROLE_GC) {
         P2pLinkNegoSuccessSetGoInfo(conn);
         P2pLinkStartOpenP2pAuthChan(conn);
+    } else {
+        P2pLinkSharelinkReuse();
+        CLOGI("new gc connected,p2p ref increase");
     }
     P2pLinkLnnSync();
 }
