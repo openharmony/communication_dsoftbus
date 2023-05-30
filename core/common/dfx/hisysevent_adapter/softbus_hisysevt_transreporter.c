@@ -282,28 +282,6 @@ static CalledApiCntStruct *GetNewApiCnt(char *apiName)
     return apiCnt;
 }
 
-static CalledApiInfoStruct *GetNewApiInfo(const char *appName, char *apiName)
-{
-    CalledApiInfoStruct *apiInfo = (CalledApiInfoStruct *)SoftBusMalloc(sizeof(CalledApiInfoStruct));
-    if (apiInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiInfo malloc failed");
-        return NULL;
-    }
-    if (strcpy_s(apiInfo->appName, SOFTBUS_HISYSEVT_PARAM_LEN, appName) != EOK ||
-        strcpy_s(apiInfo->softbusVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_softbusVersion) != EOK ||
-        strcpy_s(apiInfo->packageVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_pkgVersion) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiInfo strcpy failed");
-        SoftBusFree(apiInfo);
-        return NULL;
-    }
-    ListInit(&apiInfo->node);
-    ListInit(&apiInfo->apiCntList);
-    CalledApiCntStruct *apiCnt = GetNewApiCnt(apiName);
-    ListAdd(&apiInfo->apiCntList, &apiCnt->node);
-    apiInfo->cnt = API_TYPE_DEFAULT;
-    return apiInfo;
-}
-
 static char *GetApiNameByCode(uint32_t code)
 {
     for (uint32_t i = 0; i < sizeof(g_apiNameIdMapTbl) / sizeof(ApiNameIdMap); i++) {
@@ -316,58 +294,8 @@ static char *GetApiNameByCode(uint32_t code)
 
 void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 {
-    if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
-        MLOGE("SoftbusRecordCalledApiInfo lock fail");
-        return;
-    }
-    char *apiName = GetApiNameByCode(code);
-    if (apiName == NULL) {
-        (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
-        return;
-    }
-
-    CalledApiInfoStruct *apiInfoNode = NULL;
-    CalledApiCntStruct *apiCntNode = NULL;
-    bool isAppDiff = true;
-    bool isApiDiff = true;
-    LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
-        if (strcmp(apiInfoNode->appName, appName) == 0) {
-            isAppDiff = false;
-            LIST_FOR_EACH_ENTRY(apiCntNode, &apiInfoNode->apiCntList, CalledApiCntStruct, node) {
-                if (strcmp(apiCntNode->apiName, apiName) == 0) {
-                    isApiDiff = false;
-                    apiCntNode->calledtotalCnt++;
-                    break;
-                }
-            }
-        }
-    }
-    if (isAppDiff) {
-        apiInfoNode = GetNewApiInfo(appName, apiName);
-        if (apiInfoNode == NULL) {
-            MLOGE("GetNewApiInfo fail");
-            (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
-            return;
-        }
-        ListAdd(&g_calledApiInfoList->apiInfolist, &apiInfoNode->node);
-        g_calledApiInfoList->cnt++;
-    }
-    if ((isAppDiff == false) && (isApiDiff == true)) {
-        apiInfoNode = NULL;
-        LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
-            if (strcmp(apiInfoNode->appName, appName) == 0) {
-                apiCntNode = GetNewApiCnt(apiName);
-                if (apiCntNode == NULL) {
-                    MLOGE("GetNewApiCnt fail");
-                    (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
-                    return;
-                }
-                ListAdd(&apiInfoNode->apiCntList, &apiCntNode->node);
-                apiInfoNode->cnt++;
-            }
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+    (void)appName;
+    (void)code;
 }
 
 void SoftbusRecordCalledApiCnt(uint32_t code)
@@ -682,6 +610,10 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 
 static int32_t SoftbusReportCalledAPIEvt(void)
 {
+    if (IsListEmpty(&g_calledApiInfoList->apiInfolist)) {
+        return SOFTBUS_OK;
+    }
+    
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
     if (msg == NULL) {
         return SOFTBUS_ERR;
