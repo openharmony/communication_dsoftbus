@@ -67,6 +67,14 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
+{
+    (void)udidHash;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 {
     (void)uuid;

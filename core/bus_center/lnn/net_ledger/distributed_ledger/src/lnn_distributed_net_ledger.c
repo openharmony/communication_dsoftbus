@@ -28,6 +28,7 @@
 #include "lnn_lane_def.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -1374,6 +1375,51 @@ NO_SANITIZE("cfi") int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, 
         NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
         if ((LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) &&
             StrCmpIgnoreCase(nodeInfo->connectInfo.macAddr, btMac) == 0) {
+            if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s networkId fail!");
+            }
+            LnnMapDeinitIterator(it);
+            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_OK;
+        }
+    }
+    LnnMapDeinitIterator(it);
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_ERR;
+}
+
+NO_SANITIZE("cfi") int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
+{
+    if (udidHash == NULL || udidHash[0] == '\0' || buf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "udidHash is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    MapIterator *it = LnnMapInitIterator(&g_distributedNetLedger.distributedInfo.udidMap);
+    if (it == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "it is null");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    char nodeUdidHash[SHA_256_HASH_LEN] = {0};
+    while (LnnMapHasNext(it)) {
+        it = LnnMapNext(it);
+        if (it == NULL) {
+            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_ERR;
+        }
+        NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
+        if (LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) {
+            if (SoftBusGenerateStrHash((uint8_t*)nodeInfo->deviceInfo.deviceUdid,
+                strlen(nodeInfo->deviceInfo.deviceUdid), (uint8_t*)nodeUdidHash) != SOFTBUS_OK) {
+                continue;
+            }
+            if (strcmp(nodeUdidHash, udidHash) != 0) {
+                continue;
+            }
             if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s networkId fail!");
             }
