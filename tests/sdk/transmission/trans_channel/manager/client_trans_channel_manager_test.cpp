@@ -137,7 +137,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
 
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    
+
     ret = ClientTransChannelSendBytes(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
@@ -164,7 +164,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest001, Te
 
     ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    
+
     ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 

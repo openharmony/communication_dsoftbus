@@ -166,6 +166,12 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
       "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
       "//base/security/access_token/interfaces/innerkits/privacy/include",
+      "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_core/include/bundlemgr",
+      "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include",
+      "//base/notification/common_event_service/interfaces/inner_api",
+      "//foundation/ability/ability_base/interfaces/kits/native/want/include",
+      "//foundation/ability/ability_base/interfaces/kits/native/uri/include",
+      "//foundation/ability/ability_base/interfaces/inner_api/base/include",
     ]
     sources = dsoftbus_server_common_src
     sources += [
@@ -201,6 +207,11 @@ if (defined(ohos_lite)) {
         "safwk:system_ability_fwk",
         "samgr:samgr_proxy",
       ]
+      if (!defined(global_parts_info) ||
+          defined(global_parts_info.bundlemanager_bundle_framework)) {
+        external_deps += [ "bundle_framework:appexecfwk_core" ]
+        cflags = [ "-DSUPPORT_BUNDLENAME" ]
+      }
     }
 
     part_name = "dsoftbus"
