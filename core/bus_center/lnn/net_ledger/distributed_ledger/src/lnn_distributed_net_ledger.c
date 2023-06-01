@@ -1704,18 +1704,22 @@ NO_SANITIZE("cfi") const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUd
 
 static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
-    if (addtions->medium != BLE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshDeviceInfoDevId parameter error");
+    if (addtions->medium != COAP) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "refresh device info parameter error");
         return;
     }
-    const NodeInfo *nodeInfo = LnnGetOnlineNodeByUdidHash(device->devId);
-    if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device udidhash:%s is not online",
-            AnonymizesUDID(device->devId));
+    unsigned char shortUdidHash[SHORT_UDID_HASH_LEN + 1] = {0};
+    if (GenerateStrHashAndConvertToHexString((const unsigned char *)device->devId,
+        SHORT_UDID_HASH_LEN, shortUdidHash, SHORT_UDID_HASH_LEN + 1) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "refresh device info get short udid hash fail");
         return;
     }
-    if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy deviceUdid fail");
+    if (memset_s(device->devId, DISC_MAX_DEVICE_ID_LEN, 0, DISC_MAX_DEVICE_ID_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "refresh device info memset_s fail");
+        return;
+    }
+    if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, shortUdidHash, SHORT_UDID_HASH_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s device short udid hash fail");
     }
 }
 
@@ -1735,6 +1739,6 @@ NO_SANITIZE("cfi") void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgN
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
     RefreshDeviceInfoByDevId(device, addtions);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device found by medium=%d, online status=%d",
-        addtions->medium, device->isOnline);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device found by medium=%d, udidhash=%s, online status=%d",
+        addtions->medium, AnonymizesUDID(device->devId), device->isOnline);
 }
