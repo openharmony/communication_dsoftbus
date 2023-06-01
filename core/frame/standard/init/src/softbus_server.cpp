@@ -267,7 +267,8 @@ int32_t SoftBusServer::RefreshLNN(const char *pkgName, const SubscribeInfo *info
 
 int32_t SoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
-    return LnnIpcStopRefreshLNN(pkgName, refreshId);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcStopRefreshLNN(pkgName, (int32_t)callingPid, refreshId);
 }
 
 int32_t SoftBusServer::ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
