@@ -22,6 +22,9 @@
 #include "softbus_common.h"
 #include "token_setproc.h"
 
+#define CAPABILITY_3 "capdata3"
+#define CAPABILITY_4 "capdata4"
+
 namespace OHOS {
 constexpr char TEST_PKG_NAME[] = "com.softbus.test";
 static int32_t g_subscribeId = 0;
@@ -101,8 +104,8 @@ static PublishInfo g_pInfo = {
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata4",
-    .dataLen = sizeof("capdata4")
+    .capabilityData = (unsigned char *)CAPABILITY_4,
+    .dataLen = strlen(CAPABILITY_4)
 };
 
 static void TestPublishResult(int publishId, PublishResult reason)
@@ -126,8 +129,8 @@ static SubscribeInfo g_sInfo = {
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
+    .capabilityData = (unsigned char *)CAPABILITY_3,
+    .dataLen = strlen(CAPABILITY_3)
 };
 
 static void TestDeviceFound(const DeviceInfo *device)
