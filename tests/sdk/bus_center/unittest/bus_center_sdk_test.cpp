@@ -25,6 +25,10 @@
 #include "softbus_utils.h"
 #include "client_bus_center_manager.h"
 
+#define CAPABILITY_1 "capdata1"
+#define CAPABILITY_3 "capdata3"
+#define CAPABILITY_4 "capdata4"
+
 namespace OHOS {
 using namespace testing::ext;
 
@@ -33,6 +37,7 @@ constexpr char TEST_PKG_NAME_1[] = "com.softbus.test1";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID_1 = 0;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID_2 = 14;
+constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID_3 = 17;
 constexpr int32_t ERRO_CAPDATA_LEN = 514;
 static int32_t g_subscribeId = 0;
 static int32_t g_publishId = 0;
@@ -82,8 +87,8 @@ static SubscribeInfo g_sInfo = {
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = strlen("capdata3")
+    .capabilityData = (unsigned char *)CAPABILITY_3,
+    .dataLen = strlen(CAPABILITY_3)
 };
 
 static PublishInfo g_pInfo = {
@@ -92,8 +97,8 @@ static PublishInfo g_pInfo = {
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata4",
-    .dataLen = strlen("capdata4")
+    .capabilityData = (unsigned char *)CAPABILITY_4,
+    .dataLen = strlen(CAPABILITY_4)
 };
 
 static PublishInfo g_pInfo1 = {
@@ -272,7 +277,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize
     EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
     EXPECT_TRUE(strlen(info.networkId) == (NETWORK_ID_BUF_LEN - 1));
     EXPECT_TRUE(info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_1 ||
-        info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_2);
+        info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_2 ||
+        info.deviceTypeId == DEFAULT_LOCAL_DEVICE_TYPE_ID_3);
 }
 
 /*
@@ -395,12 +401,12 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
     g_pInfo.capabilityData = nullptr;
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
-    g_pInfo.capabilityData = (unsigned char *)"capdata1";
+    g_pInfo.capabilityData = (unsigned char *)CAPABILITY_1;
 
     g_pInfo.dataLen = ERRO_CAPDATA_LEN;
     ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
     EXPECT_TRUE(ret != 0);
-    g_pInfo.dataLen = strlen("capdata1");
+    g_pInfo.dataLen = strlen(CAPABILITY_1);
 }
 
 /**
@@ -470,12 +476,12 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
     g_sInfo.capabilityData = nullptr;
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
-    g_sInfo.capabilityData = (unsigned char *)"capdata1";
+    g_sInfo.capabilityData = (unsigned char *)CAPABILITY_1;
 
     g_sInfo.dataLen = ERRO_CAPDATA_LEN;
     ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
     EXPECT_TRUE(ret != 0);
-    g_sInfo.dataLen = strlen("capdata1");
+    g_sInfo.dataLen = strlen(CAPABILITY_1);
 }
 
 /**
