@@ -213,8 +213,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
         }
         LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
         (void)ClientOnRefreshDeviceFound(pkgName, (*iter)->pid, &newDevice, sizeof(DeviceInfo));
-        delete *iter;
-        iter = g_refreshLnnRequestInfo.erase(iter);
+        ++iter;
     }
     return SOFTBUS_OK;
 }
@@ -351,14 +350,11 @@ NO_SANITIZE("cfi") int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t pub
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-static bool IsRepeatRfreshLnnRequest(const char *pkgName, int32_t callingPid, int32_t subscribeId)
+static bool IsRepeatRfreshLnnRequest(const char *pkgName, int32_t callingPid)
 {
     std::vector<RefreshLnnRequestInfo *>::iterator iter;
     for (iter = g_refreshLnnRequestInfo.begin(); iter != g_refreshLnnRequestInfo.end(); ++iter) {
-        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0 || (*iter)->pid != callingPid) {
-            continue;
-        }
-        if ((*iter)->subscribeId == subscribeId) {
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) == 0 && (*iter)->pid == callingPid) {
             return true;
         }
     }
@@ -382,6 +378,21 @@ static int32_t AddRefreshLnnInfo(const char *pkgName, int32_t callingPid, int32_
     return SOFTBUS_OK;
 }
 
+static int32_t DeleteRefreshLnnInfo(const char *pkgName, int32_t callingPid)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<RefreshLnnRequestInfo *>::iterator iter;
+    for (iter = g_refreshLnnRequestInfo.begin(); iter != g_refreshLnnRequestInfo.end();) {
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0 || (*iter)->pid != callingPid) {
+            ++iter;
+            continue;
+        }
+        delete *iter;
+        iter = g_refreshLnnRequestInfo.erase(iter);
+    }
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
 {
     if (pkgName == nullptr || info == nullptr) {
@@ -389,11 +400,11 @@ NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t calling
         return SOFTBUS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
-    if (IsRepeatRfreshLnnRequest(pkgName, callingPid, info->subscribeId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat refresh lnn request from: %s", pkgName);
-        return SOFTBUS_ALREADY_EXISTED;
+    if (IsRepeatRfreshLnnRequest(pkgName, callingPid)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "repeat refresh lnn request from: %s", pkgName);
+    } else {
+        (void)AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
     }
-    (void)AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
     SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
@@ -401,8 +412,12 @@ NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t calling
     return LnnStartDiscDevice(pkgName, info, &callback, false);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
+NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId)
 {
+    if (IsRepeatRfreshLnnRequest(pkgName, callingPid) && (DeleteRefreshLnnInfo(pkgName, callingPid) != SOFTBUS_OK)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop refresh lnn, clean info fail");
+        return SOFTBUS_ERR;
+    }
     return LnnStopDiscDevice(pkgName, refreshId, false);
 }
 
@@ -563,6 +578,20 @@ static void RemoveLeaveRequestInfoByPkgName(const char *pkgName)
     }
 }
 
+static void RemoveRefreshRequestInfoByPkgName(const char *pkgName)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<RefreshLnnRequestInfo *>::iterator iter;
+    for (iter = g_refreshLnnRequestInfo.begin(); iter != g_refreshLnnRequestInfo.end();) {
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+            ++iter;
+            continue;
+        }
+        delete *iter;
+        iter = g_refreshLnnRequestInfo.erase(iter);
+    }
+}
+
 NO_SANITIZE("cfi") void BusCenterServerDeathCallback(const char *pkgName)
 {
     if (pkgName == nullptr) {
@@ -570,4 +599,5 @@ NO_SANITIZE("cfi") void BusCenterServerDeathCallback(const char *pkgName)
     }
     RemoveJoinRequestInfoByPkgName(pkgName);
     RemoveLeaveRequestInfoByPkgName(pkgName);
+    RemoveRefreshRequestInfoByPkgName(pkgName);
 }

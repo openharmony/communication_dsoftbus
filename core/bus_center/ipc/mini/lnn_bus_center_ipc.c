@@ -126,8 +126,9 @@ NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t calling
     return LnnStartDiscDevice(pkgName, info, &callback, false);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
+NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId)
 {
+    (void)callingPid;
     return LnnStopDiscDevice(pkgName, refreshId, false);
 }
 

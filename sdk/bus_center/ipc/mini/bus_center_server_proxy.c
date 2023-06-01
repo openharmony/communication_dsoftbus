@@ -107,7 +107,7 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 
 int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
-    return LnnIpcStopRefreshLNN(pkgName, refreshId);
+    return LnnIpcStopRefreshLNN(pkgName, 0, refreshId);
 }
 
 int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
