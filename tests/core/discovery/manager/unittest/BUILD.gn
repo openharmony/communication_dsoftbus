@@ -30,7 +30,7 @@ ohos_unittest("DiscManagerTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/coap/include",
+    "$dsoftbus_root_path/core/discovery/coap/interface",
     "//commonlibrary/c_utils/base/include",
     "unittest/common/",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
@@ -76,7 +76,7 @@ ohos_unittest("DiscManagerMockTest") {
     "$dsoftbus_core_path/discovery/ipc/include",
     "$dsoftbus_core_path/discovery/manager/include",
     "$dsoftbus_core_path/discovery/ble/dispatcher/include",
-    "$dsoftbus_core_path/discovery/coap/include",
+    "$dsoftbus_core_path/discovery/coap/interface",
   ]
   include_dirs += test_utils_inc
 
