@@ -208,6 +208,7 @@ if (defined(ohos_lite)) {
         "init:libbegetutil",
       ]
     }
+    innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }

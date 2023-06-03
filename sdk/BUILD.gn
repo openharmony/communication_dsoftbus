@@ -95,6 +95,7 @@ target(build_type, "softbus_client") {
         "ipc:ipc_single",
       ]
     }
+    innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }
