@@ -94,6 +94,7 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
+    innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }
