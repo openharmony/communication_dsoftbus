@@ -293,11 +293,11 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
             DLOGE("dataLen(%u) > max length", info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
+        uint32_t len = strlen((char *)info->capabilityData);
         if (info->capabilityData[info->dataLen] != '\0') {
-            DLOGE("capabilityData is not c-string format");
+            DLOGE("capabilityData is not c-string format: len(%u) and dataLen(%u)", len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
-        uint32_t len = strlen((char *)info->capabilityData);
         if (len != info->dataLen) {
             DLOGE("capabilityData len(%u) != dataLen(%u)", len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
@@ -331,11 +331,11 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
             DLOGE("dataLen(%u) > max length", info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
+        uint32_t len = strlen((char *)info->capabilityData);
         if (info->capabilityData[info->dataLen] != '\0') {
-            DLOGE("capabilityData is not c-string format");
+            DLOGE("capabilityData is not c-string format: len(%u) and dataLen(%u)", len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
-        uint32_t len = strlen((char *)info->capabilityData);
         if (len != info->dataLen) {
             DLOGE("capabilityData len(%u) != dataLen(%u)", len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
