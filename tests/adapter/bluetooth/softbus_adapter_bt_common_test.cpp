@@ -277,7 +277,7 @@ static void StubOnBtStateChanged(int32_t listenerId, int32_t state)
     g_btStateChangedCtx.Update(listenerId, state);
 }
 
-static void StubOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState)
+static void StubOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState, int32_t hciReason)
 {
     g_btAclStateChangedCtx.Update(listenerId, addr, aclState);
 }

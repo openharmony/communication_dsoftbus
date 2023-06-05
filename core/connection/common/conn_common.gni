@@ -14,10 +14,10 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 conn_common_src = [
   "$dsoftbus_root_path/core/connection/common/src/softbus_base_listener.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_socket.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_thread_pool.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
   "$dsoftbus_root_path/core/connection/common/src/softbus_datahead_transform.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_socket.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
 ]
 conn_common_inc = [
   "$dsoftbus_root_path/core/connection/interface",

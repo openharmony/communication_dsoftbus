@@ -20,7 +20,7 @@
 #include "common_list.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_ble_queue.h"
+#include "softbus_conn_ble_send_queue.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -28,10 +28,10 @@
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 
-#define QUEUE_NUM_PER_PID 3
-#define HIGH_PRIORITY_DEFAULT_LIMIT 32
+#define QUEUE_NUM_PER_PID             3
+#define HIGH_PRIORITY_DEFAULT_LIMIT   32
 #define MIDDLE_PRIORITY_DEFAULT_LIMIT 32
-#define LOW_PRIORITY_DEFAULT_LIMIT 16
+#define LOW_PRIORITY_DEFAULT_LIMIT    16
 
 typedef struct {
     ListNode node;
@@ -43,27 +43,27 @@ typedef enum {
     HIGH_PRIORITY = 0,
     MIDDLE_PRIORITY,
     LOW_PRIORITY,
-    PRIORITY_BOUNDARY
+    PRIORITY_BOUNDARY,
 } QueuePriority;
 
 static const int32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
     HIGH_PRIORITY_DEFAULT_LIMIT,
     MIDDLE_PRIORITY_DEFAULT_LIMIT,
-    LOW_PRIORITY_DEFAULT_LIMIT
+    LOW_PRIORITY_DEFAULT_LIMIT,
 };
 static LIST_HEAD(g_bleQueueList);
 static SoftBusMutex g_bleQueueLock;
 static BleQueue *g_innerQueue = NULL;
 static SoftBusCond g_sendCond;
 
-NO_SANITIZE("cfi") static BleQueue *CreateBleQueue(int32_t pid)
+static BleQueue *CreateBleQueue(int32_t pid)
 {
     BleQueue *queue = (BleQueue *)SoftBusCalloc(sizeof(BleQueue));
     if (queue == NULL) {
         return NULL;
     }
     queue->pid = pid;
-    int i;
+    int32_t i;
     for (i = 0; i < QUEUE_NUM_PER_PID; i++) {
         queue->queue[i] = CreateQueue(QUEUE_LIMIT[i]);
         if (queue->queue[i] == NULL) {
@@ -84,13 +84,13 @@ static void DestroyBleQueue(BleQueue *queue)
     if (queue == NULL) {
         return;
     }
-    for (int i = 0; i < QUEUE_NUM_PER_PID; i++) {
+    for (int32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {
         SoftBusFree(queue->queue[i]);
     }
     SoftBusFree(queue);
 }
 
-static int GetPriority(int32_t flag)
+static int32_t GetPriority(int32_t flag)
 {
     switch (flag) {
         case CONN_HIGH:
@@ -102,7 +102,7 @@ static int GetPriority(int32_t flag)
     }
 }
 
-NO_SANITIZE("cfi") int BleEnqueueNonBlock(const void *msg)
+int32_t ConnBleEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -133,7 +133,7 @@ NO_SANITIZE("cfi") int BleEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         BleQueue *newQueue = CreateBleQueue(queueNode->pid);
         if (newQueue == NULL) {
-            CLOGE("BleEnqueueNonBlock CreateBleQueue failed");
+            CLOGE("ConnBleEnqueueNonBlock CreateBleQueue failed");
             goto END;
         }
         ListTailInsert(&g_bleQueueList, &(newQueue->node));
@@ -148,9 +148,9 @@ END:
     return ret;
 }
 
-static int GetMsg(BleQueue *queue, void **msg)
+static int32_t GetMsg(BleQueue *queue, void **msg)
 {
-    for (int i = 0; i < QUEUE_NUM_PER_PID; i++) {
+    for (int32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {
         if (QueueSingleConsumerDequeue(queue->queue[i], msg) == 0) {
             return SOFTBUS_OK;
         }
@@ -158,7 +158,7 @@ static int GetMsg(BleQueue *queue, void **msg)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int BleDequeueBlock(void **msg)
+int32_t ConnBleDequeueBlock(void **msg)
 {
     int32_t status = SOFTBUS_ERR;
     BleQueue *item = NULL;
@@ -198,7 +198,7 @@ NO_SANITIZE("cfi") int BleDequeueBlock(void **msg)
     return status;
 }
 
-NO_SANITIZE("cfi") int BleInnerQueueInit(void)
+int32_t ConnBleInitSendQueue(void)
 {
     if (SoftBusMutexInit(&g_bleQueueLock, NULL) != 0) {
         return SOFTBUS_ERR;
@@ -217,7 +217,7 @@ NO_SANITIZE("cfi") int BleInnerQueueInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void BleInnerQueueDeinit(void)
+void ConnBleDeinitSendQueue(void)
 {
     (void)SoftBusMutexDestroy(&g_bleQueueLock);
     (void)SoftBusCondDestroy(&g_sendCond);

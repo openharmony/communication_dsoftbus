@@ -782,9 +782,8 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest001, TestSize.Level0)
  */
 HWTEST_F(TransTcpDirectTest, ClientTdcOnConnectEventTest001, TestSize.Level0)
 {
-    int events = SOFTBUS_SOCKET_IN;
     int cfd = 0;
-    int32_t ret = ClientTdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, events, cfd, nullptr);
+    int32_t ret = ClientTdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, cfd, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

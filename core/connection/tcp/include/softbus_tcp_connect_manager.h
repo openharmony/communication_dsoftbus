@@ -39,7 +39,8 @@ int32_t TcpDisconnectDevice(uint32_t connectionId);
 
 int32_t TcpDisconnectDeviceNow(const ConnectOption *option);
 
-int32_t TcpPostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq);
+int32_t TcpPostBytes(
+    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq);
 
 int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *Info);
 

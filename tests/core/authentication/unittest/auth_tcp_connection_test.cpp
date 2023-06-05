@@ -176,17 +176,15 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level
 HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_001, TestSize.Level1)
 {
     ListenerModule module = AUTH_P2P;
-    int32_t events = SOFTBUS_SOCKET_EXCEPTION;
     int32_t cfd = -1;
     ConnectOption clientAddr;
     (void)memset_s(&clientAddr, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    int32_t ret = OnConnectEvent(module, events, cfd, &clientAddr);
+    int32_t ret = OnConnectEvent(module, cfd, &clientAddr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    events = SOFTBUS_SOCKET_IN;
-    ret = OnConnectEvent(module, events, cfd, &clientAddr);
+    ret = OnConnectEvent(module, cfd, &clientAddr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     cfd = 0;
-    ret = OnConnectEvent(module, events, cfd, &clientAddr);
+    ret = OnConnectEvent(module, cfd, &clientAddr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 

@@ -238,7 +238,7 @@ static int32_t InitConnResultRecord(ConnResultRecord *connResultRecord)
     return SOFTBUS_OK;
 }
 
-static int32_t AddConnResultApiRecordNode(ConnResultApiRecordNode **connResultNode, const char * pkgName)
+static int32_t AddConnResultApiRecordNode(ConnResultApiRecordNode **connResultNode, char *pkgName)
 {
     ConnResultApiRecordNode *newNode = (ConnResultApiRecordNode *)SoftBusCalloc(sizeof(ConnResultApiRecordNode));
     COMM_CHECK_AND_RETURN_RET_LOG(newNode != NULL, SOFTBUS_ERR, "malloc fail");

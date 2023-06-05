@@ -165,7 +165,6 @@ static int32_t RecvPacketHead(int32_t fd, SocketPktHead *head)
         if (len < 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "recv head fail(=%d).", ConnGetSocketError(fd));
             (void)DelTrigger(AUTH, fd, READ_TRIGGER);
-            ConnShutdownSocket(fd);
             NotifyDisconnected(fd);
         }
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "head not enough, len=%d, abandon it.", len);
@@ -202,8 +201,8 @@ static int32_t ProcessSocketOutEvent(int32_t fd)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
         goto FAIL;
     }
-    if (ConnToggleNonBlockMode(fd, false) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set block mode fail.");
+    if (ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set none block mode fail.");
         goto FAIL;
     }
     NotifyConnected(fd, true);
@@ -242,15 +241,10 @@ static int32_t ProcessSocketInEvent(int32_t fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module, int32_t events,
-    int32_t cfd, const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     (void)module;
     (void)clientAddr;
-    if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "exception occurred, fd=%d.", cfd);
-        return SOFTBUS_ERR;
-    }
     if (cfd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
@@ -316,11 +310,7 @@ NO_SANITIZE("cfi") int32_t StartSocketListening(const char *ip, int32_t port)
         .onConnectEvent = OnConnectEvent,
         .onDataEvent = OnDataEvent,
     };
-    if (SetSoftbusBaseListener(AUTH, &listener) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set listener fail.");
-        return SOFTBUS_ERR;
-    }
-    port = StartBaseListener(&info);
+    port = StartBaseListener(&info, &listener);
     if (port <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "StartBaseListener fail(=%d).", port);
         return SOFTBUS_ERR;
@@ -407,7 +397,7 @@ NO_SANITIZE("cfi") int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head,
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
-    
+
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "SocketPostBytes: fd=%d, module=%d, seq=%" PRId64 ", flag=%d, len=%u.",
         fd, pktHead.module, pktHead.seq, pktHead.flag, pktHead.len);

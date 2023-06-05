@@ -83,3 +83,18 @@ int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
     (void)groupInfo;
     return SOFTBUS_OK;
 }
+
+bool SoftBusHasWifiDirectCapability(void)
+{
+    return true;
+}
+
+bool SoftBusIsWifiTripleMode(void)
+{
+    return false;
+}
+
+char* SoftBusGetWifiInterfaceCoexistCap(void)
+{
+    return NULL;
+}

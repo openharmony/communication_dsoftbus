@@ -36,8 +36,8 @@ typedef enum {
     SOFTBUS_HISYSEVT_CONN_TYPE_TCP = 2,
     SOFTBUS_HISYSEVT_CONN_TYPE_P2P = 3,
     SOFTBUS_HISYSEVT_CONN_TYPE_HML = 4,
-
-    SOFTBUS_HISYSEVT_CONN_TYPE_BUTT = 5,
+    SOFTBUS_HISYSEVT_CONN_TYPE_COC = 5,
+    SOFTBUS_HISYSEVT_CONN_TYPE_BUTT = 6,
 } SoftBusConnType;
 
 typedef enum {
@@ -76,6 +76,7 @@ typedef struct {
 } ProcessStepTime;
 
 typedef struct {
+    uint32_t reqId;
     uint64_t startTime;
     uint32_t connectTraceId;
 } ConnectStatistics;

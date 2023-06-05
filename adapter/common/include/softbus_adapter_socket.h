@@ -17,7 +17,6 @@
 #define SOFTBUS_ADAPTER_SOCKET_H
 
 #include <stdint.h>
-#include <unistd.h>
 #include "softbus_adapter_define.h"
 #include "softbus_adapter_timer.h"
 #ifdef __cplusplus
@@ -55,6 +54,7 @@ extern "C" {
 
 #define SOFTBUS_SO_REUSEADDR SOFTBUS_SO_REUSEADDR_
 #define SOFTBUS_SO_RCVBUF SOFTBUS_SO_RCVBUF_
+#define SOFTBUS_SO_SNDBUF SOFTBUS_SO_SNDBUF_
 #define SOFTBUS_SO_KEEPALIVE SOFTBUS_SO_KEEPALIVE_
 #define SOFTBUS_SO_REUSEPORT SOFTBUS_SO_REUSEPORT_
 #define SOFTBUS_SO_RCVBUFFORCE SOFTBUS_SO_RCVBUFFORCE_
@@ -161,6 +161,8 @@ uint64_t SoftBusHtoLll(uint64_t value);
 uint16_t SoftBusLtoHs(uint16_t value);
 uint32_t SoftBusLtoHl(uint32_t value);
 uint64_t SoftBusLtoHll(uint64_t value);
+uint16_t SoftBusLEtoBEs(uint16_t value);
+uint16_t SoftBusBEtoLEs(uint16_t value);
 
 uint32_t SoftBusInetAddr(const char *cp);
 

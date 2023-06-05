@@ -63,6 +63,8 @@ extern "C" {
 #define SESSION_KEY_LENGTH 32
 #define DEVICE_KEY_LEN 16
 
+#define MAX_SOCKET_ADDR_LEN 46
+
 #define MAX_SESSION_ID 16
 #define MAX_SESSION_SERVER_NUMBER 10
 

@@ -29,15 +29,15 @@ extern "C" {
 
 typedef struct {
     SoftBusBtUuid charaUuid;
-    uint16_t dataLen;
+    uint32_t dataLen;
     uint8_t *data;
 } SoftBusGattcNotify;
 
 typedef struct {
     SoftBusBtUuid serviceUuid;
     SoftBusBtUuid characterUuid;
-    int32_t valueLen;
-    char *value;
+    uint32_t valueLen;
+    const uint8_t *value;
 } SoftBusGattcData;
 
 typedef struct {
@@ -52,21 +52,23 @@ typedef enum {
     SOFTBUS_GATT_PRIORITY_BALANCED = 0x0,
     SOFTBUS_GATT_PRIORITY_HIGH,
     SOFTBUS_GATT_PRIORITY_LOW_POWER,
-} SoftbusGattPriority;
+} SoftbusBleGattPriority;
 
 void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb);
 int32_t SoftbusGattcRegister(void);
 int32_t SoftbusGattcUnRegister(int32_t clientId);
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr);
-int32_t SoftbusBleGattcDisconnect(int32_t clientId);
+int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt);
 int32_t SoftbusGattcSearchServices(int32_t clientId);
+int32_t SoftbusGattcRefreshServices(int32_t clientId);
 int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid);
-int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid);
+int32_t SoftbusGattcRegisterNotification(
+    int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid, SoftBusBtUuid *descriptorUuid);
 int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData);
 int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize);
 
 int32_t SoftbusGattcSetFastestConn(int32_t clientId);
-int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusGattPriority priority);
+int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusBleGattPriority priority);
 
 #ifdef __cplusplus
 #if __cplusplus

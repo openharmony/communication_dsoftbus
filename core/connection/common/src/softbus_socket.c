@@ -18,7 +18,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <securec.h>
-#include <unistd.h>
 
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
@@ -28,11 +27,11 @@
 #include "softbus_tcp_socket.h"
 
 #define MAX_SOCKET_TYPE 5
-#define SEND_BUF_SIZE 0x200000  // 2M
-#define RECV_BUF_SIZE 0x100000  // 1M
-#define USER_TIMEOUT_MS 500000  // 500000us
+#define SEND_BUF_SIZE   0x200000 // 2M
+#define RECV_BUF_SIZE   0x100000 // 1M
+#define USER_TIMEOUT_MS 500000   // 500000us
 
-static const SocketInterface *g_socketInterfaces[MAX_SOCKET_TYPE] = {0};
+static const SocketInterface *g_socketInterfaces[MAX_SOCKET_TYPE] = { 0 };
 static SoftBusMutex g_socketsMutex;
 
 int32_t RegistSocketProtocol(const SocketInterface *interface)
@@ -81,7 +80,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
     return result;
 }
 
-int32_t __attribute__ ((weak)) RegistNewIpSocket(void)
+int32_t __attribute__((weak)) RegistNewIpSocket(void)
 {
     CLOGI("newip not deployed");
     return SOFTBUS_OK;
@@ -111,7 +110,7 @@ NO_SANITIZE("cfi") int32_t ConnInitSockets(void)
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
-    
+
     return ret;
 }
 
@@ -140,37 +139,37 @@ static int WaitEvent(int fd, short events, int timeout)
         CLOGE("fd=%d invalid params", fd);
         return -1;
     }
-    SoftBusSockTimeOut tv = {0};
+    SoftBusSockTimeOut tv = { 0 };
     tv.sec = 0;
     tv.usec = timeout;
     int rc = 0;
     switch (events) {
         case SOFTBUS_SOCKET_OUT: {
-                SoftBusFdSet writeSet;
-                SoftBusSocketFdZero(&writeSet);
-                SoftBusSocketFdSet(fd, &writeSet);
-                rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, NULL, &writeSet, NULL, &tv));
-                if (rc < 0) {
-                    break;
-                }
-                if (!SoftBusSocketFdIsset(fd, &writeSet)) {
-                    rc = 0;
-                }
+            SoftBusFdSet writeSet;
+            SoftBusSocketFdZero(&writeSet);
+            SoftBusSocketFdSet(fd, &writeSet);
+            rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, NULL, &writeSet, NULL, &tv));
+            if (rc < 0) {
                 break;
             }
+            if (!SoftBusSocketFdIsset(fd, &writeSet)) {
+                rc = 0;
+            }
+            break;
+        }
         case SOFTBUS_SOCKET_IN: {
-                SoftBusFdSet readSet;
-                SoftBusSocketFdZero(&readSet);
-                SoftBusSocketFdSet(fd, &readSet);
-                rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, &readSet, NULL, NULL, &tv));
-                if (rc < 0) {
-                    break;
-                }
-                if (!SoftBusSocketFdIsset(fd, &readSet)) {
-                    rc = 0;
-                }
+            SoftBusFdSet readSet;
+            SoftBusSocketFdZero(&readSet);
+            SoftBusSocketFdSet(fd, &readSet);
+            rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketSelect(fd + 1, &readSet, NULL, NULL, &tv));
+            if (rc < 0) {
                 break;
             }
+            if (!SoftBusSocketFdIsset(fd, &readSet)) {
+                rc = 0;
+            }
+            break;
+        }
         default:
             break;
     }
@@ -265,8 +264,11 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
     if (rc == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
         CLOGW("recv data socket EAGAIN");
         rc = 0;
-    } else if (rc <= 0) {
-        CLOGE("recv data fail errno[%d], rc[%d]", errno, rc);
+    } else if (rc == 0) {
+        CLOGW("recv data fail, peer close connection, fd=%d", fd);
+        rc = -1;
+    } else if (rc < 0) {
+        CLOGE("recv data fail fd[%d] errno[%d], rc[%d]", fd, errno, rc);
         rc = -1;
     }
     return rc;

@@ -25,8 +25,10 @@ enhanced_conn_ble = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                 "value")
 ble_connection_deps = []
 if (dsoftbus_feature_conn_ble == false) {
-  ble_connection_src = [ "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection_virtual.c" ]
-  ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_conn_direct_virtual.c" ]
+  ble_connection_src = [
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_virtual.c",
+  ]
   ble_connection_inc = [
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/connection/ble/include",
@@ -39,11 +41,13 @@ if (dsoftbus_feature_conn_ble == false) {
   }
 } else {
   ble_connection_src = [
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_connection.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_gatt_client.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_gatt_server.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_queue.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_trans_manager.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_client.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_connection.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_manager.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_send_queue.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_server.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_trans.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_coc_virtual.c",
   ]
   ble_connection_inc = [
     "$dsoftbus_root_path/core/connection/ble/include",
@@ -53,7 +57,7 @@ if (dsoftbus_feature_conn_ble == false) {
   if (enhanced_conn_ble == true) {
     ble_connection_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_conn.c" ]
   } else {
-    ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_ble_conn_direct_virtual.c" ]
+    ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c" ]
   }
   ble_connection_src += adapter_ble_src
   ble_connection_inc += adapter_ble_inc

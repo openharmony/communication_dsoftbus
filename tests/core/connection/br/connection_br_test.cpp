@@ -20,13 +20,14 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_conn_br_connection.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "br_connection.c"
 
 static const uint32_t CONN_HEAD_SIZE = 24;
 #define TEST_BR_MAC "24:DA:33:6A:06:EC"
@@ -517,34 +518,4 @@ HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
     }
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
 };
-
-/*
-* @tc.name: PostBytesInner
-* @tc.desc:  connect state != BR_CONNECTION_STATE_CLOSING && state != BR_CONNECTION_STATE_CONNECTED
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBrTest, PostBytesInner, TestSize.Level1)
-{
-    uint32_t len = 16;
-    char *data = (char *) SoftBusMalloc(len);
-    ASSERT_TRUE(data != nullptr);
-    int32_t ret = PostBytesInner(0, 0, data, len);
-    EXPECT_EQ(ret, SOFTBUS_BRCONNECTION_POSTBYTES_ERROR);
-}
-
-/*
-* @tc.name: PostBytes
-* @tc.desc:  connect state != BR_CONNECTION_STATE_CONNECTED
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBrTest, PostBytes, TestSize.Level1)
-{
-    uint32_t len = 16;
-    char *data = (char *) SoftBusMalloc(len);
-    ASSERT_TRUE(data != nullptr);
-    int32_t ret = PostBytesInner(0, 0, data, len);
-    EXPECT_EQ(ret, SOFTBUS_BRCONNECTION_POSTBYTES_ERROR);
-}
 }
