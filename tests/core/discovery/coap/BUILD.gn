@@ -19,7 +19,7 @@ if (defined(ohos_lite)) {
   executable("disc_coap_test") {
     sources = [ "disc_coap_test.c" ]
     include_dirs = [
-      "${dsoftbus_root_path}/core/discovery/coap/include",
+      "${dsoftbus_root_path}/core/discovery/coap/interface",
       "${dsoftbus_root_path}/core/common/include",
       "$dsoftbus_root_path/core/discovery/interface",
       "$dsoftbus_root_path/interfaces/kits/discovery",
@@ -46,7 +46,7 @@ if (defined(ohos_lite)) {
     install_enable = true
     sources = [ "disc_coap_test.c" ]
     include_dirs = [
-      "${dsoftbus_root_path}/core/discovery/coap/include",
+      "${dsoftbus_root_path}/core/discovery/coap/interface",
       "${dsoftbus_root_path}/core/common/include",
       "$dsoftbus_root_path/core/discovery/interface",
       "$dsoftbus_root_path/interfaces/kits/discovery",

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,15 +15,19 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 if (dsoftbus_feature_disc_coap == true) {
   disc_coap_src = [
-    "$dsoftbus_root_path/core/discovery/coap/src/disc_coap.c",
-    "$dsoftbus_root_path/core/discovery/coap/src/disc_nstackx_adapter.c",
+    "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser.c",
+    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap.c",
+    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_nstackx_adapter.c",
   ]
 } else {
-  disc_coap_src =
-      [ "$dsoftbus_root_path/core/discovery/coap/src/disc_coap_virtual.c" ]
+  disc_coap_src = [
+    "$dsoftbus_root_path/core/discovery/coap/interface/disc_coap_virtual.c",
+  ]
 }
 disc_coap_inc = [
-  "$dsoftbus_root_path/core/discovery/coap/include",
+  "$dsoftbus_root_path/core/discovery/coap/interface",
+  "$dsoftbus_root_path/core/discovery/coap/common/include",
+  "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/include",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/discovery",
