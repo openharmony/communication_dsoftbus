@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "cJSON.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
@@ -29,6 +30,8 @@ void LnnDeinitCipherKeyManager(void);
 bool GetCipherKeyByNetworkId(const char *networkId, int32_t seq, uint32_t tableIndex, unsigned char *key,
     int32_t keyLen);
 bool GetLocalCipherKey(int32_t seq, uint32_t *tableIndex, unsigned char *key, int32_t keyLen);
+bool PackCipherKeySyncMsg(cJSON *json);
+void ProcessCipherKeySyncInfo(const cJSON *json, const char *networkId);
 
 #ifdef __cplusplus
 }

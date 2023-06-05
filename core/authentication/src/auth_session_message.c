@@ -21,6 +21,7 @@
 #include "auth_connection.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
@@ -271,6 +272,9 @@ static int32_t PackCommon(cJSON *json, const NodeInfo *info, SoftBusVersion vers
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddStringToJsonObject fail.");
         return SOFTBUS_ERR;
     }
+    if (!PackCipherKeySyncMsg(json)) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PackCipherKeySyncMsg fail.");
+    }
     return SOFTBUS_OK;
 }
 
@@ -331,6 +335,7 @@ static void UnpackCommon(const cJSON *json, NodeInfo *info, SoftBusVersion versi
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert str to bytes offline fail, ret=%d", ret);
     }
+    ProcessCipherKeySyncInfo(json, info->networkId);
 }
 
 static int32_t PackBt(cJSON *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
