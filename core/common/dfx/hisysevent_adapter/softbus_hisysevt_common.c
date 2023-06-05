@@ -167,4 +167,5 @@ void DeinitSoftbusSysEvt(void)
     DeinitBusCenterDfx();
     DeinitConnStatisticSysEvt();
     DeinitDiscStatisticSysEvt();
+    DeinitTransStatisticSysEvt();
 }
