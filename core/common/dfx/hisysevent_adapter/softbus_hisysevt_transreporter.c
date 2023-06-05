@@ -682,7 +682,7 @@ static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 
 static int32_t SoftbusReportCalledAPIEvt(void)
 {
-    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FOUR);
+    SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FIVE);
     if (msg == NULL) {
         return SOFTBUS_ERR;
     }
@@ -700,8 +700,7 @@ static int32_t SoftbusReportCalledAPIEvt(void)
         (void)strcpy_s(packageVersion, SOFTBUS_HISYSEVT_NAME_LEN, apiInfoItem->packageVersion);
         LIST_FOR_EACH_ENTRY(apiCntItem, &apiInfoItem->apiCntList, CalledApiCntStruct, node) {
             CreateCalledApiInfoMsg(msg, apiCntItem, appName, softbusVersion, packageVersion);
-            int ret = SoftbusWriteHisEvt(msg);
-            if (ret != SOFTBUS_OK) {
+            if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
                 SoftbusFreeEvtReporMsg(msg);
                 (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
                 ReleaseCalledApiInfoList();
