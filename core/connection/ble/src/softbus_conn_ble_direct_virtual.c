@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,24 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef BLE_CONNECTION_H
-#define BLE_CONNECTION_H
-
+#include "softbus_log.h"
 #include "softbus_conn_interface.h"
-#include "softbus_conn_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "softbus_errcode.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback);
-
-#ifdef __cplusplus
-#if __cplusplus
+int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "do not support ble direct connection");
+    return SOFTBUS_ERR;
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif
+
+int32_t ConnBleDirectInit()
+{
+    return SOFTBUS_OK;
+}

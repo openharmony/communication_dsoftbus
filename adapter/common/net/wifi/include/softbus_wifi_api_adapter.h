@@ -17,6 +17,7 @@
 #define SOFTBUS_WIFI_API_ADAPTER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -146,6 +147,9 @@ int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num);
 SoftBusBand SoftBusGetLinkBand(void);
 int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info);
 int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo);
+bool SoftBusHasWifiDirectCapability(void);
+bool SoftBusIsWifiTripleMode(void);
+char* SoftBusGetWifiInterfaceCoexistCap(void);
 
 #ifdef __cplusplus
 }

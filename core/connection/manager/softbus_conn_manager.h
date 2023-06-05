@@ -46,9 +46,12 @@ typedef struct {
      * @param[in] len Data length.
      * @param[in] pid Identification ID.
      * @param[in] flag Message send flag.
+     * @param[in] module Message source module.
+     * @param[in] seq Message sequence.
      * @return <b>SOFTBUS_OK</b> if sending by byte is successfully.
      */
-    int32_t (*PostBytes)(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq);
+    int32_t (*PostBytes)(
+        uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq);
 
     /**
      * @brief To disconnect the device, use the br/ble/tcp type of disconnect device logically to disconnect
@@ -95,6 +98,14 @@ typedef struct {
     int32_t (*StopLocalListening)(const LocalListenerInfo *info);
     bool (*CheckActiveConnection)(const ConnectOption *info);
     int32_t (*UpdateConnection)(uint32_t connectionId, UpdateOption *option);
+
+    /**
+     * @brief Prevent connect other devices in specified time.
+     * @param[in] option Indicates a pointer to the connection option. For details, see {@link ConnectOption}.
+     * @param[in] time time in millisecond
+     * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
+     */
+    int32_t (*PreventConnection)(const ConnectOption *option, uint32_t time);
 } ConnectFuncInterface;
 
 #define MAGIC_NUMBER  0xBABEFACE

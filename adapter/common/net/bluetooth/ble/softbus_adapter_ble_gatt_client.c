@@ -159,8 +159,9 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusBleGattcDisconnect(int32_t clientId)
+NO_SANITIZE("cfi") int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
 {
+    (void)refreshGatt;
     if (BleGattcDisconnect(clientId) != SOFTBUS_OK) {
         CLOGE("BleGattcDisconnect error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
@@ -177,6 +178,12 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcSearchServices(int32_t clientId)
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t SoftbusGattcRefreshServices(int32_t clientId)
+{
+    CLOGI("SoftbusGattcRefreshServices %d", clientId);
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 NO_SANITIZE("cfi") int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
@@ -196,8 +203,10 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUui
 }
 
 NO_SANITIZE("cfi")
-int32_t SoftbusGattcRegisterNotification(int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid)
+int32_t SoftbusGattcRegisterNotification(
+    int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid, SoftBusBtUuid *descriptorUuid)
 {
+    (void)descriptorUuid;
     BtGattCharacteristic btCharaUuid;
     btCharaUuid.serviceUuid.uuid = serverUuid->uuid;
     btCharaUuid.serviceUuid.uuidLen = serverUuid->uuidLen;
@@ -232,8 +241,8 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, Sof
     characteristic.serviceUuid.uuidLen = clientData->serviceUuid.uuidLen;
     characteristic.characteristicUuid.uuid = clientData->characterUuid.uuid;
     characteristic.characteristicUuid.uuidLen = clientData->characterUuid.uuidLen;
-    if (BleGattcWriteCharacteristic(
-            clientId, characteristic, OHOS_GATT_WRITE_NO_RSP, clientData->valueLen, clientData->value) != SOFTBUS_OK) {
+    if (BleGattcWriteCharacteristic(clientId, characteristic, OHOS_GATT_WRITE_NO_RSP, clientData->valueLen,
+            (const char *)clientData->value) != SOFTBUS_OK) {
         CLOGE("SoftbusGattcWriteCharacteristic error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
@@ -254,7 +263,7 @@ int32_t SoftbusGattcSetFastestConn(int32_t clientId)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusGattPriority priority)
+int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusBleGattPriority priority)
 {
     if (clientId <= 0 || addr == NULL) {
         CLOGE("invalid param, '%d'", clientId);

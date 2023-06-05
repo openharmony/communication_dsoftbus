@@ -58,22 +58,3 @@ ohos_unittest("ConnectionBrTest") {
   ]
   sources = [ "connection_br_test.cpp" ]
 }
-
-ohos_unittest("ConnectionBrManagerTest") {
-  module_out_path = module_output_path
-  public_configs = [ ":softbus_connection_br_test_config" ]
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-  ]
-  sources = [ "connection_br_manager_test.cpp" ]
-}

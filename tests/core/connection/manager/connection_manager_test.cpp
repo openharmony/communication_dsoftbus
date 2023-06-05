@@ -56,28 +56,15 @@ int ObjectConnectDevice(const ConnectOption *option, unsigned int requestId, con
     return 0;
 }
 
-int ObjectPostBytes(unsigned int connectionId, char *data, int len, int pid, int flag, int64_t seq)
+int ObjectPostBytes(unsigned int connectionId, uint8_t *data, uint32_t len, int pid, int flag, int module, int64_t seq)
 {
-    int module;
-    int bufLen = 15;
-    const char *str = "reply wdf";
-    ConnPktHead *head = nullptr;
-    if (data == nullptr) {
-        return 1;
-    }
-    head = (ConnPktHead *)data;
-    module = head->module;
-
-    char *buf = (char *)calloc(1, CONN_HEAD_SIZE + bufLen);
-    if (buf == nullptr) {
-        return -1;
-    }
-    (void)strcpy_s(buf + CONN_HEAD_SIZE, strlen(str), str);
-    if (g_mangerCb) {
-        g_mangerCb->OnDataReceived(connectionId, static_cast<ConnModule>(module),
-            1, buf, CONN_HEAD_SIZE + bufLen);
-    }
-    free(buf);
+    (void)connectionId;
+    (void)data;
+    (void)len;
+    (void)pid;
+    (void)flag;
+    (void)module;
+    (void)seq;
     return 0;
 }
 

@@ -15,10 +15,11 @@
 
 #ifndef SOFTBUS_CONN_INTERFACE_H
 #define SOFTBUS_CONN_INTERFACE_H
+#include <stdint.h>
+
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
-#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -45,7 +46,8 @@ typedef enum {
     MODULE_PKG_VERIFY = 20,
     MODULE_META_AUTH = 21,
     MODULE_BLE_NET = 100,
-    MODULE_BLE_CONN = 101
+    MODULE_BLE_CONN = 101,
+    MODULE_OLD_NEARBY = 300,
 } ConnModule;
 
 typedef enum {
@@ -53,12 +55,17 @@ typedef enum {
     CONNECT_BR,
     CONNECT_BLE,
     CONNECT_P2P,
+    CONNECT_P2P_REUSE,
     CONNECT_BLE_DIRECT,
     CONNECT_TYPE_MAX
 } ConnectType;
 
 #define CONN_INVALID_LISTENER_MODULE_ID    0xffff
 #define CONN_DYNAMIC_LISTENER_MODULE_COUNT 5
+#define DEVID_BUFF_LEN                     65
+
+#define BT_LINK_TYPE_BR  1
+#define BT_LINK_TYPE_BLE 2
 
 typedef enum {
     PROXY = 0,
@@ -79,6 +86,8 @@ struct BrInfo {
 struct BleInfo {
     char bleMac[BT_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
+    BleProtocolType protocol;
+    uint32_t psm;
 };
 struct SocketInfo {
     char addr[IP_LEN];
@@ -138,17 +147,19 @@ struct BrOption {
 };
 
 struct BleOption {
+    BleProtocolType protocol;
     char bleMac[BT_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
     bool fastestConnectEnable;
+    int32_t psm;
 };
 
 struct BleDirectOption {
     BleProtocolType protoType;
     int32_t psm;
-    unsigned char nodeIdHash[NODEID_SHORT_HASH_LEN];
-    unsigned char localUdidHash[UDID_SHORT_HASH_LEN];
-    unsigned char peerUdidHash[SHA_256_HASH_LEN];
+    char nodeIdHash[NODEID_SHORT_HASH_LEN];
+    char localUdidHash[UDID_SHORT_HASH_LEN];
+    char peerUdidHash[SHA_256_HASH_LEN];
 };
 
 struct SocketOption {
@@ -350,11 +361,10 @@ int32_t ConnStartLocalListening(const LocalListenerInfo *info);
  * @param[in] requestId Request ID.
  * @param[in] result Indicates a pointer to the connection request. For details, see {@link ConnectResult}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if the info is null.
- * @return <b>SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT</b> if the type is null or invalid.
  * @return <b>SOFTBUS_ERR</b> if the connection device function of type is null.
  * @return <b>SOFTBUS_OK</b> if the connection to the device is successfully.
  */
-int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
+int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
 
 bool CheckActiveConnection(const ConnectOption *option);
 
@@ -367,6 +377,23 @@ bool CheckActiveConnection(const ConnectOption *option);
  */
 int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option);
 
+/**
+ * @ingroup Softbus_conn_manager
+ * @brief Prevent connect other devices in specified time.
+ * @param[in] option Indicates a pointer to the connection option. For details, see {@link ConnectOption}.
+ * @param[in] time time in millisecond
+ * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
+ */
+int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time);
+
+/**
+ * @ingroup Softbus_conn_manager
+ * @brief Obtain link type based on connection ID.
+ * @param[in] connectionId Connection ID.
+ * @param[out] type Indicates a pointer to the link type. For details, see {@link ConnectType}.
+ * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
+ */
+int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
 #ifdef __cplusplus
 #if __cplusplus
 }

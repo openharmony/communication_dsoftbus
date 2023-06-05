@@ -104,14 +104,14 @@ NO_SANITIZE("cfi") static int32_t Accept(int32_t serverFd)
     return ret;
 }
 
-NO_SANITIZE("cfi") static int32_t Write(int32_t clientFd, const char *buf, const int32_t len)
+NO_SANITIZE("cfi") static int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t len)
 {
-    return SppWrite(clientFd, buf, len);
+    return SppWrite(clientFd, (const char *)buf, len);
 }
 
-static int32_t Read(int32_t clientFd, char *buf, const int32_t len)
+static int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t len)
 {
-    int32_t ret = SppRead(clientFd, buf, len);
+    int32_t ret = SppRead(clientFd, (char *)buf, len);
     if (ret == BT_SPP_READ_SOCKET_CLOSED) {
         return BR_READ_SOCKET_CLOSED;
     } else if (ret == BT_SPP_READ_FAILED) {
@@ -157,4 +157,10 @@ NO_SANITIZE("cfi") SppSocketDriver *InitSppSocketDriver()
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[InitSppSocketDriver]");
     Init(&g_sppSocketDriver);
     return &g_sppSocketDriver;
+}
+
+int SoftBusRegisterBrCallback(BrUnderlayerCallback *callback)
+{
+    (void)callback;
+    return SOFTBUS_OK;
 }

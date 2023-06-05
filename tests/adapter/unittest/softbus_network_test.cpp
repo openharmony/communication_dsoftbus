@@ -128,11 +128,11 @@ HWTEST_F(AdapterDsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1
     LnnOnBtStateChanged(listenerId, state);
     EXPECT_CALL(networkMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_ERR));
     LnnOnBtStateChanged(listenerId, state);
-    LnnOnBtAclStateChanged(listenerId, &addr, aclState);
+    LnnOnBtAclStateChanged(listenerId, &addr, aclState, 0);
     aclState = TEST_ACL_STATE2;
-    LnnOnBtAclStateChanged(listenerId, &addr, aclState);
+    LnnOnBtAclStateChanged(listenerId, &addr, aclState, 0);
     aclState = TEST_STATE1;
-    LnnOnBtAclStateChanged(listenerId, &addr, aclState);
+    LnnOnBtAclStateChanged(listenerId, &addr, aclState, 0);
     int32_t ret = LnnInitBtStateMonitorImpl();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(networkMock, SoftBusAddBtStateListener).WillRepeatedly(Return(TEST_LISTENER_ID2));

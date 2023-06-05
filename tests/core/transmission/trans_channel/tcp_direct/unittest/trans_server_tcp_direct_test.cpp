@@ -347,7 +347,7 @@ HWTEST_F(TransServerTcpDirectTest, CreateSessionConnNode001, TestSize.Level1)
     int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
     ASSERT_EQ(ret, EOK);
 
-    ret = CreateSessionConnNode(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, TRANS_TEST_FD,
+    ret = CreateSessionConnNode(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD,
                                 TRANS_TEST_CHCANNEL_ID, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
@@ -378,22 +378,22 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnConnectEvent001, TestSize.Level1)
     int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
     ASSERT_EQ(ret, EOK);
 
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_EXCEPTION, TRANS_TEST_FD, &connInfo);
+    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, -1, &connInfo);
+    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, -1, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, TRANS_TEST_FD, NULL);
+    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, TRANS_TEST_FD, &connInfo);
+    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = LnnSetLocalStrInfo(STRING_KEY_DEV_UDID, g_deviceId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, TRANS_TEST_FD, &connInfo);
+    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, &connInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 

@@ -111,8 +111,10 @@ typedef struct {
 
 typedef struct {
     int connectId;
+    int transId;
     int status;
     int attrHandle;
+    int offset;
     int valueLen;
     char *value;
 } SoftBusGattsResponse;

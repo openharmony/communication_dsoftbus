@@ -30,17 +30,21 @@
 
 #ifdef SOFTBUS_STANDARD_SYSTEM
 #define CONN_BR_MAX_DATA_LENGTH (40 * 1000)
+#define CONN_COC_MAX_DATA_LENGTH (40 * 1000)
 #else
 #define CONN_BR_MAX_DATA_LENGTH 4096
+#define CONN_COC_MAX_DATA_LENGTH 4096
 #endif
 
 #define CONN_RFCOM_SEND_MAX_LEN 990
+#define CONN_COC_SEND_MTU_LEN 990
+/* 4KB + INDEX + IV_HEAD + PACKET_HEAD + SLICE_HEAD + CHANNEL_HEAD */
+#define CONN_TCP_MAX_LENGTH (4096 + 12 + 28 + 16 + 16)
 #define CONN_BR_RECEIVE_MAX_LEN 500
-#define CONN_TCP_MAX_LENGTH 3072
 #define CONN_TCP_MAX_CONN_NUM 30
 #define CONN_TCP_TIME_OUT 100
 #define MAX_NODE_STATE_CB_CNT 10
-#define MAX_LNN_CONNECTION_CNT 10
+#define MAX_LNN_CONNECTION_CNT 30 // TODO: restore after fix the problem of connection exceeding max limit
 #define LNN_SUPPORT_CAPBILITY 62
 #define AUTH_ABILITY_COLLECTION 0
 #define ADAPTER_LOG_LEVEL 0
@@ -54,12 +58,6 @@
 #define DEFAULT_DISC_FREQ_MID ((5 << 16) | 24)
 #define DEFAULT_DISC_FREQ_HIGH ((5 << 16) | 36)
 #define DEFAULT_DISC_FREQ_SUPER_HIGH ((10 << 16) | 48)
-
-#ifdef __LITEOS_M__
-#define DEFAULT_SELECT_INTERVAL 100000
-#else
-#define DEFAULT_SELECT_INTERVAL 10000
-#endif
 
 #ifdef SOFTBUS_STANDARD_SYSTEM
 #define DEFAULT_MAX_BYTES_LEN (4 * 1024 * 1024)
@@ -105,6 +103,8 @@ typedef struct {
     int32_t lnnMaxConcurentNum;
     bool lnnAutoNetworkingSwitch;
     bool isSupportTopo;
+    int32_t connCocMaxDataLen;
+    int32_t connCocSendMtu;
 } ConfigItem;
 
 typedef struct {
@@ -131,11 +131,12 @@ ConfigItem g_config = {
     LNN_MAX_CONCURENT_NUM,
     true,
     true,
+    CONN_COC_MAX_DATA_LENGTH,
+    CONN_COC_SEND_MTU_LEN,
 };
 
 typedef struct {
     int32_t isSupportTcpProxy;
-    int32_t selectInterval;
     int32_t maxBytesLen;
     int32_t maxMessageLen;
     int32_t maxAuthBytesLen;
@@ -236,11 +237,6 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         sizeof(g_tranConfig.isSupportTcpProxy)
     },
     {
-        SOFTBUS_INT_SUPPORT_SELECT_INTERVAL,
-        (unsigned char *)&(g_tranConfig.selectInterval),
-        sizeof(g_tranConfig.selectInterval)
-    },
-    {
         SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN,
         (unsigned char *)&(g_config.lnnUdidInitDelayLen),
         sizeof(g_config.lnnUdidInitDelayLen)
@@ -290,7 +286,16 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         (unsigned char *)&(g_tranConfig.maxProxyMessageLen),
         sizeof(g_tranConfig.maxProxyMessageLen)
     },
-
+    {
+        SOFTBUS_INT_CONN_COC_MAX_DATA_LENGTH,
+        (unsigned char *)&(g_config.connCocMaxDataLen),
+        sizeof(g_config.connCocMaxDataLen)
+    },
+    {
+        SOFTBUS_INT_CONN_COC_SEND_MTU,
+        (unsigned char *)&(g_config.connCocSendMtu),
+        sizeof(g_config.connCocSendMtu)
+    },
 };
 
 int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
@@ -320,7 +325,6 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 static void SoftbusConfigSetTransDefaultVal(void)
 {
     g_tranConfig.isSupportTcpProxy = DEFAULT_IS_SUPPORT_TCP_PROXY;
-    g_tranConfig.selectInterval = DEFAULT_SELECT_INTERVAL;
     g_tranConfig.maxBytesLen = DEFAULT_MAX_BYTES_LEN;
     g_tranConfig.maxMessageLen = DEFAULT_MAX_MESSAGE_LEN;
     g_tranConfig.maxAuthBytesLen = DEFAULT_AUTH_MAX_BYTES_LEN;
