@@ -98,7 +98,7 @@ static SubscribeInfo g_sInfo = {
     .isWakeRemote = false,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = sizeof("capdata3")
+    .dataLen = strlen("capdata3")
 };
 
 static PublishInfo g_pInfo = {
@@ -108,7 +108,7 @@ static PublishInfo g_pInfo = {
     .freq = MID,
     .capability = "dvKit",
     .capabilityData = (unsigned char *)"capdata4",
-    .dataLen = sizeof("capdata4")
+    .dataLen = strlen("capdata4")
 };
 
 static void TestDeviceFound(const DeviceInfo *device)
