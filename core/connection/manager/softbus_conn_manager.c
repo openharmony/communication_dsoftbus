@@ -17,12 +17,12 @@
 
 #include <securec.h>
 
-#include "br_connection.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
-#include "softbus_ble_connection.h"
+#include "softbus_conn_ble_manager.h"
+#include "softbus_conn_br_manager.h"
 #include "softbus_conn_interface.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
@@ -82,24 +82,20 @@ static int32_t CompareConnectInfo(const ConnectionInfo *src, const ConnectionInf
     switch (src->type) {
         case CONNECT_BLE:
             if (strcasecmp(src->bleInfo.bleMac, dst->bleInfo.bleMac) != 0) {
-                CLOGE("CompareConnectInfo:bleMac is different");
                 return SOFTBUS_ERR;
             }
             break;
         case CONNECT_BR:
             if (strcasecmp(src->brInfo.brMac, dst->brInfo.brMac) != 0) {
-                CLOGE("CompareConnectInfo:brMac is different");
                 return SOFTBUS_ERR;
             }
             break;
         case CONNECT_TCP:
             if (strcasecmp(src->socketInfo.addr, dst->socketInfo.addr) != 0) {
-                CLOGE("CompareConnectInfo:tcpIp is different");
                 return SOFTBUS_ERR;
             }
             break;
         default:
-            CLOGE("CompareConnectInfo:do nothing");
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -115,6 +111,7 @@ static ConnTimeNode *GetConnTimeNode(const ConnectionInfo *info)
     LIST_FOR_EACH_ENTRY(listNode, &g_connTimeList->list, ConnTimeNode, node) {
         if (listNode != NULL) {
             if (CompareConnectInfo(&listNode->info, info) == SOFTBUS_OK) {
+                CLOGD("find connect info success, ConnectType=%d", listNode->info.type);
                 (void)SoftBusMutexUnlock(&g_connTimeList->lock);
                 return listNode;
             }
@@ -141,6 +138,7 @@ static void FreeConnTimeNode(ConnTimeNode *timeNode)
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, next, &g_connTimeList->list, ConnTimeNode, node) {
         if (removeNode->info.type == timeNode->info.type) {
             if (CompareConnectInfo(&removeNode->info, &timeNode->info) == SOFTBUS_OK) {
+                CLOGD("find connect info success, ConnectType=%d", removeNode->info.type);
                 ListDelete(&(removeNode->node));
                 break;
             }
@@ -268,11 +266,8 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
         return SOFTBUS_ERR;
     }
     item->moduleId = moduleId;
-    if (memcpy_s(&(item->callback), sizeof(ConnectCallback), callback, sizeof(ConnectCallback)) != EOK) {
-        SoftBusFree(item);
-        (void)SoftBusMutexUnlock(&g_listenerList->lock);
-        return SOFTBUS_ERR;
-    }
+    item->callback = *callback;
+
     ListAdd(&(g_listenerList->list), &(item->node));
     g_listenerList->cnt++;
     (void)SoftBusMutexUnlock(&g_listenerList->lock);
@@ -322,46 +317,21 @@ NO_SANITIZE("cfi") uint32_t ConnGetNewRequestId(ConnModule moduleId)
 NO_SANITIZE("cfi")
 void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
-    ConnListenerNode listener;
-    int32_t ret;
-    char *pkt = NULL;
-    int32_t pktLen;
+    CONN_CHECK_AND_RETURN_LOG(
+        data != NULL, "dispatch data failed: data is null, connection id=%u, module=%d", connectionId, moduleId);
+    CONN_CHECK_AND_RETURN_LOG(len > (int32_t)sizeof(ConnPktHead),
+        "dispatch data failed: data length less than connection header size, connection id=%u, module=%d, dataLen=%d",
+        connectionId, moduleId, len);
 
-    if (data == NULL) {
-        return;
-    }
+    ConnListenerNode listener = { 0 };
+    int32_t status = GetListenerByModuleId(moduleId, &listener);
+    CONN_CHECK_AND_RETURN_LOG(status == SOFTBUS_OK,
+        "dispatch data failed: get module listener failed or not register, connection id=%u, module=%d, dataLen=%d, "
+        "err=%d", connectionId, moduleId, len, status);
 
-    if (len <= (int32_t)sizeof(ConnPktHead)) {
-        CLOGE("len %d", len);
-        return;
-    }
-
-    ret = GetListenerByModuleId(moduleId, &listener);
-    if (ret == SOFTBUS_ERR) {
-        CLOGE("GetListenerByModuleId failed moduleId %d", moduleId);
-        return;
-    }
-
-    pktLen = len - sizeof(ConnPktHead);
-    pkt = data + sizeof(ConnPktHead);
+    int32_t pktLen = len - sizeof(ConnPktHead);
+    char *pkt = data + sizeof(ConnPktHead);
     listener.callback.OnDataReceived(connectionId, moduleId, seq, pkt, pktLen);
-    return;
-}
-
-static SoftBusConnType ConvertConnType(const ConnectType *connectType)
-{
-    switch (*connectType) {
-        case CONNECT_TCP:
-            return SOFTBUS_HISYSEVT_CONN_TYPE_TCP;
-        case CONNECT_BR:
-            return SOFTBUS_HISYSEVT_CONN_TYPE_BR;
-        case CONNECT_BLE:
-            return SOFTBUS_HISYSEVT_CONN_TYPE_BLE;
-        case CONNECT_P2P:
-            return SOFTBUS_HISYSEVT_CONN_TYPE_P2P;
-        default:
-            return SOFTBUS_HISYSEVT_CONN_TYPE_BUTT;
-    }
 }
 
 static void ReportConnectTime(const ConnectionInfo *info)
@@ -370,19 +340,10 @@ static void ReportConnectTime(const ConnectionInfo *info)
         CLOGE("ReportConnectTime:info is null");
         return;
     }
-    SoftBusSysTime time = { 0 };
     ConnTimeNode *timeNode = GetConnTimeNode(info);
     if (timeNode == NULL) {
         CLOGE("ReportConnectTime:get timeNode failed");
     } else {
-        SoftBusGetTime(&time);
-        uint32_t tmpTime = (uint32_t)time.sec * SEC_TIME + (uint32_t)time.usec / SEC_TIME;
-        tmpTime -= timeNode->startTime;
-        int ret = SoftbusRecordConnResult(DEFAULT_PID, ConvertConnType(&info->type), SOFTBUS_EVT_CONN_SUCC, tmpTime,
-                                          SOFTBUS_OK);
-        if (ret != SOFTBUS_OK) {
-            CLOGE("ReportConnectTime:report conn time failed");
-        }
         FreeConnTimeNode(timeNode);
     }
 }
@@ -405,7 +366,8 @@ static void RecordStartTime(const ConnectOption *info)
             }
             break;
         case CONNECT_TCP:
-            if (memcpy_s(&conInfo.socketInfo.addr, IP_LEN, info->socketOption.addr, IP_LEN) != EOK) {
+            if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr, MAX_SOCKET_ADDR_LEN) !=
+                EOK) {
                 CLOGE("RecordStartTime:addr memcpy failed");
                 return;
             }
@@ -430,7 +392,7 @@ static int32_t InitTimeNodeList()
     if (g_connTimeList == NULL) {
         g_connTimeList = CreateSoftBusList();
         if (g_connTimeList == NULL) {
-            CLOGE("create list failed \r\n");
+            CLOGE("create list failed");
             return SOFTBUS_ERR;
         }
     }
@@ -513,17 +475,29 @@ NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t
     }
 
     if (g_connManager[info->type]->ConnectDevice == NULL) {
-        SoftbusRecordConnResult(DEFAULT_PID, ConvertConnType(&info->type), SOFTBUS_EVT_CONN_SUCC, 0,
-                                SOFTBUS_HISYSEVT_CONN_MANAGER_OP_NOT_SUPPORT);
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     RecordStartTime(info);
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
 
+NO_SANITIZE("cfi") int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type)
+{
+    CONN_CHECK_AND_RETURN_RET_LOG(type != NULL, SOFTBUS_INVALID_PARAM, "param error");
+
+    ConnectType temp;
+    temp = (connectionId >> CONNECT_TYPE_SHIFT);
+    if (ConnTypeCheck(temp) != SOFTBUS_OK) {
+        CLOGE("connectionId type is err %u", temp);
+        return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
+    }
+    *type = temp;
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
 {
-    uint32_t type;
+    ConnectType type;
     ConnPktHead *head = NULL;
 
     if (data == NULL || data->buf == NULL) {
@@ -535,9 +509,7 @@ NO_SANITIZE("cfi") int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *da
         return SOFTBUS_CONN_MANAGER_PKT_LEN_INVALID;
     }
 
-    type = (connectionId >> CONNECT_TYPE_SHIFT);
-    if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
-        CLOGE("connectionId type is err %d", type);
+    if (ConnGetTypeByConnectionId(connectionId, &type) != SOFTBUS_OK) {
         SoftBusFree(data->buf);
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
@@ -554,14 +526,14 @@ NO_SANITIZE("cfi") int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *da
     head->len = data->len - sizeof(ConnPktHead);
     head->seq = data->seq;
     PackConnPktHead(head);
-    return g_connManager[type]->PostBytes(connectionId, data->buf, (int32_t)(data->len),
-        data->pid, data->flag, data->seq);
+    return g_connManager[type]->PostBytes(
+        connectionId, (uint8_t *)data->buf, data->len, data->pid, data->flag, data->module, data->seq);
 }
 
 NO_SANITIZE("cfi") int32_t ConnDisconnectDevice(uint32_t connectionId)
 {
-    uint32_t type = (connectionId >> CONNECT_TYPE_SHIFT);
-    if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
+    ConnectType type;
+    if (ConnGetTypeByConnectionId(connectionId, &type) != SOFTBUS_OK) {
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
 
@@ -589,8 +561,8 @@ NO_SANITIZE("cfi") int32_t ConnDisconnectDeviceAllConn(const ConnectOption *opti
 
 NO_SANITIZE("cfi") int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
-    uint32_t type = (connectionId >> CONNECT_TYPE_SHIFT);
-    if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
+    ConnectType type;
+    if (ConnGetTypeByConnectionId(connectionId, &type) != SOFTBUS_OK) {
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
 
@@ -743,12 +715,28 @@ int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint32_t type = (connectionId >> CONNECT_TYPE_SHIFT);
-    if (ConnTypeCheck((ConnectType)type) != SOFTBUS_OK) {
+    ConnectType type;
+    if (ConnGetTypeByConnectionId(connectionId, &type) != SOFTBUS_OK) {
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
     if (g_connManager[type]->UpdateConnection == NULL) {
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return g_connManager[type]->UpdateConnection(connectionId, option);
+}
+
+int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time)
+{
+    if (option == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (ConnTypeCheck(option->type) != SOFTBUS_OK) {
+        return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
+    }
+
+    if (g_connManager[option->type]->PreventConnection == NULL) {
+        return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
+    }
+    return g_connManager[option->type]->PreventConnection(option, time);
 }

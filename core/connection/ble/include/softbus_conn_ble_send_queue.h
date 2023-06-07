@@ -13,39 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef BR_CONNECTION_QUEUE_H
-#define BR_CONNECTION_QUEUE_H
+#ifndef SOFTBUS_CONNBLE_SEND_QUEUE_H
+#define SOFTBUS_CONNBLE_SEND_QUEUE_H
 
-#include <stdint.h>
+#include "softbus_error_code.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 typedef struct {
     uint32_t connectionId;
     int32_t pid;
     int32_t flag;
-    bool isInner;
     int32_t module;
-    uint64_t seq;
-    int64_t dataSeq;
-    uint32_t len;
-    const char *data;
-    void (*listener)(uint32_t connId, uint64_t seq, int32_t module, int32_t result);
-} SendBrQueueNode;
+    int64_t seq;
+    uint32_t dataLen;
+    uint8_t *data;
+} SendQueueNode;
 
-int32_t BrInnerQueueInit(void);
-void BrInnerQueueDeinit(void);
-int32_t BrEnqueueNonBlock(const void *msg);
-int32_t BrDequeueBlock(void **msg);
-bool IsBrQueueEmpty(void);
+int32_t ConnBleInitSendQueue(void);
+void ConnBleDeinitSendQueue(void);
+int32_t ConnBleEnqueueNonBlock(const void *msg);
+int32_t ConnBleDequeueBlock(void **msg);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif /* BR_CONNECTION_QUEUE_H */
+#endif /* SOFTBUS_CONNBLE_SEND_QUEUE_H */

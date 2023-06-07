@@ -22,9 +22,11 @@ adapter_ble_inc = [
   "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
 ]
 adapter_ble_src = [
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_client.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_server.c",
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_coc_virtual.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/adapter_bt_utils.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
 ]

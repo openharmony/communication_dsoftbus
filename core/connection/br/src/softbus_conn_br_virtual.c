@@ -12,18 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_log.h"
-#include "softbus_conn_interface.h"
-#include "softbus_conn_ble_direct.h"
-#include "softbus_errcode.h"
 
-int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result)
-{
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "do not support ble direct connection");
-    return SOFTBUS_ERR;
-}
+#include "softbus_conn_br_manager.h"
 
-int32_t ConnBleDirectInit()
+ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
 {
-    return SOFTBUS_OK;
+    (void)callback;
+    return NULL;
 }

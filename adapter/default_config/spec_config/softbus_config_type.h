@@ -40,7 +40,6 @@ typedef enum {
     SOFTBUS_INT_ADAPTER_LOG_LEVEL, /* the default val is 0 */
     SOFTBUS_STR_STORAGE_DIRECTORY, /* the max length is MAX_STORAGE_PATH_LEN */
     SOFTBUS_INT_SUPPORT_TCP_PROXY, /* the l0 devices val is 0 , others is 1 */
-    SOFTBUS_INT_SUPPORT_SELECT_INTERVAL, /* the l0 devices val is 100000us , others is 10000us */
     SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN, /* the default val is 0 */
     SOFTBUS_STR_LNN_NET_IF_NAME, /* the default val is 0:eth0,1:wlan0 */
     SOFTBUS_INT_LNN_MAX_CONCURRENT_NUM, /* the default val is 0 */
@@ -51,6 +50,8 @@ typedef enum {
     SOFTBUS_INT_DISC_FREQ, /* the default val is 5s 12 times */
     SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH, /* 4K */
     SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH, /* 1K */
+    SOFTBUS_INT_CONN_COC_MAX_DATA_LENGTH, /* the default val is 4096 */
+    SOFTBUS_INT_CONN_COC_SEND_MTU, /* the default val is 990 */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 

@@ -1867,11 +1867,10 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_ON_CONNECT_EVENT_Test_001, TestSize.Level1)
 {
     ListenerModule module = AUTH;
-    int32_t events = SOFTBUS_SOCKET_OUT;
     int32_t cfd = 0;
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    int32_t ret = OnConnectEvent(module, events, cfd, &option);
+    int32_t ret = OnConnectEvent(module, cfd, &option);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS

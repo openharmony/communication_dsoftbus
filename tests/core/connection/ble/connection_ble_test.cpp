@@ -25,7 +25,6 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
-#include "softbus_ble_connection.c"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -53,12 +52,6 @@ void ConnectionBleTest::SetUpTestCase()
 {
     SoftbusConfigInit();
     ConnServerInit();
-    LooperInit();
-    BleConnLooperInit();
-    SoftBusMutexAttr attr;
-    attr.type = SOFTBUS_MUTEX_RECURSIVE;
-    SoftBusMutexInit(&g_connectionLock, &attr);
-    BleQueueInit();
 }
 
 /*
@@ -188,89 +181,5 @@ HWTEST_F(ConnectionBleTest, ManagerTest007, TestSize.Level1)
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest007");
     int ret = ConnTypeIsSupport(CONNECT_TCP);
     EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
- * @tc.name: PackRequest
- * @tc.desc: test reference process is valid
- * @tc.in: test module, test number, test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: NA
- */
-HWTEST_F(ConnectionBleTest, PackRequest, TestSize.Level1)
-{
-    BleConnectionInfo *info = CreateBleConnectionNode();
-    info->refCount = CONNECT_REF_INCRESE;
-    ListAdd(&g_connection_list, &info->node);
-    PackRequest(CONNECT_REF_DECRESE, info->connId);
-    EXPECT_EQ(info->state, BLE_CONNECTION_STATE_CLOSING);
-
-    ListDelete(&info->node);
-    SoftBusFree(info);
-}
-
-/*
- * @tc.name: OnPackResponse
- * @tc.desc: test reference process is valid
- * @tc.in: test module, test number, test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: NA
- */
-HWTEST_F(ConnectionBleTest, OnPackResponse, TestSize.Level1)
-{
-    BleConnectionInfo *info = CreateBleConnectionNode();
-    info->state = BLE_CONNECTION_STATE_CLOSING;
-    ListAdd(&g_connection_list, &info->node);
-    OnPackResponse(CONNECT_REF_INCRESE, CONNECT_REF_INCRESE, info->connId);
-    EXPECT_EQ(info->state, BLE_CONNECTION_STATE_CONNECTED);
-
-    ListDelete(&info->node);
-    SoftBusFree(info);
-}
-
-/*
- * @tc.name: BleConnectionMsgHandler
- * @tc.desc: test message handle function
- * @tc.in: test module, test number, test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: NA
- */
-HWTEST_F(ConnectionBleTest, BleConnectionMsgHandler, TestSize.Level1)
-{
-    SoftBusMessage *message = MallocMessage();
-    message->what = BLE_CONNECTION_DISCONNECT_OUT;
-    BleConnectionMsgHandler(message);
-
-    BleConnectionInfo *info = CreateBleConnectionNode();
-    info->state = BLE_CONNECTION_STATE_CLOSED;
-    ListAdd(&g_connection_list, &info->node);
-    message->arg1 = info->connId;
-    BleConnectionMsgHandler(message);
-    EXPECT_EQ(info->state, BLE_CONNECTION_STATE_CLOSED);
-
-    FreeMessage(message);
-    ListDelete(&info->node);
-    SoftBusFree(info);
-}
-
-/*
- * @tc.name: BleConnectionRemoveMessageFunc
- * @tc.desc: remove message function
- * @tc.in: test module, test number, test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: NA
- */
-HWTEST_F(ConnectionBleTest, BleConnectionRemoveMessageFunc, TestSize.Level1)
-{
-    int64_t clientId = INT32_MAX;
-    SoftBusMessage *message = MallocMessage();
-    message->what = BLE_CONNECTION_DISCONNECT_OUT;
-    message->arg1 = clientId;
-    int32_t ret = BleConnectionRemoveMessageFunc(message, &clientId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 }

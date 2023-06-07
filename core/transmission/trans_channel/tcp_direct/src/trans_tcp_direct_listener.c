@@ -112,10 +112,8 @@ static int32_t StartVerifySession(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
-static int32_t CreateSessionConnNode(
-    ListenerModule module, int events, int fd, int32_t chanId, const ConnectOption *clientAddr)
+static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chanId, const ConnectOption *clientAddr)
 {
-    (void)events;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail in create session conn node.");
@@ -167,13 +165,8 @@ static int32_t CreateSessionConnNode(
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TdcOnConnectEvent(ListenerModule module, int events, int cfd,
-    const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOption *clientAddr)
 {
-    if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Exception occurred");
-        return SOFTBUS_ERR;
-    }
     if (cfd < 0 || clientAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param, cfd = %d", cfd);
         return SOFTBUS_INVALID_PARAM;
@@ -187,7 +180,7 @@ NO_SANITIZE("cfi") static int32_t TdcOnConnectEvent(ListenerModule module, int e
         return ret;
     }
 
-    ret = CreateSessionConnNode(module, events, cfd, channelId, clientAddr);
+    ret = CreateSessionConnNode(module, cfd, channelId, clientAddr);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create session conn node fail, delete data buf node.");
         TransSrvDelDataBufNode(channelId);
@@ -286,12 +279,7 @@ NO_SANITIZE("cfi") int32_t TransTdcStartSessionListener(ListenerModule module, c
     };
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:set listener for module %d.", __func__, module);
-    int32_t ret = SetSoftbusBaseListener(module, &sessionListener);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:Set BaseListener Failed.", __func__);
-        return ret;
-    }
-    int serverPort = StartBaseListener(info);
+    int serverPort = StartBaseListener(info, &sessionListener);
     return serverPort;
 }
 

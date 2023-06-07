@@ -28,7 +28,7 @@
 
 static int32_t g_btStateListenerId = -1;
 static void LnnOnBtStateChanged(int32_t listenerId, int32_t state);
-static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState);
+static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState, int32_t hciReason);
 
 static SoftBusBtStateListener g_btStateListener = {
     .OnBtStateChanged = LnnOnBtStateChanged,
@@ -82,7 +82,7 @@ static void LnnOnBtStateChanged(int32_t listenerId, int32_t state)
     }
 }
 
-static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState)
+static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState, int32_t hciReason)
 {
     if (listenerId < 0 || addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bt monitor get invalid param");
