@@ -1115,7 +1115,7 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
         return SOFTBUS_IPC_ERR;
     }
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = (unsigned char *)data.ReadRawData(info.dataLen);
+        info.capabilityData = (unsigned char *)data.ReadCString();
         if (info.capabilityData == nullptr) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read capabilityData failed!");
             return SOFTBUS_IPC_ERR;
@@ -1188,7 +1188,7 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
         return SOFTBUS_IPC_ERR;
     }
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = (unsigned char *)data.ReadRawData(info.dataLen);
+        info.capabilityData = (unsigned char *)data.ReadCString();
         if (info.capabilityData == nullptr) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read capabilityData failed!");
             return SOFTBUS_IPC_ERR;

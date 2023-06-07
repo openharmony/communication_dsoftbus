@@ -448,7 +448,7 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
     WriteString(&request, info->capability);
     WriteUint32(&request, info->dataLen);
     if (info->dataLen != 0) {
-        WriteBuffer(&request, info->capabilityData, info->dataLen);
+        WriteString(&request, info->capabilityData);
     }
     WriteBool(&request, info->ranging);
     /* asynchronous invocation */
@@ -512,7 +512,7 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
     WriteString(&request, info->capability);
     WriteUint32(&request, info->dataLen);
     if (info->dataLen != 0) {
-        WriteBuffer(&request, info->capabilityData, info->dataLen);
+        WriteString(&request, info->capabilityData);
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REFRESH_LNN, &request, &reply, ClientBusCenterResultCb);
