@@ -615,7 +615,7 @@ int32_t BusCenterServerProxy::PublishLNN(const char *pkgName, const PublishInfo 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write capabilityData length failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (info->dataLen != 0 && !data.WriteRawData(info->capabilityData, info->dataLen)) {
+    if (info->dataLen != 0 && !data.WriteCString((const char *)info->capabilityData)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PublishLNN write capabilityData failed!");
         return SOFTBUS_IPC_ERR;
     }
@@ -709,7 +709,7 @@ int32_t BusCenterServerProxy::RefreshLNN(const char *pkgName, const SubscribeInf
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write capabilityData length failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (info->dataLen != 0 && !data.WriteRawData(info->capabilityData, info->dataLen)) {
+    if (info->dataLen != 0 && !data.WriteCString((const char *)info->capabilityData)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RefreshLNN write capabilityData failed!");
         return SOFTBUS_IPC_ERR;
     }

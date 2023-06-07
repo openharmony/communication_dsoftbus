@@ -327,7 +327,7 @@ int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply)
     }
     ReadUint32(req, &info.dataLen);
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = (unsigned char *)ReadBuffer(req, info.dataLen);
+        info.capabilityData = (unsigned char *)ReadString(req, &len);
         if (info.capabilityData == NULL) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerPublishLNN read capabilityData is null.");
             return SOFTBUS_IPC_ERR;
@@ -404,7 +404,7 @@ int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply)
     }
     ReadUint32(req, &info.dataLen);
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = (unsigned char *)ReadBuffer(req, info.dataLen);
+        info.capabilityData = (unsigned char *)ReadString(req, &len);
         if (info.capabilityData == NULL) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRefreshLNN read capabilityData is null.");
             return SOFTBUS_IPC_ERR;
