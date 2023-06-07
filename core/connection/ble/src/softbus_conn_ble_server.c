@@ -900,7 +900,7 @@ int32_t ConnGattServerSend(ConnBleConnection *connection, const uint8_t *data, u
         .attrHandle = GetBleAttrHandle(module),
         .confirm = 0,
         .valueLen = dataLen,
-        .value = data,
+        .value = (char *)data,
     };
     return SoftBusGattsSendNotify(&notify);
 }
