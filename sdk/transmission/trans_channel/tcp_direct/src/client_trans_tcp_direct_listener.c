@@ -51,11 +51,10 @@ static void TdcLockInit(void)
     }
     return;
 }
-NO_SANITIZE("cfi") static int32_t ClientTdcOnConnectEvent(ListenerModule module, int events, int cfd,
+NO_SANITIZE("cfi") static int32_t ClientTdcOnConnectEvent(ListenerModule module, int cfd,
     const ConnectOption *clientAddr)
 {
     (void)module;
-    (void)events;
     (void)cfd;
     (void)clientAddr;
     return SOFTBUS_OK;
@@ -101,13 +100,8 @@ int32_t TransTdcCreateListener(int32_t fd)
             .onDataEvent = ClientTdcOnDataEvent,
         };
 
-        if (SetSoftbusBaseListener(DIRECT_CHANNEL_CLIENT, &listener) != SOFTBUS_OK) {
+        if (StartBaseClient(DIRECT_CHANNEL_CLIENT, &listener) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start sdk base listener failed.");
-            SoftBusMutexUnlock(&g_lock.lock);
-            return SOFTBUS_ERR;
-        }
-        if (StartBaseClient(DIRECT_CHANNEL_CLIENT) < SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client start base listener failed.");
             SoftBusMutexUnlock(&g_lock.lock);
             return SOFTBUS_ERR;
         }

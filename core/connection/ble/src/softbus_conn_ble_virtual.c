@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
-#include "br_connection.h"
+#include "softbus_adapter_bt_common.h"
+#include "softbus_conn_ble_manager.h"
 
-ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
+ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
     (void)callback;
     return NULL;
+}
+
+int SoftBusGetBtState(void)
+{
+    return BLE_DISABLE;
 }

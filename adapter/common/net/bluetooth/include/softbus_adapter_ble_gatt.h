@@ -26,7 +26,7 @@ extern "C" {
 
 // max adv and scan limit
 #define ADV_MAX_NUM 8
-#define SCAN_MAX_NUM 6
+#define SCAN_MAX_NUM 8
 
 // Bluetooth scan duty cycle, unit: ms
 #define SOFTBUS_BLE_SCAN_INTERVAL_P2 3000
@@ -140,20 +140,18 @@ typedef struct {
     SoftBusBtAddr directAddr;
     unsigned char advLen;
     unsigned char *advData;
+    char *deviceName;
+    unsigned char rspDataLen;
+    unsigned char *rspData;
 } SoftBusBleScanResult;
 
 typedef struct {
     void (*OnScanStart)(int listenerId, int status);
     void (*OnScanStop)(int listenerId, int status);
     void (*OnScanResult)(int listenerId, const SoftBusBleScanResult *scanResultdata);
+    void (*OnScanFailed)(int resultCode, bool isStartScan);
+    void (*OnScanStateChanged)(int callbackCode);
 } SoftBusScanListener;
-
-typedef struct {
-    unsigned short advLength;
-    char *advData;
-    unsigned short scanRspLength;
-    char *scanRspData;
-} SoftBusBleAdvData;
 
 typedef struct {
     int minInterval;
@@ -173,6 +171,7 @@ typedef struct {
     void (*AdvDisableCallback)(int advId, int status);
     void (*AdvDataCallback)(int advId, int status);
     void (*AdvUpdateCallback)(int advId, int status);
+    void (*SensorhubCallback)(SoftBusBtUuid *uuid, int type, unsigned char *data, int dataSize);
 } SoftBusAdvCallback;
 
 int BleGattLockInit(void);

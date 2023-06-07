@@ -27,11 +27,12 @@ extern "C" {
 #endif
 #endif
 
+// NOTICE: all element MUST be bitmap mode
 typedef enum {
-    READ_TRIGGER,
-    WRITE_TRIGGER,
-    EXCEPT_TRIGGER,
-    RW_TRIGGER,
+    READ_TRIGGER = 1,
+    WRITE_TRIGGER = 2,
+    EXCEPT_TRIGGER = 4,
+    RW_TRIGGER = READ_TRIGGER | WRITE_TRIGGER,
 } TriggerType;
 
 typedef enum {
@@ -41,25 +42,23 @@ typedef enum {
 } ModeType;
 
 typedef struct {
-    int32_t (*onConnectEvent)(ListenerModule module, int32_t events, int32_t cfd, const ConnectOption *clientAddr);
+    int32_t (*onConnectEvent)(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr);
     int32_t (*onDataEvent)(ListenerModule module, int32_t events, int32_t fd);
 } SoftbusBaseListener;
 
 int32_t InitBaseListener(void);
 void DeinitBaseListener(void);
 
+// dynamic module management, mean while static module is already registered in InitBaseListener
 uint32_t CreateListenerModule(void);
 void DestroyBaseListener(ListenerModule module);
 
-int32_t GetSoftbusBaseListener(ListenerModule module, SoftbusBaseListener *listener);
-int32_t SetSoftbusBaseListener(ListenerModule module, const SoftbusBaseListener *listener);
-
-int32_t StartBaseClient(ListenerModule module);
-int32_t StartBaseListener(const LocalListenerInfo *info);
+int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener);
+int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListener *listener);
 int32_t StopBaseListener(ListenerModule module);
 
-int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType triggerType);
-int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType triggerType);
+int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger);
+int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger);
 
 #ifdef __cplusplus
 #if __cplusplus

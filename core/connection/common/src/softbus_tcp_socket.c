@@ -16,17 +16,18 @@
 #include "softbus_tcp_socket.h"
 #include <fcntl.h>
 #include <securec.h>
-#include <unistd.h>
 
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_conn_common.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
 
-#define SEND_BUF_SIZE 0x200000  // 2M
-#define RECV_BUF_SIZE 0x100000  // 1M
-#define USER_TIMEOUT_MS (30 * 1000)  // 300000us
+#define M_BYTES               0x100000
+#define SEND_BUF_SIZE         (4 * M_BYTES) // 4M
+#define RECV_BUF_SIZE         (6 * M_BYTES) // 6M
+#define USER_TIMEOUT_MS       (15 * 1000)   // 15s
 #define SOFTBUS_TCP_USER_TIME USER_TIMEOUT_MS
 
 #ifndef __LITEOS_M__
@@ -61,6 +62,75 @@ static int SetNoDelay(int fd, int on)
     return 0;
 }
 
+#ifndef TCP_QUICK_START
+#define TCP_QUICK_START 121
+#endif
+
+static int SetQuickStart(int fd, int quick)
+{
+    errno = 0;
+    int rc = setsockopt(fd, SOFTBUS_IPPROTO_TCP, TCP_QUICK_START, &quick, sizeof(quick));
+    if (rc != 0) {
+        CLOGE("set TCP_QUICK_START");
+        return -1;
+    }
+    return 0;
+}
+
+static int SetSendBufFix(int fd, int val)
+{
+    int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_SNDBUF, &val, sizeof(val));
+    if (rc != 0) {
+        CLOGE("set SOFTBUS_SO_SNDBUF");
+        return -1;
+    }
+    return 0;
+}
+
+static int SetRcvBufFix(int fd, int val)
+{
+    int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUF, &val, sizeof(val));
+    if (rc != 0) {
+        CLOGE("set SOFTBUS_SO_RCVBUF");
+        return -1;
+    }
+    return 0;
+}
+
+static int SetSendBuf(int fd)
+{
+    static int g_sendBufSize = 0;
+    if (g_sendBufSize > 0) {
+        return SetSendBufFix(fd, g_sendBufSize);
+    }
+    // try set buffer size
+    for (int size = SEND_BUF_SIZE; size > 0; size -= M_BYTES) {
+        int ret = SetSendBufFix(fd, size);
+        if (ret == 0) {
+            g_sendBufSize = size;
+            return ret;
+        }
+    }
+    return -1;
+}
+
+static int SetRecvBuf(int fd)
+{
+    static int g_recvBufSize = 0;
+    if (g_recvBufSize > 0) {
+        return SetRcvBufFix(fd, g_recvBufSize);
+    }
+    // try set buffer size
+    for (int size = RECV_BUF_SIZE; size > 0; size -= M_BYTES) {
+        int ret = SetRcvBufFix(fd, size);
+        if (ret == 0) {
+            g_recvBufSize = size;
+            return ret;
+        }
+    }
+    return -1;
+}
+
 static void SetServerOption(int fd)
 {
     (void)SetReuseAddr(fd, 1);
@@ -68,6 +138,8 @@ static void SetServerOption(int fd)
 #ifndef __LITEOS_M__
     (void)SetReusePort(fd, 1);
 #endif
+    SetSendBuf(fd);
+    SetRecvBuf(fd);
     (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_TCP_USER_TIME);
 }
 
@@ -77,10 +149,12 @@ static void SetClientOption(int fd)
     SetNoDelay(fd, 1);
 #ifndef __LITEOS_M__
     SetReusePort(fd, 1);
+    SetQuickStart(fd, 1);
 #endif
+    SetSendBuf(fd);
+    SetRecvBuf(fd);
     (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_TCP_USER_TIME);
 }
-
 
 static int BindLocalIP(int fd, const char *localIP, uint16_t port)
 {
@@ -145,6 +219,7 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
         ConnShutdownSocket(fd);
         return -1;
     }
+    CLOGI("server listen tcp socket, fd=%d", fd);
     return fd;
 }
 
@@ -166,54 +241,49 @@ static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
 
 static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
 {
-    if (option == NULL) {
-        CLOGE("null ptr!");
-        return -1;
-    }
-    if (option->type != CONNECT_TCP && option->type != CONNECT_P2P) {
-        CLOGE("bad type!type=%d", option->type);
-        return -1;
-    }
-    if (option->socketOption.port <= 0) {
-        CLOGE("OpenTcpClientSocket invalid para, port=%d",
-            option->socketOption.port);
-        return -1;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOG(option != NULL, -1, "invalid param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOG(option->type == CONNECT_TCP || option->type == CONNECT_P2P ||
+        option->type == CONNECT_P2P_REUSE, -1, "invalid param, unsupport type=%d", option->type);
+    CONN_CHECK_AND_RETURN_RET_LOG(
+        option->socketOption.port > 0, -1, "invalid param, invalid port=%d", option->socketOption.port);
+
+    char animizedIp[IP_LEN] = { 0 };
+    ConvertAnonymizeIpAddress(animizedIp, IP_LEN, option->socketOption.addr, IP_LEN);
 
     int32_t fd = -1;
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
-        CLOGE("fd=%d", fd);
+        CLOGE("create socket failed, server ip=%s, server port=%d, error=%d",
+            animizedIp, option->socketOption.port, ret);
         return -1;
     }
-
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
-        CLOGE("set nonblock failed, fd=%d", fd);
+        CLOGE("set nonblock failed, server ip=%s, server port=%d, fd=%d", animizedIp, option->socketOption.port, fd);
         SoftBusSocketClose(fd);
         return -1;
     }
-
     SetClientOption(fd);
     ret = BindTcpClientAddr(fd, myIp);
     if (ret != SOFTBUS_OK) {
-        CLOGE("BindLocalIP ret=%d", ret);
+        CLOGE("bind client address failed, server ip=%s, server port=%d, error=%d", animizedIp,
+            option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return -1;
     }
-    SoftBusSockAddrIn addr;
-    if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
-        CLOGE("memset failed");
-    }
+
+    SoftBusSockAddrIn addr = { 0 };
     addr.sinFamily = SOFTBUS_AF_INET;
     SoftBusInetPtoN(SOFTBUS_AF_INET, option->socketOption.addr, &addr.sinAddr);
     addr.sinPort = SoftBusHtoNs((uint16_t)option->socketOption.port);
     int rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (rc != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
-        CLOGE("fd=%d,connect rc=%d", fd, rc);
+        CLOGE("client connect failed, server ip=%s, server port=%d, fd=%d, error=%d, errno=%d", animizedIp,
+            option->socketOption.port, fd, rc, errno);
         ConnShutdownSocket(fd);
         return -1;
     }
+    CLOGI("client open tcp socket, server ip=%s, server port=%d, fd=%d", animizedIp, option->socketOption.port, fd);
     return fd;
 }
 
@@ -274,7 +344,7 @@ NO_SANITIZE("cfi") int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
     return 0;
 }
 
-#ifdef SOFTBUS_TCP_USER_TIME
+#ifdef TCP_USER_TIMEOUT
 NO_SANITIZE("cfi") int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     if (fd < 0) {
@@ -321,16 +391,15 @@ static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
     return SOFTBUS_OK;
 }
 
-static SocketInterface g_ipSocketInterface = {
-    .name = "TCP",
-    .type = LNN_PROTOCOL_IP,
-    .GetSockPort = GetTcpSockPort,
-    .OpenClientSocket = OpenTcpClientSocket,
-    .OpenServerSocket = OpenTcpServerSocket,
-    .AcceptClient = AcceptTcpClient,
-};
-
 NO_SANITIZE("cfi") const SocketInterface *GetTcpProtocol(void)
 {
-    return &g_ipSocketInterface;
+    static SocketInterface tcpSocketIntf = {
+        .name = "TCP",
+        .type = LNN_PROTOCOL_IP,
+        .GetSockPort = GetTcpSockPort,
+        .OpenClientSocket = OpenTcpClientSocket,
+        .OpenServerSocket = OpenTcpServerSocket,
+        .AcceptClient = AcceptTcpClient,
+    };
+    return &tcpSocketIntf;
 }

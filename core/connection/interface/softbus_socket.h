@@ -29,50 +29,44 @@ extern "C" {
 #endif
 
 #ifndef SOFTBUS_TEMP_FAILURE_RETRY
-#define SOFTBUS_TEMP_FAILURE_RETRY(expression) \
-( \
-    __extension__ \
-    ( \
-    {   \
-    long int __result; \
-    do { \
-        __result = (long int) (expression); \
-    } \
-    while (__result == SOFTBUS_ADAPTER_SOCKET_EINTR); \
-    __result; \
-    } \
-    ) \
-)
+#define SOFTBUS_TEMP_FAILURE_RETRY(expression)              \
+    (__extension__({                                        \
+        long int __result;                                  \
+        do {                                                \
+            __result = (long int)(expression);              \
+        } while (__result == SOFTBUS_ADAPTER_SOCKET_EINTR); \
+        __result;                                           \
+    }))
 #endif
 
-enum {
-    SOFTBUS_SOCKET_OUT, // writable
-    SOFTBUS_SOCKET_IN, // readable
+enum SocketEvent {
+    SOFTBUS_SOCKET_OUT,       // writable
+    SOFTBUS_SOCKET_IN,        // readable
     SOFTBUS_SOCKET_EXCEPTION, // exception
 };
 
 typedef struct {
-    char addr[IP_LEN];
+    char addr[MAX_SOCKET_ADDR_LEN];
     int32_t port;
 } SocketAddr;
 
 typedef struct SocketInterface {
-    const char* name;
+    const char *name;
     const ProtocolType type;
     int32_t (*GetSockPort)(int32_t fd);
     int32_t (*OpenServerSocket)(const LocalListenerInfo *option);
-    int32_t (*OpenClientSocket)(const ConnectOption *option, const char* bindAddr, bool isNonBlock);
+    int32_t (*OpenClientSocket)(const ConnectOption *option, const char *bindAddr, bool isNonBlock);
     int32_t (*AcceptClient)(int32_t fd, ConnectOption *clientAddr, int32_t *cfd);
 } SocketInterface;
 
 int32_t ConnInitSockets(void);
 void ConnDeinitSockets(void);
 
-const SocketInterface* GetSocketInterface(ProtocolType protocolType);
+const SocketInterface *GetSocketInterface(ProtocolType protocolType);
 
-int32_t RegistSocketProtocol(const SocketInterface* interface);
+int32_t RegistSocketProtocol(const SocketInterface *interface);
 
-int32_t ConnOpenClientSocket(const ConnectOption *option, const char* bindAddr, bool isNonBlock);
+int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock);
 
 ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout);
 ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout);

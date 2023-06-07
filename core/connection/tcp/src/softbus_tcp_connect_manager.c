@@ -66,19 +66,30 @@ static ConnectFuncInterface g_tcpInterface;
 static int32_t AddTcpConnInfo(TcpConnInfoNode *item);
 static void DelTcpConnInfo(uint32_t connectionId);
 static void DelAllConnInfo(ListenerModule moduleId);
-static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t cfd, const ConnectOption *clientAddr);
+static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr);
 static int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd);
 static int TcpConnectInfoDump(int fd);
 
-static void DfxRecordTcpConnectFail(uint32_t pId, ConnectStatistics *statistics, int32_t reason)
+static void DfxRecordTcpConnectFail(uint32_t pId, ConnectOption *option, TcpConnInfoNode *tcpInfo,
+    ConnectStatistics *statistics, int32_t reason)
 {
+    if (statistics == NULL) {
+        CLOGE("statistics is null");
+        return;
+    }
+
     CLOGI("record tcp conn fail, connectTraceId=%u, reason=%d", statistics->connectTraceId, reason);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_TCP, SOFTBUS_EVT_CONN_FAIL, costTime, reason);
 }
 
-static void DfxRecordTcpConnectSuccess(uint32_t pId, ConnectStatistics *statistics)
+static void DfxRecordTcpConnectSuccess(uint32_t pId, TcpConnInfoNode *tcpInfo, ConnectStatistics *statistics)
 {
+    if (statistics == NULL) {
+        CLOGI("statistics is null");
+        return;
+    }
+
     CLOGI("record tcp conn success, connectTraceId=%u", statistics->connectTraceId);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_TCP, SOFTBUS_EVT_CONN_SUCC, costTime,
@@ -173,13 +184,8 @@ static void DelTcpConnNode(uint32_t connectionId)
     return;
 }
 
-NO_SANITIZE("cfi") static int32_t TcpOnConnectEvent(ListenerModule module, int32_t events, int32_t cfd,
-    const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
-    if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        CLOGE("Exception occurred");
-        return SOFTBUS_ERR;
-    }
     if (cfd < 0 || clientAddr == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -299,14 +305,16 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEventOut(int32_t fd)
     if (ret != 0) {
         CLOGE("%d connect fail %d", fd, ret);
         tcpInfo.result.OnConnectFailed(tcpInfo.requestId, ret);
-        DfxRecordTcpConnectFail(DEFAULT_PID, &tcpInfo.statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
+        tcpInfo.statistics.reqId = tcpInfo.requestId;
+        DfxRecordTcpConnectFail(
+            DEFAULT_PID, NULL, &tcpInfo, &tcpInfo.statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
         (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
-        ConnShutdownSocket(fd);
         DelTcpConnNode(tcpInfo.connectionId);
+        ConnShutdownSocket(fd);
         return SOFTBUS_OK;
     }
     CLOGI("notfiy connect ok req %d", tcpInfo.requestId);
-    DfxRecordTcpConnectSuccess(DEFAULT_PID, &tcpInfo.statistics);
+    DfxRecordTcpConnectSuccess(DEFAULT_PID, &tcpInfo, &tcpInfo.statistics);
     tcpInfo.result.OnConnectSuccessed(tcpInfo.requestId, tcpInfo.connectionId, &tcpInfo.info);
     (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
     (void)AddTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, READ_TRIGGER);
@@ -321,7 +329,7 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEventIn(int32_t fd)
     uint32_t headSize = sizeof(ConnPktHead);
     ssize_t bytes = ConnRecvSocketData(fd, (char *)&head, headSize, g_tcpTimeOut);
     UnpackConnPktHead(&head);
-    if (bytes <= 0) {
+    if (bytes < 0) {
         CLOGI("TcpOnDataEvent Disconnect fd:%d", fd);
         DelTcpConnInfo(connectionId);
         return SOFTBUS_OK;
@@ -441,6 +449,18 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requestId,
+    ConnectStatistics *statistics, const ConnectResult *result)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClient failed.");
+        result->OnConnectFailed(requestId, SOFTBUS_ERR);
+        statistics->reqId = requestId;
+        DfxRecordTcpConnectFail(
+            DEFAULT_PID, (ConnectOption *)option, NULL, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
+        SoftBusFree(statistics);
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+}
+
 NO_SANITIZE("cfi") int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
     const ConnectResult *result)
 {
@@ -454,19 +474,16 @@ NO_SANITIZE("cfi") int32_t TcpConnectDevice(const ConnectOption *option, uint32_
     CLOGI("tcp conn start connectTraceId=%u", statistics->connectTraceId);
     int32_t fd = ConnOpenClientSocket(option, BIND_ADDR_ALL, true);
     if (fd < 0) {
-        CLOGE("OpenTcpClient failed.");
-        result->OnConnectFailed(requestId, SOFTBUS_ERR);
-        DfxRecordTcpConnectFail(DEFAULT_PID, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
-        SoftBusFree(statistics);
-        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+        return TcpOpenClientSocketErr(option, requestId, statistics, result);
     }
 
+    int32_t error = SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR;
     if (option->socketOption.keepAlive == 1) {
         if (ConnSetTcpKeepAlive(fd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
             CLOGE("set keepalive fail, fd: %d", fd);
             ConnShutdownSocket(fd);
             result->OnConnectFailed(requestId, SOFTBUS_ERR);
-            DfxRecordTcpConnectFail(DEFAULT_PID, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
+            DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
             SoftBusFree(statistics);
             return SOFTBUS_ERR;
         }
@@ -477,15 +494,15 @@ NO_SANITIZE("cfi") int32_t TcpConnectDevice(const ConnectOption *option, uint32_
     if (WrapperAddTcpConnInfo(option, result, connectionId, requestId, fd, *statistics) != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
-        DfxRecordTcpConnectFail(DEFAULT_PID, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
+        DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
         SoftBusFree(statistics);
         return SOFTBUS_ERR;
     }
     if (AddTrigger((ListenerModule)(option->socketOption.moduleId), fd, WRITE_TRIGGER) != SOFTBUS_OK) {
-        ConnShutdownSocket(fd);
         DelTcpConnNode(connectionId);
+        ConnShutdownSocket(fd);
         result->OnConnectFailed(requestId, SOFTBUS_ERR);
-        DfxRecordTcpConnectFail(DEFAULT_PID, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
+        DfxRecordTcpConnectFail(DEFAULT_PID, (ConnectOption *)option, NULL, statistics, error);
         SoftBusFree(statistics);
         return SOFTBUS_ERR;
     }
@@ -534,21 +551,24 @@ NO_SANITIZE("cfi") int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
     return SOFTBUS_OK;
 }
 
-int32_t TcpPostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid, int32_t flag, int64_t seq)
+int32_t TcpPostBytes(
+    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq)
 {
     (void)pid;
+    (void)module;
+    (void)seq;
     TcpConnInfoNode *item = NULL;
-    if (data == NULL || len <= 0) {
+    if (data == NULL || len == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_tcpConnInfoList == NULL) {
-        SoftBusFree(data);
+        SoftBusFree((void*)data);
         return SOFTBUS_ERR;
     }
     int32_t fd = -1;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
         CLOGE("lock failed");
-        SoftBusFree(data);
+        SoftBusFree((void*)data);
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
@@ -559,11 +579,11 @@ int32_t TcpPostBytes(uint32_t connectionId, char *data, int32_t len, int32_t pid
     }
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     if (fd == -1) {
-        SoftBusFree(data);
+        SoftBusFree((void*)data);
         CLOGE("TcpPostBytes failed, connectionId:%08x not found.", connectionId);
         return SOFTBUS_ERR;
     }
-    int32_t bytes = ConnSendSocketData(fd, data, len, flag);
+    uint32_t bytes = ConnSendSocketData(fd, (const char *)data, len, flag);
     SoftBusFree(data);
     if (bytes != len) {
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
@@ -610,12 +630,7 @@ int32_t TcpStartListening(const LocalListenerInfo *info)
         .onConnectEvent = TcpOnConnectEvent,
         .onDataEvent = TcpOnDataEvent
     };
-    int32_t rc = SetSoftbusBaseListener(info->socketOption.moduleId, &listener);
-    if (rc != SOFTBUS_OK) {
-        CLOGE("Set BaseListener Failed.");
-        return rc;
-    }
-    return StartBaseListener(info);
+    return StartBaseListener(info, &listener);
 }
 
 int32_t TcpStopListening(const LocalListenerInfo *info)
@@ -677,6 +692,7 @@ static void InitTcpInterface(void)
     g_tcpInterface.StopLocalListening = TcpStopListening;
     g_tcpInterface.CheckActiveConnection = TcpCheckActiveConnection;
     g_tcpInterface.UpdateConnection = NULL;
+    g_tcpInterface.PreventConnection = NULL;
 }
 
 NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
@@ -706,7 +722,7 @@ NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitTcp(const ConnectCallback *call
 
 static int TcpConnectInfoDump(int fd)
 {
-    char addr[IP_LEN] = {0};
+    char addr[MAX_SOCKET_ADDR_LEN] = {0};
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CLOGE("lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -720,9 +736,9 @@ static int TcpConnectInfoDump(int fd)
         SOFTBUS_DPRINTF(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
         SOFTBUS_DPRINTF(fd, "Connection Info type              : %d\n", itemNode->info.type);
         SOFTBUS_DPRINTF(fd, "SocketInfo                        :\n");
-        DataMasking(itemNode->info.socketInfo.addr, IP_LEN, MAC_DELIMITER, addr);
+        DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER, addr);
         SOFTBUS_DPRINTF(fd, "SocketInfo addr                   : %s\n", addr);
-        SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %lu\n", itemNode->info.socketInfo.protocol);
+        SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %"PRIu64"\n", itemNode->info.socketInfo.protocol);
         SOFTBUS_DPRINTF(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
         SOFTBUS_DPRINTF(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);
         SOFTBUS_DPRINTF(fd, "SocketInfo moduleId               : %d\n", itemNode->info.socketInfo.moduleId);

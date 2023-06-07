@@ -13,24 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef BR_CONNECTION_H
-#define BR_CONNECTION_H
+#ifndef CONN_BR_SEND_QUEUE_H
+#define CONN_BR_SEND_QUEUE_H
 
-#include "softbus_conn_interface.h"
-#include "softbus_conn_manager.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif
 
-ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback);
+typedef struct {
+    uint32_t connectionId;
+    int32_t pid;
+    int32_t flag;
+    bool isInner;
+    int32_t module;
+    int64_t seq;
+    uint32_t len;
+    uint8_t *data;
+} SendBrQueueNode;
+
+int32_t ConnBrInnerQueueInit(void);
+void ConnBrInnerQueueDeinit(void);
+int32_t ConnBrEnqueueNonBlock(const void *msg);
+int32_t ConnBrDequeueBlock(void **msg);
+bool ConnBrIsQueueEmpty(void);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __clpusplus */
-#endif /* __clpusplus */
-#endif /* BR_CONNECTION_H */
-
+#endif /* __cplusplus */
+#endif /* CONN_BR_SEND_QUEUE_H */

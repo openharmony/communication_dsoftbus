@@ -17,11 +17,13 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "br_pending_packet.h"
+#include "softbus_conn_br_pending_packet.h"
 
 #include "common_list.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_br_connection.h"
+#include "softbus_conn_br_trans.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -31,7 +33,7 @@
 typedef struct {
     ListNode node;
     uint32_t id;
-    uint64_t seq;
+    int64_t seq;
     void *data;
     bool finded;
     SoftBusCond cond;
@@ -41,7 +43,7 @@ typedef struct {
 static SoftBusMutex g_pendingLock;
 static LIST_HEAD(g_pendingList);
 
-NO_SANITIZE("cfi") int32_t InitBrPendingPacket(void)
+int32_t ConnBrInitBrPendingPacket(void)
 {
     if (SoftBusMutexInit(&g_pendingLock, NULL) != 0) {
         return SOFTBUS_LOCK_ERR;
@@ -49,12 +51,12 @@ NO_SANITIZE("cfi") int32_t InitBrPendingPacket(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DestroyBrPendingPacket(void)
+void ConnBrDestroyBrPendingPacket(void)
 {
     (void)SoftBusMutexDestroy(&g_pendingLock);
 }
 
-NO_SANITIZE("cfi") int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
+int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -62,14 +64,14 @@ NO_SANITIZE("cfi") int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
     PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
-            CLOGE("PendingPacket existed. id: %u, seq: %" PRIu64, id, seq);
+            CLOGE("PendingPacket existed. id=%u, seq=%" PRId64, id, seq);
             (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_ALREADY_EXISTED;
         }
     }
     pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
     if (pending == NULL) {
-        CLOGE("CreateBrPendingPacket SoftBusCalloc failed");
+        CLOGE("ConnBrCreateBrPendingPacket SoftBusCalloc failed, id=%u, seq=%" PRId64, id, seq);
         (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -92,7 +94,7 @@ NO_SANITIZE("cfi") int32_t CreateBrPendingPacket(uint32_t id, uint64_t seq)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DelBrPendingPacket(uint32_t id, uint64_t seq)
+void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
         return;
@@ -111,7 +113,7 @@ NO_SANITIZE("cfi") void DelBrPendingPacket(uint32_t id, uint64_t seq)
     (void)SoftBusMutexUnlock(&g_pendingLock);
 }
 
-NO_SANITIZE("cfi") int32_t GetBrPendingPacket(uint32_t id, uint64_t seq, uint32_t waitMillis, void **data)
+int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data)
 {
 #define USECTONSEC 1000LL
     if (data == NULL || SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
@@ -142,7 +144,7 @@ NO_SANITIZE("cfi") int32_t GetBrPendingPacket(uint32_t id, uint64_t seq, uint32_
         SoftBusSysTime outtime;
         SoftBusSysTime now;
         (void)SoftBusGetTime(&now);
-        int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + waitMillis * USECTONSEC;
+        int64_t time = (int64_t)(now.sec * USECTONSEC * USECTONSEC + now.usec + waitMillis * USECTONSEC);
         outtime.sec = time / USECTONSEC / USECTONSEC;
         outtime.usec = time % (USECTONSEC * USECTONSEC);
         (void)SoftBusCondWait(&pending->cond, &pending->lock, &outtime);
@@ -163,11 +165,11 @@ EXIT:
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t SetBrPendingPacket(uint32_t id, uint64_t seq, void *data)
+int32_t ConnBrSetBrPendingPacket(uint32_t id, int64_t seq, void *data)
 {
     PendingPacket *item = NULL;
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        CLOGE("SetBrPendingPacket SoftBusMutexLock failed");
+        CLOGE("ConnBrSetBrPendingPacket SoftBusMutexLock failed");
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
@@ -183,4 +185,68 @@ NO_SANITIZE("cfi") int32_t SetBrPendingPacket(uint32_t id, uint64_t seq, void *d
     }
     SoftBusMutexUnlock(&g_pendingLock);
     return SOFTBUS_ERR;
+}
+
+int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
+{
+    int32_t peerWindows = 0;
+    int64_t peerSeq = 0;
+    if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||
+        !GetJsonObjectNumber64Item(json, KEY_ACK_SEQ_NUM, &peerSeq)) {
+        CLOGE("connection %u ack request message failed: parse window or seq fields failed", connection->connectionId);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+
+    int32_t status = SoftBusMutexLock(&connection->lock);
+    if (status != SOFTBUS_OK) {
+        CLOGE("ATTENTION UNEXPECTED ERROR! connection %u ack request message failed: try to lock failed, error=%d",
+            connection->connectionId, status);
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    int32_t localWindows = connection->window;
+    (void)SoftBusMutexUnlock(&connection->lock);
+
+    CLOGI("connection %u ack request message: local window=%d, peer window=%d, peer seq=%" PRId64,
+        connection->connectionId, localWindows, peerWindows, peerSeq);
+
+    int32_t flag = CONN_HIGH;
+    BrCtlMessageSerializationContext ctx = {
+        .connectionId = connection->connectionId,
+        .flag = flag,
+        .method = BR_METHOD_ACK_RESPONSE,
+        .ackRequestResponse = {
+            .window = localWindows,
+            .seq = peerSeq,
+        },
+    };
+    uint8_t *data = NULL;
+    uint32_t dataLen = 0;
+    int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
+    if (seq < 0) {
+        CLOGI("connection %u ack request message: pack ack reply message failed: local window=%d, peer "
+              "window=%d, peer seq=%" PRId64 ", error=%d",
+            connection->connectionId, localWindows, peerWindows, peerSeq, (int32_t)seq);
+        return (int32_t)seq;
+    }
+    return ConnBrPostBytes(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+}
+
+int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json)
+{
+    int32_t peerWindows = 0;
+    uint64_t seq = 0;
+    if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||
+        !GetJsonObjectNumber64Item(json, KEY_ACK_SEQ_NUM, (int64_t *)&seq)) {
+        CLOGE("connection %u ack response message failed: parse window or seq fields failed", connection->connectionId);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    CLOGI(
+        "connection %u ack response message: peer window=%d, seq=%" PRId64, connection->connectionId, peerWindows, seq);
+    int32_t status = ConnBrSetBrPendingPacket(connection->connectionId, seq, NULL);
+    if (status != SOFTBUS_OK) {
+        CLOGE("connection %u ack response message failed: set br pending packet failed, error=%d",
+            connection->connectionId, status);
+    }
+    return status;
 }

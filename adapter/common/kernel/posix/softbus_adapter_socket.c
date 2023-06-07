@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include "endian.h" /* liteos_m htons */
 #include "softbus_adapter_errcode.h"
@@ -55,6 +56,12 @@ static int32_t GetErrorCode(void)
             break;
         case EAGAIN:
             errCode = SOFTBUS_ADAPTER_SOCKET_EAGAIN;
+            break;
+        case EBADF:
+            errCode = SOFTBUS_ADAPTER_SOCKET_EBADF;
+            break;
+        case EINVAL:
+            errCode = SOFTBUS_ADAPTER_SOCKET_EINVAL;
             break;
         default:
             errCode = SOFTBUS_ADAPTER_ERR;
@@ -91,7 +98,7 @@ int32_t SoftBusSocketSetOpt(int32_t socketFd, int32_t level, int32_t optName, co
     return SOFTBUS_ADAPTER_OK;
 }
 
-int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  void *optVal, int32_t *optLen)
+int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName, void *optVal, int32_t *optLen)
 {
     int32_t ret = getsockopt(socketFd, level, optName, optVal, (socklen_t *)optLen);
     if (ret != 0) {
@@ -117,7 +124,7 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
     return err;
 }
 
-static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr * sysAddr, uint32_t len)
+static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr *sysAddr, uint32_t len)
 {
     if (len < sizeof(softbusAddr->saFamily)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:invalid len", __func__);
@@ -132,8 +139,8 @@ static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct s
         return SOFTBUS_ADAPTER_ERR;
     }
     sysAddr->sa_family = softbusAddr->saFamily;
-    if (memcpy_s(sysAddr->sa_data, sizeof(sysAddr->sa_data), softbusAddr->saData, len - sizeof(softbusAddr->saFamily))
-        != EOK) {
+    if (memcpy_s(sysAddr->sa_data, sizeof(sysAddr->sa_data), softbusAddr->saData,
+            len - sizeof(softbusAddr->saFamily)) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:memcpy fail", __func__);
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -214,7 +221,7 @@ int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrL
     }
     int32_t ret = bind(socketFd, &sysAddr, (socklen_t)addrLen);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "bind : %{public}s", strerror(errno));
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "bind : %{public}s, %d", strerror(errno), errno);
         return GetErrorCode();
     }
 
@@ -225,7 +232,7 @@ int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog)
 {
     int32_t ret = listen(socketFd, backLog);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "listen : %{public}s", strerror(errno));
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "listen : %{public}s, %d", strerror(errno), errno);
         return SOFTBUS_ADAPTER_ERR;
     }
 
@@ -245,7 +252,7 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ad
     }
     int32_t ret = accept(socketFd, &sysAddr, (socklen_t *)addrLen);
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "accept : %{public}s", strerror(errno));
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "accept : %{public}s, %d", strerror(errno), errno);
         return GetErrorCode();
     }
     if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
@@ -315,13 +322,9 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
     }
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet *exceptFds,
-    SoftBusSockTimeOut *timeOut)
+int32_t SoftBusSocketSelect(
+    int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *writeFds, SoftBusFdSet *exceptFds, SoftBusSockTimeOut *timeout)
 {
-    if (timeOut == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timeOut is null");
-        return SOFTBUS_ADAPTER_ERR;
-    }
     fd_set *tempReadSet = NULL;
     fd_set *tempWriteSet = NULL;
     fd_set *tempExceptSet = NULL;
@@ -336,11 +339,20 @@ NO_SANITIZE("cfi") int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readF
         tempExceptSet = (fd_set *)exceptFds->fdsBits;
     }
 
-    struct timeval sysTimeOut = {0};
-
-    sysTimeOut.tv_sec = timeOut->sec;
-    sysTimeOut.tv_usec = timeOut->usec;
-    int32_t ret = select(nfds, tempReadSet, tempWriteSet, tempExceptSet, &sysTimeOut);
+    struct timeval *timeoutPtr = NULL;
+    struct timeval tv = { 0 };
+    if (timeout != NULL) {
+        tv.tv_sec = timeout->sec;
+        tv.tv_usec = timeout->usec;
+        timeoutPtr = &tv;
+    }
+#define SELECT_INTERVAL_US (100 * 1000)
+#ifdef __LITEOS__
+    tv.tv_sec = 0;
+    tv.tv_usec = SELECT_INTERVAL_US;
+    timeoutPtr = &tv;
+#endif
+    int32_t ret = select(nfds, tempReadSet, tempWriteSet, tempExceptSet, timeoutPtr);
     if (ret < 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "select : %{public}s", strerror(errno));
         return GetErrorCode();
@@ -472,7 +484,7 @@ int32_t SoftBusInetPtoN(int32_t af, const char *src, void *dst)
     }
 }
 
-const char *SoftBusInetNtoP(int32_t af, const void* src, char *dst, int32_t size)
+const char *SoftBusInetNtoP(int32_t af, const void *src, char *dst, int32_t size)
 {
     return (inet_ntop(af, src, dst, size));
 }
@@ -560,5 +572,25 @@ uint64_t SoftBusLtoHll(uint64_t value)
 {
     uint64_t res = value;
     ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint16_t SoftBusLEtoBEs(uint16_t value)
+{
+    if (!IsLittleEndian()) {
+        return value;
+    }
+    uint16_t res = value;
+    ShiftByte((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint16_t SoftBusBEtoLEs(uint16_t value)
+{
+    if (!IsLittleEndian()) {
+        return value;
+    }
+    uint16_t res = value;
+    ShiftByte((uint8_t *)&res, (int8_t)sizeof(res));
     return res;
 }

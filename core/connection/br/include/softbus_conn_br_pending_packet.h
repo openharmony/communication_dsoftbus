@@ -13,38 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_BLE_QUEUE_H
-#define SOFTBUS_BLE_QUEUE_H
+#ifndef CONN_BR_PENDING_PACKET_H
+#define CONN_BR_PENDING_PACKET_H
 
 #include <stdint.h>
 
+#include "softbus_conn_br_connection.h"
+#include "softbus_json_utils.h"
+
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif
 
-typedef struct {
-    int32_t halConnId;
-    uint32_t connectionId;
-    int32_t pid;
-    int32_t flag;
-    int32_t isServer;
-    int32_t isInner;
-    int32_t module;
-    int64_t seq;
-    uint32_t len;
-    const char *data;
-} SendQueueNode;
+int32_t ConnBrInitBrPendingPacket(void);
+void ConnBrDestroyBrPendingPacket(void);
+int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq);
+void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq);
 
-int BleInnerQueueInit(void);
-void BleInnerQueueDeinit(void);
-int BleEnqueueNonBlock(const void *msg);
-int BleDequeueBlock(void **msg);
+int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data);
+int32_t ConnBrSetBrPendingPacket(uint32_t id, int64_t seq, void *data);
+
+int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json);
+int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif
+#endif /* CONN_BR_PENDING_PACKET_H */

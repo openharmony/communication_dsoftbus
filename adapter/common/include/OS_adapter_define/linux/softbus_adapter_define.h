@@ -24,7 +24,6 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -52,6 +51,7 @@ extern "C" {
 
 #define SOFTBUS_SO_REUSEADDR_ SO_REUSEADDR
 #define SOFTBUS_SO_RCVBUF_ SO_RCVBUF
+#define SOFTBUS_SO_SNDBUF_ SO_SNDBUF
 #define SOFTBUS_SO_KEEPALIVE_ SO_KEEPALIVE
 #define SOFTBUS_SO_REUSEPORT_ SO_REUSEPORT
 #define SOFTBUS_SO_RCVBUFFORCE_ SO_RCVBUFFORCE

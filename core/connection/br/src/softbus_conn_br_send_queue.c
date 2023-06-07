@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "softbus_conn_br_send_queue.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-
-#include "br_connection_queue.h"
 
 #include "common_list.h"
 #include "securec.h"
@@ -29,10 +28,10 @@
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 
-#define HIGH_PRIORITY_DEFAULT_LIMIT 32
+#define HIGH_PRIORITY_DEFAULT_LIMIT   32
 #define MIDDLE_PRIORITY_DEFAULT_LIMIT 32
-#define LOW_PRIORITY_DEFAULT_LIMIT 32
-#define WAIT_QUEUE_BUFFER_PERIOD_LEN 2
+#define LOW_PRIORITY_DEFAULT_LIMIT    32
+#define WAIT_QUEUE_BUFFER_PERIOD_LEN  2
 
 typedef enum {
     HIGH_PRIORITY = 0,
@@ -50,7 +49,7 @@ typedef struct {
 static const uint32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
     HIGH_PRIORITY_DEFAULT_LIMIT,
     MIDDLE_PRIORITY_DEFAULT_LIMIT,
-    LOW_PRIORITY_DEFAULT_LIMIT
+    LOW_PRIORITY_DEFAULT_LIMIT,
 };
 static LIST_HEAD(g_brQueueList);
 static SoftBusMutex g_brQueueLock;
@@ -93,7 +92,7 @@ static void DestroyBrQueue(BrQueue *queue)
     SoftBusFree(queue);
 }
 
-static int GetPriority(int32_t flag)
+static int32_t GetPriority(int32_t flag)
 {
     switch (flag) {
         case CONN_HIGH:
@@ -116,7 +115,7 @@ static int32_t BrSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_
         CLOGE("BrSoftBusCondWait SoftBusGetTime failed");
         return SOFTBUS_ERR;
     }
-    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + timeMillis * USECTONSEC;
+    int64_t time = (int64_t)(now.sec * USECTONSEC * USECTONSEC + now.usec + timeMillis * USECTONSEC);
     SoftBusSysTime tv;
     tv.sec = time / USECTONSEC / USECTONSEC;
     tv.usec = time % (USECTONSEC * USECTONSEC);
@@ -125,27 +124,16 @@ static int32_t BrSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_
 
 static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen, int32_t pid)
 {
-#define WAIT_RETRY_NUM 2
 #define WAIT_QUEUE_DELAY 1000
-    int32_t retry = 0;
     uint32_t queueCount = 0;
     while (true) {
         if (QueueCountGet(lockFreeQueue, &queueCount) != 0) {
             CLOGE("wait get queue count fail");
             break;
         }
-        CLOGI("br pid = %d, queue count = %d", pid, queueCount);
+        CLOGI("br pid=%d, queue count=%d", pid, queueCount);
         if (queueCount < (maxLen - diffLen)) {
             break;
-        }
-        retry++;
-        if (retry > WAIT_RETRY_NUM) {
-            CLOGI("wait queue length retry over");
-            if (queueCount < maxLen) {
-                return SOFTBUS_OK;
-            }
-            CLOGI("SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL!!");
-            return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;
         }
         CLOGI("Wait g_sendWaitCond");
         if (BrSoftBusCondWait(&g_sendWaitCond, &g_brQueueLock, WAIT_QUEUE_DELAY) != SOFTBUS_OK) {
@@ -156,7 +144,7 @@ static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxL
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") bool IsBrQueueEmpty(void)
+bool ConnBrIsQueueEmpty(void)
 {
     uint32_t queueCount = 0;
     for (uint32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {
@@ -170,7 +158,7 @@ NO_SANITIZE("cfi") bool IsBrQueueEmpty(void)
     return IsListEmpty(&g_brQueueList);
 }
 
-NO_SANITIZE("cfi") int32_t BrEnqueueNonBlock(const void *msg)
+int32_t ConnBrEnqueueNonBlock(const void *msg)
 {
     if (msg == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -226,10 +214,10 @@ END:
     return ret;
 }
 
-static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull)
+static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull, QueuePriority leastPriority)
 {
     uint32_t queueCount;
-    for (uint32_t i = 0; i < QUEUE_NUM_PER_PID; i++) {
+    for (uint32_t i = 0; i <= leastPriority; i++) {
         if (QueueCountGet(queue->queue[i], &queueCount) != 0) {
             CLOGE("GetMsg get queue count fail");
             continue;
@@ -247,7 +235,7 @@ static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t BrDequeueBlock(void **msg)
+int32_t ConnBrDequeueBlock(void **msg)
 {
     bool isFull = false;
     int32_t status = SOFTBUS_ERR;
@@ -261,13 +249,13 @@ NO_SANITIZE("cfi") int32_t BrDequeueBlock(void **msg)
         return SOFTBUS_LOCK_ERR;
     }
     do {
-        if (GetMsg(g_innerQueue, msg, &isFull) == SOFTBUS_OK) {
+        if (GetMsg(g_innerQueue, msg, &isFull, MIDDLE_PRIORITY) == SOFTBUS_OK) {
             status = SOFTBUS_OK;
             break;
         }
         LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_brQueueList, BrQueue, node) {
             ListDelete(&(item->node));
-            if (GetMsg(item, msg, &isFull) == SOFTBUS_OK) {
+            if (GetMsg(item, msg, &isFull, LOW_PRIORITY) == SOFTBUS_OK) {
                 ListTailInsert(&g_brQueueList, &(item->node));
                 status = SOFTBUS_OK;
                 break;
@@ -275,6 +263,10 @@ NO_SANITIZE("cfi") int32_t BrDequeueBlock(void **msg)
             DestroyBrQueue(item);
         }
         if (status == SOFTBUS_OK) {
+            break;
+        }
+        if (GetMsg(g_innerQueue, msg, &isFull, LOW_PRIORITY) == SOFTBUS_OK) {
+            status = SOFTBUS_OK;
             break;
         }
         CLOGI("br queue is empty, dequeue start wait ...");
@@ -292,7 +284,7 @@ NO_SANITIZE("cfi") int32_t BrDequeueBlock(void **msg)
     return status;
 }
 
-NO_SANITIZE("cfi") int32_t BrInnerQueueInit(void)
+int32_t ConnBrInnerQueueInit(void)
 {
     if (SoftBusMutexInit(&g_brQueueLock, NULL) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -308,7 +300,7 @@ NO_SANITIZE("cfi") int32_t BrInnerQueueInit(void)
     }
     g_innerQueue = CreateBrQueue(0);
     if (g_innerQueue == NULL) {
-        CLOGE("BrInnerQueueInit CreateBrQueue(0) failed");
+        CLOGE("ConnBrInnerQueueInit CreateBrQueue(0) failed");
         (void)SoftBusMutexDestroy(&g_brQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);
@@ -317,7 +309,7 @@ NO_SANITIZE("cfi") int32_t BrInnerQueueInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void BrInnerQueueDeinit(void)
+void ConnBrInnerQueueDeinit(void)
 {
     (void)SoftBusMutexDestroy(&g_brQueueLock);
     (void)SoftBusCondDestroy(&g_sendWaitCond);
