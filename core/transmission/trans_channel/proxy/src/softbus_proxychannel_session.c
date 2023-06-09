@@ -903,7 +903,7 @@ static int TransProxySubPacketProc(const char *pkgName, int32_t pid, int32_t cha
     }
     return ret;
 }
-#define SLICE_HEAD_LEN (sizeof(PacketHead) + sizeof(SliceHead))
+#define SLICE_HEAD_LEN (sizeof(SliceHead))
 NO_SANITIZE("cfi") int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
     const char *data, uint32_t len)
 {
