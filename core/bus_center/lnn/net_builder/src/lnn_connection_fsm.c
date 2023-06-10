@@ -599,16 +599,8 @@ static bool IsWifiOnlineAgain(bool newWifiFlag, bool oldWifiFlag, const NodeInfo
 {
     if (!newWifiFlag && oldWifiFlag) {
         return IsWifiInfoChanged(newNodeInfo, oldNodeInfo);
-    } else if (newWifiFlag && oldWifiFlag) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi online again, need offline");
-        return true;
     }
     return false;
-}
-
-static bool IsBleOnlineAgain(bool newBleFlag, bool oldBleFlag)
-{
-    return newBleFlag && oldBleFlag;
 }
 
 static bool IsWifiSingleOnlineProc(bool newWifiFlag, bool oldWifiFlag)
@@ -654,7 +646,6 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         isBleOffline = IsBleSingleOnlineProc(newBleFlag, oldBleFlag);
         isWifiOffline = IsWifiOnlineAgain(newWifiFlag, oldWifiFlag, newNodeInfo, oldNodeInfo);
     } else if (connFsm->connInfo.addr.type == CONNECTION_ADDR_BLE) {
-        isBleOffline = IsBleOnlineAgain(newBleFlag, oldBleFlag);
         isWifiOffline = IsWifiSingleOnlineProc(newWifiFlag, oldWifiFlag);
     }
     return IsNeedReportOffline(isBleOffline, isWifiOffline, type) ? true : false;
