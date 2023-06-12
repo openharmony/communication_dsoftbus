@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,6 +18,8 @@ import(
     "//foundation/communication/dsoftbus/adapter/common/net/wifi/net_wifi.gni")
 import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
 import(
+    "//foundation/communication/dsoftbus/core/bus_center/lnn/decision_center/decision_center.gni")
+import(
     "//foundation/communication/dsoftbus/core/bus_center/lnn/disc_mgr/bus_center_disc_mgr.gni")
 import(
     "//foundation/communication/dsoftbus/core/bus_center/lnn/lane_hub/lane_hub.gni")
@@ -36,17 +38,19 @@ bus_center_server_src =
     bus_center_adapter_src + bus_center_core_adapter_src +
     bus_center_disc_mgr_src + bus_center_hub_src + bus_center_builder_src +
     bus_center_net_mgr_src + bus_center_ledger_src + bus_center_monitor_src +
-    bus_center_utils_src + adapter_wifi_src + adapter_hdi_src
+    bus_center_utils_src + adapter_wifi_src + adapter_hdi_src +
+    bus_center_decision_center_src
 bus_center_server_inc =
     bus_center_adapter_inc + bus_center_core_adapter_inc +
     bus_center_disc_mgr_inc + bus_center_hub_inc + bus_center_builder_inc +
     bus_center_net_mgr_inc + bus_center_ledger_inc + bus_center_monitor_inc +
-    bus_center_utils_inc + adapter_wifi_inc + adapter_hdi_inc
+    bus_center_utils_inc + adapter_wifi_inc + adapter_hdi_inc +
+    bus_center_decision_center_inc
 bus_center_server_deps =
     bus_center_adapter_deps + bus_center_core_adapter_deps +
     bus_center_disc_mgr_deps + bus_center_hub_deps + bus_center_builder_deps +
     bus_center_net_mgr_deps + bus_center_ledger_deps + bus_center_monitor_deps +
-    bus_center_utils_deps
+    bus_center_utils_deps + bus_center_decision_center_deps
 
 bus_center_server_src +=
     [ "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c" ]
