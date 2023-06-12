@@ -212,9 +212,9 @@ HWTEST_F(AuthOtherTest, ON_WIFI_DATA_RECEIVED_TEST_001, TestSize.Level1)
     const uint8_t data[TEST_DATA_LEN] = { 0 };
 
     (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
-    OnWiFiDataReceived(fd, nullptr, data);
-    OnWiFiDataReceived(fd, &head, nullptr);
-    OnWiFiDataReceived(fd, &head, data);
+    OnWiFiDataReceived(AUTH, fd, nullptr, data);
+    OnWiFiDataReceived(AUTH, fd, &head, nullptr);
+    OnWiFiDataReceived(AUTH, fd, &head, data);
 }
 
 /*

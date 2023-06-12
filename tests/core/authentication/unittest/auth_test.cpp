@@ -536,10 +536,16 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, START_SOCKET_LISTENING_Test_001, TestSize.Level1)
 {
-    const char *ip = "192.168.12.1";
-    int32_t port = 22;
-
-    int32_t ret = StartSocketListening(ip, port);
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "192.168.12.1",
+            .port = 22,
+            .moduleId = AUTH,
+            .protocol = LNN_PROTOCOL_IP,
+        },
+    };
+    int32_t ret = StartSocketListening(AUTH, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 

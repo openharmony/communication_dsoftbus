@@ -84,6 +84,7 @@ public:
     virtual int32_t LnnRequestLane(uint32_t laneId,
         const LaneRequestOption *request, const ILaneListener *listener) = 0;
     virtual int32_t LnnFreeLane(uint32_t laneId) = 0;
+    virtual int32_t AuthGetConnByNodeAddr(const char *addr, uint32_t cipherFlag, AuthConnInfo *connInfo) = 0;
 };
 
 class TransAuthInterfaceMock : public TransAuthInterface {
@@ -141,6 +142,7 @@ public:
     MOCK_METHOD1(ApplyLaneId, uint32_t (LaneType));
     MOCK_METHOD3(LnnRequestLane, int32_t (uint32_t, const LaneRequestOption *, const ILaneListener *));
     MOCK_METHOD1(LnnFreeLane, int32_t (uint32_t laneId));
+    MOCK_METHOD3(AuthGetConnByNodeAddr, int32_t (const char *, uint32_t, AuthConnInfo *));
 };
 } // namespace OHOS
 #endif // TRANS_AUTH_MOCK_H

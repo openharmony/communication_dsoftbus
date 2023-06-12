@@ -847,7 +847,8 @@ NO_SANITIZE("cfi") int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI)) {
+    if (LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_WIFI) ||
+        LnnHasDiscoveryType(newInfo, DISCOVERY_TYPE_LSA)) {
         oldInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
         oldInfo->connectInfo.authPort = newInfo->connectInfo.authPort;
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
@@ -1340,6 +1341,38 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
     return ret;
 }
 
+NO_SANITIZE("cfi") bool LnnIsLSANode(const NodeBasicInfo *info)
+{
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(info->networkId, CATEGORY_NETWORK_ID);
+    if (nodeInfo != NULL && LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_LSA)) {
+        return true;
+    }
+    return false;
+}
+
+NO_SANITIZE("cfi") bool LnnHasIpByUuid(const char *uuid)
+{
+    bool hasIp = true;
+
+    NodeInfo *info = LnnGetNodeInfoById(uuid, CATEGORY_UUID);
+    if (info == NULL) {
+        return true;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_LSA)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "node is lsa neighbor");
+        return true;
+    }
+
+    if (strnlen(info->connectInfo.deviceIp, IP_LEN) == 0 ||
+        strncmp(info->connectInfo.deviceIp, LOCAL_IP, sizeof(LOCAL_IP)) == 0) {
+        hasIp = false;
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not has ip addr");
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "has ip addr");
+    }
+    return hasIp;
+}
+
 NO_SANITIZE("cfi") int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
     return GetAllOnlineAndMetaNodeInfo(info, infoNum, false);
@@ -1612,6 +1645,57 @@ NO_SANITIZE("cfi") int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, con
     }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
+}
+
+int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort)
+{
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    nodeInfo->connectInfo.proxyPort = proxyPort;
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort)
+{
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    nodeInfo->connectInfo.sessionPort = sessionPort;
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort)
+{
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    nodeInfo->connectInfo.authPort = authPort;
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
 }
 
 int32_t SoftBusDumpBusCenterRemoteDeviceInfo(int32_t fd)

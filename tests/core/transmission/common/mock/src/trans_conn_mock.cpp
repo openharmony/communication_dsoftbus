@@ -142,5 +142,39 @@ int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callb
 {
     return GetConnectInterface()->ConnSetConnectCallback(moduleId, callback);
 }
+
+void NipRecvDataFromBr(uint32_t connId, const char *buf)
+{
+    return GetConnectInterface()->NipRecvDataFromBr(connId, buf);
+}
+
+void NipConnectDevice(uint32_t connId, const char *mac)
+{
+    return GetConnectInterface()->NipConnectDevice(connId, mac);
+}
+ 
+void NipDisconnectDevice(uint32_t connId)
+{
+    return GetConnectInterface()->NipDisconnectDevice(connId);
+}
+ 
+ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
+{
+    return GetConnectInterface()->LnnGetProtocolListenerModule(protocol, mode);
+}
+NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
+{
+    return GetConnectInterface()->LnnGetNodeInfoById(id, type);
+}
+
+bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetConnectInterface()->LnnHasDiscoveryType(info, type);
+}
+
+bool LnnHasIpByUuid(const char *uuid)
+{
+    return GetConnectInterface()->LnnHasIpByUuid(uuid);
+}
 }
 }

@@ -138,6 +138,18 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusWriteFileFd(int32_t fd, const char *writeBuf, uint32_t len)
+{
+    if (writeBuf == NULL || len == 0) {
+        return SOFTBUS_FILE_ERR;
+    }
+    int32_t ret = write(fd, writeBuf, len);
+    if (ret != (int32_t)len) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteFileFd write fail");
+    }
+    return ret;
+}
+
 int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
 {
     if (fileName == NULL) {

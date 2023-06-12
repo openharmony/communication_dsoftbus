@@ -103,6 +103,9 @@ static void HandlerGetDeviceName(void)
         return;
     }
     for (int32_t i = 0; i < infoNum; i++) {
+        if (LnnIsLSANode(&info[i])) {
+            continue;
+        }
         if (LnnSyncDeviceName(info[i].networkId) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnSyncDeviceName fail");
         }
