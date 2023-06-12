@@ -32,6 +32,7 @@
 #include "softbus_datahead_transform.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_proxychannel_callback.h"
+#include "lnn_distributed_net_ledger.h"
 
 static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)
 {
@@ -105,7 +106,7 @@ static int32_t GetRemoteBtMacByUdidHash(const char *udidHash, char *brMac, int32
 
 }
 
-static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
+static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo, uint8_t cipher)
 {
     ConnectionInfo info = {0};
     if (ConnGetConnectionInfo(connId, &info) != SOFTBUS_OK) {
@@ -114,10 +115,9 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
     }
     switch (info.type) {
         case CONNECT_TCP:
-            connInfo->type = AUTH_LINK_TYPE_WIFI;
-            if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info.socketInfo.addr) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip fail.");
-                return SOFTBUS_MEM_ERR;
+            if (AuthGetConnByNodeAddr(info.socketInfo.addr, (uint32_t)cipher, connInfo) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth conn fail.");
+                return SOFTBUS_ERR;
             }
             break;
         case CONNECT_BR:
@@ -180,7 +180,7 @@ static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
 static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
 {
     AuthConnInfo connInfo;
-    if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
+    if (TransProxyGetAuthConnInfo(connId, &connInfo, cipher) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get connInfo fail connId[%d]", connId);
         return AUTH_INVALID_ID;
     }

@@ -32,7 +32,7 @@ if (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble) {
 bus_center_net_mgr_deps = []
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-newip_dir = "dsoftbus_enhance/components/newip"
+newip_dir = "dsoftbus_enhance/components/newip/network"
 newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              [
                                "$native_source_path",
@@ -42,7 +42,7 @@ newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (newip_enhanced) {
   import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/newip.gni")
+      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/network/network.gni")
 
   bus_center_net_mgr_src += newip_manager_src
   bus_center_net_mgr_inc += newip_manager_include

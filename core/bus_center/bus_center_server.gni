@@ -112,7 +112,7 @@ if (defined(ohos_lite)) {
 }
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-agcr_dir = "dsoftbus_enhance/components/agcr"
+agcr_dir = "dsoftbus_enhance/components/newip/agcr"
 agcr_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                             [
                               "$native_source_path",
@@ -122,8 +122,40 @@ agcr_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (agcr_enhanced) {
   import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/agcr/agcr.gni")
+      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/agcr/agcr.gni")
 
   bus_center_server_src += agcr_src
   bus_center_server_inc += agcr_inc
+}
+
+route_dir = "dsoftbus_enhance/components/newip/route"
+route_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                            [
+                              "$native_source_path",
+                              "$route_dir",
+                            ],
+                            "value")
+
+if (route_enhanced) {
+  import(
+      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/route/route.gni")
+
+  bus_center_server_src += route_src
+  bus_center_server_inc += route_inc
+}
+
+btn_dir = "dsoftbus_enhance/components/newip/btn"
+btn_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                            [
+                              "$native_source_path",
+                              "$btn_dir",
+                            ],
+                            "value")
+
+if (btn_enhanced) {
+  import(
+      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/btn/btn.gni")
+
+  bus_center_server_src += btn_src
+  bus_center_server_inc += btn_inc
 }

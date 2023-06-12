@@ -93,6 +93,23 @@ static SoftBusHandlerWrapper g_brManagerAsyncHandler = {
     .eventCompareFunc = BrCompareManagerLooperEventFunc,
 };
 
+void __attribute__((weak)) NipRecvDataFromBr(uint32_t connId, const char *buf, int32_t len)
+{
+    (void)connId;
+    (void)buf;
+}
+
+void __attribute__((weak)) NipConnectDevice(uint32_t connId, const char *mac)
+{
+    (void)connId;
+    (void)mac;
+}
+
+void __attribute__((weak)) NipDisconnectDevice(uint32_t connId)
+{
+    (void)connId;
+}
+
 static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *device,
     const ConnectStatistics *statistics, int32_t reason)
 {
@@ -229,6 +246,12 @@ static void NotifyDeviceConnectResult(
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
+
+    if (reason == 0) {
+        NipConnectDevice(connection->connectionId, connection->addr);
+    } else {
+        NipDisconnectDevice(connection->connectionId);
+    }
 
     ConnBrRequest *it = NULL;
     if (connection == NULL) {
@@ -748,6 +771,8 @@ static void DataReceived(ConnBrDataReceivedContext *ctx)
         ctx->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
     if (head->module == MODULE_CONNECTION) {
         ReceivedControlData(connection, ctx->data + ConnGetHeadSize(), ctx->dataLen - ConnGetHeadSize());
+    } else if (head->module == MODULE_NIP_BR_CHANNEL && head->seq == (int64_t)BR_NIP_SEQ) {
+        NipRecvDataFromBr(ctx->connectionId, (char *)ctx->data, ctx->dataLen);
     } else {
         g_connectCallback.OnDataReceived(
             ctx->connectionId, (ConnModule)head->module, head->seq, (char *)ctx->data, ctx->dataLen);
@@ -1421,6 +1446,7 @@ static int32_t BrDisconnectDevice(uint32_t connectionId)
         "br disconnect device failed: connection not exist, connection id=%u", connectionId);
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+    NipDisconnectDevice(connection->connectionId);
     ConnBrReturnConnection(&connection);
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MGR_DISCONNECT_REQUEST, connectionId, 0, NULL, 0);
     CLOGI("br disconnect device, connection id=%u, address=%s, status=%d", connectionId, animizeAddress, status);
@@ -1442,6 +1468,7 @@ static int32_t BrDisconnectDeviceNow(const ConnectOption *option)
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR,
         "br disconnect device now failed: connection is not exist, address=%s, side=%d", animizeAddress,
         option->brOption.sideType);
+    NipDisconnectDevice(connection->connectionId);
     ConnBrDisconnectNow(connection);
     ConnBrReturnConnection(&connection);
     return SOFTBUS_OK;

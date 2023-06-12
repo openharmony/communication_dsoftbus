@@ -868,6 +868,9 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
             break;
         }
         for (i = 0; i < infoNum; ++i) {
+            if (LnnIsLSANode(&info[i])) {
+                continue;
+            }
             CheckDevStatusByNetworkId(hbFsm, info[i].networkId, msgPara->hbType, nowTime);
         }
         SoftBusFree(info);
@@ -913,6 +916,9 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             break;
         }
         for (int32_t i = 0; i < infoNum; ++i) {
+            if (LnnIsLSANode(&info[i])) {
+                continue;
+            }
             CheckDevStatusForScreenOff(hbFsm, info[i].networkId, msgPara->hbType, nowTime);
         }
         SoftBusFree(info);
@@ -1035,6 +1041,7 @@ NO_SANITIZE("cfi") int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
         SoftBusFree(dupPara);
         return SOFTBUS_ERR;
     }
+    LnnNotifyHBRepeat();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB post next loop msg, delayMillis: %" PRIu64, delayMillis);
     return SOFTBUS_OK;
 }

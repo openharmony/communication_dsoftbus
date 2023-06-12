@@ -42,7 +42,7 @@ static AuthVerifyListener g_verifyListener = { 0 };
 static GroupChangeListener g_groupChangeListener = { 0 };
 static AuthTransCallback g_transCallback = { 0 };
 /* Auth Manager */
-static AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
+NO_SANITIZE("cfi") AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
 {
     AuthManager *auth = (AuthManager *)SoftBusMalloc(sizeof(AuthManager));
     if (auth == NULL) {

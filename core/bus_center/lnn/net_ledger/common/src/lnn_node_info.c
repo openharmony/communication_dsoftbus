@@ -149,6 +149,14 @@ NO_SANITIZE("cfi") int32_t LnnSetDeviceUdid(NodeInfo *info, const char *udid)
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") const char *LnnGetDeviceUuid(const NodeInfo *info)
+{
+    if (info == NULL) {
+        return NULL;
+    }
+    return info->uuid;
+}
+
 NO_SANITIZE("cfi") int32_t LnnSetDiscoveryType(NodeInfo *info, DiscoveryType type)
 {
     if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
@@ -415,7 +423,7 @@ NO_SANITIZE("cfi") const char *LnnGetP2pGoMac(const NodeInfo *info)
 NO_SANITIZE("cfi") uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return 0;
     }
     return info->supportedProtocols;

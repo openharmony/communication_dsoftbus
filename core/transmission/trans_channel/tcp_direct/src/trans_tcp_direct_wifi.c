@@ -27,6 +27,7 @@
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "softbus_adapter_hitracechain.h"
+#include "lnn_distributed_net_ledger.h"
 
 #define ID_OFFSET (1)
 
@@ -38,8 +39,10 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
         return SOFTBUS_INVALID_PARAM;
     }
 
-    ListenerModule module = DIRECT_CHANNEL_SERVER_WIFI;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
+    ListenerModule module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
+    if (module == UNUSE_BUTT) {
+        return SOFTBUS_INVALID_PARAM;
+    }
 
     SessionConn *newConn = CreateNewSessinConn(module, false);
     if (newConn == NULL) {
@@ -51,7 +54,8 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, true, false);
+    bool hasIp = LnnHasIpByUuid(newConn->appInfo.peerData.deviceId);
+    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, hasIp, false);
     if (newConn->authId == AUTH_INVALID_ID) {
         SoftBusFree(newConn);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel get authId fail");

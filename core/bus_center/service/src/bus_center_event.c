@@ -356,17 +356,17 @@ NO_SANITIZE("cfi") void LnnNotifyMasterNodeChanged(bool isMaster, const char *ma
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyNodeAddressChanged(const char *addr)
+NO_SANITIZE("cfi") void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal)
 {
     if (addr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:nullptr!", __func__);
         return;
     }
+
     LnnNodeAddrChangedEvent eventInfo;
     (void)memset_s(&eventInfo, sizeof(eventInfo), 0, sizeof(eventInfo));
     eventInfo.basic.event = LNN_EVENT_NODE_ADDR_CHANGED;
-    if (strcpy_s(eventInfo.addr, sizeof(eventInfo.addr), addr) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:strcpy_s failed", __func__);
+    if (strcpy_s(eventInfo.addr, sizeof(eventInfo.addr), addr) != EOK ||
+        strcpy_s(eventInfo.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
         return;
     }
     if (strcmp(addr, NODE_ADDR_LOOPBACK) == 0) {
@@ -374,7 +374,16 @@ NO_SANITIZE("cfi") void LnnNotifyNodeAddressChanged(const char *addr)
     } else {
         eventInfo.delFlag = false;
     }
+    eventInfo.isLocal = isLocal;
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
+}
+
+NO_SANITIZE("cfi") void LnnNotifyHBRepeat(void)
+{
+    LnnEventBasicInfo event;
+    event.event = LNN_EVENT_NODE_HB_REPEAT_CYCLE;
+
+    NotifyEvent(&event);
 }
 
 NO_SANITIZE("cfi") int32_t LnnInitBusCenterEvent(void)

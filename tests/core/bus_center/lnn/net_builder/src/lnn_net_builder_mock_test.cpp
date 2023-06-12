@@ -245,7 +245,9 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGetAllOnlineNodeInfo(_, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnNotifyNodeAddressChanged(_)).WillRepeatedly(Return());
+    EXPECT_CALL(NetBuilderMock, LnnNotifyNodeAddressChanged(_, _, _))
+        .WillOnce(Return())
+        .WillRepeatedly(Return());
     EXPECT_TRUE(LnnUpdateNodeAddr(nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) == SOFTBUS_ERR);
     EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) == SOFTBUS_OK);
