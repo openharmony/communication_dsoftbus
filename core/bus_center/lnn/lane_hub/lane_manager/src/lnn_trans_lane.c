@@ -512,7 +512,7 @@ static void LaneLinkFail(SoftBusMessage *msg)
     Unlock();
     ProtocolType acceptableProtocols = (ProtocolType)msg->arg2;
     if (msg->arg2 == (uint64_t)SOFTBUS_ERR) {
-        acceptableProtocols = LNN_PROTOCOL_ALL;
+        acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
     }
     if (PostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneId, acceptableProtocols, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post triggerLink msg fail");
