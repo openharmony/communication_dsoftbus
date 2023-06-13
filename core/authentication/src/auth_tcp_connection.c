@@ -208,8 +208,8 @@ static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
         goto FAIL;
     }
-    if (ConnToggleNonBlockMode(fd, false) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set block mode fail.");
+    if (ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set none block mode fail.");
         goto FAIL;
     }
     NotifyConnected(module, fd, true);
