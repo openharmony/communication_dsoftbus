@@ -40,6 +40,7 @@
 #include "trans_udp_negotiation.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "lnn_network_manager.h"
 
 NO_SANITIZE("cfi") int32_t TransChannelInit(void)
 {
