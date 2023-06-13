@@ -118,11 +118,11 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_001, TestSize.Level1)
     uint8_t data[TEST_DATA_LEN] = { 0 };
     (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
     pktHead.module = MODULE_AUTH_CHANNEL;
-    NotifyDataReceived(fd, &pktHead, data);
+    NotifyDataReceived(AUTH, fd, &pktHead, data);
     pktHead.module = MODULE_AUTH_MSG;
-    NotifyDataReceived(fd, &pktHead, data);
+    NotifyDataReceived(AUTH, fd, &pktHead, data);
     pktHead.module = MODULE_CONNECTION;
-    NotifyDataReceived(fd, &pktHead, data);
+    NotifyDataReceived(AUTH, fd, &pktHead, data);
 
     uint32_t len = TEST_DATA_LEN;
     uint8_t *packetData = RecvPacketData(fd, len);
