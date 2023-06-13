@@ -130,11 +130,11 @@ if (agcr_enhanced) {
 
 route_dir = "dsoftbus_enhance/components/newip/route"
 route_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                            [
-                              "$native_source_path",
-                              "$route_dir",
-                            ],
-                            "value")
+                             [
+                               "$native_source_path",
+                               "$route_dir",
+                             ],
+                             "value")
 
 if (route_enhanced) {
   import(
@@ -146,11 +146,11 @@ if (route_enhanced) {
 
 btn_dir = "dsoftbus_enhance/components/newip/btn"
 btn_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                            [
-                              "$native_source_path",
-                              "$btn_dir",
-                            ],
-                            "value")
+                           [
+                             "$native_source_path",
+                             "$btn_dir",
+                           ],
+                           "value")
 
 if (btn_enhanced) {
   import(

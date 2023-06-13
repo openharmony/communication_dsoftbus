@@ -311,7 +311,7 @@ NO_SANITIZE("cfi") int32_t StartSocketListening(ListenerModule module, const Loc
         .onConnectEvent = OnConnectEvent,
         .onDataEvent = OnDataEvent,
     };
-    int32_t port = StartBaseListener(&info, &listener);
+    int32_t port = StartBaseListener(info, &listener);
     if (port <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "StartBaseListener fail(=%d).", port);
         return SOFTBUS_ERR;
