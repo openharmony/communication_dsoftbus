@@ -23,6 +23,6 @@ trans_comm_mock_inc = [
   "$trans_comm_mock_path/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include"
+  "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
 ]
 trans_comm_mock_deps = []
