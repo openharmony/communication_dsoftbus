@@ -23,6 +23,13 @@ enhanced_conn_ble = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                   "$conn_ble_dir",
                                 ],
                                 "value")
+conn_coc_dir = "dsoftbus_enhance/core/connection/coc"
+enhanced_conn_coc = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                [
+                                  "$native_source_path",
+                                  "$conn_coc_dir",
+                                ],
+                                "value")
 ble_connection_deps = []
 if (dsoftbus_feature_conn_ble == false) {
   ble_connection_src = [
@@ -47,7 +54,6 @@ if (dsoftbus_feature_conn_ble == false) {
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_send_queue.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_server.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_trans.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_coc_virtual.c",
   ]
   ble_connection_inc = [
     "$dsoftbus_root_path/core/connection/ble/include",
@@ -58,6 +64,16 @@ if (dsoftbus_feature_conn_ble == false) {
     ble_connection_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_conn.c" ]
   } else {
     ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c" ]
+  }
+  if (enhanced_conn_coc == true) {
+    ble_connection_src += [ 
+        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/ble_protocol_interface_factory.c",
+        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_adapter_coc.c",
+        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_conn_ble_coc.c", 
+    ]
+    ble_connection_inc += [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/include" ]
+  } else {
+    ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c" ]
   }
   ble_connection_src += adapter_ble_src
   ble_connection_inc += adapter_ble_inc
