@@ -150,6 +150,8 @@ int32_t ConnBleStartServer()
             continue;
         }
         g_serverCoordination.status[i] = interface->bleServerStartService();
+    }
+    for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         if (g_serverCoordination.status[i] != SOFTBUS_OK) {
             ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_RETRY_SERVER_STATE_CONSISTENT, 0, 0, NULL,
                 RETRY_SERVER_STATE_CONSISTENT_MILLIS);
@@ -179,6 +181,8 @@ int32_t ConnBleStopServer()
             continue;
         }
         g_serverCoordination.status[i] = interface->bleServerStopService();
+    }
+    for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         if (g_serverCoordination.status[i] != SOFTBUS_OK) {
             ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_RETRY_SERVER_STATE_CONSISTENT, 0, 0, NULL,
                 RETRY_SERVER_STATE_CONSISTENT_MILLIS);
