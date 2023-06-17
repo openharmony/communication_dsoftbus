@@ -27,4 +27,4 @@ const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif //BLE_PROTOCOL_INTERFACE_FACTORY_H
+#endif /* BLE_PROTOCOL_INTERFACE_FACTORY_H */
