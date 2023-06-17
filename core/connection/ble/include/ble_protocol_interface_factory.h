@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATION_BLE_PROTOCOL_INTERFACE_FACTORY_H
-#define COMMUNICATION_BLE_PROTOCOL_INTERFACE_FACTORY_H
+#ifndef BLE_PROTOCOL_INTERFACE_FACTORY_H
+#define BLE_PROTOCOL_INTERFACE_FACTORY_H
 
 #include "softbus_conn_ble_connection.h"
 
-#ifdef__cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-const BleUnifyInterface *getBleUnifyInterface(BleProtocolType type);
+const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type);
 
-#ifdef__cplusplus
+#ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif //COMMUNICATION_BLE_PROTOCOL_INTERFACE_FACTORY_H
+#endif //BLE_PROTOCOL_INTERFACE_FACTORY_H

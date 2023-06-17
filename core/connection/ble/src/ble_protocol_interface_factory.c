@@ -35,7 +35,10 @@ static BleUnifyInterface g_bleUnifyInterface[BLE_PROTOCOL_MAX] = {
     }
 };
 
-const BleUnifyInterface *getBleUnifyInterface(BleProtocolType type)
+const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
 {
+    if (type < BLE_GATT || type >= BLE_PROTOCOL_MAX) {
+        return NULL;
+    }
     return &g_bleUnifyInterface[type];
 }
