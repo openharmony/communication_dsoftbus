@@ -201,7 +201,7 @@ int32_t ConnBleConnect(ConnBleConnection *connection)
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM,
     "ble connection connect failed, invalid param, connection is null");
     BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_LOG(interface != NULL, SOFTBUS_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection connect failed, protocol not support");
     return interface->bleClientConnect(connection);
 }
@@ -234,7 +234,7 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM,
     "ble connection disconnect failed, invalid param, connection is null");
     BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_LOG(interface != NULL, SOFTBUS_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection disconnect failed, protocol not support");
     CLOGW("receive ble disconnect now, connection id=%u, side=%d, reason=%d", connection->connectionId,
         connection->side, reason);
@@ -372,7 +372,7 @@ int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBl
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_LOG(interface != NULL, SOFTBUS_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection update connection priority failed, protocol not support");
     return interface->bleClientUpdatePriority(connection, priority);
 }
@@ -386,7 +386,7 @@ int32_t ConnBleSend(ConnBleConnection *connection, const uint8_t *data, uint32_t
     CONN_CHECK_AND_RETURN_RET_LOG(
         dataLen != 0, SOFTBUS_INVALID_PARAM, "ble connection send data failed, invalid param, data len is 0");
     BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
-    CONN_CHECK_AND_RETURN_LOG(interface != NULL, SOFTBUS_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection send data failed, protocol not support");
     return connection->side == CONN_SIDE_SERVER ?
         interface->bleServerSend(connection, data, dataLen, module) :
@@ -778,7 +778,9 @@ void BleOnServerAccepted(uint32_t connectionId)
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(
         connection != NULL, "ble server accepted failed, connection not exist, connection id=%u", connectionId);
-
+    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    CONN_CHECK_AND_RETURN_LOG(
+        interface != NULL, "ble server accepted failed, interface not support, connection id=%u", connectionId);
     int32_t status = SOFTBUS_OK;
     do {
         status = SoftBusMutexLock(&connection->lock);
@@ -984,7 +986,7 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         .onClientDataReceived = BleOnDataReceived,
         .onClientConnectionClosed = BleOnConnectionClosed,
     };
-    ConnBleServerEventListener serverEventLisener = {
+    ConnBleServerEventListener serverEventListener = {
         .onServerStarted = BleOnServerStarted,
         .onServerClosed = BleOnServerClosed,
         .onServerAccepted = BleOnServerAccepted,
