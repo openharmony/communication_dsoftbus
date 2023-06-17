@@ -67,9 +67,9 @@ if (dsoftbus_feature_conn_ble == false) {
   }
   if (enhanced_conn_coc == true) {
     ble_connection_src += [ 
-        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/ble_protocol_interface_factory.c",
-        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_adapter_coc.c",
-        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_conn_ble_coc.c", 
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/ble_protocol_interface_factory.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_adapter_coc.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_conn_ble_coc.c", 
     ]
     ble_connection_inc += [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/include" ]
   } else {
