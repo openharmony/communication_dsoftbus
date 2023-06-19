@@ -498,9 +498,11 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcReleaseFdTest0013, TestSize.Level0)
 {
     int32_t fd = INVALID_VALUE;
     TransTdcReleaseFd(fd);
+    EXPECT_TRUE(INVALID_VALUE == fd);
 
     fd = g_fd;
     TransTdcReleaseFd(fd);
+    EXPECT_TRUE(g_fd == fd);
 }
 
 /**
