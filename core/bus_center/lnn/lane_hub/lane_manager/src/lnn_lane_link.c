@@ -545,6 +545,15 @@ NO_SANITIZE("cfi") static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkReque
     LaneLinkInfo linkInfo;
     int32_t port = 0;
     int32_t ret = SOFTBUS_OK;
+    NodeInfo node = {0};
+    if (LnnGetRemoteNodeInfoById(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LLOGW("can not get peer node");
+        return SOFTBUS_ERR;
+    }
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI)) {
+        LLOGE("peer node is not wifi online");
+        return SOFTBUS_ERR;
+    }
     ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL;
     if (reqInfo->transType != LANE_T_MSG && reqInfo->transType != LANE_T_BYTE) {
         acceptableProtocols ^= LNN_PROTOCOL_NIP;

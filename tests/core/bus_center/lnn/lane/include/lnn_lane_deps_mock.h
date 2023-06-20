@@ -23,6 +23,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_score.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_node_info.h"
 #include "bus_center_manager.h"
 #include "softbus_network_utils.h"
 #include "p2plink_interface.h"
@@ -34,6 +35,8 @@ public:
     LaneDepsInterface() {};
     virtual ~LaneDepsInterface() {};
 
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
@@ -57,6 +60,8 @@ class LaneDepsInterfaceMock : public LaneDepsInterface {
 public:
     LaneDepsInterfaceMock();
     ~LaneDepsInterfaceMock() override;
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
     MOCK_METHOD2(LnnGetOnlineStateById, bool (const char*, IdCategory));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char*, uint32_t));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char*, InfoKey, char*, uint32_t));
