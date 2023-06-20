@@ -56,6 +56,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
 int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type);
 int32_t LnnClearAuthTypeValue(uint32_t *authTypeValue, AuthType type);
 void LnnRemoveNode(const char *udid);
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
 bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info);
