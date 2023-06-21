@@ -153,11 +153,10 @@ typedef struct {
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
 
-bool __attribute__((weak)) SfcIsSyncNodeAddrAck(const char *networkId, int32_t code)
+void __attribute__((weak)) SfcSyncNodeAddrHandle(const char *networkId, int32_t code)
 {
     (void)networkId;
     (void)code;
-    return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") void SetWatchdogFlag(bool flag)
@@ -1796,19 +1795,13 @@ static int32_t LnnUnpackNodeAddr(const uint8_t *data, uint32_t dataLen, LnnNodeA
         LLOGE("json parse failed");
         return SOFTBUS_ERR;
     }
-    if (!GetJsonObjectNumberItem(json, JSON_KEY_NODE_CODE, &addr->code)) {
-        LLOGE("parse code info failed");
+    if (!GetJsonObjectNumberItem(json, JSON_KEY_NODE_CODE, &addr->code) ||
+        !GetJsonObjectStringItem(json, JSON_KEY_NODE_ADDR, addr->nodeAddr, SHORT_ADDRESS_MAX_LEN) ||
+        !GetJsonObjectNumberItem(json, JSON_KEY_NODE_PROXY_PORT, &addr->proxyPort) ||
+        !GetJsonObjectNumberItem(json, JSON_KEY_NODE_SESSION_PORT, &addr->sessionPort)) {
+        LLOGE("parse addr info failed");
         cJSON_Delete(json);
         return SOFTBUS_ERR;
-    }
-    if (addr->code == 0) {
-        if (!GetJsonObjectStringItem(json, JSON_KEY_NODE_ADDR, addr->nodeAddr, SHORT_ADDRESS_MAX_LEN) ||
-            !GetJsonObjectNumberItem(json, JSON_KEY_NODE_PROXY_PORT, &addr->proxyPort) ||
-            !GetJsonObjectNumberItem(json, JSON_KEY_NODE_SESSION_PORT, &addr->sessionPort)) {
-            LLOGE("parse addr info failed");
-            cJSON_Delete(json);
-            return SOFTBUS_ERR;
-        }
     }
 
     cJSON_Delete(json);
@@ -1833,10 +1826,7 @@ static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networ
         return;
     }
 
-    if (SfcIsSyncNodeAddrAck(networkId, addr.code)) {
-        // ack return
-        return;
-    }
+    SfcSyncNodeAddrHandle(networkId, addr.code);
 
     if (LnnSetDLNodeAddr(networkId, CATEGORY_NETWORK_ID, addr.nodeAddr) != SOFTBUS_OK) {
         return;
