@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../../core/bus_center/lnn/decision_center/decision_center.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/LNN"
@@ -1432,6 +1433,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       "net_ledger/lnn_decision_db_deps_mock.cpp",
       "net_ledger/lnn_decision_db_test.cpp",
     ]
+    sources += bus_center_decision_center_src
 
     include_dirs = [
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -1467,6 +1469,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     ]
+    include_dirs += bus_center_decision_center_inc
 
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
