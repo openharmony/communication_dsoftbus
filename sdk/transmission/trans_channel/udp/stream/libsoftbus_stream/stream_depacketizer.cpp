@@ -56,6 +56,14 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
             "DepacketizeBuffer error, header_dataLen = %u, tlvTotalLen = %u", header_.GetDataLen(), tlvTotalLen);
         return;
     }
+
+    int remain = static_cast<int>(bufferSize - (ptr - buffer));
+    if (remain < dataLength_) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "Data out of bounds, remain = %d, dataLength_ = %d", remain, dataLength_);
+        return;
+    }
+
     data_ = std::make_unique<char[]>(dataLength_);
     auto ret = memcpy_s(data_.get(), dataLength_, ptr, dataLength_);
     if (ret != 0) {
