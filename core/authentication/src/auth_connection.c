@@ -42,6 +42,14 @@ typedef struct {
 
 static ListNode g_connRequestList = { &g_connRequestList, &g_connRequestList };
 static AuthConnListener g_listener = { 0 };
+void __attribute__((weak)) RouteBuildClientAuthManager(int32_t cfd)
+{
+    (void)cfd;
+}
+void __attribute__((weak)) RouteClearAuthChannelId(int32_t cfd)
+{
+    (void)cfd;
+}
 
 uint64_t GenConnId(int32_t connType, int32_t id)
 {
@@ -277,6 +285,7 @@ static void HandleConnConnectResult(const void *para)
 {
     CHECK_NULL_PTR_RETURN_VOID(para);
     int32_t fd = *(int32_t *)(para);
+    RouteBuildClientAuthManager(fd);
     ConnRequest *item = FindConnRequestByFd(fd);
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConnRequest not found, fd=%d.", fd);
@@ -306,6 +315,7 @@ static void OnWiFiDisconnected(int32_t fd)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
+    RouteClearAuthChannelId(fd);
 }
 
 static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data)

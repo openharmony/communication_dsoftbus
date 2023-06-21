@@ -58,6 +58,8 @@ public:
     virtual int32_t LnnSetSupportDiscoveryType(char *info, const char *type) = 0;
     virtual bool LnnHasSupportDiscoveryType(const char *destType, const char *type) = 0;
     virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
+    virtual void RouteBuildClientAuthManager(int32_t cfd) = 0;
+    virtual void RouteClearAuthChannelId(int32_t cfd) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -85,6 +87,8 @@ public:
     MOCK_METHOD2(LnnSetSupportDiscoveryType, int32_t(char *, const char *));
     MOCK_METHOD2(LnnHasSupportDiscoveryType, bool(const char *, const char *));
     MOCK_METHOD2(LnnPeerHasExchangeDiscoveryType, bool(const NodeInfo *, DiscoveryType));
+    MOCK_METHOD1(RouteBuildClientAuthManager, void (int32_t));
+    MOCK_METHOD1(RouteClearAuthChannelId, void (int32_t));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;
