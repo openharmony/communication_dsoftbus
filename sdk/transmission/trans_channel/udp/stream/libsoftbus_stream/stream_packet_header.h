@@ -125,16 +125,23 @@ public:
 
     void Depacketize(char *data, uint32_t size)
     {
+        if (size < sizeof(uint16_t) + sizeof(uint16_t)) {
+            return;
+        }
         auto tmp = reinterpret_cast<uint16_t *>(data);
         firstLevelHeader.type = ntohs(*tmp++);
         firstLevelHeader.length = ntohs(*tmp++);
 
         if (firstLevelHeader.type & TopMask::EXT_BUF_MASK) {
+            constexpr uint32_t EXT_FILED_NUM = 4;
+            if (sizeof(uint16_t) * EXT_FILED_NUM > size) {
+                return;
+            }
             TypeLength tl;
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
-            if (tl.length == 0 || sizeof(uint16_t) + sizeof(uint16_t) + tl.length != size) {
+            if (tl.length == 0 || sizeof(uint16_t) * EXT_FILED_NUM + tl.length > size) {
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);
