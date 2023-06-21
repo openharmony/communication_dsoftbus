@@ -48,7 +48,7 @@ int32_t LnnGetDLNumInfo(const char *networkId, InfoKey key, int32_t *info)
 bool LnnIsLSANode(const NodeBasicInfo *info)
 {
     (void)info;
-    return true; 
+    return true;
 }
 
 int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
