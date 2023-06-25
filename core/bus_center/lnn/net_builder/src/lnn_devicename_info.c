@@ -16,6 +16,7 @@
 #include "lnn_devicename_info.h"
 
 #include <securec.h>
+#include <string.h>
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
@@ -64,7 +65,11 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
 {
     char udid[UDID_BUF_LEN];
     NodeBasicInfo basic;
-    if (type != LNN_INFO_TYPE_DEVICE_NAME) {
+    if (type != LNN_INFO_TYPE_DEVICE_NAME || len == 0 || msg == NULL) {
+        return;
+    }
+    if (strnlen((char *)msg, len) == len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnReceiveDeviceName invalid msg");
         return;
     }
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
