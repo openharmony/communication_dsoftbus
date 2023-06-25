@@ -57,8 +57,10 @@ typedef struct {
             char brMac[BT_MAC_LEN];
         } brInfo;
         struct {
+            BleProtocolType protocol;
             char bleMac[BT_MAC_LEN];
             uint8_t deviceIdHash[UDID_HASH_LEN];
+            int32_t psm;
         } bleInfo;
         struct {
             char ip[IP_LEN];
