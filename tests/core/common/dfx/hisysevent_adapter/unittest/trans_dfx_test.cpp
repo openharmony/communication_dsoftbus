@@ -37,6 +37,7 @@ static const int32_t TEST_ARGC_ONE = 1;
 static const int32_t TEST_ARGC_TWO = 2;
 static const char *g_testSessionName = "testSessionName";
 static const char *g_testPkgName = "testPkg";
+static const char *g_testMsg = "test";
 
 namespace OHOS {
 class TransDfxTest : public testing::Test {
@@ -119,7 +120,8 @@ TransArgvNode g_validTransCmdArray[TRANS_DUMP_PROCESS_TEST_NUM] = {
  */
 HWTEST_F(TransDfxTest, SoftbusReportTransInfoEvt001, TestSize.Level0)
 {
-    SoftbusReportTransInfoEvt("test");
+    SoftbusReportTransInfoEvt(g_testMsg);
+    EXPECT_EQ("test", g_testMsg);
     SoftbusReportTransInfoEvt(NULL);
 }
 
