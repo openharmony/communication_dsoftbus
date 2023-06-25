@@ -352,6 +352,8 @@ NO_SANITIZE("cfi") int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, Aut
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac/deviceIdHash fail.");
                 return SOFTBUS_MEM_ERR;
             }
+            connInfo->info.bleInfo.protocol = info->bleInfo.protocol;
+            connInfo->info.bleInfo.psm = info->bleInfo.psm;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected connectionInfo, type=%d.", info->type);

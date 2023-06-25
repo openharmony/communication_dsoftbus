@@ -39,7 +39,12 @@ typedef struct {
             unsigned char rspData[RESP_DATA_MAX_LEN];
         };
     } data;
+    // for total mode
     unsigned short dataLen;
+    
+    // for separate mode
+    unsigned short advDataLen;
+    unsigned short rspDataLen;
 } BroadcastData;
 
 typedef struct {
