@@ -41,7 +41,9 @@
 #define TEST_FILE_SIZE 1000
 #define TEST_PATH_SIZE 50
 #define TEST_FILE_TEST_TXT_FILE 16
+#define TEST_FILE_MAGIC_OFFSET 0
 #define TEST_FRAME_NUMBER 2
+#define TEST_FRAME_DATA_LENGTH 10
 #define TEST_FILEPATH_LENGTH 4
 #define TEST_SEQ8 8
 #define TEST_SEQ16 16
@@ -1394,9 +1396,9 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001
     ret = ProcessFileAckResponse(sessionId, &frame);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    uint32_t dataTest = 0;
-    dataTest = FILE_MAGIC_NUMBER;
-    frame.data = (uint8_t *)&dataTest;
+    uint32_t dataTest[TEST_FRAME_DATA_LENGTH] = {0};
+    dataTest[TEST_FILE_MAGIC_OFFSET] = FILE_MAGIC_NUMBER;
+    frame.data = (uint8_t *)dataTest;
     ret = ProcessFileAckResponse(sessionId, &frame);
     EXPECT_NE(SOFTBUS_OK, ret);
 
@@ -1408,6 +1410,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     frame.frameLength = TEST_HEADER_LENGTH;
+    *(uint64_t *)(frame.data + FRAME_MAGIC_OFFSET) = FRAME_DATA_SEQ_OFFSET + FRAME_DATA_SEQ_OFFSET;
     ret = ProcessFileAckResponse(sessionId, &frame);
     EXPECT_NE(SOFTBUS_OK, ret);
 
