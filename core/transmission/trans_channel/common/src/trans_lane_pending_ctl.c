@@ -28,6 +28,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_session_manager.h"
+#include "lnn_distributed_net_ledger.h"
 
 #define TRANS_REQUEST_PENDING_TIMEOUT (5000)
 
@@ -330,6 +331,13 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
 
     requestOption->requestInfo.trans.transType = transType;
     requestOption->requestInfo.trans.expectedBw = 0; /* init expectBW */
+    requestOption->requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+
+    NodeInfo *info = LnnGetNodeInfoById(requestOption->requestInfo.trans.networkId, CATEGORY_NETWORK_ID);
+    if (info != NULL && LnnHasDiscoveryType(info, DISCOVERY_TYPE_LSA)) {
+        requestOption->requestInfo.trans.acceptableProtocols |= LNN_PROTOCOL_NIP;
+    }
+
     int32_t uid;
     if (TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "transGetUidAndPid failed.");

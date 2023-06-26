@@ -70,6 +70,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
 int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool isIpConnection);
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer);
+AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 
 int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
 int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);

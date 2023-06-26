@@ -20,6 +20,9 @@
 
 #include "softbus_conn_interface.h"
 #include "p2plink_interface.h"
+#include "lnn_node_info.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_network_manager.h"
 
 namespace OHOS {
 class TransConnInterface {
@@ -55,6 +58,13 @@ public:
     virtual bool CheckActiveConnection(const ConnectOption *option) = 0;
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
+    virtual void NipRecvDataFromBr(uint32_t connId, const char *buf) = 0;
+    virtual void NipConnectDevice(uint32_t connId, const char *mac) = 0;
+    virtual void NipDisconnectDevice(uint32_t connId) = 0;
+    virtual ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode) = 0;
+    virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
+    virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
+    virtual bool LnnHasIpByUuid(const char *uuid) = 0;
 };
 
 class TransConnInterfaceMock : public TransConnInterface {
@@ -87,6 +97,13 @@ public:
 
     MOCK_METHOD0(ConnGetHeadSize, uint32_t (void));
     MOCK_METHOD2(ConnSetConnectCallback, int32_t (ConnModule, const ConnectCallback *));
+    MOCK_METHOD2(NipRecvDataFromBr, void (uint32_t, const char *));
+    MOCK_METHOD2(NipConnectDevice, void (uint32_t, const char *));
+    MOCK_METHOD1(NipDisconnectDevice, void (uint32_t));
+    MOCK_METHOD2(LnnGetProtocolListenerModule, ListenerModule (ProtocolType, ListenerMode));
+    MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char *, IdCategory));
+    MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
+    MOCK_METHOD1(LnnHasIpByUuid, bool (const char *));
 };
 
 } // namespace OHOS

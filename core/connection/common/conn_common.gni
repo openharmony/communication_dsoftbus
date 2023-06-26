@@ -27,7 +27,7 @@ conn_common_inc = [
 ]
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-newip_dir = "dsoftbus_enhance/components/newip"
+newip_dir = "dsoftbus_enhance/components/newip/network"
 newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              [
                                "$native_source_path",
@@ -37,7 +37,7 @@ newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (newip_enhanced) {
   import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/newip.gni")
+      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/network/network.gni")
 
   conn_common_src += newip_connection_src
   conn_common_inc += newip_connection_include

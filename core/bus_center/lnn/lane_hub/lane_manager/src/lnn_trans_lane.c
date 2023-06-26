@@ -33,6 +33,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "softbus_def.h"
+#include "softbus_protocol_def.h"
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
@@ -177,7 +178,7 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
     }
     ListTailInsert(&g_multiLinkList, &linkNode->node);
     Unlock();
-    if (PostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneId, 0, NULL) != SOFTBUS_OK) {
+    if (PostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneId, request->acceptableProtocols, NULL) != SOFTBUS_OK) {
         DeleteLaneLinkNode(laneId);
         return SOFTBUS_ERR;
     }
@@ -435,6 +436,7 @@ static LaneLinkNodeInfo *GetLaneLinkNodeWithoutLock(uint32_t laneId)
 static void LaneTriggerLink(SoftBusMessage *msg)
 {
     uint32_t laneId = msg->arg1;
+    ProtocolType acceptableProtocols = (ProtocolType)msg->arg2;
     LaneLinkCb linkCb = {
         .OnLaneLinkSuccess = LinkSuccess,
         .OnLaneLinkFail = LinkFail,
@@ -458,6 +460,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
     nodeInfo->linkRetryIdx++;
     requestInfo.pid = nodeInfo->pid;
     requestInfo.transType = nodeInfo->transType;
+    requestInfo.acceptableProtocols = acceptableProtocols;
     Unlock();
     if (memcpy_s(requestInfo.peerNetworkId, sizeof(requestInfo.peerNetworkId),
         nodeInfo->networkId, sizeof(nodeInfo->networkId)) != EOK) {
@@ -467,7 +470,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
     if (ret == SOFTBUS_OK) {
         return;
     }
-    if (PostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, ret, NULL) != SOFTBUS_OK) {
+    if (PostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, acceptableProtocols, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post laneLinkFail msg err");
     }
 }
@@ -489,7 +492,7 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
 static void LaneLinkFail(SoftBusMessage *msg)
 {
     uint32_t laneId = (uint32_t)msg->arg1;
-    int32_t reason = (int32_t)msg->arg2;
+    int32_t reason = SOFTBUS_ERR;
     if (Lock() != SOFTBUS_OK) {
         return;
     }
@@ -507,7 +510,11 @@ static void LaneLinkFail(SoftBusMessage *msg)
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Continue to build link");
     Unlock();
-    if (PostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneId, 0, NULL) != SOFTBUS_OK) {
+    ProtocolType acceptableProtocols = (ProtocolType)msg->arg2;
+    if (msg->arg2 == (uint64_t)SOFTBUS_ERR) {
+        acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    }
+    if (PostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneId, acceptableProtocols, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post triggerLink msg fail");
         return;
     }
