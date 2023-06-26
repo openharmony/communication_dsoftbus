@@ -16,10 +16,17 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <securec.h>
+#include <string.h>
 #include "auth_hichain.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
 #include "softbus_def.h"
+#include "softbus_adapter_mem.h"
+#include "lnn_distributed_net_ledger.h"
+#include "bus_center_manager.h"
+
+#define BLE_CIPHER 0x4
 
 typedef struct {
     int32_t module;
@@ -261,6 +268,96 @@ NO_SANITIZE("cfi") bool AuthHasTrustedRelation(void)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "hichain getJoinedGroups sameGroupCnt:%u pointGroupCnt:%u.", sameGroupCnt, pointGroupCnt);
     return sameGroupCnt != 0 || pointGroupCnt != 0;
+}
+
+static int32_t AuthBuildNodeConnInfo(const char *networkId, const char *nodeAddr,
+    uint32_t cipherFlag, AuthConnInfo *connInfo)
+{
+    bool hasIp = false;
+    char ip[IP_LEN] = {0};
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+
+    if (nodeInfo != NULL && LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_LSA)) {
+        if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, nodeAddr) != EOK) {
+            return SOFTBUS_MEM_ERR;
+        }
+        connInfo->type = AUTH_LINK_TYPE_WIFI;
+        return SOFTBUS_OK;
+    }
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, ip, IP_LEN) == SOFTBUS_OK) {
+        if (strnlen(ip, sizeof(ip)) == 0 ||
+            strncmp(ip, LOCAL_IP, strlen(LOCAL_IP)) == 0) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "not has ip addr");
+        } else {
+            hasIp = true;
+        }
+    }
+    if (hasIp) {
+        connInfo->type = AUTH_LINK_TYPE_WIFI;
+        if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, ip) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip addr fail");
+            return SOFTBUS_NOT_FIND;
+        }
+    } else if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC,
+        connInfo->info.brInfo.brMac, BT_MAC_LEN) == SOFTBUS_OK) {
+        if ((cipherFlag & BLE_CIPHER) != 0) {
+            char udid[UDID_BUF_LEN] = {0};
+            (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN);
+            if (SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid),
+                connInfo->info.bleInfo.deviceIdHash) == SOFTBUS_OK) {
+            } else {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udid hash failed");
+                return SOFTBUS_NOT_FIND;
+            }
+            connInfo->type = AUTH_LINK_TYPE_BLE;
+        } else {
+            connInfo->type = AUTH_LINK_TYPE_BR;
+        }
+    } else {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get connect info failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t AuthGetConnByNodeAddr(const char *addr, uint32_t cipherFlag, AuthConnInfo *connInfo)
+{
+    int32_t num = 0;
+    int32_t ret = SOFTBUS_OK;
+    NodeBasicInfo *info = NULL;
+
+    if (LnnGetAllOnlineNodeInfo(&info, &num) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get online node failed");
+        return SOFTBUS_NOT_FIND;
+    }
+    if (info == NULL || num == 0) {
+        return SOFTBUS_NOT_FIND;
+    }
+    for (int32_t i = 0; i < num; i++) {
+        char nodeAddr[SHORT_ADDRESS_MAX_LEN] = {0};
+        char *tmpNetworkId = info[i].networkId;
+
+        if (!LnnIsLSANode(&info[i])) {
+            continue;
+        }
+        if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_NODE_ADDR, nodeAddr, SHORT_ADDRESS_MAX_LEN) != SOFTBUS_OK ||
+            strcmp(addr, nodeAddr) != 0) {
+            continue;
+        }
+        ret = AuthBuildNodeConnInfo(tmpNetworkId, nodeAddr, cipherFlag, connInfo);
+
+        SoftBusFree(info);
+        return ret;
+    }
+
+    connInfo->type = AUTH_LINK_TYPE_WIFI;
+    if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, addr) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy ip addr failed");
+        ret = SOFTBUS_NOT_FIND;
+    }
+
+    SoftBusFree(info);
+    return ret;
 }
 
 NO_SANITIZE("cfi") int32_t AuthInit(void)

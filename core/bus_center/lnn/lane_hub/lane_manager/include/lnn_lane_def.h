@@ -97,6 +97,7 @@ typedef struct {
     int32_t pid;
     LaneTransType transType;
     LaneLinkType linkType;
+    ProtocolType acceptableProtocols;
 } LinkRequest;
 
 typedef struct {

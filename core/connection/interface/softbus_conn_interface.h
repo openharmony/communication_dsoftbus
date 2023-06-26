@@ -47,6 +47,7 @@ typedef enum {
     MODULE_META_AUTH = 21,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
+    MODULE_NIP_BR_CHANNEL = 201,
     MODULE_OLD_NEARBY = 300,
 } ConnModule;
 

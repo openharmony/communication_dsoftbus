@@ -59,7 +59,8 @@ typedef VisitNextChoice (*VisitNetifCallback)(const LnnNetIfMgr *, void *);
 
 typedef enum {
     LNN_LISTENER_MODE_PROXY,
-    LNN_LISTENER_MODE_DIRECT
+    LNN_LISTENER_MODE_DIRECT,
+    LNN_LISTENER_MODE_AUTH
 } ListenerMode;
 
 typedef struct LnnProtocolManager {

@@ -189,7 +189,7 @@ extern "C" {
  * @brief Indicates the maximum length of the node address.
  *
  */
-#define SHORT_ADDRESS_MAX_LEN 8
+#define SHORT_ADDRESS_MAX_LEN 20
 
 /**
  * @brief Indicates the maximum num of the node status.

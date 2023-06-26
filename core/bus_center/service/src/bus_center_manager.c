@@ -46,6 +46,12 @@ int32_t __attribute__((weak)) InitNodeAddrAllocator(void)
 }
 void __attribute__((weak)) DeinitNodeAddrAllocator(void) {}
 
+int32_t __attribute__((weak)) RouteLSInit(void)
+{
+    return SOFTBUS_OK;
+}
+void __attribute__((weak)) RouteLSDeinit(void) {}
+
 typedef int32_t (*LnnInitDelayImpl)(void);
 
 typedef enum {
@@ -188,6 +194,10 @@ NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init nodeAddr failed.");
         return SOFTBUS_ERR;
     }
+    if (RouteLSInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init route failed.");
+        return SOFTBUS_ERR;
+    }
     if (StartDelayInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start delay init fail!");
         return SOFTBUS_ERR;
@@ -203,6 +213,7 @@ NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
 NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
 {
     LnnDeinitDecisionCenter();
+    RouteLSDeinit();
     DeinitNodeAddrAllocator();
     LnnDeinitLaneHub();
     LnnDeinitNetBuilder();

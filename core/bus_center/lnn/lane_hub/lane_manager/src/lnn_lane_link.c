@@ -522,7 +522,11 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
     (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
 
     LLOGI("protocol = %ld", req.selectedProtocol);
-    return LNN_PROTOCOL_IP;
+    if (req.selectedProtocol == 0) {
+        req.selectedProtocol = LNN_PROTOCOL_IP;
+    }
+
+    return req.selectedProtocol;
 }
 
 static void FillWlanLinkInfo(
@@ -554,12 +558,18 @@ NO_SANITIZE("cfi") static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkReque
         LLOGE("peer node is not wifi online");
         return SOFTBUS_ERR;
     }
-    ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL;
-    if (reqInfo->transType != LANE_T_MSG && reqInfo->transType != LANE_T_BYTE) {
-        acceptableProtocols ^= LNN_PROTOCOL_NIP;
+    ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    if (reqInfo->transType == LANE_T_MSG || reqInfo->transType == LANE_T_BYTE) {
+        acceptableProtocols |= LNN_PROTOCOL_NIP;
     }
+    acceptableProtocols = acceptableProtocols & reqInfo->acceptableProtocols;
     ProtocolType protocol =
         LnnLaneSelectProtocol(LNN_NETIF_TYPE_WLAN | LNN_NETIF_TYPE_ETH, reqInfo->peerNetworkId, acceptableProtocols);
+    if (protocol == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "protocal is invalid!");
+        return SOFTBUS_ERR;
+    }
+
     if (protocol == LNN_PROTOCOL_IP) {
         ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP, linkInfo.linkInfo.wlan.connInfo.addr,
             sizeof(linkInfo.linkInfo.wlan.connInfo.addr));

@@ -80,6 +80,10 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
 int32_t LnnAddMetaInfo(NodeInfo *info);
 int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type);
+int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
+int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort);
+int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
+bool LnnHasIpByUuid(const char *uuid);
 #ifdef __cplusplus
 }
 #endif
