@@ -878,6 +878,11 @@ NO_SANITIZE("cfi") int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         oldInfo->connectInfo.proxyPort = newInfo->connectInfo.proxyPort;
         oldInfo->connectInfo.sessionPort = newInfo->connectInfo.sessionPort;
     }
+    if (strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s fail");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
