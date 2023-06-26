@@ -57,7 +57,7 @@ static void TransactBtSubnetState(LnnPhysicalSubnet *subnet, BtSubnetManagerEven
 static int32_t GetAvailableBtMac(char *macStr, uint32_t len)
 {
     int32_t ret;
-    SoftBusBtAddr mac;
+    SoftBusBtAddr mac = {0};
 
     if (len != BT_MAC_LEN) {
         return SOFTBUS_INVALID_PARAM;
