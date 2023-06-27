@@ -63,7 +63,7 @@ ohos_unittest("LNNConnAddrUtilsTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [

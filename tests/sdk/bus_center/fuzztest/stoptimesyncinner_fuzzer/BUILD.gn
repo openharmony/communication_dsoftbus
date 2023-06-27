@@ -42,6 +42,6 @@ ohos_fuzztest("StopTimeSyncInnerFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 }

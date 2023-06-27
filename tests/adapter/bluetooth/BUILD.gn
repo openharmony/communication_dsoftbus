@@ -36,7 +36,7 @@ ohos_unittest("AdapterBleGattTest") {
 
   external_deps = [ "c_utils:utils" ]
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
@@ -63,7 +63,7 @@ ohos_unittest("AdapterBleGattServerTest") {
 
   external_deps = [ "c_utils:utils" ]
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
@@ -90,7 +90,7 @@ ohos_unittest("AdapterBleGattClientTest") {
 
   external_deps = [ "c_utils:utils" ]
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
@@ -114,7 +114,7 @@ ohos_unittest("AdapterBtUtilsTest") {
 
   external_deps = [ "c_utils:utils" ]
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
@@ -141,7 +141,7 @@ ohos_unittest("AdapterBtCommonTest") {
 
   external_deps = [ "c_utils:utils" ]
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "hilog:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }

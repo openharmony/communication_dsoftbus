@@ -41,7 +41,7 @@ ohos_unittest("PermissionStateTest") {
       "access_token:libprivacy_sdk",
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "ipc:ipc_core",
     ]
   } else {

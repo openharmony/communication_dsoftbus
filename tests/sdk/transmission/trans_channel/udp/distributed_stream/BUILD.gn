@@ -30,7 +30,7 @@ ohos_distributedtest("DistriStreamTest") {
   ]
   external_deps = [
     "dsoftbus:softbus_client",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 }
 
@@ -49,7 +49,7 @@ ohos_distributedtest("DistriStreamTestAgent") {
   ]
   external_deps = [
     "dsoftbus:softbus_client",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 }
 

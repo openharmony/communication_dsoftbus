@@ -202,9 +202,9 @@ if (defined(ohos_lite)) {
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
       external_deps = [
-        "hisysevent_native:libhisysevent",
-        "hitrace_native:libhitracechain",
-        "hiviewdfx_hilog_native:libhilog",
+        "hilog:libhilog",
+        "hisysevent:libhisysevent",
+        "hitrace:libhitracechain",
         "init:libbegetutil",
       ]
     }
