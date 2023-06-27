@@ -389,6 +389,7 @@ static SessionInfo *GetExistSession(const SessionParam *param)
                 (strcmp(sessionNode->info.peerSessionName, param->peerSessionName) != 0) ||
                 (strcmp(sessionNode->info.peerDeviceId, param->peerDeviceId) != 0) ||
                 (strcmp(sessionNode->info.groupId, param->groupId) != 0) ||
+                (memcmp(sessionNode->linkType, param->attr->linkType, sizeof(param->attr->linkType)) != 0) ||
                 (sessionNode->info.flag != param->attr->dataType)) {
                 continue;
             }
