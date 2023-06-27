@@ -51,6 +51,7 @@ typedef struct {
     int32_t fileEncrypt;
     int32_t algorithm;
     int32_t crc;
+    LinkType linkType[LINK_TYPE_MAX];
 } SessionInfo;
 
 typedef struct {
