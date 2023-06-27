@@ -995,15 +995,18 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
     };
     int32_t status = SOFTBUS_ERR;
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
+        CLOGI("start to get interface, i is %d", i);
         BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
+        CLOGI("before, interface is %d, i is %d", interface, i);
         if (interface == NULL) {
             continue;
         }
+        CLOGI("interface is %d, i is %d", interface, i);
         status = interface->bleClientInitModule(looper, &clientEventListener);
-        CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status, 
+        CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
             "init ble connection failed: init ble %d client failed, error=%d", i, status);
         status = interface->bleServerInitModule(looper, &serverEventListener);
-        CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status, 
+        CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
             "init ble connection failed: init ble %d server failed, error=%d", i, status);
     }
 
