@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
-adapter_ble_external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+adapter_ble_external_deps = [ "hilog:libhilog" ]
 
 adapter_ble_inc = [
   "$dsoftbus_root_path/adapter/common/include",
