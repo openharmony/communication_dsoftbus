@@ -247,6 +247,12 @@ static void NotifyDeviceConnectResult(
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
 
+    if (reason == 0) {
+        NipConnectDevice(connection->connectionId, connection->addr);
+    } else {
+        NipDisconnectDevice(connection->connectionId);
+    }
+
     ConnBrRequest *it = NULL;
     if (connection == NULL) {
         LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBrRequest, node) {
@@ -257,11 +263,6 @@ static void NotifyDeviceConnectResult(
                 reason);
         }
         return;
-    }
-    if (reason == 0) {
-        NipConnectDevice(connection->connectionId, connection->addr);
-    } else {
-        NipDisconnectDevice(connection->connectionId);
     }
 
     ConnectionInfo info = { 0 };
