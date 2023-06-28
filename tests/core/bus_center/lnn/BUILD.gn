@@ -128,7 +128,7 @@ ohos_unittest("LaneTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -152,7 +152,7 @@ ohos_unittest("NetLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -176,7 +176,7 @@ ohos_unittest("NetBuilderTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -200,7 +200,7 @@ ohos_unittest("LNNHuksUtilsTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -224,7 +224,7 @@ ohos_unittest("LedgerLaneHubTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -248,7 +248,7 @@ ohos_unittest("LNNBusCenterIpcTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -272,7 +272,7 @@ ohos_unittest("BusCenterClientProxyTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -296,7 +296,7 @@ ohos_unittest("BusCenterClientProxyStandardTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -357,7 +357,7 @@ ohos_unittest("LNNNetBuilderTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -427,7 +427,7 @@ ohos_unittest("LNNNetBuilderMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -466,7 +466,7 @@ ohos_unittest("LNNConnectionFsmTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -504,7 +504,7 @@ ohos_unittest("LNNDeviceNameInfoTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -542,7 +542,7 @@ ohos_unittest("LNNNetworkInfoTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -580,7 +580,7 @@ ohos_unittest("LNNNodeWeightTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -618,7 +618,7 @@ ohos_unittest("LNNP2pInfoTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -656,7 +656,7 @@ ohos_unittest("LNNSyncInfoManagerTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -694,7 +694,7 @@ ohos_unittest("LNNTopoManagerTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -763,7 +763,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -828,7 +828,7 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -894,7 +894,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -962,7 +962,7 @@ ohos_unittest("LNNLedgerMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1027,7 +1027,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1092,7 +1092,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1161,7 +1161,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1232,7 +1232,7 @@ ohos_unittest("LNNLaneMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1291,7 +1291,7 @@ ohos_unittest("LNNLaneLinkMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1354,7 +1354,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1402,7 +1402,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -1483,7 +1483,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       external_deps = [
         "c_utils:utils",
         "device_auth:deviceauth_sdk",
-        "hiviewdfx_hilog_native:libhilog",
+        "hilog:libhilog",
       ]
     } else {
       external_deps = [

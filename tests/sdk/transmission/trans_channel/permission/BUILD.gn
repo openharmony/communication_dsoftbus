@@ -31,7 +31,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk:softbus_client",
     ]
     if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps = [ "hilog:libhilog" ]
     } else {
       external_deps = [ "hilog:libhilog" ]
     }

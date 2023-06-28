@@ -71,7 +71,7 @@ ohos_unittest("ConnectionP2pTest") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   sources = [ "connection_p2p_test.cpp" ]
 }
@@ -133,7 +133,7 @@ ohos_unittest("P2pManagerTest") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   sources = [ "p2p_manager_test.cpp" ]
 }
@@ -197,7 +197,7 @@ ohos_unittest("P2pDeviceTest") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   sources = [ "p2p_device_test.cpp" ]
 }
