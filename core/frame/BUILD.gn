@@ -202,7 +202,7 @@ if (defined(ohos_lite)) {
         "access_token:libaccesstoken_sdk",
         "access_token:libprivacy_sdk",
         "device_auth:deviceauth_sdk",
-        "hiviewdfx_hilog_native:libhilog",
+        "hilog:libhilog",
         "ipc:ipc_core",
         "safwk:system_ability_fwk",
         "samgr:samgr_proxy",

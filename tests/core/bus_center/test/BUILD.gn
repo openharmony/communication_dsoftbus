@@ -63,7 +63,7 @@ ohos_unittest("HeartBeatMediumTest") {
   if (is_standard_system) {
     external_deps = [
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -128,7 +128,7 @@ ohos_unittest("HeartBeatFSMTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -175,7 +175,7 @@ ohos_unittest("ClientProxyTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "samgr:samgr_proxy",
     ]
   } else {
@@ -227,7 +227,7 @@ ohos_unittest("BusCenterIpcTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [

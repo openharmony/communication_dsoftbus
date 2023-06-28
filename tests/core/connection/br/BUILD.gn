@@ -54,7 +54,7 @@ ohos_unittest("ConnectionBrTest") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   sources = [ "connection_br_test.cpp" ]
 }

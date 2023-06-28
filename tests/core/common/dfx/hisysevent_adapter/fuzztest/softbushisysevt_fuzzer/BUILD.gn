@@ -40,7 +40,7 @@ ohos_fuzztest("SoftBusHiSysEvtFuzzTest") {
   deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
 
   if (is_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   } else {
     external_deps = [ "hilog:libhilog" ]
   }
