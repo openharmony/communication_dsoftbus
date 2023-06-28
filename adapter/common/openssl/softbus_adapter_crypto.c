@@ -38,6 +38,8 @@ static EVP_CIPHER *GetGcmAlgorithmByKeyLen(uint32_t keyLen)
             return (EVP_CIPHER *)EVP_aes_128_gcm();
         case EVP_AES_256_KEYLEN:
             return (EVP_CIPHER *)EVP_aes_256_gcm();
+        default:
+            return NULL;
     }
     return NULL;
 }
