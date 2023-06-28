@@ -24,7 +24,7 @@
       "hisysevent_config": [
         "//foundation/communication/dsoftbus/hisysevent.yaml"
       ],
-      "syscap":["SystemCapability.Communication.SoftBus.Core"],
+      "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
       "features": [
         "dsoftbus_feature_conn_p2p",
         "dsoftbus_feature_disc_ble",
