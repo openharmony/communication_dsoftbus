@@ -37,7 +37,7 @@ static BleUnifyInterface g_bleUnifyInterface[BLE_PROTOCOL_MAX] = {
 
 const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
 {
-    if (type < BLE_GATT || type >= BLE_PROTOCOL_MAX) {
+    if (type != BLE_GATT) {
         return NULL;
     }
     return &g_bleUnifyInterface[type];
