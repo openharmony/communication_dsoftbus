@@ -356,7 +356,9 @@ static SessionInfo *CreateNewSession(const SessionParam *param)
 
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK ||
-        strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, param->groupId) != EOK) {
+        strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, param->groupId) != EOK ||
+        memcpy_s(session->linkType, sizeof(param->attr->linkType), param->attr->linkType,
+            sizeof(param->attr->linkType)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy failed");
         SoftBusFree(session);
         return NULL;
@@ -387,6 +389,7 @@ static SessionInfo *GetExistSession(const SessionParam *param)
                 (strcmp(sessionNode->info.peerSessionName, param->peerSessionName) != 0) ||
                 (strcmp(sessionNode->info.peerDeviceId, param->peerDeviceId) != 0) ||
                 (strcmp(sessionNode->info.groupId, param->groupId) != 0) ||
+                (memcmp(sessionNode->linkType, param->attr->linkType, sizeof(param->attr->linkType)) != 0) ||
                 (sessionNode->info.flag != param->attr->dataType)) {
                 continue;
             }
