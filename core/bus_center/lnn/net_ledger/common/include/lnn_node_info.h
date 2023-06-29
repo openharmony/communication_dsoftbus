@@ -55,7 +55,6 @@ typedef enum {
     DISCOVERY_TYPE_BLE,
     DISCOVERY_TYPE_BR,
     DISCOVERY_TYPE_P2P,
-    DISCOVERY_TYPE_LSA,
     DISCOVERY_TYPE_COUNT,
 } DiscoveryType;
 
@@ -118,7 +117,6 @@ bool LnnHasSupportDiscoveryType(const char *destType, const char *type);
 bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type);
 const char *LnnGetDeviceUdid(const NodeInfo *info);
 int32_t LnnSetDeviceUdid(NodeInfo *info, const char *udid);
-const char *LnnGetDeviceUuid(const NodeInfo *info);
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type);
 int32_t LnnSetDiscoveryType(NodeInfo *info, DiscoveryType type);
 int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type);

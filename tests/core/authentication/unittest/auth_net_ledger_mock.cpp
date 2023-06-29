@@ -158,16 +158,6 @@ bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
     return GetNetLedgerInterface()->LnnPeerHasExchangeDiscoveryType(info, type);
 }
-
-void RouteBuildClientAuthManager(int32_t cfd)
-{
-    return GetNetLedgerInterface()->RouteBuildClientAuthManager(cfd);
-}
-
-void RouteClearAuthChannelId(int32_t cfd)
-{
-    return GetNetLedgerInterface()->RouteClearAuthChannelId(cfd);
-}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)

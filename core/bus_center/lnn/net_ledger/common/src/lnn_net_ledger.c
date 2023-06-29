@@ -99,8 +99,6 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalNumInfo(NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:
             return LnnGetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, (int16_t *)info);
-        case NODE_KEY_NODE_ADDRESS:
-            return LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
@@ -132,8 +130,6 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:
             return LnnGetRemoteNum16Info(networkId, NUM_KEY_DATA_CHANGE_FLAG, (int16_t *)info);
-        case NODE_KEY_NODE_ADDRESS:
-            return LnnGetRemoteStrInfo(networkId, STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
@@ -205,8 +201,6 @@ NO_SANITIZE("cfi") int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return LNN_COMMON_LEN;
         case NODE_KEY_DATA_CHANGE_FLAG:
             return DATA_CHANGE_FLAG_BUF_LEN;
-        case NODE_KEY_NODE_ADDRESS:
-            return SHORT_ADDRESS_MAX_LEN;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;

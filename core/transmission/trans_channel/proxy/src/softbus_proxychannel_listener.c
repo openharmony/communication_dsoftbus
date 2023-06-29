@@ -223,7 +223,6 @@ static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *c
     option.requestInfo.trans.pid = DEFAULT_PID;
     option.requestInfo.trans.transType = LANE_T_MSG;
     option.requestInfo.trans.expectedBw = 0;
-    option.requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
     if (memcpy_s(option.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
         peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy networkId failed.");

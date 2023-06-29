@@ -62,11 +62,6 @@ int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
     return HeartBeatFSMInterfaceInstance()->LnnSetHbAsMasterNodeState(isMasterNode);
 }
 
-void LnnNotifyHBRepeat(void)
-{
-    return HeartBeatFSMInterfaceInstance()->LnnNotifyHBRepeat();
-}
-
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
 {
     return HeartBeatFSMInterfaceInstance()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);

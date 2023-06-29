@@ -981,10 +981,6 @@ NO_SANITIZE("cfi") int32_t LnnInitLocalLedger(void)
     if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
         goto EXIT;
     }
-    if (strcpy_s(nodeInfo->nodeAddress, sizeof(nodeInfo->nodeAddress), NODE_ADDR_LOOPBACK) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail:strncpy_s fail!");
-        goto EXIT;
-    }
     if (InitLocalDeviceInfo(deviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local device info error!");
         goto EXIT;

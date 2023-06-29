@@ -49,6 +49,13 @@
 
 #define TOPO_HASH_TABLE_SIZE 16
 
+typedef struct {
+    ConnectionAddrType type;
+    uint8_t relation;
+    bool isJoin;
+    char udid[UDID_BUF_LEN];
+} RelationChangedMsg;
+
 typedef enum {
     TOPO_MSG_TYPE_UPDATE,
 } TopoUpdateMsgType;
@@ -79,11 +86,6 @@ typedef struct {
 } TopoInfo;
 
 static TopoHashTable g_topoTable;
-
-void __attribute__((weak)) RouteLnnRelationEventHandler(const LnnRelationChangedMsg *msg)
-{
-    (void)msg;
-}
 
 static bool IsSameRelation(const uint8_t *newRelation, const uint8_t *oldRelation, uint32_t len)
 {
@@ -431,9 +433,6 @@ static void ForwardTopoMsgToAll(const char *networkId, const uint8_t *msg, uint3
         return;
     }
     for (i = 0; i < infoNum; ++i) {
-        if (LnnIsLSANode(&info[i])) {
-            continue;
-        }
         if (strcmp(networkId, info[i].networkId) == 0) {
             continue;
         }
@@ -611,9 +610,6 @@ static void NotifyLnnRelationChange(const char *localUdid, const char *udid,
     }
     msgLen = strlen(msg) + 1;
     for (i = 0; i < infoNum; ++i) {
-        if (LnnIsLSANode(&info[i])) {
-            continue;
-        }
         if (strcmp(networkId, info[i].networkId) == 0) {
             continue;
         }
@@ -676,12 +672,11 @@ static void OnLnnRelationChangedDelay(void *para)
 {
     uint8_t newRelation[CONNECTION_ADDR_MAX] = {0};
     int32_t rc;
-    LnnRelationChangedMsg *msg = (LnnRelationChangedMsg *)para;
+    RelationChangedMsg *msg = (RelationChangedMsg *)para;
 
     if (msg == NULL) {
         return;
     }
-    RouteLnnRelationEventHandler(msg);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLnnRelationChangedDelay: %d", msg->type);
     if (msg->type == CONNECTION_ADDR_MAX) {
         SoftBusFree(msg);
@@ -715,7 +710,7 @@ static void OnLnnRelationChangedDelay(void *para)
 static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
 {
     const LnnRelationChanedEventInfo *eventInfo = (const LnnRelationChanedEventInfo *)info;
-    LnnRelationChangedMsg *msg = NULL;
+    RelationChangedMsg *msg = NULL;
 
     if (info == NULL || info->event != LNN_EVENT_RELATION_CHANGED) {
         return;
@@ -724,7 +719,7 @@ static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid relation changed params");
         return;
     }
-    msg = (LnnRelationChangedMsg *)SoftBusMalloc(sizeof(LnnRelationChangedMsg));
+    msg = (RelationChangedMsg *)SoftBusMalloc(sizeof(RelationChangedMsg));
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc relation changed msg fail");
         return;

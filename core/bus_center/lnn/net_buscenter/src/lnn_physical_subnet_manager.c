@@ -23,7 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define MAX_SUPPORTED_PHYSICAL_SUBNET 6
+#define MAX_SUPPORTED_PHYSICAL_SUBNET 4
 
 static SoftBusMutex g_physicalSubnetsLock;
 static LnnPhysicalSubnet *g_physicalSubnets[MAX_SUPPORTED_PHYSICAL_SUBNET];
