@@ -59,12 +59,6 @@ static SocketCallback g_callback = {NULL, NULL, NULL};
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
-int32_t __attribute__((weak)) RouteBuildServerAuthManager(int32_t cfd, const ConnectOption *clientAddr)
-{
-    (void)cfd;
-    (void)clientAddr;
-    return SOFTBUS_OK;
-}
 
 static uint32_t GetSocketPktSize(uint32_t len)
 {
@@ -115,10 +109,10 @@ static int32_t UnpackSocketPkt(const uint8_t *data, uint32_t len, SocketPktHead 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void NotifyConnected(ListenerModule module, int32_t fd, bool isClient)
+NO_SANITIZE("cfi") static void NotifyConnected(int32_t fd, bool isClient)
 {
     if (g_callback.onConnected != NULL) {
-        g_callback.onConnected(module, fd, isClient);
+        g_callback.onConnected(fd, isClient);
     }
 }
 
@@ -145,8 +139,7 @@ static uint32_t ModuleToDataType(int32_t module)
     return DATA_TYPE_CONNECTION;
 }
 
-NO_SANITIZE("cfi") static void NotifyDataReceived(ListenerModule module, int32_t fd,
-    const SocketPktHead *pktHead, const uint8_t *data)
+NO_SANITIZE("cfi") static void NotifyDataReceived(int32_t fd, const SocketPktHead *pktHead, const uint8_t *data)
 {
     if (pktHead->module == MODULE_AUTH_CHANNEL || pktHead->module == MODULE_AUTH_MSG) {
         NotifyChannelDataReceived(fd, pktHead, data);
@@ -160,18 +153,18 @@ NO_SANITIZE("cfi") static void NotifyDataReceived(ListenerModule module, int32_t
         .len = pktHead->len,
     };
     if (g_callback.onDataReceived != NULL) {
-        g_callback.onDataReceived(module, fd, &head, data);
+        g_callback.onDataReceived(fd, &head, data);
     }
 }
 
-static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *head)
+static int32_t RecvPacketHead(int32_t fd, SocketPktHead *head)
 {
     uint8_t buf[AUTH_PKT_HEAD_LEN] = {0};
     ssize_t len = ConnRecvSocketData(fd, (char *)&buf[0], sizeof(buf), 0);
     if (len < AUTH_PKT_HEAD_LEN) {
         if (len < 0) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "recv head fail(=%d).", ConnGetSocketError(fd));
-            (void)DelTrigger(module, fd, READ_TRIGGER);
+            (void)DelTrigger(AUTH, fd, READ_TRIGGER);
             NotifyDisconnected(fd);
         }
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "head not enough, len=%d, abandon it.", len);
@@ -200,11 +193,11 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
     return data;
 }
 
-static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
+static int32_t ProcessSocketOutEvent(int32_t fd)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "socket client connect succ: fd=%d.", fd);
-    (void)DelTrigger(module, fd, WRITE_TRIGGER);
-    if (AddTrigger(module, fd, READ_TRIGGER) != SOFTBUS_OK) {
+    (void)DelTrigger(AUTH, fd, WRITE_TRIGGER);
+    if (AddTrigger(AUTH, fd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
         goto FAIL;
     }
@@ -212,20 +205,20 @@ static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set none block mode fail.");
         goto FAIL;
     }
-    NotifyConnected(module, fd, true);
+    NotifyConnected(fd, true);
     return SOFTBUS_OK;
 
 FAIL:
-    (void)DelTrigger(module, fd, READ_TRIGGER);
+    (void)DelTrigger(AUTH, fd, READ_TRIGGER);
     ConnShutdownSocket(fd);
     NotifyDisconnected(fd);
     return SOFTBUS_ERR;
 }
 
-static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
+static int32_t ProcessSocketInEvent(int32_t fd)
 {
     SocketPktHead head = {0};
-    if (RecvPacketHead(module, fd, &head) != SOFTBUS_OK) {
+    if (RecvPacketHead(fd, &head) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
@@ -243,14 +236,15 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
     if (data == NULL) {
         return SOFTBUS_ERR;
     }
-    NotifyDataReceived(module, fd, &head, data);
+    NotifyDataReceived(fd, &head, data);
     SoftBusFree(data);
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module,
-    int32_t cfd, const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
+    (void)module;
+    (void)clientAddr;
     if (cfd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
@@ -260,22 +254,12 @@ NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module,
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
-    if (AddTrigger(module, cfd, READ_TRIGGER) != SOFTBUS_OK) {
+    if (AddTrigger(AUTH, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
-    if (module != AUTH && module != AUTH_P2P) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "newip auth process");
-        if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "build auth manager fail.");
-            (void)DelTrigger(module, cfd, READ_TRIGGER);
-            ConnShutdownSocket(cfd);
-            return SOFTBUS_ERR;
-        }
-        return SOFTBUS_OK;
-    }
-    NotifyConnected(module, cfd, false);
+    NotifyConnected(cfd, false);
     return SOFTBUS_OK;
 }
 
@@ -283,9 +267,9 @@ NO_SANITIZE("cfi") static int32_t OnDataEvent(ListenerModule module, int32_t eve
 {
     (void)module;
     if (events == SOFTBUS_SOCKET_OUT) {
-        return ProcessSocketOutEvent(module, fd);
+        return ProcessSocketOutEvent(fd);
     } else if (events == SOFTBUS_SOCKET_IN) {
-        return ProcessSocketInEvent(module, fd);
+        return ProcessSocketInEvent(fd);
     }
     return SOFTBUS_ERR;
 }
@@ -305,13 +289,28 @@ NO_SANITIZE("cfi") void UnsetSocketCallback(void)
     (void)memset_s(&g_callback, sizeof(SocketCallback), 0, sizeof(SocketCallback));
 }
 
-NO_SANITIZE("cfi") int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info)
+NO_SANITIZE("cfi") int32_t StartSocketListening(const char *ip, int32_t port)
 {
+    CHECK_NULL_PTR_RETURN_VALUE(ip, SOFTBUS_INVALID_PARAM);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start socket listening.");
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = port,
+            .moduleId = AUTH,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+    if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s ip fail.");
+        return SOFTBUS_MEM_ERR;
+    }
     SoftbusBaseListener listener = {
         .onConnectEvent = OnConnectEvent,
         .onDataEvent = OnDataEvent,
     };
-    int32_t port = StartBaseListener(info, &listener);
+    port = StartBaseListener(&info, &listener);
     if (port <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "StartBaseListener fail(=%d).", port);
         return SOFTBUS_ERR;
@@ -367,48 +366,12 @@ NO_SANITIZE("cfi") int32_t SocketConnectDevice(const char *ip, int32_t port, boo
     return fd;
 }
 
-NO_SANITIZE("cfi") int32_t NipSocketConnectDevice(ListenerModule module,
-    const char *addr, int32_t port, bool isBlockMode)
-{
-    ConnectOption option = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "",
-            .port = port,
-            .moduleId = module,
-            .protocol = LNN_PROTOCOL_NIP
-        }
-    };
-    if (strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), addr) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy remote ip fail.");
-        return AUTH_INVALID_FD;
-    }
-    int32_t fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, !isBlockMode);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConnOpenClientSocket fail.");
-        return AUTH_INVALID_FD;
-    }
-    TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
-    if (AddTrigger(module, fd, triggerMode) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
-    }
-    if (ConnSetTcpKeepAlive(fd, AUTH_KEEP_ALIVE_TIME_INTERVAL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set tcp keep alive fail.");
-        (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
-    }
-    return fd;
-}
-
-NO_SANITIZE("cfi") void SocketDisconnectDevice(ListenerModule module, int32_t fd)
+NO_SANITIZE("cfi") void SocketDisconnectDevice(int32_t fd)
 {
     if (fd < 0) {
         return;
     }
-    (void)DelTrigger(module, fd, RW_TRIGGER);
+    (void)DelTrigger(AUTH, fd, RW_TRIGGER);
     ConnShutdownSocket(fd);
 }
 
@@ -560,7 +523,7 @@ NO_SANITIZE("cfi") int32_t AuthOpenChannel(const char *ip, int32_t port)
 NO_SANITIZE("cfi") void AuthCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthChannel: close auth channel, id=%d.", channelId);
-    SocketDisconnectDevice(AUTH, channelId);
+    SocketDisconnectDevice(channelId);
 }
 
 NO_SANITIZE("cfi") int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)

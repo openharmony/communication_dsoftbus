@@ -34,7 +34,6 @@ extern "C" {
 #define BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS      (20 * 1000)
 #define BR_CONNECTION_ACL_CONNECT_COLLISION_MILLIS (6 * 1000)
 #define BR_WAIT_BLE_DISCONNECTED_PEND_MILLIS       (20 * 1000)
-#define BR_NIP_SEQ (0xeaddeaddeaddeadd)
 
 enum ConnBrDeviceState {
     BR_DEVICE_STATE_INIT,

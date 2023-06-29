@@ -313,11 +313,6 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     return GetNetLedgerInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
 
-bool LnnIsLSANode(const NodeBasicInfo *info)
-{
-    return GetNetLedgerInterface()->LnnIsLSANode(info);
-}
-
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
 {
     return GetNetLedgerInterface()->LnnGetNodeInfoById(id, type);

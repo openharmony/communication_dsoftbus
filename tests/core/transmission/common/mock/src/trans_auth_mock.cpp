@@ -233,10 +233,5 @@ int32_t LnnFreeLane(uint32_t laneId)
 {
     return GetTransAuthInterface()->LnnFreeLane(laneId);
 }
-
-int32_t AuthGetConnByNodeAddr(const char *addr, uint32_t cipherFlag, AuthConnInfo *connInfo)
-{
-    return GetTransAuthInterface()->AuthGetConnByNodeAddr(addr, cipherFlag, connInfo);
-}
 }
 }

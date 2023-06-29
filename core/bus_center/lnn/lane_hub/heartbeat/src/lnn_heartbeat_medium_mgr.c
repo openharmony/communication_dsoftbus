@@ -165,9 +165,6 @@ static const NodeInfo *HbGetOnlineNodeByRecvInfo(const char *recvUdidHash, const
     }
     DiscoveryType discType = LnnConvAddrTypeToDiscType(recvAddrType);
     for (i = 0; i < infoNum; ++i) {
-        if (LnnIsLSANode(&info[i])) {
-            continue;
-        }
         const NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
         if (nodeInfo == NULL || !LnnHasDiscoveryType(nodeInfo, discType)) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB node online not have discType:%d", discType);
@@ -391,9 +388,6 @@ NO_SANITIZE("cfi") void LnnDumpHbOnlineNodeList(void)
         return;
     }
     for (i = 0; i < infoNum; ++i) {
-        if (LnnIsLSANode(&info[i])) {
-            continue;
-        }
         if (i > HB_DUMP_ONLINE_NODE_MAX_NUM) {
             break;
         }

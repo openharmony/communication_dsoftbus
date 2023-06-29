@@ -35,7 +35,6 @@ public:
     virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr) = 0;
     virtual int32_t LnnSetHbAsMasterNodeState(bool isMasterNode) = 0;
     virtual int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight) = 0;
-    virtual void LnnNotifyHBRepeat(void);
     virtual int32_t LnnStartHbByTypeAndStrategy(
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
     virtual int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type) = 0;
@@ -68,7 +67,6 @@ public:
     MOCK_METHOD1(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *));
     MOCK_METHOD3(LnnNotifyMasterElect, int32_t(const char *, const char *, int32_t));
     MOCK_METHOD1(LnnSetHbAsMasterNodeState, int32_t(bool));
-    MOCK_METHOD0(LnnNotifyHBRepeat, void ());
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
     MOCK_METHOD1(LnnHbMediumMgrStop, int32_t(LnnHeartbeatType *));
     MOCK_METHOD0(LnnDumpHbMgrRecvList, void(void));

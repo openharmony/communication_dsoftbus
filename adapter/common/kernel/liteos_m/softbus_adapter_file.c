@@ -85,14 +85,6 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusWriteFileFd(int32_t fd, const char *writeBuf, uint32_t len)
-{
-    (void)fd;
-    (void)writeBuf;
-    (void)len;
-    return SOFTBUS_INVALID_FD;
-}
-
 int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
 {
     (void)fileName;

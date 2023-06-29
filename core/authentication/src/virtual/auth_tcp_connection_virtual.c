@@ -74,9 +74,8 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void SocketDisconnectDevice(ListenerModule module, int32_t fd)
+void SocketDisconnectDevice(int32_t fd)
 {
-    (void)module;
     (void)fd;
     return;
 }
@@ -97,10 +96,10 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info)
+int32_t StartSocketListening(const char *ip, int32_t port)
 {
-    (void)module;
-    (void)info;
+    (void)ip;
+    (void)port;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
     return SOFTBUS_NOT_IMPLEMENT;
 }
