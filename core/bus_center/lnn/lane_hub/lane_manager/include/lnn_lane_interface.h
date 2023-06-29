@@ -137,7 +137,6 @@ typedef struct {
     uint32_t expectedBw;
     int32_t pid;
     LanePreferredLinkList expectedLink;
-    ProtocolType acceptableProtocols;
 } TransOption;
 
 typedef struct {

@@ -109,9 +109,6 @@ public:
     virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
     virtual int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
     virtual int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
-    virtual int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
-    virtual int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort);
-    virtual int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
     virtual int32_t LnnInitP2p(void);
     virtual void LnnDeinitP2p(void);
     virtual int32_t LnnInitNetworkInfo(void);
@@ -144,8 +141,7 @@ public:
     virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
     virtual int32_t LnnInitFastOffline(void);
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
-    virtual bool LnnIsLSANode(const NodeBasicInfo *info) = 0;
-    virtual void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal);
+    virtual void LnnNotifyNodeAddressChanged(const char* addr);
     virtual int32_t LnnInitOffline(void);
     virtual void LnnDeinitOffline(void);
 };
@@ -204,9 +200,6 @@ public:
     MOCK_METHOD2(LnnGenLocalUuid, int32_t (char *, uint32_t));
     MOCK_METHOD2(LnnGenLocalNetworkId, int32_t (char *, uint32_t));
     MOCK_METHOD3(LnnSetDLNodeAddr, int32_t (const char *, IdCategory, const char *));
-    MOCK_METHOD3(LnnSetDLProxyPort, int32_t (const char *, IdCategory, int32_t));
-    MOCK_METHOD3(LnnSetDLSessionPort, int32_t (const char *, IdCategory, int32_t));
-    MOCK_METHOD3(LnnSetDLAuthPort, int32_t (const char *, IdCategory, int32_t));
     MOCK_METHOD0(LnnInitP2p, int32_t ());
     MOCK_METHOD0(LnnDeinitP2p, void ());
     MOCK_METHOD0(LnnInitNetworkInfo, int32_t ());
@@ -239,8 +232,7 @@ public:
     MOCK_METHOD3(LnnNotifyMasterNodeChanged, void (bool, const char*, int32_t));
     MOCK_METHOD0(LnnInitFastOffline, int32_t ());
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
-    MOCK_METHOD1(LnnIsLSANode, bool(const NodeBasicInfo *));
-    MOCK_METHOD3(LnnNotifyNodeAddressChanged, void (const char *, const char *, bool));
+    MOCK_METHOD1(LnnNotifyNodeAddressChanged, void (const char*));
     MOCK_METHOD0(LnnInitOffline, int32_t ());
     MOCK_METHOD0(LnnDeinitOffline, void ());
 

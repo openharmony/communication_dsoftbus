@@ -59,7 +59,6 @@ public:
     virtual int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac) = 0;
     virtual int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
-    virtual bool LnnIsLSANode(const NodeBasicInfo *info) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len) = 0;
     virtual int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability) = 0;
@@ -111,7 +110,6 @@ public:
     MOCK_METHOD2(LnnSetP2pGoMac, int32_t (NodeInfo *, const char *));
     MOCK_METHOD2(LnnGetAllOnlineAndMetaNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
-    MOCK_METHOD1(LnnIsLSANode, bool(const NodeBasicInfo *));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
     MOCK_METHOD4(LnnGetLnnRelation, int32_t(const char *, IdCategory, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnSetDLConnCapability, int32_t (const char *, uint64_t));

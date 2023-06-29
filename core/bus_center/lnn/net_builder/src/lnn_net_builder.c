@@ -153,12 +153,6 @@ typedef struct {
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
 
-void __attribute__((weak)) SfcSyncNodeAddrHandle(const char *networkId, int32_t code)
-{
-    (void)networkId;
-    (void)code;
-}
-
 NO_SANITIZE("cfi") void SetWatchdogFlag(bool flag)
 {
     g_watchdogFlag = flag;
@@ -1788,85 +1782,70 @@ static void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId,
     }
 }
 
-static int32_t LnnUnpackNodeAddr(const uint8_t *data, uint32_t dataLen, LnnNodeAddr *addr)
+static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size)
 {
-    cJSON *json = cJSON_Parse((char *)data);
-    if (json == NULL) {
-        LLOGE("json parse failed");
-        return SOFTBUS_ERR;
-    }
-    if (!GetJsonObjectNumberItem(json, JSON_KEY_NODE_CODE, &addr->code) ||
-        !GetJsonObjectStringItem(json, JSON_KEY_NODE_ADDR, addr->nodeAddr, SHORT_ADDRESS_MAX_LEN) ||
-        !GetJsonObjectNumberItem(json, JSON_KEY_NODE_PROXY_PORT, &addr->proxyPort) ||
-        !GetJsonObjectNumberItem(json, JSON_KEY_NODE_SESSION_PORT, &addr->sessionPort)) {
-        LLOGE("parse addr info failed");
-        cJSON_Delete(json);
-        return SOFTBUS_ERR;
-    }
-
-    cJSON_Delete(json);
-    return SOFTBUS_OK;
-}
-
-static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId,
-    const uint8_t *msg, uint32_t size)
-{
-    if (type != LNN_INFO_TYPE_NODE_ADDR) {
-        return;
-    }
+    (void)type;
     size_t addrLen = strnlen((const char *)msg, size);
     if (addrLen != size - 1 || addrLen == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad addr received!networkId=%s", __func__,
+            AnonymizesNetworkID(networkId));
         return;
     }
-    LLOGI("networkId=%s", AnonymizesNetworkID(networkId));
-
-    LnnNodeAddr addr;
-    (void)memset_s(&addr, sizeof(LnnNodeAddr), 0, sizeof(LnnNodeAddr));
-    if (LnnUnpackNodeAddr(msg, size, &addr) != SOFTBUS_OK) {
-        return;
+    int ret = LnnSetDLNodeAddr(networkId, CATEGORY_NETWORK_ID, (const char *)msg);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:update node addr failed!networkId=%s,ret=%d", __func__,
+            AnonymizesNetworkID(networkId), ret);
     }
-
-    SfcSyncNodeAddrHandle(networkId, addr.code);
-
-    if (LnnSetDLNodeAddr(networkId, CATEGORY_NETWORK_ID, addr.nodeAddr) != SOFTBUS_OK) {
-        return;
-    }
-
-    if (addr.proxyPort > 0) {
-        (void)LnnSetDLProxyPort(networkId, CATEGORY_NETWORK_ID, addr.proxyPort);
-    }
-
-    if (addr.sessionPort > 0) {
-        (void)LnnSetDLSessionPort(networkId, CATEGORY_NETWORK_ID, addr.sessionPort);
-    }
-
-    if (addr.authPort > 0) {
-        (void)LnnSetDLAuthPort(networkId, CATEGORY_NETWORK_ID, addr.authPort);
-    }
-
-    LnnNotifyNodeAddressChanged(addr.nodeAddr, networkId, false);
 }
 
 NO_SANITIZE("cfi") int32_t LnnUpdateNodeAddr(const char *addr)
 {
     if (addr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
-
-    int32_t ret = LnnSetLocalStrInfo(STRING_KEY_NODE_ADDR, addr);
-    if (ret != SOFTBUS_OK) {
-        LLOGE("set local node addr failed");
-        return ret;
-    }
-
+    NodeBasicInfo *info = NULL;
+    int32_t infoNum, i;
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
-    ret = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, sizeof(localNetworkId));
+    char addrHis[SHORT_ADDRESS_MAX_LEN];
+
+    if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, addrHis, SHORT_ADDRESS_MAX_LEN) == SOFTBUS_OK) {
+        if (strlen(addr) == strlen(addrHis) && (strcmp(addr, addrHis) == 0)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s update the same node addr", __func__);
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s start updating node addr", __func__);
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, sizeof(localNetworkId));
     if (ret != SOFTBUS_OK) {
-        LLOGE("get local network id failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get local network id failed!", __func__);
         return SOFTBUS_ERR;
     }
-    LnnNotifyNodeAddressChanged(addr, localNetworkId, true);
 
+    ret = LnnSetLocalStrInfo(STRING_KEY_NODE_ADDR, addr);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:set local node addr failed!ret=%d", __func__, ret);
+        return ret;
+    }
+    ret = LnnGetAllOnlineNodeInfo(&info, &infoNum);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get all online node info fail", __func__);
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s:online nodes count=%d", __func__, infoNum);
+        for (i = 0; i < infoNum; ++i) {
+            if (strcmp(localNetworkId, info[i].networkId) == 0) {
+                continue;
+            }
+            SoftBusLog(
+                SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "sync node address to %s", AnonymizesNetworkID(info[i].networkId));
+            if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_NODE_ADDR, info[i].networkId, (const uint8_t *)addr, strlen(addr) + 1,
+                NULL) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync node address to %s failed",
+                    AnonymizesNetworkID(info[i].networkId));
+            }
+        }
+        SoftBusFree(info);
+    }
+    LnnNotifyNodeAddressChanged(addr);
     return SOFTBUS_OK;
 }
 

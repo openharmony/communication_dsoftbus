@@ -34,7 +34,6 @@ public:
     virtual int32_t MetaNodeServerLeave(const char *networkId) = 0;
     virtual int32_t LnnServerLeave(const char *networkId) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
-    virtual bool LnnIsLSANode(const NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag) = 0;
@@ -80,7 +79,6 @@ public:
     MOCK_METHOD1(LnnServerLeave, int32_t(const char *));
     MOCK_METHOD1(MetaNodeServerLeave, int32_t(const char *));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
-    MOCK_METHOD1(LnnIsLSANode, bool(const NodeBasicInfo *));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnSetNodeDataChangeFlag, int32_t(const char *, uint16_t));

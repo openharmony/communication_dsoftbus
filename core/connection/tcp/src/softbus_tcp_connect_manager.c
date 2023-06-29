@@ -184,8 +184,7 @@ static void DelTcpConnNode(uint32_t connectionId)
     return;
 }
 
-NO_SANITIZE("cfi") static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd,
-    const ConnectOption *clientAddr)
+NO_SANITIZE("cfi") static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0 || clientAddr == NULL) {
         return SOFTBUS_INVALID_PARAM;
