@@ -39,7 +39,6 @@
 #include "trans_channel_limit.h"
 #include "trans_pending_pkt.h"
 #include "softbus_adapter_hitracechain.h"
-#include "lnn_distributed_net_ledger.h"
 
 #define ID_OFFSET (1)
 
@@ -958,13 +957,8 @@ NO_SANITIZE("cfi") int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int3
         return SOFTBUS_ERR;
     }
 
-    bool hasIp = false;
-    if (chan->type == CONNECT_TCP) {
-        hasIp = LnnHasIpByUuid(appInfo->peerData.deviceId);
-    }
-
     if (appInfo->appType != APP_TYPE_AUTH) {
-        chan->authId = AuthGetLatestIdByUuid(appInfo->peerData.deviceId, hasIp, false);
+        chan->authId = AuthGetLatestIdByUuid(appInfo->peerData.deviceId, chan->type == CONNECT_TCP, false);
         if (chan->authId == AUTH_INVALID_ID) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get authId for cipher err");
             return SOFTBUS_ERR;

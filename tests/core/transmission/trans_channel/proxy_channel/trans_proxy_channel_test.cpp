@@ -656,7 +656,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyGetAuthConnInfoTest001, TestSize.Level
 {
     int32_t connId = 1;
     AuthConnInfo connInfo;
-    int32_t ret = TransProxyGetAuthConnInfo(connId, &connInfo, ENCRYPTED);
+    int32_t ret = TransProxyGetAuthConnInfo(connId, &connInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

@@ -31,19 +31,6 @@ typedef enum {
     NODE_TYPE_L
 } NodeType;
 
-#define JSON_KEY_NODE_CODE "NODE_CODE"
-#define JSON_KEY_NODE_ADDR "NODE_ADDR"
-#define JSON_KEY_NODE_PROXY_PORT "PROXY_PORT"
-#define JSON_KEY_NODE_SESSION_PORT "SESSION_PORT"
-
-typedef struct {
-    int32_t code;
-    char nodeAddr[SHORT_ADDRESS_MAX_LEN];
-    int32_t proxyPort;
-    int32_t sessionPort;
-    int32_t authPort;
-} LnnNodeAddr;
-
 typedef struct {
     ListNode node;
     ConnectionAddr addr;

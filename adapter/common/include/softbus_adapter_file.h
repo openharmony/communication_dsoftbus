@@ -47,7 +47,6 @@ extern "C" {
 int32_t SoftBusReadFile(int32_t fd, void *readBuf, uint32_t maxLen);
 int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen);
 int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len);
-int32_t SoftBusWriteFileFd(int32_t fd, const char *writeBuf, uint32_t len);
 int32_t SoftBusOpenFile(const char *fileName, int32_t flags);
 int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t perms);
 void SoftBusRemoveFile(const char *fileName);

@@ -70,7 +70,6 @@ typedef struct {
 } ConnBrTransEventListener;
 
 int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, LimitedBuffer *buffer, uint8_t **outData);
-int32_t BrTransSend(uint32_t connectionId, int32_t socketHandle, uint32_t mtu, const uint8_t *data, uint32_t dataLen);
 int64_t ConnBrPackCtlMessage(BrCtlMessageSerializationContext ctx, uint8_t **outData, uint32_t *outLen);
 int32_t ConnBrPostBytes(
     uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq);

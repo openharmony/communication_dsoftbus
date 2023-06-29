@@ -54,9 +54,6 @@ static int32_t GetNetworkIdByP2pMac(const char *peerMac, char *networkId, int32_
     for (int32_t i = 0; i < num; i++) {
         char p2pMac[MAC_LEN] = {0};
         char *tmpNetworkId = info[i].networkId;
-        if (LnnIsLSANode(&info[i])) {
-            continue;
-        }
         if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_P2P_MAC, p2pMac, sizeof(p2pMac)) != SOFTBUS_OK) {
             continue;
         }
