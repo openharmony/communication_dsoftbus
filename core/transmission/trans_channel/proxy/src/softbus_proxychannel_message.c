@@ -102,7 +102,6 @@ static int32_t GetRemoteBtMacByUdidHash(const char *udidHash, char *brMac, int32
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
-
 }
 
 static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
