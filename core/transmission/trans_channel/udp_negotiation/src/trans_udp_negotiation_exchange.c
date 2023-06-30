@@ -221,6 +221,7 @@ NO_SANITIZE("cfi") int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appI
     (void)AddNumberToJsonObject(msg, "UID", appInfo->myData.uid);
     (void)AddNumberToJsonObject(msg, "PID", appInfo->myData.pid);
     (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", appInfo->businessType);
+    (void)AddNumberToJsonObject(msg, "STREAM_TYPE", appInfo->streamType);
 
     return SOFTBUS_OK;
 }

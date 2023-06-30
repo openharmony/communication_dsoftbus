@@ -21,6 +21,8 @@
 #include "softbus_def.h"
 #include "softbus_log.h"
 
+#define LNN_MAX_PRINT_ADDR_LEN 100
+
 NO_SANITIZE("cfi") bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
 {
     if (addr1 == NULL || addr2 == NULL) {
@@ -181,6 +183,8 @@ NO_SANITIZE("cfi") bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr,
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to connInfo fail");
             return false;
         }
+        connInfo->info.bleInfo.protocol = addr->info.ble.protocol;
+        connInfo->info.bleInfo.psm = addr->info.ble.psm;
         return true;
     }
     if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
@@ -217,6 +221,8 @@ NO_SANITIZE("cfi") bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to addr fail");
             return false;
         }
+        addr->info.ble.protocol = connInfo->info.bleInfo.protocol;
+        addr->info.ble.psm = connInfo->info.bleInfo.psm;
         return true;
     }
     if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
@@ -230,4 +236,38 @@ NO_SANITIZE("cfi") bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", connInfo->type);
     return false;
+}
+
+const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
+{
+    int32_t ret = 0;
+    static char printAddr[LNN_MAX_PRINT_ADDR_LEN] = {0};
+
+    if (addr == NULL) {
+        LLOGE("print connection addr get invalid param");
+        return "Addr=";
+    }
+    switch (addr->type) {
+        case CONNECTION_ADDR_WLAN:
+        case CONNECTION_ADDR_ETH:
+            ret = sprintf_s(printAddr, sizeof(printAddr),
+                "Ip=*.*.*%s", AnonymizesIp(addr->info.ip.ip));
+            break;
+        case CONNECTION_ADDR_BR:
+            ret = sprintf_s(printAddr, sizeof(printAddr),
+                "BrMac=**:**:**:**:%s", AnonymizesMac(addr->info.br.brMac));
+            break;
+        case CONNECTION_ADDR_BLE:
+            ret = sprintf_s(printAddr, sizeof(printAddr),
+                "BleMac=**:**:**:**:%s", AnonymizesMac(addr->info.ble.bleMac));
+            break;
+        default:
+            LLOGW("print invalid connection addr type");
+            return "Addr=";
+    }
+    if (ret < 0) {
+        LLOGE("sprintf_s connection addr failed");
+        return "Addr=";
+    }
+    return printAddr;
 }

@@ -101,7 +101,7 @@ public:
     virtual int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen,
         const char *networkId, int32_t retCode);
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
-    virtual int32_t LnnSendNotTrustedInfo(NotTrustedDelayInfo *info, uint32_t num);
+    virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis);
     virtual SoftBusLooper *GetLooper(int looper);
@@ -136,7 +136,7 @@ public:
     virtual int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
     virtual void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
-    virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target);
+    virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName);
     virtual int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
     virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
     virtual int32_t LnnInitFastOffline(void);
@@ -193,7 +193,7 @@ public:
     MOCK_METHOD2(LnnNotifyLeaveResult, void (const char *, int32_t));
     MOCK_METHOD4(MetaNodeIpcNotifyJoinResult, int32_t (void *, uint32_t, const char *, int32_t));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t (const char *, ConnectionAddrType *));
-    MOCK_METHOD2(LnnSendNotTrustedInfo, int32_t (NotTrustedDelayInfo *, uint32_t));
+    MOCK_METHOD3(LnnSendNotTrustedInfo, int32_t (const NotTrustedDelayInfo *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD1(GetLooper, SoftBusLooper * (int));
     MOCK_METHOD1(ConnDisconnectDeviceAllConn, int32_t (const ConnectOption *));
@@ -227,7 +227,7 @@ public:
     MOCK_METHOD1(LnnSendJoinRequestToConnFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD3(LnnNotifyJoinResult, void (ConnectionAddr *, const char *, int32_t));
     MOCK_METHOD1(LnnDestroyConnectionFsm, void (LnnConnectionFsm *));
-    MOCK_METHOD1(LnnCreateConnectionFsm, LnnConnectionFsm * (const ConnectionAddr *));
+    MOCK_METHOD2(LnnCreateConnectionFsm, LnnConnectionFsm * (const ConnectionAddr *, const char *));
     MOCK_METHOD1(LnnStartConnectionFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD3(LnnNotifyMasterNodeChanged, void (bool, const char*, int32_t));
     MOCK_METHOD0(LnnInitFastOffline, int32_t ());

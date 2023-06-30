@@ -17,12 +17,20 @@
 
 #include <string.h>
 
+#include "bus_center_manager.h"
+#include "lnn_device_info.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define MAX_WEIGHT_VALUE 1000
+#define MAX_WEIGHT_VALUE        1000
+#define BASE_WEIGHT_PHONE_VALUE 2000
+#define BASE_WEIGHT_PAD_VALUE   3000
+#define BASE_WEIGHT_TV_VALUE    8000
+#define BASE_WEIGHT_AUDIO_VALUE 7000
+#define BASE_WEIGHT_CAR_VALUE   5000
+#define BASE_WEIGHT_PC_VALUE    4000
 
 NO_SANITIZE("cfi") int32_t LnnGetLocalWeight(void)
 {
@@ -38,6 +46,33 @@ NO_SANITIZE("cfi") int32_t LnnGetLocalWeight(void)
         return randVal;
     }
     weight = (int32_t)((randVal * MAX_WEIGHT_VALUE) / UINT8_MAX);
+    int32_t localDevTypeId = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
+        localDevTypeId = 0;
+    }
+    switch (localDevTypeId) {
+        case TYPE_PHONE_ID:
+            weight += BASE_WEIGHT_PHONE_VALUE;
+            break;
+        case TYPE_PAD_ID:
+            weight += BASE_WEIGHT_PAD_VALUE;
+            break;
+        case TYPE_TV_ID:
+            weight += BASE_WEIGHT_TV_VALUE;
+            break;
+        case TYPE_AUDIO_ID:
+            weight += BASE_WEIGHT_AUDIO_VALUE;
+            break;
+        case TYPE_CAR_ID:
+            weight += BASE_WEIGHT_CAR_VALUE;
+            break;
+        case TYPE_PC_ID:
+            weight += BASE_WEIGHT_PC_VALUE;
+            break;
+        default:
+            break;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "generate local weight = %d", weight);
     isGenWeight = true;
     return weight;
 }

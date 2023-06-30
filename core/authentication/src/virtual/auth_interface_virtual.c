@@ -136,9 +136,9 @@ int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool is
     return AUTH_INVALID_ID;
 }
 
-int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta)
+int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta)
 {
-    (void)p2pMac;
+    (void)uuid;
     (void)type;
     (void)isServer;
     (void)isMeta;

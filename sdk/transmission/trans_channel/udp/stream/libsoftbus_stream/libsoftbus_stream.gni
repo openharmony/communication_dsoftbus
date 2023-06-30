@@ -26,6 +26,7 @@ enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 libsoftbus_stream_inc = [
   "$libsoftbus_stream_sdk_path/include",
   "//third_party/cJSON",
+  "//third_party/openssl/include",
   "//third_party/bounds_checking_function/include",
 ]
 

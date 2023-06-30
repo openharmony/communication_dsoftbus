@@ -79,7 +79,8 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if ((businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE)) {
+    if ((businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+        (channelType != CHANNEL_TYPE_AUTH)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
@@ -118,7 +119,8 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if ((businessType != BUSINESS_TYPE_MESSAGE) && (businessType != BUSINESS_TYPE_NOT_CARE)) {
+    if ((businessType != BUSINESS_TYPE_MESSAGE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+        (channelType != CHANNEL_TYPE_AUTH)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "BusinessType no match, exp: %d", businessType);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
@@ -210,7 +212,6 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
-
     SoftBusFree(fileSchemaListener);
     return ClientTransChannelSendFile(channelId, type, sFileList, dFileList, fileCnt);
 }

@@ -21,8 +21,8 @@
 #include "auth_hichain.h"
 #include "auth_manager.h"
 #include "auth_session_message.h"
+#include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_hitracechain.h"
 #include "softbus_def.h"
 
 #define AUTH_TIMEOUT_MS (10 * 1000)
@@ -39,13 +39,33 @@ typedef enum {
     FSM_MSG_RECV_DEVICE_ID,
     FSM_MSG_RECV_AUTH_DATA,
     FSM_MSG_SAVE_SESSION_KEY,
-    FSM_MSG_AUTH_RESULT,
+    FSM_MSG_AUTH_ERROR,
     FSM_MSG_RECV_DEVICE_INFO,
     FSM_MSG_RECV_CLOSE_ACK,
+    FSM_MSG_AUTH_FINISH,
     FSM_MSG_AUTH_TIMEOUT,
     FSM_MSG_DEVICE_NOT_TRUSTED,
     FSM_MSG_DEVICE_DISCONNECTED,
+    FSM_MSG_UNKNOWN,
 } StateMessageType;
+typedef struct {
+    StateMessageType type;
+    char *msg;
+} StateMsgMap;
+
+static const StateMsgMap g_StateMsgMap[] = {
+    {FSM_MSG_RECV_DEVICE_ID, (char *)"RECV_DEVICE_ID"},
+    {FSM_MSG_RECV_AUTH_DATA, (char *)"RECV_AUTH_DATA"},
+    {FSM_MSG_SAVE_SESSION_KEY, (char *)"SAVE_SESSION_KEY"},
+    {FSM_MSG_AUTH_ERROR, (char *)"AUTH_ERROR"},
+    {FSM_MSG_RECV_DEVICE_INFO, (char *)"RECV_DEVICE_INFO"},
+    {FSM_MSG_RECV_CLOSE_ACK, (char *)"RECV_CLOSE_ACK"},
+    {FSM_MSG_AUTH_FINISH, (char *)"AUTH_FINISH"},
+    {FSM_MSG_AUTH_TIMEOUT, (char *)"AUTH_TIMEOUT"},
+    {FSM_MSG_DEVICE_NOT_TRUSTED, (char *)"DEVICE_NOT_TRUSTED"},
+    {FSM_MSG_DEVICE_DISCONNECTED, (char *)"DEVICE_DISCONNECTED"},
+    {FSM_MSG_UNKNOWN, (char *)"UNKNOWN MSG!!"},
+};
 
 typedef struct {
     uint32_t len;
@@ -83,6 +103,14 @@ static FsmState g_states[STATE_NUM_MAX] = {
         .exit = NULL,
     },
 };
+
+static char *FsmMsgTypeToStr(int32_t type)
+{
+    if (type < FSM_MSG_RECV_DEVICE_ID || type > FSM_MSG_DEVICE_DISCONNECTED) {
+        return g_StateMsgMap[FSM_MSG_UNKNOWN].msg;
+    }
+    return g_StateMsgMap[type].msg;
+}
 
 static AuthFsm *TranslateToAuthFsm(FsmStateMachine *fsm, int32_t msgType, MessagePara *para)
 {
@@ -129,6 +157,7 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.isServer = isServer;
     authFsm->info.connId = connId;
     authFsm->info.connInfo = *connInfo;
+    authFsm->info.version = SOFTBUS_NEW_V2;
     if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "AuthFsm-%u", authFsm->id) == -1) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "format auth fsm name fail");
         SoftBusFree(authFsm);
@@ -183,7 +212,7 @@ static MessagePara *NewMessagePara(const uint8_t *data, uint32_t len)
         return NULL;
     }
     para->len = len;
-    if (memcpy_s(para->data, len, data, len) != EOK) {
+    if (data != NULL && len > 0 && memcpy_s(para->data, len, data, len) != EOK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy data fail");
         SoftBusFree(para);
         return NULL;
@@ -216,18 +245,18 @@ static SoftBusLinkType ConvertAuthLinkTypeToHisysEvtLinkType(AuthLinkType type)
 
 static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "report auth result evt enter");
+    ALOGI("report auth result evt enter");
     SoftBusLinkType linkType = ConvertAuthLinkTypeToHisysEvtLinkType(authFsm->info.connInfo.type);
     if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         return;
     }
     authFsm->statisticData.endAuthTime = LnnUpTimeMs();
-    int64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
+    uint64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
     AuthFailStage stage;
     switch (result) {
         case SOFTBUS_OK:
-            if (SoftBusRecordAuthResult(linkType, SOFTBUS_OK, (uint64_t)costTime, AUTH_STAGE_BUTT) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "report static auth result fail");
+            if (SoftBusRecordAuthResult(linkType, SOFTBUS_OK, costTime, AUTH_STAGE_BUTT) != SOFTBUS_OK) {
+                ALOGE("report static auth result fail");
             }
             return;
         case SOFTBUS_AUTH_SYNC_DEVID_FAIL:
@@ -246,11 +275,11 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
             stage = AUTH_VERIFY_STAGE;
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unsupport reasn:%d.", result);
+            ALOGE("unsupport reasn:%d.", result);
             return;
     }
     if (SoftBusRecordAuthResult(linkType, SOFTBUS_ERR, costTime, stage) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "report static auth result fail");
+        ALOGE("report static auth result fail");
     }
     SoftBusFaultEvtInfo info;
     (void)memset_s(&info, sizeof(SoftBusFaultEvtInfo), 0, sizeof(SoftBusFaultEvtInfo));
@@ -258,7 +287,7 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
     info.linkType = linkType;
     info.errorCode = result;
     if (SoftBusReportBusCenterFaultEvt(&info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "report buscenter fault evt fail");
+        ALOGE("report buscenter fault evt fail");
     }
 }
 
@@ -267,13 +296,14 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth fsm[%" PRId64 "] complete: side=%s, result=%d",
         authFsm->authSeq, GetAuthSideStr(authFsm->info.isServer), result);
-    LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
     ReportAuthResultEvt(authFsm, result);
     if (result == SOFTBUS_OK) {
-        AuthManagerSetAuthPassed(authFsm->authSeq, &authFsm->info);
+        AuthManagerSetAuthFinished(authFsm->authSeq, &authFsm->info);
     } else {
+        LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
         AuthManagerSetAuthFailed(authFsm->authSeq, &authFsm->info, result);
     }
+
     authFsm->isDead = true;
     LnnFsmStop(&authFsm->fsm);
     LnnFsmDeinit(&authFsm->fsm);
@@ -292,13 +322,18 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED);
             break;
         case FSM_MSG_DEVICE_DISCONNECTED:
+            if (authFsm->info.isNodeInfoReceived && authFsm->info.isCloseAckReceived) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN,
+                    "auth fsm[%" PRId64 "] wait for the finish event, ignore this disconnect event", authFsm->authSeq);
+                break;
+            }
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
                 "auth fsm[%" PRId64 "] cannot handle msg: %d", authFsm->authSeq, msgType);
             break;
-        }
+    }
 }
 
 static void SyncDevIdStateEnter(FsmStateMachine *fsm)
@@ -364,7 +399,7 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "SyncDevIdState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
+        "SyncDevIdState: auth fsm[%" PRId64"] process message: %s", authFsm->authSeq, FsmMsgTypeToStr(msgType));
     switch (msgType) {
         case FSM_MSG_RECV_DEVICE_ID:
             HandleMsgRecvDeviceId(authFsm, msgPara);
@@ -380,25 +415,15 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 
 static void HandleMsgRecvAuthData(AuthFsm *authFsm, MessagePara *para)
 {
-    if (HichainProcessData(authFsm->authSeq, para->data, para->len) != SOFTBUS_OK) {
+    int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len);
+    if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "process hichain data fail.");
-        CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
+        if (!authFsm->info.isAuthFinished) {
+            CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
+        } else {
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "auth has finished, ignore this processing failure.");
+        }
     }
-}
-
-static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
-{
-    SessionKey sessionKey = {.len = para->len};
-    if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), para->data, para->len) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy session key fail.");
-        (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-        return;
-    }
-    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth fsm[%" PRId64 "] save session key fail", authFsm->authSeq);
-    }
-    (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
 }
 
 static int32_t TrySyncDeviceInfo(int64_t authSeq, AuthSessionInfo *info)
@@ -420,28 +445,43 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, AuthSessionInfo *info)
     return SOFTBUS_ERR;
 }
 
-static void HandleMsgAuthResult(AuthFsm *authFsm, MessagePara *para)
+static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
 {
-    int32_t result = *((int32_t *)(para->data));
-    if (result != SOFTBUS_OK) {
-        CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
+    SessionKey sessionKey = {.len = para->len};
+    if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), para->data, para->len) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy session key fail.");
+        (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
         return;
     }
+    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "auth fsm[%" PRId64 "] save session key fail", authFsm->authSeq);
+    }
+    (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+
     if (TrySyncDeviceInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth fsm[%" PRId64 "] sync device info fail", authFsm->authSeq);
+            "auth fsm[%" PRId64"] sync device info fail", authFsm->authSeq);
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
         return;
     }
     if (authFsm->info.deviceInfoData != NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "auth fsm[%" PRId64 "] dispatch device info to next state", authFsm->authSeq);
+            "auth fsm[%" PRId64"] dispatch device info to next state", authFsm->authSeq);
         (void)AuthSessionProcessDevInfoData(authFsm->authSeq,
             authFsm->info.deviceInfoData, authFsm->info.deviceInfoDataLen);
         SoftBusFree(authFsm->info.deviceInfoData);
         authFsm->info.deviceInfoData = NULL;
     }
     LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO);
+}
+
+static void HandleMsgAuthError(AuthFsm *authFsm, MessagePara *para)
+{
+    int32_t result = *((int32_t *)(para->data));
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+        "auth fsm[%" PRId64"] handle hichain error, reason = %d", authFsm->authSeq, result);
+    CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
 
 static void HandleMsgRecvDevInfoEarly(AuthFsm *authFsm, MessagePara *para)
@@ -461,6 +501,28 @@ static void HandleMsgRecvDevInfoEarly(AuthFsm *authFsm, MessagePara *para)
     info->deviceInfoDataLen = para->len;
 }
 
+static void TryFinishAuthSession(AuthFsm *authFsm)
+{
+    AuthSessionInfo *info = &authFsm->info;
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "auth fsm[%" PRId64"] Try finish auth session, devInfo|closeAck|authFinish=%d|%d|%d",
+        authFsm->authSeq, info->isNodeInfoReceived, info->isCloseAckReceived, info->isAuthFinished);
+    if (info->isNodeInfoReceived && info->isCloseAckReceived && info->isAuthFinished) {
+        CompleteAuthSession(authFsm, SOFTBUS_OK);
+    }
+}
+
+static void HandleMsgAuthFinish(AuthFsm *authFsm, MessagePara *para)
+{
+    (void)para;
+    AuthSessionInfo *info = &authFsm->info;
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "auth fsm[%" PRId64"] hichain finished, devInfo|closeAck=%d|%d",
+        authFsm->authSeq, info->isNodeInfoReceived, info->isCloseAckReceived);
+    info->isAuthFinished = true;
+    TryFinishAuthSession(authFsm);
+}
+
 static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     MessagePara *msgPara = (MessagePara *)para;
@@ -471,7 +533,7 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "DeviceAuthState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
+        "DeviceAuthState: auth fsm[%" PRId64"] process message: %s", authFsm->authSeq, FsmMsgTypeToStr(msgType));
     switch (msgType) {
         case FSM_MSG_RECV_AUTH_DATA:
             HandleMsgRecvAuthData(authFsm, msgPara);
@@ -479,11 +541,14 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
         case FSM_MSG_SAVE_SESSION_KEY:
             HandleMsgSaveSessionKey(authFsm, msgPara);
             break;
-        case FSM_MSG_AUTH_RESULT:
-            HandleMsgAuthResult(authFsm, msgPara);
+        case FSM_MSG_AUTH_ERROR:
+            HandleMsgAuthError(authFsm, msgPara);
             break;
         case FSM_MSG_RECV_DEVICE_INFO:
             HandleMsgRecvDevInfoEarly(authFsm, msgPara);
+            break;
+        case FSM_MSG_AUTH_FINISH:
+            HandleMsgAuthFinish(authFsm, msgPara);
             break;
         default:
             HandleCommonMsg(authFsm, msgType, msgPara);
@@ -505,8 +570,11 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
     info->isNodeInfoReceived = true;
 
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
+        info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {
-            CompleteAuthSession(authFsm, SOFTBUS_OK);
+            LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
+            AuthManagerSetAuthPassed(authFsm->authSeq, info);
+            TryFinishAuthSession(authFsm);
             return;
         }
         /* WIFI: server should response device info */
@@ -515,7 +583,9 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVINFO_FAIL);
             return;
         }
-        CompleteAuthSession(authFsm, SOFTBUS_OK);
+        LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
+        AuthManagerSetAuthPassed(authFsm->authSeq, info);
+        TryFinishAuthSession(authFsm);
         return;
     }
 
@@ -525,7 +595,9 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
         return;
     }
     if (info->isCloseAckReceived) {
-        CompleteAuthSession(authFsm, SOFTBUS_OK);
+        LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
+        AuthManagerSetAuthPassed(authFsm->authSeq, info);
+        TryFinishAuthSession(authFsm);
     }
 }
 
@@ -535,12 +607,14 @@ static void HandleMsgRecvCloseAck(AuthFsm *authFsm, MessagePara *para)
     AuthSessionInfo *info = &authFsm->info;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "auth fsm[%" PRId64 "] recv close ack, isNodeInfoReceived=%d", authFsm->authSeq, info->isNodeInfoReceived);
+    info->isCloseAckReceived = true;
     if (info->isNodeInfoReceived) {
-        CompleteAuthSession(authFsm, SOFTBUS_OK);
+        LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
+        AuthManagerSetAuthPassed(authFsm->authSeq, info);
     } else {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "close ack received before device info");
-        info->isCloseAckReceived = true;
     }
+    TryFinishAuthSession(authFsm);
 }
 
 static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
@@ -553,13 +627,19 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "SyncDevInfoState: auth fsm[%" PRId64 "] process message: %d", authFsm->authSeq, msgType);
+        "SyncDevInfoState: auth fsm[%" PRId64"] process message: %s", authFsm->authSeq, FsmMsgTypeToStr(msgType));
     switch (msgType) {
         case FSM_MSG_RECV_DEVICE_INFO:
             HandleMsgRecvDeviceInfo(authFsm, msgPara);
             break;
         case FSM_MSG_RECV_CLOSE_ACK:
             HandleMsgRecvCloseAck(authFsm, msgPara);
+            break;
+        case FSM_MSG_RECV_AUTH_DATA:
+            HandleMsgRecvAuthData(authFsm, msgPara);
+            break;
+        case FSM_MSG_AUTH_FINISH:
+            HandleMsgAuthFinish(authFsm, msgPara);
             break;
         default:
             HandleCommonMsg(authFsm, msgType, msgPara);
@@ -570,7 +650,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
     return true;
 }
 
-static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
+AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
@@ -588,7 +668,7 @@ static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
     return NULL;
 }
 
-static AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer)
+AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
@@ -759,9 +839,14 @@ NO_SANITIZE("cfi") int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint
     return PostMessageToAuthFsm(FSM_MSG_SAVE_SESSION_KEY, authSeq, key, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionHandleAuthResult(int64_t authSeq, int32_t reason)
+NO_SANITIZE("cfi") int32_t AuthSessionHandleAuthFinish(int64_t authSeq)
 {
-    return PostMessageToAuthFsm(FSM_MSG_AUTH_RESULT, authSeq, (uint8_t *)&reason, sizeof(reason));
+    return PostMessageToAuthFsm(FSM_MSG_AUTH_FINISH, authSeq, NULL, 0);
+}
+
+NO_SANITIZE("cfi") int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason)
+{
+    return PostMessageToAuthFsm(FSM_MSG_AUTH_ERROR, authSeq, (uint8_t *)&reason, sizeof(reason));
 }
 
 NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)

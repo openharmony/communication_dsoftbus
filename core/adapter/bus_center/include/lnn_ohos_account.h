@@ -16,6 +16,7 @@
 #define LNN_OHOS_ACCOUNT_H
 
 #include <stdint.h>
+#include "lnn_ohos_account_adapter.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +24,8 @@ extern "C" {
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len);
 int32_t LnnInitOhosAccount(void);
-void LnnOnOhosAccountChanged(void);
+void LnnUpdateOhosAccount(void);
+void LnnOnOhosAccountLogout(void);
 bool LnnIsDefaultOhosAccount(void);
 
 #ifdef __cplusplus

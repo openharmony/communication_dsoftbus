@@ -53,7 +53,7 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify common event %s", action.c_str());
 
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
-        LnnOnOhosAccountChanged();
+        LnnUpdateOhosAccount();
     }
 
     SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;

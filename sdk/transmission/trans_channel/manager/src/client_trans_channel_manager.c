@@ -37,7 +37,7 @@ int32_t ClientTransChannelInit(void)
     if (ClientTransAuthInit(cb) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (ClinetTransProxyInit(cb) != SOFTBUS_OK) {
+    if (ClientTransProxyInit(cb) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     if (ClientTransUdpMgrInit(cb) != SOFTBUS_OK) {

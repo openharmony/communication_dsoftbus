@@ -25,28 +25,27 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#define FAST_EXT_BYTE_SIZE (OVERHEAD_LEN + sizeof(PacketFastHead) + sizeof(SliceFastHead) + sizeof(SessionHead))
+#define FAST_EXT_MSG_SIZE (OVERHEAD_LEN + sizeof(PacketFastHead) + sizeof(SliceFastHead))
 
 int32_t TransProxyManagerInit(const IServerChannelCallBack *cb);
 void TransProxyManagerDeinit(void);
 
-int32_t TransProxyAuthSessionDataLenCheck(uint32_t dataLen, int32_t type);
-
 int32_t TransProxyGetNewChanSeq(int32_t channelId);
-int32_t TransProxyOpenProxyChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
+int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 int32_t TransProxyCloseProxyChannel(int32_t channelId);
-int32_t TransProxySendMsg(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority);
 
 void TransProxyDelByConnId(uint32_t connId);
 void TransProxyDelChanByReqId(int32_t reqId);
 void TransProxyDelChanByChanId(int32_t chanlId);
+int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan);
+int32_t TransProxyGetChanByReqId(int32_t reqId, ProxyChannelInfo *chan);
 
 void TransProxyOpenProxyChannelSuccess(int32_t chanId);
 void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode);
 void TransProxyonMessageReceived(const ProxyMessage *msg);
 
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize);
-int16_t TransProxyGetNewMyId(void);
 int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo);
 
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo);
@@ -55,6 +54,8 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId);
 int64_t TransProxyGetAuthId(int32_t channelId);
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen);
+
+int32_t TransRefreshProxyTimesNative(int channelId);
 
 void TransProxyDeathCallback(const char *pkgName, int32_t pid);
 
@@ -67,6 +68,5 @@ int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity);
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif

@@ -163,6 +163,10 @@ NO_SANITIZE("cfi") int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
 int32_t LnnInitDeviceNameMonitorImpl(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (looper == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "looper is null");
+        return SOFTBUS_ERR;
+    }
     int32_t ret = LnnAsyncCallbackDelayHelper(looper, UpdateDeviceName, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init DeviceName LnnAsyncCallbackDelayHelper fail");

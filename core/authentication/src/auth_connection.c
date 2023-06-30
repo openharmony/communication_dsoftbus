@@ -19,14 +19,17 @@
 
 #include "auth_common.h"
 #include "auth_tcp_connection.h"
+#include "lnn_async_callback_utils.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 
-#define AUTH_CONN_DATA_HEAD_SIZE     24
-#define AUTH_CONN_CONNECT_TIMEOUT_MS 10000
+#define AUTH_CONN_DATA_HEAD_SIZE           24
+#define AUTH_CONN_CONNECT_TIMEOUT_MS       10000
+#define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY 1000
 
 typedef struct {
     uint32_t requestId;
@@ -172,7 +175,8 @@ NO_SANITIZE("cfi") uint32_t GetAuthDataSize(uint32_t len)
     return AUTH_CONN_DATA_HEAD_SIZE + len;
 }
 
-NO_SANITIZE("cfi") int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data, uint8_t *buf, uint32_t size)
+NO_SANITIZE("cfi") int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
+    uint8_t *buf, uint32_t size)
 {
     if (size < GetAuthDataSize(head->len)) {
         return SOFTBUS_NO_ENOUGH_DATA;
@@ -384,6 +388,43 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
     NotifyDataReceived(GenConnId(connInfo.type, connectionId), &connInfo, fromServer, &head, body);
 }
 
+static void AsyncCallDeviceIdReceived(void *para)
+{
+    RepeatDeviceIdData *recvData = (RepeatDeviceIdData *)para;
+    if (recvData == NULL) {
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "Delay handle RecvCommData: connectionId=%u, len=%d, from=%s.", recvData->connId, recvData->len,
+        GetAuthSideStr(recvData->fromServer));
+    NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
+    SoftBusFree(para);
+}
+
+void HandleRepeatDeviceIdDataDelay(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
+    const AuthDataHead *head, const uint8_t *data)
+{
+    RepeatDeviceIdData *request = (RepeatDeviceIdData *)SoftBusCalloc(sizeof(RepeatDeviceIdData) + head->len);
+    if (request == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc RepeatDeviceIdData fail");
+        return;
+    }
+    request->len = head->len;
+    if (data != NULL && head->len > 0 && memcpy_s(request->data, head->len, data, head->len) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy data fail");
+        SoftBusFree(request);
+        return;
+    }
+    request->connId = connId;
+    request->connInfo = *connInfo;
+    request->fromServer = fromServer;
+    request->head = *head;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), AsyncCallDeviceIdReceived, request,
+        AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY) != SOFTBUS_OK) {
+        SoftBusFree(request);
+    }
+}
+
 static int32_t InitCommConn(void)
 {
     ConnectCallback connCb = {
@@ -493,11 +534,11 @@ NO_SANITIZE("cfi") void AuthConnDeinit(void)
 
 NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
-    int32_t ret;
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "ConnectDevice: requestId=%u, connType=%d, sideType=%d.", requestId,
         connInfo->type, sideType);
     PostConnConnectTimeout(requestId);
+    int32_t ret = 0;
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI: {
             ConnCmdInfo info = {
@@ -509,6 +550,10 @@ NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnI
         }
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
+            if (SoftBusGetBtState() != BLE_ENABLE) {
+                ret = SOFTBUS_AUTH_CONN_FAIL;
+                break;
+            }
         case AUTH_LINK_TYPE_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
@@ -549,8 +594,8 @@ NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)
             break;
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
-        case AUTH_LINK_TYPE_P2P:
             ConnDisconnectDevice(GetConnId(connId));
+        case AUTH_LINK_TYPE_P2P:
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "unknown connType.");

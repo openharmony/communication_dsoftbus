@@ -101,11 +101,11 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
 {
     return HeartBeatFSMInterfaceInstance()->LnnRequestLeaveSpecific(networkId, addrType);
 }
-int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatCustSendData *custData)
+int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData)
 {
     return HeartBeatFSMInterfaceInstance()->LnnHbMediumMgrSendBegin(custData);
 }
-int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatType *type)
+int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *type)
 {
     return HeartBeatFSMInterfaceInstance()->LnnHbMediumMgrSendEnd(type);
 }

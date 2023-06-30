@@ -15,6 +15,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 bus_center_ledger_src = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_device_info.c",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_huks_utils.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_net_capability.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_net_ledger.c",

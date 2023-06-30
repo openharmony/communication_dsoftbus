@@ -141,25 +141,6 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
 }
 
 /*
- * @tc.name: AUTH_HICHAIN_GET_JOINED_GROUPS_Test_001
- * @tc.desc: hichain get joined group
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_GET_JOINED_GROUPS_Test_001, TestSize.Level1)
-{
-    LnnHichainInterfaceMock hichainMock;
-    DeviceGroupManager groupManager;
-    EXPECT_CALL(hichainMock, GetGmInstance()).WillOnce(ReturnNull()).WillOnce(ReturnNull());
-    EXPECT_TRUE(!AuthHasTrustedRelation());
-    groupManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups1;
-    EXPECT_CALL(hichainMock, GetGmInstance()).WillRepeatedly(Return(&groupManager));
-    EXPECT_TRUE(AuthHasTrustedRelation());
-    groupManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups2;
-    EXPECT_TRUE(!AuthHasTrustedRelation());
-}
-
-/*
  * @tc.name: AUTH_INIT_Test_001
  * @tc.desc: auth init
  * @tc.type: FUNC

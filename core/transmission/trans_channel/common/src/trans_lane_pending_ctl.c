@@ -16,7 +16,6 @@
 #include "trans_lane_pending_ctl.h"
 
 #include <securec.h>
-#include <unistd.h>
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
@@ -30,6 +29,8 @@
 #include "trans_session_manager.h"
 
 #define TRANS_REQUEST_PENDING_TIMEOUT (5000)
+#define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
+#define SESSION_NAME_CASTPLUS "CastPlusSessionName"
 
 typedef struct {
     ListNode node;
@@ -271,27 +272,25 @@ NO_SANITIZE("cfi") LaneTransType TransGetLaneTransTypeBySession(const SessionPar
     return LANE_T_BUTT;
 }
 
+static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
+    LANE_LINK_TYPE_BUTT,
+    LANE_WLAN_5G,
+    LANE_WLAN_2P4G,
+    LANE_P2P,
+    LANE_BR,
+    LANE_BLE,
+    LANE_P2P_REUSE,
+    LANE_BLE_DIRECT,
+    LANE_COC,
+    LANE_COC_DIRECT,
+};
 static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 {
-    switch (type) {
-        case LINK_TYPE_WIFI_WLAN_5G:
-            return LANE_WLAN_5G;
-        case LINK_TYPE_WIFI_WLAN_2G:
-            return LANE_WLAN_2P4G;
-        case LINK_TYPE_WIFI_P2P:
-            return LANE_P2P;
-        case LINK_TYPE_BR:
-            return LANE_BR;
-        case LINK_TYPE_BLE:
-            return LANE_BLE;
-        default:
-            break;
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session invalid link type[%d].", type);
-    return LANE_LINK_TYPE_BUTT;
+    return g_laneMap[type];
 }
 
-static void TransformSessionPreferredToLanePreferred(const SessionParam *param, LanePreferredLinkList *preferred)
+static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
+    LanePreferredLinkList *preferred, TransOption *transOption)
 {
     if (param->attr->linkTypeNum <= 0 || param->attr->linkTypeNum > LINK_TYPE_MAX) {
         preferred->linkTypeNum = 0;
@@ -303,12 +302,20 @@ static void TransformSessionPreferredToLanePreferred(const SessionParam *param, 
         if (linkType == LANE_LINK_TYPE_BUTT) {
             continue;
         }
+        if (linkType == LANE_BLE) {
+            (void)memcpy_s(transOption->peerBleMac, MAX_MAC_LEN, param->attr->attr.peerBleMac.bleMac, MAX_MAC_LEN);
+        }
+        if (linkType == LANE_COC) {
+            (void)memcpy_s(transOption->peerBleMac, MAX_MAC_LEN, param->attr->attr.peerBleMac.bleMac, MAX_MAC_LEN);
+            transOption->psm = param->attr->attr.peerBleMac.psm;
+        }
         if (preferred->linkTypeNum >= LINK_TYPE_MAX) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "session preferred linknum too much: %d.", preferred->linkTypeNum);
+                "session preferred linknum override lane maxcnt:%d.", LANE_LINK_TYPE_BUTT);
             break;
         }
         preferred->linkType[preferred->linkTypeNum] = linkType;
+        preferred->isReuse[preferred->linkTypeNum] = param->isLinkTypeReuse[i];
         preferred->linkTypeNum += 1;
     }
     return;
@@ -321,13 +328,17 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
         param->peerDeviceId, NETWORK_ID_BUF_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy networkId failed.");
         return SOFTBUS_ERR;
-        }
+    }
 
     LaneTransType transType = TransGetLaneTransTypeBySession(param);
     if (transType == LANE_T_BUTT) {
         return SOFTBUS_ERR;
     }
-
+    requestOption->requestInfo.trans.networkDelegate = false;
+    if (strcmp(param->sessionName, SESSION_NAME_PHONEPAD) == 0 ||
+        strcmp(param->sessionName, SESSION_NAME_CASTPLUS) == 0) {
+        requestOption->requestInfo.trans.networkDelegate = true;
+    }
     requestOption->requestInfo.trans.transType = transType;
     requestOption->requestInfo.trans.expectedBw = 0; /* init expectBW */
     int32_t uid;
@@ -336,7 +347,8 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
         return SOFTBUS_ERR;
     }
 
-    TransformSessionPreferredToLanePreferred(param, &(requestOption->requestInfo.trans.expectedLink));
+    TransformSessionPreferredToLanePreferred(param, &(requestOption->requestInfo.trans.expectedLink),
+        &requestOption->requestInfo.trans);
     return SOFTBUS_OK;
 }
 
@@ -495,6 +507,17 @@ static int32_t SetP2pConnInfo(const P2pConnInfo *p2pInfo, ConnectOption *connOpt
     connOpt->socketOption.port = -1;
     return SOFTBUS_OK;
 }
+static int32_t SetP2pReusesConnInfo(const WlanConnInfo *connInfo, ConnectOption *connOpt)
+{
+    connOpt->type = CONNECT_P2P_REUSE;
+    connOpt->socketOption.port = (int32_t)connInfo->port;
+    connOpt->socketOption.protocol = connInfo->protocol;
+    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), connInfo->addr) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set wlan localIp err");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 static int32_t SetWlanConnInfo(const WlanConnInfo *connInfo, ConnectOption *connOpt)
 {
@@ -528,24 +551,42 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set ble mac err");
         return SOFTBUS_ERR;
     }
-
+    connOpt->bleOption.protocol = BLE_GATT;
     return SOFTBUS_OK;
 }
 
-static int32_t SetBleDirectConnInfo(const BleDirectConnInfo *bleInfo, ConnectOption *connOpt)
+static int32_t SetBleDirectConnInfo(const BleDirectConnInfo* bleDirect, ConnectOption *connOpt)
 {
-    connOpt->type = CONNECT_BLE_DIRECT;
-    connOpt->bleDirectOption.protoType = bleInfo->protoType;
-    connOpt->bleDirectOption.psm = bleInfo->psm;
-    (void)memcpy_s(connOpt->bleDirectOption.nodeIdHash, NODEID_SHORT_HASH_LEN,
-        bleInfo->nodeIdHash, NODEID_SHORT_HASH_LEN);
-    (void)memcpy_s(connOpt->bleDirectOption.localUdidHash, UDID_SHORT_HASH_LEN,
-        bleInfo->localUdidHash, UDID_SHORT_HASH_LEN);
-    (void)memcpy_s(connOpt->bleDirectOption.peerUdidHash, SHA_256_HASH_LEN,
-        bleInfo->peerUdidHash, SHA_256_HASH_LEN);
+    if (memcpy_s(connOpt->bleDirectOption.nodeIdHash, NODEID_SHORT_HASH_LEN,
+        bleDirect->nodeIdHash, NODEID_SHORT_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(connOpt->bleDirectOption.localUdidHash, UDID_SHORT_HASH_LEN,
+        bleDirect->localUdidHash, UDID_SHORT_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(connOpt->bleDirectOption.peerUdidHash, SHA_256_HASH_LEN,
+        bleDirect->peerUdidHash, SHA_256_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
 
+    connOpt->type = CONNECT_BLE_DIRECT;
+    connOpt->bleDirectOption.protoType = bleDirect->protoType;
     return SOFTBUS_OK;
 }
+
+static int32_t SetCocConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt)
+{
+    connOpt->type = CONNECT_BLE;
+    if (strcpy_s(connOpt->bleOption.bleMac, sizeof(connOpt->bleOption.bleMac), bleInfo->bleMac) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set ble mac err");
+        return SOFTBUS_ERR;
+    }
+    connOpt->bleOption.protocol = BLE_COC;
+    connOpt->bleOption.psm = bleInfo->psm;
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
     if (info == NULL || connOpt == NULL) {
@@ -560,9 +601,14 @@ NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info
         return SetBrConnInfo(&(info->connInfo.br), connOpt);
     } else if (info->type == LANE_BLE) {
         return SetBleConnInfo(&(info->connInfo.ble), connOpt);
-    } else if (info->type == LANE_BLE_DIRECT) {
+    } else if (info->type == LANE_P2P_REUSE) {
+        return SetP2pReusesConnInfo(&(info->connInfo.wlan), connOpt);
+    } else if (info->type == LANE_BLE_DIRECT || info->type == LANE_COC_DIRECT) {
         return SetBleDirectConnInfo(&(info->connInfo.bleDirect), connOpt);
+    } else if (info->type == LANE_COC) {
+        return SetCocConnInfo(&(info->connInfo.ble), connOpt);
     }
+
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get conn opt err: type=%d", info->type);
     return SOFTBUS_ERR;
 }

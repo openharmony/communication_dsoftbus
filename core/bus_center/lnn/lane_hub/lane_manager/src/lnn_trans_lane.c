@@ -27,12 +27,12 @@
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
 #include "message_handler.h"
-#include "p2plink_interface.h"
+#include "wifi_direct_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
@@ -46,7 +46,7 @@ typedef struct {
     uint32_t laneId;
     TransOption info;
     LaneLinkType type;
-    char peerMac[P2P_MAC_LEN];
+    char p2pMac[MAC_ADDR_STR_LEN];
     ILaneListener listener;
 } TransReqInfo;
 
@@ -58,12 +58,15 @@ typedef struct {
 typedef struct {
     ListNode node;
     uint32_t laneId;
-    char networkId[NETWORK_ID_BUF_LEN];
     int32_t pid;
+    char networkId[NETWORK_ID_BUF_LEN];
+    char peerBleMac[MAX_MAC_LEN];
+    int32_t psm;
     LaneTransType transType;
-    LaneLinkType *linkList; /* Mem provided by laneSelect module */
+    LanePreferredLinkList *linkList; /* Mem provided by laneSelect module */
     uint32_t listNum;
     uint32_t linkRetryIdx;
+    bool networkDelegate;
 } LaneLinkNodeInfo;
 
 static ListNode g_multiLinkList;
@@ -82,8 +85,7 @@ static void Unlock(void)
     (void)SoftBusMutexUnlock(&g_transLaneMutex);
 }
 
-NO_SANITIZE("cfi") static int32_t PostMsgToHandler(int32_t msgType,
-    uint64_t param1, uint64_t param2, void *obj)
+NO_SANITIZE("cfi") static int32_t PostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2, void *obj)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
@@ -103,6 +105,7 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
 {
     if (linkInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "linkSuccess param invalid");
+        return;
     }
     LaneLinkInfo *linkParam = (LaneLinkInfo *)SoftBusCalloc(sizeof(LaneLinkInfo));
     if (linkParam == NULL) {
@@ -141,7 +144,8 @@ static void DeleteLaneLinkNode(uint32_t laneId)
         return;
     }
     LaneLinkNodeInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_multiLinkList, LaneLinkNodeInfo, node) {
+    LaneLinkNodeInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_multiLinkList, LaneLinkNodeInfo, node) {
         if (item->laneId == laneId) {
             ListDelete(&item->node);
             SoftBusFree(item->linkList);
@@ -153,7 +157,7 @@ static void DeleteLaneLinkNode(uint32_t laneId)
 }
 
 static int32_t TriggerLink(uint32_t laneId, TransOption *request,
-    LaneLinkType *recommendLinkList, uint32_t listNum)
+    LanePreferredLinkList *recommendLinkList, uint32_t listNum)
 {
     LaneLinkNodeInfo *linkNode = (LaneLinkNodeInfo *)SoftBusCalloc(sizeof(LaneLinkNodeInfo));
     if (linkNode == NULL) {
@@ -164,12 +168,15 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
         SoftBusFree(linkNode);
         return SOFTBUS_MEM_ERR;
     }
+    (void)memcpy_s(linkNode->peerBleMac, MAX_MAC_LEN, request->peerBleMac, MAX_MAC_LEN);
+    linkNode->psm = request->psm;
     linkNode->laneId = laneId;
     linkNode->linkRetryIdx = 0;
     linkNode->listNum = listNum;
     linkNode->linkList = recommendLinkList;
     linkNode->transType = request->transType;
     linkNode->pid = request->pid;
+    linkNode->networkDelegate = request->networkDelegate;
     ListInit(&linkNode->node);
     if (Lock() != SOFTBUS_OK) {
         SoftBusFree(linkNode);
@@ -184,8 +191,7 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
     return SOFTBUS_OK;
 }
 
-static TransReqInfo *CreateRequestNode(uint32_t laneId,
-    const TransOption *option, const ILaneListener *listener)
+static TransReqInfo *CreateRequestNode(uint32_t laneId, const TransOption *option, const ILaneListener *listener)
 {
     TransReqInfo *newNode = (TransReqInfo *)SoftBusCalloc(sizeof(TransReqInfo));
     if (newNode == NULL) {
@@ -210,11 +216,12 @@ static void DeleteRequestNode(uint32_t laneId)
     if (Lock() != SOFTBUS_OK) {
         return;
     }
-    TransReqInfo *infoNode = NULL;
-    LIST_FOR_EACH_ENTRY(infoNode, &g_requestList->list, TransReqInfo, node) {
-        if (infoNode->laneId == laneId) {
-            ListDelete(&infoNode->node);
-            SoftBusFree(infoNode);
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneId == laneId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
             g_requestList->cnt--;
             break;
         }
@@ -237,13 +244,13 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
-    LaneLinkType *recommendLinkList = NULL;
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    recommendLinkList->linkTypeNum = 0;
     uint32_t listNum = 0;
-    if (SelectLane((const char *)transRequest->networkId, &selectParam,
-        &recommendLinkList, &listNum) != SOFTBUS_OK) {
+    if (SelectLane((const char *)transRequest->networkId, &selectParam, recommendLinkList, &listNum) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (recommendLinkList == NULL) {
+    if (recommendLinkList->linkTypeNum == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no link resources available, alloc fail");
         return SOFTBUS_ERR;
     }
@@ -285,16 +292,16 @@ static int32_t Free(uint32_t laneId)
     if (Lock() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    TransReqInfo *infoNode = NULL;
-    LIST_FOR_EACH_ENTRY(infoNode, &g_requestList->list, TransReqInfo, node) {
-        if (infoNode->laneId == laneId) {
-            ListDelete(&infoNode->node);
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneId == laneId) {
+            ListDelete(&item->node);
             g_requestList->cnt--;
             Unlock();
-            DestroyLink(laneId, infoNode->type, infoNode->info.pid,
-                infoNode->peerMac, infoNode->info.networkId);
-            UnbindLaneId(laneId, infoNode);
-            SoftBusFree(infoNode);
+            DestroyLink(item->info.networkId, laneId, item->type, item->info.pid);
+            UnbindLaneId(laneId, item);
+            SoftBusFree(item);
             return SOFTBUS_OK;
         }
     }
@@ -334,7 +341,7 @@ static void UpdateP2pInfo(TransReqInfo *nodeInfo)
         return;
     }
     if (LnnGetRemoteStrInfo(nodeInfo->info.networkId, STRING_KEY_P2P_MAC,
-        nodeInfo->peerMac, P2P_MAC_LEN) != SOFTBUS_OK) {
+        nodeInfo->p2pMac, MAC_ADDR_STR_LEN) != SOFTBUS_OK) {
         LLOGE("get remote p2p mac fail.");
         return;
     }
@@ -397,10 +404,12 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocFail(uint32_t laneId, int32_t reas
         return;
     }
     TransReqInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == laneId) {
             ListDelete(&item->node);
             SoftBusFree(item);
+            g_requestList->cnt--;
             break;
         }
     }
@@ -440,7 +449,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         .OnLaneLinkFail = LinkFail,
         .OnLaneLinkException = LinkException,
     };
-    LinkRequest requestInfo;
+    LinkRequest requestInfo = { 0 };
     if (Lock() != SOFTBUS_OK) {
         return;
     }
@@ -454,15 +463,22 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         Unlock();
         return;
     }
-    requestInfo.linkType = nodeInfo->linkList[nodeInfo->linkRetryIdx];
+    requestInfo.networkDelegate = nodeInfo->networkDelegate;
+    requestInfo.linkType = nodeInfo->linkList->linkType[nodeInfo->linkRetryIdx];
+    requestInfo.isReuse = nodeInfo->linkList->isReuse[nodeInfo->linkRetryIdx];
     nodeInfo->linkRetryIdx++;
+    Unlock();
     requestInfo.pid = nodeInfo->pid;
     requestInfo.transType = nodeInfo->transType;
-    Unlock();
     if (memcpy_s(requestInfo.peerNetworkId, sizeof(requestInfo.peerNetworkId),
         nodeInfo->networkId, sizeof(nodeInfo->networkId)) != EOK) {
         return;
     }
+    if (memcpy_s(requestInfo.peerBleMac, sizeof(requestInfo.peerBleMac),
+        nodeInfo->peerBleMac, sizeof(nodeInfo->peerBleMac)) != EOK) {
+        return;
+    }
+    requestInfo.psm = nodeInfo->psm;
     int32_t ret = BuildLink(&requestInfo, laneId, &linkCb);
     if (ret == SOFTBUS_OK) {
         return;

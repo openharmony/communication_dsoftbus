@@ -20,10 +20,14 @@
 #include "stdint.h"
 #include "stdio.h"
 
+#ifdef _WIN32
+#include "intrin.h"
+#endif
+
 static inline void SoftBusAtomicAdd32(volatile uint32_t* ptr, int32_t value)
 {
 #ifdef _WIN32
-    InterlockedExchangeAdd(ptr, value);
+    _InterlockedExchangeAdd(ptr, value);
 #elif defined __ICCARM__
     return;
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
@@ -34,7 +38,7 @@ static inline void SoftBusAtomicAdd32(volatile uint32_t* ptr, int32_t value)
 static inline uint32_t SoftBusAtomicAddAndFetch32(volatile uint32_t* ptr, int32_t value)
 {
 #ifdef _WIN32
-    return InterlockedExchangeAdd(ptr, value) + value;
+    return _InterlockedExchangeAdd(ptr, value) + value;
 #elif defined __ICCARM__
     return -1;
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
@@ -47,7 +51,7 @@ static inline uint32_t SoftBusAtomicAddAndFetch32(volatile uint32_t* ptr, int32_
 static inline void SoftBusAtomicAdd64(uint64_t* ptr, int64_t value)
 {
 #ifdef _WIN32
-    InterlockedExchangeAdd64((volatile long long*)ptr, value);
+    _InterlockedExchangeAdd64((volatile long long*)ptr, value);
 #elif defined __ICCARM__
     return;
 #elif defined __linux__ || defined __LITEOS__ || defined __APPLE__
@@ -58,7 +62,7 @@ static inline void SoftBusAtomicAdd64(uint64_t* ptr, int64_t value)
 static inline bool SoftBusAtomicCmpAndSwap32(volatile uint32_t* ptr, int32_t oldValue, int32_t newValue)
 {
 #ifdef _WIN32
-    uint32_t initial = InterlockedCompareExchange(ptr, newValue, oldValue);
+    uint32_t initial = _InterlockedCompareExchange(ptr, newValue, oldValue);
     return initial == oldValue;
 #elif defined __ICCARM__
     return false;

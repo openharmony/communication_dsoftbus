@@ -27,6 +27,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
+#include "client_trans_session_manager.h"
 
 static SoftBusList *g_udpChannelMgr = NULL;
 static IClientSessionCallBack *g_sessionCb = NULL;
@@ -334,7 +335,7 @@ NO_SANITIZE("cfi") static int32_t CloseUdpChannel(int32_t channelId, bool isActi
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseUdpChannel del business channel=%d failed.", channelId);
         return SOFTBUS_ERR;
     }
-    
+
     if (!isActive && (g_sessionCb != NULL) && (g_sessionCb->OnSessionClosed != NULL)) {
         g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP);
     }

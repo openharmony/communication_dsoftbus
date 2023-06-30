@@ -28,7 +28,6 @@
 #include <linux/rtnetlink.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
-#include <unistd.h>
 
 #include "bus_center_event.h"
 #include "lnn_network_manager.h"
@@ -46,7 +45,7 @@
     (((len) >= (int32_t)(sizeof(struct nlmsghdr))) && (((nlh)->nlmsg_len) >= sizeof(struct nlmsghdr)) && \
         ((int32_t)((nlh)->nlmsg_len) <= (len)))
 
-#define DEFAULT_NETLINK_RECVBUF (8 * 1024)
+#define DEFAULT_NETLINK_RECVBUF (32 * 1024)
 
 static int32_t CreateNetlinkSocket(void)
 {
@@ -175,6 +174,7 @@ NO_SANITIZE("cfi") static void *NetlinkMonitorThread(void *para)
         }
         nlh = (struct nlmsghdr *)buffer;
         while (NLMSG_OK(nlh, len) && nlh->nlmsg_type != NLMSG_DONE) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "nlmsg_type: %d", nlh->nlmsg_type);
             switch (nlh->nlmsg_type) {
                 case RTM_NEWADDR:
                 case RTM_DELADDR:

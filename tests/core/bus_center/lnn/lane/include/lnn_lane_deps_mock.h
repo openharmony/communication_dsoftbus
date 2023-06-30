@@ -60,7 +60,7 @@ class LaneDepsInterfaceMock : public LaneDepsInterface {
 public:
     LaneDepsInterfaceMock();
     ~LaneDepsInterfaceMock() override;
-    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char*, IdCategory, NodeInfo *));
     MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
     MOCK_METHOD2(LnnGetOnlineStateById, bool (const char*, IdCategory));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char*, uint32_t));

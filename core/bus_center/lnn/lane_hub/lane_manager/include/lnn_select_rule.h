@@ -31,6 +31,8 @@ typedef struct {
     int32_t (*GetLinkScore)(const char *networkId, uint32_t expectedBw);
 } LinkAttribute;
 
+int32_t GetWlanLinkedFrequency(void);
+
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
 
 #ifdef __cplusplus

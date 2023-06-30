@@ -43,6 +43,8 @@ static TypeToId g_typeToIdMap[] = {
     {TYPE_CAR, TYPE_CAR_ID},
     {TYPE_WATCH, TYPE_WATCH_ID},
     {TYPE_IPCAMERA, TYPE_IPCAMERA_ID},
+    {TYPE_PC, TYPE_PC_ID},
+    {TYPE_SMART_DISPLAY, TYPE_SMART_DISPLAY_ID},
 };
 
 static char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};
@@ -117,8 +119,8 @@ static char *ConvertIntToHexString(uint16_t typeId)
 {
     uint32_t j = 0;
     for (int32_t i = DEVICE_TYPE_MAX_LENGTH - 1; i >= 0; i--) {
-        if ((j == 0) && (InterceptTypeId(typeId, i) == 0)) {
-            continue;
+        if (InterceptTypeId(typeId, i) == 0) {
+            g_stringTypeId[j] = '0';
         } else if (InterceptTypeId(typeId, i) < DIVIDE_NUMBER_AND_LETTERS) {
             g_stringTypeId[j] = InterceptTypeId(typeId, i) + '0';
         } else if (InterceptTypeId(typeId, i) >= DIVIDE_NUMBER_AND_LETTERS) {

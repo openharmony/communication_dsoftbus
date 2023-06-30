@@ -35,6 +35,9 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type);
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
 bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType);
 
+/* To avoid concurrency issues, this interface can only be used in BusCenter looper process. */
+const char *LnnPrintConnectionAddr(const ConnectionAddr *addr);
+
 #ifdef __cplusplus
 }
 #endif

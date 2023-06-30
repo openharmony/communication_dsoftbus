@@ -149,51 +149,12 @@ static bool StrStartWith(const char *string, const char *target)
     return true;
 }
 
-static int32_t GetAppInfoByJsonObject(cJSON *object, SoftBusAppInfo *appInfo)
-{
-    char mapKey[TEMP_STR_MAX_LEN];
-    int32_t ret = GetStringItemByJsonObject(object, APP_INFO_PKG_NAME_STR, appInfo->pkgName, PKG_NAME_SIZE_MAX);
-    if (ret != SOFTBUS_OK) {
-        if (ret == SOFTBUS_INVALID_PARAM) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pkgname is too long");
-            return SOFTBUS_INVALID_PARAM;
-        }
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "appInfo has no pkgname");
-    }
-    if (GetJsonObjectStringItem(object, APP_INFO_TYPE_STR, mapKey, TEMP_STR_MAX_LEN)) {
-        appInfo->type = GetPeMapValue(mapKey);
-        if (appInfo->type == UNKNOWN_VALUE) {
-            return SOFTBUS_ERR;
-        }
-    } else {
-        return SOFTBUS_ERR;
-    }
-    if (GetJsonObjectStringItem(object, APP_INFO_UID_STR, mapKey, TEMP_STR_MAX_LEN)) {
-        appInfo->uid = atoi(mapKey);
-    }
-    if (GetJsonObjectStringItem(object, APP_INFO_ACTION_STR, mapKey, TEMP_STR_MAX_LEN)) {
-        char *nextToken = NULL;
-        char *actionStr = strtok_s(mapKey, ACTIONS_SPLIT, &nextToken);
-        while (actionStr != NULL) {
-            if (strcmp(actionStr, "open") == 0) {
-                appInfo->actions |= ACTION_OPEN;
-            } else if (strcmp(actionStr, "create") == 0) {
-                appInfo->actions |= ACTION_CREATE;
-            }
-            actionStr = strtok_s(NULL, ACTIONS_SPLIT, &nextToken);
-        }
-    }
-    if (appInfo->actions == 0) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
 {
     if (object == NULL) {
         return NULL;
     }
+
     SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
     if (appInfo == NULL) {
         return NULL;
@@ -204,13 +165,46 @@ static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
     appInfo->pid = UNKNOWN_VALUE;
     appInfo->actions = 0;
 
-    int32_t ret = GetAppInfoByJsonObject(object, appInfo);
+    char mapKey[TEMP_STR_MAX_LEN];
+    char *actionStr = NULL;
+    int32_t ret = GetStringItemByJsonObject(object, APP_INFO_PKG_NAME_STR, appInfo->pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get appInfo from json failed[%d]", ret);
-        SoftBusFree(appInfo);
-        return NULL;
+        if (ret == SOFTBUS_INVALID_PARAM) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pkgname is too long");
+            goto EXIT;
+        }
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "appInfo has no pkgname");
+    }
+    if (GetJsonObjectStringItem(object, APP_INFO_TYPE_STR, mapKey, TEMP_STR_MAX_LEN)) {
+        appInfo->type = GetPeMapValue(mapKey);
+        if (appInfo->type == UNKNOWN_VALUE) {
+            goto EXIT;
+        }
+    } else {
+        goto EXIT;
+    }
+    if (GetJsonObjectStringItem(object, APP_INFO_UID_STR, mapKey, TEMP_STR_MAX_LEN)) {
+        appInfo->uid = atoi(mapKey);
+    }
+    if (GetJsonObjectStringItem(object, APP_INFO_ACTION_STR, mapKey, TEMP_STR_MAX_LEN)) {
+        char *nextToken = NULL;
+        actionStr = strtok_s(mapKey, ACTIONS_SPLIT, &nextToken);
+        while (actionStr != NULL) {
+            if (strcmp(actionStr, "open") == 0) {
+                appInfo->actions |= ACTION_OPEN;
+            } else if (strcmp(actionStr, "create") == 0) {
+                appInfo->actions |= ACTION_CREATE;
+            }
+            actionStr = strtok_s(NULL, ACTIONS_SPLIT, &nextToken);
+        }
+    }
+    if (appInfo->actions == 0) {
+        goto EXIT;
     }
     return appInfo;
+EXIT:
+    SoftBusFree(appInfo);
+    return NULL;
 }
 
 static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
@@ -232,9 +226,9 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
     char mapKey[TEMP_STR_MAX_LEN];
     int appInfoSize;
     int appInfoIndex;
-    cJSON *appInfoArray;
     if (!GetJsonObjectStringItem(object, SESSION_NAME_STR, permissionEntry->sessionName, SESSION_NAME_SIZE_MAX)) {
-        goto EXIT;
+        SoftBusFree(permissionEntry);
+        return NULL;
     }
     if (GetJsonObjectStringItem(object, REGEXP_STR, mapKey, TEMP_STR_MAX_LEN)) {
         permissionEntry->regexp = GetPeMapValue(mapKey);
@@ -245,7 +239,7 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
     if (GetJsonObjectStringItem(object, SEC_LEVEL_STR, mapKey, TEMP_STR_MAX_LEN)) {
         permissionEntry->secLevel = GetPeMapValue(mapKey);
     }
-    appInfoArray = cJSON_GetObjectItem(object, APP_INFO_STR);
+    cJSON *appInfoArray = cJSON_GetObjectItem(object, APP_INFO_STR);
     if (appInfoArray != NULL) {
         appInfoSize = cJSON_GetArraySize(appInfoArray);
         for (appInfoIndex = 0; appInfoIndex < appInfoSize; appInfoIndex++) {
@@ -256,10 +250,6 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
         }
     }
     return permissionEntry;
-
-EXIT:
-    SoftBusFree(permissionEntry);
-    return NULL;
 }
 
 static int32_t CompareString(const char *src, const char *dest, bool regexp)
@@ -401,7 +391,7 @@ static bool HaveGrantedPermission(const char *sessionName)
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t LoadPermissionJson(const char *fileName)
+int32_t LoadPermissionJson(const char *fileName)
 {
     int ret = ReadConfigJson(fileName);
     if (ret != SOFTBUS_OK) {
@@ -483,10 +473,9 @@ NO_SANITIZE("cfi") SoftBusPermissionItem *CreatePermissionItem(int32_t permType,
 NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
 {
     if (sessionName == NULL || pItem == NULL || g_permissionEntryList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "some parameters are null");
         return SOFTBUS_INVALID_PARAM;
     }
-    int permType = -1;
+    int permType;
     SoftBusPermissionEntry *pe = NULL;
     bool isDynamicPermission = CheckDBinder(sessionName);
     SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
@@ -501,7 +490,6 @@ NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const S
             permType = CheckPermissionAppInfo(pe, pItem);
             if (permType < 0) {
                 (void)SoftBusMutexUnlock(&permissionList->lock);
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "permType is invalid,  permType = %d", permType);
                 return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
             }
             (void)SoftBusMutexUnlock(&permissionList->lock);
@@ -510,23 +498,19 @@ NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const S
     }
     if (pItem->permType != NORMAL_APP) {
         (void)SoftBusMutexUnlock(&permissionList->lock);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus permission warning,  permType = %d", permType);
         return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
     }
     if (pItem->actions == ACTION_CREATE) {
         if (IsValidPkgName(pItem->uid, pItem->pkgName) != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&permissionList->lock);
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "invalid pkgName,  permType = %d", permType);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
         if (!StrStartWith(sessionName, pItem->pkgName)) {
             (void)SoftBusMutexUnlock(&permissionList->lock);
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "sessionName is not suitable with pkgName,  permType = %d", permType);
             return ENFORCING ? SOFTBUS_PERMISSION_DENIED : permType;
         }
     }
     (void)SoftBusMutexUnlock(&permissionList->lock);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus permission denied");
     return SOFTBUS_PERMISSION_DENIED;
 }
 

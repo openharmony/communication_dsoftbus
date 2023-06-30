@@ -51,7 +51,7 @@ static IServerChannelCallBack *g_cb = NULL;
 
 static void TransPostAuthChannelErrMsg(int32_t authId, int32_t errcode, const char *errMsg);
 static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int32_t authId, int32_t flag);
-static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName);
+static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isClient);
 static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
 static void DelAuthChannelInfoByAuthId(int32_t authId);
@@ -143,8 +143,11 @@ NO_SANITIZE("cfi") static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *ap
     channelInfo.peerSessionName = (char *)appInfo->peerData.sessionName;
     channelInfo.businessType = BUSINESS_TYPE_NOT_CARE;
     channelInfo.groupId = (char *)AUTH_GROUP_ID;
+    channelInfo.isEncrypt = false;
     channelInfo.sessionKey = (char *)AUTH_SESSION_KEY;
     channelInfo.keyLen = strlen(channelInfo.sessionKey) + 1;
+    channelInfo.autoCloseTime = appInfo->autoCloseTime;
+    channelInfo.reqId = (char*)appInfo->reqId;
     return g_cb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
         appInfo->myData.sessionName, &channelInfo);
 }
@@ -217,7 +220,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         }
     }
     if (!exists) {
-        item = CreateAuthChannelInfo(appInfo->myData.sessionName);
+        item = CreateAuthChannelInfo(appInfo->myData.sessionName, false);
         if (item == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateAuthChannelInfo failed");
             SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -225,7 +228,6 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
         }
         item->authId = authId;
         appInfo->myData.channelId = item->appInfo.myData.channelId;
-        item->isClient = false;
         if (AddAuthChannelInfo(item) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddAuthChannelInfo failed");
             SoftBusFree(item);
@@ -357,19 +359,26 @@ static void OnDisconnect(int32_t authId)
         dstInfo.appInfo.myData.channelId);
 }
 
-static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo)
+static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo, bool isClient)
 {
     if (sessionName == NULL || appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    appInfo->appType = APP_TYPE_NOT_CARE; // doubt
+    appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = channelId;
     appInfo->myData.apiVersion = API_V2;
     appInfo->peerData.apiVersion = API_V2;
-    if (TransGetUidAndPid(sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid failed");
-        return SOFTBUS_ERR;
+    appInfo->autoCloseTime = 0;
+    if ((!IsNoPkgNameSession(sessionName)) || (isClient)) {
+        if (TransGetUidAndPid(sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid failed");
+            return SOFTBUS_ERR;
+        }
+        if (TransGetPkgNameBySessionName(sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetPkgNameBySessionName failed");
+            return SOFTBUS_ERR;
+        }
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
@@ -377,10 +386,6 @@ static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *a
         return SOFTBUS_ERR;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (TransGetPkgNameBySessionName(sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetPkgNameBySessionName failed");
         return SOFTBUS_ERR;
     }
     appInfo->peerData.apiVersion = API_V2;
@@ -573,7 +578,7 @@ static void TransPostAuthChannelErrMsg(int32_t authId, int32_t errcode, const ch
     }
 }
 
-static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
+static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isClient)
 {
     AuthChannelInfo *info = (AuthChannelInfo *)SoftBusCalloc(sizeof(AuthChannelInfo));
     if (info == NULL) {
@@ -584,10 +589,10 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName)
     }
     info->appInfo.myData.channelId = GenerateAuthChannelId();
     SoftBusMutexUnlock(&g_authChannelList->lock);
-    if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo) != SOFTBUS_OK) {
+    if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo, isClient) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    info->isClient = false;
+    info->isClient = isClient;
     return info;
 EXIT_ERR:
     SoftBusFree(info);
@@ -595,13 +600,17 @@ EXIT_ERR:
 }
 
 NO_SANITIZE("cfi") int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt,
-    int32_t *channelId)
+    int32_t *channelId, const char *reqId)
 {
     if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP) {
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthChannelInfo *channel = CreateAuthChannelInfo(sessionName);
+    AuthChannelInfo *channel = CreateAuthChannelInfo(sessionName, true);
     if (channel == NULL) {
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(channel->appInfo.reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenAuthMsgChannel strcpy_s reqId failed");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(&channel->connOpt, sizeof(ConnectOption), connOpt, sizeof(ConnectOption)) != EOK) {
@@ -609,7 +618,6 @@ NO_SANITIZE("cfi") int32_t TransOpenAuthMsgChannel(const char *sessionName, cons
         return SOFTBUS_MEM_ERR;
     }
     *channelId = channel->appInfo.myData.channelId;
-    channel->isClient = true;
     int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port);
     if (authId < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AuthOpenChannel failed");
@@ -646,6 +654,7 @@ NO_SANITIZE("cfi") int32_t TransCloseAuthChannel(int32_t channelId)
         ListDelete(&channel->node);
         g_authChannelList->cnt--;
         AuthCloseChannel(channel->authId);
+        NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
         SoftBusFree(channel);
         SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_OK;

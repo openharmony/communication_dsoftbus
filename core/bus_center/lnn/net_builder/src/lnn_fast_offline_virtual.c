@@ -29,7 +29,7 @@ void LnnDeinitFastOffline(void)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Deinit virtual lnn fast offline");
 }
 
-int32_t LnnSendNotTrustedInfo(NotTrustedDelayInfo *info, uint32_t num)
+int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete)
 {
     (void)info;
     (void)num;

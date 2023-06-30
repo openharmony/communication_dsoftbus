@@ -24,6 +24,7 @@
 
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_common.h"
+#include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "securec.h"
@@ -101,7 +102,11 @@ static LIST_HEAD(g_recvRecipientInfoList);
 
 static int32_t ProxyChannelSendFileStream(int32_t channelId, const char *data, uint32_t len, int32_t type)
 {
-    return ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, type);
+    ProxyChannelInfoDetail info;
+    if (ClientTransProxyGetInfoByChannelId(channelId, &info) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return TransProxyPackAndSendData(channelId, data, len, &info, (SessionPktType)type);
 }
 
 static int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t result, uint32_t side)
@@ -1284,7 +1289,8 @@ static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
     SoftBusFree(sendInfo);
 }
 
-NO_SANITIZE("cfi") int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+NO_SANITIZE("cfi") int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[],
+    const char *dFileList[], uint32_t fileCnt)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy send file trans start");
     if ((fileCnt == 0) || (fileCnt > MAX_SEND_FILE_NUM)) {
@@ -1636,7 +1642,7 @@ static int32_t WriteEmptyFrame(SingleFileInfo *fileInfo, int32_t count)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "WriteEmptyFrame invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     if (count > 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "write %d empty frame", count);
         char *emptyBuff = (char *)SoftBusCalloc(fileInfo->oneFrameLen);

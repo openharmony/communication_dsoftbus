@@ -19,7 +19,7 @@
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
-#include "p2plink_interface.h"
+#include "wifi_direct_initiator.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_disc_server.h"
@@ -56,19 +56,6 @@ static void ServerModuleDeinit(void)
 NO_SANITIZE("cfi") bool GetServerIsInit(void)
 {
     return g_isInit;
-}
-
-static int32_t InitP2pLink(void)
-{
-    int32_t ret = P2pLinkInit();
-    if (ret != SOFTBUS_OK) {
-        if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "p2p link init fail");
-            return ret;
-        }
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p link not support");
-    }
-    return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") void InitSoftBusServer(void)
@@ -112,10 +99,11 @@ NO_SANITIZE("cfi") void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
-    if (InitP2pLink() != SOFTBUS_OK) {
+    if (WifiDirectInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus wifi direct init failed.");
         goto ERR_EXIT;
     }
-    
+
     if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus dfx init failed.");
         goto ERR_EXIT;

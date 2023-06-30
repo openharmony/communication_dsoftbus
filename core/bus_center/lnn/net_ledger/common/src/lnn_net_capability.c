@@ -30,7 +30,7 @@ NO_SANITIZE("cfi") bool LnnHasCapability(uint32_t capability, NetCapability type
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
         return false;
     }
-    uint32_t cap;
+    uint32_t cap = 0;
     (void)LnnSetNetCapability(&cap, type);
     if ((capability & cap) != 0) {
         return true;

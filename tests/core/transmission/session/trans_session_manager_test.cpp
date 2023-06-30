@@ -336,9 +336,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest13, TestSize.Level1)
 {
     int32_t ret = TransSessionMgrInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    TransOnLinkDown(NULL, WIFI_P2P);
+    TransOnLinkDown(NULL, NULL, NULL, NULL, WIFI_P2P);
     TransSessionMgrDeinit();
-    TransOnLinkDown(g_networkid, WIFI_P2P);
+    TransOnLinkDown(g_networkid, NULL, NULL, NULL, WIFI_P2P);
 }
 /**
  * @tc.name: TransSessionManagerTest14
@@ -361,7 +361,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest14, TestSize.Level1)
     sessionServer->uid = TRANS_TEST_INVALID_UID;
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    TransOnLinkDown(g_networkid, WIFI_P2P);
+    TransOnLinkDown(g_networkid, NULL, NULL, NULL, WIFI_P2P);
 }
 
 /**

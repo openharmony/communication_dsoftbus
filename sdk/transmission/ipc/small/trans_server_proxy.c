@@ -273,7 +273,7 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcSendMessage malloc failed!");
         return SOFTBUS_MALLOC_ERR;
     }
-    
+
     IpcIo request = {0};
     IpcIoInit(&request, ipcData, ipcDataLen, 0);
     WriteInt32(&request, channelId);

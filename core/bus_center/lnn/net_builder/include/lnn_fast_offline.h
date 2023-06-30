@@ -18,10 +18,15 @@
 
 #include <stdint.h>
 #include "lnn_node_info.h"
+#include "lnn_sync_info_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define NETWORK_TYPE_WIFI "1"
+#define NETWORK_TYPE_BLE  "2"
+#define NETWORK_TYPE_BR   "3"
 
 typedef struct {
     char udid[UDID_BUF_LEN];
@@ -30,7 +35,7 @@ typedef struct {
 
 int32_t LnnInitFastOffline(void);
 void LnnDeinitFastOffline(void);
-int32_t LnnSendNotTrustedInfo(NotTrustedDelayInfo *info, uint32_t num);
+int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
 int32_t LnnBleFastOfflineOnceBegin(void);
 void LnnIpAddrChangeEventHandler(void);
 

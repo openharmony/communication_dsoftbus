@@ -16,7 +16,6 @@
 #include "softbus_permission.h"
 
 #include <string.h>
-#include <unistd.h>
 
 #include "permission_entry.h"
 #include "pms_interface.h"

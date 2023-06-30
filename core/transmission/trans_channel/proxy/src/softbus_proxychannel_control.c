@@ -28,20 +28,18 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 
-NO_SANITIZE("cfi") int32_t TransProxySendMessage(ProxyChannelInfo *info, const char *payLoad, uint32_t payLoadLen,
-    int32_t priority)
+NO_SANITIZE("cfi") int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
+    uint32_t payLoadLen, int32_t priority)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    if (info->appInfo.appType != APP_TYPE_AUTH) {
-        msgHead.cipher = (msgHead.cipher | ENCRYPTED);
-    }
+    msgHead.cipher = (msgHead.cipher | ENCRYPTED);
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
 
@@ -94,6 +92,7 @@ NO_SANITIZE("cfi") int32_t TransProxyHandshake(ProxyChannelInfo *info)
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.cipher = CS_MODE;
     if (info->appInfo.appType != APP_TYPE_AUTH) {
         if (SetCipherOfHandshakeMsg(info->channelId, &msgHead.cipher) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set cipher fail");

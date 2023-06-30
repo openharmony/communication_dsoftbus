@@ -18,18 +18,22 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "auth_hichain.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_decision_db.h"
+#include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
+#include "lnn_feature_capability.h"
+#include "lnn_deviceinfo_to_profile.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "lnn_async_callback_utils.h"
@@ -157,27 +161,29 @@ static void FreeUnhandledMessage(int32_t msgType, void *para)
 
 static void ReportDeviceOnlineEvt(const char *udid, NodeBasicInfo *peerDevInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report device online evt enter");
+    LLOGI("report device online evt enter");
     int32_t infoNum = 0;
     NodeBasicInfo *basic = NULL;
-    NodeInfo *nodeInfo = NULL;
+    NodeInfo nodeInfo = {0};
     OnlineDeviceInfo info;
     (void)memset_s(&info, sizeof(OnlineDeviceInfo), 0, sizeof(OnlineDeviceInfo));
     if (LnnGetAllOnlineNodeInfo(&basic, &infoNum) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get online node fail");
+        LLOGE("get online node fail");
         return;
     }
     if (basic == NULL || infoNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report online evt get none online node");
+        LLOGI("report online evt get none online node");
         return;
     }
     info.onlineDevNum = infoNum;
     for (int32_t i = 0; i < infoNum; i++) {
-        nodeInfo = LnnGetNodeInfoById(basic[i].networkId, CATEGORY_NETWORK_ID);
-        if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_WIFI)) {
+        if (LnnGetRemoteNodeInfoById(basic[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+            continue;
+        }
+        if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI)) {
             info.wifiOnlineDevNum++;
         }
-        if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BR)) {
+        if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BR)) {
             info.btOnlineDevNum++;
         }
     }
@@ -185,18 +191,30 @@ static void ReportDeviceOnlineEvt(const char *udid, NodeBasicInfo *peerDevInfo)
     info.peerDevType = peerDevInfo->deviceTypeId;
     if (LnnGetRemoteStrInfo(peerDevInfo->networkId, STRING_KEY_DEV_NAME, info.peerDevName,
         SOFTBUS_HISYSEVT_NAME_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote device name fail");
-        return;
+        LLOGE("get remote device name fail");
     }
     if (LnnGetRemoteStrInfo(peerDevInfo->networkId, STRING_KEY_HICE_VERSION, info.peerSoftBusVer,
         SOFTBUS_HISYSEVT_NAME_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get remote softbus version fail");
-        return;
+        LLOGE("get remote softbus version fail");
     }
     info.insertFileResult = true;
     if (SoftBusReportDevOnlineEvt(&info, udid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report device online fail");
+        LLOGE("report device online evt fail");
     }
+}
+
+static void OnlineTrustGroupProc(const char *udid)
+{
+    NodeInfo nodeInfo = {0};
+    if (LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo) != SOFTBUS_OK) {
+        LLOGE("get remote info fail");
+        return;
+    }
+    if (((uint32_t)nodeInfo.groupType & GROUP_TYPE_P2P) == 0) {
+        LLOGW("not nonAccount group relation, don't save deviceUdid");
+        return;
+    }
+    LnnInsertSpecificTrustedDevInfo(udid);
 }
 
 static void ReportResult(const char *udid, ReportCategory report)
@@ -214,7 +232,7 @@ static void ReportResult(const char *udid, ReportCategory report)
             break;
         case REPORT_ONLINE:
             LnnNotifyOnlineState(true, &basic);
-            LnnInsertSpecificTrustedDevInfo(udid);
+            OnlineTrustGroupProc(udid);
             ReportDeviceOnlineEvt(udid, &basic);
             break;
         case REPORT_NONE:
@@ -247,16 +265,16 @@ static SoftBusLinkType ConvertAddrTypeToHisysEvtLinkType(ConnectionAddrType type
 
 static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report lnn result evt enter");
+    LLOGI("report lnn result evt enter");
     SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(connFsm->connInfo.addr.type);
     if (linkType == SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         return;
     }
     if (retCode == SOFTBUS_OK) {
         connFsm->statisticData.beginOnlineTime = LnnUpTimeMs();
-        int64_t constTime = connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime;
-        if (SoftBusRecordBusCenterResult(linkType, (uint64_t)constTime) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report static lnn duration fail");
+        uint64_t constTime = connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime;
+        if (SoftBusRecordBusCenterResult(linkType, constTime) != SOFTBUS_OK) {
+            LLOGE("report static lnn duration fail");
         }
         return;
     }
@@ -266,7 +284,62 @@ static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
     info.linkType = linkType;
     info.errorCode = retCode;
     if (SoftBusReportBusCenterFaultEvt(&info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report buscenter fault evt fail");
+        LLOGE("report buscenter fault evt fail");
+    }
+}
+
+static bool IsDeviceTypePc(NodeInfo *info)
+{
+    if (info == NULL) {
+        LLOGE("nodeInfo is NULL");
+        return false;
+    }
+    return info->deviceInfo.deviceTypeId == TYPE_PC_ID;
+}
+
+static void PostPcOnlineUniquely(NodeInfo *info)
+{
+    if (info == NULL) {
+        LLOGE("nodeInfo is NULL");
+        return;
+    }
+    LLOGI("pc online");
+    bool isPcWithSoftbus = false;
+    if (info->deviceInfo.deviceTypeId == TYPE_PC_ID &&
+        strcmp(info->networkId, info->deviceInfo.deviceUdid) != 0) {
+        isPcWithSoftbus = true;
+    }
+    if (!isPcWithSoftbus) {
+        LLOGI("pc without softbus online");
+        return;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
+    char brMacHash[BT_MAC_HASH_STR_LEN] = {0};
+    if (LnnGenerateBtMacHash((const char *)info->connectInfo.macAddr, BT_MAC_LEN,
+        brMacHash, BT_MAC_HASH_STR_LEN) != SOFTBUS_OK) {
+        LLOGE("get br mac hash fail.");
+        return;
+    }
+    if (LnnGetRemoteNodeInfoById(brMacHash, CATEGORY_UDID, &nodeInfo) == SOFTBUS_OK) {
+        LLOGI("set pc without softbus offline");
+        deleteFromProfile(nodeInfo.deviceInfo.deviceUdid);
+        LnnRemoveNode(nodeInfo.deviceInfo.deviceUdid);
+    }
+}
+
+static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool isOnline)
+{
+    if (type != CONNECTION_ADDR_BLE) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send mlps only support ble");
+        return;
+    }
+    if (isOnline) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ap online, ready to mlps");
+        // mark--SendInfoToMlpsBleOnlineProcess
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ap offline, ready to mlps");
+        // mark-- SendInfoToMlpsBleOfflineProcess
     }
 }
 
@@ -278,12 +351,26 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         return;
     }
     ReportCategory report;
+    uint64_t localFeature;
+    (void)LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     SetWatchdogFlag(true);
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
+    if (IsDeviceTypePc(connInfo->nodeInfo)) {
+        PostPcOnlineUniquely(connInfo->nodeInfo);
+    }
     ReportLnnResultEvt(connFsm, retCode);
     if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
+        int32_t groupType = AuthGetGroupType(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->nodeInfo->uuid);
+        connInfo->nodeInfo->groupType = groupType;
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "groupType = %d", groupType);
         report = LnnAddOnlineNode(connInfo->nodeInfo);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "peer feature = %lld, local=%lld", connInfo->nodeInfo->feature, localFeature);
+        if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
+            IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
+            DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
+        }
         NotifyJoinResult(connFsm, networkId, retCode);
         ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
         connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
@@ -302,7 +389,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     if (retCode != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]join failed, ready clean", connFsm->id);
+        LLOGE("[id=%u]join failed, ready clean, retCode:%d", connFsm->id, retCode);
         connFsm->isDead = true;
         LnnRequestCleanConnFsm(connFsm->id);
         return;
@@ -313,19 +400,18 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
 static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *networkId, NodeBasicInfo *basic)
 {
     const LnnConntionInfo *connInfo = &connFsm->connInfo;
-    NodeInfo *info = NULL;
+    NodeInfo info = {0};
     const char *udid = NULL;
     bool needReportOffline = false;
     bool isMetaAuth = false;
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     ReportCategory report;
 
-    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-    if (info == NULL) {
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
         return needReportOffline;
     }
-    isMetaAuth = (info->AuthTypeValue & (1 << ONLINE_METANODE)) != 0;
-    udid = LnnGetDeviceUdid(info);
+    isMetaAuth = (info.AuthTypeValue & (1 << ONLINE_METANODE)) != 0;
+    udid = LnnGetDeviceUdid(&info);
     report = LnnSetNodeOffline(udid, connInfo->addr.type, (int32_t)connInfo->authId);
     LnnGetLnnRelation(udid, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
     LnnNotifyLnnRelationChanged(udid, connInfo->addr.type, relation[connInfo->addr.type], false);
@@ -335,6 +421,8 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
         if (LnnGetBasicInfoByUdid(udid, basic) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]get basic info fail", connFsm->id);
             needReportOffline = false;
+        } else {
+            deleteFromProfile(udid);
         }
         // just remove node when peer device is not trusted
         if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0 && !isMetaAuth) {
@@ -345,14 +433,14 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     return needReportOffline;
 }
 
-static void ReportLeaveLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
+static void ReportLeaveLNNResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report leave lnn result enter");
+    LLOGI("report leave lnn result evt enter");
     if (retCode == SOFTBUS_OK) {
         connFsm->statisticData.offLineTime = LnnUpTimeMs();
-        int64_t constTime = connFsm->statisticData.offLineTime - connFsm->statisticData.beginOnlineTime;
-        if (SoftBusRecordDevOnlineDurResult((uint64_t)constTime) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report static device online duration dail");
+        uint64_t constTime = connFsm->statisticData.offLineTime - connFsm->statisticData.beginOnlineTime;
+        if (SoftBusRecordDevOnlineDurResult(constTime) != SOFTBUS_OK) {
+            LLOGE("report static device online duration fail");
         }
         return;
     }
@@ -366,7 +454,7 @@ static void ReportLeaveLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
     info.linkType = linkType;
     info.errorCode = retCode;
     if (SoftBusReportBusCenterFaultEvt(&info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report buscenter fault evt fail");
+        LLOGE("report buscenter fault evt fail");
     }
 }
 
@@ -375,7 +463,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     LnnConntionInfo *connInfo = &connFsm->connInfo;
     NodeBasicInfo basic;
     bool needReportOffline = false;
-    ReportLeaveLnnResultEvt(connFsm, retCode);
+    ReportLeaveLNNResultEvt(connFsm, retCode);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
@@ -388,6 +476,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     if (needReportOffline) {
         LnnNotifyOnlineState(false, &basic);
     }
+    // DeviceStateChangeProcess(basic.udid, connInfo->addr.type, false);
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     connFsm->isDead = true;
     LnnNotifyAuthHandleLeaveLNN(connInfo->authId);
@@ -427,11 +516,10 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]join LNN is ongoing, waiting...", connFsm->id);
         return SOFTBUS_OK;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]begin join request", connFsm->id);
+    LLOGI("[id=%u]begin join request, peer%s", connFsm->id, LnnPrintConnectionAddr(&connInfo->addr));
     connInfo->requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
-    const AuthVerifyCallback *verifyCb = LnnGetVerifyCallback();
-    if (AuthStartVerify(&authConn, connInfo->requestId, verifyCb) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback()) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth verify device failed", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
         rc = SOFTBUS_ERR;
@@ -440,7 +528,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         rc = SOFTBUS_OK;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-        "[id=%u]verify request id=%u", connFsm->id, connInfo->requestId);
+        "[id=%u]verify request requestId=%u", connFsm->id, connInfo->requestId);
     return rc;
 }
 
@@ -461,9 +549,8 @@ NO_SANITIZE("cfi") int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, Cus
             return SOFTBUS_ERR;
         }
         metaJoinNode->requestId = AuthGenRequestId();
-        const AuthVerifyCallback *metaVerifyCb = LnnGetMetaVerifyCallback();
         if (AuthMetaStartVerify(connId, customData->data, DATA_SIZE,
-            metaJoinNode->requestId, metaVerifyCb) != SOFTBUS_OK) {
+            metaJoinNode->requestId, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
                 rc = SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
@@ -474,12 +561,8 @@ NO_SANITIZE("cfi") int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, Cus
 
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
-    SoftBusSysTime times;
     SoftBusVersion version;
-    (void)SoftBusGetTime(&times);
     NodeInfo *nodeInfo = connInfo->nodeInfo;
-    nodeInfo->heartbeatTimeStamp = (uint64_t)times.sec * HB_TIME_FACTOR +
-        (uint64_t)times.usec / HB_TIME_FACTOR;
     nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
     nodeInfo->authSeqNum = connInfo->authId;
     connInfo->nodeInfo->authSeq[LnnConvAddrTypeToDiscType(connInfo->addr.type)] = connInfo->authId;
@@ -531,7 +614,8 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]auth failed, requestId=%u, reason=%d", connFsm->id, connInfo->requestId, *retCode);
+            "[id=%u]auth failed, authId=%" PRId64 ", requestId=%u, reason=%d", connFsm->id, connInfo->authId,
+            connInfo->requestId, *retCode);
         CompleteJoinLNN(connFsm, NULL, *retCode);
     }
     SoftBusFree(retCode);
@@ -572,58 +656,6 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
     return true;
 }
 
-static bool IsWifiInfoChanged(const NodeInfo *newNodeInfo, const NodeInfo *oldNodeInfo)
-{
-    if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0 ||
-        newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort ||
-        newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort ||
-        newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer device info changed");
-        return true;
-    }
-    return false;
-}
-
-static bool IsBleSingleOnlineProc(bool newBleFlag, bool oldBleFlag)
-{
-    if (!newBleFlag && oldBleFlag) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble single online, need offline");
-        return true;
-    }
-    return false;
-}
-
-
-static bool IsWifiOnlineAgain(bool newWifiFlag, bool oldWifiFlag, const NodeInfo *newNodeInfo,
-    const NodeInfo *oldNodeInfo)
-{
-    if (!newWifiFlag && oldWifiFlag) {
-        return IsWifiInfoChanged(newNodeInfo, oldNodeInfo);
-    }
-    return false;
-}
-
-static bool IsWifiSingleOnlineProc(bool newWifiFlag, bool oldWifiFlag)
-{
-    if (!newWifiFlag && oldWifiFlag) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi single online, need offline");
-        return true;
-    }
-    return false;
-}
-
-static bool IsNeedReportOffline(bool isBleOffline, bool isWifiOffline, ConnectionAddrType *type)
-{
-    if (isBleOffline) {
-        *type = CONNECTION_ADDR_BLE;
-        return true;
-    } else if (isWifiOffline) {
-        *type = CONNECTION_ADDR_WLAN;
-        return true;
-    }
-    return false;
-}
-
 static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *oldNodeInfo,
     const NodeInfo *newNodeInfo, ConnectionAddrType *type)
 {
@@ -632,40 +664,55 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         *type = CONNECTION_ADDR_MAX;
         return true;
     }
-    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_BR) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "br not support single online");
+    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH && connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN) {
         return false;
     }
-    bool newWifiFlag = LnnPeerHasExchangeDiscoveryType(newNodeInfo, DISCOVERY_TYPE_WIFI);
-    bool newBleFlag = LnnPeerHasExchangeDiscoveryType(newNodeInfo, DISCOVERY_TYPE_BLE);
-    bool oldWifiFlag = LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI);
-    bool oldBleFlag = LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_BLE);
-    bool isWifiOffline = false;
-    bool isBleOffline = false;
-    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH || connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN) {
-        isBleOffline = IsBleSingleOnlineProc(newBleFlag, oldBleFlag);
-        isWifiOffline = IsWifiOnlineAgain(newWifiFlag, oldWifiFlag, newNodeInfo, oldNodeInfo);
-    } else if (connFsm->connInfo.addr.type == CONNECTION_ADDR_BLE) {
-        isWifiOffline = IsWifiSingleOnlineProc(newWifiFlag, oldWifiFlag);
+    if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]oldNodeInfo not have wifi, discoveryType = %u",
+            connFsm->id, oldNodeInfo->discoveryType);
+        return false;
     }
-    return IsNeedReportOffline(isBleOffline, isWifiOffline, type) ? true : false;
+    if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer IP changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer auth port changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer proxy port changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]peer session port changed", connFsm->id);
+        *type = connFsm->connInfo.addr.type;
+        return true;
+    }
+    return false;
 }
 
 static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-    NodeInfo *oldNodeInfo = LnnGetNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID);
+    if (connInfo->nodeInfo == NULL) {
+        return;
+    }
+    NodeInfo oldNodeInfo = {0};
     NodeInfo *newNodeInfo = connInfo->nodeInfo;
     ConnectionAddrType addrType;
-
+    int32_t ret = LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
-    if (oldNodeInfo != NULL && LnnIsNodeOnline(oldNodeInfo)) {
-        if (IsNodeInfoChanged(connFsm, oldNodeInfo, newNodeInfo, &addrType)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-                "[id=%u] node info changed, ready clean invalid connection, connType=%d", connFsm->id, addrType);
-            LnnRequestLeaveInvalidConn(oldNodeInfo->networkId, addrType, newNodeInfo->networkId, connInfo->addr.type);
+    if (ret == SOFTBUS_OK && LnnIsNodeOnline(&oldNodeInfo)) {
+        if (IsNodeInfoChanged(connFsm, &oldNodeInfo, newNodeInfo, &addrType)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]node info changed, ready clean invalid connection",
+                connFsm->id);
+            LnnRequestLeaveInvalidConn(oldNodeInfo.networkId, addrType, newNodeInfo->networkId);
             return;
         }
     }
@@ -719,7 +766,16 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
         return;
     }
     connFsm = TO_CONN_FSM(fsm);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]online state enter", connFsm->id);
+    bool isNodeInfoValid = (connFsm->connInfo.nodeInfo != NULL);
+    char *anoyUdid = NULL;
+    char *anoyNetworkId = NULL;
+    LLOGI("[id=%u][networkId=%s][udid=%s][deviceName=%s][peer%s]online state enter",
+        connFsm->id, ToSecureStrDeviceID(connFsm->connInfo.peerNetworkId, &anoyNetworkId),
+        isNodeInfoValid ? ToSecureStrDeviceID(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anoyUdid) : "",
+        isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
+        LnnPrintConnectionAddr(&connFsm->connInfo.addr));
+    SoftBusFree(anoyUdid);
+    SoftBusFree(anoyNetworkId);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
@@ -813,7 +869,16 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     connFsm = TO_CONN_FSM(fsm);
     connInfo = &connFsm->connInfo;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]leaving state enter", connFsm->id);
+    bool isNodeInfoValid = (connFsm->connInfo.nodeInfo != NULL);
+    char *anoyUdid = NULL;
+    char *anoyNetworkId = NULL;
+    LLOGI("[id=%u][networkId=%s][udid=%s][deviceName=%s][peer%s]leaving state enter",
+        connFsm->id, ToSecureStrDeviceID(connFsm->connInfo.peerNetworkId, &anoyNetworkId),
+        isNodeInfoValid ? ToSecureStrDeviceID(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anoyUdid) : "",
+        isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
+        LnnPrintConnectionAddr(&connFsm->connInfo.addr));
+    SoftBusFree(anoyUdid);
+    SoftBusFree(anoyNetworkId);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
@@ -894,7 +959,7 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target)
+NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName)
 {
     LnnConnectionFsm *connFsm = NULL;
 
@@ -915,7 +980,14 @@ NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr
         return NULL;
     }
     connFsm->connInfo.addr = *target;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "create a new connection fsm[id=%u]", connFsm->id);
+    if (pkgName != NULL) {
+        if (strcpy_s(connFsm->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
+            SoftBusFree(connFsm);
+            return NULL;
+        }
+    }
+    LLOGI("create a new connection fsm[id=%u][peer%s]", connFsm->id, LnnPrintConnectionAddr(target));
     return connFsm;
 }
 

@@ -34,9 +34,14 @@ extern "C" {
 #define TYPE_CAR_ID 0x83
 #define TYPE_WATCH_ID 0x6D
 #define TYPE_IPCAMERA_ID 0X08
+#define TYPE_PC_ID 0x0C
+#define TYPE_SMART_DISPLAY_ID 0xA02
 
 typedef struct {
     char deviceName[DEVICE_NAME_BUF_LEN];
+    char unifiedName[DEVICE_NAME_BUF_LEN];
+    char displayName[DEVICE_NAME_BUF_LEN];
+    char unifiedDefaultName[DEVICE_NAME_BUF_LEN];
     char deviceUdid[UDID_BUF_LEN];
     uint16_t deviceTypeId;
 } DeviceBasicInfo;

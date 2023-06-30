@@ -29,13 +29,14 @@
 #include "inner_session.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 #include "softbus_trans_def.h"
-#include "softbus_feature_config.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 
@@ -200,12 +201,24 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     SoftBusFree(anonyOutPeer);
 
     TransInfo transInfo;
+    SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
+    if (tmpAttr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc SessionAttribute failed");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(tmpAttr, sizeof(SessionAttribute), attr, sizeof(SessionAttribute)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s SessionAttribute failed");
+        SoftBusFree(tmpAttr);
+        return SOFTBUS_ERR;
+    }
+    tmpAttr->fastTransData = NULL;
+    tmpAttr->fastTransDataSize = 0;
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
         .peerDeviceId = peerNetworkId,
         .groupId = groupId,
-        .attr = attr,
+        .attr = tmpAttr,
     };
 
     int32_t sessionId = INVALID_SESSION_ID;
@@ -213,6 +226,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session already opened");
             return OpenSessionWithExistSession(sessionId, isEnabled);
@@ -224,6 +238,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session ipc err: ret=%d", ret);
+        SoftBusFree(tmpAttr);
         (void)ClientDeleteSession(sessionId);
         return ret;
     }
@@ -231,11 +246,13 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session failed");
+        SoftBusFree(tmpAttr);
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d, channelType = %d",
         sessionId, transInfo.channelId, transInfo.channelType);
+    SoftBusFree(tmpAttr);
     return sessionId;
 }
 

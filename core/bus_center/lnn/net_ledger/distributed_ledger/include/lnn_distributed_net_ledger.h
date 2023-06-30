@@ -16,9 +16,6 @@
 #ifndef LNN_DISTRIBUTED_NET_LEDGER_H
 #define LNN_DISTRIBUTED_NET_LEDGER_H
 
-#include <pthread.h>
-#include <stdint.h>
-
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "lnn_node_info.h"
@@ -57,7 +54,7 @@ int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type);
 int32_t LnnClearAuthTypeValue(uint32_t *authTypeValue, AuthType type);
 void LnnRemoveNode(const char *udid);
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
-NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info); /* key means udid/uuid/networkId/macAddr/ip */
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
 bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info);
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
@@ -65,14 +62,15 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
     char *dstIdBuf, uint32_t dstIdBufLen);
 short LnnGetCnnCode(const char *uuid, DiscoveryType type);
 int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
-int32_t LnnGetLaneCount(int32_t laneId);
-int32_t LnnSetLaneCount(int32_t laneId, int32_t num);
 int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp);
+int32_t LnnGetDLOnlineTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, const uint64_t timestamp);
 bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability);
 int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
+int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info);
+int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info);
 int32_t LnnGetAllAuthSeq(const char *udid, int64_t *authSeq, uint32_t num);
 const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash);
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
