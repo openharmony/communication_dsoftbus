@@ -20,8 +20,6 @@
 #define _GNU_SOURCE
 #endif
 
-#include <arpa/inet.h>
-#include <net/if.h>
 #include <securec.h>
 #include <stdint.h>
 #include <stdlib.h>

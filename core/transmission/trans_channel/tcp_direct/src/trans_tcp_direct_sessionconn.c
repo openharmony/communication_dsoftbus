@@ -24,11 +24,11 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "trans_channel_manager.h"
 
 #define TRANS_SEQ_STEP 2
 
 static SoftBusList *g_sessionConnList = NULL;
-static int32_t g_tdcChannelId = 0;
 
 NO_SANITIZE("cfi") uint64_t TransTdcGetNewSeqId(void)
 {
@@ -45,20 +45,6 @@ NO_SANITIZE("cfi") uint64_t TransTdcGetNewSeqId(void)
     ReleaseSessonConnLock();
 
     return retseq;
-}
-
-NO_SANITIZE("cfi") int32_t GenerateTdcChannelId(void)
-{
-    int32_t channelId;
-    if (GetSessionConnLock() != SOFTBUS_OK) {
-        return INVALID_CHANNEL_ID;
-    }
-    channelId = g_tdcChannelId++;
-    if (g_tdcChannelId < 0) {
-        g_tdcChannelId = 0;
-    }
-    ReleaseSessonConnLock();
-    return channelId;
 }
 
 NO_SANITIZE("cfi") int32_t CreatSessionConnList(void)
@@ -139,7 +125,11 @@ NO_SANITIZE("cfi") SessionConn *CreateNewSessinConn(ListenerModule module, bool 
         return NULL;
     }
     conn->serverSide = isServerSid;
-    conn->channelId = GenerateTdcChannelId();
+    conn->channelId = GenerateChannelId(true);
+    if (conn->channelId == INVALID_CHANNEL_ID) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate tdc channel id failed.");
+        return NULL;
+    }
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = -1;
@@ -271,7 +261,8 @@ NO_SANITIZE("cfi") void TransDelSessionConnById(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
-            if (item->listenMod == DIRECT_CHANNEL_SERVER_P2P && item->authId != AUTH_INVALID_ID && !item->serverSide) {
+            if (item->listenMod == DIRECT_CHANNEL_SERVER_P2P && item->authId != AUTH_INVALID_ID
+                && !item->serverSide && item->appInfo.routeType != WIFI_P2P_REUSE) {
                 AuthCloseConn(item->authId);
             }
             ListDelete(&item->node);

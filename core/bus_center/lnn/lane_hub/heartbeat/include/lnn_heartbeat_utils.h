@@ -34,14 +34,21 @@ extern "C" {
 #define HB_TIME_FACTOR (1000LL)
 #define HB_START_DELAY_LEN (10 * HB_TIME_FACTOR)
 #define HB_SEND_ONCE_LEN (10 * HB_TIME_FACTOR)
-#define HB_SEND_RELAY_LEN (4 * HB_TIME_FACTOR)
+#define HB_SEND_RELAY_LEN (2 * HB_TIME_FACTOR)
 #define HB_CHECK_DELAY_LEN HB_SEND_ONCE_LEN
 #define HB_CHECK_OFFLINE_TOLERANCE_LEN HB_SEND_ONCE_LEN
 #define HB_NOTIFY_DEV_LOST_DELAY_LEN (2 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
-#define HB_REMOVE_REPEAD_RECV_LEN HB_SEND_ONCE_LEN
+#define HB_REPEAD_RECV_THRESHOLD (1 * HB_TIME_FACTOR)
+#define HB_REPEAD_JOIN_LNN_THRESHOLD (2 * HB_TIME_FACTOR)
 #define HB_OFFLINE_TIME (5 * 60 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
+#define HB_SCREEN_ON_COAP_TIME (3 * HB_TIME_FACTOR)
+#define HB_RESTART_LEN (3 * HB_TIME_FACTOR)
+#define HB_OFFLINE_PERIOD 2
 
-#define HB_MAX_TYPE_COUNT 4
+#define HB_SEND_EACH_SEPARATELY_LEN (2 * HB_TIME_FACTOR) // Split and send a single heartbeat
+#define HB_SEND_SEPARATELY_CNT (HB_SEND_ONCE_LEN / HB_SEND_EACH_SEPARATELY_LEN)
+
+#define HB_MAX_TYPE_COUNT 5
 
 // heartbeat type
 #define HEARTBEAT_TYPE_MIN              (0x1L)
@@ -49,7 +56,26 @@ extern "C" {
 #define HEARTBEAT_TYPE_BLE_V0           (0x1L << 1)
 #define HEARTBEAT_TYPE_BLE_V1           (0x1L << 2)
 #define HEARTBEAT_TYPE_TCP_FLUSH        (0x1L << 3)
-#define HEARTBEAT_TYPE_MAX              (0x1L << 4)
+#define HEARTBEAT_TYPE_BLE_V3           (0x1L << 4)
+#define HEARTBEAT_TYPE_MAX              (0x1L << 5)
+
+#define NORMAL_STRATEGY 1
+#define HIGH_PERFORMANCE_STRATEGY 2
+#define ONCE_STRATEGY 3
+#define SUSPEND_STRATEGY 4
+#define LOW_CONTINUOUS_ADVERTISE 7
+#define ADJUST_INTERVAL_STRATEGY 8
+#define REQUEST_DISABLE_BLE_DISCOVERY 100
+#define REQUEST_ENABLE_BLE_DISCOVERY  101
+
+#define MIN_DISABLE_BLE_DISCOVERY_TIME 1000
+#define MAX_DISABLE_BLE_DISCOVERY_TIME 15000
+
+#define BT_ADDR_LEN 6
+#define BT_MAC_HASH_LEN 8
+#define BT_MAC_HASH_STR_LEN 17
+
+#define CHECK_TRUSTED_RELATION_TIME 5000
 
 typedef uint32_t LnnHeartbeatType;
 
@@ -78,6 +104,7 @@ int32_t LnnConvertHbTypeToId(LnnHeartbeatType type);
 bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType);
 bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType);
 int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len);
+int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen);
 
 #ifdef __cplusplus
 }

@@ -47,6 +47,8 @@ constexpr uint32_t CRYPT_DATA_LEN = 200;
 constexpr uint32_t ENCRYPT_OVER_HEAD_LEN_TEST = 32;
 constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
 constexpr char P2P_MAC2[BT_MAC_LEN] = { 0 };
+constexpr char UUID_TEST[UUID_BUF_LEN] = "0123456789ABC";
+constexpr char UUID_TEST2[UUID_BUF_LEN] = {0};
 
 class AuthTest : public testing::Test {
 public:
@@ -163,22 +165,6 @@ HWTEST_F(AuthTest, GET_AUTH_REQUEST_Test_001, TestSize.Level1)
     AuthRequest request = { 0 };
 
     int32_t ret = GetAuthRequest(requestId, &request);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
-}
-
-/*
- * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_Test_001
- * @tc.desc: update auth request connInfo test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTest, UPDATE_AUTH_REQUEST_CONN_INFO_Test_001, TestSize.Level1)
-{
-    uint32_t requestId = 1;
-    AuthConnInfo connInfo;
-
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    int32_t ret = UpdateAuthRequestConnInfo(requestId, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
 }
 
@@ -522,9 +508,9 @@ HWTEST_F(AuthTest, POST_HICHAIN_AUTH_MESSAGE_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_001, TestSize.Level1)
 {
     AuthManager auth = { 0 };
-
+    int32_t flagRelay = 1;
     InitSessionKeyList(&auth.sessionKeyList);
-    int32_t ret = PostVerifyDeviceMessage(&auth);
+    int32_t ret = PostVerifyDeviceMessage(&auth, flagRelay);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
 }
 
@@ -843,11 +829,11 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     AuthLinkType type = AUTH_LINK_TYPE_WIFI;
     bool isServer = true;
     int64_t ret;
-    ret = AuthDeviceGetIdByP2pMac(nullptr, type, isServer);
+    ret = AuthDeviceGetIdByUuid(nullptr, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthDeviceGetIdByP2pMac(P2P_MAC2, type, isServer);
+    ret = AuthDeviceGetIdByUuid(P2P_MAC2, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthDeviceGetIdByP2pMac(P2P_MAC, type, isServer);
+    ret = AuthDeviceGetIdByUuid(P2P_MAC, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -1028,17 +1014,17 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     int64_t ret;
 
     type = AUTH_LINK_TYPE_BR;
-    ret = AuthGetIdByP2pMac(nullptr, type, true, false);
+    ret = AuthGetIdByUuid(nullptr, type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetIdByP2pMac(nullptr, type, true, true);
+    ret = AuthGetIdByUuid(nullptr, type, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    ret = AuthGetIdByP2pMac(P2P_MAC, type, true, false);
+    ret = AuthGetIdByUuid(UUID_TEST, type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetIdByP2pMac(P2P_MAC, type, true, true);
+    ret = AuthGetIdByUuid(UUID_TEST, type, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    ret = AuthGetIdByP2pMac(P2P_MAC2, type, true, false);
+    ret = AuthGetIdByUuid(UUID_TEST2, type, true, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetIdByP2pMac(P2P_MAC2, type, true, true);
+    ret = AuthGetIdByUuid(UUID_TEST2, type, true, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -1286,19 +1272,19 @@ HWTEST_F(AuthTest, COMPARE_CONN_INFO_Test_001, TestSize.Level1)
     (void)memset_s(&info2, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     info1.type = AUTH_LINK_TYPE_WIFI;
     info2.type = AUTH_LINK_TYPE_WIFI;
-    ret = CompareConnInfo(&info1, &info2);
+    ret = CompareConnInfo(&info1, &info2, false);
     EXPECT_TRUE(ret == true);
     info1.type = AUTH_LINK_TYPE_BR;
     info2.type = AUTH_LINK_TYPE_BR;
-    ret = CompareConnInfo(&info1, &info2);
+    ret = CompareConnInfo(&info1, &info2, false);
     EXPECT_TRUE(ret == true);
     info1.type = AUTH_LINK_TYPE_BLE;
     info2.type = AUTH_LINK_TYPE_BLE;
-    ret = CompareConnInfo(&info1, &info2);
+    ret = CompareConnInfo(&info1, &info2, false);
     EXPECT_TRUE(ret == true);
     info1.type = AUTH_LINK_TYPE_P2P;
     info2.type = AUTH_LINK_TYPE_P2P;
-    ret = CompareConnInfo(&info1, &info2);
+    ret = CompareConnInfo(&info1, &info2, false);
     EXPECT_TRUE(ret == true);
 }
 
@@ -1675,7 +1661,8 @@ HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     bool isMetaAuth = false;
-    int32_t ret = UnpackDeviceInfoMessage(msg, linkType, version, &nodeInfo, isMetaAuth);
+    DevInfoData devInfo = {msg, 0, linkType, version};
+    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &nodeInfo, isMetaAuth);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -1724,8 +1711,9 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_Test_001, TestSize.Level1)
 {
     const AuthManager *auth = nullptr;
     AuthManager authValue;
+    int32_t flagRelay = 1;
     (void)memset_s(&authValue, sizeof(AuthManager), 0, sizeof(AuthManager));
-    int32_t ret = PostVerifyDeviceMessage(auth);
+    int32_t ret = PostVerifyDeviceMessage(auth, flagRelay);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

@@ -32,7 +32,7 @@ public:
     virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2) = 0;
     virtual int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData) = 0;
     virtual int32_t MetaNodeServerLeave(const char *networkId) = 0;
-    virtual int32_t LnnServerLeave(const char *networkId) = 0;
+    virtual int32_t LnnServerLeave(const char *networkId, const char *pkgName) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen) = 0;
@@ -67,7 +67,7 @@ public:
     virtual int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId, int32_t reason) = 0;
     virtual int32_t ClientOnRefreshDeviceFound(
         const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen) = 0;
-    virtual int32_t LnnServerJoin(ConnectionAddr *addr) = 0;
+    virtual int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName) = 0;
 };
 class BusCenterIpcInterfaceMock : public BusCenterIpcInterface {
 public:
@@ -76,7 +76,7 @@ public:
 
     MOCK_METHOD2(LnnIsSameConnectionAddr, bool(const ConnectionAddr *, const ConnectionAddr *));
     MOCK_METHOD2(MetaNodeServerJoin, int32_t(ConnectionAddr *, CustomData *));
-    MOCK_METHOD1(LnnServerLeave, int32_t(const char *));
+    MOCK_METHOD2(LnnServerLeave, int32_t(const char *, const char *));
     MOCK_METHOD1(MetaNodeServerLeave, int32_t(const char *));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
@@ -103,7 +103,7 @@ public:
     MOCK_METHOD4(ClientOnPublishLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
     MOCK_METHOD4(ClientOnRefreshLNNResult, int32_t(const char *, int32_t, int32_t, int32_t));
     MOCK_METHOD4(ClientOnRefreshDeviceFound, int32_t(const char *, int32_t, const void *, uint32_t));
-    MOCK_METHOD1(LnnServerJoin, int32_t(ConnectionAddr *));
+    MOCK_METHOD2(LnnServerJoin, int32_t(ConnectionAddr *, const char *));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

@@ -47,7 +47,8 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
 
 int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid);
 
-void TransOnLinkDown(const char *networkId, int32_t routeType);
+void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
+    const char *peerIp, int32_t routeType);
 
 #ifdef __cplusplus
 }

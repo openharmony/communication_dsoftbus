@@ -251,6 +251,7 @@ NO_SANITIZE("cfi") int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+
     if (HksKeyExist(keyAlias, NULL) != HKS_SUCCESS) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "huks key has deleted");
         return SOFTBUS_OK;

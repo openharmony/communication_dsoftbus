@@ -462,6 +462,14 @@ static int32_t TryRecoveryTrustedDevInfoTable(void)
     return InitTrustedDevInfoTable();
 }
 
+bool LnnIsPotentialHomeGroup(const char *udid)
+{
+    (void)udid;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check is potential home group not implemented.");
+    return false;
+}
+
 NO_SANITIZE("cfi") int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {

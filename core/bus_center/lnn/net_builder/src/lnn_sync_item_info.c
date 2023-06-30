@@ -194,13 +194,8 @@ int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo
         return SOFTBUS_ERR;
     }
 
-    NodeInfo *info = LnnGetNodeInfoById(peerNetWorkId, CATEGORY_NETWORK_ID);
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local node info fail");
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(&(info->bssTransInfo), sizeof(BssTransInfo), transInfo, sizeof(BssTransInfo)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy trans info fail");
+    if (LnnSetDLBssTransInfo(peerNetWorkId, transInfo) != SOFTBUS_OK) {
+        LLOGE("save bssTransinfo fail");
         return SOFTBUS_ERR;
     }
 

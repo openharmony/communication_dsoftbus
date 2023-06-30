@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "lnn_lane_link.h"
 #include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -31,7 +32,8 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_hitracechain.h"
+#include "trans_channel_manager.h"
+#include "softbus_adapter_hitrace.h"
 
 #define ID_OFFSET (1)
 
@@ -78,7 +80,7 @@ NO_SANITIZE("cfi") void TransDelConnByConnId(uint32_t connId)
     ProxyConnInfo *removeNode = NULL;
     ProxyConnInfo *tmpNode = NULL;
 
-    if (g_proxyConnectionList == NULL) {
+    if ((g_proxyConnectionList == NULL) || (connId == 0)) {
         return;
     }
 
@@ -93,7 +95,6 @@ NO_SANITIZE("cfi") void TransDelConnByConnId(uint32_t connId)
             SoftBusFree(removeNode);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del conn=%d item.", connId);
             g_proxyConnectionList->cnt--;
-            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
@@ -105,7 +106,7 @@ NO_SANITIZE("cfi") int32_t TransDecConnRefByConnId(uint32_t connId)
     ProxyConnInfo *removeNode = NULL;
     ProxyConnInfo *tmpNode = NULL;
 
-    if (g_proxyConnectionList == NULL) {
+    if ((g_proxyConnectionList == NULL) || (connId == 0)) {
         return SOFTBUS_ERR;
     }
 
@@ -154,11 +155,12 @@ NO_SANITIZE("cfi") int32_t TransAddConnRefByConnId(uint32_t connId)
         if (item->connId == connId) {
             item->ref++;
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add conn=%d ref %d.", connId, item->ref);
-            break;
+            (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+            return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-    return SOFTBUS_OK;
+    return SOFTBUS_ERR;
 }
 
 NO_SANITIZE("cfi") static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
@@ -380,13 +382,26 @@ NO_SANITIZE("cfi") int32_t TransAddConnItem(ProxyConnInfo *chan)
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(item, tmpItem, &g_proxyConnectionList->list, ProxyConnInfo, node) {
-        if (strcmp(item->connInfo.brOption.brMac, chan->connInfo.brOption.brMac) == 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref = %d", item->ref);
-            (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-            if (item->state == PROXY_CHANNEL_STATUS_PYH_CONNECTED) {
-                TransProxyChanProcessByReqId((int32_t)chan->requestId, item->connId);
+        if (chan->connInfo.type == CONNECT_BR) {
+            if (strcasecmp(item->connInfo.brOption.brMac, chan->connInfo.brOption.brMac) == 0) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref = %d", item->ref);
+                (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+                return SOFTBUS_ERR;
             }
-            return SOFTBUS_ERR;
+        } else if (chan->connInfo.type == CONNECT_BLE) {
+            if (strcasecmp(item->connInfo.bleOption.bleMac, chan->connInfo.bleOption.bleMac) == 0) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref = %d", item->ref);
+                (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+                return SOFTBUS_ERR;
+            }
+        } else if (chan->connInfo.type == CONNECT_TCP) {
+            if (chan->connInfo.socketOption.protocol == item->connInfo.socketOption.protocol &&
+                strcasecmp(chan->connInfo.socketOption.addr, item->connInfo.socketOption.addr) == 0 &&
+                chan->connInfo.socketOption.port == item->connInfo.socketOption.port) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn ref = %d", item->ref);
+                (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
+                return SOFTBUS_ERR;
+            }
         }
     }
     ListAdd(&(g_proxyConnectionList->list), &(chan->node));
@@ -413,36 +428,6 @@ NO_SANITIZE("cfi") static void TransConnInfoToConnOpt(ConnectionInfo *connInfo, 
         connOption->socketOption.port = connInfo->socketInfo.port;
         connOption->socketOption.moduleId = connInfo->socketInfo.moduleId;
     }
-}
-
-static bool CompareConnectOption(const ConnectOption *itemConnInfo, const ConnectOption *connInfo)
-{
-    if (connInfo->type == CONNECT_TCP) {
-        if (connInfo->socketOption.protocol == itemConnInfo->socketOption.protocol &&
-            strcasecmp(connInfo->socketOption.addr, itemConnInfo->socketOption.addr) == 0 &&
-            connInfo->socketOption.port == itemConnInfo->socketOption.port) {
-            return true;
-        }
-        return false;
-    } else if (connInfo->type == CONNECT_BR) {
-        if (strcasecmp(connInfo->brOption.brMac, itemConnInfo->brOption.brMac) == 0) {
-            return true;
-        }
-        return false;
-    } else if (connInfo->type == CONNECT_BLE) {
-        if (strcasecmp(connInfo->bleOption.bleMac, itemConnInfo->bleOption.bleMac) == 0) {
-            return true;
-        }
-        return false;
-    } else if (connInfo->type == CONNECT_BLE_DIRECT) {
-        const struct BleDirectOption* dstBleDirectOption = &connInfo->bleDirectOption;
-        if ((strcmp((char*)dstBleDirectOption->nodeIdHash, (char*)itemConnInfo->bleDirectOption.nodeIdHash) == 0) &&
-            (dstBleDirectOption->protoType == itemConnInfo->bleDirectOption.protoType)) {
-            return true;
-        }
-        return false;
-    }
-    return false;
 }
 
 NO_SANITIZE("cfi") void TransCreateConnByConnId(uint32_t connId)
@@ -487,6 +472,37 @@ NO_SANITIZE("cfi") void TransCreateConnByConnId(uint32_t connId)
     g_proxyConnectionList->cnt++;
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     return;
+}
+
+static bool CompareConnectOption(const ConnectOption *itemConnInfo, const ConnectOption *connInfo)
+{
+    if (connInfo->type == CONNECT_TCP) {
+        if (connInfo->socketOption.protocol == itemConnInfo->socketOption.protocol &&
+            strcasecmp(connInfo->socketOption.addr, itemConnInfo->socketOption.addr) == 0 &&
+            connInfo->socketOption.port == itemConnInfo->socketOption.port) {
+            return true;
+        }
+        return false;
+    } else if (connInfo->type == CONNECT_BR) {
+        if (strcasecmp(connInfo->brOption.brMac, itemConnInfo->brOption.brMac) == 0) {
+            return true;
+        }
+        return false;
+    } else if (connInfo->type == CONNECT_BLE) {
+        if (strcasecmp(connInfo->bleOption.bleMac, itemConnInfo->bleOption.bleMac) == 0 &&
+            (connInfo->bleOption.protocol == itemConnInfo->bleOption.protocol) &&
+            connInfo->bleOption.psm == itemConnInfo->bleOption.psm) {
+            return true;
+        }
+        return false;
+    } else if (connInfo->type == CONNECT_BLE_DIRECT) {
+        if ((strcmp(connInfo->bleDirectOption.nodeIdHash, itemConnInfo->bleDirectOption.nodeIdHash) == 0) &&
+            (connInfo->bleDirectOption.protoType == itemConnInfo->bleDirectOption.protoType)) {
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 
 static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyConn)
@@ -553,7 +569,6 @@ NO_SANITIZE("cfi") void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId
 
 static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
 {
-    (void)connInfo;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "Connect Successe reqid %d, connectionId %d", requestId, connectionId);
     TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
@@ -566,7 +581,6 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
     if (TransDelConnByReqId(requestId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Connect fail del reqid %u fail", requestId);
     }
-
     TransProxyDelChanByReqId((int32_t)requestId);
 }
 
@@ -619,13 +633,17 @@ NO_SANITIZE("cfi") int32_t TransProxyConnExistProc(ProxyConnInfo *conn, const Ap
             SoftBusFree(chan);
             return SOFTBUS_ERR;
         }
-        TransAddConnRefByConnId(conn->connId);
+        if (TransAddConnRefByConnId(conn->connId) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransAddConnRefByConnId: %d err", conn->connId);
+            TransProxyDelChanByChanId(chanNewId);
+            return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
+        }
         TransProxyPostHandshakeMsgToLoop(chanNewId);
     }
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyConnectDevice(const ConnectOption *connInfo, uint32_t reqId)
+static int32_t TransProxyConnectDevice(ConnectOption *connInfo, uint32_t reqId)
 {
     ConnectResult result;
     result.OnConnectFailed = TransOnConnectFailed;
@@ -669,15 +687,16 @@ static int32_t TransProxyOpenNewConnChannel(
     connChan->ref = 0;
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Connect dev reqid %d", reqId);
-    (void)memcpy_s(&(connChan->connInfo), sizeof(ConnectOption), connInfo, sizeof(ConnectOption));
-    connChan->connInfo.socketOption.moduleId = moduleId;
+    connChan->connInfo = (*connInfo);
+    if (connInfo->type == CONNECT_TCP) {
+        connChan->connInfo.socketOption.moduleId = moduleId;
+    }
     if (TransAddConnItem(connChan) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn add repeat");
         SoftBusFree(connChan);
-        return SOFTBUS_OK;
+        return SOFTBUS_TRANS_PROXY_CONN_REPEAT;
     }
-
-    int32_t ret = TransProxyConnectDevice(connInfo, reqId);
+    int32_t ret = TransProxyConnectDevice(&connChan->connInfo, reqId);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");
         TransDelConnByReqId(reqId);
@@ -691,21 +710,30 @@ NO_SANITIZE("cfi") int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, con
 {
     int ret = SOFTBUS_ERR;
     ProxyConnInfo conn;
-    int32_t chanNewId = TransProxyGetNewMyId();
+    int32_t chanNewId = GenerateChannelId(false);
+    if (chanNewId == INVALID_CHANNEL_ID) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channelId is invalid");
+        return SOFTBUS_ERR;
+    }
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
         ret = TransProxyConnExistProc(&conn, appInfo, chanNewId);
+        if (ret == SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED) {
+            ret = TransProxyOpenNewConnChannel(PROXY, appInfo, connInfo, chanNewId);
+        }
     } else {
         ret = TransProxyOpenNewConnChannel(PROXY, appInfo, connInfo, chanNewId);
+        if ((ret == SOFTBUS_TRANS_PROXY_CONN_REPEAT) && (TransGetConn(connInfo, &conn) == SOFTBUS_OK)) {
+            ret = TransProxyConnExistProc(&conn, appInfo, chanNewId);
+        }
     }
     if (ret == SOFTBUS_OK) {
         *channelId = chanNewId;
     }
-
     return ret;
 }
 
-static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
-                                     int64_t seq, char *data, int32_t len)
+static void TransProxyOnDataReceived(
+    uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     ProxyMessage msg;
 
@@ -720,7 +748,7 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
     }
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     msg.connId = connectionId;
-    if (TransProxyParseMessage(data, len, &msg) != SOFTBUS_OK) {
+    if (TransProxyParseMessage((char *)data, len, &msg) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse proxy msg err");
         return;
     }
@@ -728,9 +756,7 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "TransProxyonMessageReceived, msg->data: ", msg.data, msg.dateLen);
     }
     TransProxyonMessageReceived(&msg);
-    if (msg.msgHead.cipher & ENCRYPTED) {
-        SoftBusFree(msg.data);
-    }
+    SoftBusFree(msg.data);
 }
 
 NO_SANITIZE("cfi") int32_t TransProxyTransInit(void)

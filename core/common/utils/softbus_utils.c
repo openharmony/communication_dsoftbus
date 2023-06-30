@@ -176,6 +176,7 @@ NO_SANITIZE("cfi") int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBuf
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "outBufLen=%d inLen=%d", outBufLen, inLen);
         return SOFTBUS_ERR;
     }
 
@@ -263,6 +264,23 @@ NO_SANITIZE("cfi") int32_t ConvertBtMacToBinary(const char *strMac, uint32_t str
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") int32_t ConvertBtMacToStrNoColon(char *strMac, uint32_t strMacLen, const uint8_t *binMac,
+    uint32_t binMacLen)
+{
+    int32_t ret;
+
+    if (strMac == NULL || strMacLen < BT_MAC_NO_COLON_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x%02x%02x%02x%02x%02x",
+        binMac[MAC_BIT_ZERO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_TWO],
+        binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
+    if (ret < 0) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac,
     uint32_t binMacLen)
 {
@@ -286,6 +304,40 @@ static char ToUpperCase(char ch)
         return ch - 'a' + 'A';
     }
     return ch;
+}
+
+static char ToLowerCase(char ch)
+{
+    if (ch >= 'A' && ch <= 'Z') {
+        return ch - 'A' + 'a';
+    }
+    return ch;
+}
+
+int32_t StringToUpperCase(const char *str, char *buf, int32_t size)
+{
+    if (str == NULL || buf == NULL) {
+        return SOFTBUS_ERR;
+    }
+    memset_s(buf, size, 0, size);
+    int32_t i;
+    for (i = 0; str[i] != '\0'; i++) {
+        buf[i] = ToUpperCase(str[i]);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t StringToLowerCase(const char *str, char *buf, int32_t size)
+{
+    if (str == NULL || buf == NULL) {
+        return SOFTBUS_ERR;
+    }
+    memset_s(buf, size, 0, size);
+    int32_t i;
+    for (i = 0; str[i] != '\0'; i++) {
+        buf[i] = ToLowerCase(str[i]);
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2)

@@ -16,7 +16,6 @@
 #include "trans_lane_manager.h"
 
 #include <securec.h>
-#include <unistd.h>
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -84,14 +83,14 @@ static int32_t TransLaneChannelForEachShowInfo(int fd)
         SoftBusFree(appInfo);
         return SOFTBUS_ERR;
     }
-        
+
     TransLaneInfo *laneItem = NULL;
     LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
         GetTransSessionInfoByLane(laneItem, appInfo);
         SoftBusTransDumpRunningSession(fd,
             ConvertLaneLinkTypeToDumper(laneItem->laneConnInfo.type), appInfo);
     }
-    
+
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     SoftBusFree(appInfo);
     return SOFTBUS_OK;

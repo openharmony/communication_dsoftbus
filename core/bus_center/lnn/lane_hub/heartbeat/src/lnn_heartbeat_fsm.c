@@ -20,7 +20,9 @@
 
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
@@ -32,8 +34,8 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_hisysevt_bus_center.h"
+#include "softbus_log.h"
 #include "softbus_utils.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
@@ -60,6 +62,7 @@ static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *pa
 static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para);
+static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 
 static LnnHeartbeatStateHandler g_hbNoneStateHandler[] = {
     {EVENT_HB_CHECK_DEV_STATUS, OnCheckDevStatus},
@@ -83,6 +86,7 @@ static LnnHeartbeatStateHandler g_normalNodeHandler[] = {
     {EVENT_HB_UPDATE_SEND_INFO, OnUpdateSendInfo},
     {EVENT_HB_STOP_SPECIFIC, OnStopHbByType},
     {EVENT_HB_SCREEN_OFF_CHECK_STATUS, OnScreeOffCheckDevStatus},
+    {EVENT_HB_START_PROCESS, OnReStartHbProcess},
 };
 
 static LnnHeartbeatStateHandler g_masterNodeHandler[] = {
@@ -97,6 +101,7 @@ static LnnHeartbeatStateHandler g_masterNodeHandler[] = {
     {EVENT_HB_UPDATE_SEND_INFO, OnUpdateSendInfo},
     {EVENT_HB_STOP_SPECIFIC, OnStopHbByType},
     {EVENT_HB_SCREEN_OFF_CHECK_STATUS, OnScreeOffCheckDevStatus},
+    {EVENT_HB_START_PROCESS, OnReStartHbProcess},
 };
 
 static LnnHeartbeatFsmHandler g_hbFsmHandler[] = {
@@ -115,6 +120,7 @@ static LnnHeartbeatFsmHandler g_hbFsmHandler[] = {
 };
 
 static void HbNoneStateEnter(FsmStateMachine *fsm);
+static void HbNoneStateExit(FsmStateMachine *fsm);
 static void HbNormalNodeStateEnter(FsmStateMachine *fsm);
 static void HbMasterNodeStateEnter(FsmStateMachine *fsm);
 static void HbMasterNodeStateExit(FsmStateMachine *fsm);
@@ -124,7 +130,7 @@ static FsmState g_hbState[STATE_HB_INDEX_MAX] = {
     [STATE_HB_NONE_INDEX] = {
         .enter = HbNoneStateEnter,
         .process = HbFsmStateProcessFunc,
-        .exit = NULL,
+        .exit = HbNoneStateExit,
     },
     [STATE_HB_NORMAL_NODE_INDEX] = {
         .enter = HbNormalNodeStateEnter,
@@ -140,13 +146,11 @@ static FsmState g_hbState[STATE_HB_INDEX_MAX] = {
 
 static bool CheckHbFsmStateMsgArgs(const FsmStateMachine *fsm)
 {
-    LnnHeartbeatFsm *hbFsm = NULL;
-
     if (fsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fsm is null");
         return false;
     }
-    hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnHeartbeatFsm * hbFsm = TO_HEARTBEAT_FSM(fsm);
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB hbFsm is null");
         return false;
@@ -173,14 +177,13 @@ static void FreeUnhandledHbMessage(int32_t msgType, void *para)
 NO_SANITIZE("cfi") static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     int32_t i, eventNum, ret;
-    LnnHeartbeatFsm *hbFsm = NULL;
     LnnHeartbeatStateHandler *stateHandler = NULL;
 
     if (!CheckHbFsmStateMsgArgs(fsm) || msgType <= EVENT_HB_MIN || msgType >= EVENT_HB_MAX) {
         FreeUnhandledHbMessage(msgType, para);
         return false;
     }
-    hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnHeartbeatFsm * hbFsm = TO_HEARTBEAT_FSM(fsm);
     eventNum = g_hbFsmHandler[hbFsm->state].eventNum;
     stateHandler = g_hbFsmHandler[hbFsm->state].stateHandler;
 
@@ -256,24 +259,50 @@ static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delM
 
 static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
 {
-    LnnHeartbeatCustSendData *msgPara = (LnnHeartbeatCustSendData *)ctrlMsgObj->obj;
+    LnnHeartbeatSendEndData *msgPara = (LnnHeartbeatSendEndData *)ctrlMsgObj->obj;
     LnnRemoveSendEndMsgPara *delMsgPara = (LnnRemoveSendEndMsgPara *)delMsg->obj;
 
-    if (msgPara->wakeupFlag && !delMsgPara->wakeupFlag) {
-        *delMsgPara->isRemoved = false;
-        return SOFTBUS_ERR;
-    }
-    if (msgPara->hbType == HEARTBEAT_TYPE_BLE_V0 && delMsgPara->hbType == HEARTBEAT_TYPE_BLE_V1) {
-        *delMsgPara->isRemoved = false;
-        return SOFTBUS_ERR;
-    }
-    if ((msgPara->hbType == delMsgPara->hbType) ||
-        (msgPara->hbType == HEARTBEAT_TYPE_BLE_V1 && delMsgPara->hbType == HEARTBEAT_TYPE_BLE_V0)) {
+    if (!msgPara->wakeupFlag && delMsgPara->wakeupFlag) {
         *delMsgPara->isRemoved = true;
         SoftBusFree(msgPara);
         msgPara = NULL;
         return SOFTBUS_OK;
     }
+    if (msgPara->wakeupFlag && !delMsgPara->wakeupFlag) {
+        *delMsgPara->isRemoved = false;
+        return SOFTBUS_ERR;
+    }
+    if (msgPara->isRelay && (msgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
+        *delMsgPara->isRemoved = true;
+        SoftBusFree(msgPara);
+        msgPara = NULL;
+        return SOFTBUS_OK;
+    }
+    if (delMsgPara->isRelay && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
+        *delMsgPara->isRemoved = false;
+        return SOFTBUS_ERR;
+    }
+    if ((msgPara->hbType & HEARTBEAT_TYPE_BLE_V1) != 0 && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
+        *delMsgPara->isRemoved = true;
+        SoftBusFree(msgPara);
+        msgPara = NULL;
+        return SOFTBUS_OK;
+    }
+    if ((msgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0 && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V1) != 0) {
+        *delMsgPara->isRemoved = false;
+        return SOFTBUS_ERR;
+    }
+    if (msgPara->hbType == delMsgPara->hbType && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
+        *delMsgPara->isRemoved = true;
+        SoftBusFree(msgPara);
+        msgPara = NULL;
+        return SOFTBUS_OK;
+    }
+    if (msgPara->hbType == delMsgPara->hbType && (delMsgPara->hbType & HEARTBEAT_TYPE_BLE_V1) != 0) {
+        *delMsgPara->isRemoved = false;
+        return SOFTBUS_ERR;
+    }
+    *delMsgPara->isRemoved = false;
     return SOFTBUS_ERR;
 }
 
@@ -340,7 +369,8 @@ static void RemoveHbMsgByCustObj(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType e
     }
 }
 
-NO_SANITIZE("cfi") void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool *isRemoved, bool wakeupFlag)
+NO_SANITIZE("cfi") void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
+    bool isRelay, bool *isRemoved)
 {
     if (hbFsm == NULL || isRemoved == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB remove send end msg get invalid param");
@@ -350,8 +380,9 @@ NO_SANITIZE("cfi") void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeat
     *isRemoved = true;
     LnnRemoveSendEndMsgPara msgPara = {
         .hbType = type,
-        .isRemoved = isRemoved,
         .wakeupFlag = wakeupFlag,
+        .isRelay = isRelay,
+        .isRemoved = isRemoved,
     };
     RemoveHbMsgByCustObj(hbFsm, EVENT_HB_SEND_ONE_END, (void *)&msgPara);
     msgPara.isRemoved = NULL;
@@ -391,15 +422,12 @@ NO_SANITIZE("cfi") void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnH
 
 static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
 {
-    LnnHeartbeatFsm *hbFsm = NULL;
-    LnnProcessSendOnceMsgPara *msgPara = NULL;
-
     if (!CheckHbFsmStateMsgArgs(fsm)) {
         return;
     }
-    hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
     hbFsm->state = STATE_HB_MASTER_NODE_INDEX;
-    msgPara = (LnnProcessSendOnceMsgPara *)SoftBusMalloc(sizeof(LnnProcessSendOnceMsgPara));
+    LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)SoftBusMalloc(sizeof(LnnProcessSendOnceMsgPara));
     if (msgPara == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fsmId(%d) enter master node malloc err", hbFsm->id);
         return;
@@ -407,6 +435,7 @@ static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
     msgPara->hbType = hbFsm->hbType;
     msgPara->strategyType = hbFsm->strategyType;
     msgPara->isRelay = false;
+    msgPara->isSyncData = false;
     LnnRemoveProcessSendOnceMsg(hbFsm, hbFsm->hbType, hbFsm->strategyType);
     if (LnnFsmPostMessage(fsm, EVENT_HB_PROCESS_SEND_ONCE, (void *)msgPara) != SOFTBUS_OK) {
         SoftBusFree(msgPara);
@@ -417,25 +446,21 @@ static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
 
 static void HbMasterNodeStateExit(FsmStateMachine *fsm)
 {
-    LnnHeartbeatFsm *hbFsm = NULL;
-
     if (!CheckHbFsmStateMsgArgs(fsm)) {
         return;
     }
-    hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
     LnnRemoveProcessSendOnceMsg(hbFsm, hbFsm->hbType, STRATEGY_HB_SEND_FIXED_PERIOD);
 }
 
 static void HbNormalNodeStateEnter(FsmStateMachine *fsm)
 {
-    LnnHeartbeatFsm *hbFsm = NULL;
-
     LnnDumpHbMgrRecvList();
     LnnDumpHbOnlineNodeList();
     if (!CheckHbFsmStateMsgArgs(fsm)) {
         return;
     }
-    hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
     hbFsm->state = STATE_HB_NORMAL_NODE_INDEX;
     LnnRemoveProcessSendOnceMsg(hbFsm, hbFsm->hbType, STRATEGY_HB_SEND_FIXED_PERIOD);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) fsmId(%d) perform as normal node", hbFsm->id);
@@ -443,12 +468,10 @@ static void HbNormalNodeStateEnter(FsmStateMachine *fsm)
 
 static void HbNoneStateEnter(FsmStateMachine *fsm)
 {
-    LnnHeartbeatFsm *hbFsm = NULL;
-
     if (!CheckHbFsmStateMsgArgs(fsm)) {
         return;
     }
-    hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
     hbFsm->state = STATE_HB_NONE_INDEX;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) fsmId(%d) perform none HB state", hbFsm->id);
 
@@ -457,6 +480,15 @@ static void HbNoneStateEnter(FsmStateMachine *fsm)
         return;
     }
     LnnFsmRemoveMessage(fsm, EVENT_HB_PROCESS_SEND_ONCE);
+}
+
+static void HbNoneStateExit(FsmStateMachine *fsm)
+{
+    if (!CheckHbFsmStateMsgArgs(fsm)) {
+        return;
+    }
+    LnnFsmPostMessage(fsm, EVENT_HB_UPDATE_SEND_INFO, (void *)(uintptr_t)UPDATE_HB_ACCOUNT_INFO);
+    LnnFsmPostMessage(fsm, EVENT_HB_UPDATE_SEND_INFO, (void *)(uintptr_t)UPDATE_HB_NETWORK_INFO);
 }
 
 static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *para)
@@ -514,7 +546,7 @@ static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *par
     (void)msgType;
     int32_t ret = SOFTBUS_ERR;
 
-    LnnHeartbeatCustSendData *custData = (LnnHeartbeatCustSendData *)para;
+    LnnHeartbeatSendBeginData *custData = (LnnHeartbeatSendBeginData *)para;
     if (custData == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin get invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -522,6 +554,8 @@ static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *par
     do {
         if (LnnHbMediumMgrSendBegin(custData) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin to manager fail");
+            LnnCheckDevStatusMsgPara checkMsg = {.hbType = custData->hbType, .hasNetworkId = false};
+            LnnRemoveCheckDevStatusMsg(TO_HEARTBEAT_FSM(fsm), &checkMsg);
             break;
         }
         ret = SOFTBUS_OK;
@@ -536,7 +570,7 @@ static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para)
     (void)msgType;
     int32_t ret = SOFTBUS_ERR;
 
-    LnnHeartbeatCustSendData *custData = (LnnHeartbeatCustSendData *)para;
+    LnnHeartbeatSendEndData *custData = (LnnHeartbeatSendEndData *)para;
     if (custData == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end get invalid para");
         return SOFTBUS_INVALID_PARAM;
@@ -546,7 +580,7 @@ static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end get invalid fsm");
             break;
         }
-        if (LnnHbMediumMgrSendEnd(&custData->hbType) != SOFTBUS_OK) {
+        if (LnnHbMediumMgrSendEnd(custData) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end to manager fail");
             (void)LnnFsmRemoveMessage(fsm, EVENT_HB_SEND_ONE_END);
             (void)LnnFsmRemoveMessage(fsm, EVENT_HB_CHECK_DEV_STATUS);
@@ -562,16 +596,29 @@ static int32_t OnStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *par
 {
     (void)msgType;
     (void)para;
-    LnnHeartbeatFsm *hbFsm = NULL;
+    if (!CheckHbFsmStateMsgArgs(fsm)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start process get invalid fsm");
+        return SOFTBUS_ERR;
+    }
+    LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
+    LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_AS_MASTER_NODE, NULL);
+    if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
+        /* Send once ble v0 heartbeat to recovery ble network. */
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
+{
+    (void)msgType;
+    (void)para;
 
     if (!CheckHbFsmStateMsgArgs(fsm)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start process get invalid fsm");
         return SOFTBUS_ERR;
     }
-    hbFsm = TO_HEARTBEAT_FSM(fsm);
-    LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_AS_MASTER_NODE, NULL);
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
-        /* Send once ble v0 heartbeat to recovery ble network. */
         LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
     }
     return SOFTBUS_OK;
@@ -581,7 +628,6 @@ static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
     int32_t ret = SOFTBUS_ERR;
-    LnnHeartbeatFsm *hbFsm = NULL;
 
     LnnHeartbeatType *hbType = (LnnHeartbeatType *)para;
     if (hbType == NULL) {
@@ -597,11 +643,12 @@ static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop specific manager fail");
             break;
         }
-        hbFsm = TO_HEARTBEAT_FSM(fsm);
+        LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
         if (*hbType == (HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1)) {
             LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS);
             LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE);
             LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
+            LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_END);
         }
         ret = SOFTBUS_OK;
     } while (false);
@@ -689,22 +736,47 @@ static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *pa
     return SOFTBUS_OK;
 }
 
+static bool ProcOfflineWithoutSoftbus(const char *networkId, ConnectionAddrType addrType)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LLOGW("can not find node");
+        return false;
+    }
+    LLOGD("node deviceTypeId:%d", node.deviceInfo.deviceTypeId);
+    if (node.deviceInfo.deviceTypeId == TYPE_PC_ID &&
+        strcmp(node.networkId, node.deviceInfo.deviceUdid) == 0) {
+        LLOGI("remove node because lost heartbeat");
+        deleteFromProfile(node.deviceInfo.deviceUdid);
+        LnnRemoveNode(node.deviceInfo.deviceUdid);
+        return true;
+    }
+    return false;
+}
+
 static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType addrType)
 {
     char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-
+    char *anoyNetworkId = NULL;
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost networkId is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ProcOfflineWithoutSoftbus(networkId, addrType)) {
+        LLOGI("proc offline, that device online without softbus");
+        return SOFTBUS_OK;
+    }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB process dev lost is offline, networkId:%s",
-            AnonymizesNetworkID(networkId));
+            ToSecureStrDeviceID(networkId, &anoyNetworkId));
+        SoftBusFree(anoyNetworkId);
         return SOFTBUS_OK;
     }
     if (LnnHasActiveConnection(networkId, addrType)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB process dev lost in next period, networkId:%s",
-            AnonymizesNetworkID(networkId));
+            ToSecureStrDeviceID(networkId, &anoyNetworkId));
+        SoftBusFree(anoyNetworkId);
         if (LnnOfflineTimingByHeartbeat(networkId, addrType) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost start new offline timing err");
             return SOFTBUS_ERR;
@@ -714,7 +786,8 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
     const char *udid = LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID);
     (void)LnnGenerateHexStringHash((const unsigned char *)udid, udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB process dev lost, udidHash:%s, networkId:%s",
-        AnonymizesUDID(udidHash), AnonymizesNetworkID(networkId));
+        AnonymizesUDID(udidHash), ToSecureStrDeviceID(networkId, &anoyNetworkId));
+    SoftBusFree(anoyNetworkId);
     if (LnnRequestLeaveSpecific(networkId, addrType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost send request to NetBuilder fail");
         return SOFTBUS_ERR;
@@ -751,20 +824,38 @@ static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnH
     return true;
 }
 
+static bool IsSupportBurstFeature(const char *networkId)
+{
+    uint64_t localFeature;
+    uint64_t peerFeature;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK ||
+        LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &peerFeature) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get local or remote feature fail");
+        return false;
+    }
+    if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
+        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
+        return true;
+    }
+    return false;
+}
+
 static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnHeartbeatType hbType,
     uint64_t nowTime)
 {
     uint64_t oldTimeStamp;
     DiscoveryType discType;
 
-    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-    if (nodeInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check dev status get nodeInfo fail");
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+        LLOGE("HB check dev status get nodeInfo fail");
         return;
     }
     discType = LnnConvAddrTypeToDiscType(LnnConvertHbTypeToConnAddrType(hbType));
-    if (!LnnHasDiscoveryType(nodeInfo, discType)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB check dev status node dont has the discType");
+    if (!LnnHasDiscoveryType(&nodeInfo, discType)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB check dev status node networkId:%s dont has discType:%d",
+            AnonymizesNetworkID(networkId), discType);
         return;
     }
     if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimeStamp) != SOFTBUS_OK) {
@@ -773,7 +864,8 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         return;
     }
     if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB check dev status receive heartbeat in time");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB check dev status receive heartbeat in time, networkId:%s, "
+            "now:%" PRIu64 ", old:%" PRIu64, AnonymizesNetworkID(networkId), nowTime, oldTimeStamp);
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB notify node lost heartbeat, networkId:%s, timestamp:"
@@ -782,21 +874,21 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check dev status stop offline timing fail");
         return;
     }
+    if (IsSupportBurstFeature(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "target device support burst, don't need post offline info");
+        return;
+    }
     if (ProcessLostHeartbeat(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost err, networkId:%s",
             AnonymizesNetworkID(networkId));
     }
 }
 
-static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnHeartbeatType hbType, uint64_t nowTime)
+static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *networkId,
+    LnnHeartbeatType hbType, uint64_t nowTime)
 {
     (void)hbFsm;
     uint64_t oldTimeStamp;
-    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-    if (nodeInfo == NULL) {
-        LLOGE("HB check dev status get nodeInfo fail");
-        return;
-    }
     if (LnnHasActiveConnection(networkId, LnnConvertHbTypeToConnAddrType(hbType))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB process screen off dev lost in next period, networkId:%s",
             AnonymizesNetworkID(networkId));
@@ -809,9 +901,9 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
         LLOGE("hb check dev status get timestamp err");
         return;
     }
-    if ((nowTime - oldTimeStamp) <= (2 * HB_OFFLINE_TIME)) {
+    if ((nowTime - oldTimeStamp) <= (HB_OFFLINE_PERIOD * HB_OFFLINE_TIME)) {
         LLOGI("hb check dev status , receive heartbeat in 2 * period time");
-        if (GetScreenState() == SOFTBUS_SCREEN_OFF && LnnStartScreenChangeOfflineTiming(networkId, 
+        if (GetScreenState() == SOFTBUS_SCREEN_OFF && LnnStartScreenChangeOfflineTiming(networkId,
         LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
             LLOGI("post next period screen off offline check msg");
         }
@@ -822,6 +914,10 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB process dev lost is offline, networkId:%s",
             AnonymizesNetworkID(networkId));
+        return;
+    }
+    if (IsSupportBurstFeature(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "target device support burst, screen off don't need offline");
         return;
     }
     if (LnnRequestLeaveSpecific(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
@@ -843,6 +939,11 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
         return SOFTBUS_INVALID_PARAM;
     }
     do {
+        if (GetScreenState() == SOFTBUS_SCREEN_OFF) {
+            ret = SOFTBUS_OK;
+            LLOGI("screen if off, dont need hb check");
+            break;
+        }
         SoftBusGetTime(&times);
         nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
         if (!CheckHbFsmStateMsgArgs(fsm)) {
@@ -877,7 +978,7 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
     return ret;
 }
 
-static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para) 
+static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     (void)msgType;
     int32_t ret = SOFTBUS_OK;
@@ -901,7 +1002,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             CheckDevStatusForScreenOff(hbFsm, msgPara->networkId, msgPara->hbType, nowTime);
             break;
         }
-        int32_t infoNum = 0;
+        int32_t i, infoNum;
         NodeBasicInfo *info = NULL;
         if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
             LLOGE("HB check dev status get online node info fail");
@@ -912,7 +1013,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             LLOGI("HB check dev status get none online node");
             break;
         }
-        for (int32_t i = 0; i < infoNum; ++i) {
+        for (i = 0; i < infoNum; ++i) {
             CheckDevStatusForScreenOff(hbFsm, info[i].networkId, msgPara->hbType, nowTime);
         }
         SoftBusFree(info);
@@ -1039,35 +1140,28 @@ NO_SANITIZE("cfi") int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
     return SOFTBUS_OK;
 }
 
-static int32_t CreateNewHbTypeObjMsg(LnnHeartbeatType srcType, LnnHeartbeatType **dstType)
+NO_SANITIZE("cfi") int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
+    bool wakeupFlag, LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
 {
-    *dstType = (LnnHeartbeatType *)SoftBusCalloc(sizeof(LnnHeartbeatType));
-    if (*dstType == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB new hbType obj msg malloc err");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    **dstType = srcType;
-    return SOFTBUS_OK;
-}
-
-NO_SANITIZE("cfi") int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
-    bool isRelay)
-{
-    LnnHeartbeatCustSendData *custData = NULL;
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnPostSendBeginMsgToHbFsm enter hbType=%d, isSyncData=%d",
+        type, msgPara->isSyncData);
+    LnnHeartbeatSendBeginData *custData = NULL;
 
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post send begin msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    custData = (LnnHeartbeatCustSendData *)SoftBusCalloc(sizeof(LnnHeartbeatCustSendData));
+    custData = (LnnHeartbeatSendBeginData *)SoftBusCalloc(sizeof(LnnHeartbeatSendBeginData));
     if (custData == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB new hbType obj msg malloc err");
         return SOFTBUS_MALLOC_ERR;
     }
     custData->hbType = type;
     custData->wakeupFlag = wakeupFlag;
-    custData->isRelay = isRelay;
-    if (LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN, (void *)custData) != SOFTBUS_OK) {
+    custData->isRelay = msgPara->isRelay;
+    custData->isSyncData = msgPara->isSyncData;
+    custData->isFirstBegin = delayMillis == 0 ? true : false;
+    if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN, (void *)custData, delayMillis) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post send begin msg to hbFsm fail");
         SoftBusFree(custData);
         return SOFTBUS_ERR;
@@ -1075,24 +1169,24 @@ NO_SANITIZE("cfi") int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, Ln
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, uint64_t delayMillis,
-    bool wakeupFlag)
+NO_SANITIZE("cfi") int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData *custData,
+    uint64_t delayMillis)
 {
-    LnnHeartbeatCustSendData *custData = NULL;
-    if (hbFsm == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post stop msg get invalid param");
+    LnnHeartbeatSendEndData *dupData = NULL;
+    if (hbFsm == NULL || custData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post send end msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    custData = (LnnHeartbeatCustSendData *)SoftBusCalloc(sizeof(LnnHeartbeatCustSendData));
-    if (custData == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post send end msg get invalid param");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnPostSendEndMsgToHbFsm enter hbType=%d", custData->hbType);
+    dupData = (LnnHeartbeatSendEndData *)SoftBusCalloc(sizeof(LnnHeartbeatSendEndData));
+    if (dupData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post send end msg malloc error");
         return SOFTBUS_MALLOC_ERR;
     }
-    custData->hbType = type;
-    custData->wakeupFlag = wakeupFlag;
-    if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_END, (void *)custData, delayMillis) != SOFTBUS_OK) {
+    *dupData = *custData;
+    if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_END, (void *)dupData, delayMillis) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post send end msg to hbFsm fail");
-        SoftBusFree(custData);
+        SoftBusFree(dupData);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1115,10 +1209,12 @@ NO_SANITIZE("cfi") int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHear
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post stop msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (CreateNewHbTypeObjMsg(type, &newType) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post stop msg create obj para err");
-        return SOFTBUS_ERR;
+    newType = (LnnHeartbeatType *)SoftBusCalloc(sizeof(LnnHeartbeatType));
+    if (newType == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post stop msg malloc newType err");
+        return SOFTBUS_MALLOC_ERR;
     }
+    *newType = type;
     if (LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_STOP_SPECIFIC, (void *)newType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post stop msg to hbFsm fail");
         SoftBusFree(newType);
@@ -1192,8 +1288,8 @@ NO_SANITIZE("cfi") int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFs
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
-    uint64_t delayMillis)
+NO_SANITIZE("cfi") int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
+    const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis)
 {
     LnnCheckDevStatusMsgPara *dupPara = NULL;
 

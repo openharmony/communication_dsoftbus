@@ -196,6 +196,23 @@ NO_SANITIZE("cfi") bool AddStringToJsonObject(cJSON *json, const char * const st
     return true;
 }
 
+NO_SANITIZE("cfi") bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t num)
+{
+    if (json == NULL || string == NULL) {
+        return false;
+    }
+    cJSON *item = cJSON_CreateNumber(num);
+    if (item == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot create cJSON number object [%s]", string);
+        return false;
+    }
+    if (!cJSON_AddItemToObject(json, string, item)) {
+        cJSON_Delete(item);
+        return false;
+    }
+    return true;
+}
+
 NO_SANITIZE("cfi") bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
 {
     if (json == NULL || string == NULL) {

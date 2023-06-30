@@ -34,11 +34,20 @@ typedef enum {
     LNN_EVENT_BT_ACL_STATE_CHANGED,
     LNN_EVENT_WLAN_PARAM,
     LNN_EVENT_SCREEN_STATE_CHANGED,
+    LNN_EVENT_SCREEN_LOCK_CHANGED,
+    LNN_EVENT_ACCOUNT_CHANGED,
+    LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED,
+    LNN_EVENT_USER_STATE_CHANGED,
+    LNN_EVENT_NIGHT_MODE_CHANGED,
+    LNN_EVENT_OOBE_STATE_CHANGED,
+    LNN_EVENT_HOME_GROUP_CHANGED,
     /* event from internal lnn */
     LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
+    LNN_EVENT_NODE_MIGRATE,
     LNN_EVENT_RELATION_CHANGED,
     LNN_EVENT_NODE_MASTER_STATE_CHANGED,
     LNN_EVENT_NODE_ADDR_CHANGED,
+    LNN_EVENT_NETWORK_STATE_CHANGED,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -54,7 +63,9 @@ typedef struct {
 typedef enum {
     SOFTBUS_WIFI_CONNECTED,
     SOFTBUS_WIFI_DISCONNECTED,
+    SOFTBUS_WIFI_DISABLING,
     SOFTBUS_WIFI_DISABLED,
+    SOFTBUS_WIFI_ENABLING,
     SOFTBUS_WIFI_ENABLED,
     SOFTBUS_AP_DISABLED,
     SOFTBUS_AP_ENABLED,
@@ -77,9 +88,58 @@ typedef enum {
 } SoftBusBtState;
 
 typedef enum {
+    SOFTBUS_SCREEN_LOCK,
+    SOFTBUS_SCREEN_UNLOCK,
+    SOFTBUS_SCREEN_LOCK_UNKNOWN,
+} SoftBusScreenLockState;
+
+typedef enum {
+    SOFTBUS_ACCOUNT_LOG_IN,
+    SOFTBUS_ACCOUNT_LOG_OUT,
+    SOFTBUS_ACCOUNT_UNKNOWN,
+} SoftBusAccountState;
+
+typedef enum {
+    SOFTBUS_DIF_ACCOUNT_DEV_CHANGE,
+    SOFTBUS_DIF_ACCOUNT_UNKNOWN,
+} SoftBusDifferentAccountState;
+
+typedef enum {
+    SOFTBUS_USER_FOREGROUND,
+    SOFTBUS_USER_BACKGROUND,
+    SOFTBUS_USER_UNKNOWN,
+} SoftBusUserState;
+
+typedef enum {
+    SOFTBUS_NIGHT_MODE_ON,
+    SOFTBUS_NIGHT_MODE_OFF,
+    SOFTBUS_NIGHT_MODE_UNKNOWN,
+} SoftBusNightModeState;
+
+typedef enum {
+    SOFTBUS_OOBE_RUNNING,
+    SOFTBUS_OOBE_END,
+    SOFTBUS_OOBE_UNKNOWN,
+} SoftBusOOBEState;
+
+typedef enum {
+    SOFTBUS_HOME_GROUP_JOIN = 1,
+    SOFTBUS_HOME_GROUP_LEAVE,
+    SOFTBUS_HOME_GROUP_UNKNOWN,
+} SoftBusHomeGroupState;
+
+typedef enum {
     SOFTBUS_BR_ACL_CONNECTED,
     SOFTBUS_BR_ACL_DISCONNECTED,
 } SoftBusBtAclState;
+
+typedef enum {
+    SOFTBUS_WIFI_NETWORKD_ENABLE,
+    SOFTBUS_WIFI_NETWORKD_DISABLE,
+    SOFTBUS_BLE_NETWORKD_ENABLE,
+    SOFTBUS_BLE_NETWORKD_DISABLE,
+    SOFTBUS_NETWORKD_UNKNOWN,
+} SoftBusNetworkState;
 
 typedef struct {
     LnnEventBasicInfo basic;
@@ -94,7 +154,7 @@ typedef struct {
 typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
-} LnnMonitorBtStateChangedEvent;
+} LnnMonitorHbStateChangedEvent;
 
 typedef struct {
     LnnEventBasicInfo basic;
@@ -106,6 +166,8 @@ typedef struct {
     LnnEventBasicInfo basic;
     bool isOnline;
     const char *networkId;
+    const char *uuid;
+    const char *udid;
 } LnnOnlineStateEventInfo;
 
 typedef struct {
@@ -146,19 +208,30 @@ void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode);
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
 void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
+void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info);
 
 void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state);
 void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state);
+void LnnNotifyDifferentAccountChangeEvent(void *state);
 void LnnNotifyBtStateChangeEvent(void *state);
+void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state);
+void LnnNotifyAccountStateChangeEvent(void *state);
+void LnnNotifyUserStateChangeEvent(SoftBusUserState state);
+void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state);
+void LnnNotifyNightModeStateChangeEvent(void *state);
+void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);
 void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state);
 void LnnNotifyAddressChangedEvent(const char* ifName);
 void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin);
+void LnnNotifyDeviceVerified(const char *udid);
 
 void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncResultInfo *info, int32_t retCode);
 
 void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
 
 void LnnNotifyNodeAddressChanged(const char* addr);
+
+void LnnNotifyNetworkStateChanged(SoftBusNetworkState state);
 
 #ifdef __cplusplus
 }

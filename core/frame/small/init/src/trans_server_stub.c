@@ -160,7 +160,7 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
         WriteInt32(reply, ret);
         return ret;
     }
-    ret = TransOpenAuthChannel(sessionName, &connOpt);
+    ret = TransOpenAuthChannel(sessionName, &connOpt, "");
     WriteInt32(reply, ret);
     return ret;
 }

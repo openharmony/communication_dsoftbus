@@ -297,7 +297,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGetAllAuthSeq(_, _, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnSendNotTrustedInfo(_, _))
+    EXPECT_CALL(NetBuilderMock, LnnSendNotTrustedInfo(_, _, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, GetLooper(_)).WillRepeatedly(Return(&loop));

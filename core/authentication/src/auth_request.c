@@ -40,7 +40,7 @@ static uint32_t GetAuthRequestWaitNum(AuthRequest *request)
     AuthRequest *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authRequestList, AuthRequest, node) {
         if (item->type == request->type &&
-            CompareConnInfo(&request->connInfo, &item->connInfo)) {
+            CompareConnInfo(&request->connInfo, &item->connInfo, true)) {
             num++;
         }
     }
@@ -82,29 +82,6 @@ NO_SANITIZE("cfi") int32_t GetAuthRequest(uint32_t requestId, AuthRequest *reque
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t UpdateAuthRequestConnInfo(uint32_t requestId, const AuthConnInfo *connInfo)
-{
-    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
-    if (!RequireAuthLock()) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    AuthRequest *item = FindAuthRequestByRequestId(requestId);
-    if (item == NULL) {
-        ReleaseAuthLock();
-        return SOFTBUS_NOT_FIND;
-    }
-    if (item->connInfo.type != connInfo->type) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
-            "verify request(id=%u) unexpected connType: %d -> %d.",
-            requestId, item->connInfo.type, connInfo->type);
-        ReleaseAuthLock();
-        return SOFTBUS_ERR;
-    }
-    item->connInfo = *connInfo;
-    ReleaseAuthLock();
-    return SOFTBUS_OK;
-}
-
 NO_SANITIZE("cfi") int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -115,7 +92,7 @@ NO_SANITIZE("cfi") int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInf
     AuthRequest *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authRequestList, AuthRequest, node) {
         if (item->type != REQUEST_TYPE_VERIFY ||
-            !CompareConnInfo(&item->connInfo, connInfo)) {
+            !CompareConnInfo(&item->connInfo, connInfo, true)) {
             continue;
         }
         *request = *item;

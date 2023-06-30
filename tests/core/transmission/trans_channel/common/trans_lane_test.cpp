@@ -408,7 +408,7 @@ HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
     LanePreferredLinkList *preferred = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred != nullptr);
     (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam, preferred);
+    TransformSessionPreferredToLanePreferred(sessionParam, preferred, NULL);
     SoftBusFree(sessionParam);
     SoftBusFree(preferred);
 }
@@ -725,7 +725,7 @@ HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
     LanePreferredLinkList *preferred = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred != nullptr);
     (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam, preferred);
+    TransformSessionPreferredToLanePreferred(sessionParam, preferred, NULL);
     SoftBusFree(sessionParam);
     SoftBusFree(preferred);
     SessionAttribute sessionAttr1 = {
@@ -737,7 +737,7 @@ HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
     LanePreferredLinkList *preferred1 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred1 != nullptr);
     (void)memset_s(preferred1, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam1, preferred1);
+    TransformSessionPreferredToLanePreferred(sessionParam1, preferred1, NULL);
     SoftBusFree(sessionParam1);
     SoftBusFree(preferred1);
     SessionAttribute sessionAttr2 = {
@@ -749,7 +749,7 @@ HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
     LanePreferredLinkList *preferred2 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred2 != nullptr);
     (void)memset_s(preferred2, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam2, preferred2);
+    TransformSessionPreferredToLanePreferred(sessionParam2, preferred2, NULL);
     SoftBusFree(sessionParam2);
     SoftBusFree(preferred2);
 }

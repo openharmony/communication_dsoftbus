@@ -86,6 +86,7 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
 
 ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode);
 
+void RestartCoapDiscovery(void);
 bool LnnIsAutoNetWorkingEnabled(void);
 
 bool LnnVisitNetif(VisitNetifCallback callback, void *data);

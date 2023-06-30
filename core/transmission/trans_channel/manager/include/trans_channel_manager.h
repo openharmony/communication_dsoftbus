@@ -26,13 +26,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
+int32_t GenerateChannelId(bool isTdcChannel);
+
 int32_t TransChannelInit(void);
 
 void TransChannelDeinit(void);
 
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo);
 
-int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt);
+int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt, const char *reqId);
 
 int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data);
 

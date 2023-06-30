@@ -41,6 +41,7 @@
 #include "softbus_proxychannel_message.h"
 
 #include "trans_channel_callback.h"
+#include "trans_channel_manager.c"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_auth_message.h"

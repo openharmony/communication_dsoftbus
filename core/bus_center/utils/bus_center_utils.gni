@@ -17,6 +17,8 @@ core_bus_center_utils_path = "$dsoftbus_root_path/core/bus_center/utils"
 
 bus_center_utils_src = [
   "$core_bus_center_utils_path/src/lnn_async_callback_utils.c",
+  "$core_bus_center_utils_path/src/lnn_common_utils.c",
+  "$core_bus_center_utils_path/src/lnn_compress.c",
   "$core_bus_center_utils_path/src/lnn_connection_addr_utils.c",
   "$core_bus_center_utils_path/src/lnn_map.c",
 ]

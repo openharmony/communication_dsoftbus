@@ -43,6 +43,14 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+bool LnnIsPotentialHomeGroup(const char *udid)
+{
+    (void)udid;
+
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check is potential home group not implemented.");
+    return false;
+}
+
 int32_t LnnInitDecisionDbDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init decision db not implemented.");

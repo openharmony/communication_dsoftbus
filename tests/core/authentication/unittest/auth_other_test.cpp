@@ -464,22 +464,6 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, UPDATE_AUTH_REQUEST_CONN_INFO_TEST_001, TestSize.Level1)
-{
-    uint32_t requestId = 0;
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-
-    int32_t ret = UpdateAuthRequestConnInfo(requestId, &connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
-}
-
-/*
- * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_TEST_001
- * @tc.desc: update auth request conn info test
- * @tc.type: FUNC
- * @tc.require:
- */
 HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
@@ -514,69 +498,13 @@ HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
 {
     int64_t authId = 1;
     int64_t para = 0;
-    int32_t ret = RmoveUpdateSessionKeyFunc(nullptr, nullptr);
+    int32_t ret = RemoveUpdateSessionKeyFunc(nullptr, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = RmoveUpdateSessionKeyFunc(&authId, nullptr);
+    ret = RemoveUpdateSessionKeyFunc(&authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = RmoveUpdateSessionKeyFunc(&authId, &para);
+    ret = RemoveUpdateSessionKeyFunc(&authId, &para);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = RmoveUpdateSessionKeyFunc(&authId, &authId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: UNPACK_BT_TEST_001
- * @tc.desc: unpack bt test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, UNPACK_BT_TEST_001, TestSize.Level1)
-{
-    cJSON json;
-    NodeInfo info;
-    SoftBusVersion version = SOFTBUS_OLD_V2;
-    bool isMetaAuth = true;
-    (void)memset_s(&json, sizeof(json), 0, sizeof(json));
-    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
-    int32_t ret = UnpackBt(&json, &info, version, isMetaAuth);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: PACK_WIFI_TEST_001
- * @tc.desc: pack wifi test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, PACK_WIFI_TEST_001, TestSize.Level1)
-{
-    cJSON json;
-    NodeInfo info;
-    SoftBusVersion version = SOFTBUS_OLD_V2;
-    bool isMetaAuth = true;
-    (void)memset_s(&json, sizeof(json), 0, sizeof(json));
-    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
-    int32_t ret = PackWiFi(nullptr, nullptr, version, isMetaAuth);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = PackWiFi(&json, &info, version, isMetaAuth);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: UNPACK_WIFI_TEST_001
- * @tc.desc: unpack wifi test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, UNPACK_WIFI_TEST_001, TestSize.Level1)
-{
-    cJSON json;
-    NodeInfo info;
-    SoftBusVersion version = SOFTBUS_OLD_V2;
-    bool isMetaAuth = true;
-    (void)memset_s(&json, sizeof(json), 0, sizeof(json));
-    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
-    int32_t ret = UnpackWiFi(&json, &info, version, isMetaAuth);
+    ret = RemoveUpdateSessionKeyFunc(&authId, &authId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

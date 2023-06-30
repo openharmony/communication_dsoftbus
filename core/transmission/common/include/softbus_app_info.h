@@ -32,6 +32,11 @@ extern "C" {
 
 #define APP_INFO_UDP_FILE_PROTOCOL 0x5a
 
+#define TRANS_FLAG_HAS_CHANNEL_AUTH 0x02L
+
+#define MAX_FAST_DATA_LEN (4 * 1024)
+#define BASE64_FAST_DATA_LEN 5558
+
 typedef enum {
     API_UNKNOWN = 0,
     API_V1 = 1,
@@ -49,6 +54,9 @@ typedef enum {
     ROUTE_TYPE_ALL = 0,
     WIFI_STA = 1,
     WIFI_P2P = 2,
+    BT_BR = 3,
+    BT_BLE = 4,
+    WIFI_P2P_REUSE = 6,
 } RouteType;
 
 typedef enum {
@@ -95,8 +103,18 @@ typedef struct {
     int32_t algorithm;
     int32_t crc;
     int32_t fileProtocol;
-    int64_t timeStart;
+    int32_t autoCloseTime;
+    int myHandleId;
+    int peerHandleId;
+    int migrateOption;
+    int32_t transFlag;
+    int64_t authSeq;
     int32_t linkType;
+    int32_t channelType;
+    int32_t errorCode;
+    int64_t timeStart;
+    const uint8_t *fastTransData;
+    uint16_t fastTransDataSize;
 } AppInfo;
 
 #ifdef __cplusplus

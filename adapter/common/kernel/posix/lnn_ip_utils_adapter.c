@@ -15,6 +15,8 @@
 
 #include "lnn_ip_utils_adapter.h"
 
+#include <arpa/inet.h>
+#include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>

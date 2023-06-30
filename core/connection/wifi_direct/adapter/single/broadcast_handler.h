@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,29 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef BROADCAST_HANDLER_H
+#define BROADCAST_HANDLER_H
 
-#ifndef SOFTBUS_ADAPTER_HITRACECHAIN_H
-#define SOFTBUS_ADAPTER_HITRACECHAIN_H
 #include <stdint.h>
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
 #endif
-#endif
 
-typedef enum SoftbusHiTraceIdValid {
-    SOFTBUS_HITRACE_ID_INVALID = 0,
-    SOFTBUS_HITRACE_ID_VALID = 1,
-} SoftbusHiTraceIdValid;
-
-void SoftbusHitraceStart(int32_t flags, uint64_t chainId);
-void SoftbusHitraceStop(void);
+int32_t BroadcastHandlerInit(void);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif /* SOFTBUS_ADAPTER_HITRACECHAIN_H */
+#endif
+#endif

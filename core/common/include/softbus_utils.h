@@ -33,6 +33,7 @@ extern "C" {
 #define MAX_QUERY_LEN 64
 
 #define TIMER_TIMEOUT 1000 // 1s
+#define BT_MAC_NO_COLON_LEN 13
 
 #define MAC_DELIMITER ':'
 #define IP_DELIMITER '.'
@@ -64,6 +65,9 @@ void DestroySoftBusList(SoftBusList *list);
 
 int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen);
 
+int32_t ConvertBtMacToStrNoColon(char *strMac, uint32_t strMacLen, const uint8_t *binMac,
+    uint32_t binMacLen);
+
 int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen);
 
 int32_t GenerateRandomStr(char *str, uint32_t size);
@@ -75,6 +79,10 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
 int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen);
 
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2);
+
+int32_t StringToUpperCase(const char *str, char *buf, int32_t size);
+
+int32_t StringToLowerCase(const char *str, char *buf, int32_t size);
 
 void SetSignalingMsgSwitchOn(void);
 void SetSignalingMsgSwitchOff(void);

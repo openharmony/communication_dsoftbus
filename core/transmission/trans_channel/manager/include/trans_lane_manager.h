@@ -17,6 +17,7 @@
 #define TRANS_LANE_MANAGER_H
 
 #include <stdint.h>
+#include "lnn_lane_manager.h"
 #include "lnn_lane_interface.h"
 #include "softbus_app_info.h"
 

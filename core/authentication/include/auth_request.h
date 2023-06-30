@@ -48,7 +48,6 @@ bool CheckAuthConnCallback(const AuthConnCallback *connCb);
 /* Note: return wait list num, 0 means add fail. */
 uint32_t AddAuthRequest(const AuthRequest *request);
 int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
-int32_t UpdateAuthRequestConnInfo(uint32_t requestId, const AuthConnInfo *connInfo);
 int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request);
 void DelAuthRequest(uint32_t requestId);
 void ClearAuthRequest(void);

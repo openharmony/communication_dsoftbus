@@ -17,10 +17,10 @@
 #define SOFTBUS_TCP_DIRECT_SESSIONCONN_H
 
 #include <stdint.h>
+#include "softbus_def.h"
 #include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -53,8 +53,6 @@ typedef struct {
 } SessionConn;
 
 uint64_t TransTdcGetNewSeqId(void);
-
-int32_t GenerateTdcChannelId(void);
 
 int32_t CreatSessionConnList(void);
 

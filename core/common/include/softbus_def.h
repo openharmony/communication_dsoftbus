@@ -46,7 +46,7 @@ extern "C" {
 #define PKG_NAME_SIZE_MAX 65
 #define SESSION_NAME_SIZE_MAX 256
 #define DEVICE_ID_SIZE_MAX 65
-#define GROUP_ID_SIZE_MAX 65
+#define GROUP_ID_SIZE_MAX 128
 #define REQ_ID_SIZE_MAX 65
 #define AUTH_STATE_SIZE_MAX 65
 #define FILE_RECV_ROOT_DIR_SIZE_MAX 256
@@ -72,6 +72,8 @@ extern "C" {
 
 #define NODE_ADDR_LOOPBACK "0"
 
+#define MAX_UDP_CHANNEL_ID_COUNT 20
+
 typedef struct {
     SoftBusMutex lock;
     unsigned int cnt;
@@ -93,6 +95,7 @@ enum {
 
 typedef enum {
     TRANS_SESSION_BYTES = 0,
+    TRANS_SESSION_ACK,
     TRANS_SESSION_MESSAGE,
     TRANS_SESSION_FILE_FIRST_FRAME = 3,
     TRANS_SESSION_FILE_ONGOINE_FRAME,
@@ -103,6 +106,7 @@ typedef enum {
     TRANS_SESSION_FILE_RESULT_FRAME,
     TRANS_SESSION_FILE_ACK_REQUEST_SENT,
     TRANS_SESSION_FILE_ACK_RESPONSE_SENT,
+    TRANS_SESSION_ASYNC_MESSAGE,
 } SessionPktType;
 
 typedef enum {
@@ -130,6 +134,7 @@ typedef struct {
     int32_t fd;
     bool isServer;
     bool isEnabled;
+    bool isEncrypt;
     int32_t peerUid;
     int32_t peerPid;
     char *groupId;
@@ -143,11 +148,18 @@ typedef struct {
     int32_t routeType;
     int32_t streamType;
     int32_t encrypt;
+    int32_t fileEncrypt;
     int32_t algorithm;
     int32_t crc;
+    int32_t autoCloseTime;
     bool isUdpFile;
+    int myHandleId;
+    int peerHandleId;
+    int migrateOption;
+    char *reqId;
     int64_t timeStart;
     int32_t linkType;
+    bool isFastData;
 } ChannelInfo;
 
 #ifdef __cplusplus

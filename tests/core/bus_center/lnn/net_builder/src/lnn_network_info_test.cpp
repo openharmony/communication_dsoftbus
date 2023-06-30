@@ -110,12 +110,12 @@ HWTEST_F(LNNNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level
     LnnEventHandler handler;
     bool ret = GetEventHandler(LNN_EVENT_BT_STATE_CHANGED, handler);
     ASSERT_TRUE(ret == true);
-    LnnMonitorBtStateChangedEvent btEvent1 = {
+    LnnMonitorHbStateChangedEvent btEvent1 = {
         .basic.event = LNN_EVENT_BT_STATE_CHANGED,
         .status = (uint8_t)SOFTBUS_BR_TURN_ON,
     };
     handler((LnnEventBasicInfo *)&btEvent1);
-    LnnMonitorBtStateChangedEvent btEvent2 = {
+    LnnMonitorHbStateChangedEvent btEvent2 = {
         .basic.event = LNN_EVENT_BT_STATE_CHANGED,
         .status = (uint8_t)SOFTBUS_BR_TURN_OFF,
     };
