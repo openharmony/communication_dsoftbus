@@ -67,7 +67,7 @@
         ],
         "third_party": [
           "bounds_checking_function",
-          "cjson"
+          "cJSON"
         ]
       },
       "build": {
