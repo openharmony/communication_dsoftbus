@@ -16,7 +16,6 @@
 #include "lnn_lane_common.h"
 
 #include <securec.h>
-#include <sys/time.h>
 
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
@@ -29,8 +28,6 @@
 #include "softbus_log.h"
 
 #define UINT_TO_STR_MAX_LEN 11
-#define MSEC_PER_SEC 1000
-#define USEC_PER_MSEC 1000
 
 typedef int32_t (*LinkInfoProc)(const LaneLinkInfo *, LaneConnInfo *, LaneProfile *);
 
@@ -56,21 +53,6 @@ static int32_t BleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     return SOFTBUS_OK;
 }
 
-static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
-{
-    connInfo->type = LANE_BLE_DIRECT;
-    connInfo->connInfo.bleDirect.protoType = linkInfo->linkInfo.bleDirect.protoType;
-    connInfo->connInfo.bleDirect.psm = linkInfo->linkInfo.bleDirect.psm;
-    (void)memcpy_s(connInfo->connInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN);
-    (void)memcpy_s(connInfo->connInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN);
-    (void)memcpy_s(connInfo->connInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN);
-    profile->linkType = LANE_BLE_DIRECT;
-    return SOFTBUS_OK;
-}
-
 static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_P2P;
@@ -81,6 +63,13 @@ static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     profile->linkType = LANE_P2P;
     profile->bw = linkInfo->linkInfo.p2p.bw;
     profile->phyChannel = linkInfo->linkInfo.p2p.channel;
+    return SOFTBUS_OK;
+}
+static int32_t P2pReuseInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_P2P_REUSE;
+    connInfo->connInfo.wlan = linkInfo->linkInfo.wlan.connInfo;
+    profile->linkType = LANE_P2P_REUSE;
     return SOFTBUS_OK;
 }
 
@@ -110,13 +99,49 @@ static int32_t Wlan5GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connIn
     return SOFTBUS_OK;
 }
 
+static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    if (memcpy_s(connInfo->connInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN,
+        linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(connInfo->connInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN,
+        linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(connInfo->connInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN,
+        linkInfo->linkInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    connInfo->type = LANE_BLE_DIRECT;
+    connInfo->connInfo.bleDirect.protoType = linkInfo->linkInfo.bleDirect.protoType;
+    profile->linkType = LANE_BLE_DIRECT;
+    return SOFTBUS_OK;
+}
+
+static int32_t CocInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_COC;
+    if (memcpy_s(connInfo->connInfo.ble.bleMac, BT_MAC_LEN,
+        linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    connInfo->connInfo.ble.psm = linkInfo->linkInfo.ble.psm;
+    profile->linkType = LANE_COC;
+    return SOFTBUS_OK;
+}
+
 static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = BrInfoProc,
     [LANE_BLE] = BleInfoProc,
     [LANE_P2P] = P2pInfoProc,
     [LANE_WLAN_2P4G] = Wlan2P4GInfoProc,
     [LANE_WLAN_5G] = Wlan5GInfoProc,
+    [LANE_P2P_REUSE] = P2pReuseInfoProc,
     [LANE_BLE_DIRECT] = BleDirectInfoProc,
+    [LANE_COC] = CocInfoProc,
+    // CoC reuse gatt direct
+    [LANE_COC_DIRECT] = BleDirectInfoProc,
 };
 
 NO_SANITIZE("cfi") int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
@@ -172,15 +197,7 @@ NO_SANITIZE("cfi") void LnnDeleteData(Map *map, uint32_t key)
 
 NO_SANITIZE("cfi") uint64_t LnnGetSysTimeMs(void)
 {
-    struct timeval time;
-    time.tv_sec = 0;
-    time.tv_usec = 0;
-    if (gettimeofday(&time, NULL) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[laneCommon]get sys time fail");
-        return 0;
-    }
-    uint64_t ms = (uint64_t)time.tv_sec * MSEC_PER_SEC + (uint64_t)time.tv_usec / USEC_PER_MSEC;
-    return ms;
+    return SoftBusGetSysTimeMs();
 }
 
 NO_SANITIZE("cfi") int32_t LnnInitLaneLooper(void)

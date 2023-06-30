@@ -23,6 +23,7 @@ ohos_unittest("TransLinkListenerTest") {
 
   include_dirs = [
     "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
@@ -63,6 +64,7 @@ ohos_unittest("TransLinkListenerTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/src",
     "$dsoftbus_root_path/core/transmission/ipc/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
   ]

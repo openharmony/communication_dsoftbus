@@ -297,23 +297,23 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
     ASSERT_TRUE(connOpt != nullptr);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
-    int32_t ret = TransOpenAuthChannel(NULL, NULL);
+    int32_t ret = TransOpenAuthChannel(NULL, NULL, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(sessionName, NULL);
+    ret = TransOpenAuthChannel(sessionName, NULL, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(NULL, connOpt);
+    ret = TransOpenAuthChannel(NULL, connOpt, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
     connOpt->type = CONNECT_TCP;
-    ret = TransOpenAuthChannel(sessionName, connOpt);
+    ret = TransOpenAuthChannel(sessionName, connOpt, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
     connOpt->type = CONNECT_BR;
-    ret = TransOpenAuthChannel(sessionName, connOpt);
+    ret = TransOpenAuthChannel(sessionName, connOpt, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
     connOpt->type = CONNECT_P2P;
-    ret = TransOpenAuthChannel(sessionName, connOpt);
+    ret = TransOpenAuthChannel(sessionName, connOpt, NULL);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
     SoftBusFree(connOpt);

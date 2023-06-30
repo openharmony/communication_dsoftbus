@@ -104,6 +104,9 @@ NO_SANITIZE("cfi") int32_t TransCreateSessionServer(const char *pkgName, const c
     int32_t ret = TransSessionServerAddItem(newNode);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(newNode);
+        if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server is already created");
+        }
         return ret;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateSessionServer ok");

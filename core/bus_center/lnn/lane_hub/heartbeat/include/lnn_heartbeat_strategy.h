@@ -42,12 +42,14 @@ int32_t LnnStartNewHbStrategyFsm(void);
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay);
 int32_t LnnStartHeartbeat(uint64_t delayMillis);
 int32_t LnnStopHeartbeatByType(LnnHeartbeatType type);
+int32_t LnnStopV0HeartbeatAndNotTransState();
 int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType);
-int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType);
+int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType);
 int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type);
+LnnHeartbeatStrategyType GetStrategyTypeByPolicy(int32_t policy);
 
 bool LnnIsHeartbeatEnable(LnnHeartbeatType type);
 int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable);

@@ -21,14 +21,16 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_proxychannel_session.h"
+#include "softbus_proxychannel_control.h"
 #include "softbus_utils.h"
+#include "softbus_adapter_mem.h"
 #include "trans_lane_pending_ctl.h"
-#include "softbus_hisysevt_transreporter.h"
 
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
@@ -51,6 +53,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.channelType = CHANNEL_TYPE_PROXY;
     info.isServer = isServer;
     info.isEnabled = true;
+    info.isEncrypt = appInfo->appType != APP_TYPE_AUTH;
     info.groupId = (char*)appInfo->groupId;
     info.peerSessionName = (char*)appInfo->peerData.sessionName;
     info.peerPid = appInfo->peerData.pid;
@@ -58,10 +61,19 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     char buf[NETWORK_ID_BUF_LEN] = {0};
     info.sessionKey = (char*)appInfo->sessionKey;
     info.keyLen = SESSION_KEY_LENGTH;
-    info.encrypt = appInfo->encrypt;
+    info.fileEncrypt = appInfo->encrypt;
     info.algorithm = appInfo->algorithm;
     info.crc = appInfo->crc;
+    info.routeType = appInfo->routeType;
     info.businessType = appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType;
+    info.autoCloseTime = appInfo->autoCloseTime;
+    info.myHandleId = appInfo->myHandleId;
+    info.peerHandleId = appInfo->peerHandleId;
+    info.migrateOption = appInfo->migrateOption;
+    info.linkType = appInfo->linkType;
+    if (appInfo->appType == APP_TYPE_AUTH) {
+        info.reqId = (char*)appInfo->reqId;
+    }
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
 
@@ -118,7 +130,6 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpenFailed(int32_t channelId, const App
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "proxy channel openfailed: channelId=%d, appType=%d", channelId, appInfo->appType);
-
     int32_t ret = SOFTBUS_ERR;
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
@@ -169,10 +180,8 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelMsgReceived(int32_t channelId, const Ap
 
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
-            TransOnNormalMsgReceived(appInfo->myData.pkgName, appInfo->myData.pid, channelId, data, len);
-            break;
         case APP_TYPE_AUTH:
-            TransOnAuthMsgReceived(appInfo->myData.pkgName, appInfo->myData.pid, channelId, data, len);
+            TransOnNormalMsgReceived(appInfo->myData.pkgName, appInfo->myData.pid, channelId, data, len);
             break;
         case APP_TYPE_INNER:
             NotifyNetworkingMsgReceived(channelId, data, len);
@@ -189,6 +198,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     int ret = SOFTBUS_ERR;
     appInfo->appType = APP_TYPE_INNER;
     appInfo->myData.apiVersion = API_V2;
+    appInfo->autoCloseTime = 0;
     ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local uuid fail %d", ret);
@@ -251,7 +261,7 @@ NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, c
     ConnectOption connOpt;
     int32_t channelId = INVALID_CHANNEL_ID;
 
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         return channelId;
     }
@@ -275,7 +285,34 @@ NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, c
 NO_SANITIZE("cfi") int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen,
     int32_t priority)
 {
-    return TransProxySendMsg(channelId, data, dataLen, priority);
+    int32_t ret = SOFTBUS_ERR;
+    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc in trans proxy send message.id[%d]", channelId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get proxy channel:%d failed.", channelId);
+        SoftBusFree(info);
+        return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+    }
+
+    if (info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy channel status:%d is err.", info->status);
+        SoftBusFree(info);
+        return SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID;
+    }
+
+    if (info->appInfo.appType != APP_TYPE_INNER) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "wrong app type: %d", info->appInfo.appType);
+        SoftBusFree(info);
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    }
+
+    ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
+    SoftBusFree(info);
+    return ret;
 }
 
 NO_SANITIZE("cfi") int32_t TransCloseNetWorkingChannel(int32_t channelId)

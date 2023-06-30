@@ -264,7 +264,7 @@ char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount)
     while (offset < bufferSize - sizeof(struct FileListItem)) {
         const struct FileListItem *fileListItem = (const struct FileListItem *)(buffer + offset);
         offset += sizeof(struct FileListItem);
-        
+
         uint32_t fileNameLength = ntohl(fileListItem->fileNameLength);
         if (fileNameLength > bufferSize - offset || fileNameLength > MAX_FILE_PATH_NAME_LEN) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s: invalid fileLength", __func__);
@@ -286,7 +286,7 @@ char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount)
     *fileCount = count;
     return firstFile;
 }
- 
+
 int32_t FileLock(int32_t fd, int32_t type, bool isBlock)
 {
     if (fd < 0) {

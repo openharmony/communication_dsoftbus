@@ -30,6 +30,8 @@ void LnnDeinitMetaNodeLedger(void);
 int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId);
 int32_t LnnDeactiveMetaNode(const char *metaNodeId);
 int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum);
+int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeInfo);
+int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid);
 
 #ifdef __cplusplus
 }

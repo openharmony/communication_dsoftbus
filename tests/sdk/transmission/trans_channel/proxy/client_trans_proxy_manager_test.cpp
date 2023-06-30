@@ -140,21 +140,21 @@ public:
 
 void ClientTransProxyManagerTest::SetUpTestCase(void)
 {
-    int ret = ClinetTransProxyInit(&g_clientSessionCb);
+    int ret = ClientTransProxyInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SetAceessTokenPermission("dsoftbusTransTest");
 }
 void ClientTransProxyManagerTest::TearDownTestCase(void) {}
 
 /**
- * @tc.name: ClinetTransProxyInitTest
+ * @tc.name: ClientTransProxyInitTest
  * @tc.desc: client trans proxy init test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerTest, ClinetTransProxyInitTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level0)
 {
-    int ret = ClinetTransProxyInit(nullptr);
+    int ret = ClientTransProxyInit(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -224,7 +224,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSize.Level0)
 {
-    int ret = ClinetTransProxyInit(&g_sessionCb);
+    int ret = ClientTransProxyInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ChannelInfo channelInfo = {0};
@@ -250,7 +250,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize.Level0)
 {
-    int32_t ret = ClinetTransProxyInit(&g_sessionCb);
+    int32_t ret = ClientTransProxyInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t channelId = 1;
     ClientTransProxyCloseChannel(TEST_CHANNEL_ID);

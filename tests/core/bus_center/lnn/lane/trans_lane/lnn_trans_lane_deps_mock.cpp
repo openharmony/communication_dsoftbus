@@ -37,9 +37,9 @@ static TransLaneDepsInterface *GetTransLaneIf()
 
 extern "C" {
 int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType **linkList, uint32_t *listNum)
+    LanePreferredLinkList *recommendList, uint32_t *listNum)
 {
-    return GetTransLaneIf()->SelectLane(networkId, request, linkList, listNum);
+    return GetTransLaneIf()->SelectLane(networkId, request, recommendList, listNum);
 }
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb)
@@ -47,10 +47,9 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     return GetTransLaneIf()->BuildLink(reqInfo, reqId, cb);
 }
 
-void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid,
-    const char *mac, const char *networkId)
+void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32_t pid)
 {
-    GetTransLaneIf()->DestroyLink(reqId, type, pid, mac, networkId);
+    GetTransLaneIf()->DestroyLink(networkId, reqId, type, pid);
 }
 
 uint32_t GenerateLaneProfileId(const LaneGenerateParam *param)

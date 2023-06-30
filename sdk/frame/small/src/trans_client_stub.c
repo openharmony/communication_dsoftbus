@@ -34,6 +34,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     ReadInt32(data, &(channel.channelType));
     ReadBool(data, &(channel.isServer));
     ReadBool(data, &(channel.isEnabled));
+    ReadBool(data, &(channel.isEncrypt));
     ReadInt32(data, &(channel.peerUid));
     ReadInt32(data, &(channel.peerPid));
     channel.groupId = (char *)ReadString(data, &size);

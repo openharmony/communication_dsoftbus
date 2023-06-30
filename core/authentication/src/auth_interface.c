@@ -14,12 +14,21 @@
  */
 #include "auth_interface.h"
 
+#include <securec.h>
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "auth_hichain.h"
+#include "auth_hichain_adapter.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
+#include "bus_center_manager.h"
+#include "lnn_decision_db.h"
+#include "lnn_ohos_account.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
+
+#define SHORT_ACCOUNT_HASH_LEN 2
 
 typedef struct {
     int32_t module;
@@ -163,12 +172,12 @@ NO_SANITIZE("cfi") int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, boo
     return AuthDeviceGetIdByConnInfo(connInfo, isServer);
 }
 
-NO_SANITIZE("cfi") int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta)
+NO_SANITIZE("cfi") int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta)
 {
     if (isMeta) {
-        return AuthMetaGetIdByP2pMac(p2pMac, type, isServer);
+        return AuthMetaGetIdByUuid(uuid, type, isServer);
     }
-    return AuthDeviceGetIdByP2pMac(p2pMac, type, isServer);
+    return AuthDeviceGetIdByUuid(uuid, type, isServer);
 }
 
 NO_SANITIZE("cfi") int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
@@ -254,13 +263,65 @@ NO_SANITIZE("cfi") int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") bool AuthHasTrustedRelation(void)
+NO_SANITIZE("cfi") int32_t AuthGetGroupType(const char *udid, const char *uuid)
 {
-    uint32_t sameGroupCnt = HichainGetJoinedGroups(AUTH_IDENTICAL_ACCOUNT_GROUP);
-    uint32_t pointGroupCnt = HichainGetJoinedGroups(AUTH_PEER_TO_PEER_GROUP);
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
-        "hichain getJoinedGroups sameGroupCnt:%u pointGroupCnt:%u.", sameGroupCnt, pointGroupCnt);
-    return sameGroupCnt != 0 || pointGroupCnt != 0;
+    int32_t type = 0;
+    if (udid == NULL || uuid == NULL) {
+        ALOGI("udid or uuid is null!");
+        return type;
+    }
+    type |= CheckDeviceInGroupByType(udid, uuid, AUTH_GROUP_ACCOUNT) ? GROUP_TYPE_ACCOUNT : 0;
+    type |= CheckDeviceInGroupByType(udid, uuid, AUTH_GROUP_P2P) ? GROUP_TYPE_P2P : 0;
+    type |= CheckDeviceInGroupByType(udid, uuid, AUTH_GROUP_MESH) ? GROUP_TYPE_MESH : 0;
+    type |= CheckDeviceInGroupByType(udid, uuid, AUTH_GROUP_COMPATIBLE) ? GROUP_TYPE_COMPATIBLE : 0;
+    return type;
+}
+
+NO_SANITIZE("cfi") bool AuthIsPotentialTrusted(const DeviceInfo *device)
+{
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
+    DeviceInfo defaultInfo;
+    (void)memset_s(&defaultInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+
+    if (device == NULL) {
+        ALOGE("device is null");
+        return true;
+    }
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        ALOGE("get local accountHash fail");
+        return true;
+    }
+    if (memcmp(device->accountHash, defaultInfo.accountHash, SHORT_ACCOUNT_HASH_LEN) == 0) {
+        ALOGD("accountHash is empty, continue verify progress");
+        return true;
+    }
+    if (memcmp(device->devId, defaultInfo.devId, SHA_256_HASH_LEN) == 0) {
+        ALOGD("devId is empty, continue verify progress");
+        return true;
+    }
+    if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
+        ALOGD("account:%02X%02X is same, continue verify progress", device->accountHash[0], device->accountHash[1]);
+        return true;
+    }
+    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false) && !LnnIsPotentialHomeGroup(device->devId)) {
+        ALOGD("device is not potential trusted, udidHash:%s, accountHash:%02X%02X",
+            AnonymizesUDID(device->devId), device->accountHash[0], device->accountHash[1]);
+        return false;
+    }
+    return true;
+}
+
+NO_SANITIZE("cfi") TrustedReturnType AuthHasTrustedRelation(void)
+{
+    uint32_t num = 0;
+    char *udidArray = NULL;
+
+    if (LnnGetTrustedDevInfoFromDb(&udidArray, &num) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get trusted dev info fail");
+        return TRUSTED_RELATION_IGNORE;
+    }
+    SoftBusFree(udidArray);
+    return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 
 NO_SANITIZE("cfi") int32_t AuthInit(void)

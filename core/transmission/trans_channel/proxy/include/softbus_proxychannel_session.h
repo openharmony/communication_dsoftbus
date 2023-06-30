@@ -18,6 +18,7 @@
 
 #include "stdint.h"
 #include "softbus_def.h"
+#include "softbus_trans_def.h"
 #include "softbus_proxychannel_message.h"
 
 #ifdef __cplusplus
@@ -40,19 +41,10 @@ typedef enum {
     PROXY_FLAG_ASYNC_MESSAGE = 12,
 } ProxyPacketType;
 
-typedef enum {
-    PROXY_CHANNEL_PRORITY_MESSAGE = 0,
-    PROXY_CHANNEL_PRORITY_BYTES = 1,
-    PROXY_CHANNEL_PRORITY_FILE = 2,
-    PROXY_CHANNEL_PRORITY_BUTT = 3,
-} ProxyChannelPriority;
-
 int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len, SessionPktType flags);
 int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len);
-int32_t TransOnAuthMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, const char *data, uint32_t len);
 int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId);
-void TransSliceManagerDeInit(void);
-int32_t TransSliceManagerInit(void);
+int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, TransReceiveData *receiveData);
 
 #ifdef __cplusplus
 }

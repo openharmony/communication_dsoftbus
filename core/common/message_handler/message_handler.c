@@ -25,11 +25,11 @@
 #include "softbus_def.h"
 #include "softbus_log.h"
 #include "softbus_type_def.h"
-#include "unistd.h"
 
 #define LOOP_NAME_LEN 16
 #define TIME_THOUSANDS_MULTIPLIER 1000LL
 #define MAX_LOOPER_CNT 30U
+#define MAX_LOOPER_PRINT_CNT 64
 
 static int8_t g_isNeedDestroy = 0;
 static int8_t g_isThreadStarted = 0;
@@ -144,9 +144,9 @@ NO_SANITIZE("cfi") static void *LoopTask(void *arg)
             SoftBusFree(itemNode);
             context->msgSize--;
             if (looper->dumpable) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
-                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u", context->name,
-                    msg->handler->name, msg->what, msg->arg1, context->msgSize);
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u,time=%" PRId64,
+                    context->name, msg->handler->name, msg->what, msg->arg1, context->msgSize, msg->time);
             }
         } else {
             SoftBusSysTime tv;
@@ -162,7 +162,7 @@ NO_SANITIZE("cfi") static void *LoopTask(void *arg)
         context->currentMsg = msg;
         (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
                 "LoopTask[%s], HandleMessage message. handle=%s,what=%" PRId32, context->name, msg->handler->name,
                 msg->what);
         }
@@ -202,7 +202,7 @@ static int StartNewLooperThread(SoftBusLooper *looper)
 #ifdef ASAN_BUILD
 #define MAINLOOP_STACK_SIZE 10240
 #else
-#define MAINLOOP_STACK_SIZE 8192
+#define MAINLOOP_STACK_SIZE (32 * 1024)
 #endif
 #endif
     int ret;
@@ -222,16 +222,25 @@ static int StartNewLooperThread(SoftBusLooper *looper)
     return 0;
 }
 
-static void DumpLooperLocked(const SoftBusLooperContext *context)
+static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusHandler *handler)
 {
     int i = 0;
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &context->msgHead) {
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
+        if (i > MAX_LOOPER_PRINT_CNT) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "many messages left unprocessed, msgSize is %u",
+                context->msgSize);
+            break;
+        }
+        if (handler != NULL && handler != msg->handler) {
+            continue;
+        }
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
             "DumpLooper. i=%d,handler=%s,what =%" PRId32 ",arg1=%" PRIu64 " arg2=%" PRIu64 ", time=%" PRId64,
             i, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
+
         i++;
     }
 }
@@ -247,15 +256,25 @@ NO_SANITIZE("cfi") void DumpLooper(const SoftBusLooper *looper)
         return;
     }
     if (looper->dumpable) {
-        DumpLooperLocked(context);
+        DumpLooperLocked(context, NULL);
     }
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
 NO_SANITIZE("cfi") static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
+    if (msgPost == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PostMessageAtTime with nullmsg");
+        return;
+    }
+    if (looper == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PostMessageAtTime with nulllooper");
+        FreeSoftBusMsg(msgPost);
+        return;
+    }
+
     if (looper->dumpable) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=% " PRId64 " us",
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]PostMessageAtTime what =%d time=% " PRId64 " us",
             looper->context->name, msgPost->what, msgPost->time);
     }
     if (msgPost->handler == NULL) {
@@ -305,7 +324,7 @@ NO_SANITIZE("cfi") static void PostMessageAtTime(const SoftBusLooper *looper, So
     context->msgSize++;
     if (looper->dumpable) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime. insert", context->name);
-        DumpLooperLocked(context);
+        DumpLooperLocked(context, msgPost->handler);
     }
     SoftBusCondBroadcast(&context->cond);
     (void)SoftBusMutexUnlock(&context->lock);
@@ -313,17 +332,33 @@ NO_SANITIZE("cfi") static void PostMessageAtTime(const SoftBusLooper *looper, So
 
 NO_SANITIZE("cfi") static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)
 {
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LooperPostMessage with nullmsg");
+        return;
+    }
+    if (looper == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LooperPostMessage with nulllooper");
+        return;
+    }
     msg->time = UptimeMicros();
     PostMessageAtTime(looper, msg);
 }
 
 static void LooperPostMessageDelay(const SoftBusLooper *looper, SoftBusMessage *msg, uint64_t delayMillis)
 {
+    if (msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LooperPostMessageDelay with nullmsg");
+        return;
+    }
+    if (looper == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LooperPostMessageDelay with nulllooper");
+        return;
+    }
     msg->time = UptimeMicros() + (int64_t)delayMillis * TIME_THOUSANDS_MULTIPLIER;
     PostMessageAtTime(looper, msg);
 }
 
-static int32_t WhatRemoveFunc(const SoftBusMessage *msg, void *args)
+static int WhatRemoveFunc(const SoftBusMessage *msg, void *args)
 {
     int32_t what = (int32_t)(intptr_t)args;
     if (msg->what == what) {
@@ -333,7 +368,7 @@ static int32_t WhatRemoveFunc(const SoftBusMessage *msg, void *args)
 }
 
 NO_SANITIZE("cfi") static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
-    int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
+    int (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
     SoftBusLooperContext *context = looper->context;
     if (SoftBusMutexLock(&context->lock) != 0) {

@@ -58,14 +58,14 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub update send info");
 }
 
-void LnnHbOnAuthGroupCreated(int32_t groupType)
+void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     (void)groupType;
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group created");
 }
 
-void LnnHbOnAuthGroupDeleted(void)
+void LnnHbOnTrustedRelationReduced(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group deleted");
 }

@@ -28,7 +28,11 @@ int32_t LnnInitOhosAccount(void)
     return SOFTBUS_OK;
 }
 
-void LnnOnOhosAccountChanged(void)
+void LnnUpdateOhosAccount(void)
+{
+}
+
+void LnnOnOhosAccountLogout(void)
 {
 }
 

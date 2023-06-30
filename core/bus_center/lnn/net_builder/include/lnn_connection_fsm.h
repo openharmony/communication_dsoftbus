@@ -77,6 +77,7 @@ typedef struct tagLnnConnectionFsm {
     uint16_t id;
 
     char fsmName[LNN_CONNECTION_FSM_NAME_LEN];
+    char pkgName[PKG_NAME_SIZE_MAX];
     FsmStateMachine fsm;
     LnnConntionInfo connInfo;
     LnnConnectionFsmStopCallback stopCallback;
@@ -84,7 +85,7 @@ typedef struct tagLnnConnectionFsm {
     LnnStatisticData statisticData;
 } LnnConnectionFsm;
 
-LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target);
+LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName);
 void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
 
 int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);

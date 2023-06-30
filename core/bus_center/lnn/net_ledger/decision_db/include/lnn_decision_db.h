@@ -16,6 +16,7 @@
 #ifndef LNN_DECISION_DB_H
 #define LNN_DECISION_DB_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -25,6 +26,7 @@ extern "C" {
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid);
 int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid);
 int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
+bool LnnIsPotentialHomeGroup(const char *udid);
 
 int32_t LnnInitDecisionDbDelay(void);
 

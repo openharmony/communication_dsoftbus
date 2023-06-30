@@ -374,3 +374,18 @@ NO_SANITIZE("cfi") int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *group
     }
     return SOFTBUS_OK;
 }
+
+bool SoftBusHasWifiDirectCapability(void)
+{
+    return true;
+}
+
+bool SoftBusIsWifiTripleMode(void)
+{
+    return false;
+}
+
+char* SoftBusGetWifiInterfaceCoexistCap(void)
+{
+    return NULL;
+}

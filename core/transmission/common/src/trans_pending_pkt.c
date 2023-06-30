@@ -15,16 +15,13 @@
 
 #include "trans_pending_pkt.h"
 
-#include <sys/time.h>
-#include <unistd.h>
-
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-#define TIME_OUT 20
+#define TIME_OUT 2
 
 typedef struct {
     ListNode node;

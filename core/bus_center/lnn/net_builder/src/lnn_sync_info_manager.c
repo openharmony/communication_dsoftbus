@@ -335,8 +335,13 @@ NO_SANITIZE("cfi") static void OnMessageReceived(int32_t channelId, const char *
     LnnSyncInfoMsgHandler handler;
     char networkId[NETWORK_ID_BUF_LEN] = {0};
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "data recevied, channelId: %d", channelId);
-    if (data == NULL || len <= MSG_HEAD_LEN || len > MAX_SYNC_INFO_MSG_LEN) {
+    if (data == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "recv NULL data, channelId: %d", channelId);
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv sync info msg for type:%d, channelId:%d, len:%d",
+        (LnnSyncInfoType)(*(int32_t *)data), channelId, len);
+    if (len <= MSG_HEAD_LEN || len > MAX_SYNC_INFO_MSG_LEN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid msg len: %d", len);
         return;
     }

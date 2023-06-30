@@ -814,7 +814,7 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:not found", __func__);
-        return SOFTBUS_ERR;
+        return ret;
     }
     sessionNode->channelId = transInfo->channelId;
     sessionNode->channelType = (ChannelType)transInfo->channelType;
@@ -935,9 +935,10 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->isEnable = true;
                 sessionNode->routeType = channel->routeType;
                 sessionNode->businessType = channel->businessType;
-                sessionNode->fileEncrypt = channel->encrypt;
+                sessionNode->fileEncrypt = channel->fileEncrypt;
                 sessionNode->algorithm = channel->algorithm;
                 sessionNode->crc = channel->crc;
+                sessionNode->isEncrypt = channel->isEncrypt;
                 *sessionId = sessionNode->sessionId;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,

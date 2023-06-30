@@ -54,7 +54,7 @@
         "DiscClientOnPublishSuccess";
         "ClientTransProxyDeinit";
         "JoinMetaNode";
-        "ClinetTransProxyInit";
+        "ClientTransProxyInit";
         "TransDeleteFileListener";
         "FrameIndexToType";
         "ServerIpcStopTimeSync";

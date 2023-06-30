@@ -30,6 +30,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
+#include "softbus_adapter_json.h"
 #include "softbus_log.h"
 
 #define JSON_KEY_TYPE "type"
@@ -536,11 +537,7 @@ static void OnReceiveTopoUpdateMsg(LnnSyncInfoType type, const char *networkId, 
     if (type != LNN_INFO_TYPE_TOPO_UPDATE) {
         return;
     }
-    if (strnlen((char *)msg, len) == len) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnReceiveTopoUpdateMsg msg invalid");
-        return;
-    }
-    json = cJSON_Parse((char *)msg);
+    json =  cJSON_ParseWithLength((char *)msg, (size_t)len);
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "cjson parse topo msg fail");
         return;
@@ -709,6 +706,8 @@ static void OnLnnRelationChangedDelay(void *para)
 
 static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
 {
+    LLOGI("ignore topo change event");
+    return;
     const LnnRelationChanedEventInfo *eventInfo = (const LnnRelationChanedEventInfo *)info;
     RelationChangedMsg *msg = NULL;
 

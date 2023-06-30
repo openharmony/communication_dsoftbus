@@ -57,7 +57,6 @@ constexpr uint64_t NEW_TIME_STAMP = 6000;
 constexpr int64_t AUTH_SEQ = 1;
 constexpr char NODE_ADDRESS[] = "address";
 constexpr char RECV_UDID_HASH[] = "87654321";
-constexpr int32_t INVALID_LANE_ID = -1;
 using namespace testing;
 class LNNDisctributedLedgerTest : public testing::Test {
 public:
@@ -492,17 +491,5 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DL_DEVICE_INFO_NAME_Test_001, TestSi
     EXPECT_TRUE(ret == true);
     ret = LnnSetDLDeviceInfoName(NODE2_UDID, NODE2_DEVICE_NAME);
     EXPECT_TRUE(ret == false);
-}
-
-/*
-* @tc.name: LNN_GET_AND_SET_LANE_COUNT_Test_001
-* @tc.desc: lnn get and set lane count test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_AND_SET_LANE_COUNT_Test_001, TestSize.Level1)
-{
-    EXPECT_TRUE(LnnGetLaneCount(INVALID_LANE_ID) == SOFTBUS_ERR);
-    EXPECT_TRUE(LnnSetLaneCount(INVALID_LANE_ID, AUTH_ID) == SOFTBUS_ERR);
 }
 } // namespace OHOS
