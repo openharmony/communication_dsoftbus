@@ -43,7 +43,7 @@ typedef enum {
     EVENT_HB_CHECK_DEV_STATUS,
     EVENT_HB_START_PROCESS,
     EVENT_HB_STOP_SPECIFIC,
-    EVENT_HB_SET_MEDIUM_PARAM,
+    EVENT_HB_SET_MEDIUM_PARAM = 10,
     EVENT_HB_UPDATE_SEND_INFO,
     EVENT_HB_SCREEN_OFF_CHECK_STATUS,
     EVENT_HB_MAX,
@@ -62,8 +62,9 @@ typedef struct {
 
 typedef struct {
     LnnHeartbeatType hbType;
-    bool *isRemoved;
     bool wakeupFlag;
+    bool isRelay;
+    bool *isRemoved;
 } LnnRemoveSendEndMsgPara;
 
 typedef struct {
@@ -77,6 +78,7 @@ typedef struct {
     LnnHeartbeatType hbType;
     LnnHeartbeatStrategyType strategyType;
     bool isRelay;
+    bool isSyncData;
 } LnnProcessSendOnceMsgPara;
 
 int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
@@ -84,8 +86,9 @@ int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
 
 int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para,
     uint64_t delayMillis);
-int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay);
-int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, uint64_t delayMillis, bool wakeupFlag);
+int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
+    LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis);
+int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData *custData, uint64_t delayMillis);
 int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm, uint64_t delayMillis);
 int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type);
 int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType);
@@ -96,7 +99,7 @@ int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpda
 int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para,
     uint64_t delayMillis);
 
-void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool *isRemoved, bool wakeupFlag);
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved);
 void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
 void LnnRemoveScreenOffCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
 void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType,

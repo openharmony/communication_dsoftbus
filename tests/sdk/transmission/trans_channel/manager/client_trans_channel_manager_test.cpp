@@ -87,7 +87,7 @@ void ClientTransChannelManagerTest::SetUpTestCase(void)
     int ret = ClientTransAuthInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ClinetTransProxyInit(&g_clientSessionCb);
+    ret = ClientTransProxyInit(&g_clientSessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransTdcSetCallBack(&g_clientSessionCb);

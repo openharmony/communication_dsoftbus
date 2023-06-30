@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <string>
+#include "softbus_adapter_mem.h"
+
 #include "softbus_client_stub.h"
 #include "client_trans_session_manager.h"
 #include "client_bus_center_manager.h"
@@ -240,6 +243,10 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
+    if (!data.ReadBool(channel.isEncrypt)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read isEncrypt failed!");
+        return SOFTBUS_ERR;
+    }
     if (!data.ReadInt32(channel.peerUid)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
@@ -393,7 +400,10 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    int ret = OnChannelMsgReceived(channelId, channelType, dataInfo, len, type);
+    char *infoData = (char *)SoftBusMalloc(len);
+    memcpy_s(infoData, len, dataInfo, len);
+    int ret = OnChannelMsgReceived(channelId, channelType, infoData, len, type);
+    SoftBusFree(infoData);
     bool res = reply.WriteInt32(ret);
     if (!res) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner write reply failed!");

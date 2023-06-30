@@ -30,7 +30,7 @@ typedef struct {
 } LaneSelectParam;
 
 int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType **linkList, uint32_t *listNum);
+    LanePreferredLinkList *recommendList, uint32_t *listNum);
 
 #ifdef __cplusplus
 }

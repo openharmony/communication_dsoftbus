@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef CLIENT_TRANS_AUTH_MANAGER_H 
+#ifndef CLIENT_TRANS_AUTH_MANAGER_H
 #define CLIENT_TRANS_AUTH_MANAGER_H
 
 #include "client_trans_session_callback.h"

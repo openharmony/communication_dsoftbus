@@ -27,6 +27,7 @@ typedef enum {
     COMM_DEVICE_KEY_DEVTYPE,
     COMM_DEVICE_KEY_DEVNAME,
     COMM_DEVICE_KEY_BT_MAC,
+    COMM_DEVICE_KEY_VERSION_TYPE,
     COMM_DEVICE_KEY_BUTT
 } CommonDeviceKey;
 
@@ -45,8 +46,11 @@ typedef enum {
 #define TYPE_CAR "CAR"
 #define TYPE_WATCH "WATCH"
 #define TYPE_IPCAMERA "WiFiCamara"
+#define TYPE_PC "PC"
+#define TYPE_SMART_DISPLAY "SMART_DISPLAY"
 
 int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
+int32_t GetWlanIpv4Addr(char *ip, uint32_t size);
 
 #ifdef __cplusplus
 }

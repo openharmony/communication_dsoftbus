@@ -163,8 +163,8 @@ private:
     bool boolVal_ = false;
 };
 
-constexpr int ADDR_MAX_SIZE = sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255");
-constexpr int MAX_STREAM_LEN = 2 * 1024 * 1024;
+static constexpr int ADDR_MAX_SIZE = sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255");
+static constexpr int MAX_STREAM_LEN = 2 * 1024 * 1024;
 } // namespace SoftBus
 } // namespace Communication
 

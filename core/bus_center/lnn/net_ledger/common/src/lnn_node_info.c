@@ -22,100 +22,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_mem.h"
-
-#define PEER_DISCOVERY_INTERVAL ","
-#define DISCOVERY_TYPE_JUDGE_NUM 2
-
-static int32_t TailInsertString(char *destStr, const char *sourStr, int destLen)
-{
-    uint32_t len = strlen(destStr) + strlen(sourStr) + 1;
-    if (len > destLen) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para err");
-        return SOFTBUS_ERR;
-    }
-    if (strcat_s(destStr, len, sourStr) !=0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcat err");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-NO_SANITIZE("cfi") int32_t LnnSetSupportDiscoveryType(char *dstId, const char *sourceId)
-{
-    if (dstId == NULL || sourceId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (strlen(dstId) == 0) {
-        if (strcpy_s(dstId, PEER_DISCOVERY_TYPE_LEN, sourceId) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
-            return SOFTBUS_MEM_ERR;
-        }
-    } else {
-        if (TailInsertString(dstId, PEER_DISCOVERY_INTERVAL, PEER_DISCOVERY_TYPE_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Add string err");
-            return SOFTBUS_ERR;
-        }
-        if (TailInsertString(dstId, sourceId, PEER_DISCOVERY_TYPE_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Add string err");
-            return SOFTBUS_ERR;
-        }
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set PeerDiscoveryType=%s", dstId);
-    return SOFTBUS_OK;
-}
-
-NO_SANITIZE("cfi") bool LnnHasSupportDiscoveryType(const char *destType, const char *type)
-{
-    if (destType == NULL || type == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "err para");
-        return false;
-    }
-    if (strcmp(type, destType) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Recv DisType = %s", type);
-        return true;
-    }
-    char *tmp = (char *)SoftBusCalloc(PEER_DISCOVERY_TYPE_LEN * sizeof(char));
-    if (tmp == NULL) {
-        return false;
-    }
-    if (memcpy_s(tmp, PEER_DISCOVERY_TYPE_LEN, type, strlen(type)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s err");
-        return false;
-    }
-    char *tokSave = NULL;
-    char *token = strtok_r(tmp, PEER_DISCOVERY_INTERVAL, &tokSave);
-    uint32_t count = DISCOVERY_TYPE_JUDGE_NUM;
-    for (uint32_t i = 0; i < count; i++) {
-        if (token == NULL || tokSave == NULL) {
-            SoftBusFree(tmp);
-            return false;
-        }
-        if (strcmp(token, destType) == 0) {
-            SoftBusFree(tmp);
-            return true;
-        } else if (strcmp(tokSave, destType) == 0) {
-            SoftBusFree(tmp);
-            return true;
-        }
-        token = strtok_r(NULL, PEER_DISCOVERY_INTERVAL, &tokSave);
-    }
-    SoftBusFree(tmp);
-    return false;
-}
-
-NO_SANITIZE("cfi") bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type)
-{
-    if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
-        return false;
-    }
-    if (((uint32_t)info->exchangeDiscoveryType & (1 << (uint32_t)type)) != 0) {
-        return true;
-    }
-    return false;
-}
 
 NO_SANITIZE("cfi") bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
@@ -212,7 +118,7 @@ NO_SANITIZE("cfi") const char *LnnGetNetIfName(const NodeInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
-        return DEFAULT_MAC;
+        return DEFAULT_IFNAME;
     }
     return info->connectInfo.netIfName;
 }

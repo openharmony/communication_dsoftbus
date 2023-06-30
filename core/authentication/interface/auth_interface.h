@@ -41,6 +41,8 @@ typedef enum {
     SOFTBUS_OLD_V2 = 2,
     /* softbus type v1 */
     SOFTBUS_NEW_V1 = 100,
+    /* softbus type v2 */
+    SOFTBUS_NEW_V2 = 101,
 } SoftBusVersion;
 
 typedef enum {
@@ -57,8 +59,10 @@ typedef struct {
             char brMac[BT_MAC_LEN];
         } brInfo;
         struct {
+            BleProtocolType protocol;
             char bleMac[BT_MAC_LEN];
             uint8_t deviceIdHash[UDID_HASH_LEN];
+            int32_t psm;
         } bleInfo;
         struct {
             char ip[IP_LEN];
@@ -102,11 +106,20 @@ void AuthMetaReleaseVerify(int64_t authId);
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId);
+    void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } GroupChangeListener;
+
+typedef enum {
+    TRUSTED_RELATION_IGNORE = 0,
+    TRUSTED_RELATION_NO,
+    TRUSTED_RELATION_YES,
+} TrustedReturnType;
+
 int32_t RegGroupChangeListener(const GroupChangeListener *listener);
 void UnregGroupChangeListener(void);
 
-bool AuthHasTrustedRelation(void);
+TrustedReturnType AuthHasTrustedRelation(void);
+bool AuthIsPotentialTrusted(const DeviceInfo *device);
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port);
 void AuthStopListening(AuthLinkType type);
@@ -138,7 +151,7 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
 /* for ProxyChannel & P2P TcpDirectchannel */
 int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta);
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
-int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta);
+int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta);
 
 uint32_t AuthGetEncryptSize(uint32_t inLen);
 uint32_t AuthGetDecryptSize(uint32_t inLen);
@@ -152,6 +165,7 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth);
+int32_t AuthGetGroupType(const char *udid, const char *uuid);
 
 int32_t AuthInit(void);
 void AuthDeinit(void);

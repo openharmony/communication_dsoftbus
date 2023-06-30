@@ -130,12 +130,12 @@ HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_003, TestSize.Level1)
 HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_004, TestSize.Level1)
 {
     const char *networkId = "123456xxx";
-    int32_t ret = LnnServerLeave(networkId);
+    int32_t ret = LnnServerLeave(networkId, "pkaName");
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnServerLeave(networkId);
+    ret = LnnServerLeave(networkId, "pkaName");
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     LnnDeinitNetBuilder();

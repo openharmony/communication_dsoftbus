@@ -19,23 +19,27 @@
 
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_score.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_capability.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_bus_center.h"
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
-#include "wifi_device.h"
 
-#define LNN_LINK_DEFAULT_SCORE 60 /* Indicates that scoring is not supported */
 
-static int32_t GetWlanLinkedFrequency(void)
+#define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
+#define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/
+
+int32_t GetWlanLinkedFrequency(void)
 {
     LnnWlanLinkedInfo info;
     int32_t ret = LnnGetWlanLinkedInfo(&info);
@@ -62,6 +66,48 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
     return true;
 }
 
+static bool GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remote)
+{
+    int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
+    if (ret != SOFTBUS_OK || *local < 0) {
+        LLOGE("LnnGetLocalNumInfo err, ret = %d, local = %d", ret, *local);
+        return false;
+    }
+    ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
+    if (ret != SOFTBUS_OK || *remote < 0) {
+        LLOGE("LnnGetRemoteNumInfo err, ret = %d, remote = %d", ret, *remote);
+        return false;
+    }
+    return true;
+}
+
+static bool HasActiveBleConnection(const char *networkId)
+{
+    bool ret = false;
+    ConnectOption option = { 0 };
+    char udid[UDID_BUF_LEN] = { 0 };
+    char udidHash[UDID_HASH_LEN] = { 0 };
+    if (memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption)) != EOK) {
+        return false;
+    }
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, sizeof(udid)) != SOFTBUS_OK) {
+        LLOGE("get udid err");
+        return false;
+    }
+    if (SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), (unsigned char *)udidHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get udid hash err");
+        return false;
+    }
+    option.type = CONNECT_BLE;
+    if (memcpy_s(option.bleOption.deviceIdHash, UDID_HASH_LEN, udidHash, UDID_HASH_LEN) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s udid hash err");
+        return false;
+    }
+    ret = CheckActiveConnection(&option);
+    LLOGD("has active ble connection:%s", ret ? "true" : "false");
+    return ret;
+}
+
 static bool IsEnableWlan2P4G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
@@ -74,8 +120,8 @@ static bool IsEnableWlan2P4G(const char *networkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
         return false;
     }
-    if (((local & (1<< BIT_WIFI_24G)) || (local & (1 << BIT_ETH))) &&
-        ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)))) {
+    if (((local & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G))) &&
+        ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G)))) {
         return true;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "2.4G capa disable, local:%d, remote:%d", local, remote);
@@ -94,8 +140,8 @@ static bool IsEnableWlan5G(const char *networkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
         return false;
     }
-    if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH))) &&
-        ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)))) {
+    if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G))) &&
+        ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G)))) {
         return true;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "5G capa disable, local:%d, remote:%d", local, remote);
@@ -130,6 +176,23 @@ static bool IsEnableP2p(const char *networkId)
     return true;
 }
 
+static bool IsEnableP2pReuse(const char *networkId)
+{
+    if (!IsEnableP2p(networkId)) {
+        return false;
+    }
+    uint64_t local, remote;
+    if (!GetFeatureCap(networkId, &local, &remote)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
+        return false;
+    }
+    if (((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) || ((remote & (1 << BIT_WIFI_P2P_REUSE)) == 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p reuse capa disable, local:%d, remote:%d", local, remote);
+        return false;
+    }
+    return true;
+}
+
 static bool IsEnableBle(const char *networkId)
 {
     int32_t local, remote;
@@ -143,11 +206,87 @@ static bool IsEnableBle(const char *networkId)
     return true;
 }
 
-static bool IsEnableBleDirect(const char *networkId)
+static bool IsEnableBleReuse(const char *networkId)
 {
-    return IsEnableBle(networkId);
+    int32_t local, remote;
+    uint64_t localFeature, remoteFeature;
+    uint64_t onlineTime, nowtime;
+    if (!GetNetCap(networkId, &local, &remote)) {
+        LLOGE("GetNetCap error");
+        return false;
+    }
+    if (!GetFeatureCap(networkId, &localFeature, &remoteFeature)) {
+        LLOGE("GetFeatureCap error");
+        return false;
+    }
+    if (LnnGetDLOnlineTimestamp(networkId, &onlineTime) != SOFTBUS_OK) {
+        LLOGE("GetDLOnlineTimestamp error");
+        return false;
+    }
+    nowtime = LnnUpTimeMs();
+    if (!IsFeatureSupport(localFeature, BIT_BLE_ONLINE_REUSE_CAPABILITY) ||
+        !IsFeatureSupport(remoteFeature, BIT_BLE_ONLINE_REUSE_CAPABILITY)) {
+        LLOGE("can not support ble reuse");
+        return false;
+    }
+    if (!HasActiveBleConnection(networkId) || (nowtime - onlineTime > LNN_ONLINETIME_OUT)) {
+        LLOGE("ble connection has been disconnected or online time > 10s");
+        return false;
+    }
+    LLOGD("ble will be reuse");
+    return true;
 }
 
+static bool IsEnableBleDirect(const char *networkId)
+{
+    if (!IsEnableBle(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble is not enable");
+        return false;
+    }
+
+    uint64_t local, remote;
+    if (!GetFeatureCap(networkId, &local, &remote)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetFeatureCap error");
+        return false;
+    }
+    if (((local & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0) ||
+        ((remote & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble direct capa disable, local:%d, remote:%d", local, remote);
+        return false;
+    }
+    return true;
+}
+
+static bool IsEnableCoc(const char *networkId)
+{
+    if (!IsEnableBle(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble is not enable");
+        return false;
+    }
+    uint64_t local = 0, remote = 0;
+    if (!GetFeatureCap(networkId, &local, &remote)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetFeatureCap error");
+        return false;
+    }
+    if (((local & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0) || ((remote & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coc capa disable, local:%d, remote:%d", local, remote);
+        return false;
+    }
+    return true;
+}
+
+static bool IsEnableCocDirect(const char *networkId)
+{
+    if (!IsEnableCoc(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coc is not enable");
+        return false;
+    }
+    if (!IsEnableBleDirect(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble direct is not enable");
+        return false;
+    }
+    return true;
+}
 
 NO_SANITIZE("cfi") static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
 {
@@ -157,6 +296,13 @@ NO_SANITIZE("cfi") static int32_t GetBrScore(const char *networkId, uint32_t exp
 }
 
 NO_SANITIZE("cfi") static int32_t GetBleScore(const char *networkId, uint32_t expectedBw)
+{
+    (void)networkId;
+    (void)expectedBw;
+    return LNN_LINK_DEFAULT_SCORE;
+}
+
+NO_SANITIZE("cfi") static int32_t GetBleReuseScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
@@ -203,13 +349,25 @@ static int32_t GetWlan5GScore(const char *networkId, uint32_t expectedBw)
     return GetLinkedChannelScore();
 }
 
+NO_SANITIZE("cfi") static int32_t GetCocScore(const char *networkId, uint32_t expectedBw)
+{
+    (void)networkId;
+    (void)expectedBw;
+    return LNN_LINK_DEFAULT_SCORE;
+}
+
 static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
-    [LANE_BR] = {true, IsEnableBr, GetBrScore},
-    [LANE_BLE] = {true, IsEnableBle, GetBleScore},
-    [LANE_P2P] = {true, IsEnableP2p, GetP2pScore},
-    [LANE_WLAN_2P4G] = {true, IsEnableWlan2P4G, GetWlan2P4GScore},
-    [LANE_WLAN_5G] = {true, IsEnableWlan5G, GetWlan5GScore},
-    [LANE_BLE_DIRECT] = {true, IsEnableBleDirect, GetBleScore}
+    [LANE_BR] = {true,   IsEnableBr,        GetBrScore      },
+    [LANE_BLE] = { true,  IsEnableBle,       GetBleScore     },
+    [LANE_P2P] = { true,  IsEnableP2p,       GetP2pScore     },
+    [LANE_WLAN_2P4G] = { true,  IsEnableWlan2P4G,  GetWlan2P4GScore},
+    [LANE_WLAN_5G] = { true,  IsEnableWlan5G,    GetWlan5GScore  },
+    [LANE_ETH] = { false, NULL,              NULL            },
+    [LANE_P2P_REUSE] = { true,  IsEnableP2pReuse,  GetP2pScore    },
+    [LANE_BLE_DIRECT] = { true, IsEnableBleDirect, GetBleScore     },
+    [LANE_BLE_REUSE] = { true, IsEnableBleReuse,  GetBleReuseScore},
+    [LANE_COC] = { true,  IsEnableCoc,      GetCocScore     },
+    [LANE_COC_DIRECT] = { true,  IsEnableCocDirect, GetCocScore    },
 };
 
 NO_SANITIZE("cfi") LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)

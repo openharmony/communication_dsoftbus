@@ -95,12 +95,12 @@ int64_t AuthMetaGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int64_t AuthMetaGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer)
+int64_t AuthMetaGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer)
 {
-    (void)p2pMac;
+    (void)uuid;
     (void)type;
     (void)isServer;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get auth id by p2p mac info");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get auth id by uuid");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

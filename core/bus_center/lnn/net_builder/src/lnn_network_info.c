@@ -19,6 +19,7 @@
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_deviceinfo_to_profile.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_net_capability.h"
@@ -29,10 +30,17 @@
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_json_utils.h"
 #include "softbus_def.h"
+#include "wifi_direct_types.h"
 
 #define MSG_LEN 10
 #define BITS 8
 #define BITLEN 4
+#define STRING_INTERFACE_BUFFER_LEN 16
+
+static SoftBusWifiState g_wifiState = SOFTBUS_WIFI_UNKNOWN;
+static bool g_isWifiDirectSupported = false;
+static bool g_isApCoexistSupported = false;
+static bool g_isWifiEnable = false;
 
 static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, int32_t len)
 {
@@ -59,16 +67,16 @@ static void HandlePeerNetCapchanged(const char *networkId, uint32_t capability)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "only support close ble");
         return;
     }
-    NodeInfo *info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-    if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get node info fail!");
+    NodeInfo info = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LLOGE("get node info fail");
         return;
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && !LnnHasCapability(capability, BIT_BLE)) {
+    if (LnnHasDiscoveryType(&info, DISCOVERY_TYPE_BLE) && !LnnHasCapability(capability, BIT_BLE)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remote device lost ble, ble need offline");
         PostNetchangedInfo(networkId, CONNECTION_ADDR_BLE);
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && !LnnHasCapability(capability, BIT_BR)) {
+    if (LnnHasDiscoveryType(&info, DISCOVERY_TYPE_BR) && !LnnHasCapability(capability, BIT_BR)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remote device lost br, br need offline");
         PostNetchangedInfo(networkId, CONNECTION_ADDR_BR);
     }
@@ -93,6 +101,15 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "capability:%d", capability);
     // update ledger
+    NodeInfo info = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LLOGE("get node info fail");
+        return;
+    }
+    if (info.discoveryType != capability) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "capability change, need to updateProfile");
+        updateProfile(&info);
+    }
     if (LnnSetDLConnCapability(networkId, capability)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update conn capability fail.");
         return;
@@ -146,12 +163,12 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         SoftBusFree(msg);
         return;
     }
+    NodeInfo nodeInfo = {0};
     for (int32_t i = 0; i< infoNum; i++) {
-        NodeInfo *nodeInfo = LnnGetNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID);
-        if (nodeInfo == NULL) {
+        if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
-        if (IsNeedToSend(nodeInfo, type)) {
+        if (IsNeedToSend(&nodeInfo, type)) {
             int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo[i].networkId, msg, MSG_LEN, NULL);
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync network info ret = %d to %s.",
              ret, netInfo[i].deviceName);
@@ -177,6 +194,62 @@ static void WifiStateProcess(uint32_t netCapability, bool isSend)
     return;
 }
 
+static bool IsP2pAvailable(bool isApSwitchOn)
+{
+    bool isTripleMode = SoftBusIsWifiTripleMode();
+    return g_isWifiDirectSupported && (g_isApCoexistSupported || !isApSwitchOn || isTripleMode) && g_isWifiEnable;
+}
+
+static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
+{
+    switch (wifiState) {
+        case SOFTBUS_WIFI_OBTAINING_IPADDR:
+            (void)LnnSetNetCapability(capability, BIT_WIFI);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+            break;
+        case SOFTBUS_WIFI_ENABLED:
+            g_isWifiEnable = true;
+            (void)LnnSetNetCapability(capability, BIT_WIFI);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            *needSync = true;
+            break;
+        case SOFTBUS_WIFI_CONNECTED:
+            (void)LnnSetNetCapability(capability, BIT_WIFI);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+            break;
+        case SOFTBUS_WIFI_DISABLED:
+            g_isWifiEnable = false;
+            (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+            *needSync = true;
+            break;
+        case SOFTBUS_AP_ENABLED:
+            (void)LnnSetNetCapability(capability, BIT_WIFI);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+            if (IsP2pAvailable(true)) {
+                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            } else {
+                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+            }
+            *needSync = true;
+            break;
+        case SOFTBUS_AP_DISABLED:
+            if (IsP2pAvailable(false)) {
+                (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            } else {
+                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+            }
+            *needSync = true;
+            break;
+        default:
+            break;
+    }
+}
+
 static void WifiStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_WIFI_STATE_CHANGED) {
@@ -191,42 +264,13 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "WifiStateEventHandler WifiState = %d", wifiState);
-    bool isSend = false;
-    switch (wifiState) {
-        case SOFTBUS_WIFI_OBTAINING_IPADDR:
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI);
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
-            break;
-        case SOFTBUS_WIFI_ENABLED:
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_P2P);
-            isSend = true;
-            break;
-        case SOFTBUS_WIFI_CONNECTED:
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI);
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
-            break;
-        case SOFTBUS_WIFI_DISCONNECTED:
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
-            isSend = false;
-            break;
-        case SOFTBUS_WIFI_DISABLED:
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
-            isSend = true;
-            break;
-        default:
-            break;
+    if (g_wifiState == wifiState) {
+        return;
     }
-    WifiStateProcess(netCapability, isSend);
-    return;
+    g_wifiState = wifiState;
+    bool needSync = false;
+    GetNetworkCapability(wifiState, &netCapability, &needSync);
+    WifiStateProcess(netCapability, needSync);
 }
 
 static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
@@ -239,7 +283,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
         return;
     }
-    const LnnMonitorBtStateChangedEvent *event = (const LnnMonitorBtStateChangedEvent *)info;
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusBtState btState = (SoftBusBtState)event->status;
     bool isSend = false;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bt state change btState = %d", btState);
@@ -270,8 +314,71 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     return;
 }
 
+static bool IsSupportApCoexist(const char *coexistCap)
+{
+    cJSON *coexistObj = cJSON_ParseWithLength(coexistCap, strlen(coexistCap) + 1);
+    LNN_CHECK_AND_RETURN_RET_LOG(coexistObj, false, "create json object failed");
+
+    if (!cJSON_IsArray(coexistObj)) {
+        cJSON_Delete(coexistObj);
+        LLOGE("coexistObj is not a array");
+        return false;
+    }
+
+    for (int i = 0; i < cJSON_GetArraySize(coexistObj); i++) {
+        cJSON *subItems = cJSON_GetArrayItem(coexistObj, i);
+        if (!cJSON_IsArray(subItems)) {
+            LLOGE("item %d is not array", i);
+            continue;
+        }
+
+        bool apCap = false;
+        bool p2pCap = false;
+        for (int j = 0; j < cJSON_GetArraySize(subItems); j++) {
+            cJSON *subItem = cJSON_GetArrayItem(subItems, j);
+            char interface[STRING_INTERFACE_BUFFER_LEN] = {0};
+            if (!GetJsonObjectStringItem(subItem, "IF", interface, sizeof(interface))) {
+                LLOGE("get interface failed");
+                continue;
+            }
+
+            enum WifiDirectApiRole mode = 0;
+            if (!GetJsonObjectInt32Item(subItem, "MODE", (int32_t *)&mode)) {
+                LLOGE("%s get mode failed", interface);
+                continue;
+            }
+
+            LLOGI("interface=%s mode=%d", interface, mode);
+            if ((mode & WIFI_DIRECT_API_ROLE_AP)) {
+                apCap = true;
+            } else if (mode & WIFI_DIRECT_API_ROLE_GC || mode & WIFI_DIRECT_API_ROLE_GO) {
+                p2pCap = true;
+            }
+            if (apCap && p2pCap) {
+                cJSON_Delete(coexistObj);
+                return true;
+            }
+        }
+    }
+
+    cJSON_Delete(coexistObj);
+    return false;
+}
+
+static void InitWifiDirectCapability(void)
+{
+    g_isWifiDirectSupported = SoftBusHasWifiDirectCapability();
+    char *coexistCap = SoftBusGetWifiInterfaceCoexistCap();
+    LNN_CHECK_AND_RETURN_LOG(coexistCap, "coexistCap is null");
+    LLOGI("coexistCap=%s", coexistCap);
+    g_isApCoexistSupported = IsSupportApCoexist(coexistCap);
+    SoftBusFree(coexistCap);
+    LLOGI("g_isWifiDirectSupported=%d g_isApCoexistSupported=%d", g_isWifiDirectSupported, g_isApCoexistSupported);
+}
+
 NO_SANITIZE("cfi") int32_t LnnInitNetworkInfo(void)
 {
+    InitWifiDirectCapability();
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network info register bt state change fail");
         return SOFTBUS_ERR;

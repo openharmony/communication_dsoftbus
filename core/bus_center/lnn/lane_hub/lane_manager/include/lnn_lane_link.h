@@ -18,14 +18,83 @@
 
 #include <stdint.h>
 #include "lnn_lane_def.h"
+#include "softbus_common.h"
+#include "softbus_def.h"
+#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-void DestroyLink(uint32_t reqId, LaneLinkType type, int32_t pid, const char *mac, const char *networkId);
-int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback);
+
+typedef struct {
+    char peerNetworkId[NETWORK_ID_BUF_LEN];
+    char peerBleMac[MAX_MAC_LEN];
+    int32_t psm;
+    int32_t pid;
+    bool networkDelegate;
+    bool isReuse;
+    LaneTransType transType;
+    LaneLinkType linkType;
+} LinkRequest;
+
+typedef struct {
+    int32_t channel;
+    LaneBandwidth bw;
+    WlanConnInfo connInfo;
+} WlanLinkInfo;
+
+typedef struct {
+    int32_t channel;
+    LaneBandwidth bw;
+    P2pConnInfo connInfo;
+} P2pLinkInfo;
+
+typedef struct {
+    char brMac[BT_MAC_LEN];
+} BrLinkInfo;
+
+// 'GATT' and 'CoC' protocols under BLE use the same definitions
+typedef struct {
+    char bleMac[BT_MAC_LEN];
+    int32_t psm;
+} BleLinkInfo;
+
+// 'GATT' and 'CoC' protocols under BLE use the same definitions
+typedef struct {
+    BleProtocolType protoType;
+    int32_t psm; // mark--
+    char nodeIdHash[NODEID_SHORT_HASH_LEN];
+    char localUdidHash[UDID_SHORT_HASH_LEN];
+    char peerUdidHash[SHA_256_HASH_LEN];
+} BleDirectInfo;
+
+typedef struct {
+    LaneLinkType type;
+    union {
+        WlanLinkInfo wlan;
+        P2pLinkInfo p2p;
+        BrLinkInfo br;
+        BleLinkInfo ble;
+        BleDirectInfo bleDirect;
+    } linkInfo;
+} LaneLinkInfo;
+
+typedef struct {
+    void (*OnLaneLinkSuccess)(uint32_t reqId, const LaneLinkInfo *linkInfo);
+    void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason);
+    void (*OnLaneLinkException)(uint32_t reqId, int32_t reason);
+} LaneLinkCb;
+
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
+int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
+void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32_t pid);
+
+void LaneDeleteP2pAddress(const char *networkId);
+void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port);
+
+void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
+void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 
 #ifdef __cplusplus
 }

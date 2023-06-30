@@ -210,6 +210,17 @@ typedef enum {
     CONNECTION_ADDR_SESSION,  /**< SESSION */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
+
+/**
+ * @brief Enumerates {@link BleProtocolType} types of ble connection type
+ *
+ */
+typedef enum  {
+    BLE_GATT = 0,
+    BLE_COC,
+    BLE_PROTOCOL_MAX
+} BleProtocolType;
+
 /**
  * @brief Defines the address of a device that is added to a LNN.
  * For details, see {@link ConnectionAddr}.
@@ -228,8 +239,10 @@ typedef struct {
         } br;
         /**< BLE address */
         struct BleAddr {
+            BleProtocolType protocol;
             char bleMac[BT_MAC_LEN];  /**< BLE MAC address in string format */
             uint8_t udidHash[UDID_HASH_LEN];  /**< udid hash value */
+            int32_t psm;
         } ble;
         /**< IPv4 or IPv6 address */
         struct IpAddr {

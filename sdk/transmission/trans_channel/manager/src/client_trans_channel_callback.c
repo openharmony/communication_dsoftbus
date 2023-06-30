@@ -118,6 +118,8 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
             return ClientTransAuthOnDataReceived(channelId, data, len, type);
         case CHANNEL_TYPE_PROXY:
             return ClientTransProxyOnDataReceived(channelId, data, len, type);
+        case CHANNEL_TYPE_TCP_DIRECT:
+            return ClientTransTdcOnDataReceived(channelId, data, len, type);
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }

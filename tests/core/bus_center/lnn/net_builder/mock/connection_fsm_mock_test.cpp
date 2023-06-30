@@ -72,12 +72,12 @@ static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = LnnCreateConnectionFsm(nullptr);
+    connFsm = LnnCreateConnectionFsm(nullptr, nullptr);
     EXPECT_TRUE(connFsm == nullptr);
 
     ConnectionAddr addr;
     (void)memset_s(&add, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    connFsm = LnnCreateConnectionFsm(&addr);
+    connFsm = LnnCreateConnectionFsm(&addr, "pkgName");
     EXPECT_TRUE(connFsm != nullptr);
 
     LnnDestroyConnectionFsm(connFsm);
@@ -95,7 +95,7 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_002, TestSize.Level1)
     ConnectionAddr addr;
     int32_t ret = 0;
     (void)memset_s(&add, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    connFsm = LnnCreateConnectionFsm(&addr);
+    connFsm = LnnCreateConnectionFsm(&addr, "pkgName");
     EXPECT_TRUE(connFsm != nullptr);
 
     ret = LnnStartConnectionFsm(connFsm);
@@ -120,7 +120,7 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_003, TestSize.Level1)
     ConnectionAddr addr;
     int32_t ret = 0;
     (void)memset_s(&add, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    connFsm = LnnCreateConnectionFsm(&addr);
+    connFsm = LnnCreateConnectionFsm(&addr, "pkgName");
     EXPECT_TRUE(connFsm != nullptr);
 
     ret = LnnStartConnectionFsm(connFsm);
@@ -153,7 +153,7 @@ HWTEST_F(ConnFsmMockTest, CONN_FSM_MOCK_TEST_004, TestSize.Level1)
 {
     ConnectionAddr addr;
     (void)memset_s(&add, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    LnnConnectionFsm *connFsm = LnnCreateConnectionFsm(&addr);
+    LnnConnectionFsm *connFsm = LnnCreateConnectionFsm(&addr, "pkgName");
     int32_t ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 

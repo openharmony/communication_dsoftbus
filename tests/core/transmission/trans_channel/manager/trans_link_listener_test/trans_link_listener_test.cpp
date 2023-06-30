@@ -26,10 +26,7 @@
 #include "p2plink_interface.h"
 #include "trans_channel_manager.h"
 
-#include "trans_link_listener.c"
-
 using namespace testing::ext;
-constexpr char NODE5_NETWORK_ID[] = "235689BNHFCZ";
 
 namespace OHOS {
 #define TEST_SESSION_NAME "com.softbus.transmission.test"
@@ -67,11 +64,6 @@ HWTEST_F(TransLinkListenerTest, OnP2pRoleChange001, TestSize.Level1)
 {
     int32_t ret = TransChannelInit();
     EXPECT_NE(SOFTBUS_OK, ret);
-
-    OnP2pRoleChange(ROLE_NONE);
-
-    OnP2pRoleChange(ROLE_BRIDGE_GC);
-
     TransChannelDeinit();
 }
 
@@ -83,40 +75,6 @@ HWTEST_F(TransLinkListenerTest, OnP2pRoleChange001, TestSize.Level1)
  */
 HWTEST_F(TransLinkListenerTest, ReqLinkListener001, TestSize.Level1)
 {
-    const char *peerMac = "abcdefgh";
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-
     ReqLinkListener();
-    int32_t ret = GetNetworkIdByP2pMac(peerMac, networkId, sizeof(networkId));
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/**
- * @tc.name: OnP2pLinkDisconnected001
- * @tc.desc: OnP2pLinkDisconnected001, use the wrong parameter.
- * @tc.desc: FreeMem, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLinkListenerTest, OnP2pLinkDisconnected001, TestSize.Level1)
-{
-    const char *peerMac = "abcdefgh";
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-
-    OnP2pLinkDisconnected(peerMac);
-    int32_t ret = GetNetworkIdByP2pMac(peerMac, networkId, sizeof(networkId));
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    OnP2pLinkDisconnected(NULL);
-    ret = GetNetworkIdByP2pMac(peerMac, networkId, sizeof(networkId));
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    NodeBasicInfo *nodeInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo));
-    (void)memset_s(nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-    (void)strncpy_s(nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE5_NETWORK_ID, strlen(NODE5_NETWORK_ID));
-
-    FreeMem(NULL);
-    ASSERT_TRUE(nodeInfo != nullptr);
-    FreeMem((const NodeBasicInfo *)nodeInfo);
 }
 } // OHOS

@@ -180,7 +180,7 @@ NO_SANITIZE("cfi") int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
     GattsSendRspParam response = {
         .connectId = param->connectId,
         .status = param->status,
-        .attrHandle = param->attrHandle,
+        .attrHandle = param->transId,
         .valueLen = param->valueLen,
         .value = param->value
     };

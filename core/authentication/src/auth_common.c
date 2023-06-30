@@ -37,6 +37,9 @@
 
 #define AUTH_SUPPORT_AS_SERVER_MASK 0x01
 
+/* ble network advdata take 8 bytes of UDID hash */
+#define SHORT_HASH_LEN 8
+
 typedef struct {
     EventType event;
     RemoveCompareFunc cmpFunc;
@@ -244,7 +247,7 @@ NO_SANITIZE("cfi") const char *GetAuthSideStr(bool isServer)
     return isServer ? "server" : "client";
 }
 
-NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2)
+NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info1, false);
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
@@ -262,7 +265,9 @@ NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthCon
             break;
         case AUTH_LINK_TYPE_BLE:
             if (info2->type == AUTH_LINK_TYPE_BLE &&
-                memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash, UDID_HASH_LEN) == 0) {
+                (memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash,
+                (cmpShortHash ? SHORT_HASH_LEN : UDID_HASH_LEN)) == 0 ||
+                StrCmpIgnoreCase(info1->info.bleInfo.bleMac, info2->info.bleInfo.bleMac) == 0)) {
                 return true;
             }
             break;
@@ -300,6 +305,8 @@ NO_SANITIZE("cfi") int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, 
                 return SOFTBUS_MEM_ERR;
             }
             option->bleOption.fastestConnectEnable = true;
+            option->bleOption.psm = connInfo->info.bleInfo.psm;
+            option->bleOption.protocol = connInfo->info.bleInfo.protocol;
             break;
         case AUTH_LINK_TYPE_P2P:
             option->type = CONNECT_TCP;
@@ -352,6 +359,8 @@ NO_SANITIZE("cfi") int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, Aut
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy bleMac/deviceIdHash fail.");
                 return SOFTBUS_MEM_ERR;
             }
+            connInfo->info.bleInfo.protocol = info->bleInfo.protocol;
+            connInfo->info.bleInfo.psm = info->bleInfo.psm;
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unexpected connectionInfo, type=%d.", info->type);

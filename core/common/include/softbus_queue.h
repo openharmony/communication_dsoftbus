@@ -16,7 +16,6 @@
 #ifndef SOFTBUS_QUEUE_H
 #define SOFTBUS_QUEUE_H
 
-#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "securec.h"
@@ -197,7 +196,7 @@ static inline int32_t QueueMultiProducerEnqueue(LockFreeQueue* queue, const void
 
     /* Waiting for other producers to complete enqueuing. */
     while (queue->producer.tail != producerHead) {
-        sched_yield();
+        SoftBusYieldCpu();
     }
 
     queue->producer.tail += 1;
@@ -316,7 +315,7 @@ static inline int32_t QueueMultiConsumerDequeue(LockFreeQueue *queue, void **nod
 
     /* Waiting for other consumers to finish dequeuing. */
     while (queue->consumer.tail != consumerHead) {
-        sched_yield();
+        SoftBusYieldCpu();
     }
 
     queue->consumer.tail += 1;

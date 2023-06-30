@@ -45,7 +45,7 @@ void AuthMetaCloseConn(int64_t authId);
 
 int32_t AuthMetaPostTransData(int64_t authId, const AuthTransData *dataInfo);
 int64_t AuthMetaGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
-int64_t AuthMetaGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer);
+int64_t AuthMetaGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
 int32_t AuthMetaSetP2pMac(int64_t authId, const char *p2pMac);
 int32_t AuthMetaGetConnInfo(int64_t authId, AuthConnInfo *connInfo);
 int32_t AuthMetaGetServerSide(int64_t authId, bool *isServer);

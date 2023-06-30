@@ -305,7 +305,7 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
     DelAuthManager(auth, false);
 }
 
-static int32_t RmoveUpdateSessionKeyFunc(const void *obj, void *para)
+static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
 {
     CHECK_NULL_PTR_RETURN_VALUE(obj, SOFTBUS_ERR);
     CHECK_NULL_PTR_RETURN_VALUE(para, SOFTBUS_ERR);
@@ -320,6 +320,11 @@ static int32_t RmoveUpdateSessionKeyFunc(const void *obj, void *para)
 
 NO_SANITIZE("cfi") void ScheduleUpdateSessionKey(int64_t authId, uint64_t delayMs)
 {
-    RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RmoveUpdateSessionKeyFunc, (void *)(&authId));
+    RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RemoveUpdateSessionKeyFunc, (void *)(&authId));
     PostAuthEvent(EVENT_UPDATE_SESSION_KEY, HandleUpdateSessionKeyEvent, &authId, sizeof(authId), delayMs);
+}
+
+NO_SANITIZE("cfi") void CancelUpdateSessionKey(int64_t authId)
+{
+    RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RemoveUpdateSessionKeyFunc, (void *)(&authId));
 }

@@ -50,12 +50,12 @@ void LnnOnOhosAccountChanged(void)
 {
     return GetNetworkManagerInterface()->LnnOnOhosAccountChanged();
 }
-
+/*
 void LnnHbOnAuthGroupCreated(int32_t groupType)
 {
     return GetNetworkManagerInterface()->LnnHbOnAuthGroupCreated(groupType);
 }
-
+*/
 void LnnStopDiscovery(void)
 {
     return GetNetworkManagerInterface()->LnnStopDiscovery();
@@ -70,12 +70,12 @@ void SetCallLnnStatus(bool flag)
 {
     return GetNetworkManagerInterface()->SetCallLnnStatus(flag);
 }
-
+/*
 void LnnHbOnAuthGroupDeleted(void)
 {
     return GetNetworkManagerInterface()->LnnHbOnAuthGroupDeleted();
 }
-
+*/
 int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetNetworkManagerInterface()->SoftbusGetConfig(type, val, len);

@@ -27,7 +27,7 @@
 #define HDF_MIN_MAP_SIZE 8
 #define HDF_ENLARGE_FACTOR 2
 #define HDF_MAP_KEY_MAX_SIZE 1000
-#define HDF_MAP_VALUE_MAX_SIZE 1000
+#define HDF_MAP_VALUE_MAX_SIZE 1500
 #define SHIFT_ALIGN_BYTE 4
 
 /* BKDR Hash */
@@ -133,7 +133,7 @@ NO_SANITIZE("cfi") int32_t LnnMapSet(Map *map, const char *key, const void *valu
     if (map == NULL || key == NULL || value == NULL || valueSize == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (valueSize > HDF_MAP_KEY_MAX_SIZE || strlen(key) > HDF_MAP_VALUE_MAX_SIZE) {
+    if (valueSize > HDF_MAP_VALUE_MAX_SIZE || strlen(key) > HDF_MAP_KEY_MAX_SIZE) {
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t hash = MapHash(key);

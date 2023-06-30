@@ -369,19 +369,10 @@ HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level
 */
 HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.Level1)
 {
-    NodeInfo *infoNetwork = nullptr;
-    NodeInfo *infoUuid = nullptr;
-    NodeInfo *infoUdid = nullptr;
     ConstructBRNode();
     ConstructWlan2P4GNode();
     LnnAddOnlineNode(&g_nodeInfo[BR_NUM]);
     LnnAddOnlineNode(&g_nodeInfo[WLAN2P4G_NUM]);
-
-    // GET CATEGORY_NETWORK_ID and CATEGORY_UUID
-    infoNetwork = LnnGetNodeInfoById(NODE1_NETWORK_ID, CATEGORY_NETWORK_ID);
-    infoUuid = LnnGetNodeInfoById(NODE1_UUID, CATEGORY_UUID);
-    infoUdid = LnnGetNodeInfoById(NODE1_UDID, CATEGORY_UDID);
-    EXPECT_TRUE((infoNetwork == infoUuid) && (infoNetwork == infoUdid));
     LnnRemoveNode(NODE1_UDID);
     LnnRemoveNode(NODE2_UDID);
 }

@@ -15,9 +15,6 @@
 
 #include "lnn_event_monitor.h"
 
-#include <pthread.h>
-#include <securec.h>
-
 #include "bus_center_event.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_devicename_info.h"

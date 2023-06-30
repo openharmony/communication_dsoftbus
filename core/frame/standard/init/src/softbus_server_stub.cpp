@@ -502,6 +502,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
 {
     int32_t retReply;
     SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
     TransSerializer transSerializer;
     int64_t timeStart = 0;
     int64_t timediff = 0;

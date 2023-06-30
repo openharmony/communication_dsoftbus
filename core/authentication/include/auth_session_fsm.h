@@ -45,9 +45,11 @@ typedef struct {
     NodeInfo nodeInfo;
     bool isNodeInfoReceived;
     bool isCloseAckReceived;
+    bool isAuthFinished;
     char udid[UDID_BUF_LEN];
     char uuid[UUID_BUF_LEN];
     SoftBusVersion version;
+    bool isSupportCompress;
 } AuthSessionInfo;
 
 typedef struct {
@@ -68,14 +70,16 @@ int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t l
 int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size);
 int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len);
-int32_t AuthSessionHandleAuthResult(int64_t authSeq, int32_t reason);
+int32_t AuthSessionHandleAuthFinish(int64_t authSeq);
+int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason);
 int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
-
+AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq);
+AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer);
 void AuthSessionFsmExit(void);
 
 #ifdef __cplusplus

@@ -25,10 +25,16 @@ extern "C" {
 #endif
 #endif
 
+#define GROUP_TYPE_ACCOUNT (1 << 0)
+#define GROUP_TYPE_P2P (1 << 1)
+#define GROUP_TYPE_MESH (1 << 2)
+#define GROUP_TYPE_COMPATIBLE (1 << 3)
+
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId);
     void (*onDeviceNotTrusted)(const char *udid);
+    void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } TrustDataChangeListener;
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
 void UnregTrustDataChangeListener(void);

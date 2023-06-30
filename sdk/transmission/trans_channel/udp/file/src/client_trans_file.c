@@ -30,7 +30,8 @@
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
 
-NO_SANITIZE("cfi") static void NotifySendResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData, FileListener *listener)
+NO_SANITIZE("cfi") static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
+    const DFileMsg *msgData, FileListener *listener)
 {
     if (msgData == NULL || listener == NULL) {
         return;

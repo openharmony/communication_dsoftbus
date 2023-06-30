@@ -15,6 +15,7 @@
 
 #include "trans_session_manager.h"
 
+#include "lnn_lane_link.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -306,7 +307,8 @@ static int32_t TransListCopy(ListNode *sessionServerList)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, int32_t routeType)
+NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
+    const char *peerIp, int32_t routeType)
 {
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
@@ -325,9 +327,12 @@ NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, int32_t routeType
     SessionServer *tmp = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
-        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, networkId, routeType);
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, uuid, udid, peerIp, networkId, routeType);
     }
 
+    if (routeType == WIFI_P2P) {
+        LaneDeleteP2pAddress(networkId);
+    }
     TransListDelete(&sessionServerList);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown end");
     return;

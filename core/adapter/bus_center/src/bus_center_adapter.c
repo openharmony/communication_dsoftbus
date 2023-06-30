@@ -110,3 +110,10 @@ NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *val
     }
     return SOFTBUS_OK;
 }
+
+int32_t GetWlanIpv4Addr(char *ip, uint32_t size)
+{
+    (void)ip;
+    (void)size;
+    return SOFTBUS_ERR;
+}

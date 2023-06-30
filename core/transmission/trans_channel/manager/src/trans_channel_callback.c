@@ -15,15 +15,15 @@
 
 #include "trans_channel_callback.h"
 
+#include "softbus_adapter_hitrace.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
 #include "trans_client_proxy.h"
 #include "trans_lane_manager.h"
 #include "trans_session_manager.h"
 #include "softbus_qos.h"
-#include "softbus_hisysevt_transreporter.h"
-#include "softbus_adapter_hitracechain.h"
 
 static IServerChannelCallBack g_channelCallBack;
 
@@ -122,15 +122,15 @@ NO_SANITIZE("cfi") IServerChannelCallBack *TransServerGetChannelCb(void)
     return &g_channelCallBack;
 }
 
-NO_SANITIZE("cfi") int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *networkId,
-    int32_t routeType)
+NO_SANITIZE("cfi") int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const char *uuid,
+    const char *udid, const char *peerIp, const char *networkId, int32_t routeType)
 {
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransServerOnChannelLinkDown: pkgName=%s", pkgName);
 
-    if (ClientIpcOnChannelLinkDown(pkgName, networkId, routeType, pid) != SOFTBUS_OK) {
+    if (ClientIpcOnChannelLinkDown(pkgName, networkId, uuid, udid, peerIp, routeType, pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
         return SOFTBUS_ERR;
     }

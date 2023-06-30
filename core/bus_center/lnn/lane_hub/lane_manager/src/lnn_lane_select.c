@@ -31,6 +31,7 @@ static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
     linkList[(*listNum)++] = LANE_WLAN_5G;
     linkList[(*listNum)++] = LANE_P2P;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
+    linkList[(*listNum)++] = LANE_BLE_REUSE;
     linkList[(*listNum)++] = LANE_BR;
 }
 
@@ -45,6 +46,7 @@ static void GetMsgDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
+    linkList[(*listNum)++] = LANE_BLE_REUSE;
     linkList[(*listNum)++] = LANE_BR;
 }
 
@@ -52,6 +54,7 @@ static void GetBytesDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
+    linkList[(*listNum)++] = LANE_BLE_REUSE;
     linkList[(*listNum)++] = LANE_BR;
 }
 
@@ -97,7 +100,7 @@ static bool IsLinkTypeValid(LaneLinkType type)
     return true;
 }
 
-NO_SANITIZE("cfi") static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw)
+static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw)
 {
     if (!IsLinkTypeValid(linkType)) {
         return false;
@@ -117,8 +120,41 @@ NO_SANITIZE("cfi") static bool IsValidLane(const char *networkId, LaneLinkType l
     return true;
 }
 
+static char *GetLinkTypeStrng(LaneLinkType preferredLink)
+{
+    switch (preferredLink) {
+        case LANE_BR:
+            return "BR";
+        case LANE_BLE:
+            return "BLE";
+        case LANE_P2P:
+            return "P2P";
+        case LANE_WLAN_2P4G:
+            return "WLAN 2.4G";
+        case LANE_WLAN_5G:
+            return "WLAN 5G";
+        case LANE_ETH:
+            return "ETH";
+        case LANE_P2P_REUSE:
+            return "P2P_REUSE";
+        case LANE_BLE_DIRECT:
+            return "BLE_DIRECT";
+        case LANE_COC:
+            return "COC";
+        case LANE_COC_DIRECT:
+            return "COC_DIRECT";
+        default:
+            return "INVALID_LINK";
+    }
+}
+
+static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
+{
+    LLOGD("the %u priority link: %s", priority, GetLinkTypeStrng(preferredLink));
+}
+
 static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType *resList, uint32_t *resNum)
+    LaneLinkType *resList, bool *isReuse, uint32_t *resNum)
 {
     LaneLinkType *preferredList = (LaneLinkType *)&(request->list.linkType[0]);
     uint32_t listNum = request->list.linkTypeNum;
@@ -127,13 +163,16 @@ static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *
         if (!IsValidLane(networkId, preferredList[i], request->expectedBw)) {
             continue;
         }
-        resList[(*resNum)++] = preferredList[i];
+        resList[(*resNum)] = preferredList[i];
+        isReuse[(*resNum)] = request->list.isReuse[i];
+        (*resNum)++;
+        DumpPreferredLink(preferredList[i], i);
     }
     return;
 }
 
 static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType *resList, uint32_t *resNum)
+    LaneLinkType *resList, bool *isReuse, uint32_t *resNum)
 {
     LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
     (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
@@ -147,52 +186,54 @@ static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *re
         if (!IsValidLane(networkId, optionalLink[i], request->expectedBw)) {
             continue;
         }
+        if (optionalLink[i] == LANE_BLE_REUSE) {
+            isReuse[(*resNum)] = true;
+        }
         resList[(*resNum)++] = optionalLink[i];
     }
 }
 
 static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType **recommendList, const uint32_t *listNum)
+    LanePreferredLinkList *recommendList, const uint32_t *listNum)
 {
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL) || (listNum == NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneSelect params invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device not online, cancel selectLane");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device not online, cancel selectLane, networkId:%s",
+            AnonymizesNetworkID(networkId));
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType **recommendList, uint32_t *listNum)
+    LanePreferredLinkList *recommendList, uint32_t *listNum)
 {
     if (PreProcLaneSelect(networkId, request, recommendList, listNum) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     LaneLinkType resList[LANE_LINK_TYPE_BUTT];
+    bool isReuse[LANE_LINK_TYPE_BUTT] = { false };
     uint32_t resNum = 0;
     (void)memset_s(resList, sizeof(resList), -1, sizeof(resList));
     if ((request->list.linkTypeNum > 0) && (request->list.linkTypeNum <= LANE_LINK_TYPE_BUTT)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Select lane by preferred linklist");
-        SelectByPreferredLink(networkId, request, resList, &resNum);
+        LLOGI("Select lane by preferred linklist");
+        SelectByPreferredLink(networkId, request, resList, isReuse, &resNum);
     } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Select lane by default linklist");
-        SelectByDefaultLink(networkId, request, resList, &resNum);
+        LLOGI("Select lane by default linklist");
+        SelectByDefaultLink(networkId, request, resList, isReuse, &resNum);
     }
     if (resNum == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "there is none linkResource can be used");
         *listNum = 0;
-        *recommendList = NULL;
         return SOFTBUS_ERR;
     }
-    *recommendList = (LaneLinkType *)SoftBusCalloc(sizeof(LaneLinkType) * resNum);
-    if (*recommendList == NULL) {
-        return SOFTBUS_MALLOC_ERR;
-    }
+    recommendList->linkTypeNum = resNum;
     for (uint32_t i = 0; i < resNum; i++) {
-        (*recommendList)[i] = resList[i];
+        recommendList->linkType[i] = resList[i];
+        recommendList->isReuse[i] = isReuse[i];
     }
     *listNum = resNum;
     return SOFTBUS_OK;

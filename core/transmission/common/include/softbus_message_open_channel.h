@@ -34,7 +34,13 @@
 #define AUTH_STATE "AUTH_STATE"
 #define MSG_ROUTE_TYPE "ROUTE_TYPE"
 #define BUSINESS_TYPE "BUSINESS_TYPE"
-
+#define AUTO_CLOSE_TIME "AUTO_CLOSE_TIME"
+#define TRANS_FLAGS "TRANS_FLAGS"
+#define MIGRATE_OPTION "MIGRATE_OPTION"
+#define MY_HANDLE_ID "MY_HANDLE_ID"
+#define PEER_HANDLE_ID "PEER_HANDLE_ID"
+#define FIRST_DATA "FIRST_DATA"
+#define FIRST_DATA_SIZE "FIRST_DATA_SIZE"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,17 +50,37 @@ typedef enum {
     CODE_OPEN_CHANNEL = 1,
 } MessageCode;
 
+#define FAST_DATA_HEAD_SIZE 16
+#define FAST_BYTE_TOS 0x60
+#define FAST_MESSAGE_TOS 0xC0
+
+typedef struct {
+    uint32_t magicNumber;
+    int32_t seq;
+    uint32_t flags;
+    uint32_t dataLen;
+} __attribute__((packed)) TcpFastDataPacketHead;
+
+#define FAST_TDC_EXT_DATA_SIZE (OVERHEAD_LEN + sizeof(TcpFastDataPacketHead))
+
+enum {
+    FLAG_BYTES = 0,
+    FLAG_MESSAGE = 2,
+};
+
 char *PackRequest(const AppInfo *appInfo);
 
 int UnpackRequest(const cJSON *msg, AppInfo *appInfo);
 
 char *PackReply(const AppInfo *appInfo);
 
-int UnpackReply(const cJSON *msg, AppInfo *appInfo);
+int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize);
 
 char *PackError(int errCode, const char *errDesc);
 
 int UnpackReplyErrCode(const cJSON *msg, int32_t *errCode);
+
+char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen);
 
 #ifdef __cplusplus
 }

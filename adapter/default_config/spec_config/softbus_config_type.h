@@ -50,6 +50,7 @@ typedef enum {
     SOFTBUS_INT_DISC_FREQ, /* the default val is 5s 12 times */
     SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH, /* 4K */
     SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH, /* 1K */
+    SOFTBUS_INT_LNN_SUPPORT_FEATURE, /* the default val is 490 */
     SOFTBUS_INT_CONN_COC_MAX_DATA_LENGTH, /* the default val is 4096 */
     SOFTBUS_INT_CONN_COC_SEND_MTU, /* the default val is 990 */
     SOFTBUS_CONFIG_TYPE_MAX,

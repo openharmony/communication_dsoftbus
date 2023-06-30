@@ -25,6 +25,8 @@ extern "C" {
 
 bool CheckSessionNameValidOnAuthChannel(const char *sessionName);
 
+bool IsNoPkgNameSession(const char *sessionName);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

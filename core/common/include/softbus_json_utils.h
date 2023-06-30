@@ -48,6 +48,8 @@ bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *t
 
 bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
 
+bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t num);
+
 bool AddNumberToJsonObject(cJSON *json, const char * const string, int num);
 
 bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num);

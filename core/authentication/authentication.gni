@@ -32,6 +32,7 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/auth_common.c",
     "$authentication_path/src/auth_connection.c",
     "$authentication_path/src/auth_hichain.c",
+    "$authentication_path/src/auth_hichain_adapter.c",
     "$authentication_path/src/auth_manager.c",
     "$authentication_path/src/auth_request.c",
     "$authentication_path/src/auth_session_fsm.c",
@@ -62,6 +63,8 @@ auth_server_inc = [
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+  "$dsoftbus_root_path/core/adapter/authentication/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
 ]
 auth_server_deps = []
 
