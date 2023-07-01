@@ -170,6 +170,12 @@ typedef struct {
 static NetBuilder g_netBuilder;
 static bool g_watchdogFlag = true;
 
+void __attribute__((weak)) SfcSyncNodeAddrHandle(const char *networkId, int32_t code)
+{
+    (void)networkId;
+    (void)code;
+}
+
 NO_SANITIZE("cfi") void SetWatchdogFlag(bool flag)
 {
     g_watchdogFlag = flag;

@@ -671,20 +671,21 @@ static void ProcessLnnRelationChange(const char *udid, const uint8_t *relation, 
 
 static void OnLnnRelationChangedDelay(void *para)
 {
-    uint8_t newRelation[CONNECTION_ADDR_MAX] = {0};
-    int32_t rc;
     LnnRelationChangedMsg *msg = (LnnRelationChangedMsg *)para;
-
     if (msg == NULL) {
         return;
     }
     RouteLnnRelationEventHandler(msg);
+    SoftBusFree(msg);
+    return;
+
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLnnRelationChangedDelay: %d", msg->type);
     if (msg->type == CONNECTION_ADDR_MAX) {
         SoftBusFree(msg);
         return;
     }
-    rc = LnnGetLnnRelation(msg->udid, CATEGORY_UDID, newRelation, CONNECTION_ADDR_MAX);
+    uint8_t newRelation[CONNECTION_ADDR_MAX] = {0};
+    int32_t rc = LnnGetLnnRelation(msg->udid, CATEGORY_UDID, newRelation, CONNECTION_ADDR_MAX);
     if (rc != SOFTBUS_OK && rc != SOFTBUS_NOT_FIND) { // NOT_FIND means node is offline
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new lnn relation fail");
         SoftBusFree(msg);
@@ -711,8 +712,6 @@ static void OnLnnRelationChangedDelay(void *para)
 
 static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
 {
-    LLOGI("ignore topo change event");
-    return;
     const LnnRelationChanedEventInfo *eventInfo = (const LnnRelationChanedEventInfo *)info;
     LnnRelationChangedMsg *msg = NULL;
 

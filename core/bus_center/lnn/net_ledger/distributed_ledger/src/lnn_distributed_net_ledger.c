@@ -48,8 +48,6 @@
 #define LNN_COMMON_LEN_64 8
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
 
-static NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
-
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info) do {                 \
         if ((networkId) == NULL || (buf) == NULL) {                        \
             return SOFTBUS_INVALID_PARAM;                               \
@@ -375,7 +373,7 @@ void PostOnlineNodesToCb(const INodeStateCb *callBack)
     LnnMapDeinitIterator(it);
 }
 
-NO_SANITIZE("cfi") static NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
+NO_SANITIZE("cfi") NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
 {
     NodeInfo *info = NULL;
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;

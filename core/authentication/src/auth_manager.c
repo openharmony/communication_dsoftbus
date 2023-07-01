@@ -210,7 +210,7 @@ static int32_t UpdateAuthManagerByAuthId(
     return SOFTBUS_OK;
 }
 
-static void RemoveAuthManagerByAuthId(int64_t authId)
+NO_SANITIZE("cfi") void RemoveAuthManagerByAuthId(int64_t authId)
 {
     if (!RequireAuthLock()) {
         return;
