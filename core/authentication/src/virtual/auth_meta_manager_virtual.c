@@ -17,12 +17,13 @@
 #include "auth_common.h"
 
 int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, const AuthVerifyCallback *callBack)
+    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack)
 {
     (void)connectionId;
     (void)key;
     (void)keyLen;
     (void)requestId;
+    (void)callingPid;
     (void)callBack;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta start verify");
     return SOFTBUS_NOT_IMPLEMENT;
@@ -155,5 +156,12 @@ int32_t AuthMetaInit(const AuthTransCallback *callback)
 void AuthMetaDeinit(void)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta deinit");
+    return;
+}
+
+void DelAuthMetaManagerByPid(const char *pkgName, int32_t pid)
+{
+    (void)pkgName;
+    (void)pid;
     return;
 }

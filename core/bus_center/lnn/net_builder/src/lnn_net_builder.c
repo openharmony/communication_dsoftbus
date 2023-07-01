@@ -144,6 +144,8 @@ typedef struct {
 typedef struct {
     ConnectionAddr addr;
     CustomData customData;
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t callingPid;
 } ConnectionAddrKey;
 
 typedef struct {
@@ -479,7 +481,8 @@ static bool TryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFai
     return true;
 }
 
-static MetaJoinRequestNode *TryJoinRequestMetaNode(const ConnectionAddr *addr, bool needReportFailure)
+static MetaJoinRequestNode *TryJoinRequestMetaNode(const char *pkgName, const ConnectionAddr *addr,
+    int32_t callingPid, bool needReportFailure)
 {
     MetaJoinRequestNode *request = NULL;
 
@@ -490,7 +493,13 @@ static MetaJoinRequestNode *TryJoinRequestMetaNode(const ConnectionAddr *addr, b
     }
     ListInit(&request->node);
     request->addr = *addr;
+    request->callingPid = callingPid;
     request->needReportFailure = needReportFailure;
+    if (memcpy_s(request->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s error");
+        SoftBusFree(request);
+        return NULL;
+    }
     ListTailInsert(&g_netBuilder.metaNodeList, &request->node);
     return request;
 }
@@ -622,7 +631,7 @@ static int32_t TrySendJoinMetaNodeRequest(const ConnectionAddrKey *addrDataKey, 
     metaJoinNode = FindMetaNodeByAddr(addr);
     if (metaJoinNode == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TrySendJoinMetaNodeRequest not find metaJoinNode");
-        metaJoinNode = TryJoinRequestMetaNode(addr, needReportFailure);
+        metaJoinNode = TryJoinRequestMetaNode(addrDataKey->pkgName, addr, addrDataKey->callingPid, needReportFailure);
         if (metaJoinNode == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "join request is pending");
             SoftBusFree((void *)addrDataKey);
@@ -2279,12 +2288,18 @@ NO_SANITIZE("cfi") int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgNa
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData)
+NO_SANITIZE("cfi") int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid,
+    ConnectionAddr *addr, CustomData *customData)
 {
     ConnectionAddrKey addrDataKey = {
         .addr = *addr,
         .customData = *customData,
+        .callingPid = callingPid,
     };
+    if (memcpy_s(addrDataKey.pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s error");
+        return SOFTBUS_ERR;
+    }
     ConnectionAddrKey *para = NULL;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "MetaNodeServerJoin enter!");
     if (g_netBuilder.isInit == false) {

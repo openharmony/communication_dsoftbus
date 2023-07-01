@@ -257,7 +257,7 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcServerJoin(const char *pkgName, int32_t ca
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat meta join lnn request from: %s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = MetaNodeServerJoin(connAddr, customData);
+    int32_t ret = MetaNodeServerJoin(pkgName, callingPid, connAddr, customData);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinMetaNodeInfo(pkgName, callingPid, connAddr);
     }
