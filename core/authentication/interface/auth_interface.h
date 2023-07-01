@@ -100,8 +100,9 @@ void AuthHandleLeaveLNN(int64_t authId);
 int32_t AuthFlushDevice(const char *uuid);
 
 int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, const AuthVerifyCallback *callBack);
+    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack);
 void AuthMetaReleaseVerify(int64_t authId);
+void AuthServerDeathCallback(const char *pkgName, int32_t pid);
 
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);

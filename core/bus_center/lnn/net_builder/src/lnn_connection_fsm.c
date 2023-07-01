@@ -550,7 +550,7 @@ NO_SANITIZE("cfi") int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, Cus
         }
         metaJoinNode->requestId = AuthGenRequestId();
         if (AuthMetaStartVerify(connId, customData->data, DATA_SIZE,
-            metaJoinNode->requestId, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
+            metaJoinNode->requestId, metaJoinNode->callingPid, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
                 rc = SOFTBUS_ERR;
         }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,

@@ -177,9 +177,9 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
 }
 
 int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, const AuthVerifyCallback *callBack)
+    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack)
 {
-    return GetTransAuthInterface()->AuthMetaStartVerify(connectionId, key, keyLen, requestId, callBack);
+    return GetTransAuthInterface()->AuthMetaStartVerify(connectionId, key, keyLen, requestId, callingPid, callBack);
 }
 
 void AuthMetaReleaseVerify(int64_t authId)
