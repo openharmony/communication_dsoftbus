@@ -61,7 +61,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
 /* Note: must call DelAuthManager to free. */
 AuthManager *GetAuthManagerByAuthId(int64_t authId);
 void DelAuthManager(AuthManager *auth, bool removeAuthFromList);
-
+void RemoveAuthManagerByAuthId(int64_t authId);
 int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
 int32_t AuthDevicePostTransData(int64_t authId, const AuthTransData *dataInfo);
 void AuthDeviceCloseConn(int64_t authId);
@@ -71,6 +71,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
 int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool isIpConnection);
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
+AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 
 int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
 int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);

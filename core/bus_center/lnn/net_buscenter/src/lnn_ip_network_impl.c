@@ -147,17 +147,26 @@ static int32_t OpenAuthPort(void)
     int32_t port;
     char localIp[MAX_ADDR_LEN] = {0};
 
+    int32_t authPort;
+    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get port failed");
+        authPort = 0;
+    }
+
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed");
         return SOFTBUS_ERR;
     }
-    port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, 0);
+    port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, authPort);
     if (port < 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AuthStartListening failed");
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open auth port listening on ip:%s", AnonymizesIp(localIp));
-    return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);
+    if (authPort == 0) {
+        return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);
+    }
+    return SOFTBUS_OK;
 }
 
 static void CloseAuthPort(void)
@@ -168,12 +177,18 @@ static void CloseAuthPort(void)
 
 static int32_t OpenSessionPort(void)
 {
+    int32_t sessionPort;
+    if (LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &sessionPort) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get port failed");
+        sessionPort = 0;
+    }
+
     int32_t port;
     LocalListenerInfo info = {
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = "",
-            .port = 0,
+            .port = sessionPort,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP,
         }
@@ -187,7 +202,11 @@ static int32_t OpenSessionPort(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open session server failed");
         return SOFTBUS_ERR;
     }
-    return LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, port);
+    if (sessionPort == 0) {
+        return LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, port);
+    }
+
+    return SOFTBUS_OK;
 }
 
 static void CloseSessionPort(void)
@@ -198,11 +217,17 @@ static void CloseSessionPort(void)
 
 static void OpenProxyPort(void)
 {
+    int32_t proxyPort;
+    if (LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &proxyPort) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get port failed");
+        proxyPort = 0;
+    }
+
     LocalListenerInfo listenerInfo = {
         .type = CONNECT_TCP,
         .socketOption = {
             .addr = "",
-            .port = 0,
+            .port = proxyPort,
             .moduleId = PROXY,
             .protocol = LNN_PROTOCOL_IP,
         }
@@ -218,7 +243,9 @@ static void OpenProxyPort(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open proxy server failed");
         return;
     }
-    (void)LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, port);
+    if (proxyPort == 0) {
+        (void)LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, port);
+    }
 }
 
 static void CloseProxyPort(void)
