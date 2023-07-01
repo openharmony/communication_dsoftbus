@@ -35,11 +35,6 @@ typedef struct {
     const char *peerDeviceId;
     const char *groupId;
     const SessionAttribute *attr;
-    bool isLinkTypeReuse[LINK_TYPE_MAX];
-    int myHandleId;
-    int peerHandleId;
-    int migrateOption;
-    int sessionOption;
 } SessionParam;
 
 typedef struct {

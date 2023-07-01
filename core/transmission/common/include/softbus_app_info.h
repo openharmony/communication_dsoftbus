@@ -106,7 +106,6 @@ typedef struct {
     int32_t autoCloseTime;
     int myHandleId;
     int peerHandleId;
-    int migrateOption;
     int32_t transFlag;
     int64_t authSeq;
     int32_t linkType;

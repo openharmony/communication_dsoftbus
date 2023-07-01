@@ -113,13 +113,13 @@ typedef struct {
 
 int32_t ConnBleSaveConnection(ConnBleConnection *connection);
 void ConnBleRemoveConnection(ConnBleConnection *connection);
-ConnBleConnection *ConnBleGetConnectionByAddr(const char *addr, ConnSideType side, ProtocolType protocol);
+ConnBleConnection *ConnBleGetConnectionByAddr(const char *addr, ConnSideType side, BleProtocolType protocol);
 ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId);
-ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSideType side, ProtocolType protocol);
+ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSideType side, BleProtocolType protocol);
 // get connection with different address and same udid
-ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, ProtocolType protocol);
+ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol);
 // get connection with same udid and client side
-ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, ProtocolType protocol);
+ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol);
 void ConnBleReturnConnection(ConnBleConnection **connection);
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback);

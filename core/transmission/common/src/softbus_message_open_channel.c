@@ -147,7 +147,6 @@ char *PackRequest(const AppInfo *appInfo)
     (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
     (void)AddNumberToJsonObject(json, AUTO_CLOSE_TIME, appInfo->autoCloseTime);
     (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
-    (void)AddNumberToJsonObject(json, MIGRATE_OPTION, appInfo->migrateOption);
     (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
     char *data = cJSON_PrintUnformatted(json);
@@ -219,15 +218,12 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
     (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
-    appInfo->migrateOption = -1;
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
-    if (!GetJsonObjectInt32Item(msg, MIGRATE_OPTION, &(appInfo->migrateOption)) ||
-        !GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
+    if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
         !GetJsonObjectInt32Item(msg, PEER_HANDLE_ID, &(appInfo->myHandleId))) {
             appInfo->myHandleId = -1;
             appInfo->peerHandleId = -1;
-            appInfo->migrateOption = 0;
     }
 
     size_t len = 0;
@@ -296,7 +292,6 @@ NO_SANITIZE("cfi") char *PackReply(const AppInfo *appInfo)
             return NULL;
         }
     }
-    (void)AddNumberToJsonObject(json, MIGRATE_OPTION, appInfo->migrateOption);
     (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
     char *data = cJSON_PrintUnformatted(json);
@@ -334,12 +329,10 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
     (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
-    if (!GetJsonObjectInt32Item(msg, MIGRATE_OPTION, &(appInfo->migrateOption)) ||
-        !GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
+    if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
         !GetJsonObjectInt32Item(msg, PEER_HANDLE_ID, &(appInfo->myHandleId))) {
             appInfo->myHandleId = -1;
             appInfo->peerHandleId = -1;
-            appInfo->migrateOption = 0;
     }
 
     if (apiVersion != API_V1) {

@@ -102,7 +102,6 @@ NO_SANITIZE("cfi") static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo,
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
-    info.migrateOption = 0;
     info.channelId = appInfo->myData.channelId;
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = isServerSide;

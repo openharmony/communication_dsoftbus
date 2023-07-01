@@ -125,7 +125,6 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             item->appInfo.algorithm = info->appInfo.algorithm;
             item->appInfo.crc = info->appInfo.crc;
             item->appInfo.peerHandleId = info->appInfo.peerHandleId;
-            item->appInfo.migrateOption = info->appInfo.migrateOption;
             (void)memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                            &(info->appInfo.peerData), sizeof(info->appInfo.peerData));
             (void)memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo));
@@ -792,12 +791,6 @@ NO_SANITIZE("cfi") static void ProcessHandshakeMsgNotifyNearBy(ProxyChannelInfo 
         if (myHandleId != SOFTBUS_ERR) {
             chan->appInfo.myHandleId = myHandleId;
         }
-        int migrateOption = NotifyNearByUpdateMigrateOption(chan->channelId);
-        if (migrateOption != SOFTBUS_ERR) {
-            chan->appInfo.migrateOption = migrateOption;
-        }
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy update myHandleId %d migrateOption %d in server",
-            chan->appInfo.myHandleId, chan->appInfo.migrateOption);
     }
 }
 

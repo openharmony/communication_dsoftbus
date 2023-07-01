@@ -28,11 +28,8 @@ extern "C" {
 
 typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
-    char peerBleMac[MAX_MAC_LEN];
-    int32_t psm;
     int32_t pid;
     bool networkDelegate;
-    bool isReuse;
     LaneTransType transType;
     LaneLinkType linkType;
 } LinkRequest;
@@ -55,6 +52,7 @@ typedef struct {
 
 // 'GATT' and 'CoC' protocols under BLE use the same definitions
 typedef struct {
+    BleProtocolType protoType;
     char bleMac[BT_MAC_LEN];
     int32_t psm;
 } BleLinkInfo;
