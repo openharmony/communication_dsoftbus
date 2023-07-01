@@ -963,7 +963,6 @@ static int BleCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *
 
 int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEventListener *listener)
 {
-    CLOGI("start init ble connection module1");
     CONN_CHECK_AND_RETURN_RET_LOG(
         looper != NULL, SOFTBUS_INVALID_PARAM, "init ble connection failed: invalid param, looper is null");
     CONN_CHECK_AND_RETURN_RET_LOG(
@@ -980,14 +979,12 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         "init ble connection failed: invalid param, listener onConnectionClosed is null");
     CONN_CHECK_AND_RETURN_RET_LOG(listener->onConnectionResume != NULL, SOFTBUS_INVALID_PARAM,
         "init ble connection failed: invalid param, listener onConnectionResume is null");
-    CLOGI("start init ble connection module2");
     ConnBleClientEventListener clientEventListener = {
         .onClientConnected = BleOnClientConnected,
         .onClientFailed = BleOnClientFailed,
         .onClientDataReceived = BleOnDataReceived,
         .onClientConnectionClosed = BleOnConnectionClosed,
     };
-    CLOGI("start init ble connection module3");
     ConnBleServerEventListener serverEventListener = {
         .onServerStarted = BleOnServerStarted,
         .onServerClosed = BleOnServerClosed,
@@ -996,15 +993,11 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         .onServerConnectionClosed = BleOnConnectionClosed,
     };
     int32_t status = SOFTBUS_ERR;
-    CLOGI("start init ble connection module4");
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
-        CLOGI("start to get interface, i is %d", i);
         BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
-        CLOGI("before, interface is %d, i is %d", interface, i);
         if (interface == NULL) {
             continue;
         }
-        CLOGI("interface is %d, i is %d", interface, i);
         status = interface->bleClientInitModule(looper, &clientEventListener);
         CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
             "init ble connection failed: init ble %d client failed, error=%d", i, status);
@@ -1012,12 +1005,9 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
             "init ble connection failed: init ble %d server failed, error=%d", i, status);
     }
-    CLOGI("start init ble connection module5");
     status = SoftBusMutexInit(&g_serverCoordination.lock, NULL);
-    CLOGI("start init ble connection module6");
     CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
         "init ble connection failed: init server coordination lock failed, error=%d", status);
-    CLOGI("start init ble connection module7");
     g_bleConnectionAsyncHandler.handler.looper = looper;
     g_connectionListener = *listener;
     return SOFTBUS_OK;
