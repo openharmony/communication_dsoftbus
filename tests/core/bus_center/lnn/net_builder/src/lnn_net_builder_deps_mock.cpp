@@ -305,6 +305,21 @@ int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
     return GetNetBuilderDepsInterface()->LnnSetDLNodeAddr(id, type, addr);
 }
 
+int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort)
+{
+    return GetNetBuilderDepsInterface()->LnnSetDLProxyPort(id, type, proxyPort);
+}
+
+int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort)
+{
+    return GetNetBuilderDepsInterface()->LnnSetDLSessionPort(id, type, sessionPort);
+}
+
+int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort)
+{
+    return GetNetBuilderDepsInterface()->LnnSetDLAuthPort(id, type, authPort);
+}
+
 int32_t LnnInitP2p(void)
 {
     return GetNetBuilderDepsInterface()->LnnInitP2p();
@@ -465,9 +480,14 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     return GetNetBuilderDepsInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
 
-void LnnNotifyNodeAddressChanged(const char* addr)
+bool LnnIsLSANode(const NodeBasicInfo *info)
 {
-    return GetNetBuilderDepsInterface()->LnnNotifyNodeAddressChanged(addr);
+    return GetNetBuilderDepsInterface()->LnnIsLSANode(info);
+}
+
+void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal)
+{
+    return GetNetBuilderDepsInterface()->LnnNotifyNodeAddressChanged(addr, networkId, isLocal);
 }
 
 int32_t LnnInitOffline(void)

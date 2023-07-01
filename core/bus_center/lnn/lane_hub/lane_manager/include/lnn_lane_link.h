@@ -35,6 +35,7 @@ typedef struct {
     bool isReuse;
     LaneTransType transType;
     LaneLinkType linkType;
+    ProtocolType acceptableProtocols;
 } LinkRequest;
 
 typedef struct {

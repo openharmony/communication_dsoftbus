@@ -116,6 +116,9 @@ static void ProcessSyncP2pInfo(void *para)
     }
     len = strlen(msg) + 1; /* add 1 for '\0' */
     for (i = 0; i < infoNum; i++) {
+        if (LnnIsLSANode(&info[i])) {
+            continue;
+        }
         if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync p2p info to %s fail.", info[i].deviceName);
         }

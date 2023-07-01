@@ -45,8 +45,16 @@ typedef struct {
 
 static ListNode g_connRequestList = { &g_connRequestList, &g_connRequestList };
 static AuthConnListener g_listener = { 0 };
+void __attribute__((weak)) RouteBuildClientAuthManager(int32_t cfd)
+{
+    (void)cfd;
+}
+void __attribute__((weak)) RouteClearAuthChannelId(int32_t cfd)
+{
+    (void)cfd;
+}
 
-static uint64_t GenConnId(int32_t connType, int32_t id)
+uint64_t GenConnId(int32_t connType, int32_t id)
 {
     uint64_t connId = (uint64_t)connType;
     connId = (connId << INT32_BIT_NUM) & MASK_UINT64_H32;
@@ -233,7 +241,7 @@ static void HandleConnConnectTimeout(const void *para)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthConn: connect timeout, requestId=%u.", requestId);
     ConnRequest *item = FindConnRequestByRequestId(requestId);
     if (item != NULL) {
-        SocketDisconnectDevice(item->fd);
+        SocketDisconnectDevice(AUTH, item->fd);
         DelConnRequest(item);
     }
     NotifyClientConnected(requestId, 0, SOFTBUS_AUTH_CONN_TIMEOUT, NULL);
@@ -281,6 +289,7 @@ static void HandleConnConnectResult(const void *para)
 {
     CHECK_NULL_PTR_RETURN_VOID(para);
     int32_t fd = *(int32_t *)(para);
+    RouteBuildClientAuthManager(fd);
     ConnRequest *item = FindConnRequestByFd(fd);
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConnRequest not found, fd=%d.", fd);
@@ -292,7 +301,7 @@ static void HandleConnConnectResult(const void *para)
 }
 
 /* WiFi Connection */
-static void OnWiFiConnected(int32_t fd, bool isClient)
+static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "OnWiFiConnected: fd=%d, side=%s.", fd,
         isClient ? "client" : "server(ignored)");
@@ -310,12 +319,17 @@ static void OnWiFiDisconnected(int32_t fd)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
+    RouteClearAuthChannelId(fd);
 }
 
-static void OnWiFiDataReceived(int32_t fd, const AuthDataHead *head, const uint8_t *data)
+static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
+
+    if (module != AUTH && module != AUTH_P2P) {
+        return;
+    }
     bool fromServer = false;
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -590,7 +604,7 @@ NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)
         GetConnId(connId));
     switch (GetConnType(connId)) {
         case AUTH_LINK_TYPE_WIFI:
-            SocketDisconnectDevice(GetFd(connId));
+            SocketDisconnectDevice(AUTH, GetFd(connId));
             break;
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
@@ -662,8 +676,23 @@ NO_SANITIZE("cfi") int32_t AuthStartListening(AuthLinkType type, const char *ip,
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start auth listening, type=%d, port=%d.", type, port);
     switch (type) {
-        case AUTH_LINK_TYPE_WIFI:
-            return StartSocketListening(ip, port);
+        case AUTH_LINK_TYPE_WIFI: {
+            LocalListenerInfo info = {
+                .type = CONNECT_TCP,
+                .socketOption = {
+                    .addr = "",
+                    .port = port,
+                    .moduleId = AUTH,
+                    .protocol = LNN_PROTOCOL_IP,
+                },
+            };
+
+            if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "strcpy_s ip fail.");
+                return SOFTBUS_MEM_ERR;
+            }
+            return StartSocketListening(AUTH, &info);
+        }
         case AUTH_LINK_TYPE_P2P: {
             LocalListenerInfo local = {
                 .type = CONNECT_TCP,

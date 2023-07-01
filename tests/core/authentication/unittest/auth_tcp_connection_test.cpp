@@ -101,7 +101,7 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_001, TestSize.Level1)
     int32_t fd = 0;
     SocketPktHead pktHead;
     (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
-    int32_t ret = RecvPacketHead(fd, &pktHead);
+    int32_t ret = RecvPacketHead(AUTH, fd, &pktHead);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -118,11 +118,11 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_001, TestSize.Level1)
     uint8_t data[TEST_DATA_LEN] = { 0 };
     (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
     pktHead.module = MODULE_AUTH_CHANNEL;
-    NotifyDataReceived(fd, &pktHead, data);
+    NotifyDataReceived(AUTH, fd, &pktHead, data);
     pktHead.module = MODULE_AUTH_MSG;
-    NotifyDataReceived(fd, &pktHead, data);
+    NotifyDataReceived(AUTH, fd, &pktHead, data);
     pktHead.module = MODULE_CONNECTION;
-    NotifyDataReceived(fd, &pktHead, data);
+    NotifyDataReceived(AUTH, fd, &pktHead, data);
 
     uint32_t len = TEST_DATA_LEN;
     uint8_t *packetData = RecvPacketData(fd, len);
@@ -139,11 +139,11 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Leve
 {
     int32_t fd = 0;
     bool isClient = true;
-    NotifyConnected(fd, isClient);
+    NotifyConnected(AUTH, fd, isClient);
     NotifyDisconnected(fd);
     StopSocketListening();
 
-    int32_t ret = ProcessSocketOutEvent(fd);
+    int32_t ret = ProcessSocketOutEvent(AUTH, fd);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -163,7 +163,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level
     NotifyChannelDataReceived(channelId, &head, data);
     NotifyChannelDisconnected(channelId);
 
-    int32_t ret = ProcessSocketInEvent(fd);
+    int32_t ret = ProcessSocketInEvent(AUTH, fd);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -217,9 +217,16 @@ HWTEST_F(AuthTcpConnectionTest, ON_DATA_EVENT_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthTcpConnectionTest, START_SOCKET_LISTENING_TEST_001, TestSize.Level1)
 {
-    const char *ip = "192.168.12.1";
-    int32_t port = 22;
-    int32_t ret = StartSocketListening(ip, port);
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "192.168.12.1",
+            .port = 22,
+            .moduleId = AUTH,
+            .protocol = LNN_PROTOCOL_IP,
+        },
+    };
+    int32_t ret = StartSocketListening(AUTH, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 

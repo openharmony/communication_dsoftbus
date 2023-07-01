@@ -140,6 +140,9 @@ static int32_t HbGetOnlineNodeByRecvInfo(const char *recvUdidHash,
     }
     DiscoveryType discType = LnnConvAddrTypeToDiscType(recvAddrType);
     for (i = 0; i < infoNum; ++i) {
+        if (LnnIsLSANode(&info[i])) {
+            continue;
+        }
         if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, nodeInfo) != SOFTBUS_OK) {
             LLOGD("HB get nodeInfo fail");
             continue;

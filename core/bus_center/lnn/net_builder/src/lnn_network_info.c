@@ -165,6 +165,9 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
     }
     NodeInfo nodeInfo = {0};
     for (int32_t i = 0; i< infoNum; i++) {
+        if (LnnIsLSANode(&netInfo[i])) {
+            continue;
+        }
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }

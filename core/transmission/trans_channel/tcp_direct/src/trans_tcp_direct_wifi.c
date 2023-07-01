@@ -63,6 +63,12 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
     ListenerModule module = connInfo->type == CONNECT_P2P_REUSE ?
         DIRECT_CHANNEL_SERVER_P2P : DIRECT_CHANNEL_SERVER_WIFI;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
+    if (module == DIRECT_CHANNEL_SERVER_WIFI) {
+        module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
+        if (module == UNUSE_BUTT) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+    }
 
     SessionConn *newConn = CreateNewSessinConn(module, false);
     if (newConn == NULL) {
