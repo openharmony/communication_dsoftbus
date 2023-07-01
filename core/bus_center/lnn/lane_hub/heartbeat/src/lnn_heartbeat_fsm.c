@@ -960,7 +960,6 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
         int32_t i, infoNum;
         NodeBasicInfo *info = NULL;
         if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check dev status get online node info fail");
             break;
         }
         if (info == NULL || infoNum == 0) {
