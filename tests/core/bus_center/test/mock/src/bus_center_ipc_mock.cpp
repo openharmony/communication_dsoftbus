@@ -42,9 +42,9 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
     return BusCenterIpcInterfaceInstance()->LnnIsSameConnectionAddr(addr1, addr2);
 }
 
-int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData)
+int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid, ConnectionAddr *addr, CustomData *customData)
 {
-    return BusCenterIpcInterfaceInstance()->MetaNodeServerJoin(addr, customData);
+    return BusCenterIpcInterfaceInstance()->MetaNodeServerJoin(pkgName, callingPid, addr, customData);
 }
 
 int32_t LnnServerLeave(const char *networkId, const char *pkgName)

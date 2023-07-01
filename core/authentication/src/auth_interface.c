@@ -343,3 +343,8 @@ NO_SANITIZE("cfi") void AuthDeinit(void)
     AuthDeviceDeinit();
     AuthMetaDeinit();
 }
+
+NO_SANITIZE("cfi") void AuthServerDeathCallback(const char *pkgName, int32_t pid)
+{
+    DelAuthMetaManagerByPid(pkgName, pid);
+}

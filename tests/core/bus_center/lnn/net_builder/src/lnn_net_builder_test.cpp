@@ -238,7 +238,7 @@ HWTEST_F(LNNNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = MetaNodeServerJoin(&addr, &customData);
+    ret = MetaNodeServerJoin("testName", 0, &addr, &customData);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
