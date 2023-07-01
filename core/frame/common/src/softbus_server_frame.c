@@ -123,4 +123,5 @@ NO_SANITIZE("cfi") void ClientDeathCallback(const char *pkgName, int32_t pid)
     DiscServerDeathCallback(pkgName);
     TransServerDeathCallback(pkgName, pid);
     BusCenterServerDeathCallback(pkgName);
+    AuthServerDeathCallback(pkgName, pid);
 }

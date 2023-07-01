@@ -35,7 +35,9 @@ typedef struct {
     ListNode node;
     ConnectionAddr addr;
     char networkId[NETWORK_ID_BUF_LEN];
+    char pkgName[PKG_NAME_SIZE_MAX];
     int64_t authId;
+    int32_t callingPid;
     uint32_t requestId;
     uint32_t flag;
     bool needReportFailure;
