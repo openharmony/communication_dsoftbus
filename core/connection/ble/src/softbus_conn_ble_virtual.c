@@ -26,3 +26,15 @@ int SoftBusGetBtState(void)
 {
     return BLE_DISABLE;
 }
+
+ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol)
+{
+    (void)udid;
+    (void)protocol;
+    return NULL;
+}
+
+void ConnBleReturnConnection(ConnBleConnection **connection)
+{
+    (void)connection;
+}

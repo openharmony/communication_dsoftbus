@@ -284,7 +284,6 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.sessionKey = conn.appInfo.sessionKey;
     info.myHandleId = conn.appInfo.myHandleId;
     info.peerHandleId = conn.appInfo.peerHandleId;
-    info.migrateOption = conn.appInfo.migrateOption;
     info.peerSessionName = conn.appInfo.peerData.sessionName;
     info.groupId = conn.appInfo.groupId;
     info.isEncrypt = true;
@@ -602,12 +601,6 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if (myHandleId != SOFTBUS_ERR) {
         conn->appInfo.myHandleId = myHandleId;
     }
-    int migrateOption = NotifyNearByUpdateMigrateOption(channelId);
-    if (migrateOption != SOFTBUS_ERR) {
-        conn->appInfo.migrateOption = migrateOption;
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "direct update myHandleId %d migrateOption %d in server",
-        conn->appInfo.myHandleId, conn->appInfo.migrateOption);
     (void)SetAppInfoById(channelId, &conn->appInfo);
 
     if (OpenDataBusRequestReply(&conn->appInfo, channelId, seq, flags) != SOFTBUS_OK) {

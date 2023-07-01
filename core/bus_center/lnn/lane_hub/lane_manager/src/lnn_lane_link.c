@@ -45,7 +45,7 @@ typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, co
 static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
-        LANE_BLE_DIRECT, LANE_BLE_REUSE, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT };
+        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT };
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
@@ -237,28 +237,40 @@ static bool LaneGetP2PReuseMac(const char *networkId, char *ipAddr, uint32_t max
     return false;
 }
 
-static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback,
+    BleProtocolType type)
 {
-    (void)reqId;
-    (void)reqInfo;
-    (void)callback;
-    LLOGI("not support ble reuse");
+    const char *udid = LnnConvertDLidToUdid(reqInfo->peerNetworkId, CATEGORY_UDID);
+    ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, type);
+    if ((connection == NULL) || (connection->state != BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO)) {
+        return SOFTBUS_ERR;
+    }
+    LaneLinkInfo linkInfo = {0};
+    (void)memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+    linkInfo.linkInfo.ble.protoType = type;
+    if (type == BLE_COC) {
+        linkInfo.type = LANE_COC;
+        linkInfo.linkInfo.ble.psm = connection->psm;
+    } else if (type == BLE_GATT) {
+        linkInfo.type = LANE_BLE;
+    }
+    ConnBleReturnConnection(&connection);
+    callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;
 }
 
 static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
-    LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    (void)memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, reqInfo->peerBleMac, BT_MAC_LEN);
-
-    if (!(reqInfo->isReuse) && (strlen(linkInfo.linkInfo.ble.bleMac) == 0)) {
-        LLOGE("get blemac is failed");
-        return SOFTBUS_ERR;
-    } else if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
-        return LaneLinkOfBleReuse(reqId, reqInfo, callback);
+    if (LaneLinkOfBleReuse(reqId, reqInfo, callback, BLE_GATT) == SOFTBUS_OK) {
+        return SOFTBUS_OK;
     }
-
+    LaneLinkInfo linkInfo = {0};
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_BLE_MAC, linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN)
+        != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    linkInfo.linkInfo.ble.protoType = BLE_GATT;
+    linkInfo.linkInfo.ble.psm = 0;
     linkInfo.type = LANE_BLE;
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;
@@ -491,25 +503,7 @@ NO_SANITIZE("cfi") static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkReque
 
 static int32_t LaneLinkOfCoc(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
-    LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    (void)memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, reqInfo->peerBleMac, BT_MAC_LEN);
-    linkInfo.linkInfo.ble.psm = reqInfo->psm;
-
-    if (!(reqInfo->isReuse) && (strlen(linkInfo.linkInfo.ble.bleMac) == 0)) {
-        LLOGE("get blemac is failed");
-        return SOFTBUS_ERR;
-    } else if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
-        return LaneLinkOfBleReuse(reqId, reqInfo, callback);
-    }
-    if (linkInfo.linkInfo.ble.psm == 0) {
-        LLOGE("psm is invalid");
-        return SOFTBUS_ERR;
-    }
-
-    linkInfo.type = LANE_COC;
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
-    return SOFTBUS_OK;
+    return LaneLinkOfBleReuse(reqId, reqInfo, callback, BLE_COC);
 }
 
 static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
@@ -532,7 +526,6 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_WLAN_5G] = LaneLinkOfWlan,
     [LANE_P2P_REUSE] = LaneLinkOfP2pReuse,
     [LANE_BLE_DIRECT] = LaneLinkOfGattDirect,
-    [LANE_BLE_REUSE] = LaneLinkOfBleReuse,
     [LANE_COC] = LaneLinkOfCoc,
     [LANE_COC_DIRECT] = LaneLinkOfCocDirect,
 };

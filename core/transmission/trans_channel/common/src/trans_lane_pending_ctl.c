@@ -278,11 +278,6 @@ static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
     LANE_WLAN_2P4G,
     LANE_P2P,
     LANE_BR,
-    LANE_BLE,
-    LANE_P2P_REUSE,
-    LANE_BLE_DIRECT,
-    LANE_COC,
-    LANE_COC_DIRECT,
 };
 static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 {
@@ -302,20 +297,12 @@ static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
         if (linkType == LANE_LINK_TYPE_BUTT) {
             continue;
         }
-        if (linkType == LANE_BLE) {
-            (void)memcpy_s(transOption->peerBleMac, MAX_MAC_LEN, param->attr->attr.peerBleMac.bleMac, MAX_MAC_LEN);
-        }
-        if (linkType == LANE_COC) {
-            (void)memcpy_s(transOption->peerBleMac, MAX_MAC_LEN, param->attr->attr.peerBleMac.bleMac, MAX_MAC_LEN);
-            transOption->psm = param->attr->attr.peerBleMac.psm;
-        }
         if (preferred->linkTypeNum >= LINK_TYPE_MAX) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
                 "session preferred linknum override lane maxcnt:%d.", LANE_LINK_TYPE_BUTT);
             break;
         }
         preferred->linkType[preferred->linkTypeNum] = linkType;
-        preferred->isReuse[preferred->linkTypeNum] = param->isLinkTypeReuse[i];
         preferred->linkTypeNum += 1;
     }
     return;
@@ -551,7 +538,9 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set ble mac err");
         return SOFTBUS_ERR;
     }
-    connOpt->bleOption.protocol = BLE_GATT;
+    connOpt->bleOption.protocol = bleInfo->protoType;
+    connOpt->bleOption.psm = bleInfo->psm;
+    connOpt->bleOption.fastestConnectEnable = true;
     return SOFTBUS_OK;
 }
 
@@ -575,18 +564,6 @@ static int32_t SetBleDirectConnInfo(const BleDirectConnInfo* bleDirect, ConnectO
     return SOFTBUS_OK;
 }
 
-static int32_t SetCocConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt)
-{
-    connOpt->type = CONNECT_BLE;
-    if (strcpy_s(connOpt->bleOption.bleMac, sizeof(connOpt->bleOption.bleMac), bleInfo->bleMac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set ble mac err");
-        return SOFTBUS_ERR;
-    }
-    connOpt->bleOption.protocol = BLE_COC;
-    connOpt->bleOption.psm = bleInfo->psm;
-    return SOFTBUS_OK;
-}
-
 NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
     if (info == NULL || connOpt == NULL) {
@@ -599,14 +576,12 @@ NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info
         return SetWlanConnInfo(&(info->connInfo.wlan), connOpt);
     } else if (info->type == LANE_BR) {
         return SetBrConnInfo(&(info->connInfo.br), connOpt);
-    } else if (info->type == LANE_BLE) {
+    } else if ((info->type == LANE_BLE) || (info->type == LANE_COC)) {
         return SetBleConnInfo(&(info->connInfo.ble), connOpt);
     } else if (info->type == LANE_P2P_REUSE) {
         return SetP2pReusesConnInfo(&(info->connInfo.wlan), connOpt);
     } else if (info->type == LANE_BLE_DIRECT || info->type == LANE_COC_DIRECT) {
         return SetBleDirectConnInfo(&(info->connInfo.bleDirect), connOpt);
-    } else if (info->type == LANE_COC) {
-        return SetCocConnInfo(&(info->connInfo.ble), connOpt);
     }
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get conn opt err: type=%d", info->type);

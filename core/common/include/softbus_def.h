@@ -155,7 +155,6 @@ typedef struct {
     bool isUdpFile;
     int myHandleId;
     int peerHandleId;
-    int migrateOption;
     char *reqId;
     int64_t timeStart;
     int32_t linkType;
