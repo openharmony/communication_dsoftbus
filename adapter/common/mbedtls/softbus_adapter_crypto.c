@@ -59,7 +59,7 @@
 #define EVP_AES_128_KEYLEN 16
 #define EVP_AES_256_KEYLEN 32
 
-static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
+static SoftBusMutex g_randomLock;
 
 static mbedtls_cipher_type_t GetCtrAlgorithmByKeyLen(uint32_t keyLen)
 {
@@ -220,25 +220,29 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     static bool initFlag = false;
     int32_t ret;
 
-    if (pthread_mutex_lock(&g_randomLock) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "lock mutex failed");
-        return SOFTBUS_ERR;
-    }
-
     if (initFlag == false) {
+        if (SoftBusMutexInit(&g_randomLock, NULL) != SOFTBUS_OK) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusGenerateRandomArray init lock fail");
+            return SOFTBUS_LOCK_ERR;
+        }
         mbedtls_ctr_drbg_init(&ctrDrbg);
         mbedtls_entropy_init(&entropy);
         ret = mbedtls_ctr_drbg_seed(&ctrDrbg, mbedtls_entropy_func, &entropy, NULL, 0);
         if (ret != 0) {
-            pthread_mutex_unlock(&g_randomLock);
+            SoftBusMutexUnlock(&g_randomLock);
             HILOG_ERROR(SOFTBUS_HILOG_ID, "gen random seed error, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
         initFlag = true;
     }
 
+    if (SoftBusMutexLock(&g_randomLock) != SOFTBUS_OK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusGenerateRandomArray lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+
     ret = mbedtls_ctr_drbg_random(&ctrDrbg, randStr, len);
-    pthread_mutex_unlock(&g_randomLock);
+    SoftBusMutexUnlock(&g_randomLock);
     if (ret != 0) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "gen random error, ret[%d]", ret);
         return SOFTBUS_ERR;

@@ -44,9 +44,21 @@ void LaneDepsInterfaceMock::SetDefaultResult()
     EXPECT_CALL(*this, SoftBusFrequencyToChannel).WillRepeatedly(Return(1));
     EXPECT_CALL(*this, LnnVisitPhysicalSubnet).WillRepeatedly(Return(true));
     EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*this, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(*this, LnnHasDiscoveryType).WillRepeatedly(Return(true));
 }
 
 extern "C" {
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
+bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetLaneDepsInterface()->LnnHasDiscoveryType(info, type);
+}
+
 bool LnnGetOnlineStateById(const char *id, IdCategory type)
 {
     return GetLaneDepsInterface()->LnnGetOnlineStateById(id, type);

@@ -39,7 +39,7 @@ ohos_unittest("auth_session_gtest2") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   sources = [
     "auth_session_test2.cpp",

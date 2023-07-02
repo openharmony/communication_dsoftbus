@@ -53,10 +53,14 @@ void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *p
 
 const char *AnonyDevId(char **outName, const char *inName);
 
+/* Note: need call SoftBusFree(*outputStr) */
+const char *ToSecureStrDeviceID(const char *deviceId, char **outputStr);
+
 #define UUID_ANONYMIZED_LENGTH 4
 #define NETWORKID_ANONYMIZED_LENGTH 4
 #define UDID_ANONYMIZED_LENGTH 4
 #define MACADDR_ANONYMIZED_LENGTH 5
+#define IP_ANONYMIZED_LENGTH 4
 
 const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength);
 
@@ -78,6 +82,14 @@ static inline const char *AnonymizesUDID(const char *input)
 static inline const char *AnonymizesMac(const char *input)
 {
     return Anonymizes(input, MACADDR_ANONYMIZED_LENGTH);
+}
+
+inline const char *AnonymizesIp(const char *input)
+{
+    if (input == NULL) {
+        return "NULL";
+    }
+    return Anonymizes(input, IP_ANONYMIZED_LENGTH);
 }
 
 // discovery log print macro

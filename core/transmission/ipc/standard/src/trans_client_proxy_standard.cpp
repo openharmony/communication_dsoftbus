@@ -89,6 +89,10 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
+    if (!data.WriteBool(channel->isEncrypt)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write isEncrypt failed");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteInt32(channel->peerUid)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write peerUid failed");
         return SOFTBUS_ERR;

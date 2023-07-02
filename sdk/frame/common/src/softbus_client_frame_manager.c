@@ -40,7 +40,7 @@ typedef struct PkgNameInfo {
     char pkgName[PKG_NAME_SIZE_MAX];
 } PkgNameInfo;
 
-static pthread_mutex_t g_pkgNameLock = PTHREAD_MUTEX_INITIALIZER;
+static SoftBusMutex g_pkgNameLock;
 static LIST_HEAD(g_pkgNameList);
 
 static bool CheckPkgNameInfo(const char *pkgName)
@@ -64,35 +64,35 @@ static bool CheckPkgNameInfo(const char *pkgName)
 
 static int32_t AddClientPkgName(const char *pkgName)
 {
-    if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (CheckPkgNameInfo(pkgName) == false) {
-        (void)pthread_mutex_unlock(&g_pkgNameLock);
+        SoftBusMutexUnlock(&g_pkgNameLock);
         return SOFTBUS_INVALID_PARAM;
     }
     PkgNameInfo *info = (PkgNameInfo *)SoftBusCalloc(sizeof(PkgNameInfo));
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Create PkgNameInfo malloc fail.");
-        pthread_mutex_unlock(&g_pkgNameLock);
+        SoftBusMutexUnlock(&g_pkgNameLock);
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Add strcpy_s failed.");
         SoftBusFree(info);
-        (void)pthread_mutex_unlock(&g_pkgNameLock);
+        SoftBusMutexUnlock(&g_pkgNameLock);
         return SOFTBUS_MEM_ERR;
     }
     ListInit(&info->node);
     ListAdd(&g_pkgNameList, &info->node);
-    (void)pthread_mutex_unlock(&g_pkgNameLock);
+    SoftBusMutexUnlock(&g_pkgNameLock);
     return SOFTBUS_OK;
 }
 
 static void DelClientPkgName(const char *pkgName)
 {
-    if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "del lock init failed");
         return;
     }
@@ -107,7 +107,7 @@ static void DelClientPkgName(const char *pkgName)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_pkgNameLock);
+    SoftBusMutexUnlock(&g_pkgNameLock);
 }
 
 static int32_t ClientRegisterPkgName(const char *pkgName)
@@ -127,7 +127,7 @@ static int32_t ClientRegisterPkgName(const char *pkgName)
 
 static void FreeClientPkgName(void)
 {
-    if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return;
     }
@@ -139,7 +139,7 @@ static void FreeClientPkgName(void)
         ListDelete(&info->node);
         SoftBusFree(info);
     }
-    (void)pthread_mutex_unlock(&g_pkgNameLock);
+    SoftBusMutexUnlock(&g_pkgNameLock);
 }
 
 static void ConnClientDeinit(void)
@@ -218,6 +218,11 @@ int32_t InitSoftBus(const char *pkgName)
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (SoftBusMutexInit(&g_pkgNameLock, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init pkgName failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
     if ((g_isInited == false) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
@@ -271,7 +276,7 @@ uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len)
     if (pkgList == NULL || len == 0) {
         return 0;
     }
-    if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return 0;
     }
@@ -295,14 +300,14 @@ uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len)
             break;
         }
     }
-    (void)pthread_mutex_unlock(&g_pkgNameLock);
+    SoftBusMutexUnlock(&g_pkgNameLock);
     return subscript;
 
 EXIT:
     for (uint32_t i = 0; i < subscript; i++) {
         SoftBusFree(pkgList[i]);
     }
-    (void)pthread_mutex_unlock(&g_pkgNameLock);
+    SoftBusMutexUnlock(&g_pkgNameLock);
     return 0;
 }
 
@@ -312,7 +317,7 @@ int32_t CheckPackageName(const char *pkgName)
 #ifdef __LITEOS_M__
     return SOFTBUS_OK;
 #else
-    if (pthread_mutex_lock(&g_pkgNameLock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -321,12 +326,11 @@ int32_t CheckPackageName(const char *pkgName)
     LIST_FOR_EACH(item, &g_pkgNameList) {
         info = LIST_ENTRY(item, PkgNameInfo, node);
         if (strcmp(info->pkgName, pkgName) == 0) {
-            (void)pthread_mutex_unlock(&g_pkgNameLock);
+            SoftBusMutexUnlock(&g_pkgNameLock);
             return SOFTBUS_OK;
         }
     }
-    (void)pthread_mutex_unlock(&g_pkgNameLock);
+    SoftBusMutexUnlock(&g_pkgNameLock);
     return SOFTBUS_INVALID_PKGNAME;
 #endif
 }
-

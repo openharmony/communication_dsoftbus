@@ -40,7 +40,7 @@ enum InnerStreamOptionType {
     KEEP_ALIVE_TIMEOUT,
     TOS,
     BOUND_INTERFACE_IP,
-    SOCKET_ERROR,
+    SOFTBUS_SOCKET_ERROR,
     NON_BLOCK,
     IS_SERVER,
     REUSE_ADDR,

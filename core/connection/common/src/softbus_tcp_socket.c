@@ -325,7 +325,7 @@ NO_SANITIZE("cfi") int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
             return -1;
         }
 
-        int32_t keepAliveIntvl = 1;
+        int32_t keepAliveIntvl = SOFTBUS_TCP_USER_TIME / 1000;
         rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl,
             sizeof(keepAliveIntvl));
         if (rc != 0) {

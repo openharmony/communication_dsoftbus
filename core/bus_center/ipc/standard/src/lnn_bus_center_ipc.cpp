@@ -235,7 +235,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, int32_t calling
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerJoin(connAddr);
+    int32_t ret = LnnServerJoin(connAddr, pkgName);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinLNNInfo(pkgName, callingPid, connAddr);
     }
@@ -257,7 +257,7 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcServerJoin(const char *pkgName, int32_t ca
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat meta join lnn request from: %s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = MetaNodeServerJoin(connAddr, customData);
+    int32_t ret = MetaNodeServerJoin(pkgName, callingPid, connAddr, customData);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinMetaNodeInfo(pkgName, callingPid, connAddr);
     }
@@ -275,7 +275,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, int32_t callin
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat leave lnn request from: %s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerLeave(networkId);
+    int32_t ret = LnnServerLeave(networkId, pkgName);
     if (ret == SOFTBUS_OK) {
         ret = AddLeaveLNNInfo(pkgName, callingPid, networkId);
     }

@@ -77,9 +77,10 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
 }
 
 int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
-    uint32_t requestId, const AuthVerifyCallback *callBack)
+    uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack)
 {
-    return GetNetBuilderDepsInterface()->AuthMetaStartVerify(connectionId, key, keyLen, requestId, callBack);
+    return GetNetBuilderDepsInterface()->AuthMetaStartVerify(connectionId,
+        key, keyLen, requestId, callingPid, callBack);
 }
 
 uint32_t AuthGenRequestId(void)
@@ -269,9 +270,9 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
     return GetNetBuilderDepsInterface()->LnnGetAddrTypeByIfName(ifName, type);
 }
 
-int32_t LnnSendNotTrustedInfo(NotTrustedDelayInfo *info, uint32_t num)
+int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete)
 {
-    return GetNetBuilderDepsInterface()->LnnSendNotTrustedInfo(info, num);
+    return GetNetBuilderDepsInterface()->LnnSendNotTrustedInfo(info, num, complete);
 }
 
 int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
@@ -440,9 +441,9 @@ void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
     return GetNetBuilderDepsInterface()->LnnDestroyConnectionFsm(connFsm);
 }
 
-LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target)
+LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName)
 {
-    return GetNetBuilderDepsInterface()->LnnCreateConnectionFsm(target);
+    return GetNetBuilderDepsInterface()->LnnCreateConnectionFsm(target, pkgName);
 }
 
 int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)

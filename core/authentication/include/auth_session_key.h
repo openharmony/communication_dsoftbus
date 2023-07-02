@@ -59,6 +59,7 @@ int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
     uint8_t *outData, uint32_t *outLen);
 
 void ScheduleUpdateSessionKey(int64_t authId, uint64_t delatMs);
+void CancelUpdateSessionKey(int64_t authId);
 
 /* For Debug */
 void DumpSessionkeyList(const SessionKeyList *list);

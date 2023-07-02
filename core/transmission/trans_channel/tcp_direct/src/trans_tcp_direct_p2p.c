@@ -19,7 +19,6 @@
 
 #include "auth_interface.h"
 #include "cJSON.h"
-#include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
@@ -31,7 +30,9 @@
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "softbus_adapter_hitracechain.h"
+#include "wifi_direct_manager.h"
+#include "lnn_lane_link.h"
+#include "softbus_adapter_hitrace.h"
 
 #define ID_OFFSET (1)
 
@@ -86,7 +87,7 @@ static void NotifyP2pSessionConnClear(ListNode *sessionConnList)
 
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
-    
+
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, sessionConnList, SessionConn, node) {
         (void)NotifyChannelOpenFailed(item->channelId, SOFTBUS_TRANS_NET_STATE_CHANGED);
         TransSrvDelDataBufNode(item->channelId);
@@ -99,7 +100,7 @@ static void ClearP2pSessionConn(void)
 {
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
-    
+
     SoftBusList *sessionList = GetSessionConnList();
     if (sessionList == NULL) {
         return;
@@ -107,14 +108,14 @@ static void ClearP2pSessionConn(void)
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return;
     }
-    
+
     ListNode tempSessionConnList;
     ListInit(&tempSessionConnList);
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED && item->appInfo.routeType == WIFI_P2P) {
             ListDelete(&item->node);
             sessionList->cnt--;
-        
+
             ListAdd(&tempSessionConnList, &item->node);
         }
     }
@@ -146,6 +147,7 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
         return SOFTBUS_ERR;
     }
 
+    g_p2pSessionPort = *port;
     if (strcpy_s(g_p2pSessionIp, sizeof(g_p2pSessionIp), ip) != EOK) {
         StopP2pSessionListener();
         (void)SoftBusMutexUnlock(&g_p2pLock);
@@ -309,8 +311,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
         SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, ret, "OnVerifyP2pRequest unpack fail");
         return ret;
     }
-
-    if (P2pLinkGetLocalIp(myIp, sizeof(myIp)) != SOFTBUS_OK) {
+    if (GetWifiDirectManager()->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnVerifyP2pRequest get p2p ip fail");
         SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, ret, "get p2p ip fail");
         return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
@@ -333,6 +334,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     if (ret != SOFTBUS_OK) {
         return ret;
     }
+    LaneAddP2pAddressByIp(peerIp, peerPort);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pRequest end");
     return SOFTBUS_OK;
 }
@@ -402,6 +404,8 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         goto EXIT_ERR;
     }
 
+    LaneAddP2pAddress(conn->appInfo.peerNetWorkId, conn->appInfo.peerData.addr, conn->appInfo.peerData.port);
+
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnVerifyP2pReply end: fd=%d", fd);
     return SOFTBUS_OK;
 EXIT_ERR:
@@ -452,6 +456,19 @@ static void OnAuthChannelClose(int64_t authId)
     return;
 }
 
+NO_SANITIZE("cfi") static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,
+    int32_t newChannelId, int32_t *channelId, uint32_t requestId)
+{
+    int32_t ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, conn->isMeta);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenP2pDirectChannel open auth conn fail");
+        TransDelSessionConnById(newChannelId);
+        return ret;
+    }
+    *channelId = newChannelId;
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
 {
@@ -460,9 +477,7 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
         return SOFTBUS_INVALID_PARAM;
     }
     SessionConn *conn = NULL;
-    int32_t newChannelId;
     int32_t ret = SOFTBUS_ERR;
-    uint32_t requestId;
 
     conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);
     if (conn == NULL) {
@@ -471,7 +486,7 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(conn->channelId + ID_OFFSET));
-    newChannelId = conn->channelId;
+    int32_t newChannelId = conn->channelId;
     (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
     ret = StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);
@@ -481,7 +496,7 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
         return ret;
     }
 
-    requestId = AuthGenRequestId();
+    uint32_t requestId = AuthGenRequestId();
     conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
     conn->requestId = requestId;
     uint64_t seq = TransTdcGetNewSeqId();
@@ -489,7 +504,7 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-    
+
     conn->req = (int64_t)seq;
     conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
     ret = TransTdcAddSessionConn(conn);
@@ -498,16 +513,9 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
         return ret;
     }
 
-    ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, conn->isMeta);
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenP2pDirectChannel open auth conn fail");
-        TransDelSessionConnById(newChannelId);
-        return ret;
-    }
-
-    *channelId = newChannelId;
+    ret = OpenNewAuthConn(appInfo, conn, newChannelId, channelId, requestId);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenP2pDirectChannel end: channelId=%d", newChannelId);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 NO_SANITIZE("cfi") int32_t P2pDirectChannelInit(void)
@@ -528,4 +536,3 @@ NO_SANITIZE("cfi") int32_t P2pDirectChannelInit(void)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "P2pDirectChannelInit ok");
     return SOFTBUS_OK;
 }
-

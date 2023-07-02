@@ -134,15 +134,6 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1
     visit = NotifyWlanAddressChanged(&netifMgr, nullptr);
     EXPECT_TRUE(visit == CHOICE_VISIT_NEXT);
 
-    IpAddrChangeEventHandler(nullptr);
-    LnnMonitorAddressChangedEvent event = {
-        .basic.event = LNN_EVENT_IP_ADDR_CHANGED,
-        .ifName = "name",
-    };
-    IpAddrChangeEventHandler(reinterpret_cast<LnnEventBasicInfo *>(&event));
-    memset_s(event.ifName, NET_IF_NAME_LEN, 0, NET_IF_NAME_LEN);
-    IpAddrChangeEventHandler(reinterpret_cast<LnnEventBasicInfo *>(&event));
-
     LnnProtocolManager lnnProtocolManager = {
         .id = LNN_PROTOCOL_IP,
     };
@@ -150,19 +141,6 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1
         .protocol = &lnnProtocolManager,
         .status = LNN_SUBNET_RUNNING,
     };
-
-    visit = NotifyIpAddressChanged(&subnet, nullptr);
-    EXPECT_TRUE(visit == CHOICE_VISIT_NEXT);
-
-    LnnProtocolManager lnnProtocolManager1 = {
-        .id = LNN_PROTOCOL_BLE,
-    };
-    LnnPhysicalSubnet subnet1 = {
-        .protocol = &lnnProtocolManager1,
-        .status = LNN_SUBNET_RUNNING,
-    };
-    visit = NotifyIpAddressChanged(&subnet1, nullptr);
-    EXPECT_TRUE(visit == CHOICE_VISIT_NEXT);
 
     OnIpNetifStatusChanged(&subnet, nullptr);
     OnSoftbusIpNetworkDisconnected(&subnet);

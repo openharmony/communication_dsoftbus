@@ -14,98 +14,65 @@
  */
 #include "trans_link_listener.h"
 
-#include "bus_center_info_key.h"
-#include "bus_center_manager.h"
-#include "p2plink_interface.h"
+#include "lnn_distributed_net_ledger.h"
 #include "securec.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
-#include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_p2p.h"
+#include "wifi_direct_manager.h"
+#include "data_bus_native.h"
 
-static void FreeMem(const NodeBasicInfo *info)
+static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid)
 {
-    if (info != NULL) {
-        SoftBusFree((NodeBasicInfo *)info);
+    TRAN_CHECK_AND_RETURN_LOG(peerUuid, "peer uuid is null");
+
+    NodeInfo nodeInfo;
+    memset(&nodeInfo, 0, sizeof(nodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
+    TRAN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "LnnGetRemoteNodeInfoById failed");
+
+    TransOnLinkDown(nodeInfo.networkId, nodeInfo.uuid, nodeInfo.masterUdid, peerIp, WIFI_P2P);
+    TLOGI("Notify Degrade MigrateEvents start");
+    ret = NotifyNearByOnMigrateEvents(nodeInfo.networkId, WIFI_P2P, false);
+    if (ret != SOFTBUS_OK) {
+        TLOGE("Notify Degrade MigrateEvents fail");
     }
+    TLOGI("Notify Degrade MigrateEvents success");
 }
 
-static int32_t GetNetworkIdByP2pMac(const char *peerMac, char *networkId, int32_t len)
+static void OnWifiDirectRoleChange(enum WifiDirectRole myRole)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac");
-    NodeBasicInfo *info = NULL;
-    int32_t num = 0;
-
-    if (LnnGetAllOnlineAndMetaNodeInfo(&info, &num) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "get online node fail");
-        return SOFTBUS_ERR;
-    }
-
-    if (info == NULL || num == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "no online node");
-        return SOFTBUS_NOT_FIND;
-    }
-
-    for (int32_t i = 0; i < num; i++) {
-        char p2pMac[MAC_LEN] = {0};
-        char *tmpNetworkId = info[i].networkId;
-        if (LnnGetRemoteStrInfo(tmpNetworkId, STRING_KEY_P2P_MAC, p2pMac, sizeof(p2pMac)) != SOFTBUS_OK) {
-            continue;
-        }
-        if (strcmp(peerMac, p2pMac) == 0) {
-            if (strcpy_s(networkId, len, tmpNetworkId) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "str cpy fail");
-                FreeMem(info);
-                return SOFTBUS_MEM_ERR;
-            }
-            FreeMem(info);
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac end");
-            return SOFTBUS_OK;
-        }
-    }
-
-    FreeMem(info);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac no find");
-    return SOFTBUS_NOT_FIND;
-}
-
-static void OnP2pLinkDisconnected(const char *peerMac)
-{
-    if (peerMac == NULL) {
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnP2pLinkDisconnected");
-
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    if (GetNetworkIdByP2pMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetNetworkIdByP2pMac fail");
-        return;
-    }
-
-    TransOnLinkDown(networkId, WIFI_P2P);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnP2pLinkDisconnected end");
-    return;
-}
-
-static void OnP2pRoleChange(P2pLinkRole myRole)
-{
-    if (myRole == ROLE_NONE) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "p2p role is none");
+    if (myRole == WIFI_DIRECT_ROLE_NONE) {
+        TLOGI("my role change to NONE");
         StopP2pSessionListener();
     }
 }
 
-NO_SANITIZE("cfi") void ReqLinkListener(void)
+static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid)
 {
-    P2pLinkPeerDevStateCb cb = {0};
-    cb.onMyRoleChange = OnP2pRoleChange;
-    cb.onDevOffline = OnP2pLinkDisconnected;
-    P2pLinkRegPeerDevStateChange(&cb);
-    return;
+    TRAN_CHECK_AND_RETURN_LOG(peerMac, "peer mac is null");
+    NodeInfo nodeInfo;
+    memset(&nodeInfo, 0, sizeof(nodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
+    TRAN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "LnnGetRemoteNodeInfoById failed");
+    TLOGI("Notify Upgrade MigrateEvents start");
+    ret = NotifyNearByOnMigrateEvents(nodeInfo.networkId, WIFI_P2P, true);
+    if (ret != SOFTBUS_OK) {
+        TLOGE("Notify Upgrade MigrateEvents fail");
+    }
+    TLOGI("Notify Upgrade MigrateEvents success");
 }
 
+NO_SANITIZE("cfi") void ReqLinkListener(void)
+{
+    struct WifiDirectStatusListener listener = {
+        .onDeviceOffLine = OnWifiDirectDeviceOffLine,
+        .onLocalRoleChange = OnWifiDirectRoleChange,
+        .onDeviceOnLine = OnWifiDirectDeviceOnLine,
+    };
+    GetWifiDirectManager()->registerStatusListener(&listener);
+}

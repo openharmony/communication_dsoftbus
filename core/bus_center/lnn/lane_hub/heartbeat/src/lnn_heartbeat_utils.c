@@ -20,7 +20,7 @@
 
 #include "bus_center_manager.h"
 #include "lnn_heartbeat_medium_mgr.h"
-#include "p2plink_interface.h"
+#include "wifi_direct_manager.h"
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_conn_interface.h"
@@ -28,7 +28,6 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-
 
 NO_SANITIZE("cfi") LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
 {
@@ -125,17 +124,15 @@ static bool HbHasActiveBleConnection(const char *networkId)
 
 static bool HbHasActiveP2pConnection(const char *networkId)
 {
-    int32_t ret;
-    char peerMac[P2P_MAC_LEN] = {0};
+    char peerMac[MAC_ADDR_STR_LEN] = {0};
 
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, peerMac, sizeof(peerMac)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get peer p2p mac err");
         return false;
     }
-    ret = P2pLinkQueryDevIsOnline(peerMac);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB has active p2p connection:%s, ret=%d",
-        ret == SOFTBUS_OK ? "true" : "false", ret);
-    return ret == SOFTBUS_OK ? true : false;
+    bool isOnline = GetWifiDirectManager()->isDeviceOnline(peerMac);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB has active p2p connection: %s", isOnline ? "true" : "false");
+    return isOnline;
 }
 
 NO_SANITIZE("cfi") bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
@@ -144,7 +141,7 @@ NO_SANITIZE("cfi") bool LnnHasActiveConnection(const char *networkId, Connection
 
     if (networkId == NULL || addrType >= CONNECTION_ADDR_MAX) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check active connection get invalid param");
-        return SOFTBUS_INVALID_PARAM;
+        return ret;
     }
     switch (addrType) {
         case CONNECTION_ADDR_WLAN:
@@ -224,5 +221,50 @@ NO_SANITIZE("cfi") int32_t LnnGenerateHexStringHash(const unsigned char *str, ch
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB convert bytes to str hash fail ret=%d", ret);
         return ret;
     }
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen)
+{
+    if (btMac == NULL || brMacHash == NULL) {
+        LLOGE("null point");
+        return SOFTBUS_ERR;
+    }
+    if (brMacLen != BT_MAC_LEN || hashLen != BT_MAC_HASH_STR_LEN) {
+        LLOGE("invaild len");
+        return SOFTBUS_ERR;
+    }
+    uint8_t btMacBin[BT_ADDR_LEN] = {0};
+    char btMacStr[BT_MAC_NO_COLON_LEN] = {0};
+    char hashLower[BT_MAC_HASH_STR_LEN] = {0};
+    char hash[BT_MAC_HASH_LEN] = {0};
+    if (ConvertBtMacToBinary(btMac, BT_MAC_LEN, btMacBin, BT_ADDR_LEN) != SOFTBUS_OK) {
+        LLOGE("convert br mac to bin fail.");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertBtMacToStrNoColon(btMacStr, BT_MAC_NO_COLON_LEN, btMacBin, BT_ADDR_LEN)) {
+        LLOGE("convert br mac to str fail.");
+        return SOFTBUS_ERR;
+    }
+    char brMacUpper[BT_MAC_NO_COLON_LEN] = {0};
+    if (StringToUpperCase(btMacStr, brMacUpper, BT_MAC_NO_COLON_LEN) != SOFTBUS_OK) {
+        LLOGE("bt mac to upperCase fail");
+        return SOFTBUS_ERR;
+    }
+    LLOGI("upper BrMac=**:**:**:**:%s", AnonymizesUDID(brMacUpper));
+    if (SoftBusGenerateStrHash((const unsigned char *)brMacUpper, strlen(brMacUpper), (unsigned char *)hash)) {
+        LLOGE("Generate brMac hash fail.");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertBytesToHexString(hashLower, BT_MAC_HASH_STR_LEN, (const uint8_t *)hash,
+        BT_MAC_HASH_LEN) != SOFTBUS_OK) {
+        DLOGE("ConvertBytesToHexString failed");
+        return SOFTBUS_ERR;
+    }
+    if (StringToUpperCase(hashLower, brMacHash, BT_MAC_HASH_STR_LEN) != SOFTBUS_OK) {
+        LLOGE("bt mac to upperCase fail");
+        return SOFTBUS_ERR;
+    }
+    LLOGI("brmacHash :%s", AnonymizesUDID(brMacHash));
     return SOFTBUS_OK;
 }

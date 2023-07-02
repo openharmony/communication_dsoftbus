@@ -26,16 +26,6 @@ group("unittest") {
   if (dsoftbus_feature_conn_ble) {
     deps += [ "ble:ConnectionBleTest" ]
   }
-  if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
-    deps += [
-      "p2p:ConnectionP2pTest",
-      "p2p:P2pDeviceTest",
-      "p2p:P2pManagerTest",
-      "p2p/common_mock:P2pCommonTest",
-      "p2p/interface_mock:P2pInterfaceTest",
-      "p2p/negotiation:P2pNegotiationTest",
-    ]
-  }
   if (dsoftbus_feature_conn_tcp) {
     deps += [ "tcp:TcpManagerTest" ]
   }

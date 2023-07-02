@@ -16,6 +16,10 @@
 #ifndef SOFTBUS_CPU_H
 #define SOFTBUS_CPU_H
 
+#ifndef _WIN32
+#include <sched.h>
+#endif
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -23,7 +27,7 @@ extern "C" {
 #endif
 
 #ifdef _WIN32
-#define BARRIER() MemoryBarrier()
+#define BARRIER()
 #define MB() BARRIER()
 #define WMB() BARRIER()
 #define RMB() BARRIER()
@@ -48,6 +52,12 @@ extern "C" {
 #define MB()
 #define WMB()
 #define RMB()
+#endif
+
+#ifdef _WIN32
+#define SoftBusYieldCpu()
+#else
+#define SoftBusYieldCpu() sched_yield()
 #endif
 
 #ifdef __cplusplus

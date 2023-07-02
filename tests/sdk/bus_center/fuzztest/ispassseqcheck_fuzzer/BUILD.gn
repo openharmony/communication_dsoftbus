@@ -39,6 +39,6 @@ ohos_fuzztest("IsPassSeqCheckFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 }

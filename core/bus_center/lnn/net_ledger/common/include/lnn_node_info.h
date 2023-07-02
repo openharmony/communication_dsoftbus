@@ -30,13 +30,9 @@ extern "C" {
 #define WIFI_MAC_LEN 6
 #define OFFLINE_CODE_LEN 32
 #define OFFLINE_CODE_BYTE_SIZE 4
-#define PEER_DISCOVERY_TYPE_LEN 12
+#define EXTDATA_LEN 8
 
 #define LNN_RELATION_MASK 0x03
-
-#define PEER_DISCOVERY_TYPE_BLE "BLE"
-#define PEER_DISCOVERY_TYPE_BR "BR"
-#define PEER_DISCOVERY_TYPE_WIFI "WIFI"
 
 typedef enum {
     ROLE_UNKNOWN = 0,
@@ -75,26 +71,27 @@ typedef struct {
 } MetaInfo;
 
 typedef struct {
-    const char *type;
-    uint32_t id;
-} DiscoveryTypeToId;
+    bool isCharging;
+    int32_t batteryLevel;
+} BatteryInfo;
 
 typedef struct {
     char softBusVersion[VERSION_MAX_LEN];
-    char versionType[VERSION_MAX_LEN];
-    char uuid[UUID_BUF_LEN];
+    char versionType[VERSION_MAX_LEN]; // compatible nearby
+    char pkgVersion[VERSION_MAX_LEN];
+    char uuid[UUID_BUF_LEN]; // compatible nearby
     char networkId[NETWORK_ID_BUF_LEN];
     char publicId[ID_MAX_LEN];
     char parentId[ID_MAX_LEN];
     char masterUdid[UDID_BUF_LEN];
     char nodeAddress[SHORT_ADDRESS_MAX_LEN];
+    char extData[EXTDATA_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
     int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
     uint32_t netCapacity;
     uint32_t discoveryType;
-    uint32_t exchangeDiscoveryType;
     uint64_t heartbeatTimeStamp;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
@@ -103,18 +100,28 @@ typedef struct {
     BssTransInfo bssTransInfo;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;
+    char wifiDirectAddr[MAC_LEN];
     uint64_t supportedProtocols;
     char accountHash[SHA_256_HASH_LEN];
+    int64_t accountId;
     unsigned char offlineCode[OFFLINE_CODE_BYTE_SIZE];
     int64_t authSeq[DISCOVERY_TYPE_COUNT];
     MetaInfo metaInfo;
     uint32_t AuthTypeValue;
     uint16_t dataChangeFlag;
+    BatteryInfo batteryInfo;
+    bool isScreenOn;
+    int64_t wifiVersion;
+    int64_t bleVersion;
+    uint64_t feature;
+    int64_t bleStartTimestamp;
+    uint64_t onlinetTimestamp;
+    int32_t wifiBuffSize;
+    int32_t brBuffSize;
+    int32_t stateVersion;
+    int32_t groupType;
 } NodeInfo;
 
-int32_t LnnSetSupportDiscoveryType(char *info, const char *type);
-bool LnnHasSupportDiscoveryType(const char *destType, const char *type);
-bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type);
 const char *LnnGetDeviceUdid(const NodeInfo *info);
 int32_t LnnSetDeviceUdid(NodeInfo *info, const char *udid);
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type);

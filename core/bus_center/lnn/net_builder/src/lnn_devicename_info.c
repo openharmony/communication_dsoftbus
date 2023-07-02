@@ -16,6 +16,7 @@
 #include "lnn_devicename_info.h"
 
 #include <securec.h>
+#include <string.h>
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
@@ -28,6 +29,7 @@
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_deviceinfo_to_profile.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -39,7 +41,7 @@
 #define MAX_TRY 10
 static int32_t g_tryGetDevnameNums = 0;
 
-int32_t LnnSyncDeviceName(const char *networkId)
+static int32_t LnnSyncDeviceName(const char *networkId)
 {
     const char *deviceName = NULL;
     const NodeInfo *info = LnnGetLocalNodeInfo();
@@ -64,15 +66,22 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
 {
     char udid[UDID_BUF_LEN];
     NodeBasicInfo basic;
-    if (type != LNN_INFO_TYPE_DEVICE_NAME) {
+    if (type != LNN_INFO_TYPE_DEVICE_NAME || len == 0 || networkId == NULL || msg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid param, SyncInfoType:%d", type);
         return;
     }
+    if (strnlen((char *)msg, len) == len) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnReceiveDeviceName invalid msg");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv device name changed msg:%s, networkId:%s",
+        (char *)msg, AnonymizesNetworkID(networkId));
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert networkId to udid fail");
         return;
     }
     if (!LnnSetDLDeviceInfoName(udid, (char *)msg)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set peer device name fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set peer device name fail");
     }
     (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
@@ -80,9 +89,15 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
         return;
     }
     LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
+    NodeInfo nodeInfo = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+        LLOGE("get node info fail");
+        return;
+    }
+    updateProfile(&nodeInfo);
 }
 
-static void HandlerGetDeviceName(void)
+static void HandlerGetDeviceName(const char *deviceName)
 {
     int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
@@ -123,7 +138,7 @@ static void UpdataLocalFromSetting(void *p)
             if (looper == NULL) {
                 return;
             }
-            int ret = LnnAsyncCallbackDelayHelper(looper, UpdateDeviceName, NULL, DELAY_LEN);
+            int ret = LnnAsyncCallbackDelayHelper(looper, UpdataLocalFromSetting, NULL, DELAY_LEN);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init UpdataLocalFromSetting fail");
             }
@@ -137,7 +152,7 @@ static void UpdataLocalFromSetting(void *p)
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
 }
 
-NO_SANITIZE("cfi") void UpdateDeviceNameFromSetting(void)
+NO_SANITIZE("cfi") static void UpdateDeviceNameFromSetting(void)
 {
     LnnInitGetDeviceName(HandlerGetDeviceName);
 }

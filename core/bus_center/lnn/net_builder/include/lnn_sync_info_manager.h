@@ -32,6 +32,7 @@ typedef enum {
     LNN_INFO_TYPE_P2P_INFO,
     LNN_INFO_TYPE_CHANNEL_NOISE_INFO,
     LNN_INFO_TYPE_NOT_TRUSTED,
+    LNN_INFO_TYPE_WIFI_DIRECT,
     LNN_INFO_TYPE_MASTER_ELECT,
     LNN_INFO_TYPE_BSS_TRANS,
     LNN_INFO_TYPE_TOPO_UPDATE,
@@ -39,6 +40,7 @@ typedef enum {
     LNN_INFO_TYPE_NODE_ADDR_DETECTION,
     LNN_INFO_TYPE_SYNC_CIPHERKEY,
     LNN_INFO_TYPE_COUNT,
+    //LNN_INFO_TYPE_P2P_ROLE = 256,
 } LnnSyncInfoType;
 
 typedef void (*LnnSyncInfoMsgHandler)(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);

@@ -113,7 +113,7 @@ HWTEST_F(HeartBeatFSMTest, LnnRemoveSendEndMsgTest_01, TestSize.Level1)
 {
     bool isRemoved = true;
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
-    LnnRemoveSendEndMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, &isRemoved, false);
+    LnnRemoveSendEndMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, true, true, &isRemoved);
     LnnRemoveCheckDevStatusMsg(nullptr, nullptr);
     LnnRemoveProcessSendOnceMsg(nullptr, HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
     HbMasterNodeStateEnter(nullptr);
@@ -264,7 +264,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOnceMsgTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, OnSendOneHbBeginTest_01, TestSize.Level1)
 {
     HeartBeatFSMInterfaceMock heartbeatFsmMock;
-    void *para = SoftBusCalloc(sizeof(LnnHeartbeatCustSendData));
+    void *para = SoftBusCalloc(sizeof(LnnHeartbeatSendBeginData));
     EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSendBegin).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = OnSendOneHbBegin(nullptr, TEST_ARGS, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -499,15 +499,16 @@ HWTEST_F(HeartBeatFSMTest, LnnPostNextSendOnceMsgToHbFsmTest_01, TestSize.Level1
 {
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     FsmStateMachine fsm;
+    LnnHeartbeatSendEndData *custData = nullptr;
     int32_t ret = LnnPostNextSendOnceMsgToHbFsm(nullptr, nullptr, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     LnnProcessSendOnceMsgPara para;
     hbFsm->fsm = fsm;
     ret = LnnPostNextSendOnceMsgToHbFsm(hbFsm, &para, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnPostSendEndMsgToHbFsm(nullptr, HEARTBEAT_TYPE_BLE_V1, TEST_TIME1, false);
+    ret = LnnPostSendEndMsgToHbFsm(nullptr, custData, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnPostSendEndMsgToHbFsm(hbFsm, HEARTBEAT_TYPE_BLE_V1, TEST_TIME1, false);
+    ret = LnnPostSendEndMsgToHbFsm(hbFsm, custData, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnPostStartMsgToHbFsm(nullptr, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);

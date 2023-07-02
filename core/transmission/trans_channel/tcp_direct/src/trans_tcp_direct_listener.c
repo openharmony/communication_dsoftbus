@@ -17,12 +17,10 @@
 
 #include <arpa/inet.h>
 #include <securec.h>
-#include <unistd.h>
-
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "p2plink_interface.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
@@ -32,7 +30,7 @@
 #include "softbus_socket.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "softbus_adapter_hitracechain.h"
+#include "trans_channel_manager.h"
 
 #define ID_OFFSET (1)
 
@@ -127,6 +125,8 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     conn->timeout = 0;
     conn->listenMod = module;
     conn->authId = AUTH_INVALID_ID;
+    conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
+    conn->appInfo.peerData.port = clientAddr->socketOption.port;
 
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId)) !=
         0) {
@@ -172,7 +172,7 @@ NO_SANITIZE("cfi") static int32_t TdcOnConnectEvent(ListenerModule module, int c
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t channelId = GenerateTdcChannelId();
+    int32_t channelId = GenerateChannelId(true);
     int32_t ret = TransSrvAddDataBufNode(channelId, cfd); // fd != channelId
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create srv data buf node failed.");
@@ -222,10 +222,12 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
         return SOFTBUS_ERR;
     }
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info. appfd=%d", conn->appInfo.fd, fd);
-        DelTrigger(conn->listenMod, fd, READ_TRIGGER);
-        DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
-        DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info. appfd=%d", fd, conn->appInfo.fd);
+        for (uint32_t i = DIRECT_CHANNEL_SERVER_P2P; i <= DIRECT_CHANNEL_SERVER_WIFI; i++) {
+            DelTrigger(i, fd, READ_TRIGGER);
+            DelTrigger(i, fd, WRITE_TRIGGER);
+            DelTrigger(i, fd, EXCEPT_TRIGGER);
+        }
         SoftBusFree(conn);
         ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
@@ -234,6 +236,7 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
         ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Trans Srv Recv Data ret %d. ", ret);
         if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
             SoftBusFree(conn);
             return SOFTBUS_OK;

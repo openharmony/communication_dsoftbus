@@ -245,6 +245,7 @@ static uint32_t TransGetDataBufSize(void)
     return MIN_BUF_LEN;
 }
 
+#define SLICE_HEAD_LEN 16
 static int32_t TransGetDataBufMaxSize(void)
 {
     uint32_t maxLen;
@@ -252,7 +253,7 @@ static int32_t TransGetDataBufMaxSize(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config err");
         return SOFTBUS_ERR;
     }
-    g_dataBufferMaxLen = maxLen + DATA_EXTEND_LEN;
+    g_dataBufferMaxLen = maxLen + DATA_EXTEND_LEN + SLICE_HEAD_LEN;
     return SOFTBUS_OK;
 }
 
@@ -601,6 +602,8 @@ int32_t TransTdcRecvData(int32_t channelId)
         SoftBusFree(recvBuf);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "client cId[%d] recv data failed,ret=%d.", channelId, recvLen);
         return SOFTBUS_ERR;
+    } else if (recvLen == 0) {
+        return SOFTBUS_DATA_NOT_ENOUGH;
     }
 
     if (TransClientUpdateTdcDataBufWInfo(channelId, recvBuf, recvLen) != SOFTBUS_OK) {

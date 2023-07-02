@@ -34,15 +34,17 @@ void LnnDeinitNetBuilder(void)
 {
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr)
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
 {
     (void)addr;
+    (void)pkgName;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnServerLeave(const char *networkId)
+int32_t LnnServerLeave(const char *networkId, const char *pkgName)
 {
     (void)networkId;
+    (void)pkgName;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

@@ -24,6 +24,7 @@
 
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_common.h"
+#include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "securec.h"
@@ -101,7 +102,11 @@ static LIST_HEAD(g_recvRecipientInfoList);
 
 static int32_t ProxyChannelSendFileStream(int32_t channelId, const char *data, uint32_t len, int32_t type)
 {
-    return ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, type);
+    ProxyChannelInfoDetail info;
+    if (ClientTransProxyGetInfoByChannelId(channelId, &info) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return TransProxyPackAndSendData(channelId, data, len, &info, (SessionPktType)type);
 }
 
 static int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t result, uint32_t side)
@@ -733,7 +738,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         // magic(4 byte) + dataLen(8 byte) + oneFrameLen(4 byte) + fileSize(8 byte) + fileName
         fileFrame->magic = (*(uint32_t *)(fileFrame->data));
         uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
-        if(FRAME_HEAD_LEN + dataLen != fileFrame->frameLength){
+        if(FRAME_HEAD_LEN + dataLen != fileFrame->frameLength) {
             return SOFTBUS_ERR;
         }
         if (fileFrame->magic != FILE_MAGIC_NUMBER || dataLen < (FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t))) {
@@ -1284,7 +1289,8 @@ static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
     SoftBusFree(sendInfo);
 }
 
-NO_SANITIZE("cfi") int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+NO_SANITIZE("cfi") int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[],
+    const char *dFileList[], uint32_t fileCnt)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy send file trans start");
     if ((fileCnt == 0) || (fileCnt > MAX_SEND_FILE_NUM)) {
@@ -1636,7 +1642,7 @@ static int32_t WriteEmptyFrame(SingleFileInfo *fileInfo, int32_t count)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "WriteEmptyFrame invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     if (count > 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "write %d empty frame", count);
         char *emptyBuff = (char *)SoftBusCalloc(fileInfo->oneFrameLen);
@@ -1749,13 +1755,15 @@ static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int
         uint32_t frameDataLength = dataLen - FRAME_DATA_SEQ_OFFSET;
         fileInfo->seq = fileFrame->seq;
 
-        if(MAX_FILE_SIZE < frameDataLength){
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "frameDataLength is too large, frameDataLength:%" PRIu32, frameDataLength);
+        if(MAX_FILE_SIZE < frameDataLength) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "frameDataLength is too large, frameDataLength:%" PRIu32,
+                frameDataLength);
             return SOFTBUS_ERR;
         }
 
         if(fileInfo->fileOffset > MAX_FILE_SIZE - frameDataLength) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%" PRIu64, fileInfo->fileOffset + frameDataLength);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%" PRIu64,
+                fileInfo->fileOffset + frameDataLength);
             return SOFTBUS_ERR;
         }
         int64_t writeLength = SoftBusPwriteFile(fileInfo->fileFd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET,

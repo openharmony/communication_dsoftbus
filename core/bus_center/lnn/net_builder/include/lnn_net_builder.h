@@ -35,7 +35,9 @@ typedef struct {
     ListNode node;
     ConnectionAddr addr;
     char networkId[NETWORK_ID_BUF_LEN];
+    char pkgName[PKG_NAME_SIZE_MAX];
     int64_t authId;
+    int32_t callingPid;
     uint32_t requestId;
     uint32_t flag;
     bool needReportFailure;
@@ -49,13 +51,15 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType);
-int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType oldAddrType,
-    const char *newNetworkId, ConnectionAddrType newAddrType);
+void LnnRequestLeaveAllOnlineNodes(void);
+int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType, const char *newNetworkId);
 int32_t LnnRequestCleanConnFsm(uint16_t connFsmId);
 int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight);
 int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId);
 int32_t LnnUpdateNodeAddr(const char *addr);
+int32_t FindRequestIdByAddr(ConnectionAddr *connetionAddr, uint32_t *requestId);
+NodeInfo *FindNodeInfoByRquestId(uint32_t requestId);
 AuthVerifyCallback *LnnGetVerifyCallback(void);
 AuthVerifyCallback *LnnGetMetaVerifyCallback(void);
 void SetWatchdogFlag(bool flag);

@@ -34,5 +34,6 @@ if (dsoftbus_feature_conn_p2p == true) {
 
 trans_direct_channel_inc = [
   "$tcp_direct_channel_path/include",
+  "$dsoftbus_root_path/core/adapter/transmission/include",
   "$dsoftbus_root_path/core/connection/p2p/interface",
 ]

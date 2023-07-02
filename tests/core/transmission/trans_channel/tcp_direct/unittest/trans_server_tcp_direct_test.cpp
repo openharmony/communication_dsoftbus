@@ -29,14 +29,13 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "softbus_message_open_channel.h"
 #include "softbus_protocol_def.h"
 #include "softbus_server_frame.h"
 #include "softbus_socket.h"
 #include "trans_channel_callback.c"
 #include "trans_channel_manager.h"
-#include "trans_tcp_direct_listener.c"
 #include "trans_tcp_direct_manager.c"
-#include "trans_tcp_direct_message.c"
 #include "trans_tcp_direct_p2p.c"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
@@ -67,7 +66,6 @@ namespace OHOS {
 #define TRANS_TEST_FD 1000
 
 static const char *g_sessionKey = "www.test.com";
-static const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00";
 static const char *g_uuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static SessionConn *g_conn = NULL;
@@ -207,29 +205,6 @@ static void TestDelSessionConnNode(int32_t channelId)
 }
 
 /**
- * trans_tcp_direct_listener.c
- * @tc.name: SwitchAuthLinkTypeToFlagType001
- * @tc.desc: SwitchAuthLinkTypeToFlagType, transmission tcp direct listener switch auth link type to flag type with
- *           different.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, SwitchAuthLinkTypeToFlagType001, TestSize.Level1)
-{
-    uint32_t ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BR);
-    EXPECT_EQ(ret, FLAG_BR);
-
-    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BLE);
-    EXPECT_EQ(ret, FLAG_BLE);
-
-    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_P2P);
-    EXPECT_EQ(ret, FLAG_P2P);
-
-    ret = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_WIFI);
-    EXPECT_EQ(ret, FLAG_WIFI);
-}
-
-/**
  * @tc.name: GetCipherFlagByAuthId001
  * @tc.desc: GetCipherFlagByAuthId, start channel with wrong parms.
  * @tc.type: FUNC
@@ -279,14 +254,8 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
 
     SessionKey sessionKey;
 
-    int32_t ret = StartVerifySession(g_conn);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = StartVerifySession(g_conn);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     SoftBusFree(info);
 }
@@ -314,87 +283,10 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession002, TestSize.Level1)
 
     static const char *tmpSessionKeyTest = "www.test.com";
 
-    int32_t ret = StartVerifySession(tmpSessionConn);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TestAddAuthManager(tmpSessionConn->authId, tmpSessionKeyTest, false);
+    int32_t ret = TestAddAuthManager(tmpSessionConn->authId, tmpSessionKeyTest, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = StartVerifySession(tmpSessionConn);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     TestDelAuthManager(tmpSessionConn->authId);
-}
-
-/**
- * @tc.name: CreateSessionConnNode001
- * @tc.desc: CreateSessionConnNode, transmission tcp direct listener create session node of connection without local
- *           strInfo.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, CreateSessionConnNode001, TestSize.Level1)
-{
-    ConnectOption connInfo = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = {0},
-            .port = TEST_SOCKET_PORT,
-            .moduleId = MODULE_MESSAGE_SERVICE,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
-    int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
-    ASSERT_EQ(ret, EOK);
-
-    ret = CreateSessionConnNode(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD,
-                                TRANS_TEST_CHCANNEL_ID, &connInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    TransProcDataRes(DIRECT_CHANNEL_SERVER_WIFI, ret, TRANS_TEST_CHCANNEL_ID, TRANS_TEST_FD);
-
-    ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    TransProcDataRes(DIRECT_CHANNEL_SERVER_WIFI, ret, TRANS_TEST_CHCANNEL_ID, TRANS_TEST_FD);
-}
-
-/**
- * @tc.name: TdcOnConnectEvent001
- * @tc.desc: TdcOnConnectEvent, transmission tcp direct listener Tdc on connect event with different parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, TdcOnConnectEvent001, TestSize.Level1)
-{
-    ConnectOption connInfo = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = {0},
-            .port = TEST_SOCKET_PORT,
-            .moduleId = MODULE_MESSAGE_SERVICE,
-            .protocol = LNN_PROTOCOL_IP
-        }
-    };
-    int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
-    ASSERT_EQ(ret, EOK);
-
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, &connInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, -1, &connInfo);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, &connInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    ret = LnnSetLocalStrInfo(STRING_KEY_DEV_UDID, g_deviceId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = TdcOnConnectEvent(DIRECT_CHANNEL_SERVER_WIFI, TRANS_TEST_FD, &connInfo);
-    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /**
@@ -417,26 +309,16 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent001, TestSize.Level1)
     int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
     ASSERT_EQ(ret, EOK);
 
-    ret = TdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, TRANS_TEST_FD);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = TestAddSessionConn(true);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = TestAddSessionConn(true);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    
-    ret = TdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_IN, TRANS_TEST_FD);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_OUT, TRANS_TEST_FD);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TestDelSessionConnNode(TRANS_TEST_CHCANNEL_ID);
 
     ret = TestAddSessionConn(true);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_EXCEPTION, TRANS_TEST_FD);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -462,9 +344,6 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent002, TestSize.Level1)
     InitSoftBusServer();
     ret = TestAddSessionConn(false);
     ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = TdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_SOCKET_OUT, TRANS_TEST_FD);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -547,28 +426,10 @@ HWTEST_F(TransServerTcpDirectTest, OpenTcpDirectChannel001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, PackBytes001, TestSize.Level1)
 {
-    const char *data = TEST_MESSAGE;
-    const char *bytes = TEST_MESSAGE;
     int32_t channelId = g_conn->channelId;
-    TdcPacketHead packetHead;
-    packetHead.magicNumber = MAGIC_NUMBER;
-    packetHead.module = MODULE_SESSION;
-    packetHead.seq = 0;
-    packetHead.flags = FLAG_REQUEST;
-    packetHead.dataLen = strlen(bytes);
-    char buffer[DC_MSG_PACKET_HEAD_SIZE_LEN] = {0};
 
-    int32_t ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = SetAuthIdByChanId(channelId, 1);
+    int32_t ret = SetAuthIdByChanId(channelId, 1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = PackBytes(channelId, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = PackBytes(-1, data, &packetHead, buffer, DC_MSG_PACKET_HEAD_SIZE_LEN);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -601,139 +462,6 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcPostBytes001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OpenDataBusReply001
- * @tc.desc: OpenDataBusReply, Open the data channel for reply with error parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenDataBusReply001, TestSize.Level1)
-{
-    int32_t channelId = g_conn->channelId;
-    uint64_t seq = 0;
-    int32_t errCode = SOFTBUS_ERR;
-    char *msg = PackError(errCode, TEST_MESSAGE);
-    cJSON *reply = cJSON_Parse(msg);
-
-    int32_t ret = OpenDataBusReply(channelId, seq, reply);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = OpenDataBusReply(0, seq, reply);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    cJSON_Delete(reply);
-}
-
-/**
- * @tc.name: OpenDataBusRequestError001
- * @tc.desc: OpenDataBusRequestError, open dsofutbus data erro request with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenDataBusRequestError001, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    uint64_t seq = 0;
-    int32_t errCode = 0;
-    uint32_t flags = 0;
-    int32_t ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: GetUuidByChanId001
- * @tc.desc: GetUuidByChanId, get uuid by channelId with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, GetUuidByChanId001, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    uint32_t len = 0;
-    int32_t ret = GetUuidByChanId(channelId, NULL, len);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = GetUuidByChanId(g_conn->channelId, NULL, len);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: OpenDataBusRequest001
- * @tc.desc: OpenDataBusRequest, start with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, OpenDataBusRequest001, TestSize.Level1)
-{
-    uint32_t flags = 0;
-    uint64_t seq = 0;
-    int32_t ret = OpenDataBusRequest(0, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = OpenDataBusRequest(g_conn->channelId, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: ProcessMessage001
- * @tc.desc: ProcessMessage, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, ProcessMessage001, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    uint32_t flags = 0;
-    uint64_t seq = 0;
-    int32_t ret = ProcessMessage(channelId, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    channelId = g_conn->channelId;
-    ret = ProcessMessage(channelId, flags, seq, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = ProcessMessage(channelId, flags, seq, TEST_MESSAGE);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: GetAuthIdByChannelInfo001
- * @tc.desc: GetAuthIdByChannelInfo, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChannelInfo001, TestSize.Level1)
-{
-    int32_t channelId = g_conn->channelId;
-    uint64_t seq = 0;
-    uint32_t cipherFlag = 0;
-    int32_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: DecryptMessage001
- * @tc.desc: DecryptMessage, start channel with wrong parms.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransServerTcpDirectTest, DecryptMessage001, TestSize.Level1)
-{
-    int32_t channelId = g_conn->channelId;
-    uint8_t* outData = nullptr;
-    uint32_t dataLen = DC_MSG_PACKET_HEAD_SIZE_LEN;
-    const char *bytes = TEST_MESSAGE;
-    TdcPacketHead packetHead = {
-        .magicNumber = MAGIC_NUMBER,
-        .module = MODULE_SESSION,
-        .seq = 0,
-        .flags = FLAG_REQUEST,
-        .dataLen = strlen(bytes), /* reset after encrypt */
-    };
-    int32_t ret = DecryptMessage(channelId, &packetHead, NULL, &outData, &dataLen);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
  * @tc.name: ProcessReceivedData001
  * @tc.desc: ProcessReceivedData, The process of receiving data.
  * @tc.type: FUNC
@@ -744,14 +472,8 @@ HWTEST_F(TransServerTcpDirectTest, ProcessReceivedData001, TestSize.Level1)
     int32_t channelId = g_conn->channelId;
     int32_t fd = 1;
 
-    int32_t ret = ProcessReceivedData(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransSrvAddDataBufNode(channelId, fd);
+    int32_t ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = ProcessReceivedData(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**

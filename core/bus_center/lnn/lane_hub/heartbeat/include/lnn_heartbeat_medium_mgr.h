@@ -45,7 +45,8 @@ typedef struct {
 
 typedef struct {
     void (*onRelay)(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
-    int32_t (*onReceive)(DeviceInfo *device, int32_t weight, int32_t localMasterWeight, LnnHeartbeatType hbType);
+    int32_t (*onReceive)(DeviceInfo *device, int32_t weight, int32_t localMasterWeight,
+        LnnHeartbeatType hbType, bool isOnlineDirectly);
     int32_t (*onRecvHigherWeight)(const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect);
 } LnnHeartbeatMediumMgrCb;
 
@@ -53,13 +54,22 @@ typedef struct {
     LnnHeartbeatType hbType;
     bool wakeupFlag;
     bool isRelay;
-} LnnHeartbeatCustSendData;
+    bool isSyncData;
+    bool isFirstBegin;
+} LnnHeartbeatSendBeginData;
+
+typedef struct {
+    LnnHeartbeatType hbType;
+    bool wakeupFlag;
+    bool isRelay;
+    bool isLastEnd;
+} LnnHeartbeatSendEndData;
 
 typedef struct {
     LnnHeartbeatType supportType;
     int32_t (*init)(const LnnHeartbeatMediumMgrCb *callback);
-    int32_t (*onSendOneHbBegin)(const LnnHeartbeatCustSendData *custData);
-    int32_t (*onSendOneHbEnd)(void);
+    int32_t (*onSendOneHbBegin)(const LnnHeartbeatSendBeginData *custData);
+    int32_t (*onSendOneHbEnd)(const LnnHeartbeatSendEndData *custData);
     int32_t (*onSetMediumParam)(const LnnHeartbeatMediumParam *param);
     int32_t (*onUpdateSendInfo)(LnnHeartbeatUpdateInfoType type);
     int32_t (*onStopHbByType)(void);
@@ -67,10 +77,11 @@ typedef struct {
 } LnnHeartbeatMediumMgr;
 
 int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param);
-int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatCustSendData *custData);
-int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatType *type);
+int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData);
+int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custData);
 int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type);
 int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type);
+void LnnHbClearRecvList(void);
 
 int32_t LnnHbMediumMgrInit(void);
 void LnnHbMediumMgrDeinit(void);

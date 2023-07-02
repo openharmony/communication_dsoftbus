@@ -12,21 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef WIFI_DIRECT_ANONYMOUS_H
+#define WIFI_DIRECT_ANONYMOUS_H
 
-#include "softbus_adapter_hitracechain.h"
+#include "wifi_direct_types.h"
+#include "common_list.h"
 
-#include "hitrace/tracechain.h"
-#include "softbus_adapter_crypto.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
-{
-    HiTraceIdStruct pId = HiTraceChainGetId();
-    pId.valid = flags;
-    pId.chainId = chainId > 0 ? chainId : (uint64_t)SoftBusCryptoRand();
-    HiTraceChainSetId(&pId);
+const char* WifiDirectAnonymizeMac(const char *mac);
+const char* WifiDirectAnonymizeIp(const char *ip);
+
+#ifdef __cplusplus
 }
-
-void SoftbusHitraceStop(void)
-{
-    HiTraceChainClearId();
-}
+#endif
+#endif

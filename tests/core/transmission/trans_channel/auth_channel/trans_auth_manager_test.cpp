@@ -91,12 +91,12 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
     ConnectOption *connOpt = (ConnectOption*)SoftBusCalloc(sizeof(ConnectOption));
     ASSERT_TRUE(connOpt != NULL);
     int32_t channelId = 0;
-    int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId);
+    int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     connOpt->type = CONNECT_TCP;
-    ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, NULL);
+    ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, NULL, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
-    ret = TransOpenAuthMsgChannel(g_sessionName, NULL, &channelId);
+    ret = TransOpenAuthMsgChannel(g_sessionName, NULL, &channelId, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     SoftBusFree(connOpt);
 }

@@ -213,7 +213,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, int32_t calling
         (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerJoin(connAddr);
+    int32_t ret = LnnServerJoin(connAddr, pkgName);
     if (ret == SOFTBUS_OK) {
         ret = AddJoinLNNInfo(pkgName, connAddr);
     }
@@ -246,7 +246,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, int32_t callin
         (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ALREADY_EXISTED;
     }
-    int32_t ret = LnnServerLeave(networkId);
+    int32_t ret = LnnServerLeave(networkId, pkgName);
     if (ret == SOFTBUS_OK) {
         ret = AddLeaveLNNInfo(pkgName, networkId);
     }

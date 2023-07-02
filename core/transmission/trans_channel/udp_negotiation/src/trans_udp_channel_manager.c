@@ -26,7 +26,7 @@
 #include "softbus_utils.h"
 #include "trans_udp_negotiation.h"
 
-#define MAX_WAIT_CONNECT_TIME 15
+#define MAX_WAIT_CONNECT_TIME 5
 
 static SoftBusList *g_udpChannelMgr = NULL;
 
@@ -78,10 +78,10 @@ static void TransUdpTimerProc(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
-    
+
     ListNode udpTmpChannelList;
     ListInit(&udpTmpChannelList);
-    
+
     UdpChannelInfo *udpChannel = NULL;
     UdpChannelInfo *nextUdpChannel = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, nextUdpChannel, &g_udpChannelMgr->list, UdpChannelInfo, node) {

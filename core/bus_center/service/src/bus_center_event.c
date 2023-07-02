@@ -18,7 +18,9 @@
 #include <securec.h>
 #include <stdlib.h>
 
+#include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
+#include "lnn_network_id.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -40,25 +42,45 @@ typedef struct {
 typedef enum {
     NOTIFY_ONLINE_STATE_CHANGED = 0,
     NOTIFY_NODE_BASIC_INFO_CHANGED,
+    NOTIFY_NETWORKID_UPDATE,
 } NotifyType;
+
+#define NETWORK_ID_UPDATE_DELAY_TIME (5 * 60 * 1000) // 5min
 
 static BusCenterEventCtrl g_eventCtrl;
 static SoftBusHandler g_notifyHandler = {"NotifyHandler", NULL, NULL};
 
-NO_SANITIZE("cfi") static int32_t PostMessageToHandler(SoftBusMessage *msg)
+NO_SANITIZE("cfi") static int32_t PostMessageToHandlerDelay(SoftBusMessage *msg, uint64_t delayMillis)
 {
     if (g_notifyHandler.looper == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "NotifyHandler not initialized.");
+        LLOGE("NotifyHandler not initialized.");
         FreeMessage(msg);
         return SOFTBUS_NO_INIT;
     }
-    if (g_notifyHandler.looper->PostMessage == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid looper.");
+    if (g_notifyHandler.looper->PostMessage == NULL || g_notifyHandler.looper->PostMessageDelay == NULL) {
+        LLOGE("invalid looper");
         FreeMessage(msg);
         return SOFTBUS_ERR;
     }
-    g_notifyHandler.looper->PostMessage(g_notifyHandler.looper, msg);
+    if (delayMillis == 0) {
+        g_notifyHandler.looper->PostMessage(g_notifyHandler.looper, msg);
+    } else {
+        g_notifyHandler.looper->PostMessageDelay(g_notifyHandler.looper, msg, delayMillis);
+    }
     return SOFTBUS_OK;
+}
+
+static void RemoveNotifyMessage(int32_t what)
+{
+    if (g_notifyHandler.looper == NULL) {
+        LLOGE("looper not initialized, can't remove message");
+        return;
+    }
+    if (g_notifyHandler.looper->RemoveMessage == NULL) {
+        LLOGE("removeMessage is null");
+        return;
+    }
+    g_notifyHandler.looper->RemoveMessage(g_notifyHandler.looper, &g_notifyHandler, what);
 }
 
 static void HandleOnlineStateChangedMessage(SoftBusMessage *msg)
@@ -81,6 +103,18 @@ static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
     LnnIpcNotifyBasicInfoChanged(msg->obj, sizeof(NodeBasicInfo), type);
 }
 
+static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
+{
+    (void)msg;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        LLOGE("generate networkid fail");
+        return;
+    }
+    LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
+    LLOGD("offline exceted 5min, process networkId update event");
+}
+
 NO_SANITIZE("cfi") static void HandleNotifyMessage(SoftBusMessage *msg)
 {
     if (msg == NULL) {
@@ -94,6 +128,9 @@ NO_SANITIZE("cfi") static void HandleNotifyMessage(SoftBusMessage *msg)
             break;
         case NOTIFY_NODE_BASIC_INFO_CHANGED:
             HandleNodeBasicInfoChangedMessage(msg);
+            break;
+        case NOTIFY_NETWORKID_UPDATE:
+            HandleNetworkUpdateMessage(msg);
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unknown notify message, type = %d.", msg->what);
@@ -149,7 +186,20 @@ static int32_t PostNotifyMessage(int32_t what, uint64_t arg, const NodeBasicInfo
     }
     msg->handler = &g_notifyHandler;
     msg->FreeMessage = FreeNotifyMessage;
-    return PostMessageToHandler(msg);
+    return PostMessageToHandlerDelay(msg, 0);
+}
+
+static int32_t PostNotifyMessageDelay(int32_t what, uint64_t delayMillis)
+{
+    SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        LLOGE("malloc msg fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = what;
+    msg->handler = &g_notifyHandler;
+    msg->FreeMessage = FreeNotifyMessage;
+    return PostMessageToHandlerDelay(msg, delayMillis);
 }
 
 static bool IsRepeatEventHandler(LnnEventType event, LnnEventHandler handler)
@@ -190,6 +240,13 @@ NO_SANITIZE("cfi") static void NotifyEvent(const LnnEventBasicInfo *info)
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
 }
 
+void LnnNotifyDeviceVerified(const char *udid)
+{
+    (void)udid;
+    LLOGI("exist device joining LNN, remove networkId update event");
+    RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
+}
+
 NO_SANITIZE("cfi") void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
 {
     LnnOnlineStateEventInfo eventInfo;
@@ -203,6 +260,32 @@ NO_SANITIZE("cfi") void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     SetDefaultQdisc();
     (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
+    eventInfo.isOnline = isOnline;
+    eventInfo.networkId = info->networkId;
+    eventInfo.uuid = "";
+    eventInfo.udid = "";
+    NotifyEvent((LnnEventBasicInfo *)&eventInfo);
+    int32_t onlineNodeNum = 0;
+    if (LnnGetAllOnlineNodeNum(&onlineNodeNum) != SOFTBUS_OK) {
+        LLOGE("get online nodeNum fail");
+        return;
+    }
+    if (!isOnline && onlineNodeNum == 0) {
+        LLOGI("no online devices, post networkId update event");
+        RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
+        (void)PostNotifyMessageDelay(NOTIFY_NETWORKID_UPDATE, NETWORK_ID_UPDATE_DELAY_TIME);
+    }
+}
+
+void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info)
+{
+    LnnOnlineStateEventInfo eventInfo;
+
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : info = null!");
+        return;
+    }
+    eventInfo.basic.event = LNN_EVENT_NODE_MIGRATE;
     eventInfo.isOnline = isOnline;
     eventInfo.networkId = info->networkId;
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
@@ -300,7 +383,7 @@ NO_SANITIZE("cfi") void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad state %d", state);
         return;
     }
-    LnnMonitorScreenStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_STATE_CHANGED, .status = state};
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_STATE_CHANGED, .status = state};
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
@@ -312,9 +395,85 @@ NO_SANITIZE("cfi") void LnnNotifyBtStateChangeEvent(void *state)
         SoftBusFree(btState);
         return;
     }
-    LnnMonitorBtStateChangedEvent event = {.basic.event = LNN_EVENT_BT_STATE_CHANGED, .status = (uint8_t)(*btState)};
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_BT_STATE_CHANGED, .status = (uint8_t)(*btState)};
     NotifyEvent((const LnnEventBasicInfo *)&event);
     SoftBusFree(btState);
+}
+
+void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state)
+{
+    if (state < SOFTBUS_SCREEN_LOCK || state >= SOFTBUS_SCREEN_LOCK_UNKNOWN) {
+        LLOGE("bad lockState %d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_LOCK_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyAccountStateChangeEvent(void *state)
+{
+    SoftBusAccountState *accountState = (SoftBusAccountState *)state;
+    if (*accountState < SOFTBUS_ACCOUNT_LOG_IN || *accountState >= SOFTBUS_ACCOUNT_UNKNOWN) {
+        LLOGE("bad accountState %d", *accountState);
+        SoftBusFree(accountState);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_ACCOUNT_CHANGED, .status = (uint8_t)(*accountState)};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+    SoftBusFree(accountState);
+}
+
+void LnnNotifyDifferentAccountChangeEvent(void *state)
+{
+    SoftBusDifferentAccountState *difAccountState = (SoftBusDifferentAccountState *)state;
+    if (*difAccountState < SOFTBUS_DIF_ACCOUNT_DEV_CHANGE || *difAccountState >= SOFTBUS_DIF_ACCOUNT_UNKNOWN) {
+        LLOGE("bad difAccountState %d", *difAccountState);
+        SoftBusFree(difAccountState);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED, .status = (uint8_t)(*difAccountState)};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+    SoftBusFree(difAccountState);
+}
+
+void LnnNotifyUserStateChangeEvent(SoftBusUserState state)
+{
+    if (state < SOFTBUS_USER_FOREGROUND || state >= SOFTBUS_USER_UNKNOWN) {
+        LLOGE("bad backgroundtState %d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_USER_STATE_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyNightModeStateChangeEvent(void *state)
+{
+    SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)state;
+    if (*nightModeState < SOFTBUS_NIGHT_MODE_ON || *nightModeState >= SOFTBUS_NIGHT_MODE_UNKNOWN) {
+        LLOGE("bad nightModeState %d", *nightModeState);
+        SoftBusFree(nightModeState);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_NIGHT_MODE_CHANGED, .status = (uint8_t)(*nightModeState)};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+    SoftBusFree(nightModeState);
+}
+
+void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state)
+{
+    LLOGI("[native]notify home group change");
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_HOME_GROUP_CHANGED, .status = (uint8_t)state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
+{
+    if (state < SOFTBUS_OOBE_RUNNING || state >= SOFTBUS_OOBE_UNKNOWN) {
+        LLOGE("bad OOBEState %d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_OOBE_STATE_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 NO_SANITIZE("cfi") void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
@@ -375,6 +534,16 @@ NO_SANITIZE("cfi") void LnnNotifyNodeAddressChanged(const char *addr)
         eventInfo.delFlag = false;
     }
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
+}
+
+NO_SANITIZE("cfi") void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
+{
+    if (state < SOFTBUS_WIFI_NETWORKD_ENABLE || state >= SOFTBUS_NETWORKD_UNKNOWN) {
+        LLOGE("bad network state %d", state);
+        return;
+    }
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_NETWORK_STATE_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 NO_SANITIZE("cfi") int32_t LnnInitBusCenterEvent(void)

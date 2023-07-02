@@ -56,7 +56,7 @@ static LnnDiscoveryImplCallback g_discoveryCallback = {
     .OnDeviceFound = DeviceFound,
 };
 
-static void ReportDeviceFoundResultEvt(void)
+NO_SANITIZE("cfi") static void ReportDeviceFoundResultEvt(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report device found result evt enter");
     if (SoftBusRecordDiscoveryResult(DEVICE_FOUND, NULL) != SOFTBUS_OK) {
@@ -124,7 +124,7 @@ NO_SANITIZE("cfi") void LnnStopPublish(void)
     }
 }
 
-static void ReportStartDiscoveryResultEvt(void)
+NO_SANITIZE("cfi") static void ReportStartDiscoveryResultEvt(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report start discovery result evt enter");
     if (SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL) != SOFTBUS_OK) {

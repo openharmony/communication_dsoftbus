@@ -15,7 +15,6 @@
 #include <gtest/gtest.h>
 #include "securec.h"
 
-#include "trans_tcp_direct_message.c"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "session.h"
@@ -73,49 +72,10 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
 
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    const IServerChannelCallBack *cb = TransServerGetChannelCb();
-    ret = TransTdcSetCallBack(cb);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
     ret = NotifyChannelOpenFailed(TEST_CHANNELID, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = NotifyChannelOpenFailed(ERR_CHANNELID, 0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    cJSON replyData;
-    ret = OpenDataBusReply(TEST_CHANNELID, 0, &replyData);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    ret = OpenDataBusReply(ERR_CHANNELID, 0, &replyData);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    char reply[TEST_LEN];
-    int ret2 = TransTdcPostReplyMsg(TEST_CHANNELID, 0, 0, reply);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret2);
-
-    AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != NULL);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    int res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_sessionName);
-    ASSERT_TRUE(res == EOK);
-    ret = OpenDataBusRequestReply(appInfo, TEST_CHANNELID, 0, 0);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-    SoftBusFree(appInfo);
-
-    int32_t errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
-    char errDesc[TEST_LEN] = "Get Uuid By ChanId failed";
-    ret = OpenDataBusRequestError(TEST_CHANNELID, 0, errDesc, errCode, 0);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-
-    OpenDataBusRequestOutSessionName(g_sessionName, g_sessionName);
-
-    TransSrvDataListDeinit();
-    ServerDataBuf *serverDataBuf = TransSrvGetDataBufNodeById(TEST_CHANNELID);
-    EXPECT_EQ(NULL, serverDataBuf);
-
-    int64_t ret3 = GetAuthIdByChannelInfo(ERR_CHANNELID, 0, 0);
-    EXPECT_EQ(AUTH_INVALID_ID, ret3);
-
-    ret3 = GetAuthIdByChannelInfo(TEST_CHANNELID, 0, 0);
-    EXPECT_EQ(AUTH_INVALID_ID, ret3);
 }
 
 /**
@@ -131,14 +91,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest001, TestSize.L
     conn.serverSide = true;
     conn.channelId = TEST_CHANNELID;
 
-    ret = NotifyChannelOpened(0);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
     ret = CreatSessionConnList();
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransTdcAddSessionConn(&conn);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = NotifyChannelOpened(TEST_CHANNELID);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 }

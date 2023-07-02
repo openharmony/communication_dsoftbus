@@ -18,7 +18,6 @@
 #include <securec.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"

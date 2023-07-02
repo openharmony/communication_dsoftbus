@@ -25,6 +25,7 @@ ohos_unittest("TransProxyChannelTest") {
     "$softbus_adapter_common/include",
 
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
 
@@ -36,6 +37,8 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
 
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
@@ -77,7 +80,7 @@ ohos_unittest("TransProxyChannelTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [

@@ -52,9 +52,9 @@
           "device_auth",
           "drivers_interface_wlan",
           "hicollie_native",
-          "hisysevent_native",
-          "hitrace_native",
-          "hiviewdfx_hilog_native",
+          "hisysevent",
+          "hitrace",
+          "hilog",
           "huks",
           "init",
           "ipc",
@@ -67,7 +67,7 @@
         ],
         "third_party": [
           "bounds_checking_function",
-          "cjson"
+          "cJSON"
         ]
       },
       "build": {

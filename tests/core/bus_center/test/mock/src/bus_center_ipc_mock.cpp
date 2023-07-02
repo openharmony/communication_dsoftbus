@@ -42,14 +42,14 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
     return BusCenterIpcInterfaceInstance()->LnnIsSameConnectionAddr(addr1, addr2);
 }
 
-int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData)
+int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid, ConnectionAddr *addr, CustomData *customData)
 {
-    return BusCenterIpcInterfaceInstance()->MetaNodeServerJoin(addr, customData);
+    return BusCenterIpcInterfaceInstance()->MetaNodeServerJoin(pkgName, callingPid, addr, customData);
 }
 
-int32_t LnnServerLeave(const char *networkId)
+int32_t LnnServerLeave(const char *networkId, const char *pkgName)
 {
-    return BusCenterIpcInterfaceInstance()->LnnServerLeave(networkId);
+    return BusCenterIpcInterfaceInstance()->LnnServerLeave(networkId, pkgName);
 }
 
 int32_t MetaNodeServerLeave(const char *networkId)
@@ -186,9 +186,9 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     return BusCenterIpcInterfaceInstance()->ClientOnRefreshDeviceFound(pkgName, pid, device, deviceLen);
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr)
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
 {
-    return BusCenterIpcInterfaceInstance()->LnnServerJoin(addr);
+    return BusCenterIpcInterfaceInstance()->LnnServerJoin(addr, pkgName);
 }
 }
 } // namespace OHOS

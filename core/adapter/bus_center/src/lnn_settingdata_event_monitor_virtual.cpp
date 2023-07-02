@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "lnn_ohos_account.h"
 #include "lnn_settingdata_event_monitor.h"
 
 #include "softbus_errcode.h"

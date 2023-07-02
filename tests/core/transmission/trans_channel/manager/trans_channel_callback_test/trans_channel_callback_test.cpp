@@ -191,15 +191,15 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelLinkDown001, TestSize.Lev
     const char *networkId = "1234";
     int32_t routeType = 123124;
 
-    int32_t ret = TransServerOnChannelLinkDown(NULL, pid, networkId, routeType);
+    int32_t ret = TransServerOnChannelLinkDown(NULL, pid, NULL, NULL, NULL, networkId, routeType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pid = -1;
-    ret = TransServerOnChannelLinkDown(pkgName, pid, networkId, routeType);
+    ret = TransServerOnChannelLinkDown(pkgName, pid, NULL, NULL, NULL, networkId, routeType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     pid = 1;
-    ret = TransServerOnChannelLinkDown(pkgName, pid, networkId, routeType);
+    ret = TransServerOnChannelLinkDown(pkgName, pid, NULL, NULL, NULL, networkId, routeType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

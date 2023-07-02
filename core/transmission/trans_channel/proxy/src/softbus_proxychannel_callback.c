@@ -61,4 +61,3 @@ NO_SANITIZE("cfi") int32_t TransProxyGetUidAndPidBySessionName(const char *sessi
 {
     return g_channelCb.GetUidAndPidBySessionName(sessionName, uid, pid);
 }
-

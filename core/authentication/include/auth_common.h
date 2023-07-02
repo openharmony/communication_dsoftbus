@@ -101,11 +101,12 @@ typedef enum {
     EVENT_UPDATE_SESSION_KEY,
     EVENT_AUTH_META_TIMEOUT,
     EVENT_AUTH_DISCONNECT,
+    EVENT_BLE_DISCONNECT_DELAY,
 } EventType;
 typedef void(*EventHandler)(const void *obj);
 int32_t PostAuthEvent(EventType event, EventHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
-typedef int32_t(*RemoveCompareFunc)(const void *obj, void *param);
+typedef int(*RemoveCompareFunc)(const void *obj, void *param);
 int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param);
 
 /* Auth Lock */
@@ -120,7 +121,7 @@ uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size);
 int64_t GenSeq(bool isServer);
 uint64_t GetCurrentTimeMs(void);
 const char *GetAuthSideStr(bool isServer);
-bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2);
+bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash);
 int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option);
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo);
 

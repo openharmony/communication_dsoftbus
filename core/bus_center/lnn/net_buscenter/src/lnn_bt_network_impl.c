@@ -23,12 +23,13 @@
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
 #define LNN_BT_PROTOCOL_PRI 10
+#define TIME_FACTOR (1000LL)
 
 typedef enum {
     BT_SUBNET_MANAGER_EVENT_IF_READY,   // bluetooth on
@@ -57,7 +58,7 @@ static void TransactBtSubnetState(LnnPhysicalSubnet *subnet, BtSubnetManagerEven
 static int32_t GetAvailableBtMac(char *macStr, uint32_t len)
 {
     int32_t ret;
-    SoftBusBtAddr mac;
+    SoftBusBtAddr mac = {0};
 
     if (len != BT_MAC_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -254,14 +255,26 @@ static VisitNextChoice NotifyBtStatusChanged(const LnnNetIfMgr *netifManager, vo
     return CHOICE_VISIT_NEXT;
 }
 
+static void BtNetworkInfoUpdate(SoftBusBtState btState)
+{
+    if (btState == SOFTBUS_BLE_TURN_ON) {
+        LnnSetLocalNum64Info(NUM_KEY_BLE_START_TIME, SoftBusGetSysTimeMs());
+    }
+    if (btState == SOFTBUS_BLE_TURN_OFF) {
+        LnnSetLocalNum64Info(NUM_KEY_BLE_START_TIME, 0);
+    }
+}
+
 static void BtStateChangedEvtHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_BT_STATE_CHANGED) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:not interest event", __func__);
         return;
     }
-    LnnMonitorBtStateChangedEvent *event = (LnnMonitorBtStateChangedEvent *)info;
+
+    LnnMonitorHbStateChangedEvent *event = (LnnMonitorHbStateChangedEvent *)info;
     (void)LnnVisitNetif(NotifyBtStatusChanged, (void *)&event->status);
+    BtNetworkInfoUpdate((SoftBusBtState)event->status);
 }
 
 static void LeaveSpecificBrNetwork(const char *btMac)
@@ -337,7 +350,7 @@ int32_t LnnEnableBtProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
+static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
 {
     return UNUSE_BUTT;
 }
@@ -362,7 +375,7 @@ static LnnProtocolManager g_btProtocol = {
     .pri = LNN_BT_PROTOCOL_PRI,
 };
 
-NO_SANITIZE("cfi") int32_t RegistBtProtocolManager(void)
+int32_t RegistBtProtocolManager(void)
 {
     return LnnRegistProtocol(&g_btProtocol);
 }

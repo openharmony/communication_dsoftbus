@@ -25,6 +25,7 @@
 #include "bus_center_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
+#include "lnn_feature_capability.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -37,6 +38,7 @@
 #define VERSION_TYPE_LITE "LITE"
 #define VERSION_TYPE_DEFAULT ""
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
+#define ALL_GROUP_TYPE 0xF
 
 typedef struct {
     NodeInfo localInfo;
@@ -103,6 +105,20 @@ static int32_t LlGetOffLineCode(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(buf, len, info->offlineCode, OFFLINE_CODE_BYTE_SIZE) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s offlinecode ERROR!");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetExtData(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "buf of offlinecode is null!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(buf, len, info->extData, EXTDATA_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s offlinecode ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -202,6 +218,26 @@ static int32_t UpdateNodeDataChangeFlag(const void *buf)
     return LnnSetDataChangeFlag(info, *(int16_t *)buf);
 }
 
+static int32_t LocalUpdateNodeAccountId(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->accountId = *((int64_t *)buf);
+    return SOFTBUS_OK;
+}
+
+static int32_t LocalUpdateBleStartTime(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->bleStartTimestamp = *((int64_t *)buf);
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetDeviceName(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -252,6 +288,7 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi ip fail.");
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get LocalIp =%s", AnonymizesIp(ip));
     if (strncpy_s(buf, len, ip, strlen(ip)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
@@ -370,6 +407,16 @@ static int32_t LlGetNetCap(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetFeatureCapa(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != sizeof(uint64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint64_t *)buf) = info->feature;
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetNetType(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -455,6 +502,24 @@ static int32_t L1GetNodeDataChangeFlag(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LocalGetNodeAccountId(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int64_t *)buf) = g_localNetLedger.localInfo.accountId;
+    return SOFTBUS_OK;
+}
+
+static int32_t LocalGetNodeBleStartTime(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int64_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int64_t *)buf) = g_localNetLedger.localInfo.bleStartTimestamp;
+    return SOFTBUS_OK;
+}
+
 static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
 {
     char devType[DEVICE_TYPE_BUF_LEN] = TYPE_UNKNOWN;
@@ -482,11 +547,16 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
 
 static int32_t InitLocalVersionType(NodeInfo *info)
 {
+    char versionType[VERSION_MAX_LEN] = "";
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail:para error!");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(info->versionType, VERSION_MAX_LEN, VERSION_TYPE_LITE, strlen(VERSION_TYPE_LITE)) != EOK) {
+    if (GetCommonDevInfo(COMM_DEVICE_KEY_VERSION_TYPE, versionType, VERSION_MAX_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_VERSION_TYPE failed");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(info->versionType, VERSION_MAX_LEN, versionType, strlen(versionType)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s error");
         return SOFTBUS_MEM_ERR;
     }
@@ -496,15 +566,15 @@ static int32_t InitLocalVersionType(NodeInfo *info)
 static int32_t InitOfflineCode(NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info of offlinecode is null!");
+        LLOGE("info of offlinecode is null!");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memset_s(info->offlineCode, OFFLINE_CODE_BYTE_SIZE, 0, OFFLINE_CODE_BYTE_SIZE) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "offlineCode memset_s failed");
+        LLOGE("offlineCode memset_s failed");
         return SOFTBUS_ERR;
     }
     if (SoftBusGenerateRandomArray(info->offlineCode, OFFLINE_CODE_BYTE_SIZE) != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "generate offlinecode error.");
+        LLOGE("generate offlinecode error.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -553,6 +623,11 @@ static int32_t LlUpdateLocalOffLineCode(const void *id)
     return ModifyId((char *)g_localNetLedger.localInfo.offlineCode, OFFLINE_CODE_BYTE_SIZE, (char *)id);
 }
 
+static int32_t LlUpdateLocalExtData(const void *id)
+{
+    return ModifyId((char *)g_localNetLedger.localInfo.extData, EXTDATA_LEN, (char *)id);
+}
+
 static int32_t UpdateLocalUuid(const void *id)
 {
     return ModifyId(g_localNetLedger.localInfo.uuid, UUID_BUF_LEN, (char *)id);
@@ -580,6 +655,15 @@ static int32_t UpdateLocalNetCapability(const void *capability)
         return SOFTBUS_INVALID_PARAM;
     }
     g_localNetLedger.localInfo.netCapacity = *(int32_t *)capability;
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateLocalFeatureCapability(const void *capability)
+{
+    if (capability == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.feature |= *(uint64_t *)capability;
     return SOFTBUS_OK;
 }
 
@@ -611,6 +695,7 @@ static int32_t UpdateLocalDeviceIp(const void *ip)
         return SOFTBUS_INVALID_PARAM;
     }
     LnnSetWiFiIp(&g_localNetLedger.localInfo, ip);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set LocalIp =%s", AnonymizesIp(ip));
     return SOFTBUS_OK;
 }
 
@@ -739,16 +824,20 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_P2P_MAC, MAC_LEN, LlGetP2pMac, UpdateP2pMac},
     {STRING_KEY_P2P_GO_MAC, MAC_LEN, LlGetP2pGoMac, UpdateP2pGoMac},
     {STRING_KEY_OFFLINE_CODE, OFFLINE_CODE_LEN, LlGetOffLineCode, LlUpdateLocalOffLineCode},
+    {STRING_KEY_EXTDATA, EXTDATA_LEN, LlGetExtData, LlUpdateLocalExtData},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
+    {NUM_KEY_FEATURE_CAPA, -1, LlGetFeatureCapa, UpdateLocalFeatureCapability},
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
     {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
+    {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
+    {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
 };
 
@@ -881,6 +970,17 @@ NO_SANITIZE("cfi") static int32_t LnnSetLocalInfo(InfoKey key, void* info)
     return SOFTBUS_ERR;
 }
 
+NO_SANITIZE("cfi") static int32_t LnnFirstGetUdid(void)
+{
+    NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
+    DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
+    if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
@@ -889,6 +989,11 @@ NO_SANITIZE("cfi") int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 NO_SANITIZE("cfi") int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
+}
+
+NO_SANITIZE("cfi") int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(uint64_t));
 }
 
 NO_SANITIZE("cfi") int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
@@ -976,7 +1081,10 @@ NO_SANITIZE("cfi") int32_t LnnInitLocalLedger(void)
         g_localNetLedger.status = LL_INIT_FAIL;
         return SOFTBUS_MEM_ERR;
     }
+    nodeInfo->groupType = ALL_GROUP_TYPE;
+    nodeInfo->discoveryType = 0;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
+    nodeInfo->feature = LnnGetFeatureCapabilty();
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
         goto EXIT;
@@ -1006,6 +1114,9 @@ NO_SANITIZE("cfi") int32_t LnnInitLocalLedger(void)
         SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegBusCenterVarDump regist fail");
         return SOFTBUS_ERR;
+    }
+    if (LnnFirstGetUdid() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "first get udid fail, try again in one second.");
     }
     g_localNetLedger.status = LL_INIT_SUCCESS;
     return SOFTBUS_OK;

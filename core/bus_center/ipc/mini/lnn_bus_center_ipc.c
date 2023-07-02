@@ -50,17 +50,15 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
 
 NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
 {
-    (void)pkgName;
     (void)callingPid;
     (void)addrTypeLen;
-    return LnnServerJoin((ConnectionAddr *)addr);
+    return LnnServerJoin((ConnectionAddr *)addr, pkgName);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
 {
-    (void)pkgName;
     (void)callingPid;
-    return LnnServerLeave(networkId);
+    return LnnServerLeave(networkId, pkgName);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen,

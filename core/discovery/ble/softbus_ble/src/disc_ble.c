@@ -324,8 +324,6 @@ static int32_t ScanFilter(const SoftBusBleScanResult *scanResultData)
     DISC_CHECK_AND_RETURN_RET_LOG(advLen > (POS_PACKET_LENGTH + broadcastAdvLen + 1), SOFTBUS_ERR,
         "advLen[%u] is too short, less than adv packet length", advLen);
     uint32_t broadcastRspLen = advData[POS_PACKET_LENGTH + broadcastAdvLen + 1];
-    DISC_CHECK_AND_RETURN_RET_LOG(broadcastRspLen >= (RSP_HEAD_LEN - 1), SOFTBUS_ERR,
-        "broadcastRspLen[%u] is too short, less than rsp header length", broadcastRspLen);
     DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (POS_PACKET_LENGTH + broadcastAdvLen + 1 + broadcastRspLen + 1),
         SOFTBUS_ERR, "advLen[%u] is too short, less than adv+rsp packet length", advLen);
 
