@@ -345,56 +345,6 @@ static void SetNegoChannelForLink(struct WifiDirectNegotiateChannel *channel)
     target->putPointer(target, IL_KEY_NEGO_CHANNEL, (void **)&channelNew);
 }
 
-static void RemoveP2pGroupIfNeeded(struct InnerLink *link)
-{
-    enum WifiDirectConnectType type =
-        (enum WifiDirectConnectType)link->getInt(link, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_INVALID);
-    if (type != WIFI_DIRECT_CONNECT_TYPE_P2P) {
-        return;
-    }
-
-    struct WifiDirectP2pGroupInfo *groupInfo = NULL;
-    int32_t ret = GetWifiDirectP2pAdapter()->getGroupInfo(&groupInfo);
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "get group info failed");
-
-    if (!groupInfo->isGroupOwner) {
-        CLOGD(LOG_LABEL "remove gc group");
-        (void)GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(IF_NAME_P2P);
-        SoftBusFree(groupInfo);
-        return;
-    }
-
-    if (groupInfo->clientDeviceSize > 1) {
-        SoftBusFree(groupInfo);
-        return;
-    }
-
-    bool removeGo = false;
-    if (groupInfo->clientDeviceSize == 0) {
-        removeGo = true;
-    } else if (groupInfo->clientDeviceSize == 1) {
-        const char *remoteMac = link->getString(link, IL_KEY_REMOTE_BASE_MAC, "");
-        size_t addressSize = MAC_ADDR_ARRAY_SIZE;
-        uint8_t address[MAC_ADDR_ARRAY_SIZE] = {0};
-        ret = GetWifiDirectNetWorkUtils()->macStringToArray(remoteMac, address, &addressSize);
-        if (ret != SOFTBUS_OK) {
-            CLOGE(LOG_LABEL "convert failed");
-            SoftBusFree(groupInfo);
-            return;
-        }
-        if (memcmp(address, groupInfo->clientDevices[0].address, sizeof(address)) == 0) {
-            removeGo = true;
-        }
-    }
-
-    if (removeGo) {
-        CLOGD(LOG_LABEL "remove go group");
-        (void)GetWifiDirectP2pAdapter()->removeGroup(IF_NAME_P2P);
-    }
-
-    SoftBusFree(groupInfo);
-}
-
 static void ClearNegoChannelForLink(struct WifiDirectNegotiateChannel *channel)
 {
     struct LinkManager *self = GetLinkManager();
@@ -403,17 +353,19 @@ static void ClearNegoChannelForLink(struct WifiDirectNegotiateChannel *channel)
     char uuid[UUID_BUF_LEN] = {0};
     (void)channel->getDeviceId(channel, uuid, sizeof(uuid));
 
+    SoftBusMutexLock(&self->mutex);
     struct InnerLink *target = self->getLinkByUuid(uuid);
-    CONN_CHECK_AND_RETURN_LOG(target, "uuid=%s failed", AnonymizesUUID(uuid));
-
+    if (target == NULL) {
+        SoftBusMutexUnlock(&self->mutex);
+        CLOGE(LOG_LABEL "uuid=%s failed", AnonymizesUUID(uuid));
+        return;
+    }
     struct DefaultNegotiateChannel *channelOld = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
     if (channelOld) {
         DefaultNegotiateChannelDelete(channelOld);
     }
     target->remove(target, IL_KEY_NEGO_CHANNEL);
-    target->putInt(target, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
-    OnInnerLinkChange(target, true);
-    RemoveP2pGroupIfNeeded(target);
+    SoftBusMutexUnlock(&self->mutex);
 }
 
 static void Dump(void)
