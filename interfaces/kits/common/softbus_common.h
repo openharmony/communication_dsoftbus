@@ -211,7 +211,11 @@ typedef enum {
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 
-typedef enum {
+/**
+ * @brief Enumerates {@link BleProtocolType} types of ble connection type
+ *
+ */
+typedef enum  {
     BLE_GATT = 0,
     BLE_COC,
     BLE_PROTOCOL_MAX

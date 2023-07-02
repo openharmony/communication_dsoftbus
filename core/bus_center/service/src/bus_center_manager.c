@@ -159,6 +159,10 @@ NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start decision center init fail!");
+        return SOFTBUS_ERR;
+    }
     if (LnnInitBusCenterEvent() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init bus center event failed");
         return SOFTBUS_ERR;
@@ -192,17 +196,12 @@ NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start delay init fail!");
         return SOFTBUS_ERR;
     }
-    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start decision center init fail!");
-        return SOFTBUS_ERR;
-    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
 {
-    LnnDeinitDecisionCenter();
     DeinitNodeAddrAllocator();
     LnnDeinitLaneHub();
     LnnDeinitNetBuilder();
@@ -210,6 +209,7 @@ NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
     LnnDeinitEventMonitor();
     LnnDeinitBusCenterEvent();
     DeinitNodeAddrAllocator();
+    LnnDeinitDecisionCenter();
     LnnDeinitNetLedger();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

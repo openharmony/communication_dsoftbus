@@ -88,7 +88,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_002, TestSize.Level1
 {
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
     EXPECT_CALL(btMock, LnnVisitNetif).WillRepeatedly(Return(false));
-    LnnMonitorBtStateChangedEvent info = {
+    LnnMonitorHbStateChangedEvent info = {
         .basic.event = LNN_EVENT_BT_STATE_CHANGED,
         .status = (uint8_t)SOFTBUS_BLE_TURN_ON,
     };

@@ -59,7 +59,7 @@ if (defined(ohos_lite)) {
       }
       sources = [
         "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
-        "$softbus_adapter_common/dfx/softbus_adapter_hitracechain_virtual.c",
+        "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
         "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
@@ -74,7 +74,7 @@ if (defined(ohos_lite)) {
         sources = []
         sources = [
           "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
-          "$softbus_adapter_common/dfx/softbus_adapter_hitracechain_virtual.c",
+          "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
           "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
@@ -113,7 +113,7 @@ if (defined(ohos_lite)) {
       cflags_cc = [ "-fPIC" ]
       sources = [
         "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
-        "$softbus_adapter_common/dfx/softbus_adapter_hitracechain_virtual.c",
+        "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
         "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
@@ -159,11 +159,13 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
       "//commonlibrary/c_utils/base/include",
       "//third_party/bounds_checking_function/include",
+      "//third_party/json/include",
     ]
     sources = [
       "$dsoftbus_feature_product_config_path/spec_config/softbus_config_adapter.c",
       "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
-      "$softbus_adapter_common/dfx/softbus_adapter_hitracechain.c",
+      "$softbus_adapter_common/dfx/softbus_adapter_hitrace.c",
+      "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
       "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
       "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
       "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
@@ -171,6 +173,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
       "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
       "$softbus_adapter_common/log/softbus_adapter_log.c",
+      "$softbus_adapter_common/perf/softbus_adapter_perf.c",
     ]
     public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
     native_source_path = rebase_path("$dsoftbus_root_path")
@@ -202,9 +205,9 @@ if (defined(ohos_lite)) {
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
       external_deps = [
-        "hisysevent_native:libhisysevent",
-        "hitrace_native:libhitracechain",
-        "hiviewdfx_hilog_native:libhilog",
+        "hilog:libhilog",
+        "hisysevent:libhisysevent",
+        "hitrace:libhitracechain",
         "init:libbegetutil",
       ]
     }

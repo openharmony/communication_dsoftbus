@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "softbus_adapter_mem.h"
+#include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
@@ -305,4 +306,36 @@ NO_SANITIZE("cfi") const char *AnonyDevId(char **outName, const char *inName)
     }
     return *outName;
 #endif
+}
+
+static inline void StringAppend(char *dst, uint32_t size, const char *src, uint32_t start, uint32_t nSize)
+{
+    uint32_t len = strlen(dst);
+    if (strncpy_s(dst + len, size - len, src + start, nSize) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strncpy_s outputStr fail.");
+    }
+}
+
+NO_SANITIZE("cfi") const char *ToSecureStrDeviceID(const char *deviceId, char **outputStr)
+{
+#define SECURE_PRINT_PREFIX_LEN 4
+#define SECURE_PRINT_SUFFIX_LEN 4
+#define SECURE_PRINT_STARKEY_SIZE 3
+    if (deviceId == NULL || outputStr == NULL) {
+        return "unknown";
+    }
+    uint32_t deviceIdLen = strlen(deviceId);
+    if (deviceIdLen < SECURE_PRINT_PREFIX_LEN + SECURE_PRINT_SUFFIX_LEN) {
+        return "unknown";
+    }
+    uint32_t outputSize = SECURE_PRINT_PREFIX_LEN + SECURE_PRINT_SUFFIX_LEN + SECURE_PRINT_STARKEY_SIZE + 1;
+    *outputStr = (char *)SoftBusCalloc(outputSize);
+    if (*outputStr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc outputStr fail.");
+        return "unknown";
+    }
+    StringAppend(*outputStr, outputSize, deviceId, 0, SECURE_PRINT_PREFIX_LEN);
+    StringAppend(*outputStr, outputSize, "***", 0, SECURE_PRINT_STARKEY_SIZE);
+    StringAppend(*outputStr, outputSize, deviceId, deviceIdLen - SECURE_PRINT_SUFFIX_LEN, SECURE_PRINT_SUFFIX_LEN);
+    return *outputStr;
 }

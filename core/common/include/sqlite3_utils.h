@@ -16,7 +16,11 @@
 #ifndef SQLITE3_UTILS_H
 #define SQLITE3_UTILS_H
 
+#ifndef _WIN32
 #include <sqlite3sym.h>
+#else
+#include <sqlite3.h>
+#endif
 #include <stdbool.h>
 #include <stdint.h>
 

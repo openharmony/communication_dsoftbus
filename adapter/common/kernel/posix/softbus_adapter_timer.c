@@ -19,8 +19,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "securec.h"

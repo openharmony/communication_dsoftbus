@@ -20,11 +20,26 @@
 
 #include "bus_center_info_key.h"
 #include "disc_manager.h"
+#include "lnn_lane_info.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum {
+    LNN_MESSAGE_LANE = 1,
+    LNN_BYTES_LANE,
+    LNN_FILE_LANE,
+    LNN_STREAM_LANE,
+    LNN_LANE_PROPERTY_BUTT,
+} LnnLaneProperty;
+
+typedef struct {
+    LnnLaneProperty prop;
+    uint32_t laneNum;
+    int32_t laneId[0];
+} LnnLanesObject;
 
 typedef union  {
     IServerDiscInnerCallback serverCb;
@@ -37,14 +52,18 @@ int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const
     bool isInnerRequest);
 int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest);
 
-int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
-int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info);
-int32_t LnnGetRemoteNum16Info(const char *netWorkId, InfoKey key, int16_t *info);
+int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len);
+int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info);
+int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info);
+int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info);
+int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info);
+int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len);
 int32_t LnnSetLocalStrInfo(InfoKey key, const char *info);
 int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info);
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info);
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info);
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info);
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info);
 int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info);
@@ -52,6 +71,7 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len);
 int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len);
 int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
 int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
+int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum);
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info);
 int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
 int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag);
@@ -63,10 +83,17 @@ int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
 bool LnnIsMasterNode(void);
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 
-int32_t LnnServerJoin(ConnectionAddr *addr);
-int32_t MetaNodeServerJoin(ConnectionAddr *addr, CustomData *customData);
-int32_t LnnServerLeave(const char *networkId);
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName);
+int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid, ConnectionAddr *addr, CustomData *customData);
+int32_t LnnServerLeave(const char *networkId, const char *pkgName);
 int32_t MetaNodeServerLeave(const char *networkId);
+
+LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
+    const LnnPreferredLinkList *list, uint32_t laneNum);
+void LnnReleaseLanesObject(LnnLanesObject *lanesObject);
+int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num);
+const LnnLaneInfo *LnnGetLaneInfo(int32_t laneId);
+
 int32_t BusCenterServerInit(void);
 void BusCenterServerDeinit(void);
 

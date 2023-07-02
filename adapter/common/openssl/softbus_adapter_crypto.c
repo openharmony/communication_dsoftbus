@@ -23,7 +23,7 @@
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
 
-static pthread_mutex_t g_randomLock = PTHREAD_MUTEX_INITIALIZER;
+static SoftBusMutex g_randomLock;
 
 #define OPENSSL_EVP_PADDING_FUNC_OPEN (1)
 #define OPENSSL_EVP_PADDING_FUNC_CLOSE (0)
@@ -38,6 +38,8 @@ static EVP_CIPHER *GetGcmAlgorithmByKeyLen(uint32_t keyLen)
             return (EVP_CIPHER *)EVP_aes_128_gcm();
         case EVP_AES_256_KEYLEN:
             return (EVP_CIPHER *)EVP_aes_256_gcm();
+        default:
+            return NULL;
     }
     return NULL;
 }
@@ -125,7 +127,7 @@ static int32_t SslAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned
         HILOG_ERROR(SOFTBUS_HILOG_ID, "Encrypt invalid para.");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     int32_t outlen = 0;
     int32_t outbufLen;
     EVP_CIPHER_CTX *ctx = NULL;
@@ -308,18 +310,22 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     static bool initFlag = false;
     int32_t ret;
 
-    if (pthread_mutex_lock(&g_randomLock) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "lock mutex failed.");
+    if (SoftBusMutexInit(&g_randomLock, NULL) != SOFTBUS_OK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "init mutex failed.");
         return SOFTBUS_ERR;
     }
 
+    if (SoftBusMutexLock(&g_randomLock) != SOFTBUS_OK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "lock mutex failed");
+        return SOFTBUS_ERR;
+    }
     if (initFlag == false) {
         RAND_seed(randStr, (int32_t)len);
         initFlag = true;
     }
 
     ret = RAND_bytes(randStr, (int32_t)len);
-    pthread_mutex_unlock(&g_randomLock);
+    SoftBusMutexUnlock(&g_randomLock);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "gen random error, ret[%d]", ret);
         return SOFTBUS_ERR;

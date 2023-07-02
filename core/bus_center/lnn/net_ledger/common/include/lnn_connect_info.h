@@ -27,6 +27,7 @@ extern "C" {
 #define LOCAL_IP "127.0.0.1"
 #define DEFAULT_IP ""
 #define DEFAULT_MAC ""
+#define DEFAULT_IFNAME ""
 #define MAX_ADDR_LEN 46
 
 typedef struct {

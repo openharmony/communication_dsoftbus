@@ -30,10 +30,12 @@ int32_t LnnStartHeartbeatFrameDelay(void);
 int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType);
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
+void LnnRequestBleDiscoveryProcess(int32_t strategy, long timeout);
 
-void LnnHbOnAuthGroupCreated(int32_t groupType);
-void LnnHbOnAuthGroupDeleted(void);
+void LnnHbOnTrustedRelationIncreased(int32_t groupType);
+void LnnHbOnTrustedRelationReduced(void);
 
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);

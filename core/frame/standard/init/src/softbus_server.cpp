@@ -161,7 +161,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
         default:
             return SOFTBUS_ERR;
     }
-    return TransOpenAuthChannel(sessionName, &connOpt);
+    return TransOpenAuthChannel(sessionName, &connOpt, "");
 }
 
 int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId, int32_t channelType)

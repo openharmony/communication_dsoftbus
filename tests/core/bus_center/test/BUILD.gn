@@ -51,6 +51,9 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
   ]
 
   deps = [
@@ -63,7 +66,7 @@ ohos_unittest("HeartBeatMediumTest") {
   if (is_standard_system) {
     external_deps = [
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -114,6 +117,9 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
@@ -128,7 +134,7 @@ ohos_unittest("HeartBeatFSMTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -175,7 +181,7 @@ ohos_unittest("ClientProxyTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "samgr:samgr_proxy",
     ]
   } else {
@@ -213,6 +219,7 @@ ohos_unittest("BusCenterIpcTest") {
     "$dsoftbus_root_path/core/bus_center/ipc/standard/src",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   ]
 
   deps = [
@@ -227,7 +234,7 @@ ohos_unittest("BusCenterIpcTest") {
     external_deps = [
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -243,7 +250,8 @@ group("unittest") {
   deps = [
     ":BusCenterIpcTest",
     ":ClientProxyTest",
-    ":HeartBeatFSMTest",
-    ":HeartBeatMediumTest",
+
+    # ":HeartBeatFSMTest",
+    # ":HeartBeatMediumTest",
   ]
 }

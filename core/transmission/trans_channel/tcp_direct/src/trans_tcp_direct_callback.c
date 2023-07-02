@@ -29,7 +29,6 @@ NO_SANITIZE("cfi") int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb)
     g_channelCb = *cb;
     return SOFTBUS_OK;
 }
-
 NO_SANITIZE("cfi") int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
 {
@@ -55,4 +54,9 @@ NO_SANITIZE("cfi") int32_t TransTdcGetPkgName(const char *sessionName, char *pkg
 NO_SANITIZE("cfi") int32_t TransTdcGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     return g_channelCb.GetUidAndPidBySessionName(sessionName, uid, pid);
+}
+
+int32_t TransTdcOnMsgReceived(const char *pkgName, int32_t pid, int32_t channelId, TransReceiveData *receiveData)
+{
+    return g_channelCb.OnDataReceived(pkgName, pid, channelId, CHANNEL_TYPE_TCP_DIRECT, receiveData);
 }

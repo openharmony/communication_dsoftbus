@@ -24,6 +24,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
@@ -38,10 +39,54 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
-#include "softbus_hisysevt_transreporter.h"
 #include "trans_tcp_direct_sessionconn.h"
 
-NO_SANITIZE("cfi") int32_t TransChannelInit(void)
+#define MIGRATE_ENABLE 2
+#define MIGRATE_SUPPORTED 1
+#define MAX_PROXY_CHANNEL_ID 0x00008000
+#define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
+#define MAX_FD_ID 1025
+
+static int32_t g_allocProxyChannelId = MAX_FD_ID;
+static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
+static SoftBusMutex g_myIdLock;
+
+static int32_t GenerateTdcChannelId()
+{
+    int32_t channelId;
+    if (SoftBusMutexLock(&g_myIdLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    channelId = g_allocTdcChannelId++;
+    if (g_allocTdcChannelId >= MAX_TDC_CHANNEL_ID) {
+        g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
+    }
+    SoftBusMutexUnlock(&g_myIdLock);
+    return channelId;
+}
+
+static int32_t GenerateProxyChannelId()
+{
+    int32_t channelId;
+    if (SoftBusMutexLock(&g_myIdLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+    channelId = g_allocProxyChannelId++;
+    if (g_allocProxyChannelId >= MAX_PROXY_CHANNEL_ID) {
+        g_allocProxyChannelId = MAX_FD_ID;
+    }
+    SoftBusMutexUnlock(&g_myIdLock);
+    return channelId;
+}
+
+int32_t GenerateChannelId(bool isTdcChannel)
+{
+    return isTdcChannel ? GenerateTdcChannelId() : GenerateProxyChannelId();
+}
+
+int32_t TransChannelInit(void)
 {
     IServerChannelCallBack *cb = TransServerGetChannelCb();
     if (cb == NULL) {
@@ -75,6 +120,11 @@ NO_SANITIZE("cfi") int32_t TransChannelInit(void)
 
     ReqLinkListener();
 
+    if (SoftBusMutexInit(&g_myIdLock, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init lock failed");
+        return SOFTBUS_ERR;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -86,10 +136,65 @@ NO_SANITIZE("cfi") void TransChannelDeinit(void)
     TransTcpDirectDeinit();
     TransUdpChannelDeinit();
     TransReqLanePendingDeinit();
+    SoftBusMutexDestroy(&g_myIdLock);
+}
+
+static int32_t TransGetRemoteInfo(const SessionParam* param, AppInfo* appInfo)
+{
+    if (param == NULL || appInfo == NULL) {
+        return SOFTBUS_ERR;
+    }
+    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
+        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "direct get remote node uuid err");
+        char peerNetworkId[NETWORK_ID_BUF_LEN];
+        (void)memset_s(peerNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+        if (LnnGetNetworkIdByUuid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by uuid");
+        } else {
+            if (strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId), param->peerDeviceId) != SOFTBUS_OK) {
+                return SOFTBUS_ERR;
+            }
+            if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
+                return SOFTBUS_ERR;
+            }
+            return SOFTBUS_OK;
+        }
+        if (LnnGetNetworkIdByUdid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by udid");
+            return SOFTBUS_ERR;
+        }
+        if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
+        if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
+            appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
 {
+    if (param->attr->fastTransData != NULL && param->attr->fastTransDataSize > 0 &&
+        param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
+        if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not support send fast data");
+            return SOFTBUS_ERR;
+        }
+        appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
+        if (appInfo->fastTransData == NULL) {
+            return SOFTBUS_ERR;
+        }
+        if (memcpy_s((char *)appInfo->fastTransData, param->attr->fastTransDataSize,
+            (const char *)param->attr->fastTransData, param->attr->fastTransDataSize) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s err");
+            return SOFTBUS_ERR;
+        }
+    }
+    appInfo->fastTransDataSize = param->attr->fastTransDataSize;
     if (TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -108,9 +213,8 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
         return SOFTBUS_ERR;
     }
-    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
+    if (TransGetRemoteInfo(param, appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node info err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -118,7 +222,10 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
 
 static AppInfo *GetAppInfo(const SessionParam *param)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo");
+    char *anoyDevId = NULL;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo, deviceId=%s",
+        ToSecureStrDeviceID(param->peerDeviceId, &anoyDevId));
+    SoftBusFree(anoyDevId);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         return NULL;
@@ -147,11 +254,18 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    appInfo->autoCloseTime = 0;
+    appInfo->myHandleId = param->myHandleId;
+    appInfo->peerHandleId = param->peerHandleId;
+    appInfo->migrateOption = param->migrateOption;
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo ok");
     return appInfo;
 EXIT_ERR:
     if (appInfo != NULL) {
+        if (appInfo->fastTransData != NULL) {
+            SoftBusFree((void*)appInfo->fastTransData);
+        }
         SoftBusFree(appInfo);
     }
     return NULL;
@@ -164,12 +278,13 @@ static ChannelType TransGetChannelType(const SessionParam *param, const LaneConn
         return CHANNEL_TYPE_BUTT;
     }
 
-    if (connInfo->type == LANE_BR || connInfo->type == LANE_BLE || connInfo->type == LANE_BLE_DIRECT) {
+    if (connInfo->type == LANE_BR || connInfo->type == LANE_BLE || connInfo->type == LANE_BLE_DIRECT ||
+        connInfo->type == LANE_BLE_REUSE || connInfo->type == LANE_COC || connInfo->type == LANE_COC_DIRECT) {
         return CHANNEL_TYPE_PROXY;
-    } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO ||
-        transType == LANE_T_RAW_STREAM || transType == LANE_T_COMMON_VOICE) {
+    } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
+        transType == LANE_T_RAW_STREAM) {
         return CHANNEL_TYPE_UDP;
-    } else if ((transType == LANE_T_MSG) && (connInfo->type != LANE_P2P)) {
+    } else if ((transType == LANE_T_MSG) && (connInfo->type != LANE_P2P) && (connInfo->type != LANE_P2P_REUSE)) {
         return CHANNEL_TYPE_PROXY;
     }
     return CHANNEL_TYPE_TCP_DIRECT;
@@ -201,12 +316,27 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") static void FillAppInfo(AppInfo *appInfo, ConnectOption *connOpt, const SessionParam *param,
+    TransInfo *transInfo, LaneConnInfo *connInfo)
+{
+    if (((param->sessionOption & MIGRATE_ENABLE) != 0) &&
+        (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE)) {
+        if (param->attr->dataType != TYPE_FILE) {
+            appInfo->migrateOption |= MIGRATE_SUPPORTED;
+        }
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+        "set migrateinfo to appinfo, myHandleId %d, peerHandleId %d, migrateOption %d",
+        appInfo->myHandleId, appInfo->peerHandleId, appInfo->migrateOption);
+    transInfo->channelType = TransGetChannelType(param, connInfo);
+    appInfo->linkType = connInfo->type;
+    appInfo->channelType = transInfo->channelType;
+}
+
 NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
-    int64_t timeStart = 0;
-    int64_t timediff = 0;
-    timeStart = GetSoftbusRecordTimeMillis();
+    int64_t timeStart = GetSoftbusRecordTimeMillis();
     transInfo->channelId = INVALID_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_BUTT;
     LaneConnInfo connInfo;
@@ -215,11 +345,7 @@ NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
     AppInfo *appInfo = GetAppInfo(param);
-    if (appInfo == NULL) {
-        return INVALID_CHANNEL_ID;
-    }
-    appInfo->timeStart = timeStart;
-
+    TRAN_CHECK_AND_RETURN_RET_LOG(!(appInfo == NULL), INVALID_CHANNEL_ID, "GetAppInfo is null.");
     if (TransGetLaneInfo(param, &connInfo, &laneId) != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
         goto EXIT_ERR;
@@ -228,38 +354,41 @@ NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo
         "sessionName[%s], get laneId[%u], link type[%u].", param->sessionName, laneId, connInfo.type);
 
     if (TransGetConnectOptByConnInfo(&connInfo, &connOpt) != SOFTBUS_OK) {
-        timediff = GetSoftbusRecordTimeMillis() - timeStart;
-        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
-            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+        SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, connInfo.type,
+            SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
     }
-
-    transInfo->channelType = TransGetChannelType(param, &connInfo);
+    FillAppInfo(appInfo, &connOpt, param, transInfo, &connInfo);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "lane[%u] get channel type[%u].", laneId, transInfo->channelType);
-
     if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId)) != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
-        timediff = GetSoftbusRecordTimeMillis() - timeStart;
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
-            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
     }
 
-    if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType,
+    if (((ChannelType)transInfo->channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
+        LnnFreeLane(laneId);
+    } else if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType,
         &connInfo, laneId, &appInfo->myData) != SOFTBUS_OK) {
-        timediff = GetSoftbusRecordTimeMillis() - timeStart;
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
-            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
+            appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         TransCloseChannel(transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
 
+    if (appInfo->fastTransData != NULL) {
+        SoftBusFree((void*)appInfo->fastTransData);
+    }
     SoftBusFree(appInfo);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel ok: channelId=%d, channelType=%d",
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
+    if (appInfo->fastTransData != NULL) {
+        SoftBusFree((void*)appInfo->fastTransData);
+    }
     SoftBusFree(appInfo);
     if (laneId != 0) {
         LnnFreeLane(laneId);
@@ -277,11 +406,12 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     }
     appInfo->appType = APP_TYPE_AUTH;
     appInfo->myData.apiVersion = API_V2;
+    appInfo->autoCloseTime = 0;
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get deviceId failed");
         goto EXIT_ERR;
@@ -302,25 +432,32 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAuthAppInfo ok");
     return appInfo;
 EXIT_ERR:
-    SoftBusFree(appInfo);
+    if (appInfo != NULL) {
+        SoftBusFree(appInfo);
+    }
     return NULL;
 }
 
-NO_SANITIZE("cfi") int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt)
+NO_SANITIZE("cfi") int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
+    const char *reqId)
 {
     int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) || connOpt == NULL) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
         return channelId;
     }
 
     if (connOpt->type == CONNECT_TCP) {
-        if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId) != SOFTBUS_OK) {
+        if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId, reqId) != SOFTBUS_OK) {
             return INVALID_CHANNEL_ID;
         }
     } else if (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE) {
         AppInfo *appInfo = GetAuthAppInfo(sessionName);
         if (appInfo == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo failed");
+            return INVALID_CHANNEL_ID;
+        }
+        if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenAuthChannel strcpy_s reqId failed");
             return INVALID_CHANNEL_ID;
         }
         if (TransProxyOpenProxyChannel(appInfo, connOpt, &channelId) != SOFTBUS_OK) {
@@ -461,38 +598,48 @@ NO_SANITIZE("cfi") int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t cha
 NO_SANITIZE("cfi") int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel: id=%d, type=%d", channelId, channelType);
+    int32_t ret = SOFTBUS_ERR;
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
             (void)TransLaneMgrDelLane(channelId, channelType);
-            return TransProxyCloseProxyChannel(channelId);
+            ret = TransProxyCloseProxyChannel(channelId);
+            break;
         case CHANNEL_TYPE_TCP_DIRECT:
             (void)TransLaneMgrDelLane(channelId, channelType);
-            return SOFTBUS_OK;
+            ret = SOFTBUS_OK;
+            break;
         case CHANNEL_TYPE_UDP:
             (void)NotifyQosChannelClosed(channelId, channelType);
             (void)TransLaneMgrDelLane(channelId, channelType);
-            return TransCloseUdpChannel(channelId);
+            ret = TransCloseUdpChannel(channelId);
+            break;
         case CHANNEL_TYPE_AUTH:
-            return TransCloseAuthChannel(channelId);
+            ret = TransCloseAuthChannel(channelId);
+            break;
         default:
             break;
     }
-    return SOFTBUS_ERR;
+    return ret;
 }
 
 NO_SANITIZE("cfi") int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
     int32_t msgType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: id=%d, type=%d", channelId, channelType);
+    int32_t ret = SOFTBUS_OK;
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
-            return TransSendAuthMsg(channelId, (char*)data, (int32_t)len);
+            ret = TransSendAuthMsg(channelId, (char*)data, (int32_t)len);
+            break;
         case CHANNEL_TYPE_PROXY:
-            return TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
+            ret = TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
+            break;
         default:
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send msg: id=%d invalid type=%d", channelId, channelType);
-            return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
+            ret = SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
+            break;
     }
+    return ret;
 }
 
 NO_SANITIZE("cfi") void TransChannelDeathCallback(const char *pkgName, int32_t pid)

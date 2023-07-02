@@ -24,9 +24,50 @@
 extern "C" {
 #endif
 
-int32_t ClinetTransProxyInit(const IClientSessionCallBack *cb);
+typedef struct {
+    int32_t isEncrypted;
+    int32_t sequence;
+    char sessionKey[SESSION_KEY_LENGTH];
+}ProxyChannelInfoDetail;
+
+typedef struct {
+    ListNode node;
+    int32_t channelId;
+    ProxyChannelInfoDetail detail;
+}ClientProxyChannelInfo;
+
+typedef struct {
+    int32_t active;
+    int32_t timeout;
+    int32_t sliceNumber;
+    int32_t expectedSeq;
+    int32_t dataLen;
+    int32_t bufLen;
+    char *data;
+}SliceProcessor;
+
+typedef enum {
+    PROXY_CHANNEL_PRORITY_MESSAGE = 0,
+    PROXY_CHANNEL_PRORITY_BYTES = 1,
+    PROXY_CHANNEL_PRORITY_FILE = 2,
+    PROXY_CHANNEL_PRORITY_BUTT = 3,
+} ProxyChannelPriority;
+
+typedef struct {
+    ListNode head;
+    int32_t channelId;
+    SliceProcessor processor[PROXY_CHANNEL_PRORITY_BUTT];
+}ChannelSliceProcessor;
+
+int32_t ClientTransProxyInit(const IClientSessionCallBack *cb);
 
 void ClientTransProxyDeinit(void);
+
+int32_t ClientTransProxyGetInfoByChannelId(int32_t channelId, ProxyChannelInfoDetail *info);
+
+int32_t ClientTransProxyAddChannelInfo(ClientProxyChannelInfo *info);
+
+int32_t ClientTransProxyDelChannelInfo(int32_t channelId);
 
 int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
 
@@ -38,6 +79,9 @@ int32_t ClientTransProxyOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type);
 
 void ClientTransProxyCloseChannel(int32_t channelId);
+
+int32_t TransProxyPackAndSendData(int32_t channelId, const void *data, uint32_t len,
+    ProxyChannelInfoDetail* info, SessionPktType pktType);
 
 int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len);
 

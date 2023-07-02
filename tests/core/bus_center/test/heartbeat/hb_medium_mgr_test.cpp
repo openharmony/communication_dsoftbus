@@ -79,11 +79,13 @@ int32_t onUpdateSendInfo2(LnnHeartbeatUpdateInfoType type)
 HWTEST_F(HeartBeatMediumTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
 {
     DeviceInfo device;
+    LnnHeartbeatRecvInfo storedInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     int32_t weight = TEST_WEIGHT;
     int32_t masterWeight = TEST_WEIGHT2;
     uint64_t recvTime = TEST_RECVTIME_FIRST;
-    int32_t ret = HbFirstSaveRecvTime(&device, weight, masterWeight, recvTime);
+    int32_t ret = HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, recvTime);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -96,25 +98,29 @@ HWTEST_F(HeartBeatMediumTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatMediumTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
 {
     DeviceInfo device1;
+    LnnHeartbeatRecvInfo storedInfo1;
     (void)memset_s(&device1, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    (void)memset_s(&storedInfo1, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     (void)strcpy_s(device1.devId, DISC_MAX_DEVICE_ID_LEN, TEST_DEVID);
     device1.addr->type = CONNECTION_ADDR_BR;
     int32_t weight = TEST_WEIGHT;
     int32_t masterWeight = TEST_WEIGHT2;
     uint64_t recvTime1 = TEST_RECVTIME_FIRST;
-    int32_t ret = HbFirstSaveRecvTime(&device1, weight, masterWeight, recvTime1);
+    int32_t ret = HbFirstSaveRecvTime(&storedInfo1, &device1, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = HbSaveRecvTimeToRemoveRepeat(&device1, weight, masterWeight, recvTime1);
+    ret = HbSaveRecvTimeToRemoveRepeat(&storedInfo1, &device1, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     DeviceInfo device2;
+    LnnHeartbeatRecvInfo storedInfo2;
     (void)memset_s(&device2, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    (void)memset_s(&storedInfo2, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     (void)strcpy_s(device2.devId, DISC_MAX_DEVICE_ID_LEN, TEST_DEVID);
     device2.addr->type = CONNECTION_ADDR_WLAN;
     uint64_t recvTime2 = TEST_RECVTIME_LAST;
-    ret = HbSaveRecvTimeToRemoveRepeat(&device2, weight, masterWeight, recvTime2);
+    ret = HbSaveRecvTimeToRemoveRepeat(&storedInfo2, &device2, weight, masterWeight, recvTime2);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     uint64_t recvTime3 = TEST_RECVTIME_LAST + HB_RECV_INFO_SAVE_LEN;
-    ret = HbSaveRecvTimeToRemoveRepeat(&device2, weight, masterWeight, recvTime3);
+    ret = HbSaveRecvTimeToRemoveRepeat(&storedInfo2, &device2, weight, masterWeight, recvTime3);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -127,20 +133,22 @@ HWTEST_F(HeartBeatMediumTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatMediumTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
 {
     DeviceInfo device;
+    LnnHeartbeatRecvInfo storedInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     (void)strcpy_s(device.devId, sizeof(TEST_DEVID), TEST_DEVID);
     device.addr->type = CONNECTION_ADDR_BR;
     int32_t weight = TEST_WEIGHT;
     int32_t masterWeight = TEST_WEIGHT2;
     uint64_t recvTime1 = TEST_RECVTIME_FIRST;
-    int32_t ret1 = HbFirstSaveRecvTime(&device, weight, masterWeight, recvTime1);
+    int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
-    bool ret2 = HbIsRepeatedRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BR, TEST_RECVTIME_FIRST);
+    bool ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, TEST_RECVTIME_FIRST);
     EXPECT_FALSE(ret2);
-    ret2 = HbIsRepeatedRecvInfo(TEST_DEVID, CONNECTION_ADDR_BLE, TEST_RECVTIME_LAST);
+    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, TEST_RECVTIME_LAST);
     EXPECT_FALSE(ret2);
     uint64_t nowTime = TEST_RECVTIME_LAST + HB_RECV_INFO_SAVE_LEN;
-    ret2 = HbIsRepeatedRecvInfo(TEST_DEVID, CONNECTION_ADDR_BR, nowTime);
+    ret2 = HbIsRepeatedRecvInfo(HEARTBEAT_TYPE_BLE_V1, &storedInfo, nowTime);
     EXPECT_FALSE(ret2);
 }
 
@@ -164,16 +172,16 @@ HWTEST_F(HeartBeatMediumTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
     ON_CALL(ledgerMock, LnnHasDiscoveryType).WillByDefault(Return(true));
     LnnGenerateHexStringHash(
         reinterpret_cast<const unsigned char *>(TEST_UDID_HASH), udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
-    auto ret = HbGetOnlineNodeByRecvInfo(udidHash, CONNECTION_ADDR_BR);
-    EXPECT_TRUE(ret != nullptr);
+    int32_t ret = HbGetOnlineNodeByRecvInfo(udidHash, CONNECTION_ADDR_BR, &nodeInfo);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
-    ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BR);
-    EXPECT_TRUE(ret == nullptr);
+    ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BR, &nodeInfo);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgerMock, LnnGetNodeInfoById).WillOnce(Return(nullptr));
-    ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_WLAN);
-    EXPECT_TRUE(ret == nullptr);
+    ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, &nodeInfo);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -221,7 +229,9 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
 {
     DeviceInfo device;
+    LnnHeartbeatRecvInfo storedInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
@@ -241,21 +251,21 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     device.devType = SMART_PHONE;
     int32_t weight = TEST_WEIGHT;
     int32_t masterWeight = TEST_WEIGHT2;
-    int32_t ret1 = HbFirstSaveRecvTime(&device, weight, masterWeight, TEST_RECVTIME_FIRST);
+    int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, TEST_RECVTIME_FIRST);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
     ON_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
-    int ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1);
+    int ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    HbFirstSaveRecvTime(&device, weight, masterWeight, TEST_RECVTIME_FIRST);
+    HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, TEST_RECVTIME_FIRST);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_ERR));
-    ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1);
+    ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false);
     EXPECT_TRUE(ret != SOFTBUS_ERR);
-    ret = HbMediumMgrRecvProcess(nullptr, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1);
+    ret = HbMediumMgrRecvProcess(nullptr, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-    ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1);
+    ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_OFFLINE);
 }
 
@@ -325,23 +335,25 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess, TestSize.Level1)
 HWTEST_F(HeartBeatMediumTest, LnnDumpHbMgrRecvList_TEST01, TestSize.Level1)
 {
     DeviceInfo device1;
+    LnnHeartbeatRecvInfo storedInfo;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnConvertIdToDeviceType)
         .WillOnce(Return(nullptr))
         .WillRepeatedly(Return(const_cast<char *>(TYPE_PAD)));
     (void)memset_s(&device1, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     (void)strcpy_s(device1.devId, DISC_MAX_DEVICE_ID_LEN, TEST_DEVID);
     device1.addr->type = CONNECTION_ADDR_BR;
     int32_t weight = TEST_WEIGHT;
     int32_t masterWeight = TEST_WEIGHT2;
     uint64_t recvTime1 = TEST_RECVTIME_FIRST;
-    int32_t ret = HbFirstSaveRecvTime(&device1, weight, masterWeight, recvTime1);
+    int32_t ret = HbFirstSaveRecvTime(&storedInfo, &device1, weight, masterWeight, recvTime1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     DeviceInfo device2;
     (void)memset_s(&device2, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)strcpy_s(device1.devId, DISC_MAX_DEVICE_ID_LEN, TEST_NETWORK_ID);
     device2.addr->type = CONNECTION_ADDR_MAX;
-    ret = HbFirstSaveRecvTime(&device2, weight, masterWeight, TEST_RECVTIME_LAST);
+    ret = HbFirstSaveRecvTime(&storedInfo, &device2, weight, masterWeight, TEST_RECVTIME_LAST);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDumpHbMgrRecvList();
     SoftBusSleepMs(50);
@@ -387,7 +399,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
 {
     bool ret = VisitHbMediumMgrSendBegin(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
-    LnnHeartbeatCustSendData data = {
+    LnnHeartbeatSendBeginData data = {
         .hbType = HEARTBEAT_TYPE_BLE_V1,
         .wakeupFlag = false,
         .isRelay = false,
@@ -415,7 +427,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
 {
-    LnnHeartbeatCustSendData data = {
+    LnnHeartbeatSendBeginData data = {
         .hbType = HEARTBEAT_TYPE_MAX,
         .wakeupFlag = false,
         .isRelay = false,

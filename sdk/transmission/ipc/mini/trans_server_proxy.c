@@ -57,7 +57,7 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     if (!LnnConvertAddrToOption(addrInfo, &connOpt)) {
         return SOFTBUS_ERR;
     }
-    return TransOpenAuthChannel(sessionName, &connOpt);
+    return TransOpenAuthChannel(sessionName, &connOpt, "");
 }
 
 int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)

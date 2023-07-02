@@ -16,12 +16,14 @@
 #include "bus_center_manager.h"
 
 #include <securec.h>
+#include "softbus_adapter_perf.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
 NO_SANITIZE("cfi") int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {
+    LNN_CHECK_AND_RETURN_RET_LOG(!SoftBusIsRamTest(), SOFTBUS_ERR, "LnnPublishService: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
         if ((ret = DiscPublishService(pkgName, info)) != SOFTBUS_OK) {
@@ -56,6 +58,7 @@ NO_SANITIZE("cfi") int32_t LnnUnPublishService(const char *pkgName, int32_t publ
 NO_SANITIZE("cfi") int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
     bool isInnerRequest)
 {
+    LNN_CHECK_AND_RETURN_RET_LOG(!SoftBusIsRamTest(), SOFTBUS_ERR, "LnnStartDiscDevice: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
         if ((ret = DiscStartDiscovery(pkgName, info, &cb->serverCb)) != SOFTBUS_OK) {

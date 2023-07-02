@@ -20,6 +20,7 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
+#include "session.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +35,11 @@ typedef enum {
     LANE_WLAN_2P4G,
     LANE_WLAN_5G,
     LANE_ETH,
+    LANE_P2P_REUSE,
     LANE_BLE_DIRECT,
+    LANE_BLE_REUSE,
+    LANE_COC,
+    LANE_COC_DIRECT,
     LANE_LINK_TYPE_BUTT,
 } LaneLinkType;
 
@@ -67,25 +72,25 @@ typedef struct {
 
 typedef struct {
     char bleMac[BT_MAC_LEN];
+    int32_t psm;
 } BleConnInfo;
 
 typedef struct {
     BleProtocolType protoType;
-    int32_t psm;
-    unsigned char nodeIdHash[NODEID_SHORT_HASH_LEN];
-    unsigned char localUdidHash[UDID_SHORT_HASH_LEN];
-    unsigned char peerUdidHash[SHA_256_HASH_LEN];
+    char nodeIdHash[NODEID_SHORT_HASH_LEN];
+    char localUdidHash[UDID_SHORT_HASH_LEN];
+    char peerUdidHash[SHA_256_HASH_LEN];
 } BleDirectConnInfo;
 
 typedef struct {
-    uint32_t protocol;
+    uint16_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
 } P2pConnInfo;
 
 typedef struct {
-    uint32_t protocol;
-    char addr[IP_LEN];
+    uint16_t protocol;
+    char addr[MAX_SOCKET_ADDR_LEN];
     uint16_t port;
 } WlanConnInfo;
 
@@ -129,14 +134,19 @@ typedef struct {
 typedef struct {
     uint32_t linkTypeNum;
     LaneLinkType linkType[LANE_LINK_TYPE_BUTT];
+    bool isReuse[LANE_LINK_TYPE_BUTT];
 } LanePreferredLinkList;
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
+    char peerBleMac[MAX_MAC_LEN];
+    // 'psm' field is valid only when 'expectedLink' contains 'LANE_COC'
+    int32_t psm;
     LaneTransType transType;
     uint32_t expectedBw;
     int32_t pid;
     LanePreferredLinkList expectedLink;
+    bool networkDelegate;
 } TransOption;
 
 typedef struct {

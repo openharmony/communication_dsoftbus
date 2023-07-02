@@ -27,7 +27,7 @@ static int32_t InitBleHeartbeat(const LnnHeartbeatMediumMgrCb *callback)
     return SOFTBUS_OK;
 }
 
-static int32_t BleHeartbeatOnceBegin(const LnnHeartbeatCustSendData *custData)
+static int32_t BleHeartbeatOnceBegin(const LnnHeartbeatSendBeginData *custData)
 {
     (void)custData;
 
@@ -35,8 +35,10 @@ static int32_t BleHeartbeatOnceBegin(const LnnHeartbeatCustSendData *custData)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t BleHeartbeatOnceEnd(void)
+static int32_t BleHeartbeatOnceEnd(const LnnHeartbeatSendEndData *custData)
 {
+    (void)custData;
+
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat end");
     return SOFTBUS_NOT_IMPLEMENT;
 }

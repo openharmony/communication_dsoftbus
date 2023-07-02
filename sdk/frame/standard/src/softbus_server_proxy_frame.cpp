@@ -16,7 +16,6 @@
 #include "softbus_server_proxy_frame.h"
 
 #include <mutex>
-#include <unistd.h>
 #include "client_trans_session_manager.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
@@ -130,7 +129,7 @@ void ClientDeathProcTask(void)
     ClientCleanAllSessionWhenServerDeath();
 
     while (g_serverProxy == nullptr) {
-        sleep(g_waitServerInterval);
+        SoftBusSleepMs(g_waitServerInterval);
         ServerProxyInit();
         if (g_serverProxy != nullptr) {
             break;

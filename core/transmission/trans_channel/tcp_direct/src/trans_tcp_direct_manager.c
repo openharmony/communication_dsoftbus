@@ -20,7 +20,6 @@
 #include "auth_interface.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "p2plink_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -32,6 +31,7 @@
 #include "trans_tcp_direct_p2p.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
+#include "wifi_direct_manager.h"
 
 #define HANDSHAKE_TIMEOUT 19
 
@@ -62,7 +62,7 @@ static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
 
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
-    
+
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
         OnSessionOpenFailProc(item, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
         TransSrvDelDataBufNode(item->channelId);
@@ -84,7 +84,7 @@ static void TransTdcTimerProc(void)
 
     ListNode tempTdcChannelList;
     ListInit(&tempTdcChannelList);
-    
+
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         item->timeout++;
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED) {
@@ -109,7 +109,7 @@ static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
 
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
-    
+
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
         OnSessionOpenFailProc(item, SOFTBUS_TRANS_NET_STATE_CHANGED);
         TransSrvDelDataBufNode(item->channelId);
@@ -131,10 +131,10 @@ NO_SANITIZE("cfi") void TransTdcStopSessionProc(ListenerModule listenMod)
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return;
     }
-    
+
     ListNode tempTdcChannelList;
     ListInit(&tempTdcChannelList);
-    
+
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (listenMod != item->listenMod) {
             continue;
@@ -237,8 +237,9 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get local ip fail");
                 return SOFTBUS_ERR;
             }
-        } else {
-            if (P2pLinkGetLocalIp(appInfo->myData.addr, sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
+        } else if ((connInfo->type == CONNECT_P2P_REUSE) || (connInfo->type == CONNECT_P2P)) {
+            if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, appInfo->myData.addr,
+                sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get p2p ip fail");
                 return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
             }
@@ -247,8 +248,7 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOpenDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
-    int32_t *channelId)
+NO_SANITIZE("cfi") int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenDirectChannel");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
@@ -260,9 +260,16 @@ NO_SANITIZE("cfi") int32_t TransOpenDirectChannel(const AppInfo *appInfo, const 
         return SOFTBUS_ERR;
     }
 
+    int32_t ret = SOFTBUS_ERR;
     if (connInfo->type == CONNECT_P2P) {
-        return OpenP2pDirectChannel(appInfo, connInfo, channelId);
+        appInfo->routeType = WIFI_P2P;
+        ret = OpenP2pDirectChannel(appInfo, connInfo, channelId);
+    } else if (connInfo->type == CONNECT_P2P_REUSE) {
+        appInfo->routeType = WIFI_P2P_REUSE;
+        ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     } else {
-        return OpenTcpDirectChannel(appInfo, connInfo, channelId);
+        appInfo->routeType = WIFI_STA;
+        ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
+    return ret;
 }

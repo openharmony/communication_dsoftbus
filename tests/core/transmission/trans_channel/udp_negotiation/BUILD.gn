@@ -63,6 +63,7 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
@@ -79,7 +80,7 @@ ohos_unittest("TransUdpNegoTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -117,7 +118,7 @@ ohos_unittest("TransUdpNegotiationTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -149,7 +150,7 @@ ohos_unittest("TransUdpNegotiationExchangeTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [
@@ -219,7 +220,7 @@ ohos_unittest("TransUdpManagerTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [

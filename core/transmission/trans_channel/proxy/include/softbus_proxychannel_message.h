@@ -33,6 +33,8 @@ typedef enum {
     PROXYCHANNEL_MSG_TYPE_RESET,
     PROXYCHANNEL_MSG_TYPE_KEEPALIVE,
     PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK,
+    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_AUTH,
+
     PROXYCHANNEL_MSG_TYPE_MAX
 } MsgType;
 
@@ -52,6 +54,14 @@ typedef enum {
 #define JSON_KEY_ALGORITHM "ALGORITHM"
 #define JSON_KEY_CRC "CRC"
 #define JSON_KEY_BUSINESS_TYPE "BUSINESS_TYPE"
+#define JSON_KEY_TRANS_FLAGS "TRANS_FLAGS"
+#define JSON_KEY_MIGRATE_OPTION "MIGRATE_OPTION"
+#define JSON_KEY_MY_HANDLE_ID "MY_HANDLE_ID"
+#define JSON_KEY_PEER_HANDLE_ID "PEER_HANDLE_ID"
+#define JSON_KEY_AUTH_SEQ "AUTH_SEQ"
+#define JSON_KEY_ROUTE_TYPE "ROUTE_TYPE"
+#define JSON_KEY_FIRST_DATA "FIRST_DATA"
+#define JSON_KEY_FIRST_DATA_SIZE "FIRST_DATA_SIZE"
 
 typedef struct {
     uint8_t type; // MsgType
@@ -76,7 +86,8 @@ typedef struct {
 #define ENCRYPTED 0x1
 #define AUTH_SERVER_SIDE 0x2
 #define USE_BLE_CIPHER 0x4
-#define PROXY_BYTES_LENGTH_MAX (1024 * 1024)
+#define CS_MODE 0x10
+#define PROXY_BYTES_LENGTH_MAX (4 * 1024 * 1024)
 #define PROXY_MESSAGE_LENGTH_MAX 1024
 
 #define IDENTITY_LEN 32
@@ -107,28 +118,12 @@ typedef struct {
     int16_t peerId;
     uint32_t connId;
     ConnectType type;
+    BleProtocolType blePrototolType;
     int32_t seq;
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
     int64_t authId; /* for cipher */
 } ProxyChannelInfo;
-
-typedef struct {
-    int32_t active;
-    int32_t timeout;
-    int32_t sliceNumber;
-    int32_t expectedSeq;
-    int32_t dataLen;
-    int32_t bufLen;
-    char *data;
-} SliceProcessor;
-
-#define PROCESSOR_MAX 3
-typedef struct {
-    ListNode head;
-    int32_t channelId;
-    SliceProcessor processor[PROCESSOR_MAX];
-} ChannelSliceProcessor;
 
 typedef struct {
     uint8_t *inData;
@@ -137,16 +132,38 @@ typedef struct {
     uint32_t outLen;
 } ProxyDataInfo;
 
+typedef struct  {
+    int32_t magicNumber;
+    int32_t seq;
+    int32_t flags;
+    int32_t dataLen;
+} PacketFastHead;
+
+typedef struct {
+    int32_t priority;
+    int32_t sliceNum;
+    int32_t sliceSeq;
+    int32_t reserved;
+} SliceFastHead;
+
+typedef struct {
+    int seq;
+    int packetFlag;
+    int shouldAck;
+} SessionHead;
+
 int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int* errCode, int32_t len);
-int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len);
+int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
+    int32_t len, uint16_t *fastDataSize);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char* TransProxyPackHandshakeErrMsg(int32_t errCode);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
-int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t length);
+int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char* TransProxyPackIdentity(const char *identity);
 int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len);
+char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen);
 
 #ifdef __cplusplus
 #if __cplusplus

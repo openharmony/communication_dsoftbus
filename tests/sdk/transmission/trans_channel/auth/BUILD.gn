@@ -54,7 +54,7 @@ if (defined(ohos_lite)) {
     ]
 
     if (is_standard_system) {
-      external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+      external_deps = [ "hilog:libhilog" ]
       part_name = "dsoftbus"
     }
     subsystem_name = "communication"
@@ -83,7 +83,7 @@ ohos_unittest("TransClientSdkAuthManagerTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   } else {
     external_deps = [

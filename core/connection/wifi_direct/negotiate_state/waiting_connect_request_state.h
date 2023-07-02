@@ -12,15 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef NEGOTIATE_WAITING_CONNECT_REQUEST_STATE_H
+#define NEGOTIATE_WAITING_CONNECT_REQUEST_STATE_H
 
-#include "softbus_adapter_hitracechain.h"
+#include "negotiate_state.h"
 
-void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
-{
-    (void)flags;
-    (void)chainId;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct WaitingConnectRequestState {
+    NEGOTIATE_STATE_BASE(WaitingConnectRequestState);
+};
+
+struct WaitingConnectRequestState* GetWaitingConnectRequestState(struct WifiDirectNegotiator *negotiator);
+
+#ifdef __cplusplus
 }
-
-void SoftbusHitraceStop(void)
-{
-}
+#endif
+#endif

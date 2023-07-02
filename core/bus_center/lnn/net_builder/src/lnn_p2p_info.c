@@ -20,11 +20,12 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_sync_info_manager.h"
-#include "p2plink_interface.h"
+#include "wifi_direct_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
+#include "softbus_adapter_json.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"
 #define JSON_KEY_P2P_MAC "P2P_MAC"
@@ -60,29 +61,29 @@ static char *LnnGetP2pInfoMsg(const P2pInfo *info)
     return msg;
 }
 
-static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info)
+static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info, uint32_t len)
 {
-    cJSON *json = cJSON_Parse((char *)msg);
+    JsonObj *json = JSON_Parse((char *)msg, len);
     if (json == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse p2p info json fail.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!GetJsonObjectNumberItem(json, JSON_KEY_P2P_ROLE, &info->p2pRole)) {
+    if (!JSON_GetInt32FromOject(json, JSON_KEY_P2P_ROLE, &info->p2pRole)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p role not found.");
-        cJSON_Delete(json);
+        JSON_Delete(json);
         return SOFTBUS_ERR;
     }
-    if (!GetJsonObjectStringItem(json, JSON_KEY_P2P_MAC, info->p2pMac, sizeof(info->p2pMac))) {
+    if (!JSON_GetStringFromOject(json, JSON_KEY_P2P_MAC, info->p2pMac, sizeof(info->p2pMac))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p mac not found.");
-        cJSON_Delete(json);
+        JSON_Delete(json);
         return SOFTBUS_ERR;
     }
-    if (!GetJsonObjectStringItem(json, JSON_KEY_GO_MAC, info->goMac, sizeof(info->goMac))) {
+    if (!JSON_GetStringFromOject(json, JSON_KEY_GO_MAC, info->goMac, sizeof(info->goMac))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "go mac not found.");
-        cJSON_Delete(json);
+        JSON_Delete(json);
         return SOFTBUS_ERR;
     }
-    cJSON_Delete(json);
+    JSON_Delete(json);
     return SOFTBUS_OK;
 }
 
@@ -133,12 +134,8 @@ static void OnReceiveP2pSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     if (msg == NULL || len == 0) {
         return;
     }
-    if (strnlen((char *)msg, len) == len) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnReceiveP2pSyncInfoMsg msg invalid");
-        return;
-    }
     P2pInfo p2pInfo = {0};
-    if (LnnParseP2pInfoMsg((const char *)msg, &p2pInfo) != SOFTBUS_OK) {
+    if (LnnParseP2pInfoMsg((const char *)msg, &p2pInfo, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse p2p info fail");
         return;
     }
@@ -164,7 +161,7 @@ NO_SANITIZE("cfi") int32_t LnnInitLocalP2pInfo(NodeInfo *info)
     }
     bool isSupportBle = info->netCapacity & (1 << BIT_BLE);
     bool isSupportP2p = info->netCapacity & (1 << BIT_WIFI_P2P);
-    if (LnnSetP2pRole(info, ROLE_NONE) != SOFTBUS_OK ||
+    if (LnnSetP2pRole(info, WIFI_DIRECT_ROLE_NONE) != SOFTBUS_OK ||
         LnnSetP2pMac(info, "") != SOFTBUS_OK ||
         LnnSetP2pGoMac(info, "") != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init p2p info fail.");

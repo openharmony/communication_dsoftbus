@@ -32,11 +32,11 @@ public:
     virtual int32_t RegistIPProtocolManager(void) = 0;
     virtual int32_t LnnInitPhysicalSubnetManager(void) = 0;
     virtual void LnnOnOhosAccountChanged(void) =0;
-    virtual void LnnHbOnAuthGroupCreated(int32_t groupType) = 0;
+    // virtual void LnnHbOnAuthGroupCreated(int32_t groupType) = 0;
     virtual void LnnStopDiscovery(void) = 0;
     virtual int32_t LnnStartDiscovery(void) = 0;
     virtual void SetCallLnnStatus(bool flag) = 0;
-    virtual void LnnHbOnAuthGroupDeleted(void) =0;
+    // virtual void LnnHbOnAuthGroupDeleted(void) =0;
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
 };
 
@@ -47,11 +47,11 @@ public:
     MOCK_METHOD0(RegistIPProtocolManager, int32_t (void));
     MOCK_METHOD0(LnnInitPhysicalSubnetManager, int32_t (void));
     MOCK_METHOD0(LnnOnOhosAccountChanged, void (void));
-    MOCK_METHOD1(LnnHbOnAuthGroupCreated, void (int32_t));
+    // MOCK_METHOD1(LnnHbOnAuthGroupCreated, void (int32_t));
     MOCK_METHOD0(LnnStopDiscovery, void (void));
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
     MOCK_METHOD1(SetCallLnnStatus, void (bool));
-    MOCK_METHOD0(LnnHbOnAuthGroupDeleted, void (void));
+    // MOCK_METHOD0(LnnHbOnAuthGroupDeleted, void (void));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
 };
 } // namespace OHOS

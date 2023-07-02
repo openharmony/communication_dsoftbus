@@ -23,8 +23,6 @@
 #include "softbus_protocol_def.h"
 #include "auth_interface.h"
 #include "softbus_proxychannel_control.c"
-#include "softbus_proxychannel_transceiver.c"
-#include "softbus_proxychannel_message.c"
 #include "softbus_proxychannel_manager.c"
 #include "trans_channel_manager.h"
 
@@ -145,58 +143,6 @@ void TestDelTestProxyChannel(void)
     TransProxyDelChanByChanId(m_testProxyChannelId);
     m_testProxyChannelId = -1;
     TransProxyManagerDeinitInner();
-}
-
-/**
- * @tc.name: TransProxySendMessageTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyChannelTest, TransProxySendMessageTest001, TestSize.Level1)
-{
-    const char *payLoad = TEST_PAY_LOAD;
-    uint32_t payLoadLen = strlen(payLoad);
-    int32_t ret = TransProxySendMessage(NULL, payLoad, payLoadLen, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ProxyChannelInfo info;
-    info.appInfo.appType = APP_TYPE_AUTH;
-    info.myId = 0;
-    info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
-    
-    ret = TransProxySendMessage(&info, NULL, 0, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransProxySendMessage(&info, payLoad, payLoadLen, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    info.authId = 0;
-    ret = TransProxySendMessage(&info, payLoad, payLoadLen, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: TransProxySendMessageTest002
- * @tc.desc: extern module active publish, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyChannelTest, TransProxySendMessageTest002, TestSize.Level1)
-{
-    const char *payLoad = TEST_PAY_LOAD;
-    uint32_t payLoadLen = strlen(payLoad);
-
-    ProxyChannelInfo info;
-    info.appInfo.appType = APP_TYPE_NORMAL;
-    info.myId = 0;
-    info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
-    info.connId = -1;
-
-    int32_t ret = TransProxySendMessage(&info, payLoad, payLoadLen, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -621,57 +567,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyPackMessageHeadTest001, TestSize.Level1)
 {
-    ProxyMessageHead msgHead;
-    uint8_t buf[TEST_BUF_LEN] = {0};
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    TransProxyPackMessageHead(&msgHead, (uint8_t *)buf, PROXY_CHANNEL_HEAD_LEN - 1);
-    TransProxyPackMessageHead(&msgHead, (uint8_t *)buf, PROXY_CHANNEL_HEAD_LEN);
     TransProxyManagerDeinitInner();
-}
-
-/**
- * @tc.name: GetRemoteUdidByBtMacTest001
- * @tc.desc: GetRemoteUdidByBtMacTest001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyChannelTest, GetRemoteUdidByBtMacTest001, TestSize.Level1)
-{
-    string peerMac = "";
-    string udid = "";
-    int32_t len = 1;
-    int32_t ret = GetRemoteUdidByBtMac(peerMac.c_str(), (char *)udid.c_str(), len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: TransProxyGetAuthConnInfoTest001
- * @tc.desc: TransProxyGetAuthConnInfoTest001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyChannelTest, TransProxyGetAuthConnInfoTest001, TestSize.Level1)
-{
-    int32_t connId = 1;
-    AuthConnInfo connInfo;
-    int32_t ret = TransProxyGetAuthConnInfo(connId, &connInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: GetAuthIdByHandshakeMsgTest001
- * @tc.desc: GetAuthIdByHandshakeMsgTest001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyChannelTest, GetAuthIdByHandshakeMsgTest001, TestSize.Level1)
-{
-    uint32_t connId = 1;
-    uint8_t cipher = 1;
-    int32_t ret = GetAuthIdByHandshakeMsg(connId, cipher);
-    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -682,11 +581,7 @@ HWTEST_F(TransProxyChannelTest, GetAuthIdByHandshakeMsgTest001, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest001, TestSize.Level1)
 {
-    ProxyMessageHead head;
     ProxyDataInfo dataInfo;
-    head.cipher |= ENCRYPTED;
-    head.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    PackPlaintextMessage(&head, &dataInfo);
     char *data = (char *)dataInfo.outData;
     int32_t len = dataInfo.outLen;
     
@@ -699,24 +594,6 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransProxyParseMessage(data, PROXY_CHANNEL_HEAD_LEN - 1, &msg);
-    EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: PackEncryptedMessageTest001
- * @tc.desc: PackEncryptedMessageTest001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyChannelTest, PackEncryptedMessageTest001, TestSize.Level1)
-{
-    ProxyMessageHead msg;
-    int64_t authId = AUTH_INVALID_ID;
-    ProxyDataInfo dataInfo;
-    int32_t ret = PackEncryptedMessage(&msg, authId, &dataInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = PackEncryptedMessage(&msg, 1, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

@@ -17,6 +17,7 @@
 #define LNN_BLE_HEARTBEAT_H
 
 #include <stdint.h>
+#include "lnn_heartbeat_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

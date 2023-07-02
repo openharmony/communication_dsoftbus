@@ -46,6 +46,7 @@
 #define MAX_NODE_STATE_CB_CNT 10
 #define MAX_LNN_CONNECTION_CNT 30 // TODO: restore after fix the problem of connection exceeding max limit
 #define LNN_SUPPORT_CAPBILITY 62
+#define LNN_SUPPORT_FEATURE   0x7E2
 #define AUTH_ABILITY_COLLECTION 0
 #define ADAPTER_LOG_LEVEL 0
 #ifndef DEFAULT_STORAGE_PATH
@@ -64,7 +65,7 @@
 #define DEFAULT_MAX_MESSAGE_LEN (4 * 1024)
 #define DEFAULT_AUTH_MAX_BYTES_LEN (40000 - 8)
 #define DEFAULT_AUTH_MAX_MESSAGE_LEN (4 * 1024)
-#define DEFAULT_PROXY_MAX_BYTES_LEN (1024 * 1024)
+#define DEFAULT_PROXY_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
 #elif defined SOFTBUS_SMALL_SYSTEM
@@ -103,6 +104,7 @@ typedef struct {
     int32_t lnnMaxConcurentNum;
     bool lnnAutoNetworkingSwitch;
     bool isSupportTopo;
+    uint64_t supportFeature;
     int32_t connCocMaxDataLen;
     int32_t connCocSendMtu;
 } ConfigItem;
@@ -131,6 +133,7 @@ ConfigItem g_config = {
     LNN_MAX_CONCURENT_NUM,
     true,
     true,
+    LNN_SUPPORT_FEATURE,
     CONN_COC_MAX_DATA_LENGTH,
     CONN_COC_SEND_MTU_LEN,
 };
@@ -285,6 +288,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH,
         (unsigned char *)&(g_tranConfig.maxProxyMessageLen),
         sizeof(g_tranConfig.maxProxyMessageLen)
+    },
+    {
+        SOFTBUS_INT_LNN_SUPPORT_FEATURE,
+        (unsigned char *)&(g_config.supportFeature),
+        sizeof(g_config.supportFeature)
     },
     {
         SOFTBUS_INT_CONN_COC_MAX_DATA_LENGTH,

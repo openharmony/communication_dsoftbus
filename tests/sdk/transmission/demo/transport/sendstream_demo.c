@@ -76,7 +76,7 @@ int main(void)
 
     /*
      * 2. Device A calls OpenSession() to open a session based on the local session name,
-     * peer session name, and peer network ID, and determine the session channel based on the session type. 
+     * peer session name, and peer network ID, and determine the session channel based on the session type.
      * When the session is open, a callback will be invoked to notify devices A and B.
      * A session ID is returned for subsequent data sending.
      */

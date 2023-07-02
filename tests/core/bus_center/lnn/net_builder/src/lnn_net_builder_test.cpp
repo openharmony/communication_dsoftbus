@@ -131,11 +131,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0
 */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Level0)
 {
-    int32_t ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID, CONNECTION_ADDR_WLAN);
+    int32_t ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID, CONNECTION_ADDR_WLAN);
+    ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -238,7 +238,7 @@ HWTEST_F(LNNNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = MetaNodeServerJoin(&addr, &customData);
+    ret = MetaNodeServerJoin("testName", 0, &addr, &customData);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -284,11 +284,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
 */
 HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
 {
-    int32_t ret = LnnServerLeave(NETWORKID);
+    int32_t ret = LnnServerLeave(NETWORKID, "pkaName");
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnServerLeave(NETWORKID);
+    ret = LnnServerLeave(NETWORKID, "pkaName");
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -305,11 +305,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
         .info.ip.port = PORT
     };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
-    int32_t ret = LnnServerJoin(&addr);
+    int32_t ret = LnnServerJoin(&addr, "pkgName");
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnServerJoin(&addr);
+    ret = LnnServerJoin(&addr, "pkgName");
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

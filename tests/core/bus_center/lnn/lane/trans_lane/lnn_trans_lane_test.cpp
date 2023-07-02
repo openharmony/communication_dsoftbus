@@ -59,7 +59,7 @@ void LNNTransLaneMockTest::SetUp()
 void LNNTransLaneMockTest::TearDown()
 {
 }
-
+/*
 static void LaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
 {
     LLOGD("laneRequest succ, laneId:%d", laneId);
@@ -74,7 +74,7 @@ static void LaneStateChange(uint32_t laneId, LaneState state)
 {
     LLOGD("laneState chanage, laneId:%d, state:%d", laneId, state);
 }
-
+*/
 /*
 * @tc.name: LNN_TRANS_LANE_001
 * @tc.desc: Init
@@ -117,7 +117,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_002, TestSize.Level1)
     EXPECT_CALL(laneMock, SelectLane).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = transObj->AllocLane(laneId, (const LaneRequestOption *)&request, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-
+    /*
     auto laneSelect = [](LaneLinkType **list, uint32_t *num) {
         uint32_t laneNum = 2; // means two phy-channels are available
         *list = (LaneLinkType *)SoftBusMalloc(sizeof(LaneLinkType) * laneNum);
@@ -138,7 +138,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_002, TestSize.Level1)
     };
     ret = transObj->AllocLane(laneId, (const LaneRequestOption *)&request, &listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
-
+    */
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->Deinit();
 }

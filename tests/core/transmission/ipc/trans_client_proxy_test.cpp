@@ -180,7 +180,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
     int32_t ret;
     char networkId[] = "ABCDEFG";
 
-    ret = ClientIpcOnChannelLinkDown(g_pkgName, networkId, TEST_REMOTE_TYPE, TEST_PID);
+    ret = ClientIpcOnChannelLinkDown(g_pkgName, networkId, NULL, NULL, NULL, TEST_REMOTE_TYPE, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -191,7 +191,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    ret = ClientIpcOnChannelLinkDown(g_pkgName, networkId, TEST_REMOTE_TYPE, TEST_PID);
+    ret = ClientIpcOnChannelLinkDown(g_pkgName, networkId, NULL, NULL, NULL, TEST_REMOTE_TYPE, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
