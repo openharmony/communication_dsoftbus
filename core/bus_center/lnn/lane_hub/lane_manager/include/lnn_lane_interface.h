@@ -37,7 +37,6 @@ typedef enum {
     LANE_ETH,
     LANE_P2P_REUSE,
     LANE_BLE_DIRECT,
-    LANE_BLE_REUSE,
     LANE_COC,
     LANE_COC_DIRECT,
     LANE_LINK_TYPE_BUTT,
@@ -71,6 +70,7 @@ typedef struct {
 } BrConnInfo;
 
 typedef struct {
+    BleProtocolType protoType;
     char bleMac[BT_MAC_LEN];
     int32_t psm;
 } BleConnInfo;
@@ -134,14 +134,10 @@ typedef struct {
 typedef struct {
     uint32_t linkTypeNum;
     LaneLinkType linkType[LANE_LINK_TYPE_BUTT];
-    bool isReuse[LANE_LINK_TYPE_BUTT];
 } LanePreferredLinkList;
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
-    char peerBleMac[MAX_MAC_LEN];
-    // 'psm' field is valid only when 'expectedLink' contains 'LANE_COC'
-    int32_t psm;
     LaneTransType transType;
     uint32_t expectedBw;
     int32_t pid;

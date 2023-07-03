@@ -60,8 +60,6 @@ typedef struct {
     uint32_t laneId;
     int32_t pid;
     char networkId[NETWORK_ID_BUF_LEN];
-    char peerBleMac[MAX_MAC_LEN];
-    int32_t psm;
     LaneTransType transType;
     LanePreferredLinkList *linkList; /* Mem provided by laneSelect module */
     uint32_t listNum;
@@ -168,8 +166,6 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
         SoftBusFree(linkNode);
         return SOFTBUS_MEM_ERR;
     }
-    (void)memcpy_s(linkNode->peerBleMac, MAX_MAC_LEN, request->peerBleMac, MAX_MAC_LEN);
-    linkNode->psm = request->psm;
     linkNode->laneId = laneId;
     linkNode->linkRetryIdx = 0;
     linkNode->listNum = listNum;
@@ -465,7 +461,6 @@ static void LaneTriggerLink(SoftBusMessage *msg)
     }
     requestInfo.networkDelegate = nodeInfo->networkDelegate;
     requestInfo.linkType = nodeInfo->linkList->linkType[nodeInfo->linkRetryIdx];
-    requestInfo.isReuse = nodeInfo->linkList->isReuse[nodeInfo->linkRetryIdx];
     nodeInfo->linkRetryIdx++;
     Unlock();
     requestInfo.pid = nodeInfo->pid;
@@ -474,11 +469,6 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         nodeInfo->networkId, sizeof(nodeInfo->networkId)) != EOK) {
         return;
     }
-    if (memcpy_s(requestInfo.peerBleMac, sizeof(requestInfo.peerBleMac),
-        nodeInfo->peerBleMac, sizeof(nodeInfo->peerBleMac)) != EOK) {
-        return;
-    }
-    requestInfo.psm = nodeInfo->psm;
     int32_t ret = BuildLink(&requestInfo, laneId, &linkCb);
     if (ret == SOFTBUS_OK) {
         return;

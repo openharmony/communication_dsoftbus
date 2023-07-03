@@ -389,7 +389,6 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     }
     (void)AddNumberToJsonObject(root, JSON_KEY_BUSINESS_TYPE, appInfo->businessType);
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
-    (void)AddNumberToJsonObject(root, JSON_KEY_MIGRATE_OPTION, appInfo->migrateOption);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(root, JSON_KEY_PEER_HANDLE_ID, appInfo->peerHandleId);
     return SOFTBUS_OK;
@@ -503,7 +502,6 @@ NO_SANITIZE("cfi") char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
             cJSON_Delete(root);
             return NULL;
         }
-        (void)AddNumberToJsonObject(root, JSON_KEY_MIGRATE_OPTION, appInfo->migrateOption);
         (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
     } else if (appInfo->appType == APP_TYPE_AUTH) {
         if (!AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName)) {
@@ -580,9 +578,7 @@ NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, Prox
             appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
             appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
         }
-        if (!GetJsonObjectInt32Item(root, JSON_KEY_MIGRATE_OPTION, &(appInfo->migrateOption)) ||
-            !GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId))) {
-                appInfo->migrateOption = 0;
+        if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId))) {
                 appInfo->peerHandleId = -1;
         }
     }
@@ -659,12 +655,10 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
     }
 
     GetJsonObjectStringItem(root, JSON_KEY_GROUP_ID, appInfo->groupId, sizeof(appInfo->groupId));
-    if (!GetJsonObjectInt32Item(root, JSON_KEY_MIGRATE_OPTION, &(appInfo->migrateOption)) ||
-        !GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
+    if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
         !GetJsonObjectInt32Item(root, JSON_KEY_PEER_HANDLE_ID, &(appInfo->myHandleId))) {
             appInfo->myHandleId = -1;
             appInfo->peerHandleId = -1;
-            appInfo->migrateOption = 0;
     }
     size_t len = 0;
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),

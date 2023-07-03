@@ -255,9 +255,8 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->autoCloseTime = 0;
-    appInfo->myHandleId = param->myHandleId;
-    appInfo->peerHandleId = param->peerHandleId;
-    appInfo->migrateOption = param->migrateOption;
+    appInfo->myHandleId = -1;
+    appInfo->peerHandleId = -1;
 
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo ok");
     return appInfo;
@@ -279,7 +278,7 @@ static ChannelType TransGetChannelType(const SessionParam *param, const LaneConn
     }
 
     if (connInfo->type == LANE_BR || connInfo->type == LANE_BLE || connInfo->type == LANE_BLE_DIRECT ||
-        connInfo->type == LANE_BLE_REUSE || connInfo->type == LANE_COC || connInfo->type == LANE_COC_DIRECT) {
+        connInfo->type == LANE_COC || connInfo->type == LANE_COC_DIRECT) {
         return CHANNEL_TYPE_PROXY;
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
         transType == LANE_T_RAW_STREAM) {
@@ -319,15 +318,6 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
 NO_SANITIZE("cfi") static void FillAppInfo(AppInfo *appInfo, ConnectOption *connOpt, const SessionParam *param,
     TransInfo *transInfo, LaneConnInfo *connInfo)
 {
-    if (((param->sessionOption & MIGRATE_ENABLE) != 0) &&
-        (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE)) {
-        if (param->attr->dataType != TYPE_FILE) {
-            appInfo->migrateOption |= MIGRATE_SUPPORTED;
-        }
-    }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "set migrateinfo to appinfo, myHandleId %d, peerHandleId %d, migrateOption %d",
-        appInfo->myHandleId, appInfo->peerHandleId, appInfo->migrateOption);
     transInfo->channelType = TransGetChannelType(param, connInfo);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
