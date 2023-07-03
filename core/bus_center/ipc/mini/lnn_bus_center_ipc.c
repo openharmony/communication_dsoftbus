@@ -182,13 +182,13 @@ int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 NO_SANITIZE("cfi") int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
-    return LnnOnNodeOnlineStateChanged(isOnline, info);
+    return LnnOnNodeOnlineStateChanged("", isOnline, info);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     (void)infoTypeLen;
-    return LnnOnNodeBasicInfoChanged(info, type);
+    return LnnOnNodeBasicInfoChanged("", info, type);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,

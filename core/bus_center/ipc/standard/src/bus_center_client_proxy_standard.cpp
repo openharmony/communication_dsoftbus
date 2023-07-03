@@ -221,11 +221,16 @@ int32_t BusCenterClientProxy::OnLeaveMetaNodeResult(const char *networkId, int r
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
+int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(const char *pkgName, bool isOnline,
+    void *info, uint32_t infoTypeLen)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is nullptr");
         return SOFTBUS_ERR;
     }
     if (info == nullptr) {
@@ -235,6 +240,10 @@ int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write pkgName failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteBool(isOnline)) {
@@ -263,11 +272,16 @@ int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info
     return serverRet;
 }
 
-int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *info,
+    uint32_t infoTypeLen, int32_t type)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is nullptr");
         return SOFTBUS_ERR;
     }
     if (info == nullptr) {
@@ -278,6 +292,10 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTy
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnNodeBasicInfoChanged type: %d", type);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(pkgName)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write pkgName failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(type)) {

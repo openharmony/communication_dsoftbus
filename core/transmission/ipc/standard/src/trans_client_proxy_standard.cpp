@@ -410,16 +410,20 @@ int32_t TransClientProxy::OnLeaveMetaNodeResult(const char *networkId, int retCo
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
+int32_t TransClientProxy::OnNodeOnlineStateChanged(const char *pkgName, bool isOnline,
+    void *info, uint32_t infoTypeLen)
 {
+    (void)pkgName;
     (void)isOnline;
     (void)info;
     (void)infoTypeLen;
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+int32_t TransClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *info,
+    uint32_t infoTypeLen, int32_t type)
 {
+    (void)pkgName;
     (void)info;
     (void)infoTypeLen;
     (void)type;

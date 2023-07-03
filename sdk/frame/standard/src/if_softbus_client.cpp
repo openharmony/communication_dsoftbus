@@ -104,13 +104,13 @@ int32_t ISoftBusClient::OnLeaveMetaNodeResult(const char *networkId, int retCode
     return SOFTBUS_OK;
 }
 
-int32_t ISoftBusClient::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
+int32_t ISoftBusClient::OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen)
 {
     MLOGI("ipc default impl");
     return SOFTBUS_OK;
 }
 
-int32_t ISoftBusClient::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+int32_t ISoftBusClient::OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type)
 {
     MLOGI("ipc default impl");
     return SOFTBUS_OK;
