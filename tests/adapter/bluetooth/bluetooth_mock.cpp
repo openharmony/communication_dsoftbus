@@ -25,6 +25,7 @@
 MockBluetooth *MockBluetooth::targetMocker = nullptr;
 BtGapCallBacks *MockBluetooth::btGapCallback = nullptr;
 BtGattCallbacks *MockBluetooth::btGattCallback = nullptr;
+BleScanCallbacks  *MockBluetooth::bleScanCallback  = nullptr;
 
 static int ActionGapRegisterCallbacks(BtGapCallBacks *func)
 {
@@ -101,14 +102,14 @@ int BleGattRegisterCallbacks(BtGattCallbacks *func)
     return MockBluetooth::GetMocker()->BleGattRegisterCallbacks(func);
 }
 
-int BleStartScanEx(BleScanConfigs *configs, BleScanNativeFilter *filter, unsigned int filterSize)
+int BleStartScanEx(int scannerId, BleScanConfigs *configs, BleScanNativeFilter *filter, unsigned int filterSize)
 {
-    return MockBluetooth::GetMocker()->BleStartScanEx(configs, filter, filterSize);
+    return MockBluetooth::GetMocker()->BleStartScanEx(scannerId, configs, filter, filterSize);
 }
 
-int BleStopScan(void)
+int BleStopScan(int scannerId)
 {
-    return MockBluetooth::GetMocker()->BleStopScan();
+    return MockBluetooth::GetMocker()->BleStopScan(scannerId);
 }
 
 int BleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam)
