@@ -81,33 +81,6 @@ static bool GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remo
     return true;
 }
 
-static bool HasActiveBleConnection(const char *networkId)
-{
-    bool ret = false;
-    ConnectOption option = { 0 };
-    char udid[UDID_BUF_LEN] = { 0 };
-    char udidHash[UDID_HASH_LEN] = { 0 };
-    if (memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption)) != EOK) {
-        return false;
-    }
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, sizeof(udid)) != SOFTBUS_OK) {
-        LLOGE("get udid err");
-        return false;
-    }
-    if (SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), (unsigned char *)udidHash) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get udid hash err");
-        return false;
-    }
-    option.type = CONNECT_BLE;
-    if (memcpy_s(option.bleOption.deviceIdHash, UDID_HASH_LEN, udidHash, UDID_HASH_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s udid hash err");
-        return false;
-    }
-    ret = CheckActiveConnection(&option);
-    LLOGD("has active ble connection:%s", ret ? "true" : "false");
-    return ret;
-}
-
 static bool IsEnableWlan2P4G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
@@ -206,37 +179,6 @@ static bool IsEnableBle(const char *networkId)
     return true;
 }
 
-static bool IsEnableBleReuse(const char *networkId)
-{
-    int32_t local, remote;
-    uint64_t localFeature, remoteFeature;
-    uint64_t onlineTime, nowtime;
-    if (!GetNetCap(networkId, &local, &remote)) {
-        LLOGE("GetNetCap error");
-        return false;
-    }
-    if (!GetFeatureCap(networkId, &localFeature, &remoteFeature)) {
-        LLOGE("GetFeatureCap error");
-        return false;
-    }
-    if (LnnGetDLOnlineTimestamp(networkId, &onlineTime) != SOFTBUS_OK) {
-        LLOGE("GetDLOnlineTimestamp error");
-        return false;
-    }
-    nowtime = LnnUpTimeMs();
-    if (!IsFeatureSupport(localFeature, BIT_BLE_ONLINE_REUSE_CAPABILITY) ||
-        !IsFeatureSupport(remoteFeature, BIT_BLE_ONLINE_REUSE_CAPABILITY)) {
-        LLOGE("can not support ble reuse");
-        return false;
-    }
-    if (!HasActiveBleConnection(networkId) || (nowtime - onlineTime > LNN_ONLINETIME_OUT)) {
-        LLOGE("ble connection has been disconnected or online time > 10s");
-        return false;
-    }
-    LLOGD("ble will be reuse");
-    return true;
-}
-
 static bool IsEnableBleDirect(const char *networkId)
 {
     if (!IsEnableBle(networkId)) {
@@ -302,13 +244,6 @@ NO_SANITIZE("cfi") static int32_t GetBleScore(const char *networkId, uint32_t ex
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-NO_SANITIZE("cfi") static int32_t GetBleReuseScore(const char *networkId, uint32_t expectedBw)
-{
-    (void)networkId;
-    (void)expectedBw;
-    return LNN_LINK_DEFAULT_SCORE;
-}
-
 NO_SANITIZE("cfi") static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
@@ -365,7 +300,6 @@ static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_ETH] = { false, NULL,              NULL            },
     [LANE_P2P_REUSE] = { true,  IsEnableP2pReuse,  GetP2pScore    },
     [LANE_BLE_DIRECT] = { true, IsEnableBleDirect, GetBleScore     },
-    [LANE_BLE_REUSE] = { true, IsEnableBleReuse,  GetBleReuseScore},
     [LANE_COC] = { true,  IsEnableCoc,      GetCocScore     },
     [LANE_COC_DIRECT] = { true,  IsEnableCocDirect, GetCocScore    },
 };

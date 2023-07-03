@@ -34,6 +34,8 @@ typedef struct {
     char netIfName[NET_IF_NAME_LEN];
     char deviceIp[MAX_ADDR_LEN];
     char macAddr[MAC_LEN];
+    char bleMacAddr[MAC_LEN];
+    uint64_t latestTime;
     int authPort;
     int proxyPort;
     int sessionPort;

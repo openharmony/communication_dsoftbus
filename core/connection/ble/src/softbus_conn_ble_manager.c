@@ -106,7 +106,7 @@ typedef struct {
         } udidAddressOption;
         struct {
             const char *udid;
-            ProtocolType protocol;
+            BleProtocolType protocol;
         } udidClientOption;
     };
 } BleConnectionCompareOption;
@@ -1199,7 +1199,7 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
     return target;
 }
 
-ConnBleConnection *ConnBleGetConnectionByAddr(const char *addr, ConnSideType side, ProtocolType protocol)
+ConnBleConnection *ConnBleGetConnectionByAddr(const char *addr, ConnSideType side, BleProtocolType protocol)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(addr != NULL, NULL, "invalid parameter, ble addr is null");
     BleConnectionCompareOption option = {
@@ -1224,7 +1224,7 @@ ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId)
     return GetConnectionByOption(&option);
 }
 
-ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSideType side, ProtocolType protocol)
+ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSideType side, BleProtocolType protocol)
 {
     BleConnectionCompareOption option = {
         .type = BLE_CONNECTION_COMPARE_TYPE_UNDERLAY_HANDLE,
@@ -1233,7 +1233,7 @@ ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSi
     return GetConnectionByOption(&option);
 }
 
-ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, ProtocolType protocol)
+ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol)
 {
     BleConnectionCompareOption option = {
         .type = BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS,
@@ -1246,7 +1246,7 @@ ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid
     return GetConnectionByOption(&option);
 }
 
-ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, ProtocolType protocol)
+ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol)
 {
     BleConnectionCompareOption option = {
         .type = BLE_CONNECTION_COMPARE_TYPE_UDID_CLIENT_SIDE,

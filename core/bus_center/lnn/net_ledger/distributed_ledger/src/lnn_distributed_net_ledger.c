@@ -44,6 +44,8 @@
 #include "softbus_hisysevt_bus_center.h"
 #include "bus_center_event.h"
 
+#define TIME_THOUSANDS_FACTOR (1000)
+#define BLE_ADV_LOST_TIME 1200
 #define LONG_TO_STRING_MAX_LEN 21
 #define LNN_COMMON_LEN_64 8
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
@@ -91,6 +93,16 @@ typedef struct {
 } DistributedNetLedger;
 
 static DistributedNetLedger g_distributedNetLedger;
+
+static uint64_t GetCurrentTime(void)
+{
+    SoftBusSysTime now = { 0 };
+    if (SoftBusGetTime(&now) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCurrentTime fail.");
+        return 0;
+    }
+    return (uint64_t)now.sec * TIME_THOUSANDS_FACTOR + (uint64_t)now.usec / TIME_THOUSANDS_FACTOR;
+}
 
 NO_SANITIZE("cfi") int32_t LnnSetAuthTypeValue(uint32_t *authTypeValue, AuthType type)
 {
@@ -687,6 +699,47 @@ static int32_t DlGetMasterUdid(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    uint64_t currentTimeMs = GetCurrentTime();
+    LNN_CHECK_AND_RETURN_RET_LOG(info->connectInfo.latestTime + BLE_ADV_LOST_TIME <= currentTimeMs, SOFTBUS_ERR,
+        "ble mac out date, lastAdvTime:%llu, now:%llu", info->connectInfo.latestTime, currentTimeMs);
+
+    if (memcpy_s(buf, len, info->connectInfo.bleMacAddr, MAC_LEN) != EOK) {
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void LnnUpdateNodeBleMac(const char *networkId, char *bleMac, uint32_t len)
+{
+    if ((networkId == NULL) || (bleMac == NULL) || (len != MAC_LEN)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid arg");
+        return;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        return;
+    }
+    NodeInfo *info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get node info fail.");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return;
+    }
+    if (memcpy_s(info->connectInfo.bleMacAddr, MAC_LEN, bleMac, len) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy fail.");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return;
+    }
+    info->connectInfo.latestTime = GetCurrentTime();
+
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+}
+
 static int32_t DlGetAuthPort(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -903,6 +956,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_P2P_GO_MAC, DlGetP2pGoMac},
     {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
+    {STRING_KEY_BLE_MAC, DlGetNodeBleMac},
     {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
