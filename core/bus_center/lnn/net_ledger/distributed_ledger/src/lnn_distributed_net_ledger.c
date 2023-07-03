@@ -1378,6 +1378,11 @@ NO_SANITIZE("cfi") ReportCategory LnnSetNodeOffline(const char *udid, Connection
         }
         return REPORT_NONE;
     }
+    if (!LnnIsNodeOnline(info)) {
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "the state is already offline, no need to report offline.");
+        return REPORT_NONE;
+    }
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);

@@ -555,6 +555,11 @@ int32_t SoftBusClientStub::OnLeaveMetaNodeResultInner(MessageParcel &data, Messa
 
 int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, MessageParcel &reply)
 {
+    const char *pkgName = data.ReadCString();
+    if (strlen(pkgName) == 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid package name, length is zero");
+        return SOFTBUS_ERR;
+    }
     bool isOnline = false;
     if (!data.ReadBool(isOnline)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChangedInner read online state failed!");
@@ -571,7 +576,7 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChangedInner read basic info failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = OnNodeOnlineStateChanged(isOnline, info, infoTypeLen);
+    int32_t retReply = OnNodeOnlineStateChanged(pkgName, isOnline, info, infoTypeLen);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChangedInner write reply failed!");
         return SOFTBUS_ERR;
@@ -581,6 +586,11 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
 
 int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, MessageParcel &reply)
 {
+    const char *pkgName = data.ReadCString();
+    if (strlen(pkgName) == 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid package name, length is zero");
+        return SOFTBUS_ERR;
+    }
     int32_t type;
     if (!data.ReadInt32(type)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner read type failed!");
@@ -598,7 +608,7 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner read basic info failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = OnNodeBasicInfoChanged(info, infoTypeLen, type);
+    int32_t retReply = OnNodeBasicInfoChanged(pkgName, info, infoTypeLen, type);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner write reply failed!");
         return SOFTBUS_ERR;
@@ -706,16 +716,17 @@ int32_t SoftBusClientStub::OnLeaveMetaNodeResult(const char *networkId, int retC
     return MetaNodeOnLeaveResult(networkId, retCode);
 }
 
-int32_t SoftBusClientStub::OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
+int32_t SoftBusClientStub::OnNodeOnlineStateChanged(const char *pkgName, bool isOnline,
+    void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
-    return LnnOnNodeOnlineStateChanged(isOnline, info);
+    return LnnOnNodeOnlineStateChanged(pkgName, isOnline, info);
 }
 
-int32_t SoftBusClientStub::OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+int32_t SoftBusClientStub::OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type)
 {
     (void)infoTypeLen;
-    return LnnOnNodeBasicInfoChanged(info, type);
+    return LnnOnNodeBasicInfoChanged(pkgName, info, type);
 }
 
 int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode)

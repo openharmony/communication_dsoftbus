@@ -116,7 +116,7 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeOnlineStateChanged read basic info failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = LnnOnNodeOnlineStateChanged(isOnline, info);
+    int32_t retReply = LnnOnNodeOnlineStateChanged("", isOnline, info);
     if (retReply != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
             "ClientOnNodeOnlineStateChanged LnnOnNodeOnlineStateChanged failed!");
@@ -146,7 +146,7 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeBasicInfoChanged read basic info failed!");
         return SOFTBUS_ERR;
     }
-    int32_t retReply = LnnOnNodeBasicInfoChanged(info, type);
+    int32_t retReply = LnnOnNodeBasicInfoChanged("", info, type);
     if (retReply != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
             "ClientOnNodeBasicInfoChanged LnnOnNodeBasicInfoChanged failed!");

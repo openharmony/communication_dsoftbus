@@ -26,6 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 
 #define DEFAULT_NODE_STATE_CB_CNT 10
 #define MAX_IPC_LEN 1024
@@ -65,6 +66,7 @@ typedef struct {
 typedef struct {
     ListNode node;
     INodeStateCb cb;
+    char pkgName[PKG_NAME_SIZE_MAX];
 } NodeStateCallbackItem;
 
 typedef struct {
@@ -341,11 +343,12 @@ static void DuplicateNodeStateCbList(ListNode *list)
     NodeStateCallbackItem *copyItem = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.nodeStateCbList, NodeStateCallbackItem, node) {
-        copyItem = (NodeStateCallbackItem *)SoftBusMalloc(sizeof(NodeStateCallbackItem));
+        copyItem = (NodeStateCallbackItem *)SoftBusCalloc(sizeof(NodeStateCallbackItem));
         if (copyItem == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc node state callback item fail");
             continue;
         }
+        (void)strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1);
         ListInit(&copyItem->node);
         copyItem->cb = item->cb;
         ListAdd(list, &copyItem->node);
@@ -613,7 +616,10 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
     NodeStateCallbackItem *item = NULL;
     int32_t rc = SOFTBUS_ERR;
 
-    (void)pkgName;
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Package name is empty or length exceeds");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (!g_busCenterClient.isInit) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: reg node state cb not init");
         return SOFTBUS_NO_INIT;
@@ -632,11 +638,12 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
         if (g_busCenterClient.nodeStateCbListCnt >= g_maxNodeStateCbCount) {
             break;
         }
-        item = (NodeStateCallbackItem *)SoftBusMalloc(sizeof(*item));
+        item = (NodeStateCallbackItem *)SoftBusCalloc(sizeof(*item));
         if (item == NULL) {
             rc = SOFTBUS_MALLOC_ERR;
             break;
         }
+        (void)strncpy_s(item->pkgName, PKG_NAME_SIZE_MAX, pkgName, PKG_NAME_SIZE_MAX - 1);
         ListInit(&item->node);
         item->cb = *callback;
         ListAdd(&g_busCenterClient.nodeStateCbList, &item->node);
@@ -930,13 +937,13 @@ int32_t MetaNodeOnLeaveResult(const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info)
+NO_SANITIZE("cfi") int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info)
 {
     NodeStateCallbackItem *item = NULL;
     NodeBasicInfo *basicInfo = (NodeBasicInfo *)info;
     ListNode dupList;
 
-    if (basicInfo == NULL) {
+    if (basicInfo == NULL || pkgName == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
@@ -953,11 +960,13 @@ NO_SANITIZE("cfi") int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
         if (isOnline == true) {
-            if ((item->cb.events & EVENT_NODE_STATE_ONLINE) != 0) {
+            if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+                (item->cb.events & EVENT_NODE_STATE_ONLINE) != 0) {
                 item->cb.onNodeOnline(basicInfo);
             }
         } else {
-            if ((item->cb.events & EVENT_NODE_STATE_OFFLINE) != 0) {
+            if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+                (item->cb.events & EVENT_NODE_STATE_OFFLINE) != 0) {
                 item->cb.onNodeOffline(basicInfo);
             }
         }
@@ -966,14 +975,14 @@ NO_SANITIZE("cfi") int32_t LnnOnNodeOnlineStateChanged(bool isOnline, void *info
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type)
+NO_SANITIZE("cfi") int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
 {
     NodeStateCallbackItem *item = NULL;
     NodeBasicInfo *basicInfo = (NodeBasicInfo *)info;
     ListNode dupList;
 
-    if (basicInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info or list is null");
+    if (basicInfo == NULL || pkgName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info or pkgName is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
@@ -994,7 +1003,8 @@ NO_SANITIZE("cfi") int32_t LnnOnNodeBasicInfoChanged(void *info, int32_t type)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock node basic info cb list in notify");
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
-        if ((item->cb.events & EVENT_NODE_STATE_INFO_CHANGED) != 0) {
+        if (((strcmp(item->pkgName, pkgName) == 0) || (strlen(pkgName) == 0)) &&
+            (item->cb.events & EVENT_NODE_STATE_INFO_CHANGED) != 0) {
             item->cb.onNodeBasicInfoChanged((NodeBasicInfoType)type, basicInfo);
         }
     }
