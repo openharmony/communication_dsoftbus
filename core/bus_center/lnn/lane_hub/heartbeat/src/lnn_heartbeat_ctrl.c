@@ -313,10 +313,12 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (btState) {
         case SOFTBUS_BLE_TURN_ON:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB handle SOFTBUS_BLE_TURN_ON");
+            LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
             HbConditionChanged(false);
             break;
         case SOFTBUS_BLE_TURN_OFF:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB handle SOFTBUS_BLE_TURN_OFF");
+            LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_CLOSE_INFO);
             HbProcOfflineNodeWithoutSoftbus();
             HbConditionChanged(false);
             break;

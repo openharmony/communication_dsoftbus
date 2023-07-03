@@ -77,6 +77,7 @@
 #define BlE_ADVERTISER "bleAdvertiser"
 #define RECV_MESSAGE_INFO "recvMessageInfo"
 
+static int32_t g_bleScannerId = -1;
 typedef enum {
     PUBLISH_ACTIVE_SERVICE,
     PUBLISH_PASSIVE_SERVICE,
@@ -574,13 +575,15 @@ static SoftBusAdvCallback g_advCallback = {
     .AdvEnableCallback = BleAdvEnableCallback,
     .AdvDisableCallback = BleAdvDisableCallback,
     .AdvDataCallback = BleAdvDataCallback,
-    .AdvUpdateCallback = BleAdvUpdateCallback
+    .AdvUpdateCallback = BleAdvUpdateCallback,
+    .LpDeviceInfoCallback = NULL
 };
 
 static SoftBusScanListener g_scanListener = {
     .OnScanStart = BleOnScanStart,
     .OnScanStop = BleOnScanStop,
-    .OnScanResult = BleScanResultCallback
+    .OnScanResult = BleScanResultCallback,
+    .OnScanStateChanged = NULL
 };
 
 static SoftBusBtStateListener g_stateChangedListener = {
@@ -930,7 +933,7 @@ static void StartScaner(void)
         DLOGE("GetScannerParam failed");
         return;
     }
-    if (SoftBusStartScan(g_bleListener.scanListenerId, &scanParam) != SOFTBUS_OK) {
+    if (SoftBusStartScan(g_bleListener.scanListenerId, g_bleScannerId, &scanParam) != SOFTBUS_OK) {
         DLOGE("start scan failed");
         return;
     }
@@ -943,7 +946,7 @@ static int32_t StopScaner(void)
         DLOGI("already stop scanning");
         return SOFTBUS_OK;
     }
-    if (SoftBusStopScan(g_bleListener.scanListenerId) != SOFTBUS_OK) {
+    if (SoftBusStopScan(g_bleListener.scanListenerId, g_bleScannerId) != SOFTBUS_OK) {
         DLOGI("StopScaner failed");
         return SOFTBUS_ERR;
     }
@@ -1222,8 +1225,8 @@ static DiscoveryBleDispatcherInterface g_discBleDispatcherInterface = {
 
 static int32_t InitAdvertiser(void)
 {
-    int32_t conChannel = SoftBusGetAdvChannel(&g_advCallback);
-    int32_t nonChannel = SoftBusGetAdvChannel(&g_advCallback);
+    int32_t conChannel = SoftBusGetAdvChannel(&g_advCallback, &g_bleScannerId, false);
+    int32_t nonChannel = SoftBusGetAdvChannel(&g_advCallback, &g_bleScannerId, false);
     if (conChannel < 0 || nonChannel < 0) {
         DLOGE("get adv channel failed");
         (void)SoftBusReleaseAdvChannel(conChannel);
@@ -1599,7 +1602,7 @@ static void DiscBleSetScanFilter(int32_t listenerId)
 
 static int32_t InitBleListener(void)
 {
-    g_bleListener.scanListenerId = SoftBusAddScanListener(&g_scanListener);
+    g_bleListener.scanListenerId = SoftBusAddScanListener(&g_scanListener, &g_bleScannerId, false);
     g_bleListener.stateListenerId = SoftBusAddBtStateListener(&g_stateChangedListener);
     if (g_bleListener.stateListenerId < 0 || g_bleListener.scanListenerId < 0) {
         return SOFTBUS_ERR;
@@ -1674,6 +1677,7 @@ static void BleListenerDeinit(void)
 {
     (void)SoftBusRemoveBtStateListener(g_bleListener.stateListenerId);
     (void)SoftBusRemoveScanListener(g_bleListener.scanListenerId);
+    (void)SoftBusDeregisterScanCallbacks(g_bleScannerId);
 }
 
 static void DiscBleInfoDeinit(void)
