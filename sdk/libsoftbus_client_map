@@ -190,6 +190,7 @@
         "LnnOnNodeBasicInfoChanged";
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
+        "ReadSessionLinkType";
         "ClientTransTdcOnChannelOpened";
         ".term_proc";
         "LnnOnTimeSyncResult";
