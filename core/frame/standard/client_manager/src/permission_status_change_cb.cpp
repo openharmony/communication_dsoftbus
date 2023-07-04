@@ -18,7 +18,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "message_parcel.h"
 
 namespace OHOS {

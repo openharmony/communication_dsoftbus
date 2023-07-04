@@ -18,7 +18,7 @@
 #include "client_trans_channel_callback.h"
 #include "ipc_skeleton.h"
 #include "softbus_errcode.h"
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "softbus_log.h"
 
 int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)

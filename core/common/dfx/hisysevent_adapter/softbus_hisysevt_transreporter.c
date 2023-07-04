@@ -22,7 +22,7 @@
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_utils.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 
 #define STATISTIC_EVT_TRANSPORT_KPI "TRANSPORT_KPI"
 #define STATISTIC_EVT_CALLED_API_INFO "CALLED_API_INFO"
