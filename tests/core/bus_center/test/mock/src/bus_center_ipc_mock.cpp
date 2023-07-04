@@ -62,6 +62,11 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     return BusCenterIpcInterfaceInstance()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
 
+bool LnnIsLSANode(const NodeBasicInfo *info)
+{
+    return BusCenterIpcInterfaceInstance()->LnnIsLSANode(info);
+}
+
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     return BusCenterIpcInterfaceInstance()->LnnGetLocalDeviceInfo(info);

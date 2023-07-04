@@ -183,6 +183,9 @@ static void HbSendCheckOffLineMessage(LnnHeartbeatType hbType)
         return;
     }
     for (i = 0; i < infoNum; ++i) {
+        if (LnnIsLSANode(&info[i])) {
+            continue;
+        }
         (void)LnnStopScreenChangeOfflineTiming(info[i].networkId, LnnConvertHbTypeToConnAddrType(hbType));
         if (LnnStartScreenChangeOfflineTiming(info[i].networkId,
             LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
@@ -355,6 +358,9 @@ static void HbRemoveCheckOffLineMessage(LnnHeartbeatType hbType)
         return;
     }
     for (i = 0; i < infoNum; ++i) {
+        if (LnnIsLSANode(&info[i])) {
+            continue;
+        }
         if (LnnStopScreenChangeOfflineTiming(info[i].networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
             LLOGE("HB stop check offline target msg failed, networkId:%s", AnonymizesNetworkID(info[i].networkId));
         }

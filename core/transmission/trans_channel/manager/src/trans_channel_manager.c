@@ -40,6 +40,7 @@
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "lnn_network_manager.h"
 
 #define MIGRATE_ENABLE 2
 #define MIGRATE_SUPPORTED 1
@@ -323,6 +324,18 @@ NO_SANITIZE("cfi") static void FillAppInfo(AppInfo *appInfo, ConnectOption *conn
     appInfo->channelType = transInfo->channelType;
 }
 
+static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
+{
+    if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP ||
+        channelType != CHANNEL_TYPE_PROXY) {
+        return;
+    }
+    int32_t module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+    if (module != UNUSE_BUTT) {
+        connOpt->socketOption.moduleId = module;
+    }
+}
+
 NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
@@ -349,6 +362,7 @@ NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo
         goto EXIT_ERR;
     }
     FillAppInfo(appInfo, &connOpt, param, transInfo, &connInfo);
+    TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "lane[%u] get channel type[%u].", laneId, transInfo->channelType);
     if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId)) != SOFTBUS_OK) {
