@@ -17,7 +17,7 @@
 #include <cstring>
 #include "if_softbus_client.h"
 #include "softbus_log.h"
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "securec.h"
 
 using testing::_;
