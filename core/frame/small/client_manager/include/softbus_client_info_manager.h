@@ -17,7 +17,7 @@
 #define SOFTBUS_CLIENT_INFO_MANAGER_H
 
 #include <stdbool.h>
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 
 #ifdef __cplusplus
 extern "C" {

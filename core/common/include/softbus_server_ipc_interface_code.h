@@ -36,6 +36,7 @@ struct CommonScvId {
     unsigned int cbId;
 };
 
+/*SAID: 4700*/
 enum SoftBusFuncId {
     MANAGE_REGISTER_SERVICE = 0,
 

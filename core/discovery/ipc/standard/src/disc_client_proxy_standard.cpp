@@ -14,7 +14,7 @@
  */
 
 #include "disc_client_proxy_standard.h"
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "softbus_log.h"
 
 namespace OHOS {
