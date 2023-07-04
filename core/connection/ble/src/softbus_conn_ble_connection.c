@@ -145,7 +145,7 @@ int32_t ConnBleStartServer()
         return SOFTBUS_OK;
     }
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
-        BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
+        const BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
         if (interface == NULL) {
             continue;
         }
@@ -176,7 +176,7 @@ int32_t ConnBleStopServer()
         return SOFTBUS_OK;
     }
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
-        BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
+        const BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
         if (interface == NULL) {
             continue;
         }
@@ -200,7 +200,7 @@ int32_t ConnBleConnect(ConnBleConnection *connection)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM,
     "ble connection connect failed, invalid param, connection is null");
-    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection connect failed, protocol not support");
     return interface->bleClientConnect(connection);
@@ -233,7 +233,7 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
 {
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM,
     "ble connection disconnect failed, invalid param, connection is null");
-    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection disconnect failed, protocol not support");
     CLOGW("receive ble disconnect now, connection id=%u, side=%d, reason=%d", connection->connectionId,
@@ -371,7 +371,7 @@ int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBl
     if (connection->side == CONN_SIDE_SERVER) {
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
-    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection update connection priority failed, protocol not support");
     return interface->bleClientUpdatePriority(connection, priority);
@@ -385,7 +385,7 @@ int32_t ConnBleSend(ConnBleConnection *connection, const uint8_t *data, uint32_t
         data != NULL, SOFTBUS_INVALID_PARAM, "ble connection send data failed, invalid param, data is null");
     CONN_CHECK_AND_RETURN_RET_LOG(
         dataLen != 0, SOFTBUS_INVALID_PARAM, "ble connection send data failed, invalid param, data len is 0");
-    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection send data failed, protocol not support");
     return connection->side == CONN_SIDE_SERVER ?
@@ -655,7 +655,7 @@ void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t
         SoftBusFree(data);
         return;
     }
-    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     if (interface == NULL) {
         CLOGE("ble connection data received failed, protocol not support, connection id=%u", connectionId);
         SoftBusFree(data);
@@ -778,7 +778,7 @@ void BleOnServerAccepted(uint32_t connectionId)
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(
         connection != NULL, "ble server accepted failed, connection not exist, connection id=%u", connectionId);
-    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_LOG(
         interface != NULL, "ble server accepted failed, interface not support, connection id=%u", connectionId);
     int32_t status = SOFTBUS_OK;
@@ -812,7 +812,7 @@ static int32_t DoRetryAction(enum BleServerState expect)
     int32_t statusGatt = SOFTBUS_OK;
     int32_t statusCoc = SOFTBUS_OK;
     if (g_serverCoordination.status[BLE_GATT] != SOFTBUS_OK) {
-        BleUnifyInterface *interface = ConnBleGetUnifyInterface(BLE_GATT);
+        const BleUnifyInterface *interface = ConnBleGetUnifyInterface(BLE_GATT);
         if (interface != NULL) {
             statusGatt = (expect == BLE_SERVER_STATE_STARTED) ? interface->bleServerStartService() :
                                  interface->bleServerStopService();
@@ -820,7 +820,7 @@ static int32_t DoRetryAction(enum BleServerState expect)
     }
 
     if (g_serverCoordination.status[BLE_COC] != SOFTBUS_OK) {
-        BleUnifyInterface *interface = ConnBleGetUnifyInterface(BLE_COC);
+        const BleUnifyInterface *interface = ConnBleGetUnifyInterface(BLE_COC);
         if (interface != NULL) {
             statusCoc = (expect == BLE_SERVER_STATE_STARTED) ? interface->bleServerStartService() :
                                 interface->bleServerStopService();
@@ -865,7 +865,7 @@ static void BasicInfoExchangeTimeoutHandler(uint32_t connectionId)
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(connection != NULL,
         "ble basic info exchange timeout handle failed, connection not exist, connection id=%u", connectionId);
-    BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
+    const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_LOG(interface != NULL,
         "ble basic info exchange timeout handle failed, protocol not support, connection id=%u", connectionId);
     CLOGW("ble basic info exchange timeout, connection id=%u, side=%s", connectionId,
@@ -994,7 +994,7 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
     };
     int32_t status = SOFTBUS_ERR;
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
-        BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
+        const BleUnifyInterface *interface = ConnBleGetUnifyInterface(i);
         if (interface == NULL) {
             continue;
         }
