@@ -144,7 +144,7 @@ int32_t ConnBleStartServer()
     if (actual == BLE_SERVER_STATE_STARTING || actual == BLE_SERVER_STATE_STARTED) {
         return SOFTBUS_OK;
     }
-    const BleUnifyInterface *interface;
+    const BleUnifyInterface *interface = NULL;
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         interface = ConnBleGetUnifyInterface(i);
         if (interface == NULL) {
@@ -176,7 +176,7 @@ int32_t ConnBleStopServer()
     if (actual == BLE_SERVER_STATE_STOPPING || actual == BLE_SERVER_STATE_STOPPED) {
         return SOFTBUS_OK;
     }
-    const BleUnifyInterface *interface;
+    const BleUnifyInterface *interface = NULL;
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         interface = ConnBleGetUnifyInterface(i);
         if (interface == NULL) {
@@ -995,7 +995,7 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         .onServerConnectionClosed = BleOnConnectionClosed,
     };
     int32_t status = SOFTBUS_ERR;
-    const BleUnifyInterface *interface;
+    const BleUnifyInterface *interface = NULL;
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         interface = ConnBleGetUnifyInterface(i);
         if (interface == NULL) {
