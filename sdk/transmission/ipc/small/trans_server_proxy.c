@@ -23,7 +23,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "softbus_log.h"
 
 #define WAIT_SERVER_READY_INTERVAL_COUNT 50

@@ -20,7 +20,7 @@
 #include "message_parcel.h"
 #include "peer_holder.h"
 #include "softbus_errcode.h"
-#include "softbus_ipc_def.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "softbus_common.h"
 #include "softbus_trans_def.h"
 #include "softbus_def.h"
