@@ -104,6 +104,8 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
 
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId);
 
+int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, int32_t *routeType);
+
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId);
 
 int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callback);
