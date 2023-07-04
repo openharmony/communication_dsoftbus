@@ -26,6 +26,7 @@
 #include "softbus_hisysevt_transreporter.h"
 
 namespace OHOS {
+static constexpr int BUFF_MAX_LEN = 65;
 int32_t ReportStatisticEvt()
 {
     return 0;
@@ -59,18 +60,39 @@ void SoftBusRecordDevOnlineDurResultFuzzTest(const uint8_t *data, size_t size)
 void SoftBusReportDevOnlineEvtFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[BUFF_MAX_LEN] = {0};
     if (memcpy_s(udid, sizeof(udid) - 1, data, size) != EOK) {
         return;
     }
-    OnlineDeviceInfo info = *(reinterpret_cast<const OnlineDeviceInfo *>(data));
+    OnlineDeviceInfo info = {0};
+    info.onlineDevnum = *(reinterpret_cast<const uint32_t *>(data));
+    info.btOnlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
+    info.wifiOnlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
+    info.peerDevType = *(reinterpret_cast<const uint32_t *>(data));
+    info.insertFileResult = *(reinterpret_cast<const int32_t *>(data));
     SoftBusReportDevOnlineEvt(&info, udid);
 }
 
 void SoftBusReportBusCenterFaultEvtFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
-    SoftBusFaultEvtInfo info = *(reinterpret_cast<const SoftBusFaultEvtInfo *>(data));
+    SoftBusFaultEvtInfo info = {0};
+    info.moduleType = *(reinterpret_cast<const uint8_t *>(data));
+    info.linkType = *(reinterpret_cast<const uint8_t *>(data));
+    info.channelQuality = *(reinterpret_cast<const float *>(data));
+    info.errorCode = *(reinterpret_cast<const int32_t *>(data));
+    info.peerDevType = *(reinterpret_cast<const int32_t *>(data));
+    info.onLineDevNum = *(reinterpret_cast<const int32_t *>(data));
+    info.connNum = *(reinterpret_cast<const int32_t *>(data));
+    info.nightMode = *(reinterpret_cast<const int32_t *>(data));
+    info.wifiStatue = *(reinterpret_cast<const int32_t *>(data));
+    info.bleStatue = *(reinterpret_cast<const int32_t *>(data));
+    info.callerAppMode = *(reinterpret_cast<const int32_t *>(data));
+    info.subErrCode = *(reinterpret_cast<const int32_t *>(data));
+    info.connBrNum = *(reinterpret_cast<const int32_t *>(data));
+    info.connBleNum = *(reinterpret_cast<const int32_t *>(data));
+    info.bleBradStatus = *(reinterpret_cast<const bool *>(data));
+    info.bleScanStatus = *(reinterpret_cast<const bool *>(data));
     SoftBusReportBusCenterFaultEvt(&info);
 }
 
@@ -78,7 +100,8 @@ void SoftBusRecordDiscoveryResultFuzzTest(const uint8_t *data, size_t size)
 {
     InitBusCenterDfx();
     DiscoveryStage stage = *(reinterpret_cast<const DiscoveryStage *>(data));
-    AppDiscNode node = *(reinterpret_cast<const AppDiscNode *>(data));
+    AppDiscNode node = {0};
+    node.appDiscCnt = *(reinterpret_cast<const int32_t *>(data));
     SoftBusRecordDiscoveryResult(stage, &node);
 }
 
@@ -91,12 +114,14 @@ void SoftBusHiSysEvtCommonFuzzTest(const uint8_t *data, size_t size)
 
 void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t *data, size_t size)
 {
-    (void)data;
-    (void)size;
+    char tmp[BUFF_MAX_LEN] = {0};
+    if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
+        return;
+    }
     InitTransStatisticSysEvt();
     GetSoftbusRecordTimeMillis();
     SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);
-    SoftbusReportTransInfoEvt(reinterpret_cast<const char *>(data));
+    SoftbusReportTransInfoEvt(reinterpret_cast<const char *>(tmp));
     SoftbusRecordOpenSession(SOFTBUS_EVT_OPEN_SESSION_SUCC, 0);
 }
 } // namespace OHOS
@@ -104,7 +129,7 @@ void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t *data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
+    if (data == nullptr || size < sizeof(uint64_t)) {
         return 0;
     }
 
