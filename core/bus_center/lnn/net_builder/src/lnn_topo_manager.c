@@ -50,13 +50,6 @@
 
 #define TOPO_HASH_TABLE_SIZE 16
 
-typedef struct {
-    ConnectionAddrType type;
-    uint8_t relation;
-    bool isJoin;
-    char udid[UDID_BUF_LEN];
-} RelationChangedMsg;
-
 typedef enum {
     TOPO_MSG_TYPE_UPDATE,
 } TopoUpdateMsgType;
@@ -87,6 +80,11 @@ typedef struct {
 } TopoInfo;
 
 static TopoHashTable g_topoTable;
+
+void __attribute__((weak)) RouteLnnRelationEventHandler(const LnnRelationChangedMsg *msg)
+{
+    (void)msg;
+}
 
 static bool IsSameRelation(const uint8_t *newRelation, const uint8_t *oldRelation, uint32_t len)
 {
@@ -434,6 +432,9 @@ static void ForwardTopoMsgToAll(const char *networkId, const uint8_t *msg, uint3
         return;
     }
     for (i = 0; i < infoNum; ++i) {
+        if (LnnIsLSANode(&info[i])) {
+            continue;
+        }
         if (strcmp(networkId, info[i].networkId) == 0) {
             continue;
         }
@@ -607,6 +608,9 @@ static void NotifyLnnRelationChange(const char *localUdid, const char *udid,
     }
     msgLen = strlen(msg) + 1;
     for (i = 0; i < infoNum; ++i) {
+        if (LnnIsLSANode(&info[i])) {
+            continue;
+        }
         if (strcmp(networkId, info[i].networkId) == 0) {
             continue;
         }
@@ -667,19 +671,21 @@ static void ProcessLnnRelationChange(const char *udid, const uint8_t *relation, 
 
 static void OnLnnRelationChangedDelay(void *para)
 {
-    uint8_t newRelation[CONNECTION_ADDR_MAX] = {0};
-    int32_t rc;
-    RelationChangedMsg *msg = (RelationChangedMsg *)para;
-
+    LnnRelationChangedMsg *msg = (LnnRelationChangedMsg *)para;
     if (msg == NULL) {
         return;
     }
+    RouteLnnRelationEventHandler(msg);
+    SoftBusFree(msg);
+    return;
+
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLnnRelationChangedDelay: %d", msg->type);
     if (msg->type == CONNECTION_ADDR_MAX) {
         SoftBusFree(msg);
         return;
     }
-    rc = LnnGetLnnRelation(msg->udid, CATEGORY_UDID, newRelation, CONNECTION_ADDR_MAX);
+    uint8_t newRelation[CONNECTION_ADDR_MAX] = {0};
+    int32_t rc = LnnGetLnnRelation(msg->udid, CATEGORY_UDID, newRelation, CONNECTION_ADDR_MAX);
     if (rc != SOFTBUS_OK && rc != SOFTBUS_NOT_FIND) { // NOT_FIND means node is offline
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new lnn relation fail");
         SoftBusFree(msg);
@@ -706,10 +712,8 @@ static void OnLnnRelationChangedDelay(void *para)
 
 static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
 {
-    LLOGI("ignore topo change event");
-    return;
     const LnnRelationChanedEventInfo *eventInfo = (const LnnRelationChanedEventInfo *)info;
-    RelationChangedMsg *msg = NULL;
+    LnnRelationChangedMsg *msg = NULL;
 
     if (info == NULL || info->event != LNN_EVENT_RELATION_CHANGED) {
         return;
@@ -718,7 +722,7 @@ static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid relation changed params");
         return;
     }
-    msg = (RelationChangedMsg *)SoftBusMalloc(sizeof(RelationChangedMsg));
+    msg = (LnnRelationChangedMsg *)SoftBusMalloc(sizeof(LnnRelationChangedMsg));
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc relation changed msg fail");
         return;

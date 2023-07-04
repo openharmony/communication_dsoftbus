@@ -143,6 +143,7 @@ typedef struct {
     int32_t pid;
     LanePreferredLinkList expectedLink;
     bool networkDelegate;
+    ProtocolType acceptableProtocols;
 } TransOption;
 
 typedef struct {

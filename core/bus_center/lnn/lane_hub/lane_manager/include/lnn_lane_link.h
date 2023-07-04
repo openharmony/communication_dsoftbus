@@ -32,6 +32,7 @@ typedef struct {
     bool networkDelegate;
     LaneTransType transType;
     LaneLinkType linkType;
+    ProtocolType acceptableProtocols;
 } LinkRequest;
 
 typedef struct {

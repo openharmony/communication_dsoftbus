@@ -70,7 +70,7 @@ int32_t __attribute__((weak)) RegistNewIPProtocolManager(void)
     return SOFTBUS_OK;
 }
 
-int32_t __attribute__ ((weak)) RegistBtProtocolManager(void)
+int32_t __attribute__((weak)) RegistBtProtocolManager(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "regist virtual bt protocol manager");
     return SOFTBUS_OK;
