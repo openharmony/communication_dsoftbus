@@ -65,7 +65,7 @@ void SoftBusReportDevOnlineEvtFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     OnlineDeviceInfo info = {0};
-    info.onlineDevnum = *(reinterpret_cast<const uint32_t *>(data));
+    info.onlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
     info.btOnlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
     info.wifiOnlineDevNum = *(reinterpret_cast<const uint32_t *>(data));
     info.peerDevType = *(reinterpret_cast<const uint32_t *>(data));
