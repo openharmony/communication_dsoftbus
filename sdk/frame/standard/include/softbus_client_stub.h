@@ -44,8 +44,8 @@ public:
     int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
     int32_t OnLeaveMetaNodeResult(const char *networkId, int retCode) override;
-    int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen) override;
-    int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type) override;
+    int32_t OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen) override;
+    int32_t OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type) override;
     int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;

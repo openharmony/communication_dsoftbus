@@ -49,11 +49,11 @@ namespace OHOS {
         switch (cmd) {
             case CMD_SOFTBUS_ONE: {
                 bool isOnline = true;
-                LnnOnNodeOnlineStateChanged(isOnline, info);
+                LnnOnNodeOnlineStateChanged("", isOnline, info);
                 break;
             }
             case CMD_SOFTBUS_TWO: {
-                LnnOnNodeBasicInfoChanged(info, type);
+                LnnOnNodeBasicInfoChanged("", info, type);
                 break;
             }
             case CMD_SOFTBUS_THREE: {

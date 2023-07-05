@@ -97,7 +97,7 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *i
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
-        clientProxy->OnNodeOnlineStateChanged(isOnline, info, infoTypeLen);
+        clientProxy->OnNodeOnlineStateChanged(proxy.first.c_str(), isOnline, info, infoTypeLen);
     }
     return SOFTBUS_OK;
 }
@@ -108,7 +108,7 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t inf
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
     for (auto proxy : proxyMap) {
         sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(proxy.second);
-        clientProxy->OnNodeBasicInfoChanged(info, infoTypeLen, type);
+        clientProxy->OnNodeBasicInfoChanged(proxy.first.c_str(), info, infoTypeLen, type);
     }
     return SOFTBUS_OK;
 }

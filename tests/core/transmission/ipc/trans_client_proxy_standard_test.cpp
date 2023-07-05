@@ -96,10 +96,10 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     bool isOnline = false;
-    ret = clientProxy->OnNodeOnlineStateChanged(isOnline, addr, addrTypeLen);
+    ret = clientProxy->OnNodeOnlineStateChanged("test", isOnline, addr, addrTypeLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = clientProxy->OnNodeBasicInfoChanged(addr, addrTypeLen, tmp);
+    ret = clientProxy->OnNodeBasicInfoChanged("test", addr, addrTypeLen, tmp);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = clientProxy->OnTimeSyncResult(addr, addrTypeLen, tmp);
