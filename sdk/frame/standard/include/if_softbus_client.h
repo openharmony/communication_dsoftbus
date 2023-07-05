@@ -60,9 +60,9 @@ public:
 
     virtual int32_t OnLeaveMetaNodeResult(const char *networkId, int retCode);
 
-    virtual int32_t OnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);
+    virtual int32_t OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen);
 
-    virtual int32_t OnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
+    virtual int32_t OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type);
 
     virtual int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode);
 

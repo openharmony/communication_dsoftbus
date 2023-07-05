@@ -159,9 +159,9 @@ HWTEST_F(ClientProxyTest, OnNodeOnlineStateChangedTest_01, TestSize.Level1)
     bool isOnline = false;
     char *addr = const_cast<char *>(TEST_ADDR);
     void *addrInput = reinterpret_cast<void *>(addr);
-    int32_t ret = clientProxy->OnNodeOnlineStateChanged(isOnline, nullptr, TEST_ADDR_TYPE_LEN);
+    int32_t ret = clientProxy->OnNodeOnlineStateChanged("test", isOnline, nullptr, TEST_ADDR_TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = clientProxy->OnNodeOnlineStateChanged(isOnline, addrInput, TEST_ADDR_TYPE_LEN);
+    ret = clientProxy->OnNodeOnlineStateChanged("test", isOnline, addrInput, TEST_ADDR_TYPE_LEN);
     EXPECT_FALSE(ret == SOFTBUS_OK);
 }
 
@@ -181,9 +181,9 @@ HWTEST_F(ClientProxyTest, OnNodeBasicInfoChangedTest_01, TestSize.Level1)
     ASSERT_TRUE(clientProxy != nullptr);
     char *addr = const_cast<char *>(TEST_ADDR);
     void *addrInput = reinterpret_cast<void *>(addr);
-    int32_t ret = clientProxy->OnNodeBasicInfoChanged(nullptr, TEST_ADDR_TYPE_LEN, TEST_TYPE);
+    int32_t ret = clientProxy->OnNodeBasicInfoChanged("test", nullptr, TEST_ADDR_TYPE_LEN, TEST_TYPE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = clientProxy->OnNodeBasicInfoChanged(addrInput, TEST_ADDR_TYPE_LEN, TEST_TYPE);
+    ret = clientProxy->OnNodeBasicInfoChanged("test", addrInput, TEST_ADDR_TYPE_LEN, TEST_TYPE);
     EXPECT_FALSE(ret == SOFTBUS_OK);
 }
 
