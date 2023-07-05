@@ -731,6 +731,16 @@ static void ConstructProxyChannelInfo(
     if (chan->type == CONNECT_BLE || chan->type == CONNECT_BLE_DIRECT) {
         chan->blePrototolType = info->bleInfo.protocol;
     }
+
+    if (info->type == CONNECT_TCP) {
+        chan->appInfo.routeType = WIFI_STA;
+    } else if (info->type == CONNECT_BR) {
+        chan->appInfo.routeType = BT_BR;
+    } else if (info->type == CONNECT_BLE) {
+        chan->appInfo.routeType = BT_BLE;
+    } else if (info->type == CONNECT_BLE_DIRECT) {
+        chan->appInfo.routeType = BT_BLE;
+    }
 }
 
 static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan)

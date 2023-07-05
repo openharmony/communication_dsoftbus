@@ -40,6 +40,8 @@
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 
+#define INVAILD_ROUTE_TYPE (-1)
+
 typedef int (*SessionOptionRead)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
 typedef int (*SessionOptionWrite)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
 
@@ -763,10 +765,27 @@ int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_
     return SOFTBUS_OK;
 }
 
+int ReadSessionLinkType(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
+{
+    if (valueSize != sizeof(uint32_t)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "value size is %d, not match", valueSize);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t routeType = INVAILD_ROUTE_TYPE;
+    if (ClientGetRouteTypeByChannelId(channelId, type, &routeType) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get link type failed.");
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+
+    (*(int32_t*)value) = routeType;
+    return SOFTBUS_OK;
+}
 
 static const SessionOptionItem g_SessionOptionArr[SESSION_OPTION_BUTT] = {
     {true, ReadMaxSendBytesSize},
     {true, ReadMaxSendMessageSize},
+    {true, ReadSessionLinkType},
 };
 
 int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize)
