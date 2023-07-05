@@ -55,9 +55,10 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcps_s fail");
                 return SOFTBUS_ERR;
             }
+            return SOFTBUS_OK;
         }
     }
-    return SOFTBUS_OK;
+    return SOFTBUS_ERR;
 }
 
 NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
