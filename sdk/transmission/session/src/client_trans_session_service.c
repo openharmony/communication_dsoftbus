@@ -214,7 +214,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         return SOFTBUS_ERR;
     }
     tmpAttr->fastTransData = NULL;
-    tmpAttr->fastTransData = 0;
+    tmpAttr->fastTransDataSize = 0;
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
