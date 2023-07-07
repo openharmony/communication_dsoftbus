@@ -260,3 +260,50 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
     }
     return true;
 }
+
+bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const char **value, int32_t len)
+{
+    if (value == NULL || obj == NULL || key == NULL) {
+        JSON_LOGE("input invalid");
+        return false;
+    }
+    nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
+    if (json == nullptr) {
+        return false;
+    }
+    nlohmann::json *valueStringArray = new (std::nothrow) nlohmann::json();
+    for (int32_t i = 0; i < len; i++) {
+        valueStringArray->push_back(value[i]);
+    }
+    (*json)[key] = *valueStringArray;
+    delete valueStringArray;
+    return true;
+}
+
+bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, char **value, int32_t *len)
+{
+    if (value == NULL && obj == NULL && key == NULL && len == NULL) {
+        JSON_LOGE("input invalid");
+        return false;
+    }
+    nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
+    if (json == nullptr) {
+        return false;
+    }
+    nlohmann::json item = (*json)[key];
+    if (!item.is_array()) {
+        JSON_LOGE("cannot find or invalid [%s]", key);
+        return false;
+    }
+    *len = item.size();
+    int32_t i = 0;
+    for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
+        std::string valueString = it.value().get<std::string>();
+        if (strcpy_s(value[i], strlen(valueString.c_str()), valueString.c_str()) != EOK) {
+            JSON_LOGE("strcpy [%{public}s] value err, value=%{public}s", key, valueString.c_str());
+            return false;
+        }
+        i++;
+    }
+    return true;
+}

@@ -61,6 +61,10 @@ bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value);
 
 bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size);
 
+bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const char **value, int32_t len);
+
+bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, char **value, int32_t *len);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
