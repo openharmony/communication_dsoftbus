@@ -40,13 +40,13 @@ bool GetLocalCipherKey(int32_t seq, uint32_t *tableIndex, unsigned char *key, in
     return true;
 }
 
-bool PackCipherKeySyncMsg(cJSON *json)
+bool PackCipherKeySyncMsg(void *json)
 {
     (void)json;
     return true;
 }
 
-void ProcessCipherKeySyncInfo(const cJSON *json, const char *networkId)
+void ProcessCipherKeySyncInfo(const void *json, const char *networkId)
 {
     (void)json;
     (void)networkId;
