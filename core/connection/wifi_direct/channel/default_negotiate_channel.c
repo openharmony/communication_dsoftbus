@@ -120,31 +120,25 @@ static bool IsRemoteTlvSupported(struct WifiDirectNegotiateChannel *base)
 
 static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
 {
-    int32_t ret = AuthDeviceGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
+    int32_t ret = AuthGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "get device id failed");
     return ret;
 }
 
 static int32_t GetP2pMac(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize)
 {
-    AuthManager *authManager = GetAuthManagerByAuthId(((struct DefaultNegotiateChannel *)base)->authId);
-    if (authManager == NULL) {
-        return SOFTBUS_AUTH_NOT_FOUND;
-    }
-    if (strcpy_s(p2pMac, p2pMacSize, authManager->p2pMac) != EOK) {
-        CLOGE(LOG_LABEL "copy p2p mac failed");
-        DelAuthManager(authManager, false);
-        return SOFTBUS_ERR;
-    }
-    DelAuthManager(authManager, false);
-    return SOFTBUS_OK;
+    struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
+    int32_t ret = strcpy_s(p2pMac, p2pMacSize, self->p2pMac);
+    return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
 static void SetP2pMac(struct WifiDirectNegotiateChannel *base, const char *p2pMac)
 {
-    if (AuthSetP2pMac(((struct DefaultNegotiateChannel *)base)->authId, p2pMac) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "set auth p2p mac failed");
-    }
+    struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
+    int32_t ret = strcpy_s(self->p2pMac, sizeof(self->p2pMac), p2pMac);
+    CONN_CHECK_AND_RETURN_LOG(ret == EOK, LOG_LABEL "copy p2p mac failed");
+    ret = AuthSetP2pMac(((struct DefaultNegotiateChannel *)base)->authId, p2pMac);
+    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "set auth p2p mac failed");
 }
 
 static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
