@@ -414,12 +414,10 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         ALOGE("JSON_AddStringToObject fail.");
         return SOFTBUS_ERR;
     }
-    /*
+    PackCommonFastAuth(json, info);
     if (!PackCipherKeySyncMsg(json)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PackCipherKeySyncMsg fail.");
     }
-    */
-    PackCommonFastAuth(json, info);
     return SOFTBUS_OK;
 }
 
@@ -486,6 +484,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
             ALOGE("v1 version strcpy networkid fail");
         }
     }
+    ProcessCipherKeySyncInfo(json, info->networkId);
 }
 
 static int32_t GetBtDiscTypeString(const NodeInfo *info, char *buf, uint32_t len)
@@ -516,7 +515,6 @@ static void AddDiscoveryType(JsonObj *json, const char *remoteUuid)
         ALOGI("networkId not found by uuid, maybe first online!");
         return;
     }
-    // ProcessCipherKeySyncInfo(json, networkId);
     uint32_t discoveryType = 0;
     if (LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) != SOFTBUS_OK) {
         ALOGE("get discoveryType fail!");

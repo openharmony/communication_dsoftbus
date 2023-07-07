@@ -30,8 +30,8 @@ void LnnDeinitCipherKeyManager(void);
 bool GetCipherKeyByNetworkId(const char *networkId, int32_t seq, uint32_t tableIndex, unsigned char *key,
     int32_t keyLen);
 bool GetLocalCipherKey(int32_t seq, uint32_t *tableIndex, unsigned char *key, int32_t keyLen);
-bool PackCipherKeySyncMsg(cJSON *json);
-void ProcessCipherKeySyncInfo(const cJSON *json, const char *networkId);
+bool PackCipherKeySyncMsg(void *json);
+void ProcessCipherKeySyncInfo(const void *json, const char *networkId);
 
 #ifdef __cplusplus
 }
