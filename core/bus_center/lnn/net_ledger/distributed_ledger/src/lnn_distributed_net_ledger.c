@@ -1084,7 +1084,7 @@ NO_SANITIZE("cfi") int32_t LnnAddMetaInfo(NodeInfo *info)
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d, ret");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d", ret);
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnAddMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -1117,7 +1117,7 @@ NO_SANITIZE("cfi") int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrTyp
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d, ret");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d", ret);
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnDeleteMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -1262,7 +1262,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
     UpdateNewNodeAccountHash(info);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d, ret");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d", ret);
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (isOffline) {
