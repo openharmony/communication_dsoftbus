@@ -93,7 +93,10 @@ NO_SANITIZE("cfi") void InitSoftBusServer(void)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus buscenter server init failed.");
         goto ERR_EXIT;
     }
-    ConnBleDirectInit();
+    if (ConnBleDirectInit() == SOFTBUS_ERR) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus ble direct init failed.");
+        goto ERR_EXIT;
+    }
     if (TransServerInit() == SOFTBUS_ERR) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus trans server init failed.");
         goto ERR_EXIT;
