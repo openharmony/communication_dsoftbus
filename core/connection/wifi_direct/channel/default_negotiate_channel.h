@@ -28,6 +28,7 @@ struct DefaultNegotiateChannel {
 
     int64_t authId;
     bool tlvFeature;
+    char p2pMac[MAC_ADDR_STR_LEN];
 };
 
 void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, int64_t authId);
