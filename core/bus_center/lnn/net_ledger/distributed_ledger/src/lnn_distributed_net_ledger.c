@@ -1082,7 +1082,7 @@ NO_SANITIZE("cfi") int32_t LnnAddMetaInfo(NodeInfo *info)
         info->metaInfo.metaDiscType = info->metaInfo.metaDiscType | temp.metaDiscType;
     }
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
-    int32_t LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
+    int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d, ret");
     }
