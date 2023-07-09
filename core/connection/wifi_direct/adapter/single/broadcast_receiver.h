@@ -28,6 +28,7 @@ extern "C" {
 enum BroadcastReceiverAction {
     WIFI_P2P_STATE_CHANGED_ACTION = 0,
     WIFI_P2P_CONNECTION_CHANGED_ACTION = 1,
+    WIFI_CFG_CHANGED_ACTION = 2,
     BROADCAST_RECEIVER_ACTION_MAX,
 };
 
@@ -41,6 +42,7 @@ struct BroadcastParam {
     union {
         P2pState p2pState;
         struct P2pConnChangedInfo changedInfo;
+        int wifiConnectChangedState;
     };
 };
 

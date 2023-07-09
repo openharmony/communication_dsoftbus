@@ -43,6 +43,22 @@ struct NegotiateMessage;
 struct NegotiateState;
 struct InnerLink;
 
+struct ProcessorFastConnect {
+    int (*createLink)(struct WifiDirectConnectInfo *connectInfo, enum WifiDirectRole *finalRole,
+        const struct WDFastCfg *remoteCfg);
+    int (*sendGroupConfig)(void);
+    int (*onBcastDataReceived)(struct WifiDirectConnectInfo *connectInfo,
+        enum WifiDirectRole peerRole, conststruct WDFastCfg *remoteCfg);
+    int (*onSessionCreated)(struct WifiDirectNegotiateChannel *channel);
+    int (*onConfigRecvd)(struct NegotiateMessage *msg);
+    void (*onClientConnected)(const char *remoteMac);
+    void (*stop)(bool destroyGroup, const char *remoteMac);
+
+    bool started;
+    bool sessionCreated;
+    bool groupCreated;
+};
+
 #define PROCESSOR_BASE                                                                                            \
     int32_t (*createLink)(struct WifiDirectConnectInfo *connectInfo);                                             \
     int32_t (*reuseLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);                 \
@@ -53,6 +69,8 @@ struct InnerLink;
     void (*processUnhandledRequest)(struct NegotiateMessage *msg, int32_t errorCode);                             \
     void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \
                                                                                                                   \
+    struct ProcessorFastConnect fastConnect;                                                                      \
+                                                                                                                  \                                                                                                                 \
     enum WifiDirectProcessorState currentState;                                                                   \
     struct NegotiateMessage *currentMsg;                                                                          \
     char *name;
