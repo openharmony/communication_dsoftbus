@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "auth_device_common_key.h"
 #include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
 #include "auth_manager.h"
@@ -180,6 +181,47 @@ NO_SANITIZE("cfi") int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, 
     return AuthDeviceGetIdByUuid(uuid, type, isServer);
 }
 
+NO_SANITIZE("cfi") int32_t AuthRestoreAuthManager(const char *udidHash,
+    const AuthConnInfo *connInfo, int32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
+{
+    if (udidHash == NULL || connInfo == NULL || nodeInfo == NULL || authId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "restore manager fail because para error");
+        return SOFTBUS_ERR;
+    }
+    // get device key
+    AuthDeviceKeyInfo keyInfo = {0};
+    if (AuthFindDeviceKey(udidHash, connInfo->type, &keyInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "restore manager fail because device key not exist");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusGenerateStrHash((unsigned char *)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), (unsigned char *)connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "restore manager fail because generate strhash");
+        return SOFTBUS_ERR;
+    }
+    AuthSessionInfo info;
+    SessionKey sessionKey;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    info.requestId = requestId;
+    info.isServer = keyInfo.isServerSide;
+    info.connId = keyInfo.keyIndex;
+    info.connInfo = *connInfo;
+    info.version = SOFTBUS_NEW_V2;
+    if (strcpy_s(info.uuid, sizeof(info.uuid), nodeInfo->uuid) != EOK ||
+        strcpy_s(info.udid, sizeof(info.udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "restore manager fail because copy uuid/udid fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), keyInfo.deviceKey, sizeof(keyInfo.deviceKey)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "restore manager fail because memcpy device key");
+        return SOFTBUS_MEM_ERR;
+    }
+    sessionKey.len = keyInfo.keyLen;
+    *authId = keyInfo.keyIndex;
+    return AuthManagerSetSessionKey(keyInfo.keyIndex, &info, &sessionKey, false);
+}
+
 NO_SANITIZE("cfi") int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
@@ -335,6 +377,7 @@ NO_SANITIZE("cfi") int32_t AuthInit(void)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth device init failed");
         return ret;
     }
+    AuthLoadDeviceKey();
     return AuthMetaInit(&callBack);
 }
 

@@ -45,6 +45,7 @@ int32_t LnnInitLocalLedgerDelay(void);
 void LnnDeinitLocalLedger(void);
 
 const NodeInfo *LnnGetLocalNodeInfo(void);
+int32_t LnnUpdateLocalNetworkId(const void *id);
 
 #ifdef __cplusplus
 }

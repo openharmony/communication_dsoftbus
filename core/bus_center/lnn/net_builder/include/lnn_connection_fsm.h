@@ -82,10 +82,11 @@ typedef struct tagLnnConnectionFsm {
     LnnConntionInfo connInfo;
     LnnConnectionFsmStopCallback stopCallback;
     bool isDead;
+    bool isNeedConnect;
     LnnStatisticData statisticData;
 } LnnConnectionFsm;
 
-LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName);
+LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName, bool isNeedConnect);
 void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
 
 int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);

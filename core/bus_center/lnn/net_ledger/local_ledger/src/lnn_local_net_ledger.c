@@ -23,6 +23,7 @@
 
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
@@ -39,6 +40,7 @@
 #define VERSION_TYPE_DEFAULT ""
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 #define ALL_GROUP_TYPE 0xF
+#define MAX_STATE_VERSION 0xFF
 
 typedef struct {
     NodeInfo localInfo;
@@ -47,6 +49,18 @@ typedef struct {
 } LocalNetLedger;
 
 static LocalNetLedger g_localNetLedger;
+
+static void UpDateStateVersionAndStore()
+{
+    int32_t ret;
+    g_localNetLedger.localInfo.stateVersion++;
+    if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
+        g_localNetLedger.localInfo.stateVersion = 0;
+    }
+    if ((ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update local store fail!");
+    }
+}
 
 static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
 {
@@ -388,6 +402,19 @@ static int32_t LlGetProxyPort(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateStateVersion(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (*(int32_t *)buf > MAX_STATE_VERSION) {
+        *(int32_t *)buf = 0;
+    }
+    info->stateVersion = *(int32_t *)buf;
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalProxyPort(const void *buf)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -490,6 +517,15 @@ static int32_t L1GetP2pRole(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = LnnGetP2pRole(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetStateVersion(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = g_localNetLedger.localInfo.stateVersion;
     return SOFTBUS_OK;
 }
 
@@ -610,12 +646,27 @@ NO_SANITIZE("cfi") const NodeInfo *LnnGetLocalNodeInfo(void)
 
 static int32_t UpdateLocalDeviceName(const void *name)
 {
-    return LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, (char *)name);
+    if (name == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *beforeName = LnnGetDeviceName(&g_localNetLedger.localInfo.deviceInfo);
+    if (strcmp(beforeName, name) != 0) {
+        if (LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, (char *)name) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set device name fail.");
+            return SOFTBUS_ERR;
+        }
+        UpDateStateVersionAndStore();
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t UpdateLocalNetworkId(const void *id)
 {
-    return ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id);
+    if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    UpDateStateVersionAndStore();
+    return SOFTBUS_OK;
 }
 
 static int32_t LlUpdateLocalOffLineCode(const void *id)
@@ -809,6 +860,14 @@ int32_t LlUpdateNodeAddr(const void *addr)
     return SOFTBUS_OK;
 }
 
+int32_t LnnUpdateLocalNetworkId(const void *id)
+{
+    if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -834,6 +893,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
+    {NUM_KEY_STATE_VERSION, -1, LlGetStateVersion, UpdateStateVersion},
     {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
     {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
