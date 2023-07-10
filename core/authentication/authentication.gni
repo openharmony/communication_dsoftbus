@@ -41,10 +41,15 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/auth_interface.c",
   ]
   if (enhanced) {
-    auth_server_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/src/auth_meta_manager.c" ]
+    auth_server_src += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/src/auth_meta_manager.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/src/auth_device_common_key.c",
+    ]
   } else {
-    auth_server_src +=
-        [ "$authentication_path/src/virtual/auth_meta_manager_virtual.c" ]
+    auth_server_src += [
+      "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
+      "$authentication_path/src/virtual/auth_device_common_key_virtual.c",
+    ]
   }
   if (dsoftbus_feature_ip_auth) {
     auth_server_src +=

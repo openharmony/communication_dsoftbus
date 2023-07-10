@@ -19,13 +19,16 @@
 #include <string.h>
 
 #include "auth_interface.h"
+#include "auth_device_common_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_ble_lpdevice.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_device_info.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
 #include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
@@ -54,7 +57,7 @@ typedef struct {
 
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_t masterWeight,
-    LnnHeartbeatType hbType, bool isOnlineDirectly);
+    LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
 static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type,
     bool isReElect);
 
@@ -253,8 +256,62 @@ static void HbDumpRecvDeviceInfo(const DeviceInfo *device, int32_t weight, int32
         devTypeStr != NULL ? devTypeStr : "", weight, masterWeight, device->devType, device->addr[0].type, nowTime);
 }
 
+static bool IsLocalSupportBleDirectOnline()
+{
+    uint64_t localFeatureCap = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeatureCap) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB build ble broadcast, get local feature cap failed");
+        return false;
+    }
+    if ((localFeatureCap & (1 << BIT_BLE_DIRECT_ONLINE)) == 0) {
+        return false;
+    }
+    return true;
+}
+
+static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
+{
+    if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
+        LLOGI("don't support ble direct online because resp data");
+        return true;
+    }
+    int32_t ret;
+    NodeInfo deviceInfo = {0};
+    if (!IsLocalSupportBleDirectOnline()) {
+        LLOGI("ble don't support ble direct online");
+        return true;
+    }
+    if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK) {
+        LLOGI("don't support ble direct online because device info not exist");
+        return true;
+    }
+    if ((int32_t)hbResp->stateVersion != deviceInfo.stateVersion) {
+        LLOGI("don't support ble direct online because state version change");
+        return true;
+    }
+    AuthDeviceKeyInfo keyInfo = {0};
+    if (AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK) {
+        LLOGI("don't support ble direct online because key not exist");
+        return true;
+    }
+
+    // update capability
+    if ((hbResp->capabiltiy & (1 << ENABLE_WIFI_CAP)) != 0) {
+        (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_WIFI);
+    }
+    if ((hbResp->capabiltiy & (1 << P2P_GO)) != 0 || (hbResp->capabiltiy & (1 << P2P_GC))) {
+        (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_WIFI_P2P);
+    }
+    if ((ret = LnnSaveRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
+        LLOGE("don't support ble direct online because update device info fail ret = %d", ret);
+        return true;
+    }
+    LLOGI("support ble direct online");
+    return false;
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
-    int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly)
+    int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
     uint64_t nowTime;
     SoftBusSysTime times = {0};
@@ -297,17 +354,23 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-    LLOGI("heartbeat(HB) find device, udidHash:%s, ConnectionAddrType:%02X",
-        AnonymizesUDID(device->devId), device->addr[0].type);
-    if (LnnNotifyDiscoveryDevice(device->addr) != SOFTBUS_OK) {
+    bool isConnect = IsNeedConnectOnLine(device, hbResp);
+    LLOGI("heartbeat(HB) find device, udidHash:%s, ConnectionAddrType:%02X, isConnect = %d",
+        AnonymizesUDID(device->devId), device->addr[0].type, isConnect);
+    if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
         LLOGE("HB mgr recv process notify device found fail");
         return SOFTBUS_ERR;
+    }
+    if (isConnect) {
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
+    } else {
+        return SOFTBUS_NETWORK_NODE_DIRECT_ONLINE;
     }
     return SOFTBUS_NETWORK_NODE_OFFLINE;
 }
 
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight,
-    int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly)
+    int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
     if (device == NULL) {
         LLOGE("HB mgr recv process get invalid param");
@@ -318,7 +381,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight,
             AnonymizesUDID(device->devId), device->accountHash[0], device->accountHash[1]);
         return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
     }
-    return HbNotifyReceiveDevice(device, weight, masterWeight, hbType, isOnlineDirectly);
+    return HbNotifyReceiveDevice(device, weight, masterWeight, hbType, isOnlineDirectly, hbResp);
 }
 
 static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type,

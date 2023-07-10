@@ -39,12 +39,17 @@ if (dsoftbus_feature_lnn_net) {
     bus_center_builder_src += [
       "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c",
       "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_device_info_recovery_virtual.c",
     ]
   } else {
     import(
         "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/cipherkey/cipherkey.gni")
 
     bus_center_builder_src += cipherkey_sources
+    bus_center_builder_src += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_device_info_recovery.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_secure_storage.c",
+    ]
   }
 } else {
   bus_center_builder_src = [

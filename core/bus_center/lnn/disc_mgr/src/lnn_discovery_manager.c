@@ -71,7 +71,7 @@ NO_SANITIZE("cfi") static void DeviceFound(const ConnectionAddr *addr)
         return;
     }
     ReportDeviceFoundResultEvt();
-    if (LnnNotifyDiscoveryDevice(addr) != SOFTBUS_OK) {
+    if (LnnNotifyDiscoveryDevice(addr, true) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify device found failed\n");
     }
 }

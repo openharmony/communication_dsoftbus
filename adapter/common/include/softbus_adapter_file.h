@@ -58,6 +58,7 @@ int32_t SoftBusAccessFile(const char *pathName, int32_t mode);
 int32_t SoftBusMakeDir(const char *pathName, int32_t mode);
 int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize);
 char *SoftBusRealPath(const char *path, char *absPath);
+int32_t SoftBusReadFullFileAndSize(const char *fileName, char *readBuf, uint32_t maxLen, int32_t *size);
 
 #ifdef __cplusplus
 #if __cplusplus
