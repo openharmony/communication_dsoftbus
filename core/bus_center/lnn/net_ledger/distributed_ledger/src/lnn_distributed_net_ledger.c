@@ -28,6 +28,7 @@
 #include "lnn_node_info.h"
 #include "lnn_lane_def.h"
 #include "lnn_deviceinfo_to_profile.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "softbus_adapter_mem.h"
@@ -892,6 +893,22 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetStateVersion(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+
+    if (len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (!LnnIsNodeOnline(info)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    *((int32_t *)buf) = info->stateVersion;
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetNodeDataChangeFlag(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -964,6 +981,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_DISCOVERY_TYPE, DlGetNetType},
     {NUM_KEY_MASTER_NODE_WEIGHT, DlGetMasterWeight},
     {NUM_KEY_P2P_ROLE, DlGetP2pRole},
+    {NUM_KEY_STATE_VERSION, DlGetStateVersion},
     {NUM_KEY_DATA_CHANGE_FLAG, DlGetNodeDataChangeFlag},
     {NUM_KEY_DEV_TYPE_ID, DlGetDeviceTypeId},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
@@ -1248,6 +1266,14 @@ static void NotifyMigrateUpgrade(NodeInfo *info)
     }
 }
 
+static void NodeOnlineProc(NodeInfo *info)
+{
+    if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
+        LLOGE("save remote devInfo fail");
+        return;
+    }
+}
+
 NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
@@ -1318,6 +1344,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lnn map set failed, ret=%d", ret);
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    NodeOnlineProc(info);
     if (isOffline) {
         if (!oldWifiFlag && !newWifiFlag && newBleBrFlag) {
             OnlinePreventBrConnection(info);

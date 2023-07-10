@@ -166,7 +166,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
     }
     sessionKey->len = strlen(sessionKeyStr);
 
-    int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false);
     SoftBusFree(info);
     return ret;
 }
@@ -254,7 +254,7 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
 
     SessionKey sessionKey;
 
-    int32_t ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     SoftBusFree(info);

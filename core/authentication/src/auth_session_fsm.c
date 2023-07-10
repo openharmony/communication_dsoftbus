@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_connection.h"
+#include "auth_device_common_key.h"
 #include "auth_hichain.h"
 #include "auth_manager.h"
 #include "auth_session_message.h"
@@ -291,6 +292,31 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
     }
 }
 
+static void SaveDeviceKey(AuthFsm *authFsm)
+{
+    AuthDeviceKeyInfo deviceKey;
+    SessionKey sessionKey;
+    (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    if (AuthManagerGetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey) != SOFTBUS_OK) {
+        ALOGE("get session key fail");
+        return;
+    }
+    if (memcpy_s(deviceKey.deviceKey, sizeof(deviceKey.deviceKey),
+        sessionKey.value, sizeof(sessionKey.value)) != EOK) {
+        ALOGE("session key cpy fail");
+        return;
+    }
+    deviceKey.keyLen = sessionKey.len;
+    deviceKey.keyIndex = authFsm->authSeq;
+    deviceKey.keyType = authFsm->info.connInfo.type;
+    deviceKey.isServerSide = authFsm->info.isServer;
+    if (AuthInsertDeviceKey(&authFsm->info.nodeInfo, &deviceKey) != SOFTBUS_OK) {
+        ALOGE("insert deviceKey fail");
+        return;
+    }
+}
+
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
@@ -299,6 +325,10 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
     ReportAuthResultEvt(authFsm, result);
     if (result == SOFTBUS_OK) {
         AuthManagerSetAuthFinished(authFsm->authSeq, &authFsm->info);
+        if ((!authFsm->info.isSupportFastAuth) && (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE)) {
+            ALOGI("only hichain verify, save the device key");
+            SaveDeviceKey(authFsm);
+        }
     } else {
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
         AuthManagerSetAuthFailed(authFsm->authSeq, &authFsm->info, result);
@@ -358,6 +388,31 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
     SoftbusHitraceStop();
 }
 
+static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
+{
+#define UDID_SHORT_HASH_LEN_TEMP 8
+#define UDID_SHORT_HASH_HEX_STRING 17
+    AuthDeviceKeyInfo key = {0};
+    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    int ret = SoftBusGenerateStrHash((uint8_t *)authFsm->info.udid, strlen(authFsm->info.udid), hash);
+    if (ret != SOFTBUS_OK) {
+        ALOGE("generate udidHash fail");
+        return SOFTBUS_ERR;
+    }
+    char udidShortHash[UDID_SHORT_HASH_HEX_STRING] = {0};
+    if (ConvertBytesToUpperCaseHexString(udidShortHash, UDID_SHORT_HASH_HEX_STRING,
+        hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+        ALOGE("convert bytes to string fail");
+        return SOFTBUS_ERR;
+    }
+    if (AuthFindDeviceKey(udidShortHash, authFsm->info.connInfo.type , &key) != SOFTBUS_OK) {
+        ALOGE("find key fail, fastAuth error");
+        return SOFTBUS_ERR;
+    }
+    authFsm->info.oldIndex = key.keyIndex;
+    return AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
+}
+
 static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
 {
     int32_t ret;
@@ -372,14 +427,22 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
                 ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
                 break;
             }
-        } else {
+        }
+        LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
+        if (info->isSupportFastAuth) {
+            ALOGI("fast auth succ");
+            if (RecoveryDeviceKey(authFsm) != SOFTBUS_OK) {
+                ALOGE("fast auth recovery device key fail");
+                ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
+                 break;
+            }
+        } else if (!info->isServer) {
             /* just client need start authDevice. */
             if (HichainStartAuth(authFsm->authSeq, info->udid, info->connInfo.peerUid) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
                 break;
             }
         }
-        LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
         ret = SOFTBUS_OK;
     } while (false);
 
@@ -453,7 +516,7 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
         (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
         return;
     }
-    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey) != SOFTBUS_OK) {
+    if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey, true) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
             "auth fsm[%" PRId64 "] save session key fail", authFsm->authSeq);
     }

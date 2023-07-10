@@ -60,7 +60,7 @@ int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr);
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType);

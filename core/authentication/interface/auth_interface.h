@@ -170,6 +170,8 @@ int32_t AuthGetGroupType(const char *udid, const char *uuid);
 
 int32_t AuthInit(void);
 void AuthDeinit(void);
+int32_t AuthRestoreAuthManager(const char *udidHash,
+    const AuthConnInfo *connInfo, int32_t requestId, NodeInfo *nodeInfo, int64_t *authId);
 
 #ifdef __cplusplus
 #if __cplusplus

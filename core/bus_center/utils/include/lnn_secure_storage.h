@@ -13,31 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef LNN_COMMON_UTILS_H
-#define LNN_COMMON_UTILS_H
+#ifndef LNN_SECURE_STORAGE_H
+#define LNN_SECURE_STORAGE_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-    uint8_t *data;
-    uint32_t dataLen;
-    uint8_t *key;
-    uint32_t keyLen;
-} AesGcmInputParam;
+typedef enum {
+    LNN_DATA_TYPE_LOCAL_DEVINFO = 1,
+    LNN_DATA_TYPE_REMOTE_DEVINFO,
+    LNN_DATA_TYPE_DEVICE_KEY,
+} LnnDataType;
 
-bool IsEnableSoftBusHeartbeat(void);
-bool IsOOBEState(void);
-bool IsScreenUnlock(void);
-int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen);
-int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen);
+int32_t LnnSaveDeviceData(const char *data, LnnDataType dataType);
+int32_t LnnRetrieveDeviceData(LnnDataType dataType, char **data, uint32_t *dataLen);
+int32_t LnnUpdateDeviceData(const char *data, LnnDataType dataType);
+int32_t LnnDeletaDeviceData(LnnDataType dataType);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* LNN_COMMON_UTILS_H */
+#endif /* LNN_SECURE_STORAGE_H */

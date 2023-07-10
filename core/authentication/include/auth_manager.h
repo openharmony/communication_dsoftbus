@@ -51,7 +51,8 @@ typedef struct {
     ListNode node;
 } AuthManager;
 
-int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, const SessionKey *sessionKey);
+int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, const SessionKey *sessionKey,
+    bool isConnect);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);
 
 void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info);

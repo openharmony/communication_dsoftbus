@@ -667,7 +667,7 @@ HWTEST_F(AuthTest, AUTH_MANAGER_SET_SESSION_KEY_Test_001, TestSize.Level1)
     const AuthSessionInfo info = { 0 };
     const SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
 
-    int32_t ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey);
+    int32_t ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

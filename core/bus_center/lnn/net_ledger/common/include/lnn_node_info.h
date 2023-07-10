@@ -120,7 +120,9 @@ typedef struct {
     int32_t wifiBuffSize;
     int32_t brBuffSize;
     int32_t stateVersion;
+    int32_t localStateVersion;
     int32_t groupType;
+    bool initPreventFlag;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

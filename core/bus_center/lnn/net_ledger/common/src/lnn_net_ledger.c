@@ -18,12 +18,14 @@
 #include <string.h>
 #include <securec.h>
 
+#include "auth_device_common_key.h"
 #include "bus_center_manager.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_meta_node_ledger.h"
+#include "lnn_device_info_recovery.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -51,6 +53,43 @@ NO_SANITIZE("cfi") int32_t LnnInitNetLedger(void)
     return SOFTBUS_OK;
 }
 
+static void LnnRestoreLocalDeviceInfo()
+{
+    LLOGI("restore local device info enter.");
+    if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
+        LLOGI("get local device info fail");
+        const NodeInfo *temp = LnnGetLocalNodeInfo();
+        if (LnnSaveLocalDeviceInfo(temp) != SOFTBUS_OK) {
+            LLOGE("save local device info fail");
+        }
+        LLOGI("save local device info success.");
+    } else {
+        NodeInfo info;
+        (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        (void)LnnGetLocalDevInfo(&info);
+        LLOGI("load local deviceInfo success, networkId:%s", AnonymizesNetworkID(info.networkId));
+        int64_t accountId = 0;
+        if (LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) {
+            if (accountId != info.accountId) {
+                info.stateVersion++;
+            }
+        }
+        LLOGI("load local deviceInfo stateVersion=%d", info.stateVersion);
+        if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
+            LLOGE("set state version fail");
+        }
+        if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
+            LLOGE("set networkId fail");
+        }
+    }
+    if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
+        LLOGE("load remote deviceInfo fail");
+        return;
+    }
+    AuthLoadDeviceKey();
+    LLOGI("load remote deviceInfo devicekey success");
+}
+
 int32_t LnnInitNetLedgerDelay(void)
 {
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
@@ -61,6 +100,7 @@ int32_t LnnInitNetLedgerDelay(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "delay init decision db fail!");
         return SOFTBUS_ERR;
     }
+    LnnRestoreLocalDeviceInfo();
     return SOFTBUS_OK;
 }
 

@@ -13,31 +13,39 @@
  * limitations under the License.
  */
 
-#ifndef LNN_COMMON_UTILS_H
-#define LNN_COMMON_UTILS_H
+#ifndef AUTH_DEVICE_COMMON_KEY_H
+#define AUTH_DEVICE_COMMON_KEY_H
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "lnn_node_info.h"
+#include "softbus_def.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
+#endif
 
 typedef struct {
-    uint8_t *data;
-    uint32_t dataLen;
-    uint8_t *key;
+    bool isServerSide;
+    int32_t keyType;
+    int64_t keyIndex;
+    uint8_t deviceKey[SESSION_KEY_LENGTH];
     uint32_t keyLen;
-} AesGcmInputParam;
+} AuthDeviceKeyInfo;
 
-bool IsEnableSoftBusHeartbeat(void);
-bool IsOOBEState(void);
-bool IsScreenUnlock(void);
-int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen);
-int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen);
+void AuthLoadDeviceKey(void);
+int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey);
+void AuthRemoveDeviceKeyByUdid(const char *udidOrHash);
+void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType);
+int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey);
+void AuthClearDeviceKey(void);
 
 #ifdef __cplusplus
+#if __cplusplus
 }
-#endif /* __cplusplus */
-
-#endif /* LNN_COMMON_UTILS_H */
+#endif
+#endif
+#endif /* AUTH_DEVICE_COMMON_KEY_H */

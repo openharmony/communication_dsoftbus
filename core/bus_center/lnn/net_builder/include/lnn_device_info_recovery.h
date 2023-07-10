@@ -13,31 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef LNN_COMMON_UTILS_H
-#define LNN_COMMON_UTILS_H
+#ifndef LNN_DEVICE_INFO_RECOVERY_H
+#define LNN_DEVICE_INFO_RECOVERY_H
 
 #include <stdint.h>
-#include <stdbool.h>
+#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
-typedef struct {
-    uint8_t *data;
-    uint32_t dataLen;
-    uint8_t *key;
-    uint32_t keyLen;
-} AesGcmInputParam;
-
-bool IsEnableSoftBusHeartbeat(void);
-bool IsOOBEState(void);
-bool IsScreenUnlock(void);
-int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen);
-int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen);
+int32_t LnnLoadLocalDeviceInfo(void);
+int32_t LnnLoadRemoteDeviceInfo(void);
+int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo);
+int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo);
+int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo);
+int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo*deviceInfo);
+int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo*deviceInfo);
+void LnnDeleteDeviceInfo(const char *udid);
+void ClearDeviceInfo(void);
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
-#endif /* LNN_COMMON_UTILS_H */
+#endif /* LNN_DEVICE_INFO_RECOVERY_H */
