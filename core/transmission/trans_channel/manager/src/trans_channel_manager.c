@@ -326,14 +326,20 @@ NO_SANITIZE("cfi") static void FillAppInfo(AppInfo *appInfo, ConnectOption *conn
 
 static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
 {
-    if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP ||
-        channelType != CHANNEL_TYPE_PROXY) {
+    if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP) {
         return;
     }
-    int32_t module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+
+    int32_t module = UNUSE_BUTT;
+    if (channelType == CHANNEL_TYPE_PROXY) {
+        module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+    } else if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
+    }
     if (module != UNUSE_BUTT) {
         connOpt->socketOption.moduleId = module;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set nip module = %d", connOpt->socketOption.moduleId);
 }
 
 NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
