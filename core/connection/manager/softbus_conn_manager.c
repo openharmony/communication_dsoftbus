@@ -364,6 +364,8 @@ static void RecordStartTime(const ConnectOption *info)
                 CLOGE("RecordStartTime:bleMac memcpy failed");
                 return;
             }
+            conInfo.bleInfo.protocol = info->bleOption.protocol;
+            conInfo.bleInfo.psm = info->bleDirectOption.psm;
             break;
         case CONNECT_TCP:
             if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr, MAX_SOCKET_ADDR_LEN) !=
