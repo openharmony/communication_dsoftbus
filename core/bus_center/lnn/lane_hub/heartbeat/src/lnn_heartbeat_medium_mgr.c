@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_ble_heartbeat.h"
+#include "lnn_ble_lpdevice.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
@@ -504,7 +505,10 @@ NO_SANITIZE("cfi") int32_t LnnHbMediumMgrInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist ble heartbeat manager fail");
         return SOFTBUS_ERR;
     }
-    // mark-- LnnRegistBleSensorHubMediumMgr
+    if (LnnRegisterBleLpDeviceMediumMgr() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SH regist LpDevice manager fail");
+        return SOFTBUS_ERR;
+    }
     return HbInitRecvList();
 }
 
@@ -566,6 +570,10 @@ NO_SANITIZE("cfi") static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send once end get invalid param");
         return false;
     }
+    if (eachType == HEARTBEAT_TYPE_BLE_V3) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "V3 don't stop");
+        return true;
+    }
     custData = (LnnHeartbeatSendEndData *)data;
     custData->hbType = eachType;
     id = LnnConvertHbTypeToId(eachType);
@@ -575,10 +583,6 @@ NO_SANITIZE("cfi") static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet
     }
     if (g_hbMeidumMgr[id] == NULL || (eachType & g_hbMeidumMgr[id]->supportType) == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat type(%d)", eachType);
-        return true;
-    }
-    if (eachType == HEARTBEAT_TYPE_BLE_V3) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "V3 don't stop");
         return true;
     }
     if (g_hbMeidumMgr[id]->onSendOneHbEnd == NULL) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef LNN_BLE_HEARTBEAT_H
-#define LNN_BLE_HEARTBEAT_H
+#include "lnn_ble_lpdevice.h"
+#include "softbus_errcode.h"
 
-#include <stdint.h>
-#include "lnn_heartbeat_utils.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t LnnRegistBleHeartbeatMediumMgr(void);
-int32_t HbUpdateBleScanFilter(int32_t listenerId);
-void SetBleTypeIsSupportLpDevice(int32_t type);
-int32_t HbGenerateBitPosition(int32_t min, int32_t max, int64_t seed, int32_t *randPos, int32_t num);
-#ifdef __cplusplus
+int32_t LnnRegisterBleLpDeviceMediumMgr(void)
+{
+    return SOFTBUS_OK;
 }
-#endif
-#endif /* LNN_BLE_HEARTBEAT_H */
+
+void SendInfoToMlpsBleOnlineProcess(void *para)
+{
+    (void)para;
+    return;
+}
+
+void SendInfoToMlpsBleOfflineProcess(void *para)
+{
+    (void)para;
+    return;
+}
