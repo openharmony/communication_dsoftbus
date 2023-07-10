@@ -715,19 +715,22 @@ NO_SANITIZE("cfi") int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, con
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channelId is invalid");
         return SOFTBUS_ERR;
     }
+    ListenerModule module = PROXY;
+    if (connInfo->type == CONNECT_TCP) {
+        module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+        if (module == UNUSE_BUTT) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "get listener module failed, protocol = %d", connInfo->socketOption.protocol);
+            return SOFTBUS_INVALID_PARAM;
+        }
+    }
+
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
         ret = TransProxyConnExistProc(&conn, appInfo, chanNewId);
         if (ret == SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED) {
-            ret = TransProxyOpenNewConnChannel(PROXY, appInfo, connInfo, chanNewId);
+            ret = TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
         }
     } else {
-        ListenerModule module = PROXY;
-        if (connInfo->type == CONNECT_TCP) {
-            module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
-            if (module == UNUSE_BUTT) {
-                return SOFTBUS_INVALID_PARAM;
-            }
-        }
         ret = TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
         if ((ret == SOFTBUS_TRANS_PROXY_CONN_REPEAT) && (TransGetConn(connInfo, &conn) == SOFTBUS_OK)) {
             ret = TransProxyConnExistProc(&conn, appInfo, chanNewId);
