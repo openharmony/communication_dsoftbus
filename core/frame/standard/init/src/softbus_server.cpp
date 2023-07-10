@@ -134,6 +134,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
         return SOFTBUS_INVALID_PARAM;
     }
     ConnectOption connOpt;
+    (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     connOpt.type = ConvertConnectType(addrInfo->type);
     switch (connOpt.type) {
         case CONNECT_TCP:
@@ -148,6 +149,8 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
                 return SOFTBUS_MEM_ERR;
             }
+            connOpt.bleOption.protocol = addrInfo->info.ble.protocol;
+            connOpt.bleOption.psm = addrInfo->info.ble.psm;
             connOpt.bleOption.fastestConnectEnable = true;
             break;
         case CONNECT_BR:

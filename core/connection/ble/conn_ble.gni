@@ -61,7 +61,12 @@ if (dsoftbus_feature_conn_ble == false) {
     "$dsoftbus_root_path/core/common/include",
   ]
   if (enhanced_conn_ble == true) {
-    ble_connection_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_conn.c" ]
+    ble_connection_src += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_conn.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_pipeline.c",
+    ]
+    ble_connection_inc +=
+        [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/include" ]
   } else {
     ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c" ]
   }
