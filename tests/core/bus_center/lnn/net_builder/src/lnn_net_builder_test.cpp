@@ -81,7 +81,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
     };
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
-    int32_t ret = LnnNotifyDiscoveryDevice(&target);
+    int32_t ret = LnnNotifyDiscoveryDevice(&target, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 

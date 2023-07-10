@@ -161,6 +161,7 @@ typedef struct {
 
 typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
+    bool isNeedConnect;
     ConnectionAddr addr;
 } JoinLnnMsgPara;
 
@@ -317,7 +318,7 @@ static void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm)
     connFsm->statisticData.beginJoinLnnTime = LnnUpTimeMs();
 }
 
-static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr, const char *pkgName)
+static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr, const char *pkgName, bool isNeedConnect)
 {
     LnnConnectionFsm *connFsm = NULL;
 
@@ -326,7 +327,7 @@ static LnnConnectionFsm *StartNewConnectionFsm(const ConnectionAddr *addr, const
             g_netBuilder.connCount);
         return NULL;
     }
-    connFsm = LnnCreateConnectionFsm(addr, pkgName);
+    connFsm = LnnCreateConnectionFsm(addr, pkgName, isNeedConnect);
     if (connFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create connection fsm failed");
         return NULL;
@@ -464,10 +465,13 @@ static bool IsSamePendingRequest(const PendingJoinRequestNode *request)
     return false;
 }
 
-static bool TryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFailure)
+static bool TryPendingJoinRequest(const JoinLnnMsgPara *para, bool needReportFailure)
 {
     PendingJoinRequestNode *request = NULL;
-
+    if (para == NULL || !para->isNeedConnect) {
+        LLOGI("not connect online not need pending.");
+        return false;
+    }
     if (!NeedPendingJoinRequest()) {
         return false;
     }
@@ -477,7 +481,7 @@ static bool TryPendingJoinRequest(const ConnectionAddr *addr, bool needReportFai
         return false;
     }
     ListInit(&request->node);
-    request->addr = *addr;
+    request->addr = para->addr;
     request->needReportFailure = needReportFailure;
     if (IsSamePendingRequest(request)) {
         SoftBusFree(request);
@@ -511,7 +515,7 @@ static MetaJoinRequestNode *TryJoinRequestMetaNode(const char *pkgName, const Co
 }
 
 static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr *addr,
-    const char* pkgName, bool needReportFailure)
+    const char* pkgName, bool isNeedConnect, bool needReportFailure)
 {
     int32_t rc = SOFTBUS_OK;
     bool isCreate = false;
@@ -520,7 +524,7 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
         connFsm = FindConnectionFsmByAddr(addr);
     }
     if (connFsm == NULL || connFsm->isDead) {
-        connFsm = StartNewConnectionFsm(addr, pkgName);
+        connFsm = StartNewConnectionFsm(addr, pkgName, isNeedConnect);
         isCreate = true;
     }
     if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
@@ -564,7 +568,8 @@ static void TryRemovePendingJoinRequest(void)
             return;
         }
         ListDelete(&item->node);
-        if (PostJoinRequestToConnFsm(NULL, &item->addr, DEFAULT_PKG_NAME, item->needReportFailure) != SOFTBUS_OK) {
+        if (PostJoinRequestToConnFsm(NULL, &item->addr, DEFAULT_PKG_NAME, true, item->needReportFailure)
+            != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "post pending join request failed");
         }
         LLOGI("remove a pending join request, peer%s", LnnPrintConnectionAddr(&item->addr));
@@ -602,12 +607,12 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
     }
     connFsm = FindConnectionFsmByAddr(&para->addr);
     if (connFsm == NULL || connFsm->isDead) {
-        if (TryPendingJoinRequest(&para->addr, needReportFailure)) {
+        if (TryPendingJoinRequest(para, needReportFailure)) {
             LLOGI("join request is pending, peer%s", LnnPrintConnectionAddr(&para->addr));
             SoftBusFree((void *)para);
             return SOFTBUS_OK;
         }
-        ret = PostJoinRequestToConnFsm(connFsm, &para->addr, para->pkgName, needReportFailure);
+        ret = PostJoinRequestToConnFsm(connFsm, &para->addr, para->pkgName, para->isNeedConnect, needReportFailure);
         SoftBusFree((void *)para);
         return ret;
     }
@@ -858,7 +863,7 @@ static int32_t ProcessVerifyResult(const void *para)
 static int32_t CreatePassiveConnectionFsm(const DeviceVerifyPassMsgPara *msgPara)
 {
     LnnConnectionFsm *connFsm = NULL;
-    connFsm = StartNewConnectionFsm(&msgPara->addr, DEFAULT_PKG_NAME);
+    connFsm = StartNewConnectionFsm(&msgPara->addr, DEFAULT_PKG_NAME, true);
     if (connFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
             "start new connection fsm fail: %" PRId64, msgPara->authId);
@@ -1930,7 +1935,7 @@ static ConnectionAddr *CreateConnectionAddrMsgPara(const ConnectionAddr *addr)
     return para;
 }
 
-static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const char *pkgName)
+static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const char *pkgName, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
 
@@ -1948,6 +1953,7 @@ static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const ch
         SoftBusFree(para);
         return NULL;
     }
+    para->isNeedConnect = isNeedConnect;
     para->addr = *addr;
     return para;
 }
@@ -2296,7 +2302,7 @@ NO_SANITIZE("cfi") int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgNa
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
         return SOFTBUS_NO_INIT;
     }
-    para = CreateJoinLnnMsgPara(addr, pkgName);
+    para = CreateJoinLnnMsgPara(addr, pkgName, true);
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "prepare join lnn message fail");
         return SOFTBUS_MALLOC_ERR;
@@ -2385,16 +2391,16 @@ NO_SANITIZE("cfi") int32_t MetaNodeServerLeave(const char *networkId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
+NO_SANITIZE("cfi") int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnNotifyDiscoveryDevice enter!");
+    LLOGI("notify discovery device enter! isNeedConnect = %d", isNeedConnect);
     if (g_netBuilder.isInit == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no init");
         return SOFTBUS_ERR;
     }
-    para = CreateJoinLnnMsgPara(addr, DEFAULT_PKG_NAME);
+    para = CreateJoinLnnMsgPara(addr, DEFAULT_PKG_NAME, isNeedConnect);
     if (para == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc discovery device message fail");
         return SOFTBUS_MALLOC_ERR;

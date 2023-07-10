@@ -35,6 +35,7 @@ typedef enum {
     BIT_BLE_ONLINE_REUSE_CAPABILITY,
     BIT_COC_CONNECT_CAPABILITY,
     BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT, // support burst and sensorhub
+    BIT_BLE_DIRECT_ONLINE,
     BIT_FEATURE_COUNT,
 } FeatureCapability;
 

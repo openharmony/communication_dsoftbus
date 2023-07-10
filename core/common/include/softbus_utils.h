@@ -71,6 +71,9 @@ int32_t ConvertBtMacToStrNoColon(char *strMac, uint32_t strMacLen, const uint8_t
 
 int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen);
 
+int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen,
+    const unsigned char *inBuf, uint32_t inLen);
+
 int32_t GenerateRandomStr(char *str, uint32_t size);
 
 bool IsValidString(const char *input, uint32_t maxLen);

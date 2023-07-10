@@ -25,6 +25,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
@@ -37,6 +38,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 #include "lnn_async_callback_utils.h"
 #include "trans_channel_manager.h"
 
@@ -535,9 +537,28 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]join LNN is ongoing, waiting...", connFsm->id);
         return SOFTBUS_OK;
     }
-    LLOGI("[id=%u]begin join request, peer%s", connFsm->id, LnnPrintConnectionAddr(&connInfo->addr));
+    LLOGI("[id=%u]begin join request, peer%s, isNeedConnect=%d", connFsm->id,
+        LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+    if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
+        // go to online
+        LLOGI("begin to start ble direct online");
+        int32_t ret;
+        NodeInfo deviceInfo = {0};
+        int64_t authId = 0;
+        char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+        ret = memcpy_s(udidHash, HB_SHORT_UDID_HASH_HEX_LEN, connInfo->addr.info.ble.udidHash,
+            HB_SHORT_UDID_HASH_HEX_LEN);
+        LLOGI("join udidHash = %s", udidHash);
+        if (ret == EOK) {
+            if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
+                AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo, &authId) == SOFTBUS_OK) {
+                LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authId, &deviceInfo);
+                return SOFTBUS_OK;
+            }
+        }
+    }
     if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback()) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth verify device failed", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
@@ -978,7 +999,8 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName)
+NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName,
+    bool isNeedConnect)
 {
     LnnConnectionFsm *connFsm = NULL;
 
@@ -1006,7 +1028,9 @@ NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr
             return NULL;
         }
     }
-    LLOGI("create a new connection fsm[id=%u][peer%s]", connFsm->id, LnnPrintConnectionAddr(target));
+    connFsm->isNeedConnect = isNeedConnect;
+    LLOGI("create a new connection fsm[id=%u][peer%s][needConnect=%d]", connFsm->id, LnnPrintConnectionAddr(target),
+        isNeedConnect);
     return connFsm;
 }
 

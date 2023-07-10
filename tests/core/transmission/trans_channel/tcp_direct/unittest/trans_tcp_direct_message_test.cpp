@@ -582,7 +582,7 @@ HWTEST_F(TransTcpDirectMessageTest, OpenTcpDirectChannelTest0018, TestSize.Level
     AuthSessionInfo info;
     SessionKey sessionKey;
 
-    ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey);
+    ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = OpenTcpDirectChannel(nullptr, &connInfo, &channelId);
