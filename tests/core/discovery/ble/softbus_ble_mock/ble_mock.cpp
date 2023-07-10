@@ -35,9 +35,9 @@ int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
     return BleMock::GetMock()->SoftBusAddBtStateListener(listener);
 }
 
-int SoftBusAddScanListener(const SoftBusScanListener *listener)
+int SoftBusAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan)
 {
-    return BleMock::GetMock()->SoftBusAddScanListener(listener);
+    return BleMock::GetMock()->SoftBusAddScanListener(listener, scannerId, isLpDeviceScan);
 }
 
 int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize)
@@ -45,9 +45,9 @@ int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t f
     return BleMock::GetMock()->SoftBusSetScanFilter(listenerId, filter, filterSize);
 }
 
-int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
+int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan)
 {
-    return BleMock::GetMock()->SoftBusGetAdvChannel(callback);
+    return BleMock::GetMock()->SoftBusGetAdvChannel(callback, scannerId, isLpDeviceScan);
 }
 
 int SoftBusReleaseAdvChannel(int channel)
@@ -55,9 +55,9 @@ int SoftBusReleaseAdvChannel(int channel)
     return BleMock::GetMock()->SoftBusReleaseAdvChannel(channel);
 }
 
-int SoftBusStopScan(int listenerId)
+int SoftBusStopScan(int listenerId, int scannerId)
 {
-    return BleMock::GetMock()->SoftBusStopScan(listenerId);
+    return BleMock::GetMock()->SoftBusStopScan(listenerId, scannerId);
 }
 
 int SoftBusRemoveBtStateListener(int listenerId)
@@ -70,6 +70,11 @@ int SoftBusRemoveScanListener(int listenerId)
     return BleMock::GetMock()->SoftBusRemoveScanListener(listenerId);
 }
 
+int32_t SoftBusDeregisterScanCallbacks(int32_t scannerId)
+{
+    return BleMock::GetMock()->SoftBusDeregisterScanCallbacks(scannerId);
+}
+
 int SoftBusStopAdv(int channel)
 {
     return BleMock::GetMock()->SoftBusStopAdv(channel);
@@ -80,9 +85,9 @@ int SoftBusUpdateAdv(int channel, const SoftBusBleAdvData *data, const SoftBusBl
     return BleMock::GetMock()->SoftBusUpdateAdv(channel, data, param);
 }
 
-int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
+int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param)
 {
-    return BleMock::GetMock()->SoftBusStartScan(listenerId, param);
+    return BleMock::GetMock()->SoftBusStartScan(listenerId, scannerId, param);
 }
 
 int SoftBusSetAdvData(int channel, const SoftBusBleAdvData *data)
@@ -134,7 +139,7 @@ int32_t BleMock::ActionOfRemoveBtStateListener(int listenerId)
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfAddScanListener(const SoftBusScanListener *listener)
+int32_t BleMock::ActionOfAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan)
 {
     scanListener = listener;
     return SCAN_LISTENER_ID;
@@ -146,13 +151,18 @@ int32_t BleMock::ActionOfRemoveScanListener(int listenerId)
     return SOFTBUS_OK;
 }
 
+int32_t BleMock::ActionOfDeregisterScanCallbacks(int scannerId)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t BleMock::ActionOfSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
     DLOGI("listenerId=%d filterSize=%d", listenerId, filterSize);
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfGetAdvChannel(const SoftBusAdvCallback *callback)
+int32_t BleMock::ActionOfGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan)
 {
     static int32_t advChannel = 0;
     advCallback = callback;
@@ -165,7 +175,7 @@ int32_t BleMock::ActionOfReleaseAdvChannel(int channel)
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfStartScan(int listenerId, const SoftBusBleScanParams *param)
+int32_t BleMock::ActionOfStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param)
 {
     if (listenerId != SCAN_LISTENER_ID) {
         return SOFTBUS_ERR;
@@ -179,7 +189,7 @@ int32_t BleMock::ActionOfStartScan(int listenerId, const SoftBusBleScanParams *p
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfStopScan(int listenerId)
+int32_t BleMock::ActionOfStopScan(int listenerId, int scannerId)
 {
     if (listenerId != SCAN_LISTENER_ID) {
         return SOFTBUS_ERR;
@@ -464,11 +474,12 @@ void BleMock::SetupSuccessStub()
     EXPECT_CALL(*this, SoftBusRemoveBtStateListener).WillRepeatedly(BleMock::ActionOfRemoveBtStateListener);
     EXPECT_CALL(*this, BleGattLockInit).WillRepeatedly(BleMock::ActionOfBleGattLockInit);
     EXPECT_CALL(*this, SoftBusAddBtStateListener(NotNull())).WillRepeatedly(BleMock::ActionOfAddBtStateListener);
-    EXPECT_CALL(*this, SoftBusAddScanListener(NotNull())).WillRepeatedly(BleMock::ActionOfAddScanListener);
+    EXPECT_CALL(*this, SoftBusAddScanListener).WillRepeatedly(BleMock::ActionOfAddScanListener);
     EXPECT_CALL(*this, SoftBusGetAdvChannel).WillRepeatedly(BleMock::ActionOfGetAdvChannel);
     EXPECT_CALL(*this, SoftBusSetScanFilter).WillRepeatedly(BleMock::ActionOfSetScanFilter);
     EXPECT_CALL(*this, SoftBusRemoveScanListener).WillRepeatedly(BleMock::ActionOfRemoveScanListener);
     EXPECT_CALL(*this, SoftBusReleaseAdvChannel).WillRepeatedly(BleMock::ActionOfReleaseAdvChannel);
+    EXPECT_CALL(*this, SoftBusDeregisterScanCallbacks).WillRepeatedly(BleMock::ActionOfDeregisterScanCallbacks);
 }
 
 void BleMock::AsyncAdvertiseDone()

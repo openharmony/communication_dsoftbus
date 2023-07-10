@@ -790,7 +790,8 @@ NO_SANITIZE("cfi") int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
         return SOFTBUS_ERR;
     }
     LnnHbClearRecvList();
-    if (type == (HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_TCP_FLUSH)) {
+    if (type == (HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3 |
+        HEARTBEAT_TYPE_TCP_FLUSH)) {
         return LnnPostTransStateMsgToHbFsm(g_hbFsm, EVENT_HB_IN_NONE_STATE);
     }
     return SOFTBUS_OK;
@@ -883,7 +884,7 @@ NO_SANITIZE("cfi") void LnnHbStrategyDeinit(void)
     if (g_hbFsm != NULL) {
         (void)LnnStopHeartbeatFsm(g_hbFsm);
     }
-    LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1);
+    LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3);
     LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH);
     (void)SoftBusMutexDestroy(&g_hbStrategyMutex);
 }
