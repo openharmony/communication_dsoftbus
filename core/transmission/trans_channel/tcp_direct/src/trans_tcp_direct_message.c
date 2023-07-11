@@ -642,7 +642,7 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
         if (TransGetLocalConfig(CHANNEL_TYPE_TCP_DIRECT, appInfo->businessType, localDataConfig) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
-        appInfo->myData.dataConfig = MIN(appInfo->myData.dataConfig, appInfo->peerData.dataConfig);
+        appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill dataConfig[%u] succ", appInfo->myData.dataConfig)
         return SOFTBUS_OK;
     }

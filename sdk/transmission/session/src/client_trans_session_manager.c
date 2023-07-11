@@ -1014,6 +1014,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->routeType = channel->routeType;
                 sessionNode->businessType = channel->businessType;
                 sessionNode->fileEncrypt = channel->fileEncrypt;
+                sessionNode->dataConfig = channel->dataConfig;
                 sessionNode->algorithm = channel->algorithm;
                 sessionNode->crc = channel->crc;
                 sessionNode->isEncrypt = channel->isEncrypt;

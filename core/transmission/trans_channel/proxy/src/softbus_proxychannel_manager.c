@@ -829,7 +829,7 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
     }
     if (appInfo->peerData.dataConfig != 0) {
         uint32_t localDataConfig = 0;
-        if (SoftbusGetLocalConfig(CHANNEL_TYPE_PROXY, appInfo->businessType, localDataConfig) != SOFTBUS_OK) {
+        if (TransGetLocalConfig(CHANNEL_TYPE_PROXY, appInfo->businessType, localDataConfig) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local config failed, businessType[%d]",
                 appInfo->businessType);
             return SOFTBUS_ERR;
