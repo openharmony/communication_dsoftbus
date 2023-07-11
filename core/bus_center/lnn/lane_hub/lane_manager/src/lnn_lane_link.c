@@ -240,7 +240,7 @@ static bool LaneGetP2PReuseMac(const char *networkId, char *ipAddr, uint32_t max
 static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback,
     BleProtocolType type)
 {
-    const char *udid = LnnConvertDLidToUdid(reqInfo->peerNetworkId, CATEGORY_UDID);
+    const char *udid = LnnConvertDLidToUdid(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID);
     ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, type);
     if ((connection == NULL) || (connection->state != BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO)) {
         return SOFTBUS_ERR;
@@ -262,6 +262,7 @@ static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, co
 static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     if (LaneLinkOfBleReuse(reqId, reqInfo, callback, BLE_GATT) == SOFTBUS_OK) {
+        LLOGI("reuse ble gatt connection");
         return SOFTBUS_OK;
     }
     LaneLinkInfo linkInfo = {0};
