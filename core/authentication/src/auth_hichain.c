@@ -36,15 +36,43 @@ typedef struct {
 
 static TrustDataChangeListener g_dataChangeListener;
 
-static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClient)
+static char *GenDeviceLevelParam(int64_t authSeq, const char *udid, const char *uid, bool isClient)
 {
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
         ALOGE("create json fail.");
         return NULL;
     }
-    if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
-        !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
+    char peerUdidHash[UDID_BUF_LEN] = {0};
+    int32_t ret = SOFTBUS_ERR;
+    AuthFsm *fsm = GetAuthFsmByAuthSeq(authSeq);
+    if (fsm == NULL) {
+        cJSON_Delete(msg);
+        return NULL;
+    }
+    do {
+        if (fsm->info.idType == EXCHANHE_UDID) {
+            if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
+                !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
+                break;
+            }
+        }
+        if (fsm->info.idType == EXCHANGE_NETWORKID) {
+            if (GetPeerUdidHashByNetworkId(fsm->info.udid, peerUdidHash) != SOFTBUS_OK) {
+                break;
+            }
+            if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, peerUdidHash) ||
+                !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
+                break;
+            }
+        }
+        ret = SOFTBUS_OK;
+    } while (false);
+    if (ret == SOFTBUS_ERR) {
+        cJSON_Delete(msg);
+        return NULL;
+    }
+    if (!AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
         !AddBoolToJsonObject(msg, FIELD_IS_DEVICE_LEVEL, true) ||
         !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, isClient) ||
         !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, SESSION_KEY_LENGTH)) {
@@ -118,14 +146,37 @@ NO_SANITIZE("cfi") static char *OnRequest(int64_t authSeq, int operationCode, co
         return NULL;
     }
     char localUdid[UDID_BUF_LEN] = {0};
+    char peerUdidHash[UDID_BUF_LEN] = {0};
     LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
+    AuthFsm *fsm = GetAuthFsmByAuthSeq(authSeq);
+    if (fsm == NULL) {
+        cJSON_Delete(msg);
+        return NULL;
+    }
     if (!AddNumberToJsonObject(msg, FIELD_CONFIRMATION, REQUEST_ACCEPTED) ||
         !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
-        !AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
         !AddStringToJsonObject(msg, FIELD_DEVICE_ID, localUdid)) {
         ALOGE("pack request msg fail.");
         cJSON_Delete(msg);
         return NULL;
+    }
+    if (fsm->info.idType == EXCHANHE_UDID) {
+        if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
+            !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
+            cJSON_Delete(msg);
+            return NULL;
+        }
+    }
+    if (fsm->info.idType == EXCHANGE_NETWORKID) {
+        if (GetPeerUdidHashByNetworkId(fsm->info.udid, peerUdidHash) != SOFTBUS_OK) {
+            cJSON_Delete(msg);
+            return NULL;
+        }
+        if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, peerUdidHash) ||
+            !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
+            cJSON_Delete(msg);
+            return NULL;
+        }
     }
     char *msgStr = cJSON_PrintUnformatted(msg);
     if (msgStr == NULL) {
@@ -261,7 +312,7 @@ NO_SANITIZE("cfi") int32_t HichainStartAuth(int64_t authSeq, const char *udid, c
         ALOGE("udid/uid is invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *authParams = GenDeviceLevelParam(udid, uid, true);
+    char *authParams = GenDeviceLevelParam(authSeq, udid, uid, true);
     if (authParams == NULL) {
         ALOGE("generate auth param fail.");
         return SOFTBUS_ERR;
