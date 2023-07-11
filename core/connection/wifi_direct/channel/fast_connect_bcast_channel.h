@@ -25,6 +25,8 @@ extern "C" {
 struct FastConnectBcastChannel {
     WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE;
 
+    bool (*isEnable)(void);
+
     char *remoteNetworkId;
     bool tlvFeature;
 };

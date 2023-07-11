@@ -14,6 +14,9 @@
  */
 
 #include "fast_connect_bcast_channel.h"
+
+#include <securec.h>
+
 #include "softbus_adapter_mem.h"
 #include "softbus_log.h"
 #include "softbus_error_code.h"
@@ -79,6 +82,11 @@ static void Destructor(struct WifiDirectNegotiateChannel *base)
     (void)base;
 }
 
+static bool IsEnable(void)
+{
+    return false;
+}
+
 void FastConnectBcastChannelConstructor(struct FastConnectBcastChannel *self, const char *networkId)
 {
     (void)networkId;
@@ -92,6 +100,8 @@ void FastConnectBcastChannelConstructor(struct FastConnectBcastChannel *self, co
     self->isP2pChannel = IsP2pChannel;
     self->duplicate = Duplicate;
     self->destructor = Destructor;
+
+    self->isEnable = IsEnable;
 
     self->tlvFeature = false;
 }
