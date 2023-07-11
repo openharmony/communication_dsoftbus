@@ -31,7 +31,7 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
     TRAN_CHECK_AND_RETURN_LOG(peerUuid, "peer uuid is null");
 
     NodeInfo nodeInfo;
-    memset(&nodeInfo, 0, sizeof(nodeInfo));
+    memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
     TRAN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "LnnGetRemoteNodeInfoById failed");
 
@@ -56,7 +56,7 @@ static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, co
 {
     TRAN_CHECK_AND_RETURN_LOG(peerMac, "peer mac is null");
     NodeInfo nodeInfo;
-    memset(&nodeInfo, 0, sizeof(nodeInfo));
+    memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
     TRAN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "LnnGetRemoteNodeInfoById failed");
     TLOGI("Notify Upgrade MigrateEvents start");

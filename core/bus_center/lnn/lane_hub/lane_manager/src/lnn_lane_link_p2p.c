@@ -334,7 +334,8 @@ static int32_t GetPreferAuth(const char *networkId, AuthConnInfo *connInfo, bool
     return AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
 }
 
-static int32_t GetP2pLinkReqParam(uint32_t authRequestId, int32_t p2pRequestId, struct WifiDirectConnectInfo *wifiDirectInfo)
+static int32_t GetP2pLinkReqParam(uint32_t authRequestId, int32_t p2pRequestId,
+    struct WifiDirectConnectInfo *wifiDirectInfo)
 {
     P2pLinkReqList *item = NULL;
     P2pLinkReqList *next = NULL;

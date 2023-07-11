@@ -1704,7 +1704,7 @@ static bool DeletePcNodeInfo(const char *peerUdid)
         return false;
     }
     LLOGI("device not trust, delete pc online node");
-    deleteFromProfile(remoteNodeInfo.deviceInfo.deviceUdid);
+    DeleteFromProfile(remoteNodeInfo.deviceInfo.deviceUdid);
     LnnRemoveNode(remoteNodeInfo.deviceInfo.deviceUdid);
     return true;
 }

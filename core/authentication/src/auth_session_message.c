@@ -529,8 +529,6 @@ static void PackCommonFastAuth(JsonObj *json, const NodeInfo *info)
         ALOGI("GetExtData : %s", extData);
         (void)JSON_AddStringToObject(json, EXTDATA, extData);
     }
-    //!JSON_AddStringToObject(json, BD_KEY,);
-    //!JSON_AddInt32ToObject(json, IV,));
 }
 
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
@@ -580,16 +578,13 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
-        //!JSON_AddStringToObject(json, IP_MAC,) ||
         !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
         !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
         !JSON_AddBoolToObject(json, DISTRIBUTED_SWITCH, true) ||
-        //!JSON_AddInt64ToObject(json, TRANS_FLAGS,) ||
         !JSON_AddInt64ToObject(json, BLE_TIMESTAMP, info->bleStartTimestamp) ||
         !JSON_AddInt32ToObject(json, WIFI_BUFF_SIZE, info->wifiBuffSize) ||
         !JSON_AddInt32ToObject(json, BR_BUFF_SIZE, info->brBuffSize) ||
         !JSON_AddInt64ToObject(json, FEATURE, info->feature) ||
-        //!JSON_AddStringToObject(json, META_NODE_INFO_OF_EAR, ) ||
         !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity)) {
         ALOGE("JSON_AddStringToObject fail.");
         return SOFTBUS_ERR;
@@ -645,8 +640,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptBool(json, IS_SCREENON, &info->isScreenOn, false);
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
-    //OptString(json, IP_MAC, );
-    //OptInt64(json, TRANS_FLAGS, , 0);
+
     //IS_SUPPORT_TCP_HEARTBEAT
     OptString(json, HML_MAC, info->wifiDirectAddr, MAC_LEN, "");
     OptString(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN, "");
@@ -746,8 +740,6 @@ static int32_t UnpackBt(const JsonObj *json, NodeInfo *info, SoftBusVersion vers
     (void)SetDiscType(&info->discoveryType, discTypeStr);
     OptInt64(json, BLE_TIMESTAMP, &info->bleStartTimestamp, DEFAULT_BLE_TIMESTAMP);
     OptInt(json, STATE_VERSION, &info->stateVersion, 0);
-    //OptString(json, BD_KEY, );
-    //OpyInt(json, IV);
     UnpackCommon(json, info, version, isMetaAuth);
     return SOFTBUS_OK;
 }
@@ -848,7 +840,6 @@ static int32_t PackDeviceInfoBtV1(JsonObj *json, const NodeInfo *info, bool isMe
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
         !JSON_AddInt32ToObject(json, P2P_ROLE, info->p2pInfo.p2pRole) ||
-        //!JSON_AddStringToObject(json, CONNECT_INFO,) ||
         !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
         !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight)) {
         ALOGE("add wifi info fail");
@@ -879,7 +870,6 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
     OptBool(json, IS_CHARGING, &info->batteryInfo.isCharging, false);
     OptBool(json, IS_SCREENON, &info->isScreenOn, false);
     OptInt(json, P2P_ROLE, &info->p2pInfo.p2pRole, 0);
-    //OptString(json, CONNECT_INFO, , , "");
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
@@ -1136,7 +1126,6 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     }
     uint8_t *decompressData = NULL;
     uint32_t decompressLen = 0;
-    // need (flags == FLAG_COMPRESS_DEVICE_INFO)
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
         ALOGI("before decompress, msgSize:%d", msgSize);
         if (DataDecompress((uint8_t *)msg, msgSize, &decompressData, &decompressLen) != SOFTBUS_OK) {
