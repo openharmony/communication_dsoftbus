@@ -169,8 +169,6 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest01, TestSiz
     EXPECT_EQ(ret,  INVALID_SESSION_ID);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
-    ret = FindConfigType(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_FILE);
-    EXPECT_EQ(ret,  SOFTBUS_CONFIG_TYPE_MAX);
 }
 
 /**
@@ -243,18 +241,6 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest03, TestSiz
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(sessionParam);
-}
-
-/**
- * @tc.name: TransClientSessionServiceTest04
- * @tc.desc: Transmission sdk session service qos find config type.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest04, TestSize.Level1)
-{
-    int32_t ret = FindConfigType(CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE);
-    EXPECT_EQ(ret,  SOFTBUS_INT_MAX_MESSAGE_LENGTH);
 }
 
 }
