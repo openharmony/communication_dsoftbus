@@ -130,7 +130,8 @@ char *PackRequest(const AppInfo *appInfo)
         !AddStringToJsonObject(json, GROUP_ID, appInfo->groupId) ||
         !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
-        !AddStringToJsonObject(json, SESSION_KEY, (char*)encodeSessionKey)) {
+        !AddStringToJsonObject(json, SESSION_KEY, (char*)encodeSessionKey) ||
+        !AddNumberToJsonObject(json, MTU_SIZE, appInfo->myData.dataConfig)) {
         cJSON_Delete(json);
         return NULL;
     }
@@ -213,6 +214,9 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get BUS_NAME");
         return SOFTBUS_ERR;
     }
+    if (!GetJsonObjectNumberItem(msg, MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "peer dataconfig is null.");
+    }
     appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
     appInfo->peerData.uid = -1;
     appInfo->peerData.pid = -1;
@@ -279,6 +283,12 @@ NO_SANITIZE("cfi") char *PackReply(const AppInfo *appInfo)
         cJSON_Delete(json);
         return NULL;
     }
+    if (appInfo->peerData.dataConfig != 0) {
+        if (!AddNumberToJsonObject(json, MTU_SIZE, appInfo->myData.dataConfig)) {
+            cJSON_Delete(json);
+            return NULL;
+        }
+    }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to add trans data size");
         return NULL;
@@ -334,7 +344,9 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
             appInfo->myHandleId = -1;
             appInfo->peerHandleId = -1;
     }
-
+    if (!GetJsonObjectNumberItem(msg, MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "peer dataconfig is null.");
+    }
     if (apiVersion != API_V1) {
         if (!GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName), PKG_NAME_SIZE_MAX) ||
             !GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {

@@ -27,6 +27,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
 #include "softbus_message_open_channel.h"
@@ -50,6 +51,12 @@ typedef struct {
     char *data;
     char *w;
 } ServerDataBuf;
+
+typedef struct {
+    int32_t channelType;
+    int32_t businessType;
+    ConfigType configType;
+} ConfigTypeMap;
 
 static SoftBusList *g_tcpSrvDataList = NULL;
 
@@ -296,6 +303,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.peerIp = conn.appInfo.peerData.addr;
     info.peerPort = conn.appInfo.peerData.port;
     info.linkType = conn.appInfo.linkType;
+    info.dataConfig = conn.appInfo.myData.dataConfig;
     char myIp[IP_LEN] = {0};
     if (conn.serverSide) {
         if (conn.appInfo.routeType == WIFI_STA) {
@@ -407,6 +415,67 @@ static int TransTdcPostFisrtData(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
+static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
+};
+
+static int32_t FindConfigType(int32_t channelType, int32_t businessType)
+{
+    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
+        if ((g_configTypeMap[i].channelType == channelType) &&
+            (g_configTypeMap[i].businessType == businessType)) {
+            return g_configTypeMap[i].configType;
+        }
+    }
+    return SOFTBUS_CONFIG_TYPE_MAX;
+}
+
+static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t len)
+{
+    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
+    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType: %d, businessType: %d",
+            channelType, businessType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType: %d.", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+
+    len = maxLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local config = %d.", len);
+    return SOFTBUS_OK;
+}
+
+static int32_t TransTdcProcessDataConfig(AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "appInfo is null");
+        return SOFTBUS_ERR;
+    }
+    if (appInfo->businessType != BUSINESS_TYPE_MESSAGE && appInfo->businessType != BUSINESS_TYPE_BYTE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "invalid businessType[%d]", appInfo->businessType);
+        return SOFTBUS_OK;
+    }
+    if (appInfo->peerData.dataConfig != 0) {
+        appInfo->myData.dataConfig = MIN(appInfo->myData.dataConfig, appInfo->peerData.dataConfig);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "process dataConfig[%u] succ", appInfo->myData.dataConfig);
+        return SOFTBUS_OK;
+    }
+    ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
+        SOFTBUS_INT_MAX_BYTES_LENGTH : SOFTBUS_INT_MAX_MESSAGE_LENGTH;
+    if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
+        sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType[%d]", configType);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process data config value[%d]", appInfo->myData.dataConfig);
+    return SOFTBUS_OK;
+}
+
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
     (void)seq;
@@ -429,6 +498,11 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     uint16_t fastDataSize = 0;
     if (UnpackReply(reply, &conn.appInfo, &fastDataSize) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UnpackReply failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (TransTdcProcessDataConfig(&conn.appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Trans Tdc process data config failed.");
         return SOFTBUS_ERR;
     }
 
@@ -553,6 +627,36 @@ static void NotifyFastDataRecv(SessionConn *conn, int32_t channelId)
     return;
 }
 
+static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "appInfo is null");
+        return SOFTBUS_ERR;
+    }
+    if (appInfo->businessType != BUSINESS_TYPE_BYTE && appInfo->businessType != BUSINESS_TYPE_MESSAGE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "invalid businessType[%d]", appInfo->businessType);
+        return SOFTBUS_OK;
+    }
+    if (appInfo->peerData.dataConfig != 0) {
+        uint32_t localDataConfig = 0;
+        if (TransGetLocalConfig(CHANNEL_TYPE_TCP_DIRECT, appInfo->businessType, localDataConfig) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
+        appInfo->myData.dataConfig = MIN(appInfo->myData.dataConfig, appInfo->peerData.dataConfig);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill dataConfig[%u] succ", appInfo->myData.dataConfig)
+        return SOFTBUS_OK;
+    }
+    ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
+        SOFTBUS_INT_MAX_BYTES_LENGTH : SOFTBUS_INT_MAX_MESSAGE_LENGTH;
+    if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
+        sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType[%d]", configType);
+        return SOFTBUS_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill data config value[%d]", appInfo->myData.dataConfig);
+    return SOFTBUS_OK;
+}
+
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d, seq=%d.", channelId, seq);
@@ -574,6 +678,13 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get Uuid By ChanId failed.");
         errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
         errDesc = (char *)"Get Uuid By ChanId failed";
+        goto ERR_EXIT;
+    }
+
+    if (TransTdcFillDataConfig(&conn->appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fill data config failed.");
+        errCode = SOFTBUS_INVALID_PARAM;
+        errDesc = (char *)"fill data config failed";
         goto ERR_EXIT;
     }
 
