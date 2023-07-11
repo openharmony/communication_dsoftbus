@@ -770,7 +770,7 @@ int ReadSessionLinkType(int32_t channelId, int32_t type, void* value, uint32_t v
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t routeType = INVAILD_ROUTE_TYPE;
+    int32_t routeType = INVALID_ROUTE_TYPE;
     if (ClientGetRouteTypeByChannelId(channelId, type, &routeType) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get link type failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
