@@ -643,7 +643,7 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
             return SOFTBUS_ERR;
         }
         appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill dataConfig[%u] succ", appInfo->myData.dataConfig)
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill dataConfig[%u] succ", appInfo->myData.dataConfig);
         return SOFTBUS_OK;
     }
     ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
