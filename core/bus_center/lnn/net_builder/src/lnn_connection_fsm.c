@@ -326,7 +326,7 @@ static void PostPcOnlineUniquely(NodeInfo *info)
     }
     if (LnnGetRemoteNodeInfoById(brMacHash, CATEGORY_UDID, &nodeInfo) == SOFTBUS_OK) {
         LLOGI("set pc without softbus offline");
-        deleteFromProfile(nodeInfo.deviceInfo.deviceUdid);
+        DeleteFromProfile(nodeInfo.deviceInfo.deviceUdid);
         LnnRemoveNode(nodeInfo.deviceInfo.deviceUdid);
     }
 }
@@ -443,7 +443,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]get basic info fail", connFsm->id);
             needReportOffline = false;
         } else {
-            deleteFromProfile(udid);
+            DeleteFromProfile(udid);
         }
         // just remove node when peer device is not trusted
         if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0 && !isMetaAuth) {

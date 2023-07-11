@@ -98,9 +98,9 @@ static int32_t GetStationFrequency(void)
 static int32_t GetRecommendChannel(void)
 {
     RecommendChannelRequest request;
-    memset(&request, 0, sizeof(request));
+    (void)memset_s(&request, sizeof(request), 0, sizeof(request));
     RecommendChannelResponse response;
-    memset(&response, 0, sizeof(response));
+    (void)memset_s(&response, sizeof(response), 0, sizeof(response));
 
     int32_t ret = Hid2dGetRecommendChannel(&request, &response);
     if (ret != WIFI_SUCCESS) {
@@ -260,7 +260,12 @@ static int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
     }
 
     char interface[INTERFACE_LENGTH];
-    memcpy(interface, groupInfo->interface, sizeof(groupInfo->interface));
+    int32_t res = memcpy_s(interface, sizeof(interface), groupInfo->interface, sizeof(groupInfo->interface));
+    if (res != EOK) {
+        CLOGE(LOG_LABEL "memcpy_s failed");
+        SoftBusFree(groupInfo);
+        return SOFTBUS_ERR;
+    }
     SoftBusFree(groupInfo);
     CLOGI(LOG_LABEL "interfaceName=%s", interface);
 
@@ -346,7 +351,7 @@ static int32_t P2pConfigGcIp(const char *interface, const char *ip)
     CONN_CHECK_AND_RETURN_RET_LOG(ip, SOFTBUS_INVALID_PARAM, LOG_LABEL "ip is null");
 
     IpAddrInfo addrInfo;
-    memset(&addrInfo, 0, sizeof(addrInfo));
+    (void)memset_s(&addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo));
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     int32_t ret = netWorkUtils->ipStringToIntArray(ip, addrInfo.ip, IPV4_ARRAY_LEN);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "convert ip to int array failed");
@@ -381,7 +386,7 @@ static int32_t P2pConnectGroup(char *groupConfigString)
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "split group config failed");
 
     Hid2dConnectConfig connectConfig;
-    memset(&connectConfig, 0, sizeof(connectConfig));
+    (void)memset_s(&connectConfig, sizeof(connectConfig), 0, sizeof(connectConfig));
 
     ret = strcpy_s(connectConfig.ssid, sizeof(connectConfig.ssid), configs[P2P_GROUP_CONFIG_INDEX_SSID]);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy ssid failed");

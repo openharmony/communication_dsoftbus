@@ -247,6 +247,7 @@ static void RetainOfflineCode(const NodeInfo *oldInfo, NodeInfo *newInfo)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return;
     }
+    // 4 represents the number of destination bytes and source bytes.
     if (memcpy_s(newInfo->offlineCode, 4, oldInfo->offlineCode, 4) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy offlineCode error!");
         return;
@@ -1334,7 +1335,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
         info->discoveryType |= oldInfo->discoveryType;
         info->heartbeatTimeStamp = oldInfo->heartbeatTimeStamp;
         MergeLnnInfo(oldInfo, info);
-        updateProfile(info);
+        UpdateProfile(info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
@@ -1349,7 +1350,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
         if (!oldWifiFlag && !newWifiFlag && newBleBrFlag) {
             OnlinePreventBrConnection(info);
         }
-        insertToProfile(info);
+        InsertToProfile(info);
         return REPORT_ONLINE;
     }
     if (isMigrateEvent) {

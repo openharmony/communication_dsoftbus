@@ -145,7 +145,6 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
 NO_SANITIZE("cfi") static void *NetlinkMonitorThread(void *para)
 {
     struct nlmsghdr *nlh = NULL;
-
     (void)para;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread start");
     int32_t sockFd = CreateNetlinkSocket();

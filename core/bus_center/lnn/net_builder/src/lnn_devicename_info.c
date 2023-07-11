@@ -94,7 +94,7 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
         LLOGE("get node info fail");
         return;
     }
-    updateProfile(&nodeInfo);
+    UpdateProfile(&nodeInfo);
 }
 
 static void HandlerGetDeviceName(const char *deviceName)
