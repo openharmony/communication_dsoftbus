@@ -15,10 +15,14 @@
 #ifndef WIFI_DIRECT_BROADCAST_RECEIVER_H
 #define WIFI_DIRECT_BROADCAST_RECEIVER_H
 
-#include <stdint.h>
+#include <stdbool.h>
 #include <stddef.h>
-#include "common_list.h"
+#include <stdint.h>
+
+#include "wifi_device.h"
 #include "wifi_p2p.h"
+
+#include "common_list.h"
 #include "wifi_direct_p2p_adapter.h"
 
 #ifdef __cplusplus

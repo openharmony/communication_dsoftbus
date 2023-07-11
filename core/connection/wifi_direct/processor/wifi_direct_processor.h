@@ -47,8 +47,8 @@ struct ProcessorFastConnect {
     int (*createLink)(struct WifiDirectConnectInfo *connectInfo, enum WifiDirectRole *finalRole,
         const struct WDFastCfg *remoteCfg);
     int (*sendGroupConfig)(void);
-    int (*onBcastDataReceived)(struct WifiDirectConnectInfo *connectInfo,
-        enum WifiDirectRole peerRole, conststruct WDFastCfg *remoteCfg);
+    int (*onBcastDataReceived)(
+        struct WifiDirectConnectInfo *connectInfo, enum WifiDirectRole peerRole, const struct WDFastCfg *remoteCfg);
     int (*onSessionCreated)(struct WifiDirectNegotiateChannel *channel);
     int (*onConfigRecvd)(struct NegotiateMessage *msg);
     void (*onClientConnected)(const char *remoteMac);
@@ -59,20 +59,20 @@ struct ProcessorFastConnect {
     bool groupCreated;
 };
 
-#define PROCESSOR_BASE                                                                                            \
-    int32_t (*createLink)(struct WifiDirectConnectInfo *connectInfo);                                             \
-    int32_t (*reuseLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);                 \
-    int32_t (*disconnectLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);            \
-    int32_t (*processNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);        \
-    int32_t (*onOperationEvent)(int32_t requestId, int32_t result);                                               \
-                                                                                                                  \
-    void (*processUnhandledRequest)(struct NegotiateMessage *msg, int32_t errorCode);                             \
-    void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \
-                                                                                                                  \
-    struct ProcessorFastConnect fastConnect;                                                                      \
-                                                                                                                  \                                                                                                                 \
-    enum WifiDirectProcessorState currentState;                                                                   \
-    struct NegotiateMessage *currentMsg;                                                                          \
+#define PROCESSOR_BASE                                                                                      \
+    int32_t (*createLink)(struct WifiDirectConnectInfo * connectInfo);                                      \
+    int32_t (*reuseLink)(struct WifiDirectConnectInfo * connectInfo, struct InnerLink * innerLink);         \
+    int32_t (*disconnectLink)(struct WifiDirectConnectInfo * connectInfo, struct InnerLink * innerLink);    \
+    int32_t (*processNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage * msg); \
+    int32_t (*onOperationEvent)(int32_t requestId, int32_t result);                                         \
+                                                                                                            \
+    void (*processUnhandledRequest)(struct NegotiateMessage * msg, int32_t errorCode);                      \
+    void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage * msg);                 \
+                                                                                                            \
+    struct ProcessorFastConnect fastConnect;                                                                \
+                                                                                                            \
+    enum WifiDirectProcessorState currentState;                                                             \
+    struct NegotiateMessage *currentMsg;                                                                    \
     char *name;
 
 struct WifiDirectProcessor {

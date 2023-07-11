@@ -23,7 +23,7 @@ enhanced_wifi_direct = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                    "value")
 
 wifi_direct_connection_src = []
-wifi_direct_connection_external_deps = [ "wifi:wifi_sdk" ]
+wifi_direct_connection_external_deps = []
 
 wifi_direct_connection_inc = [
   "$dsoftbus_root_path/core/connection/wifi_direct",
@@ -82,7 +82,6 @@ if (dsoftbus_feature_conn_p2p == true &&
     "$dsoftbus_root_path/core/connection/wifi_direct/negotiate_state/fast_connecting_state.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor/wifi_direct_processor_factory.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/entity/wifi_direct_entity_factory.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_role_option.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/broadcast_handler.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/broadcast_receiver.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/link_manager_broadcast_handler.c",
@@ -102,6 +101,7 @@ if (dsoftbus_feature_conn_p2p == true &&
       "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_fast_connect.c",
       "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_bcast_channel.c",
     ]
+    wifi_direct_connection_external_deps = [ "wifi:wifi_sdk" ]
   }
 } else {
   wifi_direct_connection_src += [
