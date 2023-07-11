@@ -431,7 +431,7 @@ static int32_t FindConfigType(int32_t channelType, int32_t businessType)
     return SOFTBUS_CONFIG_TYPE_MAX;
 }
 
-static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t len)
+static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
@@ -445,8 +445,8 @@ static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, ui
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
 
-    len = maxLen;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local config = %d.", len);
+    *len = maxLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local config = %d.", *len);
     return SOFTBUS_OK;
 }
 
@@ -639,7 +639,7 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
     }
     if (appInfo->peerData.dataConfig != 0) {
         uint32_t localDataConfig = 0;
-        if (TransGetLocalConfig(CHANNEL_TYPE_TCP_DIRECT, appInfo->businessType, localDataConfig) != SOFTBUS_OK) {
+        if (TransGetLocalConfig(CHANNEL_TYPE_TCP_DIRECT, appInfo->businessType, &localDataConfig) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }
         appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);

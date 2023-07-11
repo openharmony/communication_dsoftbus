@@ -340,7 +340,7 @@ static int32_t FindConfigType(int32_t channelType, int32_t businessType)
     return SOFTBUS_CONFIG_TYPE_MAX;
 }
 
-static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t len)
+static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
@@ -353,8 +353,8 @@ static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get fail configType[%d]", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-    len = maxLen;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get appinfo local config[%d]", len);
+    *len = maxLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get appinfo local config[%d]", *len);
     return SOFTBUS_OK;
 }
 
@@ -364,7 +364,7 @@ NO_SANITIZE("cfi") static void FillAppInfo(AppInfo *appInfo, ConnectOption *conn
     transInfo->channelType = TransGetChannelType(param, connInfo);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
-    (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, appInfo->myData.dataConfig);
+    (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
 }
 
 static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)

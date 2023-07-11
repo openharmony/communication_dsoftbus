@@ -695,71 +695,37 @@ int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality)
     return ret;
 }
 
-static const ConfigTypeMap g_configTypeMap[] = {
-    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
-    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH},
-    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_LENGTH},
-    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_LENGTH},
-};
-
-int32_t FindConfigType(int32_t channelType, int32_t businessType)
-{
-    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
-        if ((g_configTypeMap[i].channelType == channelType) &&
-            (g_configTypeMap[i].businessType == businessType)) {
-            return g_configTypeMap[i].configType;
-        }
-    }
-    return SOFTBUS_CONFIG_TYPE_MAX;
-}
-
 int ReadMaxSendBytesSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
-    (void)channelId;
     if (valueSize != sizeof(uint32_t)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "value size is %d, not match", valueSize);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    ConfigType configType = (ConfigType)FindConfigType(type, BUSINESS_TYPE_BYTE);
-    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType: %d, businessType: %d",
-            type, BUSINESS_TYPE_BYTE);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t maxLen;
-    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType: %d.", configType);
+    uint32_t dataConfig = INVALID_DATA_CONFIG;
+    if (ClientGetDataConfigByChannelId(channelId, type, &dataConfig) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
 
-    (*(uint32_t*)value) = maxLen;
+    (*(uint32_t*)value) = dataConfig;
     return SOFTBUS_OK;
 }
 
 int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
-    (void)channelId;
     if (valueSize != sizeof(uint32_t)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "value size is %d, not match", valueSize);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    ConfigType configType = (ConfigType)FindConfigType(type, BUSINESS_TYPE_MESSAGE);
-    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType: %d, businessType: %d",
-            type, BUSINESS_TYPE_MESSAGE);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t maxLen;
-    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType: %d.", configType);
+    uint32_t dataConfig = INVALID_DATA_CONFIG;
+    if (ClientGetDataConfigByChannelId(channelId, type, &dataConfig) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
 
-    (*(uint32_t*)value) = maxLen;
+    (*(uint32_t*)value) = dataConfig;
     return SOFTBUS_OK;
 }
 
@@ -780,28 +746,10 @@ int ReadSessionLinkType(int32_t channelId, int32_t type, void* value, uint32_t v
     return SOFTBUS_OK;
 }
 
-int ReadSessionSendDataSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
-{
-    if (valueSize != sizeof(uint32_t)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "value size is %d, not match", valueSize);
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    uint32_t dataConfig = INVALID_DATA_CONFIG;
-    if (ClientGetDataConfigByChannelId(channelId, type, &dataConfig) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed.");
-        return SOFTBUS_GET_CONFIG_VAL_ERR;
-    }
-
-    (*(uint32_t*)value) = dataConfig;
-    return SOFTBUS_OK;
-}
-
 static const SessionOptionItem g_SessionOptionArr[SESSION_OPTION_BUTT] = {
     {true, ReadMaxSendBytesSize},
     {true, ReadMaxSendMessageSize},
     {true, ReadSessionLinkType},
-    {true, ReadSessionSendDataSize},
 };
 
 int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize)
