@@ -164,6 +164,7 @@
         "RemoveSessionServer";
         "StopDiscovery";
         "ClientGetSessionCallbackById";
+        "ClientGetDataConfigByChannelId";
         "ClientTransUdpMgrInit";
         "GetPeerUidInner";
         "TransCloseFileChannel";
@@ -191,6 +192,7 @@
         "OpenSessionSync";
         "ReadMaxSendMessageSize";
         "ReadSessionLinkType";
+        "ReadSessionSendDataSize";
         "ClientTransTdcOnChannelOpened";
         ".term_proc";
         "LnnOnTimeSyncResult";

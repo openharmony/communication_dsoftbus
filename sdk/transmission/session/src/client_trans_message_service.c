@@ -26,19 +26,14 @@
 #include "softbus_log.h"
 #include "softbus_adapter_mem.h"
 
-int CheckSendLen(int32_t channelType, int32_t businessType, unsigned int len)
+int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len)
 {
-    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
-    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType: %d, businessType: %d",
-            channelType, businessType);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t maxLen;
-    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType: %d.", configType);
+    uint32_t dataConfig = INVALID_DATA_CONFIG;
+    if (ClientGetDataConfigByChannelId(channelId, channelType, &dataConfig) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len:%u", dataConfig);
     if (len > maxLen) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
@@ -71,7 +66,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
-    if (CheckSendLen(channelType, BUSINESS_TYPE_BYTE, len) != SOFTBUS_OK) {
+    if (CheckSendLen(channelId, channelType, len) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
 
@@ -111,7 +106,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
-    if (CheckSendLen(channelType, BUSINESS_TYPE_MESSAGE, len) != SOFTBUS_OK) {
+    if (CheckSendLen(channelId, channelType, len) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
     }
 

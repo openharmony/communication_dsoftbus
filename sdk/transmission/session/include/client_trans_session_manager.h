@@ -52,6 +52,7 @@ typedef struct {
     int32_t algorithm;
     int32_t crc;
     LinkType linkType[LINK_TYPE_MAX];
+    uint32_t dataConfig;
 } SessionInfo;
 
 typedef struct {
@@ -105,6 +106,8 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId);
 
 int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, int32_t *routeType);
+
+int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, uint32_t *dataConfig);
 
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId);
 

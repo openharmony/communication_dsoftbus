@@ -135,6 +135,10 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
     data.WriteInt32(channel->encrypt);
     data.WriteInt32(channel->algorithm);
     data.WriteInt32(channel->crc);
+    if (!data.WriteUint32(channel->dataConfig)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write data config failed");
+        return SOFTBUS_ERR;
+    }
 
     MessageParcel reply;
     MessageOption option;

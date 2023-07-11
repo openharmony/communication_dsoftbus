@@ -25,6 +25,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
+    SOFTBUS_INT_MAX_BYTES_NEW_LENGTH, /* the default val is 4194304 */
+    SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH, /* the default val is 4194304 */
     SOFTBUS_INT_MAX_BYTES_LENGTH, /* the default val is 4194304 */
     SOFTBUS_INT_MAX_MESSAGE_LENGTH, /* the default val is 4096 */
     SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH, /* the default val is 4096 */

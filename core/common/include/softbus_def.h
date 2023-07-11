@@ -41,6 +41,8 @@ extern "C" {
 
 #define INVALID_SESSION_ID (-1)
 #define INVALID_CHANNEL_ID (-1)
+#define INVALID_ROUTE_TYPE (-1)
+#define INVALID_DATA_CONFIG (0)
 #define INVALID_SEQ_ID (0x7fffffff)
 
 #define PKG_NAME_SIZE_MAX 65
@@ -159,6 +161,7 @@ typedef struct {
     int64_t timeStart;
     int32_t linkType;
     bool isFastData;
+    uint32_t dataConfig;
 } ChannelInfo;
 
 #ifdef __cplusplus

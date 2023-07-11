@@ -26,6 +26,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 int32_t TransSrvDataListInit(void);
 void TransSrvDataListDeinit(void);
 int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd);
