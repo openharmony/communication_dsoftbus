@@ -46,7 +46,7 @@
 #include "bus_center_event.h"
 
 #define TIME_THOUSANDS_FACTOR (1000)
-#define BLE_ADV_LOST_TIME 1200
+#define BLE_ADV_LOST_TIME 5000
 #define LONG_TO_STRING_MAX_LEN 21
 #define LNN_COMMON_LEN_64 8
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
@@ -704,7 +704,7 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     uint64_t currentTimeMs = GetCurrentTime();
-    LNN_CHECK_AND_RETURN_RET_LOG(info->connectInfo.latestTime + BLE_ADV_LOST_TIME <= currentTimeMs, SOFTBUS_ERR,
+    LNN_CHECK_AND_RETURN_RET_LOG(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
         "ble mac out date, lastAdvTime:%llu, now:%llu", info->connectInfo.latestTime, currentTimeMs);
 
     if (memcpy_s(buf, len, info->connectInfo.bleMacAddr, MAC_LEN) != EOK) {
