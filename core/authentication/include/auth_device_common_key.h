@@ -41,6 +41,7 @@ int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo 
 void AuthRemoveDeviceKeyByUdid(const char *udidOrHash);
 void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType);
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey);
+void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer);
 void AuthClearDeviceKey(void);
 
 #ifdef __cplusplus

@@ -127,8 +127,43 @@ static uint64_t HbGetRepeatThresholdByType(LnnHeartbeatType hbType)
     }
 }
 
+static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbResp)
+{
+    if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
+        LLOGD("isn't ble directly online, ignore");
+        return;
+    }
+    NodeInfo nodeInfo = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+        LLOGD("get nodeInfo fail");
+        return;
+    }
+    uint32_t oldNetCapa = nodeInfo.netCapacity;
+    if ((hbResp->capabiltiy & (1 << ENABLE_WIFI_CAP)) != 0) {
+        (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
+    }
+    if ((hbResp->capabiltiy & (1 << P2P_GO)) != 0 || (hbResp->capabiltiy & (1 << P2P_GC)) != 0) {
+        (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
+    }
+    (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BLE);
+    (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BR);
+    if (oldNetCapa == nodeInfo.netCapacity) {
+        LLOGD("capa not change, don't update devInfo");
+        return;
+    }
+    if (LnnSetDLConnCapability(networkId, nodeInfo.netCapacity) != SOFTBUS_OK) {
+        LLOGE("update net capability fail");
+        return;
+    }
+    int32_t ret = LnnSaveRemoteDeviceInfo(&nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LLOGD("update device info fail,ret:%d", ret);
+        return;
+    }
+}
+
 static int32_t HbGetOnlineNodeByRecvInfo(const char *recvUdidHash,
-    const ConnectionAddrType recvAddrType, NodeInfo *nodeInfo)
+    const ConnectionAddrType recvAddrType, NodeInfo *nodeInfo, HbRespData *hbResp)
 {
     int32_t i, infoNum;
     NodeBasicInfo *info = NULL;
@@ -162,6 +197,7 @@ static int32_t HbGetOnlineNodeByRecvInfo(const char *recvUdidHash,
         if (strncmp(udidHash, recvUdidHash, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
             LLOGD("HB node udidHash:%s networkId:%s is online", AnonymizesUDID(udidHash),
                 AnonymizesNetworkID(info[i].networkId));
+            UpdateOnlineInfoNoConnection(info[i].networkId, hbResp);
             SoftBusFree(info);
             return SOFTBUS_OK;
         }
@@ -290,6 +326,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         return true;
     }
     AuthDeviceKeyInfo keyInfo = {0};
+    LLOGI("AuthFindDeviceKey = %s", device->devId);
     if (AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK) {
         LLOGI("don't support ble direct online because key not exist");
         return true;
@@ -302,6 +339,8 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     if ((hbResp->capabiltiy & (1 << P2P_GO)) != 0 || (hbResp->capabiltiy & (1 << P2P_GC))) {
         (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_WIFI_P2P);
     }
+    (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BR);
+    (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BLE);
     if ((ret = LnnSaveRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         LLOGE("don't support ble direct online because update device info fail ret = %d", ret);
         return true;
@@ -339,7 +378,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
     HbDumpRecvDeviceInfo(device, weight, masterWeight, hbType, nowTime);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
-    if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo) == SOFTBUS_OK) {
+    if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         if (!HbIsNeedReAuth(&nodeInfo, device->accountHash)) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
@@ -396,7 +435,7 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
         return SOFTBUS_ERR;
     }
     (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
-    if (HbGetOnlineNodeByRecvInfo(udidHash, type, &nodeInfo) != SOFTBUS_OK) {
+    if (HbGetOnlineNodeByRecvInfo(udidHash, type, &nodeInfo, NULL) != SOFTBUS_OK) {
         LLOGD("HB recv higher weight udidhash:%s is not online yet", AnonymizesUDID(udidHash));
         return SOFTBUS_OK;
     }
