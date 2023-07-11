@@ -608,7 +608,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
     }
 }
 
-static int32_t TransProxyGetPeerDataInfo(int16_t myId, AppInfo *appInfo)
+static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -623,9 +623,7 @@ static int32_t TransProxyGetPeerDataInfo(int16_t myId, AppInfo *appInfo)
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->myId == myId) {
-            (void)memcpy_s(&(appInfo->peerData), sizeof(AppInfoData),
-                &(item->appInfo.peerData), sizeof(item->appInfo.peerData));
-            appInfo->businessType = item->appInfo.businessType;
+            (void)memcpy_s(appInfo, sizeof(AppInfo), &(item->appInfo), sizeof(item->appInfo));
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
@@ -649,7 +647,7 @@ static int32_t FindConfigType(int32_t channelType, int32_t businessType)
     return SOFTBUS_CONFIG_TYPE_MAX;
 }
 
-static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t len)
+static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
@@ -662,8 +660,8 @@ static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get fail configType[%d]", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-    len = maxLen;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get local config[%u]", len);
+    *len = maxLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get local config[%u]", *len);
     return SOFTBUS_OK;
 }
 
@@ -702,7 +700,7 @@ NO_SANITIZE("cfi") void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg
     info->myId = msg->msgHead.myId;
     info->peerId = msg->msgHead.peerId;
 
-    if (TransProxyGetPeerDataInfo(info->myId, &(info->appInfo)) != SOFTBUS_OK) {
+    if (TransProxyGetAppInfo(info->myId, &(info->appInfo)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to get peer data info");
         SoftBusFree(info);
         return;
@@ -829,7 +827,7 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
     }
     if (appInfo->peerData.dataConfig != 0) {
         uint32_t localDataConfig = 0;
-        if (TransGetLocalConfig(CHANNEL_TYPE_PROXY, appInfo->businessType, localDataConfig) != SOFTBUS_OK) {
+        if (TransGetLocalConfig(CHANNEL_TYPE_PROXY, appInfo->businessType, &localDataConfig) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local config failed, businessType[%d]",
                 appInfo->businessType);
             return SOFTBUS_ERR;
