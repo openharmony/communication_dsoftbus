@@ -391,7 +391,7 @@ NO_SANITIZE("cfi") int32_t LnnInitSyncInfoManager(void)
     for (i = 0; i < LNN_INFO_TYPE_COUNT; ++i) {
         g_syncInfoManager.handlers[i] = NULL;
     }
-    if (TransRegisterNetworkingChannelListener(&g_networkListener) != SOFTBUS_OK) {
+    if (TransRegisterNetworkingChannelListener(CHANNEL_NAME, &g_networkListener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "reg proxy channel lister fail");
         return SOFTBUS_ERR;
     }
@@ -459,7 +459,7 @@ NO_SANITIZE("cfi") static int32_t SendSyncInfoByNewChannel(const char *networkId
     if (info == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    info->clientChannelId = TransOpenNetWorkingChannel(CHANNEL_NAME, networkId);
+    info->clientChannelId = TransOpenNetWorkingChannel(CHANNEL_NAME, networkId, NULL);
     if (info->clientChannelId == INVALID_CHANNEL_ID) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open sync info channel fail");
         SoftBusFree(info);

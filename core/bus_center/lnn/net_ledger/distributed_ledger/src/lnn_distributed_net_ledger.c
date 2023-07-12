@@ -876,6 +876,50 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetWifiCfg(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    const char *wifiCfg = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    wifiCfg = LnnGetWifiCfg(info);
+    if (wifiCfg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi cfg fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(buf, len, wifiCfg) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy wifi cfg to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetChanList5g(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    const char *chanList5g = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    chanList5g = LnnGetChanList5g(info);
+    if (chanList5g == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get chan list 5g fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(buf, len, chanList5g) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy chan list 5g to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -889,6 +933,22 @@ static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
     *((int32_t *)buf) = LnnGetP2pRole(info);
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetStaFrequency(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+
+    if (len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    *((int32_t *)buf) = LnnGetStaFrequency(info);
     return SOFTBUS_OK;
 }
 
@@ -951,6 +1011,8 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_WLAN_IP, DlGetWlanIp},
     {STRING_KEY_MASTER_NODE_UDID, DlGetMasterUdid},
     {STRING_KEY_P2P_MAC, DlGetP2pMac},
+    {STRING_KEY_WIFI_CFG, DlGetWifiCfg},
+    {STRING_KEY_CHAN_LIST_5G, DlGetChanList5g},
     {STRING_KEY_P2P_GO_MAC, DlGetP2pGoMac},
     {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
@@ -963,6 +1025,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_FEATURE_CAPA, DlGetFeatureCap},
     {NUM_KEY_DISCOVERY_TYPE, DlGetNetType},
     {NUM_KEY_MASTER_NODE_WEIGHT, DlGetMasterWeight},
+    {NUM_KEY_STA_FREQUENCY, DlGetStaFrequency},
     {NUM_KEY_P2P_ROLE, DlGetP2pRole},
     {NUM_KEY_DATA_CHANGE_FLAG, DlGetNodeDataChangeFlag},
     {NUM_KEY_DEV_TYPE_ID, DlGetDeviceTypeId},
