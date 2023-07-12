@@ -33,6 +33,8 @@ extern "C" {
 #define EXTDATA_LEN 8
 
 #define LNN_RELATION_MASK 0x03
+#define WIFI_CFG_INFO_MAX_LEN 512
+#define CHANNEL_LIST_STR_LEN  256
 
 typedef enum {
     ROLE_UNKNOWN = 0,
@@ -62,6 +64,9 @@ typedef struct {
 
 typedef struct {
     int32_t p2pRole;
+    char wifiCfg[WIFI_CFG_INFO_MAX_LEN];
+    char chanList5g[CHANNEL_LIST_STR_LEN];
+    int32_t staFrequency;
     char p2pMac[MAC_LEN]; // the mac of local p2p interface
     char goMac[MAC_LEN]; // the mac of p2p Go device, while local device as Gc role.
 } P2pInfo;
@@ -149,6 +154,12 @@ int32_t LnnGetProxyPort(const NodeInfo *info);
 int32_t LnnSetProxyPort(NodeInfo *info, int32_t port);
 int32_t LnnSetP2pRole(NodeInfo *info, int32_t role);
 int32_t LnnGetP2pRole(const NodeInfo *info);
+int32_t LnnSetWifiCfg(NodeInfo *info, const char *wifiCfg);
+const char *LnnGetWifiCfg(const NodeInfo *info);
+int32_t LnnSetChanList5g(NodeInfo *info, const char *chanList5g);
+const char *LnnGetChanList5g(const NodeInfo *info);
+int32_t LnnSetStaFrequency(NodeInfo *info, int32_t staFrequency);
+int32_t LnnGetStaFrequency(const NodeInfo *info);
 int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac);
 uint16_t LnnGetDataChangeFlag(const NodeInfo *info);
 int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag);

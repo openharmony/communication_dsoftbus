@@ -37,12 +37,12 @@ static LnnTransInterfaceMock *GetTransInterface()
 }
 
 extern "C" {
-int TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
+int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
 {
     return GetTransInterface()->TransRegisterNetworkingChannelListener(listener);
 }
 
-int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId)
+int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId, ConnectOption *connOpt)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TransOpenNetWorkingChannel enter");
     return GetTransInterface()->TransOpenNetWorkingChannel(sessionName, peerNetworkId);

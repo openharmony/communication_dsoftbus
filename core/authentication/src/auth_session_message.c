@@ -88,6 +88,7 @@
 #define MASTER_UDID "MASTER_UDID"
 #define MASTER_WEIGHT "MASTER_WEIGHT"
 #define BLE_P2P "BLE_P2P"
+#define STA_FREQUENCY               "STA_FREQUENCY"
 #define P2P_MAC_ADDR "P2P_MAC_ADDR"
 #define P2P_ROLE "P2P_ROLE"
 #define TRANSPORT_PROTOCOL "TRANSPORT_PROTOCOL"
@@ -98,6 +99,8 @@
 #define WIFI_VERSION "WIFI_VERSION"
 #define BLE_VERSION "BLE_VERSION"
 #define HML_MAC "HML_MAC"
+#define WIFI_CFG "WIFI_CFG"
+#define CHAN_LIST_5G "CHAN_LIST_5G"
 #define REMAIN_POWER "REMAIN_POWER"
 #define IS_CHARGING "IS_CHARGING"
 #define IS_SCREENON "IS_SCREENON"
@@ -576,6 +579,17 @@ static void PackCommonFastAuth(JsonObj *json, const NodeInfo *info)
     //!JSON_AddInt32ToObject(json, IV,));
 }
 
+static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
+{
+    (void)JSON_AddInt32ToObject(json, P2P_ROLE, LnnGetP2pRole(info));
+    (void)JSON_AddStringToObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info));
+    (void)JSON_AddStringToObject(json, HML_MAC, info->wifiDirectAddr);
+
+    (void)JSON_AddStringToObject(json, WIFI_CFG, info->p2pInfo.wifiCfg);
+    (void)JSON_AddStringToObject(json, CHAN_LIST_5G, info->p2pInfo.chanList5g);
+    (void)JSON_AddInt32ToObject(json, STA_FREQUENCY, LnnGetStaFrequency(info));
+}
+
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -598,11 +612,9 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     }
     if (!JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
         !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
-        !JSON_AddInt32ToObject(json, P2P_ROLE, LnnGetP2pRole(info)) ||
         !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
-        !JSON_AddStringToObject(json, P2P_MAC_ADDR, LnnGetP2pMac(info)) ||
         !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info))) {
         ALOGE("JSON_AddStringToObject fail.");
         return SOFTBUS_ERR;
@@ -619,7 +631,6 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         !JSON_AddInt64ToObject(json, WIFI_VERSION, info->wifiVersion) ||
         !JSON_AddInt64ToObject(json, BLE_VERSION, info->bleVersion) ||
         !JSON_AddStringToObject(json, BT_MAC, btMacUpper) ||
-        !JSON_AddStringToObject(json, HML_MAC, info->wifiDirectAddr) ||
         !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
@@ -641,6 +652,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (!PackCipherKeySyncMsg(json)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "PackCipherKeySyncMsg fail.");
     }
+    PackCommP2pInfo(json, info);
     return SOFTBUS_OK;
 }
 
@@ -680,9 +692,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
 
     info->isBleP2p = false;
     (void)JSON_GetBoolFromOject(json, BLE_P2P, &info->isBleP2p);
-    (void)JSON_GetInt32FromOject(json, P2P_ROLE, &info->p2pInfo.p2pRole);
     (void)JSON_GetInt16FromOject(json, DATA_CHANGE_FLAG, (int16_t *)&info->dataChangeFlag);
-    (void)JSON_GetStringFromOject(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN);
     (void)JSON_GetBoolFromOject(json, IS_CHARGING, &info->batteryInfo.isCharging);
     (void)JSON_GetInt32FromOject(json, REMAIN_POWER, &info->batteryInfo.batteryLevel);
     OptBool(json, IS_SCREENON, &info->isScreenOn, false);
@@ -691,8 +701,6 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     //OptString(json, IP_MAC, );
     //OptInt64(json, TRANS_FLAGS, , 0);
     //IS_SUPPORT_TCP_HEARTBEAT
-    OptString(json, HML_MAC, info->wifiDirectAddr, MAC_LEN, "");
-    OptString(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN, "");
     OptInt64(json, NEW_CONN_CAP, (int64_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {
         (void)JSON_GetInt64FromOject(json, CONN_CAP, (int64_t *)&info->netCapacity);
@@ -708,6 +716,14 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
         }
     }
     ProcessCipherKeySyncInfo(json, info->networkId);
+
+    // unpack p2p info
+    OptInt(json, P2P_ROLE, &info->p2pInfo.p2pRole, -1);
+    OptString(json, WIFI_CFG, info->p2pInfo.wifiCfg, WIFI_CFG_INFO_MAX_LEN, "");
+    OptString(json, CHAN_LIST_5G, info->p2pInfo.chanList5g, CHANNEL_LIST_STR_LEN, "");
+    OptInt(json, STA_FREQUENCY, &info->p2pInfo.staFrequency, -1);
+    OptString(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN, "");
+    OptString(json, HML_MAC, info->wifiDirectAddr, MAC_LEN, "");
 }
 
 static int32_t GetBtDiscTypeString(const NodeInfo *info, char *buf, uint32_t len)

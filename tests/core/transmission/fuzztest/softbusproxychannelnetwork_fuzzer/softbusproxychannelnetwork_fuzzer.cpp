@@ -33,7 +33,7 @@ void TransRegisterNetworkingChannelListenerTest(const uint8_t* data, size_t size
         return;
     }
 
-    TransRegisterNetworkingChannelListener(&listener);
+    TransRegisterNetworkingChannelListener("", &listener);
 }
 } // namespace OHOS
 

@@ -377,8 +377,7 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const Lan
     if (BindLaneIdToProfile(laneId, &profile) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind laneId to profile fail");
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Notify laneAlloc succ, laneId:0x%x, linkType:%d",
-        laneId, info->type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Notify laneAlloc succ, laneId:%d, linkType:%d", laneId, info->type);
     reqInfo.listener.OnLaneRequestSuccess(laneId, &connInfo);
     UpdateLinkType(laneId, info->type);
     LaneGenerateParam param;

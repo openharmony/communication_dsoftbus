@@ -38,7 +38,7 @@ void TransOpenNetWorkingChannelSessionNameTest(const uint8_t* data, size_t size)
 
     char peerNetworkId[DEVICE_ID_SIZE_MAX] = TEST_PEER_NETWORK_ID;
 
-    TransOpenNetWorkingChannel(mySessionName, peerNetworkId);
+    TransOpenNetWorkingChannel(mySessionName, peerNetworkId, nullptr);
 }
 
 void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t size)
@@ -53,7 +53,7 @@ void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t siz
     }
 
     const char *mySessionName = TEST_SESSION_NAME;
-    TransOpenNetWorkingChannel(mySessionName, peerNetworkId);
+    TransOpenNetWorkingChannel(mySessionName, peerNetworkId, nullptr);
 }
 
 void TransCloseNetWorkingChannelTest(const uint8_t* data, size_t size)
