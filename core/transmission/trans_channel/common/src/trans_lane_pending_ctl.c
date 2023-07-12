@@ -279,6 +279,11 @@ static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
     LANE_WLAN_2P4G,
     LANE_P2P,
     LANE_BR,
+    LANE_BLE,
+    LANE_P2P_REUSE,
+    LANE_BLE_DIRECT,
+    LANE_COC,
+    LANE_COC_DIRECT,
 };
 static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 {

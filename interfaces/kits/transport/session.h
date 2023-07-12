@@ -88,9 +88,14 @@ typedef enum  {
     LINK_TYPE_WIFI_WLAN_2G = 2,  /**< 2.4 GHz Wi-Fi link */
     LINK_TYPE_WIFI_P2P = 3,      /**< P2P link */
     LINK_TYPE_BR = 4,            /**< BR link */
-    LINK_TYPE_MAX = 4,
+    LINK_TYPE_BLE = 5,
+    LINK_TYPE_WIFI_P2P_REUSE = 6,
+    LINK_TYPE_BLE_DIRECT = 7,
+    LINK_TYPE_COC = 8,
+    LINK_TYPE_COC_DIRECT = 9,
+    LINK_TYPE_MAX = 9,
 } LinkType;
-// mark--
+
 #define MAX_MAC_LEN 18
 
 /**
