@@ -49,6 +49,7 @@
 #define DATA_BUF_SIZE_TAG "DataBufSize"
 #define SOFTBUS_VERSION_TAG "softbusVersion"
 #define SUPPORT_INFO_COMPRESS "supportInfoCompress"
+#define EXCHANGE_ID_TYPE "exchangeIdType"
 #define CMD_TAG_LEN 30
 #define PACKET_SIZE (64 * 1024)
 
@@ -362,6 +363,46 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     (void)memset_s(&deviceKey, sizeof(deviceKey), 0, sizeof(deviceKey));
 }
 
+static int32_t GetExchangeIdTypeAndValve(const AuthSessionInfo *info, char *udid, int32_t *type)
+{
+    char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    char peerUdidHash[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, sizeof(localNetworkId)) != SOFTBUS_OK) {
+        ALOGE("get networkId fail.");
+        return SOFTBUS_ERR;
+    }
+    if (info->idType != EXCHANGE_NETWORKID) {
+        return SOFTBUS_OK;
+    }
+    if (!info->isServer) {
+        if (memcpy_s(udid, UDID_BUF_LEN, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
+        *type = EXCHANGE_NETWORKID;
+        return SOFTBUS_OK;
+    }
+    if (GetPeerUdidHashByNetworkId(info->udid, peerUdidHash) != SOFTBUS_OK) {
+        *type = EXCHANGE_FAIL;
+    } else {
+        *type = EXCHANGE_NETWORKID;
+    }
+    if (memcpy_s(udid, UDID_BUF_LEN, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void PackCompressInfo(JsonObj *obj, const NodeInfo *info)
+{
+    if (info != NULL) {
+        if (IsFeatureSupport(info->feature, BIT_INFO_COMPRESS)) {
+            JSON_AddStringToObject(obj, SUPPORT_INFO_COMPRESS, TRUE_STRING_TAG);
+        } else {
+            JSON_AddStringToObject(obj, SUPPORT_INFO_COMPRESS, FALSE_STRING_TAG);
+        }
+    }
+}
+
 static char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
     ALOGI("PackDeviceId: connType = %d.", info->connInfo.type);
@@ -374,6 +415,11 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         ALOGE("get uuid/udid fail.");
+        JSON_Delete(obj);
+        return NULL;
+    }
+    int32_t idType = 0;
+    if (GetExchangeIdTypeAndValve(info, udid, &idType) != SOFTBUS_OK) {
         JSON_Delete(obj);
         return NULL;
     }
@@ -393,19 +439,14 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
     if (!JSON_AddStringToObject(obj, DATA_TAG, uuid) ||
         !JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid) ||
         !JSON_AddInt32ToObject(obj, DATA_BUF_SIZE_TAG, PACKET_SIZE) ||
-        !JSON_AddInt32ToObject(obj, SOFTBUS_VERSION_TAG, info->version)) {
+        !JSON_AddInt32ToObject(obj, SOFTBUS_VERSION_TAG, info->version) ||
+        !JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, idType)) {
         ALOGE("add msg body fail.");
         JSON_Delete(obj);
         return NULL;
     }
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
-    if (nodeInfo != NULL) {
-        if (IsFeatureSupport(nodeInfo->feature, BIT_INFO_COMPRESS)) {
-            JSON_AddStringToObject(obj, SUPPORT_INFO_COMPRESS, TRUE_STRING_TAG);
-        } else {
-            JSON_AddStringToObject(obj, SUPPORT_INFO_COMPRESS, FALSE_STRING_TAG);
-        }
-    }
+    PackCompressInfo(obj, nodeInfo);
     PackFastAuth(obj, (AuthSessionInfo *)info, nodeInfo);
     char *msg = JSON_PrintUnformatted(obj);
     JSON_Delete(obj);
@@ -490,6 +531,7 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
     if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
         // info->version = SOFTBUS_OLD_V2;
     }
+    OptInt(obj, EXCHANGE_ID_TYPE, &info->idType, EXCHANHE_UDID);
     if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
         char compressParse[PARSE_UNCOMPRESS_STRING_BUFF_LEN] = {0};
         OptString(obj, SUPPORT_INFO_COMPRESS, compressParse,

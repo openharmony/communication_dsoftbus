@@ -840,7 +840,16 @@ static void HandleDeviceIdData(
                 "local device NOT support as server, ignore auth seq=%" PRId64, head->seq);
             return;
         }
-        if (GetAuthFsmByConnId(connId, true) != NULL) {
+        AuthFsm *fsm = GetAuthFsmByConnId(connId, true);
+        if (fsm != NULL && fsm->info.idType == EXCHANGE_NETWORKID) {
+            ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
+            if (ret != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+                    "perform auth(=%" PRId64 ") session recv devId fail(=%d)", head->seq, ret);
+            }
+            return;
+        }
+        if (fsm != NULL && fsm->info.idType == EXCHANHE_UDID) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
                 "the same connId fsm not support, ignore auth seq=%" PRId64, head->seq);
             HandleRepeatDeviceIdDataDelay(connId, connInfo, fromServer, head, data);

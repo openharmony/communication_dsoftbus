@@ -36,6 +36,13 @@ extern "C" {
 
 #define AUTH_FSM_NAME_LEN 32
 
+typedef enum {
+    EXCHANHE_UDID = 0,
+    EXCHANGE_NETWORKID,
+    EXCHANGE_FAIL,
+    EXCHANGE_TYPE_MAX
+} ExchangeDataType;
+
 typedef struct {
     uint32_t requestId;
     bool isServer;
@@ -53,6 +60,7 @@ typedef struct {
     bool isSupportCompress;
     bool isSupportFastAuth;
     int64_t oldIndex;
+    int32_t idType;
 } AuthSessionInfo;
 
 typedef struct {
