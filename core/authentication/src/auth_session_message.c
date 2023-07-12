@@ -154,6 +154,7 @@
 #define DEVICE_ID "DEVICE_ID"
 #define ENCRYPTED_FAST_AUTH_MAX_LEN 512
 #define UDID_SHORT_HASH_HEX_STR 16
+#define UDID_SHORT_HASH_LEN_TEMP 8
 
 static void OptString(const JsonObj *json, const char * const key,
     char *target, uint32_t targetLen, const char *defaultValue)
@@ -236,7 +237,7 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
             ALOGE("generate udidHash fail");
             return false;
         }
-        if (ConvertBytesToUpperCaseHexString(udidBuf, bufLen, hash, UDID_SHORT_HASH_LEN) != SOFTBUS_OK) {
+        if (ConvertBytesToUpperCaseHexString(udidBuf, bufLen, hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
             ALOGE("convert bytes to string fail");
             return false;
         }
@@ -245,7 +246,7 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE) {
         ALOGI("use bleInfo deviceIdHash build fastAuthInfo");
         return (ConvertBytesToUpperCaseHexString(udidBuf, bufLen, info->connInfo.info.bleInfo.deviceIdHash,
-            UDID_SHORT_HASH_LEN) == SOFTBUS_OK);
+            UDID_SHORT_HASH_LEN_TEMP) == SOFTBUS_OK);
     }
     return false;
 }
@@ -271,7 +272,7 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
         info->isSupportFastAuth = false;
         return;
     }
-    ALOGD("udidHashHexStr:%s", AnonymizesUDID(udidHashHexStr));
+    ALOGD("udidHashHexStr:%s", udidHashHexStr);
     if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false)) {
         ALOGI("not potential trusted realtion, bypass fastAuthProc");
         info->isSupportFastAuth = false;
@@ -343,7 +344,7 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     }
     char udidShortHash[UDID_SHORT_HASH_HEX_STR + 1] = {0};
     if (ConvertBytesToUpperCaseHexString(udidShortHash, UDID_SHORT_HASH_HEX_STR + 1,
-        udidHash, UDID_SHORT_HASH_LEN) != SOFTBUS_OK) {
+        udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
         ALOGE("udid hash bytes to hexString fail");
         return;
     }
