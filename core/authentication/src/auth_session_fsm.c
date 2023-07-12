@@ -435,7 +435,7 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
             if (RecoveryDeviceKey(authFsm) != SOFTBUS_OK) {
                 ALOGE("fast auth recovery device key fail");
                 ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
-                 break;
+                break;
             }
         } else if (!info->isServer) {
             /* just client need start authDevice. */
