@@ -159,6 +159,7 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.connId = connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
+    authFsm->info.idType = EXCHANHE_UDID;
     if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "AuthFsm-%u", authFsm->id) == -1) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "format auth fsm name fail");
         SoftBusFree(authFsm);
@@ -414,6 +415,30 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
     return AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
 }
 
+static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
+{
+    int32_t ret = SOFTBUS_OK;
+    AuthSessionInfo *info = &authFsm->info;
+    char udidHash[UDID_BUF_LEN] = {0};
+    do {
+        if (info->idType == EXCHANGE_NETWORKID) {
+            if (GetPeerUdidHashByNetworkId(info->udid, udidHash) != SOFTBUS_OK) {
+                ret = SOFTBUS_ERR;
+                break;
+            }
+        }
+        if (info->idType == EXCHANGE_FAIL) {
+            ret = SOFTBUS_ERR;
+            break;
+        }
+    } while (false);
+    if (ret != SOFTBUS_OK) {
+        info->idType = EXCHANHE_UDID;
+        LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
+    }
+    return ret;
+}
+
 static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
 {
     int32_t ret;
@@ -439,6 +464,10 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
             }
         } else if (!info->isServer) {
             /* just client need start authDevice. */
+            if (ClientSetExchangeIdType(authFsm) != SOFTBUS_OK) {
+                ret = SOFTBUS_OK;
+                break;
+            }
             if (HichainStartAuth(authFsm->authSeq, info->udid, info->connInfo.peerUid) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
                 break;
@@ -599,6 +628,9 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
         "DeviceAuthState: auth fsm[%" PRId64"] process message: %s", authFsm->authSeq, FsmMsgTypeToStr(msgType));
     switch (msgType) {
+        case FSM_MSG_RECV_DEVICE_ID:
+            HandleMsgRecvDeviceId(authFsm, msgPara);
+            break;
         case FSM_MSG_RECV_AUTH_DATA:
             HandleMsgRecvAuthData(authFsm, msgPara);
             break;

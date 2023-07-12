@@ -32,6 +32,7 @@ ohos_fuzztest("UnpackAuthDataFuzzTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
   ]
 
   cflags = [
