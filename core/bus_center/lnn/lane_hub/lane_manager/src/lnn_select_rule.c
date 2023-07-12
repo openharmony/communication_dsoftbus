@@ -298,10 +298,11 @@ static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_WLAN_2P4G] = { true,  IsEnableWlan2P4G,  GetWlan2P4GScore},
     [LANE_WLAN_5G] = { true,  IsEnableWlan5G,    GetWlan5GScore  },
     [LANE_ETH] = { false, NULL,              NULL            },
-    [LANE_P2P_REUSE] = { true,  IsEnableP2pReuse,  GetP2pScore    },
-    [LANE_BLE_DIRECT] = { true, IsEnableBleDirect, GetBleScore     },
-    [LANE_COC] = { true,  IsEnableCoc,      GetCocScore     },
-    [LANE_COC_DIRECT] = { true,  IsEnableCocDirect, GetCocScore    },
+    [LANE_P2P_REUSE] = { true,  IsEnableP2pReuse,  GetP2pScore     },
+    [LANE_BLE_DIRECT] = { true,  IsEnableBleDirect, GetBleScore     },
+    [LANE_BLE_REUSE] = { false, NULL,              NULL            },
+    [LANE_COC] = { true,  IsEnableCoc,       GetCocScore     },
+    [LANE_COC_DIRECT] = { true,  IsEnableCocDirect, GetCocScore     },
 };
 
 NO_SANITIZE("cfi") LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)

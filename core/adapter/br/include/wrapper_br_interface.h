@@ -131,7 +131,6 @@ typedef enum {
 
 int SoftBusRegisterBrCallback(BrUnderlayerCallback *callback);
 SppSocketDriver* InitSppSocketDriver();
-int32_t SppGattsRegisterHalCallback(const SoftBusBtStateListener *lister);
 
 #ifdef __cplusplus
 }

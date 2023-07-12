@@ -37,6 +37,7 @@ typedef enum {
     LANE_ETH,
     LANE_P2P_REUSE,
     LANE_BLE_DIRECT,
+    LANE_BLE_REUSE,
     LANE_COC,
     LANE_COC_DIRECT,
     LANE_LINK_TYPE_BUTT,

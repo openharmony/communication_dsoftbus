@@ -110,7 +110,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo
             ret = NotifyNormalChannelOpened(channelId, appInfo, isServer);
             break;
         case APP_TYPE_INNER:
-            ret = NotifyNetworkingChannelOpened(channelId, appInfo, isServer);
+            ret = NotifyNetworkingChannelOpened(appInfo->myData.sessionName, channelId, appInfo, isServer);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -137,7 +137,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpenFailed(int32_t channelId, const App
             ret = NotifyNormalChannelOpenFailed(appInfo->myData.pkgName, appInfo->myData.pid, channelId, errCode);
             break;
         case APP_TYPE_INNER:
-            NotifyNetworkingChannelOpenFailed(channelId, appInfo->peerData.deviceId);
+            NotifyNetworkingChannelOpenFailed(appInfo->myData.sessionName, channelId, appInfo->peerData.deviceId);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -161,7 +161,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo
             ret = NotifyNormalChannelClosed(appInfo->myData.pkgName, appInfo->myData.pid, channelId);
             break;
         case APP_TYPE_INNER:
-            NotifyNetworkingChannelClosed(channelId);
+            NotifyNetworkingChannelClosed(appInfo->myData.sessionName, channelId);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -184,7 +184,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelMsgReceived(int32_t channelId, const Ap
             TransOnNormalMsgReceived(appInfo->myData.pkgName, appInfo->myData.pid, channelId, data, len);
             break;
         case APP_TYPE_INNER:
-            NotifyNetworkingMsgReceived(channelId, data, len);
+            NotifyNetworkingMsgReceived(appInfo->myData.sessionName, channelId, data, len);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -256,17 +256,21 @@ EXIT_ERR:
     return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId)
+NO_SANITIZE("cfi")
+int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId, ConnectOption *connOpt)
 {
     AppInfo appInfo;
-    ConnectOption connOpt;
+    ConnectOption innerConnOpt;
     int32_t channelId = INVALID_CHANNEL_ID;
 
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         return channelId;
     }
-    if (TransGetConnectOption(peerNetworkId, &connOpt) != SOFTBUS_OK) {
+    if (connOpt != NULL) {
+        innerConnOpt = *connOpt;
+    }
+    if (TransGetConnectOption(peerNetworkId, &innerConnOpt) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking get connect option fail");
         return channelId;
     }
@@ -276,7 +280,7 @@ NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, c
         return channelId;
     }
 
-    if (TransProxyOpenProxyChannel(&appInfo, &connOpt, &channelId) != SOFTBUS_OK) {
+    if (TransProxyOpenProxyChannel(&appInfo, &innerConnOpt, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking open channel fail");
         channelId = INVALID_CHANNEL_ID;
     }
