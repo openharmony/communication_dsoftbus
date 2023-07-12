@@ -39,7 +39,8 @@ NO_SANITIZE("cfi") int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *ap
         !AddStringToJsonObject(msg, "PKG_NAME", appInfo->myData.pkgName) ||
         !AddStringToJsonObject(msg, "SRC_BUS_NAME", appInfo->myData.sessionName) ||
         !AddStringToJsonObject(msg, "DST_BUS_NAME", appInfo->peerData.sessionName) ||
-        !AddStringToJsonObject(msg, "REQ_ID", appInfo->reqId)) {
+        !AddStringToJsonObject(msg, "REQ_ID", appInfo->reqId) ||
+        !AddNumberToJsonObject(msg, "MTU_SIZE", appInfo->myData.dataConfig)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransAuthChannelMsgPack failed");
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -69,6 +70,9 @@ NO_SANITIZE("cfi") int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *a
         !GetJsonObjectStringItem(obj, "REQ_ID", appInfo->reqId, REQ_ID_SIZE_MAX)) {
         cJSON_Delete(obj);
         return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (!GetJsonObjectNumberItem(obj, "MTU_SIZE", (int32_t *)&(appInfo->peerData.dataConfig))) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "peer dataconfig is null.");
     }
     cJSON_Delete(obj);
     return SOFTBUS_OK;

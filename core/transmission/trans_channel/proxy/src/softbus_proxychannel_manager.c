@@ -633,6 +633,8 @@ static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
 }
 
 static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
     {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
     {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
 };
@@ -832,7 +834,6 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
                 appInfo->businessType);
             return SOFTBUS_ERR;
         }
-
         appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill dataConfig[%u] succ", appInfo->myData.dataConfig);
         return SOFTBUS_OK;
