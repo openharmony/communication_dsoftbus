@@ -324,6 +324,8 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
 }
 
 static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
     {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
     {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
     {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
@@ -454,6 +456,8 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     appInfo->appType = APP_TYPE_AUTH;
     appInfo->myData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;
+    appInfo->businessType = BUSINESS_TYPE_BYTE;
+    appInfo->channelType = CHANNEL_TYPE_AUTH;
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
@@ -473,6 +477,10 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     }
     if (TransGetPkgNameBySessionName(mySessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get PkgName failed");
+        goto EXIT_ERR;
+    }
+    if (TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get local data config failed");
         goto EXIT_ERR;
     }
 
