@@ -56,3 +56,12 @@ void AuthClearDeviceKey(void)
 {
     return;
 }
+
+void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer)
+{
+    (void)udidHash;
+    (void)keyType;
+    (void)index;
+    (void)isServer;
+    return;
+}

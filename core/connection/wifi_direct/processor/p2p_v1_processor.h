@@ -21,8 +21,21 @@
 extern "C" {
 #endif
 
+#define P2P_VERSION 2
+
 struct P2pV1Processor {
     PROCESSOR_BASE;
+
+    void (*initBasicInnerLink)(struct InnerLink *innerLink, bool isClient);
+    int32_t (*saveCurrentMessage)(struct NegotiateMessage *msg);
+    void (*setInnerLinkDeviceId)(struct NegotiateMessage *msg, struct InnerLink *innerLink);
+    int32_t (*createGroup)(struct NegotiateMessage *msg);
+    int32_t (*connectGroup)(struct NegotiateMessage *msg);
+    int32_t (*reuseP2p)(void);
+    int32_t (*removeLink)(const char *remoteMac);
+    void (*notifyNewClient)(int requestId, char *localInterface, char *remoteMac);
+    void (*cancelNewClient)(int requestId, char *localInterface, const char *remoteMac);
+    char *(*getGoMac)(enum WifiDirectRole myRole);
 
     struct InnerLink *currentInnerLink;
     bool needReply;

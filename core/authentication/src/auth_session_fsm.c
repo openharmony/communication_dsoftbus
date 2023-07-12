@@ -406,10 +406,11 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
         ALOGE("convert bytes to string fail");
         return SOFTBUS_ERR;
     }
-    if (AuthFindDeviceKey(udidShortHash, authFsm->info.connInfo.type , &key) != SOFTBUS_OK) {
+    if (AuthFindDeviceKey(udidShortHash, authFsm->info.connInfo.type, &key) != SOFTBUS_OK) {
         ALOGE("find key fail, fastAuth error");
         return SOFTBUS_ERR;
     }
+    AuthUpdateKeyIndex(udidShortHash, authFsm->info.connInfo.type, authFsm->authSeq, authFsm->info.isServer);
     authFsm->info.oldIndex = key.keyIndex;
     return AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
 }
@@ -459,7 +460,7 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
             if (RecoveryDeviceKey(authFsm) != SOFTBUS_OK) {
                 ALOGE("fast auth recovery device key fail");
                 ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
-                 break;
+                break;
             }
         } else if (!info->isServer) {
             /* just client need start authDevice. */

@@ -20,7 +20,7 @@
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 
-#define JSON_LOGE(fmt, ...) HILOG_ERROR(SOFTBUS_HILOG_ID, "[%s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define JSON_LOGE(fmt, ...) HILOG_ERROR(SOFTBUS_HILOG_ID, "[%{public}s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
 
 JsonObj *JSON_CreateObject(void)
 {
@@ -249,7 +249,7 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_string()) {
-        JSON_LOGE("cannot find or invalid [%s]", key);
+        JSON_LOGE("cannot find or invalid [%{public}s]", key);
         return false;
     }
     std::string valueString = item.get<std::string>();
@@ -263,7 +263,7 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
 
 bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const char **value, int32_t len)
 {
-    if (value == NULL || obj == NULL || key == NULL) {
+    if (value == NULL || obj == NULL || key == NULL || len == 0) {
         JSON_LOGE("input invalid");
         return false;
     }
@@ -271,12 +271,11 @@ bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const cha
     if (json == nullptr) {
         return false;
     }
-    nlohmann::json *valueStringArray = new (std::nothrow) nlohmann::json();
+    nlohmann::json valueStringArray = nlohmann::json::array();
     for (int32_t i = 0; i < len; i++) {
-        valueStringArray->push_back(value[i]);
+        valueStringArray.push_back(value[i]);
     }
-    (*json)[key] = *valueStringArray;
-    delete valueStringArray;
+    (*json)[key] = valueStringArray;
     return true;
 }
 
@@ -292,15 +291,20 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_array()) {
-        JSON_LOGE("cannot find or invalid [%s]", key);
+        JSON_LOGE("cannot find or invalid [%{public}s]", key);
         return false;
     }
     *len = item.size();
     int32_t i = 0;
     for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
-        std::string valueString = it.value().get<std::string>();
-        if (strcpy_s(value[i], strlen(valueString.c_str()), valueString.c_str()) != EOK) {
-            JSON_LOGE("strcpy [%{public}s] value err, value=%{public}s", key, valueString.c_str());
+        const char* valueString = it.value().get<std::string>().c_str();
+        uint32_t len = strlen(valueString) + 1;
+        value[i] = (char*)SoftBusCalloc(len);
+        if (value[i] == NULL) {
+            return false;
+        }
+        if (strcpy_s(value[i], len, valueString) != EOK) {
+            JSON_LOGE("strcpy [%{public}s] value err, value=%{public}s", key, valueString);
             return false;
         }
         i++;

@@ -24,6 +24,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
 #include "softbus_proxychannel_manager.h"
@@ -51,6 +52,12 @@
 static int32_t g_allocProxyChannelId = MAX_FD_ID;
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
+
+typedef struct {
+    int32_t channelType;
+    int32_t businessType;
+    ConfigType configType;
+} ConfigTypeMap;
 
 static int32_t GenerateTdcChannelId()
 {
@@ -316,12 +323,48 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     return SOFTBUS_OK;
 }
 
+static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
+};
+
+static int32_t FindConfigType(int32_t channelType, int32_t businessType)
+{
+    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
+        if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
+            return g_configTypeMap[i].configType;
+        }
+    }
+    return SOFTBUS_CONFIG_TYPE_MAX;
+}
+
+static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
+{
+    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
+    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType[%d] businessType[%d]",
+            channelType, businessType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get fail configType[%d]", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    *len = maxLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get appinfo local config[%d]", *len);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") static void FillAppInfo(AppInfo *appInfo, ConnectOption *connOpt, const SessionParam *param,
     TransInfo *transInfo, LaneConnInfo *connInfo)
 {
     transInfo->channelType = TransGetChannelType(param, connInfo);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
+    (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
 }
 
 static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
