@@ -1266,12 +1266,42 @@ static void NotifyMigrateUpgrade(NodeInfo *info)
     }
 }
 
-static void NodeOnlineProc(NodeInfo *info)
+static void FilterWifiInfo(NodeInfo *info)
 {
+    (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_WIFI);
+    info->authChannelId[CONNECTION_ADDR_WLAN] = 0;
+}
+
+static void FilterBrInfo(NodeInfo *info)
+{
+    (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_BR);
+    info->authChannelId[CONNECTION_ADDR_BR] = 0;
+}
+
+static void BleDirectlyOnlineProc(NodeInfo *info)
+{
+    if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+        return;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
+        FilterWifiInfo(info);
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
+        FilterBrInfo(info);
+    }
     if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
         LLOGE("save remote devInfo fail");
         return;
     }
+}
+
+static void NodeOnlineProc(NodeInfo *info)
+{
+    NodeInfo nodeInfo;
+    if (memcpy_s(&nodeInfo, sizeof(nodeInfo), info, sizeof(NodeInfo)) != EOK) {
+        return;
+    }
+    BleDirectlyOnlineProc(&nodeInfo);
 }
 
 NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
@@ -2095,7 +2125,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uin
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
+NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -2107,7 +2137,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint64_
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    nodeInfo->netCapacity = (uint32_t)connCapability;
+    nodeInfo->netCapacity = connCapability;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }

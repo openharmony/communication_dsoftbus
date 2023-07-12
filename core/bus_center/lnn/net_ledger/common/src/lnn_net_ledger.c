@@ -82,11 +82,11 @@ static void LnnRestoreLocalDeviceInfo()
             LLOGE("set networkId fail");
         }
     }
+    AuthLoadDeviceKey();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
         LLOGE("load remote deviceInfo fail");
         return;
     }
-    AuthLoadDeviceKey();
     LLOGI("load remote deviceInfo devicekey success");
 }
 
