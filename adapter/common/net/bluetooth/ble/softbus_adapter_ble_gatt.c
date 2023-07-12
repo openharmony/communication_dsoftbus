@@ -27,6 +27,10 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
+#define BT_UUID "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
+#define DELIVERY_MODE_REPLY 0xF0 // Lpdevice delivery mode: reply adv when filter matched
+#define ADV_DURATION_MS 0
+static int32_t g_scannerId = -1;
 typedef struct {
     int advId;
     bool isUsed;
@@ -44,6 +48,7 @@ typedef struct {
     SoftBusBleScanFilter *filter;
     uint8_t filterSize;
     SoftBusScanListener *listener;
+    int32_t scannerId;
 } ScanListener;
 
 static AdvChannel g_advChannel[ADV_MAX_NUM];
@@ -54,6 +59,7 @@ static SoftBusMutex g_advLock = {0};
 static SoftBusMutex g_scanerLock = {0};
 
 static volatile bool g_isRegCb = false;
+static volatile bool g_isLpDeviceRegCb = false;
 
 NO_SANITIZE("cfi") static void OnBtStateChanged(int32_t listenerId, int32_t state)
 {
@@ -84,18 +90,13 @@ NO_SANITIZE("cfi") static void OnBtStateChanged(int32_t listenerId, int32_t stat
         CLOGE("ATTENTION, try to get scan lock failed, something unexpected happened");
         return;
     }
-    bool needStopScan = false;
     for (int index = 0; index < SCAN_MAX_NUM; index++) {
         ScanListener *scanListener = &g_scanListener[index];
         if (scanListener->isUsed && scanListener->isScanning) {
             scanListener->isScanning = false;
             scanListener->listener->OnScanStop(index, SOFTBUS_BT_STATUS_SUCCESS);
-            needStopScan = true;
+            (void)BleStopScan(scanListener->scannerId);
         }
-    }
-    if (needStopScan) {
-        // ignore status code explicitedly, just to notify bt cleanup resources associated with this scan
-        (void)BleStopScan();
     }
     (void)SoftBusMutexUnlock(&g_scanerLock);
 }
@@ -265,7 +266,8 @@ static void GetAllNativeScanFilter(int thisListenerId, BleScanNativeFilter **nat
 {
     uint8_t nativeSize = 0;
     for (int index = 0; index < SCAN_MAX_NUM; index++) {
-        if (!g_scanListener[index].isUsed || (!g_scanListener[index].isScanning && index != thisListenerId)) {
+        if (!g_scanListener[index].isUsed || (!g_scanListener[index].isScanning && index != thisListenerId) ||
+            g_scanListener[index].scannerId != g_scannerId) {
             g_scanListener[index].isNeedReset = false;
             continue;
         }
@@ -299,6 +301,31 @@ static void GetAllNativeScanFilter(int thisListenerId, BleScanNativeFilter **nat
             (*nativeFilter + nativeSize)->serviceUuidMask = (filter + size)->serviceUuidMask;
         }
     }
+}
+
+static void SoftBusGetBurstScanFilter(int thisListenerId, BleScanNativeFilter **nativeFilter, uint8_t *filterSize)
+{
+    uint8_t size = g_scanListener[thisListenerId].filterSize;
+    *nativeFilter = (BleScanNativeFilter *)SoftBusCalloc(sizeof(BleScanNativeFilter) * size);
+    if (*nativeFilter == NULL) {
+        return;
+    }
+    const SoftBusBleScanFilter *filter = g_scanListener[thisListenerId].filter;
+    while (size-- > 0) {
+        (*nativeFilter + size)->address = (filter + size)->address;
+        (*nativeFilter + size)->deviceName = (filter + size)->deviceName;
+        (*nativeFilter + size)->manufactureData = (filter + size)->manufactureData;
+        (*nativeFilter + size)->manufactureDataLength = (filter + size)->manufactureDataLength;
+        (*nativeFilter + size)->manufactureDataMask = (filter + size)->manufactureDataMask;
+        (*nativeFilter + size)->manufactureId = (filter + size)->manufactureId;
+        (*nativeFilter + size)->serviceData = (filter + size)->serviceData;
+        (*nativeFilter + size)->serviceDataLength = (filter + size)->serviceDataLength;
+        (*nativeFilter + size)->serviceDataMask = (filter + size)->serviceDataMask;
+        (*nativeFilter + size)->serviceUuid = (filter + size)->serviceUuid;
+        (*nativeFilter + size)->serviceUuidLength = (filter + size)->serviceUuidLength;
+        (*nativeFilter + size)->serviceUuidMask = (filter + size)->serviceUuidMask;
+    }
+    *filterSize = g_scanListener[thisListenerId].filterSize;
 }
 
 static void ConvertScanResult(const BtScanResultData *src, SoftBusBleScanResult *dst)
@@ -492,11 +519,33 @@ NO_SANITIZE("cfi") static void WrapperScanResultCallback(BtScanResultData *scanR
     }
 }
 
-static void WrapperScanParameterSetCompletedCallback(int clientId, int status)
+static void WrapperLpDeviceInfoCallback(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
-    (void)clientId;
-    (void)status;
-    CLOGI("WrapperScanParameterSetCompletedCallback");
+    for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
+        AdvChannel *advChannel = &g_advChannel[index];
+        if (advChannel->isUsed == false || advChannel->advCallback == NULL ||
+            advChannel->advCallback->LpDeviceInfoCallback == NULL) {
+            continue;
+        }
+        advChannel->advCallback->LpDeviceInfoCallback((SoftBusBtUuid *)uuid, type, data, dataSize);
+        break;
+    }
+}
+
+static void WrapperScanStateChangeCallback(int32_t resultCode, bool isStartScan)
+{
+    int32_t listenerId;
+    for (listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
+        SoftBusMutexLock(&g_scanerLock);
+        ScanListener *scanListener = &g_scanListener[listenerId];
+        if (!scanListener->isUsed || scanListener->listener == NULL || !scanListener->isScanning ||
+            scanListener->listener->OnScanStateChanged == NULL) {
+            SoftBusMutexUnlock(&g_scanerLock);
+            continue;
+        }
+    SoftBusMutexUnlock(&g_scanerLock);
+    scanListener->listener->OnScanStateChanged(resultCode, isStartScan);
+    }
 }
 
 static BtGattCallbacks g_softbusGattCb = {
@@ -505,8 +554,12 @@ static BtGattCallbacks g_softbusGattCb = {
     .advDataCb = WrapperAdvDataCallback,
     .advUpdateCb = WrapperAdvUpdateCallback,
     .securityRespondCb = WrapperSecurityRespondCallback,
+};
+
+static BleScanCallbacks g_softbusBleScanCb = {
     .scanResultCb = WrapperScanResultCallback,
-    .scanParamSetCb = WrapperScanParameterSetCompletedCallback
+    .scanStateChangeCb = WrapperScanStateChangeCallback,
+    .lpDeviceInfoCb = WrapperLpDeviceInfoCallback,
 };
 
 static SoftBusBtStateListener g_btStateLister = {
@@ -514,19 +567,39 @@ static SoftBusBtStateListener g_btStateLister = {
     .OnBtAclStateChanged = NULL,
 };
 
-static int RegisterBleGattCallback(void)
+static int RegisterBleGattCallback(int32_t *scannerId, bool isLpDeviceScan)
 {
-    if (g_isRegCb) {
+    if (!g_isRegCb && !g_isLpDeviceRegCb) {
+        if (BleGattRegisterCallbacks(&g_softbusGattCb) != 0) {
+            return SOFTBUS_ERR;
+        }
+        if (SoftBusAddBtStateListener(&g_btStateLister) < 0) {
+            return SOFTBUS_ERR;
+        }
+    }
+    if (!isLpDeviceScan) {
+        if (g_isRegCb) {
+            *scannerId = g_scannerId;
+            return SOFTBUS_OK;
+        }
+        if (BleRegisterScanCallbacks(&g_softbusBleScanCb, scannerId) != 0) {
+            CLOGE("SH register ble scan callback failed");
+            return SOFTBUS_ERR;
+        }
+        g_scannerId = *scannerId;
+        g_isRegCb = true;
+        return SOFTBUS_OK;
+    } else {
+        if (g_isLpDeviceRegCb) {
+            return SOFTBUS_OK;
+        }
+        if (BleRegisterScanCallbacks(&g_softbusBleScanCb, scannerId) != 0) {
+            CLOGE("SH register sh scan callback failed");
+            return SOFTBUS_ERR;
+        }
+        g_isLpDeviceRegCb = true;
         return SOFTBUS_OK;
     }
-    if (BleGattRegisterCallbacks(&g_softbusGattCb) != 0) {
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusAddBtStateListener(&g_btStateLister) < 0) {
-        return SOFTBUS_ERR;
-    }
-    g_isRegCb = true;
-    return SOFTBUS_OK;
 }
 
 static bool CheckAdvChannelInUsed(int advId)
@@ -607,7 +680,7 @@ static void ClearAdvData(int advId)
     g_advChannel[advId].advData.scanRspData = NULL;
 }
 
-NO_SANITIZE("cfi") int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
+NO_SANITIZE("cfi") int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan)
 {
     if (callback == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -615,7 +688,7 @@ NO_SANITIZE("cfi") int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback)
     if (SoftBusMutexLock(&g_advLock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    if (RegisterBleGattCallback() != SOFTBUS_OK) {
+    if (RegisterBleGattCallback(scannerId, isLpDeviceScan) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_ERR;
     }
@@ -710,7 +783,6 @@ NO_SANITIZE("cfi") int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *par
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_ERR;
     }
-    g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_SUCCESS);
     SoftBusMutexUnlock(&g_advLock);
     return SOFTBUS_OK;
 }
@@ -759,7 +831,7 @@ NO_SANITIZE("cfi") int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data
     return SoftBusStartAdv(advId, param);
 }
 
-NO_SANITIZE("cfi") int SoftBusAddScanListener(const SoftBusScanListener *listener)
+NO_SANITIZE("cfi") int SoftBusAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan)
 {
     if (listener == NULL) {
         return SOFTBUS_ERR;
@@ -767,7 +839,7 @@ NO_SANITIZE("cfi") int SoftBusAddScanListener(const SoftBusScanListener *listene
     if (SoftBusMutexLock(&g_scanerLock) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
-    if (RegisterBleGattCallback() != SOFTBUS_OK) {
+    if (RegisterBleGattCallback(scannerId, isLpDeviceScan) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
     }
@@ -777,6 +849,7 @@ NO_SANITIZE("cfi") int SoftBusAddScanListener(const SoftBusScanListener *listene
             g_scanListener[index].isUsed = true;
             g_scanListener[index].isNeedReset = true;
             g_scanListener[index].isScanning = false;
+            g_scanListener[index].scannerId = *scannerId;
             g_scanListener[index].listener = (SoftBusScanListener *)listener;
             SoftBusMutexUnlock(&g_scanerLock);
             return index;
@@ -822,7 +895,7 @@ NO_SANITIZE("cfi") int SoftBusRemoveScanListener(int listenerId)
     return SOFTBUS_OK;
 }
 
-static bool CheckNeedReStartScan(void)
+static bool CheckNeedReStartScan(int scannerId)
 {
     bool isNeedReset = false;
     bool isScanning = false;
@@ -835,7 +908,7 @@ static bool CheckNeedReStartScan(void)
         }
     }
     if (isNeedReset && isScanning) {
-        if (BleOhosStatusToSoftBus(BleStopScan()) != SOFTBUS_BT_STATUS_SUCCESS) {
+        if (BleOhosStatusToSoftBus(BleStopScan(scannerId)) != SOFTBUS_BT_STATUS_SUCCESS) {
             CLOGE("ble stop scan failed");
             return false;
         }
@@ -881,7 +954,7 @@ NO_SANITIZE("cfi") int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param)
+NO_SANITIZE("cfi") int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param)
 {
     if (param == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -897,12 +970,16 @@ NO_SANITIZE("cfi") int SoftBusStartScan(int listenerId, const SoftBusBleScanPara
     BleScanConfigs scanConfig;
     SetAndGetSuitableScanConfig(listenerId, param, &scanConfig);
     int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
-    if (CheckNeedReStartScan()) {
+    if (CheckNeedReStartScan(scannerId)) {
         uint8_t filterSize = 0;
         BleScanNativeFilter *nativeFilter = NULL;
-        GetAllNativeScanFilter(listenerId, &nativeFilter, &filterSize);
+        if (scannerId == g_scannerId) {
+            GetAllNativeScanFilter(listenerId, &nativeFilter, &filterSize);
+        } else {
+            SoftBusGetBurstScanFilter(listenerId, &nativeFilter, &filterSize);
+        }
         DumpBleScanFilter(nativeFilter, filterSize);
-        status = BleOhosStatusToSoftBus(BleStartScanEx(&scanConfig, nativeFilter, filterSize));
+        status = BleOhosStatusToSoftBus(BleStartScanEx(scannerId, &scanConfig, nativeFilter, filterSize));
         SoftBusFree(nativeFilter);
     }
     if (status != SOFTBUS_BT_STATUS_SUCCESS) {
@@ -921,7 +998,7 @@ NO_SANITIZE("cfi") int SoftBusStartScan(int listenerId, const SoftBusBleScanPara
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int SoftBusStopScan(int listenerId)
+NO_SANITIZE("cfi") int SoftBusStopScan(int listenerId, int scannerId)
 {
     if (SoftBusMutexLock(&g_scanerLock) != 0) {
         return SOFTBUS_LOCK_ERR;
@@ -936,7 +1013,7 @@ NO_SANITIZE("cfi") int SoftBusStopScan(int listenerId)
     }
     int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
     if (CheckNeedStopScan(listenerId)) {
-        status = BleOhosStatusToSoftBus(BleStopScan());
+        status = BleOhosStatusToSoftBus(BleStopScan(scannerId));
     }
     if (status != SOFTBUS_BT_STATUS_SUCCESS) {
         SoftBusMutexUnlock(&g_scanerLock);
@@ -982,4 +1059,76 @@ int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data)
     ConvertAdvData(data, &advData);
     ret = BleOhosStatusToSoftBus(BleSetAdvData(btAdvId, advData));
     return ret;
+}
+
+NO_SANITIZE("cfi") bool SoftBusIsLpDeviceAvailable(void)
+{
+    return IsLpDeviceAvailable();
+}
+
+NO_SANITIZE("cfi") bool SoftBusSetAdvFilterParam(int advHandle, int advId, SoftBusBleAdvParams *advParam,
+    int listenerId, SoftBusBleScanParams *scanParam)
+{
+    BleScanConfigs scanConfig;
+    SetAndGetSuitableScanConfig(listenerId, scanParam, &scanConfig);
+    BleScanNativeFilter *filter = NULL;
+    uint8_t filterSize = 0;
+    SoftBusGetBurstScanFilter(listenerId, &filter, &filterSize);
+    DumpBleScanFilter(filter, filterSize);
+    BleAdvParams btAdvParam;
+    StartAdvRawData rawData;
+    ConvertAdvParam(advParam, &btAdvParam);
+    ConvertAdvData(&g_advChannel[advId].advData, &rawData);
+    BtUuid btUuid;
+    btUuid.uuid = BT_UUID;
+    btUuid.uuidLen = strlen(BT_UUID);
+    BtLpDeviceParam btLpDeviceParam;
+    btLpDeviceParam.scanConfig = &scanConfig;
+    btLpDeviceParam.filter = filter;
+    btLpDeviceParam.filterSize = filterSize;
+    btLpDeviceParam.advParam = btAdvParam;
+    btLpDeviceParam.rawData = rawData;
+    btLpDeviceParam.uuid = btUuid;
+    btLpDeviceParam.activeDeviceInfo = NULL;
+    btLpDeviceParam.activeDeviceSize = 0;
+    btLpDeviceParam.deliveryMode = DELIVERY_MODE_REPLY;
+    btLpDeviceParam.advHandle = advHandle;
+    btLpDeviceParam.duration = ADV_DURATION_MS;
+    if (SetLpDeviceParam(&btLpDeviceParam) != SOFTBUS_OK) {
+        CLOGE("SH SetLpDeviceParam failed");
+        return false;
+    }
+    SoftBusFree(filter);
+    return true;
+}
+
+NO_SANITIZE("cfi") int32_t SoftBusGetAdvHandle(int32_t advId, int32_t *advHandle)
+{
+    return GetAdvHandle(g_advChannel[advId].advId, advHandle);
+}
+
+NO_SANITIZE("cfi") int32_t SoftBusEnableSyncDataToLpDevice(void)
+{
+    return EnableSyncDataToLpDevice();
+}
+
+NO_SANITIZE("cfi") int32_t SoftBusDisableSyncDataToLpDevice(void)
+{
+    return DisableSyncDataToLpDevice();
+}
+
+NO_SANITIZE("cfi") int32_t SoftBusDeregisterScanCallbacks(int32_t scannerId)
+{
+    return BleDeregisterScanCallbacks(scannerId);
+}
+
+NO_SANITIZE("cfi") int32_t SoftBusSetScanReportChannelToLpDevice(int scannerId, bool enable)
+{
+    return SetScanReportChannelToLpDevice(scannerId, enable);
+}
+
+NO_SANITIZE("cfi") int32_t SoftBusSetLpDeviceParam(int duration, int maxExtAdvEvents, int window,
+    int interval, int advHandle)
+{
+    return SetLpDeviceAdvParam(duration, maxExtAdvEvents, window, interval, advHandle);
 }

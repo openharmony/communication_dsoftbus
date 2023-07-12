@@ -45,6 +45,7 @@ static void GetMsgDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
+    linkList[(*listNum)++] = LANE_BLE;
     linkList[(*listNum)++] = LANE_BR;
 }
 
@@ -52,6 +53,7 @@ static void GetBytesDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
+    linkList[(*listNum)++] = LANE_BLE;
     linkList[(*listNum)++] = LANE_BR;
 }
 

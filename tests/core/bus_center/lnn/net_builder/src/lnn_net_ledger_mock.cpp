@@ -328,7 +328,7 @@ int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, ui
     return GetNetLedgerInterface()->LnnGetLnnRelation(id, type, relation, len);
 }
 
-int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
+int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
 {
     return GetNetLedgerInterface()->LnnSetDLConnCapability(networkId, connCapability);
 }

@@ -53,7 +53,7 @@ void LNNConnectionFsmTest::SetUpTestCase()
     LooperInit();
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
-    connFsm2 = LnnCreateConnectionFsm(&target, "pkgName");
+    connFsm2 = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm2 != nullptr);
 }
 
@@ -84,7 +84,7 @@ void FsmStopCallback(struct tagLnnConnectionFsm *connFsm)
 HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
     ConnectionAddr *target1 = nullptr;
-    LnnConnectionFsm *fsm = LnnCreateConnectionFsm(target1, "pkgName");
+    LnnConnectionFsm *fsm = LnnCreateConnectionFsm(target1, "pkgName", true);
     EXPECT_TRUE(fsm == nullptr);
     LnnDestroyConnectionFsm(fsm);
 }

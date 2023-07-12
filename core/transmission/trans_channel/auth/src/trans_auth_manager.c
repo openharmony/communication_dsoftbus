@@ -721,7 +721,7 @@ NO_SANITIZE("cfi") int32_t TransNotifyAuthDataSuccess(int32_t channelId, const C
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel=%d convert addr fail.", channelId);
         return SOFTBUS_ERR;
     }
-    return LnnNotifyDiscoveryDevice(&addr);
+    return LnnNotifyDiscoveryDevice(&addr, true);
 }
 
 NO_SANITIZE("cfi") int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)

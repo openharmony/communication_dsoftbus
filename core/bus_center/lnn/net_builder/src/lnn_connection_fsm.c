@@ -21,9 +21,11 @@
 #include "auth_hichain.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "lnn_ble_lpdevice.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
@@ -36,6 +38,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_utils.h"
 #include "lnn_async_callback_utils.h"
 #include "trans_channel_manager.h"
 
@@ -331,16 +334,34 @@ static void PostPcOnlineUniquely(NodeInfo *info)
 static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool isOnline)
 {
     if (type != CONNECTION_ADDR_BLE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send mlps only support ble");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send mlps only support ble");
         return;
     }
-    if (isOnline) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ap online, ready to mlps");
-        // mark--SendInfoToMlpsBleOnlineProcess
-    } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ap offline, ready to mlps");
-        // mark-- SendInfoToMlpsBleOfflineProcess
+    char *outUdid = (char *)SoftBusCalloc(UDID_BUF_LEN);
+    if (outUdid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "calloc outUdid fail");
+        return;
     }
+    if (strcpy_s(outUdid, UDID_BUF_LEN, udid) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy outUdid fail");
+        SoftBusFree(outUdid);
+        return;
+    }
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (isOnline) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "SH ap online");
+        if (LnnAsyncCallbackDelayHelper(looper, SendInfoToMlpsBleOnlineProcess, (void *)outUdid, 0) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async call online process fail");
+            SoftBusFree(outUdid);
+        }
+    } else {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "SH ap offline");
+        if (LnnAsyncCallbackDelayHelper(looper, SendInfoToMlpsBleOfflineProcess, (void *)outUdid, 0) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async call online process fail");
+            SoftBusFree(outUdid);
+        }
+    }
+    return;
 }
 
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
@@ -516,9 +537,28 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]join LNN is ongoing, waiting...", connFsm->id);
         return SOFTBUS_OK;
     }
-    LLOGI("[id=%u]begin join request, peer%s", connFsm->id, LnnPrintConnectionAddr(&connInfo->addr));
+    LLOGI("[id=%u]begin join request, peer%s, isNeedConnect=%d", connFsm->id,
+        LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
+    if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
+        // go to online
+        LLOGI("begin to start ble direct online");
+        int32_t ret;
+        NodeInfo deviceInfo = {0};
+        int64_t authId = 0;
+        char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+        ret = memcpy_s(udidHash, HB_SHORT_UDID_HASH_HEX_LEN, connInfo->addr.info.ble.udidHash,
+            HB_SHORT_UDID_HASH_HEX_LEN);
+        LLOGI("join udidHash = %s", udidHash);
+        if (ret == EOK) {
+            if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
+                AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo, &authId) == SOFTBUS_OK) {
+                LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authId, &deviceInfo);
+                return SOFTBUS_OK;
+            }
+        }
+    }
     if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback()) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]auth verify device failed", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
@@ -604,8 +644,8 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         return SOFTBUS_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%" PRId64 ", result=%d",
-        connFsm->id, connInfo->authId, *retCode);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "[id=%u]auth done, authId=%" PRId64 ", result=%d, connType=%d",
+        connFsm->id, connInfo->authId, *retCode, connFsm->connInfo.addr.type);
     if (*retCode == SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "[id=%u]auth passed, authId=%" PRId64, connFsm->id, connInfo->authId);
@@ -614,8 +654,8 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]auth failed, authId=%" PRId64 ", requestId=%u, reason=%d", connFsm->id, connInfo->authId,
-            connInfo->requestId, *retCode);
+            "[id=%u]auth failed, authId=%" PRId64 ", requestId=%u, reason=%d, connType=%d", connFsm->id, connInfo->authId,
+            connInfo->requestId, *retCode, connFsm->connInfo.addr.type);
         CompleteJoinLNN(connFsm, NULL, *retCode);
     }
     SoftBusFree(retCode);
@@ -959,7 +999,8 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName)
+NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName,
+    bool isNeedConnect)
 {
     LnnConnectionFsm *connFsm = NULL;
 
@@ -987,7 +1028,9 @@ NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr
             return NULL;
         }
     }
-    LLOGI("create a new connection fsm[id=%u][peer%s]", connFsm->id, LnnPrintConnectionAddr(target));
+    connFsm->isNeedConnect = isNeedConnect;
+    LLOGI("create a new connection fsm[id=%u][peer%s][needConnect=%d]", connFsm->id, LnnPrintConnectionAddr(target),
+        isNeedConnect);
     return connFsm;
 }
 

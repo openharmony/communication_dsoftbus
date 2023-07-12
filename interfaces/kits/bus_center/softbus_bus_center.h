@@ -148,15 +148,15 @@ extern "C" {
 typedef enum {
     NODE_KEY_UDID = 0,    /**< UDID in string format*/
     NODE_KEY_UUID,        /**< UUID in string format */
-    NODE_KEY_MASTER_UDID, /**< UDID of master node in string format */
+    NODE_KEY_MASTER_UDID, /**< UDID of device in string format */
     NODE_KEY_BR_MAC,      /**< BR MAC in string format */
     NODE_KEY_IP_ADDRESS,  /**< IP address in string format */
     NODE_KEY_DEV_NAME,    /**< Device name in string format */
     NODE_KEY_NETWORK_CAPABILITY, /**< Network capability in number format */
     NODE_KEY_NETWORK_TYPE,       /**< Network type in number format */
     NODE_KEY_BLE_OFFLINE_CODE,   /**< Ble offlinecode in string format */
-    NODE_KEY_DATA_CHANGE_FLAG,
-    NODE_KEY_NODE_ADDRESS,  /**< Node address in string format */
+    NODE_KEY_DATA_CHANGE_FLAG,   /**< Device info change flag in number format */
+    NODE_KEY_NODE_ADDRESS,       /**< Node address in string format */
 } NodeDeviceInfoKey;
 
 /**
@@ -198,11 +198,11 @@ typedef enum {
  * @version 1.0
  */
 typedef enum {
-    LOW_ACCURACY = 0,
-    NORMAL_ACCURACY,
-    HIGH_ACCURACY,
-    SUPER_HIGH_ACCURACY,
-    UNAVAIL_ACCURACY = 0xFFFF,
+    LOW_ACCURACY = 0,              /**< Low accuracy */
+    NORMAL_ACCURACY,               /**< Normal accuracy */
+    HIGH_ACCURACY,                 /**< High accuracy */
+    SUPER_HIGH_ACCURACY,           /**< Super high accuracy */
+    UNAVAIL_ACCURACY = 0xFFFF,     /**< Invalid accuracy */
 } TimeSyncAccuracy;
 
 /**
@@ -212,9 +212,9 @@ typedef enum {
  * @version 1.0
  */
 typedef enum {
-    SHORT_PERIOD = 0,
-    NORMAL_PERIOD,
-    LONG_PERIOD,
+    SHORT_PERIOD = 0,  /**< Short accuracy */
+    NORMAL_PERIOD,     /**< Normal accuracy */
+    LONG_PERIOD,       /**< Long accuracy */
 } TimeSyncPeriod;
 
 /**
@@ -224,9 +224,9 @@ typedef enum {
  * @version 1.0
  */
 typedef enum {
-    NODE_SPECIFIC = 0,
-    ALL_LNN,
-    WRITE_RTC,
+    NODE_SPECIFIC = 0,  /**< Time sync in a specific mode */
+    ALL_LNN,            /**< Time sync during the entire networking */
+    WRITE_RTC,          /**< Write RTC synchronization */
 } TimeSyncFlag;
 
 /**
@@ -236,9 +236,9 @@ typedef enum {
  * @version 1.0
  */
 typedef struct {
-    char networkId[NETWORK_ID_BUF_LEN];    /**< Device ID */
+    char networkId[NETWORK_ID_BUF_LEN];    /**< Device network id */
     char deviceName[DEVICE_NAME_BUF_LEN];  /**< Device name */
-    uint16_t deviceTypeId;
+    uint16_t deviceTypeId;                 /**< Device type id */
 } NodeBasicInfo;
 
 /**
@@ -259,11 +259,11 @@ typedef enum {
  * @version 1.0
  */
 typedef struct {
-    NodeBasicInfo basicInfo;
-    uint16_t authStatus;
-    uint16_t dataBaseStatus;
-    uint16_t meshType;
-    uint16_t reserved[NODE_STATUS_MAX_NUM - 3];
+    NodeBasicInfo basicInfo;     /**< The basic info of device */
+    uint16_t authStatus;         /**< The auth state of device */
+    uint16_t dataBaseStatus;     /**< The data base state of device */
+    uint16_t meshType;           /**< The mesh type of device */
+    uint16_t reserved[NODE_STATUS_MAX_NUM - 3];  /**< The reserved data of device */
 } NodeStatus;
 
 /**
@@ -273,36 +273,36 @@ typedef struct {
  * @version 1.0
  */
 typedef enum {
-    TYPE_AUTH_STATUS = 2,     /**< certify status change */
-    TYPE_DATABASE_STATUS = 3, /**< database  change */
-    TYPE_MESH_TYPE = 4,       /**< lnn mesh typechange */
-    TYPE_STATUS_MAX = 5,      /**< max num */
+    TYPE_AUTH_STATUS = 2,     /**< Certify status change */
+    TYPE_DATABASE_STATUS = 3, /**< Database  change */
+    TYPE_MESH_TYPE = 4,       /**< Lnn mesh typechange */
+    TYPE_STATUS_MAX = 5,      /**< Max num */
 } NodeStatusType;
 
 /**
- * @brief time synchronize result.
+ * @brief Defines time synchronize result.
  *
  * @since 1.0
  * @version 1.0
  */
 typedef struct {
-    int32_t millisecond;
-    int32_t microsecond;
-    TimeSyncAccuracy accuracy;
+    int32_t millisecond;        /**< Number of milli second */
+    int32_t microsecond;        /**< Number of micro second */
+    TimeSyncAccuracy accuracy;  /**< Time sync accuracy */
 } TimeSyncResult;
 
 /**
- * @brief time synchronize result info.
+ * @brief Defines time synchronize result info.
  *
  * @since 1.0
  * @version 1.0
  */
 typedef struct {
-    TimeSyncResult result;
-    TimeSyncFlag flag;
+    TimeSyncResult result;    /**< Time synchronize result */
+    TimeSyncFlag flag;        /**< Time synchronize flag */
     union {
-        char targetNetworkId[NETWORK_ID_BUF_LEN];
-        char masterNetworkId[NETWORK_ID_BUF_LEN];
+        char targetNetworkId[NETWORK_ID_BUF_LEN];  /**< The network id of time sync target device */
+        char masterNetworkId[NETWORK_ID_BUF_LEN];  /**< The network id of node */
     } target;
 } TimeSyncResultInfo;
 
@@ -311,16 +311,14 @@ typedef struct {
  *
  * The error codes are returned to the caller through <b>IPublishCallback</b>.
  *
+ * @since 1.0
+ * @version 1.0
  */
 typedef enum {
-    /* publish success */
-    PUBLISH_LNN_SUCCESS = 0,
-    /* Unsupported medium */
-    PUBLISH_LNN_NOT_SUPPORT_MEDIUM = 1,
-    /* internal error */
-    PUBLISH_LNN_INTERNAL = 2,
-    /* Unknown reason */
-    PUBLISH_LNN_UNKNOWN = 0xFF
+    PUBLISH_LNN_SUCCESS = 0,              /**< Publish success */
+    PUBLISH_LNN_NOT_SUPPORT_MEDIUM = 1,   /**< Unsupported medium */
+    PUBLISH_LNN_INTERNAL = 2,             /**< Internal error */
+    PUBLISH_LNN_UNKNOWN = 0xFF            /**< Unknown reason */
 } PublishResult;
 
 /**
@@ -328,24 +326,32 @@ typedef enum {
  *
  * The error codes are returned to the caller through <b>IDiscoveryCallback</b>.
  *
+ * @since 1.0
+ * @version 1.0
  */
 typedef enum {
-    /* refresh success */
-    REFRESH_LNN_SUCCESS = 0,
-    /* Unsupported medium */
-    REFRESH_LNN_NOT_SUPPORT_MEDIUM = 1,
-    /* internal error */
-    REFRESH_LNN_INTERNAL = 2,
-    /* Unknown error */
-    REFRESH_LNN_UNKNOWN = 0xFF
+    REFRESH_LNN_SUCCESS = 0,             /**< Refresh success */
+    REFRESH_LNN_NOT_SUPPORT_MEDIUM = 1,  /**< Unsupported medium */
+    REFRESH_LNN_INTERNAL = 2,            /**< Internal error */
+    REFRESH_LNN_UNKNOWN = 0xFF           /**< Unknown error */
 } RefreshResult;
 
 /**
  * @brief Defines the callbacks for successful and failed service publishing.
  *
+ * @since 1.0
+ * @version 1.0
  */
 typedef struct {
-    /** Callback for publish result */
+    /**
+     * @brief Callback for publish result.
+     *
+     * @param publishId the publish Id which has been published.
+     * @param reason the publish result of this time.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
     void (*OnPublishResult)(int publishId, PublishResult reason);
 } IPublishCb;
 
@@ -354,11 +360,29 @@ typedef struct {
  *
  * Three types of callbacks are available.
  *
+ * @since 1.0
+ * @version 1.0
  */
 typedef struct {
-    /** Callback that is invoked when a device is found */
+    /**
+     * @brief Callback that is invoked when a device is found.
+     *
+     * @param device Indicates the pointer to the device info about device.
+     * For details, see {@link DeviceInfo}.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
     void (*OnDeviceFound)(const DeviceInfo *device);
-    /** Callback for a subscription result */
+    /**
+     * @brief Callback for a subscription result.
+     *
+     * @param refreshId Indicates the refresh Id which.
+     * @param reason Indicates the result of this time. For details, see {@link RefreshResult}.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
     void (*OnDiscoverResult)(int32_t refreshId, RefreshResult reason);
 } IRefreshCallback;
 
@@ -446,12 +470,12 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    char udid[UDID_BUF_LEN];
-    char deviceName[DEVICE_NAME_BUF_LEN];
-    uint16_t deviceTypeId;
-    uint8_t addrNum;
-    ConnectionAddr addr[CONNECTION_ADDR_MAX];
-    char bypassInfo[META_NODE_BYPASS_INFO_LEN];
+    char udid[UDID_BUF_LEN];                       /**< The udid of meta node */
+    char deviceName[DEVICE_NAME_BUF_LEN];          /**< The name of meta node */
+    uint16_t deviceTypeId;                         /**< The device type id of meta node */
+    uint8_t addrNum;                               /**< The connection addr type of meta node */
+    ConnectionAddr addr[CONNECTION_ADDR_MAX];      /**< The connection addr of meta node */
+    char bypassInfo[META_NODE_BYPASS_INFO_LEN];    /**< The pass info of meta node */
 } MetaNodeConfigInfo;
 
 /**
@@ -461,9 +485,9 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    char metaNodeId[NETWORK_ID_BUF_LEN];
-    bool isOnline;
-    MetaNodeConfigInfo configInfo;
+    char metaNodeId[NETWORK_ID_BUF_LEN];  /**< The id of meta node */
+    bool isOnline;                        /**< The online state of meta node */
+    MetaNodeConfigInfo configInfo;        /**< The node ConfigInfo of meta node */
 } MetaNodeInfo;
 
 /**
@@ -497,8 +521,8 @@ typedef enum {
  * @version 1.0
  */
 typedef struct {
-    CustomType type;                  /**< user type */
-    uint8_t data[USER_DATA_MAX_LEN];  /**< user data */
+    CustomType type;                  /**< User type */
+    uint8_t data[USER_DATA_MAX_LEN];  /**< User data */
 } CustomData;
 
 /**
@@ -542,7 +566,7 @@ typedef void (*OnJoinMetaNodeResult)(ConnectionAddr *addr, const char *networkId
 typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
 
 /**
- * @brief Called when a device is removed from a LNN via {@link LeaveLNN}.
+ * @brief Called when a device is removed from a LNN via {@link LeaveMetaNode}.
  *
  * @param networkId Indicates the pointer to the network ID of the device.
  * @param retCode Indicates the result code. Value <b>0</b> indicates that the device is successfully
@@ -693,6 +717,19 @@ void FreeNodeInfo(NodeBasicInfo *info);
  */
 int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info);
 
+/**
+ * @brief Set the Node Data Change Flag object.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param networkId Indicates the pointer to the network ID of the device.
+ * @param dataChangeFlag Indicates the data change flag.
+ *
+ * @return Returns <b>0</b> if set change flag success, returns any other value otherwise.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
 int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 
 /**
@@ -757,10 +794,14 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId);
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param info Indicates the pointer to the service publishing information. For details, see {@link PublishInfo}.
  * @param cb Indicates the pointer to the service publishing callback {@link IPublishCb}.
+ *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return Returns <b>SOFTBUS_OK</b> if the service is successfully published.
+ *
+ * @since 1.0
+ * @version 1.0
  */
 int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
 
@@ -769,9 +810,13 @@ int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishC
  *
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param publishId Indicates the service ID.
+ *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_OK</b> if the service is successfully unpublished.
+ *
+ * @since 1.0
+ * @version 1.0
  */
 int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
 
@@ -785,10 +830,14 @@ int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param info Indicates the pointer to the service subscription information. For details, see {@link SubscribeInfo}.
  * @param cb Indicates the service subscription callback {@link IRefreshCallback}.
+ *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful.
+ *
+ * @since 1.0
+ * @version 1.0
  */
 int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
 
@@ -797,9 +846,13 @@ int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefres
  *
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  * @param refreshId Indicates the service ID.
+ *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>pkgName</b> is invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_OK</b> if the service unsubscription is successful.
+ *
+ * @since 1.0
+ * @version 1.0
  */
 int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
 
@@ -810,7 +863,7 @@ int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
  * For the same caller, the value of this parameter must be the same for all functions.
  * @param info Meta node configuration information, see {@link MetaNodeConfigInfo}.
  * @param metaNodeId Save meta node ID when it is activated successfully, its buffer length must be not
- * less then NETWORK_ID_BUF_LEN
+ * less then NETWORK_ID_BUF_LEN.
  *
  * @return Returns <b>0</b> if the meta node is activated; returns any other value if the request fails.
  *
@@ -869,4 +922,3 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
 #endif
 
 #endif
-/** @} */

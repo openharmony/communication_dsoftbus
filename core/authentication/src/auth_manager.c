@@ -387,7 +387,8 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
 }
 
 NO_SANITIZE("cfi")
-int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, const SessionKey *sessionKey)
+int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
+    const SessionKey *sessionKey, bool isConnect)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(sessionKey, SOFTBUS_INVALID_PARAM);
@@ -395,6 +396,11 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, c
         authSeq, GetAuthSideStr(info->isServer), info->requestId);
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
+    }
+    if (!isConnect && info->connInfo.type != AUTH_LINK_TYPE_BLE) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "only support ble direct on line");
+        ReleaseAuthLock();
+        return SOFTBUS_OK;
     }
     bool isNewCreated = false;
     AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
@@ -416,7 +422,11 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, c
     auth->connId = info->connId;
     auth->lastVerifyTime = GetCurrentTimeMs();
     auth->lastActiveTime = GetCurrentTimeMs();
-    if (AddSessionKey(&auth->sessionKeyList, TO_INT32(authSeq), sessionKey) != SOFTBUS_OK) {
+    int32_t sessionKeyIndex = TO_INT32(authSeq);
+    if ((info->isSupportFastAuth) && (info->version <= SOFTBUS_OLD_V2)) {
+        sessionKeyIndex = TO_INT32(info->oldIndex);
+    }
+    if (AddSessionKey(&auth->sessionKeyList, sessionKeyIndex, sessionKey) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddSessionKey fail.");
         if (isNewCreated) {
             DelAuthManager(auth, true);
@@ -427,8 +437,11 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, c
     if (auth->connInfo.type == AUTH_LINK_TYPE_WIFI && !auth->isServer) {
         ScheduleUpdateSessionKey(auth->authId, SCHEDULE_UPDATE_SESSION_KEY_PERIOD);
     }
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG,
-        "auth manager[%" PRId64 "] add session key succ, index=%d.", auth->authId, TO_INT32(authSeq));
+    if (!isConnect) {
+        auth->hasAuthPassed = true;
+    }
+    ALOGD("auth manager[%" PRId64 "] add session key succ, index=%d. sessionKeyIndex=%d",
+        auth->authId, TO_INT32(authSeq), sessionKeyIndex);
     ReleaseAuthLock();
     return SOFTBUS_OK;
 }
@@ -499,6 +512,7 @@ NO_SANITIZE("cfi") static void OnDeviceNotTrusted(const char *peerUdid)
     }
     g_verifyListener.onDeviceNotTrusted(peerUdid);
     LnnHbOnTrustedRelationReduced();
+    AuthRemoveDeviceKeyByUdid(peerUdid);
 }
 
 NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupId, int32_t groupType)

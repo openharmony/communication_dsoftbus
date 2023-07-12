@@ -32,16 +32,16 @@ public:
     virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual int SoftBusRemoveBtStateListener(int listenerId) = 0;
 
-    virtual int SoftBusAddScanListener(const SoftBusScanListener *listener) = 0;
+    virtual int SoftBusAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan) = 0;
     virtual int SoftBusRemoveScanListener(int listenerId) = 0;
 
     virtual int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize) = 0;
 
-    virtual int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback) = 0;
+    virtual int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan) = 0;
     virtual int SoftBusReleaseAdvChannel(int channel) = 0;
 
-    virtual int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param) = 0;
-    virtual int SoftBusStopScan(int listenerId) = 0;
+    virtual int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param) = 0;
+    virtual int SoftBusStopScan(int listenerId, int scannerId) = 0;
 
     virtual int SoftBusStartAdv(int channel, const SoftBusBleAdvParams *param) = 0;
     virtual int SoftBusStopAdv(int channel) = 0;
@@ -51,6 +51,8 @@ public:
 
     virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
     virtual int SoftBusGetBtState() = 0;
+
+    virtual int32_t SoftBusDeregisterScanCallbacks(int32_t scannerId) = 0;
 };
 
 class BleMock : public BleInterface {
@@ -68,17 +70,19 @@ public:
     MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int listenerId), (override));
 
-    MOCK_METHOD(int, SoftBusAddScanListener, (const SoftBusScanListener *listener), (override));
+    MOCK_METHOD(int, SoftBusAddScanListener, (const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan), (override));
     MOCK_METHOD(int, SoftBusRemoveScanListener, (int listenerId), (override));
+
+    MOCK_METHOD(int, SoftBusDeregisterScanCallbacks, (int32_t scannerId), (override));
 
     MOCK_METHOD(int, SoftBusSetScanFilter, (int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize),
                 (override));
 
-    MOCK_METHOD(int, SoftBusGetAdvChannel, (const SoftBusAdvCallback *callback), (override));
+    MOCK_METHOD(int, SoftBusGetAdvChannel, (const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan), (override));
     MOCK_METHOD(int, SoftBusReleaseAdvChannel, (int channel), (override));
 
-    MOCK_METHOD(int, SoftBusStartScan, (int listenerId, const SoftBusBleScanParams *param), (override));
-    MOCK_METHOD(int, SoftBusStopScan, (int listenerId), (override));
+    MOCK_METHOD(int, SoftBusStartScan, (int listenerId, int scannerId, const SoftBusBleScanParams *param), (override));
+    MOCK_METHOD(int, SoftBusStopScan, (int listenerId, int scannerId), (override));
 
     MOCK_METHOD(int, SoftBusStartAdv, (int channel, const SoftBusBleAdvParams *param), (override));
     MOCK_METHOD(int, SoftBusStopAdv, (int channel), (override));
@@ -99,13 +103,14 @@ public:
     static int32_t ActionOfBleGattLockInit();
     static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener);
     static int32_t ActionOfRemoveBtStateListener(int listenerId);
-    static int32_t ActionOfAddScanListener(const SoftBusScanListener *listener);
+    static int32_t ActionOfAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan);
     static int32_t ActionOfRemoveScanListener(int listenerId);
+    static int32_t ActionOfDeregisterScanCallbacks(int scannerId);
     static int32_t ActionOfSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize);
-    static int32_t ActionOfGetAdvChannel(const SoftBusAdvCallback *callback);
+    static int32_t ActionOfGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan);
     static int32_t ActionOfReleaseAdvChannel(int channel);
-    static int32_t ActionOfStartScan(int listenerId, const SoftBusBleScanParams *param);
-    static int32_t ActionOfStopScan(int listenerId);
+    static int32_t ActionOfStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param);
+    static int32_t ActionOfStopScan(int listenerId, int scannerId);
     static int32_t ActionOfStartAdv(int channel, const SoftBusBleAdvParams *param);
     static int32_t ActionOfStopAdv(int channel);
     static int32_t ActionOfSetAdvDataForActiveDiscovery(int channel, const SoftBusBleAdvData *data);

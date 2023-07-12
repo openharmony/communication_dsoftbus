@@ -22,6 +22,7 @@
 #include "auth_common.h"
 #include "auth_interface.h"
 #include "auth_session_key.h"
+#include "auth_device_common_key.h"
 #include "common_list.h"
 #include "lnn_node_info.h"
 #include "lnn_state_machine.h"
@@ -50,6 +51,8 @@ typedef struct {
     char uuid[UUID_BUF_LEN];
     SoftBusVersion version;
     bool isSupportCompress;
+    bool isSupportFastAuth;
+    int64_t oldIndex;
 } AuthSessionInfo;
 
 typedef struct {

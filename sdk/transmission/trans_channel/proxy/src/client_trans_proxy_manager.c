@@ -158,11 +158,11 @@ int32_t ClientTransProxyInit(const IClientSessionCallBack *cb)
         return SOFTBUS_ERR;
     }
 
-    if (SoftbusGetConfig(SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH,
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_NEW_LENGTH,
         (unsigned char*)&g_proxyMaxByteBufSize, sizeof(g_proxyMaxByteBufSize)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth proxy channel max bytes length fail");
     }
-    if (SoftbusGetConfig(SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH,
+    if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
         (unsigned char*)&g_proxyMaxMessageBufSize, sizeof(g_proxyMaxMessageBufSize)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get auth proxy channel max message length fail");
     }

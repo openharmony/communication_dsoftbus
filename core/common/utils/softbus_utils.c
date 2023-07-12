@@ -132,6 +132,32 @@ void SoftBusTimerDeInit(void)
     }
 }
 
+int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char * inBuf,
+    uint32_t inLen)
+{
+    if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
+        return SOFTBUS_ERR;
+    }
+
+    while (inLen > 0) {
+        unsigned char h = *inBuf / HEX_MAX_NUM;
+        unsigned char l = *inBuf % HEX_MAX_NUM;
+        if (h < DEC_MAX_NUM) {
+            *outBuf++ = '0' + h;
+        } else {
+            *outBuf++ = 'A' + h - DEC_MAX_NUM;
+        }
+        if (l < DEC_MAX_NUM) {
+            *outBuf++ = '0' + l;
+        } else {
+            *outBuf++ = 'A' + l - DEC_MAX_NUM;
+        }
+        ++inBuf;
+        inLen--;
+    }
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf,
     uint32_t inLen)
 {

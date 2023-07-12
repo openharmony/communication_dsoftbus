@@ -38,7 +38,7 @@
 
 static struct HksBlob g_keyAlias = {sizeof(LNN_DB_KEY_AILAS), (uint8_t *)LNN_DB_KEY_AILAS};
 
-static int32_t EncryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
+int32_t EncryptStorageData(uint8_t *dbKey, uint32_t len)
 {
     struct HksBlob plainData = {0};
     struct HksBlob encryptData = {0};
@@ -48,6 +48,7 @@ static int32_t EncryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "calloc encrypt dbKey fail");
         return SOFTBUS_MEM_ERR;
     }
+    LLOGI("Encrypt, data len = %d", len);
     plainData.size = len;
     plainData.data = dbKey;
     if (LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData) != SOFTBUS_OK) {
@@ -67,16 +68,17 @@ static int32_t EncryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DecryptDecisionDbKey(uint8_t *dbKey, uint32_t len)
+int32_t DecryptStorageData(uint8_t *dbKey, uint32_t len)
 {
     struct HksBlob encryptData = {0};
     struct HksBlob decryptData = {0};
 
-    decryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
+    decryptData.data = (uint8_t *)SoftBusCalloc(len);
     if (decryptData.data == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "calloc decrypt dbKey fail");
         return SOFTBUS_MEM_ERR;
     }
+    LLOGI("Decrypt, data len = %d", len);
     encryptData.size = len;
     encryptData.data = dbKey;
     int32_t ret;
@@ -116,7 +118,7 @@ static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate random dbKey fail");
             return SOFTBUS_ERR;
         }
-        if (EncryptDecisionDbKey(dbKey, len) != SOFTBUS_OK) {
+        if (EncryptStorageData(dbKey, len) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "encrypt dbKey fail");
             return SOFTBUS_ERR;
         }
@@ -129,7 +131,7 @@ static int32_t GetDecisionDbKey(uint8_t *dbKey, uint32_t len, bool isUpdate)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read dbKey from file fail");
         return SOFTBUS_ERR;
     }
-    if (DecryptDecisionDbKey(dbKey, len) != SOFTBUS_OK) {
+    if (DecryptStorageData(dbKey, len) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "decrypt dbKey fail");
         return SOFTBUS_ERR;
     }
@@ -158,8 +160,7 @@ static int32_t UpdateDecisionDbKey(DbContext *ctx)
 {
     uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
 
-    if (LnnDeleteKeyByHuks(&g_keyAlias) != SOFTBUS_OK ||
-        LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
+    if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update decision db root key fail");
         return SOFTBUS_ERR;
     }
