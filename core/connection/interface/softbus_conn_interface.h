@@ -395,6 +395,37 @@ int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time);
  * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
  */
 int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
+
+typedef void (*OnMessageReceivedFunc)(int32_t channelId, const char *data, uint32_t len);
+void PipelineRegisterIpPortVerifyCallBack(const OnMessageReceivedFunc cb);
+
+typedef struct {
+    void (*onScanReceived)(const char *networkId, uint8_t *buf, size_t bufLen);
+    int (*onChannnelOpened)(int32_t channelId, const char *networkId, unsigned char isServer);
+    void (*onChannelFailed)(int32_t channelId, const char *networkId);
+    void (*onChannelClosed)(int32_t channelId);
+    void (*onMessageReceived)(int32_t channelId, const uint8_t *data, uint32_t len);
+} ConnBleDirectPipelineCallback;
+int32_t ConnBleDirectPipelineInit(ConnBleDirectPipelineCallback* cb);
+
+typedef struct {
+    const char *networkId;
+    uint8_t *buf;
+    int bufLen;
+} ConnBleDirectPipelineOption;
+int32_t ConnBleDirectPipelineOpen(const ConnBleDirectPipelineOption *option, const ConnectResult *result);
+
+int32_t ConnBleDirectPipelineClose(int32_t channelId);
+
+typedef enum {
+    PIPE_LINE_MSG_TYPE_P2P_NEGO = 0xABADBEEF,
+    PIPE_LINE_MSG_TYPE_IP_PORT_EXCHANGE,
+} PipelineMsgType;
+int32_t ConnBleDirectPipelineSendMessage(int32_t channelId, const uint8_t *data, uint32_t dataLen,
+    PipelineMsgType type);
+
+int32_t GetPipelineIdByPeerNetworkId(const char* peerNetworkId);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
