@@ -46,7 +46,7 @@
 #include "bus_center_event.h"
 
 #define TIME_THOUSANDS_FACTOR (1000)
-#define BLE_ADV_LOST_TIME 1200
+#define BLE_ADV_LOST_TIME 5000
 #define LONG_TO_STRING_MAX_LEN 21
 #define LNN_COMMON_LEN_64 8
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
@@ -704,7 +704,7 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     uint64_t currentTimeMs = GetCurrentTime();
-    LNN_CHECK_AND_RETURN_RET_LOG(info->connectInfo.latestTime + BLE_ADV_LOST_TIME <= currentTimeMs, SOFTBUS_ERR,
+    LNN_CHECK_AND_RETURN_RET_LOG(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
         "ble mac out date, lastAdvTime:%llu, now:%llu", info->connectInfo.latestTime, currentTimeMs);
 
     if (memcpy_s(buf, len, info->connectInfo.bleMacAddr, MAC_LEN) != EOK) {
@@ -1266,12 +1266,42 @@ static void NotifyMigrateUpgrade(NodeInfo *info)
     }
 }
 
-static void NodeOnlineProc(NodeInfo *info)
+static void FilterWifiInfo(NodeInfo *info)
 {
+    (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_WIFI);
+    info->authChannelId[CONNECTION_ADDR_WLAN] = 0;
+}
+
+static void FilterBrInfo(NodeInfo *info)
+{
+    (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_BR);
+    info->authChannelId[CONNECTION_ADDR_BR] = 0;
+}
+
+static void BleDirectlyOnlineProc(NodeInfo *info)
+{
+    if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+        return;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
+        FilterWifiInfo(info);
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
+        FilterBrInfo(info);
+    }
     if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
         LLOGE("save remote devInfo fail");
         return;
     }
+}
+
+static void NodeOnlineProc(NodeInfo *info)
+{
+    NodeInfo nodeInfo;
+    if (memcpy_s(&nodeInfo, sizeof(nodeInfo), info, sizeof(NodeInfo)) != EOK) {
+        return;
+    }
+    BleDirectlyOnlineProc(&nodeInfo);
 }
 
 NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
@@ -2095,7 +2125,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uin
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
+NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -2107,7 +2137,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint64_
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    nodeInfo->netCapacity = (uint32_t)connCapability;
+    nodeInfo->netCapacity = connCapability;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }

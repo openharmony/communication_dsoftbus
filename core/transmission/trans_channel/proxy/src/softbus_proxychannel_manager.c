@@ -56,6 +56,12 @@
 #define PROXY_CHANNEL_SERVER 1
 static SoftBusList *g_proxyChannelList = NULL;
 
+typedef struct {
+    int32_t channelType;
+    int32_t businessType;
+    ConfigType configType;
+} ConfigTypeMap;
+
 static int32_t ChanIsEqual(ProxyChannelInfo *a, ProxyChannelInfo *b)
 {
     if ((a->myId == b->myId) &&
@@ -124,6 +130,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
             item->appInfo.encrypt = info->appInfo.encrypt;
             item->appInfo.algorithm = info->appInfo.algorithm;
             item->appInfo.crc = info->appInfo.crc;
+            item->appInfo.myData.dataConfig = info->appInfo.myData.dataConfig;
             item->appInfo.peerHandleId = info->appInfo.peerHandleId;
             (void)memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
                            &(info->appInfo.peerData), sizeof(info->appInfo.peerData));
@@ -601,7 +608,7 @@ static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCo
     }
 }
 
-static int32_t TransProxyGetPeerDataInfo(int16_t myId, AppInfoData *peerDataInfo)
+static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -616,13 +623,72 @@ static int32_t TransProxyGetPeerDataInfo(int16_t myId, AppInfoData *peerDataInfo
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->myId == myId) {
-            (void)memcpy_s(peerDataInfo, sizeof(AppInfoData), &(item->appInfo.peerData), sizeof(item->appInfo.peerData));
+            (void)memcpy_s(appInfo, sizeof(AppInfo), &(item->appInfo), sizeof(item->appInfo));
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_ERR;
+}
+
+static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
+};
+
+static int32_t FindConfigType(int32_t channelType, int32_t businessType)
+{
+    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
+        if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
+            return g_configTypeMap[i].configType;
+        }
+    }
+    return SOFTBUS_CONFIG_TYPE_MAX;
+}
+
+static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
+{
+    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
+    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType[%d] businessType[%d]",
+            channelType, businessType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get fail configType[%d]", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    *len = maxLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get local config[%u]", *len);
+    return SOFTBUS_OK;
+}
+
+static int32_t TransProxyProcessDataConfig(AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "appInfo is null");
+        return SOFTBUS_ERR;
+    }
+    if (appInfo->businessType != BUSINESS_TYPE_MESSAGE && appInfo->businessType != BUSINESS_TYPE_BYTE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "invalid businessType[%d]", appInfo->businessType);
+        return SOFTBUS_OK;
+    }
+    if (appInfo->peerData.dataConfig != 0) {
+        appInfo->myData.dataConfig = MIN(appInfo->myData.dataConfig, appInfo->peerData.dataConfig);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "process dataConfig[%u] succ", appInfo->myData.dataConfig);
+        return SOFTBUS_OK;
+    }
+    ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
+        SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH : SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH;
+    if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
+        sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType[%d]", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "process data config value[%d]", appInfo->myData.dataConfig);
+    return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
@@ -634,7 +700,7 @@ NO_SANITIZE("cfi") void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg
     info->myId = msg->msgHead.myId;
     info->peerId = msg->msgHead.peerId;
 
-    if (TransProxyGetPeerDataInfo(info->myId, &(info->appInfo.peerData)) != SOFTBUS_OK) {
+    if (TransProxyGetAppInfo(info->myId, &(info->appInfo)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to get peer data info");
         SoftBusFree(info);
         return;
@@ -655,6 +721,12 @@ NO_SANITIZE("cfi") void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv Handshake ack myid %d peerid %d identity %s crc %d",
         info->myId, info->peerId, info->identity, info->appInfo.crc);
+
+    if (TransProxyProcessDataConfig(&info->appInfo) != SOFTBUS_OK) {
+        SoftBusFree(info);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ProcessDataConfig fail");
+        return;
+    }
 
     if (TransProxyUpdateAckInfo(info) != SOFTBUS_OK) {
         SoftBusFree(info);
@@ -743,6 +815,39 @@ static void ConstructProxyChannelInfo(
     }
 }
 
+static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "appInfo is null");
+        return SOFTBUS_ERR;
+    }
+    if (appInfo->businessType != BUSINESS_TYPE_MESSAGE && appInfo->businessType != BUSINESS_TYPE_BYTE) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "invalid businessType[%d]", appInfo->businessType);
+        return SOFTBUS_OK;
+    }
+    if (appInfo->peerData.dataConfig != 0) {
+        uint32_t localDataConfig = 0;
+        if (TransGetLocalConfig(CHANNEL_TYPE_PROXY, appInfo->businessType, &localDataConfig) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get local config failed, businessType[%d]",
+                appInfo->businessType);
+            return SOFTBUS_ERR;
+        }
+
+        appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill dataConfig[%u] succ", appInfo->myData.dataConfig);
+        return SOFTBUS_OK;
+    }
+    ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
+        SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH : SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH;
+    if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
+        sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed, configType[%d]", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fill data config value[%d]", appInfo->myData.dataConfig);
+    return SOFTBUS_OK;
+}
+
 static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan)
 {
     int32_t ret = TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dateLen);
@@ -778,6 +883,11 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         return ret;
     }
 
+    ret = TransProxyFillDataConfig(&chan->appInfo);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fill dataConfig fail.");
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 

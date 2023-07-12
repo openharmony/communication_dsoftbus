@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FAST_CONNECTING_STATE_H
+#define FAST_CONNECTING_STATE_H
 
-#ifndef CLIENT_TRANS_SESSION_SERVICE_H
-#define CLIENT_TRANS_SESSION_SERVICE_H
-
-#include "session.h"
+#include "negotiate_state.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
-int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
-    const char *groupId, const SessionAttribute *attr);
+struct FastConnectingState {
+    NEGOTIATE_STATE_BASE(FastConnectingState);
+};
+
+struct FastConnectingState* GetFastConnectingState(struct WifiDirectNegotiator *negotiator);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // CLIENT_TRANS_SESSION_SERVICE_H
+#endif

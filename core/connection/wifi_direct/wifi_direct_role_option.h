@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef CLIENT_TRANS_SESSION_SERVICE_H
-#define CLIENT_TRANS_SESSION_SERVICE_H
+#ifndef WIFI_DIRECT_ROLE_OPTION_H
+#define WIFI_DIRECT_ROLE_OPTION_H
 
-#include "session.h"
+#include "wifi_direct_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
-int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
-    const char *groupId, const SessionAttribute *attr);
+struct WifiDirectRoleOption {
+    enum WifiDirectRole (*getExpectedP2pRole)(const char *networkId);
+    enum WifiDirectRole (*getRemoteExpectedP2pRole)(const char *networkId);
+};
+
+struct WifiDirectRoleOption *GetWifiDirectRoleOption(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // CLIENT_TRANS_SESSION_SERVICE_H
+#endif

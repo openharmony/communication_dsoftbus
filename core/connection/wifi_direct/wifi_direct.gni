@@ -28,7 +28,10 @@ wifi_direct_connection_external_deps = []
 wifi_direct_connection_inc = [
   "$dsoftbus_root_path/core/connection/wifi_direct",
   "$dsoftbus_root_path/core/connection/wifi_direct/adapter",
+  "$dsoftbus_root_path/core/connection/wifi_direct/processor",
   "$dsoftbus_root_path/core/authentication/include",
+  "//foundation/communication/wifi/wifi/interfaces/kits/c",
+  "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
 ]
 
 if (dsoftbus_feature_conn_p2p == true &&
@@ -75,6 +78,16 @@ if (dsoftbus_feature_conn_p2p == true &&
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_anonymous.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_perf_recorder.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_role_option.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/negotiate_state/fast_connecting_state.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/processor/wifi_direct_processor_factory.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/wifi_direct_entity_factory.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/broadcast_handler.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/broadcast_receiver.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/link_manager_broadcast_handler.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/p2p_entity_broadcast_handler.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/resource_manager_broadcast_handler.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/wifi_direct_p2p_adapter.c",
   ]
 
   if (enhanced_wifi_direct) {
@@ -84,21 +97,11 @@ if (dsoftbus_feature_conn_p2p == true &&
     wifi_direct_connection_inc += wifi_direct_connection_enhance_inc
     wifi_direct_connection_src += wifi_direct_connection_enhance_src
   } else {
-    wifi_direct_connection_inc += [
-      "//foundation/communication/wifi/wifi/interfaces/kits/c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
-    ]
     wifi_direct_connection_src += [
-      "$dsoftbus_root_path/core/connection/wifi_direct/processor/wifi_direct_processor_factory.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/entity/wifi_direct_entity_factory.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/broadcast_handler.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/broadcast_receiver.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/link_manager_broadcast_handler.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/p2p_entity_broadcast_handler.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/resource_manager_broadcast_handler.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/wifi_direct_p2p_adapter.c",
+      "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_fast_connect.c",
+      "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_bcast_channel.c",
     ]
-    wifi_direct_connection_external_deps += [ "wifi:wifi_sdk" ]
+    wifi_direct_connection_external_deps = [ "wifi:wifi_sdk" ]
   }
 } else {
   wifi_direct_connection_src += [

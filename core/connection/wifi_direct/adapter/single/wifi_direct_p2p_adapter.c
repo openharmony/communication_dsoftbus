@@ -225,6 +225,8 @@ static int32_t GetGroupInfo(struct WifiDirectP2pGroupInfo **groupInfoOut)
         return SOFTBUS_ERR;
     }
 
+    (void)memcpy_s(groupInfo->groupOwner.address, sizeof(groupInfo->groupOwner.address),
+        info->owner.devAddr, sizeof(info->owner.devAddr));
     groupInfo->isGroupOwner = info->isP2pGroupOwner;
     groupInfo->frequency = info->frequency;
     groupInfo->clientDeviceSize = info->clientDevicesSize;
