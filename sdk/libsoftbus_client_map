@@ -164,6 +164,7 @@
         "RemoveSessionServer";
         "StopDiscovery";
         "ClientGetSessionCallbackById";
+        "ClientGetDataConfigByChannelId";
         "ClientTransUdpMgrInit";
         "GetPeerUidInner";
         "TransCloseFileChannel";
