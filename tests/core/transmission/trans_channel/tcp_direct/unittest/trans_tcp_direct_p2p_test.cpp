@@ -304,13 +304,13 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     string msg = TestGetMsgPack();
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
-    SendVerifyP2pFailRsp(authId, seq, code, errCode, nullptr);
+    SendVerifyP2pFailRsp(authId, seq, code, errCode, nullptr, true);
 
-    SendVerifyP2pFailRsp(authId, seq, code, errCode, errDesc);
-    int32_t ret = OnVerifyP2pRequest(authId, seq, nullptr);
+    SendVerifyP2pFailRsp(authId, seq, code, errCode, errDesc, true);
+    int32_t ret = OnVerifyP2pRequest(authId, seq, nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = OnVerifyP2pRequest(authId, seq, json);
+    ret = OnVerifyP2pRequest(authId, seq, json, true);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     OnAuthChannelClose(authId);
@@ -389,7 +389,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
     data->seq = 1;
     data->data = (const uint8_t *)str;
     data->len = AUTH_TRANS_DATA_LEN;
-    int32_t ret = OnVerifyP2pRequest(authId, seq, nullptr);
+    int32_t ret = OnVerifyP2pRequest(authId, seq, nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     OnAuthMsgProc(authId, flags, seq, nullptr);
 

@@ -48,7 +48,7 @@ int32_t LnnServerLeave(const char *networkId, const char *pkgName)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnec)
 {
     (void)addr;
     return SOFTBUS_NOT_IMPLEMENT;

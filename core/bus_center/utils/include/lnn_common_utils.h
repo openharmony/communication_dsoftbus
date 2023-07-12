@@ -23,9 +23,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+    uint8_t *data;
+    uint32_t dataLen;
+    uint8_t *key;
+    uint32_t keyLen;
+} AesGcmInputParam;
+
 bool IsEnableSoftBusHeartbeat(void);
 bool IsOOBEState(void);
 bool IsScreenUnlock(void);
+int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen);
+int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen);
 
 #ifdef __cplusplus
 }

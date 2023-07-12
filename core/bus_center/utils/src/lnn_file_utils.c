@@ -35,6 +35,9 @@ static char g_storagePath[SOFTBUS_MAX_PATH_LEN] = {0};
 static FilePathInfo g_filePath[LNN_FILE_ID_MAX] = {
     { LNN_FILE_ID_UUID, "/dsoftbus/uuid" },
     { LNN_FILE_ID_DB_KEY, "/dsoftbus/dbKey" },
+    { LNN_FILE_ID_LOCAL_DEVICE, "/dsoftbus/localdevinfo" },
+    { LNN_FILE_ID_REMOTE_DEVICE, "/dsoftbus/deviceinfo" },
+    { LNN_FILE_ID_COMM_KEY, "/dsoftbus/devicecommkey" },
 };
 
 static int32_t InitStorageConfigPath(void)

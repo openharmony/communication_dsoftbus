@@ -149,8 +149,7 @@ typedef struct {
     void (*OnScanStart)(int listenerId, int status);
     void (*OnScanStop)(int listenerId, int status);
     void (*OnScanResult)(int listenerId, const SoftBusBleScanResult *scanResultdata);
-    void (*OnScanFailed)(int resultCode, bool isStartScan);
-    void (*OnScanStateChanged)(int callbackCode);
+    void (*OnScanStateChanged)(int32_t resultCode, bool isStartScan);
 } SoftBusScanListener;
 
 typedef struct {
@@ -162,7 +161,7 @@ typedef struct {
     SoftBusBtAddr peerAddr;
     int channelMap;
     unsigned char advFilterPolicy;
-    int txPower;
+    int8_t txPower;
     int duration;
 } SoftBusBleAdvParams;
 
@@ -171,22 +170,22 @@ typedef struct {
     void (*AdvDisableCallback)(int advId, int status);
     void (*AdvDataCallback)(int advId, int status);
     void (*AdvUpdateCallback)(int advId, int status);
-    void (*SensorhubCallback)(SoftBusBtUuid *uuid, int type, unsigned char *data, int dataSize);
+    void (*LpDeviceInfoCallback)(SoftBusBtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize);
 } SoftBusAdvCallback;
 
 int BleGattLockInit(void);
 
-int SoftBusAddScanListener(const SoftBusScanListener *listener);
+int SoftBusAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan);
 
 int SoftBusRemoveScanListener(int listenerId);
 
 int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize);
 
-int SoftBusStartScan(int listenerId, const SoftBusBleScanParams *param);
+int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param);
 
-int SoftBusStopScan(int listenerId);
+int SoftBusStopScan(int listenerId, int scannerId);
 
-int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback);
+int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan);
 
 int SoftBusReleaseAdvChannel(int advId);
 
@@ -200,6 +199,23 @@ int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleA
 
 int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data);
 
+bool SoftBusIsLpDeviceAvailable(void);
+
+bool SoftBusSetAdvFilterParam(int advHandle, int advId, SoftBusBleAdvParams *advParam,
+    int listenerId, SoftBusBleScanParams *scanParam);
+
+int32_t SoftBusGetAdvHandle(int32_t advId, int32_t *advHandle);
+
+int32_t SoftBusEnableSyncDataToLpDevice(void);
+
+int32_t SoftBusDisableSyncDataToLpDevice(void);
+
+int32_t SoftBusDeregisterScanCallbacks(int32_t scannerId);
+
+int32_t SoftBusSetScanReportChannelToLpDevice(int32_t scannerId, bool enable);
+
+int32_t SoftBusSetLpDeviceParam(int duration, int maxExtAdvEvents, int window,
+    int interval, int advHandle);
 #ifdef __cplusplus
 #if __cplusplus
 }

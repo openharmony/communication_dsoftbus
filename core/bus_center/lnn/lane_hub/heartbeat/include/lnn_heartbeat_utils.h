@@ -92,8 +92,20 @@ typedef enum {
     UPDATE_HB_ACCOUNT_INFO,
     UPDATE_HB_NETWORK_INFO,
     UPDATE_SCREEN_STATE_INFO,
+    UPDATE_BT_STATE_OPEN_INFO,
+    UPDATE_BT_STATE_CLOSE_INFO,
     UPDATE_HB_MAX_INFO,
 } LnnHeartbeatUpdateInfoType;
+
+typedef struct {
+    uint8_t capabiltiy;
+    int16_t stateVersion;
+} HbRespData;
+#define STATE_VERSION_INVALID (-1)
+#define ENABLE_COC_CAP (1 << 0)
+#define P2P_GO (1 << 1)
+#define P2P_GC (1 << 2)
+#define ENABLE_WIFI_CAP (1 << 3)
 
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data);
