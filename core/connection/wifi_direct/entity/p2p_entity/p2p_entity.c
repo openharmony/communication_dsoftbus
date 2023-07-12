@@ -81,7 +81,7 @@ static int32_t ReuseLink(struct WifiDirectConnectParams *params)
     return ret;
 }
 
-static int32_t Disconnect(struct WifiDirectConnectParams *params)
+static int32_t P2pDisconnect(struct WifiDirectConnectParams *params)
 {
     CLOGD(LOG_LABEL "enter");
     struct P2pEntity *self = GetP2pEntity();
@@ -313,7 +313,7 @@ static void OnClientJoinTimeout(void *data)
     struct WifiDirectConnectParams params;
     strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);
 
-    int32_t ret = Disconnect(&params);
+    int32_t ret = P2pDisconnect(&params);
     CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "disconnect failed");
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
@@ -329,7 +329,7 @@ static void P2pEntityConstructor(struct P2pEntity *self)
     self->createServer = CreateServer;
     self->connect = Connect;
     self->reuseLink = ReuseLink;
-    self->disconnect = Disconnect;
+    self->disconnect = P2pDisconnect;
     self->destroyServer = DestroyServer;
     self->notifyNewClientJoining = NotifyNewClientJoining;
     self->cancelNewClientJoining = CancelNewClientJoining;
