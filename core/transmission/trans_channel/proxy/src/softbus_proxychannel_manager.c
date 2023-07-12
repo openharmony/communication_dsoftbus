@@ -1125,10 +1125,12 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
     uint32_t connId;
+    int8_t status;
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyProcList, ProxyChannelInfo, node) {
         ListDelete(&(removeNode->node));
-        if (removeNode->status == PROXY_CHANNEL_STATUS_TIMEOUT) {
+        status = removeNode->status;
+        if (status == PROXY_CHANNEL_STATUS_TIMEOUT) {
             connId = removeNode->connId;
             ProxyChannelInfo *resetMsg = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
             if (resetMsg != NULL) {
@@ -1138,12 +1140,12 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             TransProxyPostOpenClosedMsgToLoop(removeNode);
             TransProxyPostDisConnectMsgToLoop(connId);
         }
-        if (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
+        if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
             TransProxyPostDisConnectMsgToLoop(connId);
         }
-        if (removeNode->status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
+        if (status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send keepalive channel %d.", removeNode->myId);
             TransProxyPostKeepAliveMsgToLoop(removeNode);
         }
