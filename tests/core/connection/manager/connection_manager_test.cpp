@@ -218,7 +218,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger001, TestSize.Level1)
 
 #ifdef connection_enable_ble_test
     ret = ConnTypeIsSupport(CONNECT_BLE);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     GTEST_LOG_(INFO) << "BLE Support";
 #endif
 };

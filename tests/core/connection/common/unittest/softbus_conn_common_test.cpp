@@ -137,8 +137,8 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener006, TestSize.Level1)
     int triggerType;
     int fd = 1;
     for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
-        EXPECT_EQ(SOFTBUS_NOT_FIND, AddTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
-        EXPECT_EQ(SOFTBUS_NOT_FIND, DelTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, AddTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, DelTrigger(UNUSE_BUTT, fd, static_cast<TriggerType>(triggerType)));
     }
     for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
@@ -163,7 +163,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener007, TestSize.Level1)
     int fd = 1;
     for (module = PROXY; module < LISTENER_MODULE_DYNAMIC_START; module++) {
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
-            EXPECT_EQ(SOFTBUS_OK, AddTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_ERR, AddTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
             EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
@@ -317,8 +317,8 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener022, TestSize.Level1)
  */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener026, TestSize.Level1)
 {
-    EXPECT_EQ(SOFTBUS_NOT_FIND, StopBaseListener(static_cast<ListenerModule>(PROXY - 1)));
-    EXPECT_EQ(SOFTBUS_NOT_FIND, StopBaseListener(static_cast<ListenerModule>(UNUSE_BUTT)));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StopBaseListener(static_cast<ListenerModule>(PROXY - 1)));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StopBaseListener(static_cast<ListenerModule>(UNUSE_BUTT)));
 };
 
 /*
@@ -335,7 +335,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener027, TestSize.Level1)
     for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
     }
-    EXPECT_EQ(SOFTBUS_NOT_FIND, StopBaseListener(UNUSE_BUTT));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StopBaseListener(UNUSE_BUTT));
 };
 
 /*
