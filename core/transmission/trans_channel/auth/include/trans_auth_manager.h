@@ -26,6 +26,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 int32_t TransAuthInit(IServerChannelCallBack *cb);
 void TransAuthDeinit(void);
 int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
