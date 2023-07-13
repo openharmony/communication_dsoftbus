@@ -49,6 +49,7 @@ bool CheckAuthConnCallback(const AuthConnCallback *connCb);
 uint32_t AddAuthRequest(const AuthRequest *request);
 int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
 int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request);
+int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request);
 void DelAuthRequest(uint32_t requestId);
 void ClearAuthRequest(void);
 

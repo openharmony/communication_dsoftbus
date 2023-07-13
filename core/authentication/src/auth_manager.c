@@ -841,7 +841,8 @@ static void HandleDeviceIdData(
             return;
         }
         AuthFsm *fsm = GetAuthFsmByConnId(connId, true);
-        if (fsm != NULL && fsm->info.idType == EXCHANGE_NETWORKID) {
+        if ((fsm != NULL && fsm->info.idType == EXCHANGE_NETWORKID) ||
+            (fsm != NULL && fsm->info.idType == EXCHANGE_FAIL)) {
             ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
             if (ret != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
