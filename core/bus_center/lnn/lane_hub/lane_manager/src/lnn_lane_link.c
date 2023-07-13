@@ -421,8 +421,12 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
 
     (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
 
-    LLOGI("LnnLaneSelectProtocol protocol = %lld", req.selectedProtocol);
-    return LNN_PROTOCOL_IP;
+    LLOGI("protocol = %d", req.selectedProtocol);
+    if (req.selectedProtocol == 0) {
+        req.selectedProtocol = LNN_PROTOCOL_IP;
+    }
+ 
+    return req.selectedProtocol;
 }
 
 static void FillWlanLinkInfo(
