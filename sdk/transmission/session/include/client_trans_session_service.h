@@ -26,6 +26,8 @@ int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
 int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr);
 
+int32_t FindConfigType(int32_t channelType, int32_t businessType);
+
 #ifdef __cplusplus
 }
 #endif

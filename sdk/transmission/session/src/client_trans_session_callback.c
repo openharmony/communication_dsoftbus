@@ -49,7 +49,6 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->fileEncrypt = channel->fileEncrypt;
     session->algorithm = channel->algorithm;
     session->crc = channel->crc;
-    session->dataConfig = channel->dataConfig;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {

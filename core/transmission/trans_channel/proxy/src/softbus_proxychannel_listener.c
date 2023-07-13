@@ -70,7 +70,6 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
     info.linkType = appInfo->linkType;
-    info.dataConfig = appInfo->myData.dataConfig;
     if (appInfo->appType == APP_TYPE_AUTH) {
         info.reqId = (char*)appInfo->reqId;
     }
