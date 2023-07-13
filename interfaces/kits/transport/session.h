@@ -302,9 +302,12 @@ typedef struct {
 } QosTv;
 
 typedef enum {
-    SESSION_OPTION_MAX_SENDBYTES_SIZE = 0,   /**< Value type of this option is uint32_t, this option only can be get */
-    SESSION_OPTION_MAX_SENDMESSAGE_SIZE,     /**< Value type of this option is uint32_t, this option only can be get */
-    SESSION_OPTION_LINK_TYPE,                /**< Value type of this option is int32_t, this option only can be get */
+    /* Value type of this option is uint32_t, this option only can be get */
+    SESSION_OPTION_MAX_SENDBYTES_SIZE = 0,
+    /* Value type of this option is uint32_t, this option only can be get */
+    SESSION_OPTION_MAX_SENDMESSAGE_SIZE,
+    /* Value type of this option is int32_t, this option only can be get */
+    SESSION_OPTION_LINK_TYPE,
 
     SESSION_OPTION_BUTT,
 } SessionOption;
