@@ -82,7 +82,6 @@ typedef struct {
     char addr[IP_LEN];
     int port;
     int64_t channelId;
-    uint32_t dataConfig;
 } AppInfoData;
 
 typedef struct {
