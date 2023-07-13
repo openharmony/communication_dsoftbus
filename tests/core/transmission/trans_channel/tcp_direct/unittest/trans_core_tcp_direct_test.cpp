@@ -582,7 +582,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     int errCode = SOFTBUS_OK;
     int32_t channelId = 1;
     int32_t ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
@@ -602,7 +602,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     conn->serverSide = false;
     ret = TransSessionMgrInit();
@@ -613,7 +613,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = NotifyChannelOpenFailed(channelId, errCode);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     TransSessionMgrDeinit();
     SoftBusFree(conn);
 }

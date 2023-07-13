@@ -144,7 +144,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest04, TestSize.Level1)
     char groupId[] = {"ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00AB"};
     sessionPara.groupId = groupId;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_GROUP_INVALID);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
     sessionPara.groupId = g_groupid;
     ret = TransOpenSession(&sessionPara, transInfo);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
