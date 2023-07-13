@@ -940,45 +940,6 @@ int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, in
     return SOFTBUS_ERR;
 }
 
-int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, uint32_t *dataConfig)
-{
-    if ((channelId < 0) || (dataConfig == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (g_clientSessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
-        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
-    }
-
-    ClientSessionServer *serverNode = NULL;
-    SessionInfo *sessionNode = NULL;
-
-    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
-        return SOFTBUS_LOCK_ERR;
-    }
-
-    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (IsListEmpty(&serverNode->sessionList)) {
-            continue;
-        }
-
-        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
-                *dataConfig = sessionNode->dataConfig;
-                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-                return SOFTBUS_OK;
-            }
-        }
-    }
-
-    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not found dataConfig with channelId [%d]", channelId);
-    return SOFTBUS_ERR;
-}
-
 int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sessionId)
 {
     if ((channel == NULL) || (sessionId == NULL)) {
@@ -1014,7 +975,6 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->routeType = channel->routeType;
                 sessionNode->businessType = channel->businessType;
                 sessionNode->fileEncrypt = channel->fileEncrypt;
-                sessionNode->dataConfig = channel->dataConfig;
                 sessionNode->algorithm = channel->algorithm;
                 sessionNode->crc = channel->crc;
                 sessionNode->isEncrypt = channel->isEncrypt;

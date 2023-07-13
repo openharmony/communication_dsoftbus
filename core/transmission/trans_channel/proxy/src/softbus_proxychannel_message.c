@@ -431,8 +431,7 @@ NO_SANITIZE("cfi") char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         !AddStringToJsonObject(root, JSON_KEY_IDENTITY, info->identity) ||
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId) ||
         !AddStringToJsonObject(root, JSON_KEY_SRC_BUS_NAME, appInfo->myData.sessionName) ||
-        !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName) ||
-        !AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, appInfo->myData.dataConfig)) {
+        !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName)) {
         goto EXIT;
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
@@ -488,12 +487,6 @@ NO_SANITIZE("cfi") char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId)) {
         cJSON_Delete(root);
         return NULL;
-    }
-    if (appInfo->peerData.dataConfig != 0) {
-        if (!AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, appInfo->myData.dataConfig)) {
-            cJSON_Delete(root);
-            return NULL;
-        }
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
     if (appInfo->appType == APP_TYPE_NORMAL) {
@@ -558,9 +551,6 @@ NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, Prox
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fail to get json item");
         cJSON_Delete(root);
         return SOFTBUS_ERR;
-    }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "peer dataconfig is null.");
     }
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
@@ -735,10 +725,6 @@ NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyCh
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get handshake msg");
         cJSON_Delete(root);
         return SOFTBUS_ERR;
-    }
-    
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "peer dataconfig is null.");
     }
 
     if (appInfo->appType == APP_TYPE_NORMAL) {
