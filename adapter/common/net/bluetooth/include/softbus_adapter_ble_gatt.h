@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 // max adv and scan limit
-#define ADV_MAX_NUM 8
+#define ADV_MAX_NUM 9
 #define SCAN_MAX_NUM 8
 
 // Bluetooth scan duty cycle, unit: ms
