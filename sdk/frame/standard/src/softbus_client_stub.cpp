@@ -293,10 +293,6 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     data.ReadInt32(channel.encrypt);
     data.ReadInt32(channel.algorithm);
     data.ReadInt32(channel.crc);
-    if (!data.ReadUint32(channel.dataConfig)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner data config failed!");
-        return SOFTBUS_ERR;
-    }
 
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
