@@ -29,7 +29,6 @@
 #define UID "UID"
 #define PID "PID"
 #define SESSION_KEY "SESSION_KEY"
-#define MTU_SIZE "MTU_SIZE"
 #define PKG_NAME "PKG_NAME"
 #define CLIENT_BUS_NAME "CLIENT_BUS_NAME"
 #define AUTH_STATE "AUTH_STATE"

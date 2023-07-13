@@ -28,8 +28,6 @@ extern "C" {
 #define FAST_EXT_BYTE_SIZE (OVERHEAD_LEN + sizeof(PacketFastHead) + sizeof(SliceFastHead) + sizeof(SessionHead))
 #define FAST_EXT_MSG_SIZE (OVERHEAD_LEN + sizeof(PacketFastHead) + sizeof(SliceFastHead))
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 int32_t TransProxyManagerInit(const IServerChannelCallBack *cb);
 void TransProxyManagerDeinit(void);
 
