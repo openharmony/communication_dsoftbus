@@ -312,6 +312,7 @@ static void SendVerifyP2pFailRsp(int64_t authId, int64_t seq,
         }
         ConnBleDirectPipelineSendMessage(authId, (uint8_t *)sendMsg,
             strLen + sizeof(int64_t) + sizeof(int64_t), PIPE_LINE_MSG_TYPE_IP_PORT_EXCHANGE);
+        SoftBusFree(sendMsg);
     }
     cJSON_free(reply);
     return;
@@ -343,6 +344,7 @@ static int32_t SendVerifyP2pRsp(int64_t authId, int32_t module, int32_t flag, in
         if (ret != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnBleDirectPipelineSendMessage fail");
         }
+        SoftBusFree(sendMsg);
     }
     return ret;
 }
