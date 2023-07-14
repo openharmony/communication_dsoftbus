@@ -72,6 +72,7 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_core_path/core/adapter/bus_center/include",
       "$dsoftbus_core_path/core/authentication/interface",
       "$dsoftbus_core_path/connection/p2p/interface",
+      "$dsoftbus_core_path/core/common/include",
     ]
     bus_center_hub_src += [
       "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl.c",

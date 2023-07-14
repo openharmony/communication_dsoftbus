@@ -1515,8 +1515,15 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     }
     ctx->fastestConnectEnable = option->bleOption.fastestConnectEnable;
     ctx->result = *result;
-    ctx->protocol = option->bleOption.protocol;
-    ctx->psm = option->bleOption.psm;
+    //keep compatibility if protocol is undefined
+    if (option->bleOption.protocol != BLE_GATT && option -> bleOption.protocol != BLE_COC) {
+        CLOGW("ble connect device warning, protocol=%d is unknown, use GATT forcely", option->bleOption.protocol);
+        ctx->protocol = BLE_GATT;
+        ctx->psm = 0;
+    } else {
+        ctx->protocol = option->bleOption.protocol;
+        ctx->psm = option->bleOption.psm;
+    }
     status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CLOGE("ble connect device failed: post connect msg to manager looper failed, request id=%u, address=%s, "
@@ -1527,7 +1534,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     }
     CLOGI("ble connect device: receive connect request, request id=%u, address=%s, protocol=%d, udid=%s, fastest "
           "connect enable=%d, connectTraceId=%u",
-        requestId, anomizeAddress, option->bleOption.protocol, anomizeUdid, option->bleOption.fastestConnectEnable,
+        requestId, anomizeAddress, ctx->protocol, anomizeUdid, ctx->fastestConnectEnable,
         ctx->statistics.connectTraceId);
     return SOFTBUS_OK;
 }
