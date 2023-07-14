@@ -293,10 +293,7 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "appInfo is null");
         return SOFTBUS_ERR;
     }
-    if (appInfo->businessType != BUSINESS_TYPE_BYTE && appInfo->businessType != BUSINESS_TYPE_MESSAGE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "invalid businessType[%d]", appInfo->businessType);
-        return SOFTBUS_OK;
-    }
+    appInfo->businessType = BUSINESS_TYPE_BYTE;
     if (appInfo->peerData.dataConfig != 0) {
         uint32_t localDataConfig = 0;
         if (TransGetLocalConfig(CHANNEL_TYPE_AUTH, appInfo->businessType, &localDataConfig) != SOFTBUS_OK) {
