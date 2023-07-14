@@ -823,6 +823,9 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "appInfo is null");
         return SOFTBUS_ERR;
     }
+    if (appInfo->appType == APP_TYPE_AUTH) {
+        appInfo->businessType = BUSINESS_TYPE_BYTE;
+    }
     if (appInfo->businessType != BUSINESS_TYPE_MESSAGE && appInfo->businessType != BUSINESS_TYPE_BYTE) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "invalid businessType[%d]", appInfo->businessType);
         return SOFTBUS_OK;
