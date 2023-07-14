@@ -47,9 +47,9 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
     return HeartBeatStrategyInterface()->LnnStopOfflineTimingStrategy(networkId, addrType);
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
 {
-    return HeartBeatStrategyInterface()->LnnNotifyDiscoveryDevice(addr);
+    return HeartBeatStrategyInterface()->LnnNotifyDiscoveryDevice(addr, isNeedConnect);
 }
 
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight)
