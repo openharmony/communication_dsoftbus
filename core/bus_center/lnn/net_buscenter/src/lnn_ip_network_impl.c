@@ -120,6 +120,10 @@ static void RetryGetAvailableIpAddr(void *para)
 static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     static int32_t retryTime = GET_IP_RETRY_TIMES;
+    if (ifName == NULL) {
+        LLOGE("ifName is NULL");
+        return SOFTBUS_ERR;
+    }
     if (!LnnIsLinkReady(ifName)) {
         LLOGE("ifName %s link not ready", ifName);
     }
