@@ -25,12 +25,12 @@ extern "C" {
 #endif
 #endif
 
-void insertToProfile(NodeInfo *info);
-void insertMetaNodeInfoToProfile(MetaNodeInfo *info);
-void updateProfile(NodeInfo *info);
-void updateMetaNodeProfile(MetaNodeInfo *info);
-void deleteFromProfile(const char *udid);
-void clearProfile();
+void InsertToProfile(NodeInfo *info);
+void InsertMetaNodeInfoToProfile(MetaNodeInfo *info);
+void UpdateProfile(NodeInfo *info);
+void UpdateMetaNodeProfile(MetaNodeInfo *info);
+void DeleteFromProfile(const char *udid);
+void ClearProfile();
 
 #ifdef __cplusplus
 #if __cplusplus

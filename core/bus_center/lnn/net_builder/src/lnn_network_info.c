@@ -108,7 +108,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     }
     if (info.discoveryType != capability) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "capability change, need to updateProfile");
-        updateProfile(&info);
+        UpdateProfile(&info);
     }
     if (LnnSetDLConnCapability(networkId, capability)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update conn capability fail.");
@@ -354,7 +354,7 @@ static bool IsSupportApCoexist(const char *coexistCap)
             LLOGI("interface=%s mode=%d", interface, mode);
             if ((mode & WIFI_DIRECT_API_ROLE_AP)) {
                 apCap = true;
-            } else if (mode & WIFI_DIRECT_API_ROLE_GC || mode & WIFI_DIRECT_API_ROLE_GO) {
+            } else if ((mode & WIFI_DIRECT_API_ROLE_GC) || (mode & WIFI_DIRECT_API_ROLE_GO)) {
                 p2pCap = true;
             }
             if (apCap && p2pCap) {

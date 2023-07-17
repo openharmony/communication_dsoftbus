@@ -293,14 +293,6 @@ static void HbProcOfflineNodeWithoutSoftbus(void)
         LLOGE("HB get online node is 0");
         return;
     }
-    // for (int32_t i = 0; i < infoNum; ++i) {
-    //     if (strlen(info[i].udid) == HB_SHORT_UDID_HASH_HEX_LEN && info[i].deviceTypeId == TYPE_PC_ID &&
-    //         strcmp(info[i].networkId, info[i].udid) == 0) {
-    //         LLOGI("device online without softbus, offline directly because ble turn off");
-    //         deleteFromProfile(info[i].udid);
-    //         LnnRemoveNode(info[i].udid);
-    //     }
-    // }
     SoftBusFree(info);
 }
 

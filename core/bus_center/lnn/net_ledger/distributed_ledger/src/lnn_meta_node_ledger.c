@@ -107,7 +107,7 @@ NO_SANITIZE("cfi") int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, cha
             }
             ListAdd(&g_metaNodeList->list, &storageInfo->node);
             g_metaNodeList->cnt++;
-            insertMetaNodeInfoToProfile(&storageInfo->info);
+            InsertMetaNodeInfoToProfile(&storageInfo->info);
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "active a mete node");
         } else {
             if (strncpy_s(metaNodeId, NETWORK_ID_BUF_LEN, storageInfo->info.metaNodeId,
@@ -116,7 +116,7 @@ NO_SANITIZE("cfi") int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, cha
                 break;
             }
             storageInfo->info.configInfo = *info;
-            updateMetaNodeProfile(&storageInfo->info);
+            UpdateMetaNodeProfile(&storageInfo->info);
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update a mete node");
         }
         rc = SOFTBUS_OK;
@@ -145,7 +145,7 @@ NO_SANITIZE("cfi") int32_t LnnDeactiveMetaNode(const char *metaNodeId)
         ListDelete(&storageInfo->node);
         g_metaNodeList->cnt--;
         SoftBusFree(storageInfo);
-        deleteFromProfile(storageInfo->info.configInfo.udid);
+        DeleteFromProfile(storageInfo->info.configInfo.udid);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "deactive a mete node");
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "meta node not exist");
