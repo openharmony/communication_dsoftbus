@@ -125,7 +125,7 @@ const char *GetAuthSideStr(bool isServer);
 bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash);
 int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option);
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo);
-int32_t GetPeerUdidHashByNetworkId(const char *networkId, char *udidHash);
+int32_t GetPeerUdidByNetworkId(const char *networkId, char *udidHash);
 
 int32_t AuthCommonInit(void);
 void AuthCommonDeinit(void);

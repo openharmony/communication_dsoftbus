@@ -82,6 +82,17 @@ NO_SANITIZE("cfi") int32_t GetAuthRequest(uint32_t requestId, AuthRequest *reque
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
+    AuthRequest *item = FindAuthRequestByRequestId(requestId);
+    if (item == NULL) {
+        return SOFTBUS_NOT_FIND;
+    }
+    *request = *item;
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);

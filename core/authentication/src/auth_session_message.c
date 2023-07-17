@@ -366,35 +366,6 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     (void)memset_s(&deviceKey, sizeof(deviceKey), 0, sizeof(deviceKey));
 }
 
-static int32_t GetExchangeIdTypeAndValve(const AuthSessionInfo *info, char *udid, int32_t *type)
-{
-    char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
-    char peerUdidHash[UDID_BUF_LEN] = {0};
-    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, sizeof(localNetworkId)) != SOFTBUS_OK) {
-        ALOGE("get networkId fail.");
-        return SOFTBUS_ERR;
-    }
-    if (info->idType != EXCHANGE_NETWORKID) {
-        return SOFTBUS_OK;
-    }
-    if (!info->isServer) {
-        if (memcpy_s(udid, UDID_BUF_LEN, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
-        }
-        *type = EXCHANGE_NETWORKID;
-        return SOFTBUS_OK;
-    }
-    if (GetPeerUdidHashByNetworkId(info->udid, peerUdidHash) != SOFTBUS_OK) {
-        *type = EXCHANGE_FAIL;
-    } else {
-        *type = EXCHANGE_NETWORKID;
-    }
-    if (memcpy_s(udid, UDID_BUF_LEN, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static void PackCompressInfo(JsonObj *obj, const NodeInfo *info)
 {
     if (info != NULL) {
@@ -415,14 +386,11 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
     }
     char uuid[UUID_BUF_LEN] = {0};
     char udid[UDID_BUF_LEN] = {0};
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        ALOGE("get uuid/udid fail.");
-        JSON_Delete(obj);
-        return NULL;
-    }
-    int32_t idType = 0;
-    if (GetExchangeIdTypeAndValve(info, udid, &idType) != SOFTBUS_OK) {
+        LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK ||
+        LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        ALOGE("get uuid/udid/networkId fail.");
         JSON_Delete(obj);
         return NULL;
     }
@@ -439,11 +407,25 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
             return NULL;
         }
     }
+    if (info->idType == EXCHANGE_NETWORKID) {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, networkId)) {
+            ALOGE("add msg body fail.");
+            JSON_Delete(obj);
+            return NULL;
+        }
+        ALOGI("exchangeIdType=[%d], networkid=[%s]", info->idType, AnonymizesNetworkID(networkId));
+    } else {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
+            ALOGE("add msg body fail.");
+            JSON_Delete(obj);
+            return NULL;
+        }
+        ALOGI("exchangeIdType=[%d], udid=[%s]", info->idType, AnonymizesUDID(udid));
+    }
     if (!JSON_AddStringToObject(obj, DATA_TAG, uuid) ||
-        !JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid) ||
         !JSON_AddInt32ToObject(obj, DATA_BUF_SIZE_TAG, PACKET_SIZE) ||
         !JSON_AddInt32ToObject(obj, SOFTBUS_VERSION_TAG, info->version) ||
-        !JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, idType)) {
+        !JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, info->idType)) {
         ALOGE("add msg body fail.");
         JSON_Delete(obj);
         return NULL;
@@ -487,6 +469,61 @@ static void SetCompressFlag(const char *compressCapa, bool *sessionSupportFlag)
     } else {
         *sessionSupportFlag = false;
     }
+}
+
+static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
+{
+    int32_t idType = -1;
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (obj == NULL || info == NULL) {
+        ALOGE("param invalid");
+        return SOFTBUS_ERR;
+    }
+    if (!JSON_GetInt32FromOject(obj, EXCHANGE_ID_TYPE, &idType)) {
+        ALOGI("parse idType failed, ignore");
+        info->idType = EXCHANHE_UDID;
+        return SOFTBUS_OK;
+    }
+    ALOGI("old idType=[%d] exchangeIdType=[%d] deviceId=[%s]", info->idType, idType, AnonymizesUDID(info->udid));
+    if (idType == EXCHANHE_UDID) {
+        info->idType = EXCHANHE_UDID;
+        return SOFTBUS_OK;
+    }
+    if (info->isServer) {
+        if (idType == EXCHANGE_NETWORKID) {
+            if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+                info->idType = EXCHANGE_FAIL;
+            } else {
+                if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
+                    ALOGE("copy peer udid fail");
+                    info->idType = EXCHANGE_FAIL;
+                    return SOFTBUS_ERR;
+                }
+                info->idType = EXCHANGE_NETWORKID;
+            }
+        }
+        return SOFTBUS_OK;
+    }
+    if (info->idType == EXCHANGE_NETWORKID) {
+        if (idType == EXCHANGE_FAIL) {
+            info->idType = EXCHANGE_FAIL;
+        }
+        if (idType == EXCHANGE_NETWORKID) {
+            if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+                ALOGE("get peer udid fail, peer networkId=[%s]", AnonymizesUDID(info->udid));
+                info->idType = EXCHANGE_FAIL;
+            } else {
+                if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
+                    ALOGE("copy peer udid fail");
+                    info->idType = EXCHANGE_FAIL;
+                    return SOFTBUS_ERR;
+                }
+                ALOGE("get peer udid success, peer udid=[%s]", AnonymizesUDID(info->udid));
+                info->idType = EXCHANGE_NETWORKID;
+            }
+        }
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
@@ -534,7 +571,11 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
     if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
         // info->version = SOFTBUS_OLD_V2;
     }
-    OptInt(obj, EXCHANGE_ID_TYPE, &info->idType, EXCHANHE_UDID);
+    if (SetExchangeIdTypeAndValve(obj, info) != SOFTBUS_OK) {
+        ALOGE("set exchange id type or valve fail.");
+        JSON_Delete(obj);
+        return SOFTBUS_ERR;
+    }
     if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
         char compressParse[PARSE_UNCOMPRESS_STRING_BUFF_LEN] = {0};
         OptString(obj, SUPPORT_INFO_COMPRESS, compressParse,

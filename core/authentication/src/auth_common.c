@@ -392,15 +392,15 @@ NO_SANITIZE("cfi") void AuthCommonDeinit(void)
     }
 }
 
-int32_t GetPeerUdidHashByNetworkId(const char *networkId, char *udidHash)
+int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
 {
-    if (networkId == NULL || udidHash == NULL) {
+    if (networkId == NULL || udid == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "param err.");
         return SOFTBUS_ERR;
     }
     NodeInfo *info = LnnRetrieveDeviceInfoByNetworkId(networkId);
     if (info != NULL && info->deviceInfo.deviceUdid[0] != '\0') {
-        if (memcpy_s(udidHash, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
+        if (memcpy_s(udid, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
             return SOFTBUS_ERR;
         }
         return SOFTBUS_OK;
