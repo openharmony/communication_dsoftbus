@@ -748,7 +748,7 @@ static bool ProcOfflineWithoutSoftbus(const char *networkId, ConnectionAddrType 
     if (node.deviceInfo.deviceTypeId == TYPE_PC_ID &&
         strcmp(node.networkId, node.deviceInfo.deviceUdid) == 0) {
         LLOGI("remove node because lost heartbeat");
-        deleteFromProfile(node.deviceInfo.deviceUdid);
+        DeleteFromProfile(node.deviceInfo.deviceUdid);
         LnnRemoveNode(node.deviceInfo.deviceUdid);
         return true;
     }
@@ -1004,7 +1004,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             CheckDevStatusForScreenOff(hbFsm, msgPara->networkId, msgPara->hbType, nowTime);
             break;
         }
-        int32_t i, infoNum;
+        int32_t infoNum;
         NodeBasicInfo *info = NULL;
         if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
             LLOGE("HB check dev status get online node info fail");
@@ -1015,7 +1015,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             LLOGI("HB check dev status get none online node");
             break;
         }
-        for (i = 0; i < infoNum; ++i) {
+        for (int32_t i = 0; i < infoNum; ++i) {
             if (LnnIsLSANode(&info[i])) {
                 continue;
             }

@@ -422,7 +422,8 @@ void LnnNotifyAccountStateChangeEvent(void *state)
         SoftBusFree(accountState);
         return;
     }
-    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_ACCOUNT_CHANGED, .status = (uint8_t)(*accountState)};
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_ACCOUNT_CHANGED,
+        .status = (uint8_t)(*accountState)};
     NotifyEvent((const LnnEventBasicInfo *)&event);
     SoftBusFree(accountState);
 }
@@ -435,7 +436,8 @@ void LnnNotifyDifferentAccountChangeEvent(void *state)
         SoftBusFree(difAccountState);
         return;
     }
-    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED, .status = (uint8_t)(*difAccountState)};
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED,
+        .status = (uint8_t)(*difAccountState)};
     NotifyEvent((const LnnEventBasicInfo *)&event);
     SoftBusFree(difAccountState);
 }
@@ -458,7 +460,8 @@ void LnnNotifyNightModeStateChangeEvent(void *state)
         SoftBusFree(nightModeState);
         return;
     }
-    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_NIGHT_MODE_CHANGED, .status = (uint8_t)(*nightModeState)};
+    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_NIGHT_MODE_CHANGED,
+        .status = (uint8_t)(*nightModeState)};
     NotifyEvent((const LnnEventBasicInfo *)&event);
     SoftBusFree(nightModeState);
 }

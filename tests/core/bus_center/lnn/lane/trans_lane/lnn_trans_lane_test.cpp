@@ -59,22 +59,7 @@ void LNNTransLaneMockTest::SetUp()
 void LNNTransLaneMockTest::TearDown()
 {
 }
-/*
-static void LaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
-{
-    LLOGD("laneRequest succ, laneId:%d", laneId);
-}
 
-static void LaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
-{
-    LLOGD("laneRequest fail, laneId:%d, code:%d", laneId, reason);
-}
-
-static void LaneStateChange(uint32_t laneId, LaneState state)
-{
-    LLOGD("laneState chanage, laneId:%d, state:%d", laneId, state);
-}
-*/
 /*
 * @tc.name: LNN_TRANS_LANE_001
 * @tc.desc: Init

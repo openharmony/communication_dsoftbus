@@ -101,7 +101,8 @@ public:
     virtual int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen,
         const char *networkId, int32_t retCode);
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
-    virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
+    virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num,
+        LnnSyncInfoMsgComplete complete);
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis);
     virtual SoftBusLooper *GetLooper(int looper);
