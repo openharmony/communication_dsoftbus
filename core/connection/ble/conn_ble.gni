@@ -30,7 +30,8 @@ enhanced_conn_coc = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                   "$conn_coc_dir",
                                 ],
                                 "value")
-ble_connection_deps = []
+ble_connection_external_deps = []
+ble_compatible_external_deps = []
 if (dsoftbus_feature_conn_ble == false) {
   ble_connection_src = [
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c",
@@ -45,7 +46,8 @@ if (dsoftbus_feature_conn_ble == false) {
   if (dsoftbus_feature_conn_br == true) {
     ble_connection_src += adapter_net_br_src
     ble_connection_inc += adapter_ble_inc
-    ble_connection_deps += adapter_ble_deps
+    ble_connection_external_deps += adapter_ble_external_deps
+    ble_compatible_external_deps += compatible_ble_deps
   }
 } else {
   ble_connection_src = [
@@ -87,5 +89,6 @@ if (dsoftbus_feature_conn_ble == false) {
   }
   ble_connection_src += adapter_ble_src
   ble_connection_inc += adapter_ble_inc
-  ble_connection_deps += adapter_ble_deps
+  ble_connection_external_deps += adapter_ble_external_deps
+  ble_compatible_external_deps += compatible_ble_deps
 }

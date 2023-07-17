@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
-adapter_ble_external_deps = [ "hilog:libhilog" ]
 
 adapter_ble_inc = [
   "$dsoftbus_root_path/adapter/common/include",
@@ -30,5 +29,6 @@ adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
 ]
 adapter_net_br_src = [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
-adapter_ble_deps =
+adapter_ble_external_deps = [ "bluetooth:btframework" ]
+compatible_ble_deps =
     [ "//foundation/communication/bluetooth/frameworks/inner:btframework" ]
