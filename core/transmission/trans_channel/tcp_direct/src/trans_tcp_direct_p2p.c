@@ -542,8 +542,17 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
     int32_t newChannelId = conn->channelId;
     int32_t pipeLineChannelId = GetPipelineIdByPeerNetworkId(appInfo->peerNetWorkId);
     if (pipeLineChannelId == INVALID_CHANNEL_ID) {
+        uint32_t requestId = AuthGenRequestId();
+        conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
+        conn->requestId = requestId;
         ret = OpenNewAuthConn(appInfo, conn, newChannelId, conn->requestId);
     } else {
+        conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, true, false);
+        if (conn->authId == AUTH_INVALID_ID) {
+            conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, false, false);
+        }
+        TRAN_CHECK_AND_RETURN_RET_LOG(conn->authId != AUTH_INVALID_ID, SOFTBUS_ERR, "get auth id failed");
+        conn->requestId = AUTH_INVALID_ID;
         char *msg = VerifyP2pPack(conn->appInfo.myData.addr, conn->appInfo.myData.port);
         if (msg == NULL) {
             return SOFTBUS_ERR;
@@ -595,15 +604,11 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
         return ret;
     }
 
-    uint32_t requestId = AuthGenRequestId();
-    conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
-    conn->requestId = requestId;
     uint64_t seq = TransTdcGetNewSeqId();
     if (seq == INVALID_SEQ_ID) {
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-
     conn->req = (int64_t)seq;
     conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
     ret = TransTdcAddSessionConn(conn);
