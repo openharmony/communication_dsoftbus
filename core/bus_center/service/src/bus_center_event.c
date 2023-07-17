@@ -275,6 +275,10 @@ NO_SANITIZE("cfi") void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
         RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
         (void)PostNotifyMessageDelay(NOTIFY_NETWORKID_UPDATE, NETWORK_ID_UPDATE_DELAY_TIME);
     }
+    if (isOnline) {
+        LLOGI("online process, remove networkId update event");
+        RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
+    }
 }
 
 void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info)
