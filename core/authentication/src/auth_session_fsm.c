@@ -21,6 +21,7 @@
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
 #include "auth_manager.h"
+#include "auth_request.h"
 #include "auth_session_message.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -159,7 +160,29 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.connId = connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
+    NodeInfo nodeInfo;
+    AuthRequest request;
+    if (memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK ||
+        memset_s(&request, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+        ALOGE("memset fail.");
+        SoftBusFree(authFsm);
+        return NULL;
+    }
     authFsm->info.idType = EXCHANHE_UDID;
+    if (!isServer) {
+        if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
+            if (GetAuthRequestNoLock(requestId, &request) != SOFTBUS_OK) {
+                ALOGE("get auth request fail");
+                SoftBusFree(authFsm);
+                return NULL;
+            }
+            if (LnnRetrieveDeviceInfo(
+                (const char *)request.connInfo.info.bleInfo.deviceIdHash, &nodeInfo) == SOFTBUS_OK) {
+                ALOGI("LnnRetrieveDeviceInfo success");
+                authFsm->info.idType = EXCHANGE_NETWORKID;
+            }
+        }
+    }
     if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "AuthFsm-%u", authFsm->id) == -1) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "format auth fsm name fail");
         SoftBusFree(authFsm);
@@ -417,26 +440,14 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
 
 static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
 {
-    int32_t ret = SOFTBUS_OK;
     AuthSessionInfo *info = &authFsm->info;
-    char udidHash[UDID_BUF_LEN] = {0};
-    do {
-        if (info->idType == EXCHANGE_NETWORKID) {
-            if (GetPeerUdidHashByNetworkId(info->udid, udidHash) != SOFTBUS_OK) {
-                ret = SOFTBUS_ERR;
-                break;
-            }
-        }
-        if (info->idType == EXCHANGE_FAIL) {
-            ret = SOFTBUS_ERR;
-            break;
-        }
-    } while (false);
-    if (ret != SOFTBUS_OK) {
+    if (info->idType == EXCHANGE_FAIL) {
+        ALOGI("fsm switch to reauth due to not find networkId");
         info->idType = EXCHANHE_UDID;
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
+        return SOFTBUS_ERR;
     }
-    return ret;
+    return SOFTBUS_OK;
 }
 
 static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
@@ -468,6 +479,7 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
                 ret = SOFTBUS_OK;
                 break;
             }
+            ALOGI("start auth send udid=[%s]", AnonymizesUDID(info->udid));
             if (HichainStartAuth(authFsm->authSeq, info->udid, info->connInfo.peerUid) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
                 break;
