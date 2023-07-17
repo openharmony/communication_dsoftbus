@@ -60,11 +60,13 @@ void LNNNetBuilderTest::TearDownTestCase()
 
 void LNNNetBuilderTest::SetUp()
 {
+    LnnInitBusCenterEvent();
 }
 
 void LNNNetBuilderTest::TearDown()
 {
     LnnDeinitNetBuilder();
+    LnnDeinitBusCenterEvent();
 }
 
 /*
