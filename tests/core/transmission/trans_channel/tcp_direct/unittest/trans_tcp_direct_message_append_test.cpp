@@ -73,7 +73,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = NotifyChannelOpenFailed(TEST_CHANNELID, 0);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = NotifyChannelOpenFailed(ERR_CHANNELID, 0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }

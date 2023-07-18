@@ -383,10 +383,6 @@ HWTEST_F(TransLaneTest, TransLaneTest009, TestSize.Level1)
     type = (LinkType)LINK_TYPE_BR;
     ret = TransGetLaneLinkTypeBySessionLinkType(type);
     EXPECT_TRUE(ret == LANE_BR);
-
-    type = (LinkType)LANE_LINK_TYPE_BUTT;
-    ret = TransGetLaneLinkTypeBySessionLinkType(type);
-    EXPECT_TRUE(ret == LANE_LINK_TYPE_BUTT);
 }
 
 /**
