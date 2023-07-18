@@ -62,7 +62,7 @@
         }                                                               \
     } while (0)                                                        \
 
-#define CONNECTION_FREEZE_TIMEOUT_MILLIS (20 * 1000)
+#define CONNECTION_FREEZE_TIMEOUT_MILLIS (10 * 1000)
 
 // softbus version for support initConnectFlag
 #define SOFTBUS_VERSION_FOR_INITCONNECTFLAG "11.1.0.001"
