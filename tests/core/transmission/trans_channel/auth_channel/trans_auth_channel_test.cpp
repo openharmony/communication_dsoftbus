@@ -146,7 +146,7 @@ HWTEST_F(TransAuthChannelTest, GetAppInfoTest001, TestSize.Level1)
     ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_UID, TRANS_TEST_PID);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = GetAppInfo(g_sessionName, TRANS_TEST_CHANNEL_ID, appInfo, isClient);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnSetLocalStrInfo(STRING_KEY_DEV_UDID, g_deviceId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetAppInfo(g_sessionName, TRANS_TEST_CHANNEL_ID, appInfo, isClient);
