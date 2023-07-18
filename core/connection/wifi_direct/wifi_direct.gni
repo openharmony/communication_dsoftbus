@@ -101,7 +101,10 @@ if (dsoftbus_feature_conn_p2p == true &&
       "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_fast_connect.c",
       "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_bcast_channel.c",
     ]
-    wifi_direct_connection_external_deps = [ "wifi:wifi_sdk" ]
+    wifi_direct_connection_external_deps = [
+      "napi:ace_napi",
+      "wifi:wifi_sdk",
+    ]
   }
 } else {
   wifi_direct_connection_src += [
