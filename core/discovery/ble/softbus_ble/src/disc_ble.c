@@ -31,14 +31,14 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_range.h"
 #include "softbus_bitmap.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
-#include "softbus_utils.h"
-#include "softbus_adapter_range.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
+#include "softbus_log.h"
+#include "softbus_utils.h"
 
 #define BLE_PUBLISH 0x0
 #define BLE_SUBSCRIBE 0x2
@@ -59,7 +59,6 @@
 #define BLE_MSG_TIME_OUT 6000
 
 /* Defination of boardcast */
-
 #define BLE_VERSION 4
 #define NEARBY_BUSINESS 0x1
 #define DISTRIBUTE_BUSINESS 0x5
@@ -731,12 +730,14 @@ static void DestroyBleConfigAdvData(SoftBusBleAdvData *advData)
 
 static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastData)
 {
+    (void)SoftBusMutexLock(&g_recvMessageInfo.lock);
     if (g_recvMessageInfo.numNeedBrMac > 0) {
         SoftBusBtAddr addr;
         if (SoftBusGetBtMacAddr(&addr) == SOFTBUS_OK) {
             (void)AssembleTLV(broadcastData, TLV_TYPE_BR_MAC, (const void *)&addr.addr, BT_ADDR_LEN);
         }
     }
+    (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
     if (info->range > 0) {
         int8_t power = 0;
         if (SoftBusGetBlePower(&power) == SOFTBUS_OK) {
@@ -1065,6 +1066,7 @@ static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
 
 static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t activeFlags, const void *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "option is null");
     DiscBleOption regOption;
     if (publishFlags == BLE_PUBLISH) {
         regOption.publishOption = (PublishOption *)option;
@@ -1081,8 +1083,9 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     uint32_t oldCap = g_bleInfoManager[index].capBitMap[0];
     int32_t oldRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     if (isStart) {
-        if (RegisterCapability(&g_bleInfoManager[index], &regOption) != SOFTBUS_OK) {
-            DLOGE("RegisterCapability failed.");
+        int32_t status = RegisterCapability(&g_bleInfoManager[index], &regOption);
+        if (status != SOFTBUS_OK) {
+            DLOGE("RegisterCapability failed, err=%d", status);
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_ERR;
         }
