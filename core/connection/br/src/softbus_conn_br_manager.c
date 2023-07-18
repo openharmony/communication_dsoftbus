@@ -78,7 +78,7 @@ static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args
 static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress);
 static int32_t BrPendConnection(const ConnectOption *option, uint32_t time);
 static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress);
-static void UnpendConnection(const ConnBrPendInfo *info);
+static void UnpendConnection(const ConnBrPendInfo *unpendInfo);
 
 static ConnBrManager g_brManager = { 0 };
 static ConnectCallback g_connectCallback = { 0 };

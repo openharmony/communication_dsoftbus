@@ -334,8 +334,8 @@ int32_t ConnBrUpdateConnectionRc(ConnBrConnection *connection, int32_t delta)
         connection->connectionId, delta);
     connection->connectionRc += delta;
     int32_t localRc = connection->connectionRc;
-    CLOGI("br notify refrence, connection id=%u, side=%d, delta=%d, after update reference, localRc=%d,"
-        "underlayer handle=%d", connection->connectionId, connection->side, delta, localRc);
+    CLOGI("br notify refrence, connection id=%u, side=%d, delta=%d, after update reference, localRc=%d,",
+        connection->connectionId, connection->side, delta, localRc);
     if (localRc <= 0) {
         connection->state = BR_CONNECTION_STATE_NEGOTIATION_CLOSING;
         ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,

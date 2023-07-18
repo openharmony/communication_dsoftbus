@@ -276,7 +276,7 @@ void LnnRequestBleDiscoveryProcess(int strategy, long timeout)
     } else if (strategy == REQUEST_ENABLE_BLE_DISCOVERY) {
         RequestEnableDiscovery(NULL);
     } else {
-        LLOGE("error strategy = %d, not need to deal");
+        LLOGE("error strategy = %d, not need to deal", strategy);
     }
     return;
 }
