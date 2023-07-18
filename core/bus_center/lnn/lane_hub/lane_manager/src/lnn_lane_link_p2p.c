@@ -745,7 +745,7 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, 
     }
 
     char uuid[UDID_BUF_LEN] = { 0 };
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid) != SOFTBUS_OK)) {
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
         LLOGE("get peer uuid fail");
         return SOFTBUS_ERR;
     }
