@@ -27,7 +27,7 @@
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
 
-#define SESSION_NAME "com.huawei.dsoftbus.inner.p2pchannel"
+#define SESSION_NAME "ohos.dsoftbus.inner.p2pchannel"
 
 enum PipelineLooperMsgType {
     LOOPER_MSG_TYPE_OPEN_CHANNEL,
