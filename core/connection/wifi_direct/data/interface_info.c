@@ -309,8 +309,10 @@ static void IncreaseRefCount(struct InterfaceInfo *self)
     int32_t *count = self->get(self, II_KEY_REUSE_COUNT, NULL, NULL);
     if (count) {
         ++*count;
+        CLOGI(LOG_LABEL "reuseCount=%d", *count);
+    } else {
+        CLOGI(LOG_LABEL "Count is null");
     }
-    CLOGI(LOG_LABEL "reuseCount=%d", *count);
 }
 
 static void DecreaseRefCount(struct InterfaceInfo *self)
@@ -318,8 +320,10 @@ static void DecreaseRefCount(struct InterfaceInfo *self)
     int32_t *count = self->get(self, II_KEY_REUSE_COUNT, NULL, NULL);
     if (count) {
         --*count;
+        CLOGI(LOG_LABEL "reuseCount=%d", *count);
+    } else {
+        CLOGI(LOG_LABEL "Count is null");
     }
-    CLOGI(LOG_LABEL "reuseCount=%d", *count);
 }
 
 /* private method implement */

@@ -763,7 +763,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
         uint64_t localFeature;
         int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
         if (ret != SOFTBUS_OK) {
-            LLOGE("LnnGetLocalNumInfo err, ret = %d, local = %d", ret);
+            LLOGE("LnnGetLocalNumInfo err, ret = %d, local = %d", ret, localFeature);
             return;
         }
         if (IsFeatureSupport(localFeature, BIT_BLE_ONLINE_REUSE_CAPABILITY) &&
