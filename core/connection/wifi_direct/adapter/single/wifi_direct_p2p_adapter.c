@@ -141,7 +141,7 @@ static int32_t GetSelfWifiConfigInfo(uint8_t *config, size_t *configSize)
     return SOFTBUS_OK;
 }
 
-static int32_t SetPeerWifiConfigInfo(const char *config)
+static int32_t SetPeerWifiConfigInfo(char *config)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(config, SOFTBUS_INVALID_PARAM, LOG_LABEL "cfg is null");
     size_t configSize = strlen(config);
@@ -363,7 +363,7 @@ static int32_t P2pCreateGroup(int32_t frequency, bool wideBandSupported)
     return SOFTBUS_OK;
 }
 
-static int32_t P2pConnectGroup(char *groupConfigString)
+static int32_t P2pConnectGroup(const char *groupConfigString)
 {
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX];
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
@@ -453,7 +453,7 @@ static void SetWifiLinkAttr(const char *interface, const char *attr)
     (void)attr;
 }
 
-static int32_t GetInterfaceCoexistCap(const char **cap)
+static int32_t GetInterfaceCoexistCap(char **cap)
 {
     *cap = NULL;
     return SOFTBUS_OK;
