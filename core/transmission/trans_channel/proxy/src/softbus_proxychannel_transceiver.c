@@ -20,6 +20,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_network_manager.h"
 #include "message_handler.h"
+#include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -31,9 +32,9 @@
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
+#include "softbus_proxychannel_pipeline.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
-#include "softbus_adapter_hitrace.h"
 
 #define ID_OFFSET (1)
 
@@ -787,6 +788,10 @@ NO_SANITIZE("cfi") int32_t TransProxyTransInit(void)
     }
     if (TransProxyLoopInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create loopInit fail");
+        return SOFTBUS_ERR;
+    }
+    if (TransProxyPipelineInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init proxy pipeline failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

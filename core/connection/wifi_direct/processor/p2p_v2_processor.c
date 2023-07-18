@@ -1561,59 +1561,6 @@ static int32_t ReturnConnectResult(struct LinkInfo *linkInfo, struct InterfaceIn
     return ret;
 }
 
-static int FastConnectCreateLink(struct WifiDirectConnectInfo *connectInfo, enum WifiDirectRole *finalRole,
-    const struct WDFastCfg *remoteCfg)
-{
-    CLOGE(LOG_LABEL "p2pv2 not supported yet");
-    (void)connectInfo;
-    (void)finalRole;
-    (void)remoteCfg;
-    return SOFTBUS_ERR;
-}
-
-static int FastConnectSendGroupConfig(void)
-{
-    CLOGE(LOG_LABEL "p2pv2 not supported yet");
-    return SOFTBUS_ERR;
-}
-
-static int OnFastConnectBcastDataReceived(struct WifiDirectConnectInfo *connectInfo,
-    enum WifiDirectRole peerRole, struct WDFastCfg *remoteCfg)
-{
-    CLOGE(LOG_LABEL "p2pv2 not supported yet");
-    (void)connectInfo;
-    (void)peerRole;
-    (void)remoteCfg;
-    return SOFTBUS_ERR;
-}
-
-static int OnFastConnectSessionCreated(struct WifiDirectNegotiateChannel *channel)
-{
-    CLOGE(LOG_LABEL "p2pv2 not supported yet");
-    (void)channel;
-    return SOFTBUS_ERR;
-}
-
-static int OnFastConnectConfigRecvd(struct NegotiateMessage *msg)
-{
-    CLOGE(LOG_LABEL "p2pv2 not supported yet");
-    (void)msg;
-    return SOFTBUS_ERR;
-}
-
-static void OnFastConnectClientConnected(const char *remoteMac)
-{
-    CLOGE(LOG_LABEL "p2pv2 not supported yet");
-    (void)remoteMac;
-}
-
-static void FastConnectStop(bool destroyGroup, const char *remoteMac)
-{
-    CLOGE(LOG_LABEL "p2pv2 not supported yet");
-    (void)destroyGroup;
-    (void)remoteMac;
-}
-
 static struct P2pV2Processor g_processor = {
     .needReply = false,
     .currentRequestId = REQUEST_ID_INVALID,
@@ -1624,17 +1571,6 @@ static struct P2pV2Processor g_processor = {
     .onOperationEvent = OnOperationEvent,
     .processUnhandledRequest = ProcessUnhandledRequest,
     .onReversal = OnReversal,
-
-    .fastConnect.createLink = FastConnectCreateLink,
-    .fastConnect.sendGroupConfig = FastConnectSendGroupConfig,
-    .fastConnect.onBcastDataReceived = OnFastConnectBcastDataReceived,
-    .fastConnect.onSessionCreated = OnFastConnectSessionCreated,
-    .fastConnect.onConfigRecvd = OnFastConnectConfigRecvd,
-    .fastConnect.onClientConnected = OnFastConnectClientConnected,
-    .fastConnect.stop = FastConnectStop,
-    .fastConnect.started = false,
-    .fastConnect.sessionCreated = false,
-
     .name = "P2pV2Processor",
 };
 
