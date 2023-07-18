@@ -292,7 +292,8 @@ static int32_t SetP2pGroupConfig(struct InterfaceInfo *self, char *groupConfig)
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX] = {0};
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
     int32_t ret = GetWifiDirectNetWorkUtils()->splitString(groupConfig, "\n", configs, &configsSize);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "split group config failed");
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK && configsSize > P2P_GROUP_CONFIG_INDEX_FREQ,
+        SOFTBUS_ERR, "split group config failed");
 
     self->putString(self, II_KEY_SSID, configs[P2P_GROUP_CONFIG_INDEX_SSID]);
     if (!self->get(self, II_KEY_DYNAMIC_MAC, NULL, NULL)) {

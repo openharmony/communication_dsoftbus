@@ -24,6 +24,7 @@
 #include "softbus_adapter_crypto.h"
 #include "wifi_direct_defines.h"
 #include "utils/wifi_direct_network_utils.h"
+#include "utils/wifi_direct_anonymous.h"
 #include "data/resource_manager.h"
 
 #define LOG_LABEL "[WifiDirect] WifiDirectP2pAdapter: "
@@ -140,7 +141,7 @@ static int32_t GetSelfWifiConfigInfo(uint8_t *config, size_t *configSize)
     return SOFTBUS_OK;
 }
 
-static int32_t SetPeerWifiConfigInfo(const char *config)
+static int32_t SetPeerWifiConfigInfo(char *config)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(config, SOFTBUS_INVALID_PARAM, LOG_LABEL "cfg is null");
     size_t configSize = strlen(config);
@@ -171,33 +172,22 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
         return SOFTBUS_ERR;
     }
 
-    struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
-    uint8_t macAddrArray[MAC_ADDR_ARRAY_SIZE];
-    size_t macAddrArraySize = MAC_ADDR_ARRAY_SIZE;
-    ret = netWorkUtils->getInterfaceMacAddr(groupInfo->interface, macAddrArray, &macAddrArraySize);
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "get interface mac addr failed");
-        SoftBusFree(groupInfo);
-        return ret;
-    }
-
     char macAddrString[MAC_ADDR_STR_LEN];
-    ret = netWorkUtils->macArrayToString(macAddrArray, macAddrArraySize, macAddrString, sizeof(macAddrString));
+    ret = GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->owner.devAddr, sizeof(groupInfo->owner.devAddr),
+                                                        macAddrString, sizeof(macAddrString));
     if (ret != SOFTBUS_OK) {
         CLOGE(LOG_LABEL "convert mac addr to string failed");
         SoftBusFree(groupInfo);
         return ret;
     }
-    CLOGI(LOG_LABEL "groupName=%s", groupInfo->groupName);
-    CLOGE(LOG_LABEL "mac=%s", macAddrString);
-    CLOGE(LOG_LABEL "passphrase=%s", groupInfo->passphrase);
-    CLOGE(LOG_LABEL "frequency=%d", groupInfo->frequency);
+    CLOGI(LOG_LABEL "groupName=%s, mac=%s, passphrase=%s, frequency=%d",
+          groupInfo->groupName, WifiDirectAnonymizeMac(macAddrString), groupInfo->passphrase, groupInfo->frequency);
 
     ret = sprintf_s(groupConfigString, *groupConfigStringSize, "%s\n%s\n%s\n%d",
                     groupInfo->groupName, macAddrString, groupInfo->passphrase, groupInfo->frequency);
+    SoftBusFree(groupInfo);
     if (ret < 0) {
         CLOGE(LOG_LABEL "convert mac addr to string failed");
-        SoftBusFree(groupInfo);
         return SOFTBUS_ERR;
     }
 
@@ -376,7 +366,7 @@ static int32_t P2pCreateGroup(int32_t frequency, bool wideBandSupported)
     return SOFTBUS_OK;
 }
 
-static int32_t P2pConnectGroup(char *groupConfigString)
+static int32_t P2pConnectGroup(const char *groupConfigString)
 {
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX];
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
@@ -466,7 +456,7 @@ static void SetWifiLinkAttr(const char *interface, const char *attr)
     (void)attr;
 }
 
-static int32_t GetInterfaceCoexistCap(const char **cap)
+static int32_t GetInterfaceCoexistCap(char **cap)
 {
     *cap = NULL;
     return SOFTBUS_OK;
