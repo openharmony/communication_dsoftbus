@@ -62,7 +62,7 @@
         }                                                               \
     } while (0)                                                        \
 
-#define CONNECTION_FREEZE_TIMEOUT_MILLIS (20 * 1000)
+#define CONNECTION_FREEZE_TIMEOUT_MILLIS (10 * 1000)
 
 // softbus version for support initConnectFlag
 #define SOFTBUS_VERSION_FOR_INITCONNECTFLAG "11.1.0.001"
@@ -1370,11 +1370,12 @@ static void NodeOnlineProc(NodeInfo *info)
 
 NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
-    // judge map
-    info->onlinetTimestamp = LnnUpTimeMs();
     if (info == NULL) {
         return REPORT_NONE;
     }
+    // judge map
+    info->onlinetTimestamp = LnnUpTimeMs();
+
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
