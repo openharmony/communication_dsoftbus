@@ -341,7 +341,9 @@ int32_t SoftBusSocketSelect(
 
     struct timeval *timeoutPtr = NULL;
     struct timeval tv = { 0 };
-    if (timeout != NULL) {
+    if (timeout == NULL) {
+        return SOFTBUS_ADAPTER_ERR;
+    } else {
         tv.tv_sec = timeout->sec;
         tv.tv_usec = timeout->usec;
         timeoutPtr = &tv;
