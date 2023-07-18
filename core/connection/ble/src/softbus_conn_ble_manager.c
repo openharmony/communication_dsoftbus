@@ -724,7 +724,8 @@ static void BleServerAccepted(uint32_t connectionId)
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
-    CLOGI("ble server accept a new connection, connection id=%u, peer address=%s", connectionId, anomizeAddress);
+    CLOGI("ble server accept a new connection, connection id=%u, peer address=%s, protocol=%d", connectionId,
+        anomizeAddress, connection->protocol);
 
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);

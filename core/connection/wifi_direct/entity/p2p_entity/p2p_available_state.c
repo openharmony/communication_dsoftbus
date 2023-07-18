@@ -139,8 +139,6 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
                 SoftBusFree(client);
                 entity->joiningClientCount--;
             }
-
-            entity->listener->onClientConnected(mac);
         }
     }
 

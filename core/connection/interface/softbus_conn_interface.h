@@ -68,8 +68,6 @@ typedef enum {
 #define BT_LINK_TYPE_BR  1
 #define BT_LINK_TYPE_BLE 2
 
-#define MAX_DIRECT_EXT_ADV_BUF_LEN  1
-
 typedef enum {
     PROXY = 0,
     AUTH,
@@ -163,8 +161,6 @@ struct BleDirectOption {
     char nodeIdHash[NODEID_SHORT_HASH_LEN];
     char localUdidHash[UDID_SHORT_HASH_LEN];
     char peerUdidHash[SHA_256_HASH_LEN];
-    char extAdvBuf[MAX_DIRECT_EXT_ADV_BUF_LEN];
-    size_t extAdvBufLen;
 };
 
 struct SocketOption {
@@ -371,6 +367,14 @@ int32_t ConnStartLocalListening(const LocalListenerInfo *info);
  */
 int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
 
+/**
+ * @ingroup Softbus_conn_manager.
+ * @brief call this interface to check ble direct connect support or not.
+ * @return <b>false</b> if not support.
+ * @return <b>true</b> if support.
+ */
+bool ConnBleDirectIsEnable(BleProtocolType protocol);
+
 bool CheckActiveConnection(const ConnectOption *option);
 
 /**
@@ -399,85 +403,6 @@ int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time);
  * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
  */
 int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
-
-typedef void (*OnMessageReceivedFunc)(int32_t channelId, const char *data, uint32_t len);
-void PipelineRegisterIpPortVerifyCallBack(const OnMessageReceivedFunc cb);
-
-typedef struct {
-    void (*onScanReceived)(const char *networkId, uint8_t *buf, size_t bufLen);
-    int (*onChannelOpened)(int32_t channelId, const char *networkId, unsigned char isServer);
-    void (*onChannelOpenFailed)(int32_t channelId, const char *networkId);
-    void (*onChannelClosed)(int32_t channelId);
-    void (*onMessageReceived)(int32_t channelId, const uint8_t *data, uint32_t len);
-} ConnBleDirectPipelineCallback;
-
-typedef struct {
-    const char *networkId;
-    uint8_t *buf; /**< Pointer to the buffer for storing the ble pipeline adv extended data, TLV format */
-    int bufLen; /**< Length of the buffer, range in 0-1 bytes */
-} ConnBleDirectPipelineOption;
-
-/**
- * @ingroup Softbus_conn_manager
- * @brief open a ble direct pipeline
- * @param[in] option Indicates a pointer to the connection option. For details, see {@link ConnBleDirectPipelineOption}.
- * @param[in] result Indicates a pointer to the connection request. For details, see {@link ConnectResult}.
- * @return <b>SOFTBUS_ERR</b> if the pipeline open failed.
- * @return <b>SOFTBUS_OK</b> if the pipeline open successfully.
- */
-int32_t ConnBleDirectPipelineOpen(const ConnBleDirectPipelineOption *option, const ConnectResult *result);
-
-/**
- * @ingroup Softbus_conn_manager
- * @brief to close the ble direct pipeline
- * this interface is only called once when the channleIdId already opened
- * @param[in] channelId indicates the opened channelId.
- * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of information
- * @return <b>SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID</b> Failed to delete pipeline info.
- * @return <b>SOFTBUS_OK</b> Success to close this ble direct pipeline, returns other internal error codes otherwise.
- */
-int32_t ConnBleDirectPipelineClose(int32_t channelId);
-
-/**
- * @ingroup Softbus_conn_manager
- * @brief init ble direct pipeline
- * @param[in] cb Indicates a pointer to the pipeline callback. For details, see {@link ConnBleDirectPipelineCallback}.
- * @return <b>SOFTBUS_ERR</b> if the pipeline init failed.
- * @return <b>SOFTBUS_OK</b> if the pipeline init successfully.
- */
-int32_t ConnBleDirectPipelineInit(ConnBleDirectPipelineCallback* cb);
-
-typedef enum {
-    PIPE_LINE_MSG_TYPE_P2P_NEGO = 0xABADBEEF,
-    PIPE_LINE_MSG_TYPE_IP_PORT_EXCHANGE,
-} PipelineMsgType;
-
-/**
- * @ingroup Softbus_conn_manager
- * @brief sendmessage through the specified ble direct pipeline
- * this interface is current only called once when the sync device info
- * @see {@link ConnBleDirectPipelineCallback}
- * @param[in] channelId indicates the opened channelId.
- * @param[in] data indicates the pointer to message data
- * @param[in] dataLen indicates the message data of len.
- * @param[in] type indicates the sending message type
- * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of information
- * @return <b>SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID</b> Failed to delete pipeline info.
- * @return <b>SOFTBUS_TRANS_PROXY_CHANNEL_STATUS_INVAILD</b> the channel status is abnormal.
- * @return <b>SOFTBUS_TRANS_PROXY_PACKMSG_ERR</b> Failed to packaged the message data.
- * @return <b>SOFTBUS_OK</b> Success to close this ble direct pipeline, returns other internal error codes otherwise.
- */
-int32_t ConnBleDirectPipelineSendMessage(int32_t channelId, const uint8_t *data, uint32_t dataLen,
-    PipelineMsgType type);
-
-/**
- * @ingroup Softbus_conn_manager
- * @brief getpipeline by peerNetworkId
- * @param[in] peerNetworkId indicates the peer networkId.
- * @return <b>INVALID_CHANNEL_ID</b> Failed to get invalid pipeline channelId
- * @return others Success to get the normal pipeline channelId
- */
-int32_t GetPipelineIdByPeerNetworkId(const char* peerNetworkId);
 
 #ifdef __cplusplus
 #if __cplusplus

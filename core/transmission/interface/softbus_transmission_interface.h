@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "lnn_lane_interface.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 
@@ -66,11 +67,12 @@ typedef struct {
  * @see {@link TransCloseNetWorkingChannel}
  * @param[in] sessionName indicates the pointer to the package name.
  * @param[in] peerNetworkId indicates the pointer to the peer network id.
- * @param[in] connOpt indicates the pointer to the connect option, allow null
+ * @param[in] preferred indicates the pointer to preferred link list, allow null
  * @return <b>INVALID_CHANNEL_ID</b> Failed to open channel, return invalid channel id.
  * @return <b>NewChannelId</b> Success to open channel, and return valid channel id.
  */
-int TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId, ConnectOption *connOpt);
+int TransOpenNetWorkingChannel(
+    const char *sessionName, const char *peerNetworkId, const LanePreferredLinkList *preferred);
 
 /**
  * @brief To close the sepcified proxy channel.
