@@ -2041,7 +2041,7 @@ NO_SANITIZE("cfi") int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char 
                 strlen(nodeInfo->deviceInfo.deviceUdid), (uint8_t*)nodeUdidHash) != SOFTBUS_OK) {
                 continue;
             }
-            if (strcmp(nodeUdidHash, udidHash) != 0) {
+            if (memcmp(nodeUdidHash, udidHash, len) != 0) {
                 continue;
             }
             if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
