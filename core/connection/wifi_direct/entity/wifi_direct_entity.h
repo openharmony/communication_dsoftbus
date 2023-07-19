@@ -48,7 +48,6 @@ enum EntityState {
 struct EntityListener {
     void (*onOperationComplete)(int32_t requestId, int32_t result);
     void (*onEntityChanged)(enum EntityState state);
-    void (*onClientConnected)(char *remoteMac);
 };
 
 #define WIFI_DIRECT_ENTITY_BASE                                                       \

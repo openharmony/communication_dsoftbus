@@ -89,8 +89,6 @@ enum WifiDirectNegotiateCmdType {
 
     CMD_PC_GET_INTERFACE_INFO_REQ = 30,
     CMD_PC_GET_INTERFACE_INFO_RESP = 31,
-
-    CMD_FAST_CONNECT_MSG = 32,
 };
 
 enum WifiDirectEntityType {
@@ -115,14 +113,6 @@ struct WifiDirectLink {
     enum WifiDirectConnectType connectType;
 };
 
-struct WDFastCfg {
-    enum WifiDirectRole role;
-    enum WifiDirectRole expectRole;
-    char wifiCfg[WIFI_CFG_INFO_MAX_LEN];
-    char chanList5G[CHANNEL_LIST_STR_LEN];
-    int staFrequency;
-};
-
 struct WifiDirectNegotiateChannel;
 struct WifiDirectConnectInfo {
     int32_t requestId;
@@ -130,11 +120,8 @@ struct WifiDirectConnectInfo {
     enum WifiDirectConnectType connectType;
     struct WifiDirectNegotiateChannel *negoChannel;
     enum WifiDirectRole expectRole;
-    char remoteNetworkId[NETWORK_ID_BUF_LEN];
     char remoteMac[MAC_ADDR_STR_LEN];
     bool isNetworkDelegate;
-    bool fastConnect;
-    bool fastConnectChannelUsed;
     int32_t linkId;
 };
 

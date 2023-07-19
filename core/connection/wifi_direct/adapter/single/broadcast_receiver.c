@@ -102,22 +102,6 @@ static void P2pConnectionChangeHandler(const WifiP2pLinkedInfo info)
     }
 }
 
-static void WifiDirectOnWifiConnectionChanged(int state, WifiLinkedInfo *info)
-{
-    CLOGI(LOG_LABEL "state: %d, freq: %d, connect state: %d", state, info->frequency, info->connState);
-    struct BroadcastParam *param = (struct BroadcastParam *)SoftBusCalloc(sizeof(struct BroadcastParam));
-    CONN_CHECK_AND_RETURN_LOG(param, LOG_LABEL "alloc failed");
-    param->action = WIFI_CFG_CHANGED_ACTION;
-    param->wifiConnectChangedState = state;
-    if (CallMethodAsync(DispatchWorkHandler, param, 0) != SOFTBUS_OK) {
-        SoftBusFree(param);
-    }
-}
-
-static WifiEvent g_event = {
-    .OnWifiConnectionChanged = WifiDirectOnWifiConnectionChanged,
-};
-
 int32_t BroadcastReceiverInit(void)
 {
     for (size_t i = 0; i < BROADCAST_RECEIVER_ACTION_MAX; i++) {
@@ -135,11 +119,6 @@ int32_t BroadcastReceiverInit(void)
         CLOGE(LOG_LABEL "RegisterP2pConnectionChangedCallback failed, error code=%d", ret);
         return SOFTBUS_ERR;
     }
-
-    (void)UnRegisterWifiEvent(&g_event);
-    ret = RegisterWifiEvent(&g_event);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, ret,
-        LOG_LABEL "register wifi event failed, error code=%d", ret);
 
     g_broadcastReceiver.isInited = true;
     return SOFTBUS_OK;

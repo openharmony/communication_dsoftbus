@@ -12,28 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef P2P_V1_PROCESSOR_H
-#define P2P_V1_PROCESSOR_H
+#include "fast_connect_negotiate_channel.h"
 
-#include "wifi_direct_processor.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct P2pV1Processor {
-    PROCESSOR_BASE;
-
-    struct InnerLink *currentInnerLink;
-    bool needReply;
-    struct NegotiateMessage *pendingRequestMsg;
-    int32_t currentRequestId;
-    int32_t goPort;
-};
-
-struct P2pV1Processor* GetP2pV1Processor(void);
-
-#ifdef __cplusplus
+void FastConnectNegotiateChannelConstructor(struct FastConnectNegotiateChannel *self, int32_t channelId)
+{
+    (void)self;
+    (void)channelId;
 }
-#endif
-#endif
+
+void FastConnectNegotiateChannelDestructor(struct FastConnectNegotiateChannel *self)
+{
+    (void)self;
+}
+
+struct FastConnectNegotiateChannel *FastConnectNegotiateChannelNew(int32_t channelId)
+{
+    (void)channelId;
+    return NULL;
+}
+
+void FastConnectNegotiateChannelDelete(struct FastConnectNegotiateChannel *self)
+{
+    (void)self;
+}
+
+int32_t FastConnectNegotiateChannelInit(void)
+{
+    return 0;
+}
