@@ -15,14 +15,10 @@
 #ifndef WIFI_DIRECT_BROADCAST_RECEIVER_H
 #define WIFI_DIRECT_BROADCAST_RECEIVER_H
 
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
-
-#include "wifi_device.h"
-#include "wifi_p2p.h"
-
+#include <stddef.h>
 #include "common_list.h"
+#include "wifi_p2p.h"
 #include "wifi_direct_p2p_adapter.h"
 
 #ifdef __cplusplus
@@ -32,13 +28,12 @@ extern "C" {
 enum BroadcastReceiverAction {
     WIFI_P2P_STATE_CHANGED_ACTION = 0,
     WIFI_P2P_CONNECTION_CHANGED_ACTION = 1,
-    WIFI_CFG_CHANGED_ACTION = 2,
     BROADCAST_RECEIVER_ACTION_MAX,
 };
 
 struct P2pConnChangedInfo {
     WifiP2pLinkedInfo p2pLinkInfo;
-    struct WifiDirectGroupInfo *groupInfo;
+    struct WifiDirectP2pGroupInfo *groupInfo;
 };
 
 struct BroadcastParam {
@@ -46,7 +41,6 @@ struct BroadcastParam {
     union {
         P2pState p2pState;
         struct P2pConnChangedInfo changedInfo;
-        int wifiConnectChangedState;
     };
 };
 

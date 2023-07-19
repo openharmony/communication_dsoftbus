@@ -17,13 +17,17 @@
 
 #include <securec.h>
 
-#include "auth_interface.h"
 #include "cJSON.h"
+
+#include "auth_interface.h"
+#include "lnn_lane_link.h"
+#include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_proxychannel_pipeline.h"
 #include "softbus_socket.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_tcp_direct_json.h"
@@ -31,8 +35,6 @@
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
-#include "lnn_lane_link.h"
-#include "softbus_adapter_hitrace.h"
 
 #define ID_OFFSET (1)
 #define P2P_VERIFY_REQUEST 0
@@ -310,8 +312,8 @@ static void SendVerifyP2pFailRsp(int64_t authId, int64_t seq,
             SoftBusFree(sendMsg);
             return;
         }
-        ConnBleDirectPipelineSendMessage(authId, (uint8_t *)sendMsg,
-            strLen + sizeof(int64_t) + sizeof(int64_t), PIPE_LINE_MSG_TYPE_IP_PORT_EXCHANGE);
+        TransProxyPipelineSendMessage(
+            authId, (uint8_t *)sendMsg, strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
         SoftBusFree(sendMsg);
     }
     cJSON_free(reply);
@@ -339,10 +341,10 @@ static int32_t SendVerifyP2pRsp(int64_t authId, int32_t module, int32_t flag, in
             SoftBusFree(sendMsg);
             return SOFTBUS_ERR;
         }
-        ret = ConnBleDirectPipelineSendMessage(authId, (uint8_t *)sendMsg,
-            strLen + sizeof(int64_t) + sizeof(int64_t), PIPE_LINE_MSG_TYPE_IP_PORT_EXCHANGE);
+        ret = TransProxyPipelineSendMessage(
+            authId, (uint8_t *)sendMsg, strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ConnBleDirectPipelineSendMessage fail");
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyPipelineSendMessage fail");
         }
         SoftBusFree(sendMsg);
     }
@@ -536,11 +538,16 @@ static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t
     }
 }
 
+void OnP2pVerifyChannelClosed(int32_t channelId)
+{
+    TLOGW("receive p2p verify channel: %d close", channelId);
+}
+
 static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
 {
     int32_t ret = SOFTBUS_ERR;
     int32_t newChannelId = conn->channelId;
-    int32_t pipeLineChannelId = GetPipelineIdByPeerNetworkId(appInfo->peerNetWorkId);
+    int32_t pipeLineChannelId = TransProxyPipelineGetChannelIdByNetworkId(appInfo->peerNetWorkId);
     if (pipeLineChannelId == INVALID_CHANNEL_ID) {
         uint32_t requestId = AuthGenRequestId();
         conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
@@ -570,8 +577,8 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
             SoftBusFree(sendMsg);
             return SOFTBUS_ERR;
         }
-        ret = ConnBleDirectPipelineSendMessage(pipeLineChannelId, (uint8_t *)sendMsg,
-            strLen + sizeof(int64_t) + sizeof(int64_t), PIPE_LINE_MSG_TYPE_IP_PORT_EXCHANGE);
+        ret = TransProxyPipelineSendMessage(pipeLineChannelId, (uint8_t *)sendMsg,
+            strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
         cJSON_free(msg);
         SoftBusFree(sendMsg);
     }
@@ -609,6 +616,7 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
+
     conn->req = (int64_t)seq;
     conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
     ret = TransTdcAddSessionConn(conn);
@@ -642,7 +650,14 @@ NO_SANITIZE("cfi") int32_t P2pDirectChannelInit(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "P2pDirectChannelInit set cb fail");
         return SOFTBUS_ERR;
     }
-    PipelineRegisterIpPortVerifyCallBack(OnP2pVerifyMsgReceived);
+    ITransProxyPipelineListener listener = {
+        .onDataReceived = OnP2pVerifyMsgReceived,
+        .onDisconnected = OnP2pVerifyChannelClosed,
+    };
+    if (TransProxyPipelineRegisterListener(MSG_TYPE_IP_PORT_EXCHANGE, &listener) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "register listener failed");
+        return SOFTBUS_ERR;
+    }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "P2pDirectChannelInit ok");
     return SOFTBUS_OK;
 }

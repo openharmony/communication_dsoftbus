@@ -42,7 +42,8 @@ int TransRegisterNetworkingChannelListener(const char *sessionName, const INetwo
     return GetTransInterface()->TransRegisterNetworkingChannelListener(listener);
 }
 
-int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId, ConnectOption *connOpt)
+int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId,
+    const LanePreferredLinkList *preferred)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TransOpenNetWorkingChannel enter");
     return GetTransInterface()->TransOpenNetWorkingChannel(sessionName, peerNetworkId);

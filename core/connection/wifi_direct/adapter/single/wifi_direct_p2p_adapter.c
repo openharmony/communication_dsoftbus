@@ -141,7 +141,7 @@ static int32_t GetSelfWifiConfigInfo(uint8_t *config, size_t *configSize)
     return SOFTBUS_OK;
 }
 
-static int32_t SetPeerWifiConfigInfo(char *config)
+static int32_t SetPeerWifiConfigInfo(const char *config)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(config, SOFTBUS_INVALID_PARAM, LOG_LABEL "cfg is null");
     size_t configSize = strlen(config);
@@ -158,6 +158,13 @@ static int32_t SetPeerWifiConfigInfo(char *config)
     CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR, LOG_LABEL "set wifi cfg failed");
     CLOGI(LOG_LABEL "set success");
     return SOFTBUS_OK;
+}
+
+static int32_t SetPeerWifiConfigInfoV2(uint8_t *cfg, size_t size)
+{
+    (void)cfg;
+    (void)size;
+    return SOFTBUS_ERR;
 }
 
 static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigStringSize)
@@ -215,8 +222,6 @@ static int32_t GetGroupInfo(struct WifiDirectP2pGroupInfo **groupInfoOut)
         return SOFTBUS_ERR;
     }
 
-    (void)memcpy_s(groupInfo->groupOwner.address, sizeof(groupInfo->groupOwner.address),
-        info->owner.devAddr, sizeof(info->owner.devAddr));
     groupInfo->isGroupOwner = info->isP2pGroupOwner;
     groupInfo->frequency = info->frequency;
     groupInfo->clientDeviceSize = info->clientDevicesSize;
@@ -368,7 +373,7 @@ static int32_t P2pCreateGroup(int32_t frequency, bool wideBandSupported)
     return SOFTBUS_OK;
 }
 
-static int32_t P2pConnectGroup(const char *groupConfigString)
+static int32_t P2pConnectGroup(char *groupConfigString)
 {
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX];
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
@@ -568,7 +573,7 @@ static struct WifiDirectP2pAdapter g_adapter = {
 
     .getInterfaceCoexistCap = GetInterfaceCoexistCap,
     .getSelfWifiConfigInfoV2 = GetSelfWifiConfigInfo,
-    .setPeerWifiConfigInfoV2 = SetPeerWifiConfigInfo,
+    .setPeerWifiConfigInfoV2 = SetPeerWifiConfigInfoV2,
     .getRecommendChannelV2 = GetRecommendChannelV2,
     .setConnectNotify = SetConnectNotify,
 

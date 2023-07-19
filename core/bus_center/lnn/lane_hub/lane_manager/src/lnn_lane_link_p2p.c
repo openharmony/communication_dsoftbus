@@ -22,7 +22,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "channel/default_negotiate_channel.h"
-#include "fast_connect_bcast_channel.h"
+#include "channel/fast_connect_negotiate_channel.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_def.h"
@@ -35,6 +35,7 @@
 #include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
+#include "softbus_proxychannel_pipeline.h"
 #include "wifi_direct_manager.h"
 
 typedef struct {
@@ -56,10 +57,16 @@ typedef struct {
 } P2pRequestInfo;
 
 typedef struct {
+    int32_t requestId;
+    int32_t channelId;
+} ProxyChannelInfo;
+
+typedef struct {
     ListNode node;
     LaneLinkRequestInfo laneRequestInfo;
     AuthChannel auth;
     P2pRequestInfo p2pInfo;
+    ProxyChannelInfo proxyChannelInfo;
 } P2pLinkReqList;
 
 typedef struct {
@@ -75,7 +82,7 @@ typedef struct {
 typedef enum {
     ASYNC_RESULT_P2P,
     ASYNC_RESULT_AUTH,
-    ASYNC_RESULT_COUNT,
+    ASYNC_RESULT_CHANNEL,
 } AsyncResultType;
 
 static ListNode *g_p2pLinkList = NULL; // process p2p link request
@@ -337,8 +344,42 @@ static int32_t GetPreferAuth(const char *networkId, AuthConnInfo *connInfo, bool
     return AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
 }
 
-static int32_t GetP2pLinkReqParam(uint32_t authRequestId, int32_t p2pRequestId,
-    struct WifiDirectConnectInfo *wifiDirectInfo)
+static int32_t GetP2pLinkReqParamByChannelRequetId(
+    int32_t channelRequestId, int32_t channelId, int32_t p2pRequestId, struct WifiDirectConnectInfo *wifiDirectInfo)
+{
+    if (LinkLock() != 0) {
+        LLOGE("lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    P2pLinkReqList *item = NULL;
+    P2pLinkReqList *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkList, P2pLinkReqList, node) {
+        if (item->proxyChannelInfo.requestId != channelRequestId) {
+            continue;
+        }
+        if (LnnGetRemoteStrInfo(item->laneRequestInfo.networkId, STRING_KEY_P2P_MAC, wifiDirectInfo->remoteMac,
+                                sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
+            LinkUnlock();
+            LLOGE("get remote p2p mac fail");
+            return SOFTBUS_ERR;
+        }
+        wifiDirectInfo->pid = item->laneRequestInfo.pid;
+        wifiDirectInfo->expectRole = GetExpectedP2pRole(item->laneRequestInfo.networkId);
+        wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
+        item->p2pInfo.p2pRequestId = p2pRequestId;
+        item->proxyChannelInfo.channelId = channelId;
+        LinkUnlock();
+        return SOFTBUS_OK;
+    }
+
+    LinkUnlock();
+    LLOGE("request item not found, channelId=%d", channelId);
+    return SOFTBUS_ERR;
+}
+
+static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pRequestId,
+                                          struct WifiDirectConnectInfo *wifiDirectInfo)
 {
     P2pLinkReqList *item = NULL;
     P2pLinkReqList *next = NULL;
@@ -370,7 +411,7 @@ static int32_t GetP2pLinkReqParam(uint32_t authRequestId, int32_t p2pRequestId,
 
 static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reason)
 {
-    LLOGI("requestId:%d, reason:%d", requestId, reason);
+    LLOGI("type:%d, requestId:%d, reason:%d", type, requestId, reason);
     if (LinkLock() != 0) {
         LLOGE("lock fail");
         return;
@@ -391,6 +432,9 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
             (item->p2pInfo.p2pRequestId == requestId)) {
             isNodeExist = true;
             break;
+        } else if (type == ASYNC_RESULT_CHANNEL && item->proxyChannelInfo.requestId == requestId) {
+            isNodeExist = true;
+            break;
         }
     }
     if (!isNodeExist) {
@@ -408,6 +452,9 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
     }
     if (authId != INVAILD_AUTH_ID) {
         AuthCloseConn(authId);
+    }
+    if (item->proxyChannelInfo.channelId > 0) {
+        TransProxyPipelineCloseChannel(item->proxyChannelInfo.channelId);
     }
 }
 
@@ -445,6 +492,9 @@ static void NotifyLinkSucc(AsyncResultType type, int32_t requestId, LaneLinkInfo
             (item->p2pInfo.p2pRequestId == requestId)) {
             isNodeExist = true;
             break;
+        } else if (type == ASYNC_RESULT_CHANNEL && item->proxyChannelInfo.channelId == requestId) {
+            isNodeExist = true;
+            break;
         }
     }
     if (!isNodeExist) {
@@ -468,6 +518,9 @@ static void NotifyLinkSucc(AsyncResultType type, int32_t requestId, LaneLinkInfo
     LinkUnlock();
     if (authId != INVAILD_AUTH_ID) {
         AuthCloseConn(authId);
+    }
+    if (item->proxyChannelInfo.channelId > 0) {
+        TransProxyPipelineCloseChannelDelay(item->proxyChannelInfo.channelId);
     }
 FAIL:
     if (cb.OnLaneLinkSuccess != NULL) {
@@ -515,7 +568,7 @@ static void OnAuthConnOpened(uint32_t authRequestId, int64_t authId)
     struct DefaultNegotiateChannel channel;
     DefaultNegotiateChannelConstructor(&channel, authId);
     info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel;
-    if (GetP2pLinkReqParam(authRequestId, info.requestId, &info) != SOFTBUS_OK) {
+    if (GetP2pLinkReqParamByAuthId(authRequestId, info.requestId, &info) != SOFTBUS_OK) {
         LLOGE("set p2p link param fail");
         goto FAIL;
     }
@@ -541,7 +594,7 @@ static void OnAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)
 }
 
 static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, uint32_t laneLinkReqId,
-    const char *networkId, bool networkDelegate, int32_t pid, const LaneLinkCb *callback)
+    int32_t channelRequestId, const char *networkId, bool networkDelegate, int32_t pid, const LaneLinkCb *callback)
 {
     P2pLinkReqList *item = (P2pLinkReqList *)SoftBusCalloc(sizeof(P2pLinkReqList));
     if (item == NULL) {
@@ -563,6 +616,7 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
     item->p2pInfo.p2pModuleGenId = INVALID_P2P_REQUEST_ID;
     item->p2pInfo.networkDelegate = networkDelegate;
     item->p2pInfo.p2pRequestId = p2pRequestId;
+    item->proxyChannelInfo.requestId = channelRequestId;
     if (LinkLock() != 0) {
         SoftBusFree(item);
         LLOGE("lock fail, add conn request fail");
@@ -639,46 +693,66 @@ static int32_t OpenAuthToDisconnP2p(const char *networkId, uint32_t laneLinkReqI
     return SOFTBUS_OK;
 }
 
-static int32_t OpenBroadcastToConnP2p(
-    const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId, const LaneLinkCb *callback)
+static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
 {
-    struct WifiDirectConnectInfo info = { 0 };
+    LLOGI("channelRequestId=%d, channelId=%d", channelRequestId, channelId);
+    struct WifiDirectConnectInfo info;
     info.requestId = GetWifiDirectManager()->getRequestId();
     info.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
-    if (strcpy_s(info.remoteNetworkId, sizeof(info.remoteNetworkId), networkId) != EOK) {
-        return SOFTBUS_MEM_ERR;
-    }
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, info.remoteMac, sizeof(info.remoteMac) != SOFTBUS_OK)) {
-        LLOGE("get remote p2p mac fail");
-        return SOFTBUS_ERR;
-    }
-    struct FastConnectBcastChannel channel;
-    FastConnectBcastChannelConstructor(&channel, networkId);
-    info.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
-    info.fastConnect = true;
 
-    if (!channel.isEnable()) {
-        LLOGE("open broadcast to connect p2p failed, not enable");
-        return SOFTBUS_ERR;
+    struct FastConnectNegotiateChannel channel;
+    FastConnectNegotiateChannelConstructor(&channel, channelId);
+    info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel;
+
+    if (GetP2pLinkReqParamByChannelRequetId(channelRequestId, channelId, info.requestId, &info) != SOFTBUS_OK) {
+        LLOGE("get p2p link param fail");
+        FastConnectNegotiateChannelDestructor(&channel);
+        TransProxyPipelineCloseChannel(channelId);
+        NotifyLinkFail(ASYNC_RESULT_CHANNEL, channelRequestId, SOFTBUS_ERR);
+        return;
     }
 
-    if (AddConnRequestItem(INVAILD_AUTH_ID, info.requestId, laneLinkReqId, networkId, networkDelegate, pid, callback) !=
-        SOFTBUS_OK) {
-        LLOGE("add new conn node fail");
-        FastConnectBcastChannelDestructor(&channel);
-        return SOFTBUS_ERR;
-    }
-
-    struct WifiDirectConnectCallback wifiDirectCallback = {
+    struct WifiDirectConnectCallback callback = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
-    if (GetWifiDirectManager()->connectDevice(&info, &wifiDirectCallback) != SOFTBUS_OK) {
-        LLOGE("open broadcast to connect p2p failed, connect device failed");
-        FastConnectBcastChannelDestructor(&channel);
-        DelConnRequestItem(INVAILD_AUTH_ID, info.requestId);
-        return SOFTBUS_ERR;
+
+    LLOGI("p2p connectDevice request=%d", info.requestId);
+    int32_t ret = GetWifiDirectManager()->connectDevice(&info, &callback);
+    FastConnectNegotiateChannelDestructor(&channel);
+    if (ret != SOFTBUS_OK) {
+        LLOGE("connect p2p device fail");
+        NotifyLinkFail(ASYNC_RESULT_CHANNEL, channelRequestId, SOFTBUS_ERR);
     }
+}
+
+static void OnProxyChannelOpenFailed(int32_t channelRequestId, int32_t reason)
+{
+    NotifyLinkFail(ASYNC_RESULT_CHANNEL, channelRequestId, reason);
+}
+
+static int32_t OpenProxyChannelToConnP2p(const char *networkId, int32_t pid, bool networkDelegate,
+                                         uint32_t laneLinkReqId, const LaneLinkCb *callback)
+{
+    LLOGI("enter");
+    TransProxyPipelineChannelOption option = {
+        .bleDirect = true,
+    };
+    ITransProxyPipelineCallback channelCallback = {
+        .onChannelOpened = OnProxyChannelOpened,
+        .onChannelOpenFailed = OnProxyChannelOpenFailed,
+    };
+    int32_t requestId = TransProxyPipelineGenRequestId();
+    int32_t ret = TransProxyPipelineOpenChannel(requestId, networkId, &option, &channelCallback);
+    LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "open channel failed, ret=%d", ret);
+    CLOGI("requestId=%d", requestId);
+
+    ret = AddConnRequestItem(0, 0, laneLinkReqId, requestId, networkId, networkDelegate, pid, callback);
+    if (ret != SOFTBUS_OK) {
+        LLOGE("add new connect node failed");
+        return ret;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -693,10 +767,9 @@ static int32_t OpenAuthToConnP2p(const char *networkId, int32_t pid,
         return SOFTBUS_ERR;
     }
     uint32_t authRequestId = AuthGenRequestId();
-    if (AddConnRequestItem(authRequestId, 0, laneLinkReqId, networkId, networkDelegate, pid, callback) != SOFTBUS_OK) {
-        LLOGE("add new conn node fail");
-        return SOFTBUS_ERR;
-    }
+    int32_t ret = AddConnRequestItem(authRequestId, 0, laneLinkReqId, 0, networkId, networkDelegate, pid, callback);
+    LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "add new connect node failed");
+
     AuthConnCallback cb = {
         .onConnOpened = OnAuthConnOpened,
         .onConnOpenFailed = OnAuthConnOpenFailed
@@ -732,7 +805,7 @@ static int32_t LnnP2pInit(void)
 }
 
 int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
-    const LaneLinkCb *callback)
+                      const LaneLinkCb *callback)
 {
     LNN_CHECK_AND_RETURN_RET_LOG(networkId && callback, SOFTBUS_ERR, "invalid null network id or callback");
     if (g_p2pLinkList == NULL) {
@@ -744,42 +817,43 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, 
         return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
     }
 
-    char uuid[UDID_BUF_LEN] = { 0 };
+    char uuid[UUID_BUF_LEN] = { 0 };
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
         LLOGE("get peer uuid fail");
         return SOFTBUS_ERR;
     }
 
     if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
-        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, false) ||
-        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, false)) {
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
         return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
     }
 
     uint64_t local = 0;
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &local);
     if (ret != SOFTBUS_OK) {
-        LLOGE("get local feature cal failed, error=%u, local=%u", ret, local);
+        LLOGE("get local feature capa failed, error=%u, local=%u", ret, local);
         return ret;
     }
     uint64_t remote = 0;
-    ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &local);
+    ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &remote);
     if (ret != SOFTBUS_OK) {
-        LLOGE("get remote feature cal failed, error=%u, remote=%u", ret, local);
+        LLOGE("get remote feature capa failed, error=%u, remote=%u", ret, remote);
         return ret;
     }
 
-    if (((local & (1 << BIT_ADV_P2P_CONNECT_CAPABILITY)) == 0) ||
-        ((remote & (1 << BIT_ADV_P2P_CONNECT_CAPABILITY)) == 0)) {
-        LLOGW("adv p2p connect capa disable, local=%u, remote=%u", local, remote);
+    if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0) ||
+        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0)) {
+        LLOGI("open auth to connect p2p, local=%u, remot=%u", local, remote);
         return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
     }
-    ret = OpenBroadcastToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+
+    LLOGI("open channel to connect p2p");
+    ret = OpenProxyChannelToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
     if (ret != SOFTBUS_OK) {
-        LLOGW("open broadcast to connect p2p failed, ret=%d", ret);
+        LLOGE("open channel to connect p2p failed, backward to auth", ret);
         return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
     }
-    LLOGI("open broadcast to connect p2p");
     return SOFTBUS_OK;
 }
 
