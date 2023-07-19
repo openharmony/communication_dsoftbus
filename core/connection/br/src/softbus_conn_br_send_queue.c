@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -28,46 +29,23 @@
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 
-#define HIGH_PRIORITY_DEFAULT_LIMIT   32
-#define MIDDLE_PRIORITY_DEFAULT_LIMIT 32
-#define LOW_PRIORITY_DEFAULT_LIMIT    32
-#define WAIT_QUEUE_BUFFER_PERIOD_LEN  2
-
-typedef enum {
-    HIGH_PRIORITY = 0,
-    MIDDLE_PRIORITY,
-    LOW_PRIORITY,
-    QUEUE_NUM_PER_PID,
-} QueuePriority;
-
-typedef struct {
-    ListNode node;
-    int32_t pid;
-    LockFreeQueue *queue[QUEUE_NUM_PER_PID];
-} BrQueue;
-
-static const uint32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
-    HIGH_PRIORITY_DEFAULT_LIMIT,
-    MIDDLE_PRIORITY_DEFAULT_LIMIT,
-    LOW_PRIORITY_DEFAULT_LIMIT,
-};
 static LIST_HEAD(g_brQueueList);
 static SoftBusMutex g_brQueueLock;
-static BrQueue *g_innerQueue = NULL;
+static ConnectionQueue *g_innerQueue = NULL;
 
 static SoftBusCond g_sendWaitCond;
 static SoftBusCond g_sendCond;
 
-static BrQueue *CreateBrQueue(int32_t pid)
+static ConnectionQueue *CreateBrQueue(int32_t pid)
 {
-    BrQueue *queue = (BrQueue *)SoftBusCalloc(sizeof(BrQueue));
+    ConnectionQueue *queue = (ConnectionQueue *)SoftBusCalloc(sizeof(ConnectionQueue));
     if (queue == NULL) {
         return NULL;
     }
     queue->pid = pid;
     int32_t i;
     for (i = 0; i < QUEUE_NUM_PER_PID; i++) {
-        queue->queue[i] = CreateQueue(QUEUE_LIMIT[i]);
+        queue->queue[i] = CreateQueue(GetQueueLimit(i));
         if (queue->queue[i] == NULL) {
             goto ERR_RETURN;
         }
@@ -81,7 +59,7 @@ ERR_RETURN:
     return NULL;
 }
 
-static void DestroyBrQueue(BrQueue *queue)
+static void DestroyBrQueue(ConnectionQueue *queue)
 {
     if (queue == NULL) {
         return;
@@ -102,46 +80,6 @@ static int32_t GetPriority(int32_t flag)
         default:
             return LOW_PRIORITY;
     }
-}
-
-static int32_t BrSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_t timeMillis)
-{
-#define USECTONSEC 1000LL
-    if (timeMillis == 0) {
-        return SoftBusCondWait(cond, mutex, NULL);
-    }
-    SoftBusSysTime now;
-    if (SoftBusGetTime(&now) != SOFTBUS_OK) {
-        CLOGE("BrSoftBusCondWait SoftBusGetTime failed");
-        return SOFTBUS_ERR;
-    }
-    int64_t time = (int64_t)(now.sec * USECTONSEC * USECTONSEC + now.usec + timeMillis * USECTONSEC);
-    SoftBusSysTime tv;
-    tv.sec = time / USECTONSEC / USECTONSEC;
-    tv.usec = time % (USECTONSEC * USECTONSEC);
-    return SoftBusCondWait(cond, mutex, &tv);
-}
-
-static int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen, int32_t pid)
-{
-#define WAIT_QUEUE_DELAY 1000
-    uint32_t queueCount = 0;
-    while (true) {
-        if (QueueCountGet(lockFreeQueue, &queueCount) != 0) {
-            CLOGE("wait get queue count fail");
-            break;
-        }
-        CLOGI("br pid=%d, queue count=%d", pid, queueCount);
-        if (queueCount < (maxLen - diffLen)) {
-            break;
-        }
-        CLOGI("Wait g_sendWaitCond");
-        if (BrSoftBusCondWait(&g_sendWaitCond, &g_brQueueLock, WAIT_QUEUE_DELAY) != SOFTBUS_OK) {
-            CLOGE("wait queue length cond wait fail");
-            return SOFTBUS_ERR;
-        }
-    }
-    return SOFTBUS_OK;
 }
 
 bool ConnBrIsQueueEmpty(void)
@@ -171,7 +109,8 @@ int32_t ConnBrEnqueueNonBlock(const void *msg)
     int32_t ret = SOFTBUS_ERR;
     bool isListEmpty = true;
     if (queueNode->pid == 0 && queueNode->isInner) {
-        ret = WaitQueueLength(g_innerQueue->queue[priority], QUEUE_LIMIT[priority], WAIT_QUEUE_BUFFER_PERIOD_LEN, 0);
+        ret = WaitQueueLength(g_innerQueue->queue[priority], GetQueueLimit(priority), WAIT_QUEUE_BUFFER_PERIOD_LEN,
+            &g_sendWaitCond, &g_brQueueLock);
         if (ret == SOFTBUS_OK) {
             ret = QueueMultiProducerEnqueue(g_innerQueue->queue[priority], msg);
         }
@@ -181,15 +120,15 @@ int32_t ConnBrEnqueueNonBlock(const void *msg)
         isListEmpty = false;
     }
     LockFreeQueue *lockFreeQueue = NULL;
-    BrQueue *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_brQueueList, BrQueue, node) {
+    ConnectionQueue *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_brQueueList, ConnectionQueue, node) {
         if (item->pid == queueNode->pid) {
             lockFreeQueue = item->queue[priority];
             break;
         }
     }
     if (lockFreeQueue == NULL) {
-        BrQueue *newQueue = CreateBrQueue(queueNode->pid);
+        ConnectionQueue *newQueue = CreateBrQueue(queueNode->pid);
         if (newQueue == NULL) {
             CLOGE("br enqueue create queue fail");
             goto END;
@@ -197,7 +136,8 @@ int32_t ConnBrEnqueueNonBlock(const void *msg)
         ListTailInsert(&g_brQueueList, &(newQueue->node));
         lockFreeQueue = newQueue->queue[priority];
     } else {
-        ret = WaitQueueLength(lockFreeQueue, QUEUE_LIMIT[priority], WAIT_QUEUE_BUFFER_PERIOD_LEN, queueNode->pid);
+        ret = WaitQueueLength(
+            lockFreeQueue, GetQueueLimit(priority), WAIT_QUEUE_BUFFER_PERIOD_LEN, &g_sendWaitCond, &g_brQueueLock);
         if (ret != SOFTBUS_OK) {
             goto END;
         }
@@ -214,33 +154,12 @@ END:
     return ret;
 }
 
-static int32_t GetMsg(BrQueue *queue, void **msg, bool *isFull, QueuePriority leastPriority)
-{
-    uint32_t queueCount;
-    for (uint32_t i = 0; i <= leastPriority; i++) {
-        if (QueueCountGet(queue->queue[i], &queueCount) != 0) {
-            CLOGE("GetMsg get queue count fail");
-            continue;
-        }
-        if (queueCount >= (QUEUE_LIMIT[i] - WAIT_QUEUE_BUFFER_PERIOD_LEN)) {
-            (*isFull) = true;
-        } else {
-            (*isFull) = false;
-        }
-        if (QueueSingleConsumerDequeue(queue->queue[i], msg) != 0) {
-            continue;
-        }
-        return SOFTBUS_OK;
-    }
-    return SOFTBUS_ERR;
-}
-
 int32_t ConnBrDequeueBlock(void **msg)
 {
     bool isFull = false;
     int32_t status = SOFTBUS_ERR;
-    BrQueue *item = NULL;
-    BrQueue *next = NULL;
+    ConnectionQueue *item = NULL;
+    ConnectionQueue *next = NULL;
 
     if (msg == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -253,7 +172,7 @@ int32_t ConnBrDequeueBlock(void **msg)
             status = SOFTBUS_OK;
             break;
         }
-        LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_brQueueList, BrQueue, node) {
+        LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_brQueueList, ConnectionQueue, node) {
             ListDelete(&(item->node));
             if (GetMsg(item, msg, &isFull, LOW_PRIORITY) == SOFTBUS_OK) {
                 ListTailInsert(&g_brQueueList, &(item->node));
