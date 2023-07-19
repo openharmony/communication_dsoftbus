@@ -114,7 +114,8 @@ if (defined(ohos_lite)) {
 }
 
 if (dsoftbus_feature_lnn_net) {
-  if (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble) {
+  if (support_bluetooth &&
+      (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
     bus_center_adapter_src +=
         [ "$adapter_bus_center_path/network/lnn_bt_monitor.c" ]
     bus_center_adapter_inc += [

@@ -45,6 +45,13 @@ if (defined(global_parts_info) &&
   softbus_os_account = false
 }
 
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_bluetooth)) {
+  support_bluetooth = false
+} else {
+  support_bluetooth = true
+}
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
