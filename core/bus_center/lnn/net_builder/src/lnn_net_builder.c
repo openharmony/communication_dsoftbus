@@ -1382,12 +1382,14 @@ static int32_t ProcessLeaveSpecific(const void *para)
     }
 
     int32_t rc;
+    bool deviceLeave = false;
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         if (strcmp(item->connInfo.peerNetworkId, msgPara->networkId) != 0 ||
             (item->connInfo.addr.type != msgPara->addrType &&
             msgPara->addrType != CONNECTION_ADDR_MAX)) {
             continue;
         }
+        deviceLeave = true;
         rc = LnnSendLeaveRequestToConnFsm(item);
         if (rc == SOFTBUS_OK) {
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
@@ -1395,6 +1397,33 @@ static int32_t ProcessLeaveSpecific(const void *para)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
             "send leave LNN msg to connection fsm[id=%u] result: %d", item->id, rc);
     }
+
+    if (deviceLeave) {
+        SoftBusFree((void*)msgPara);
+        return SOFTBUS_OK;
+    }
+
+    do {
+        NodeInfo nodeInfo = {0};
+        if (LnnGetRemoteNodeInfoById(msgPara->networkId, CATEGORY_NETWORK_ID, &nodeInfo)) {
+            break;
+        }
+
+        if (nodeInfo.deviceInfo.deviceTypeId != TYPE_PC_ID ||
+            strcmp(nodeInfo.networkId, nodeInfo.deviceInfo.deviceUdid) != 0) {
+            break;
+        }
+
+        (void)LnnClearDiscoveryType(&nodeInfo, LnnConvAddrTypeToDiscType(msgPara->addrType));
+        if (nodeInfo.discoveryType != 0) {
+            LLOGI("pc without softbus has another discovery type");
+            break;
+        }
+
+        LLOGI("pc without softbus offline");
+        DeleteFromProfile(nodeInfo.deviceInfo.deviceUdid);
+        LnnRemoveNode(nodeInfo.deviceInfo.deviceUdid);
+    } while (false);
     SoftBusFree((void *)msgPara);
     return SOFTBUS_OK;
 }

@@ -18,8 +18,11 @@
 
 #include <stdint.h>
 
+#include "common_list.h"
 #include "message_handler.h"
 #include "softbus_error_code.h"
+#include "softbus_queue.h"
+#include "softbus_adapter_thread.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,6 +31,9 @@ extern "C" {
 #define COMPARE_SUCCESS 0
 #define COMPARE_FAILED  1
 #define MAX_DATA_LEN (40 * 1000)
+#define WAIT_QUEUE_BUFFER_PERIOD_LEN 2
+#define QUEUE_NUM_PER_PID            3
+
 // provide remove event compare function field
 typedef struct {
     SoftBusHandler handler;
@@ -39,6 +45,19 @@ typedef struct {
     uint32_t capacity;
     uint32_t length;
 } LimitedBuffer;
+
+typedef struct {
+    ListNode node;
+    int32_t pid;
+    LockFreeQueue *queue[QUEUE_NUM_PER_PID];
+} ConnectionQueue;
+
+typedef enum {
+    HIGH_PRIORITY = 0,
+    MIDDLE_PRIORITY,
+    LOW_PRIORITY,
+    PRIORITY_BOUNDARY,
+} QueuePriority;
 
 int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *));
 void ConvertAnonymizeMacAddress(char *outAnomize, uint32_t anomizeLen, const char *mac, uint32_t macLen);
@@ -52,7 +71,13 @@ void ConnRemoveMsgFromLooper(
 
 int32_t ConnNewLimitedBuffer(LimitedBuffer **outLimiteBuffer, uint32_t capacity);
 void ConnDeleteLimitedBuffer(LimitedBuffer **limiteBuffer);
+
+int32_t WaitQueueLength(const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen, SoftBusCond *cond,
+    SoftBusMutex *mutex);
+int32_t GetMsg(ConnectionQueue *queue, void **msg, bool *isFull, QueuePriority leastPriority);
+uint32_t GetQueueLimit(int32_t index);
+
 #ifdef __cplusplus
 }
-#endif /* __clpusplus */
+#endif /* __cplusplus */
 #endif /* SOFTBUS_CONN_COMMON_H  */
