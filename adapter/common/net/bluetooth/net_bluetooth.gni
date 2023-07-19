@@ -18,7 +18,6 @@ adapter_ble_inc = [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common",
-  "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
 ]
 adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
@@ -30,5 +29,3 @@ adapter_ble_src = [
 ]
 adapter_net_br_src = [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
 adapter_ble_external_deps = [ "bluetooth:btframework" ]
-compatible_ble_deps =
-    [ "//foundation/communication/bluetooth/frameworks/inner:btframework" ]

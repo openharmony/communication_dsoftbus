@@ -23,8 +23,8 @@
 #include "softbus_log.h"
 #include "softbus_type_def.h"
 
-#include "ohos_bt_def.h"
-#include "ohos_bt_gatt_client.h"
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_gatt_client.h"
 
 #define APP_UUID_LEN 2
 #define INVALID_ID   (-1)

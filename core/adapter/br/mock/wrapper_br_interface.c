@@ -15,9 +15,9 @@
 #include "wrapper_br_interface.h"
 
 #include "message_handler.h"
-#include "ohos_bt_def.h"
-#include "ohos_bt_gap.h"
-#include "ohos_bt_spp.h"
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_gap.h"
+#include "c_header/ohos_bt_spp.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"

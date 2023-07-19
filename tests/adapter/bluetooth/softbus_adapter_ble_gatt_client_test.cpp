@@ -18,7 +18,7 @@
 #include <cstdint>
 
 #include "bluetooth_mock.h"
-#include "ohos_bt_def.h"
+#include "c_header/ohos_bt_def.h"
 #include "softbus_adapter_ble_gatt_client.h"
 #include "softbus_error_code.h"
 

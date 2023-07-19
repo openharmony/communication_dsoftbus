@@ -17,8 +17,8 @@
 #include "gtest/gtest.h"
 
 #include "bluetooth_mock.h"
-#include "ohos_bt_def.h"
-#include "ohos_bt_gatt_server.h"
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_gatt_server.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_error_code.h"
 

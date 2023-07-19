@@ -17,10 +17,7 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 br_adapter_src =
     [ "$dsoftbus_root_path/core/adapter/br/mock/wrapper_br_interface.c" ]
 
-br_adapter_inc = [
-  "$dsoftbus_root_path/core/adapter/br/include",
-  "//foundation/communication/bluetooth/interfaces/innerkits/native_c/include",
-]
+br_adapter_inc = [ "$dsoftbus_root_path/core/adapter/br/include" ]
 
 bus_center_core_adapter_src = [
   "$dsoftbus_root_path/core/adapter/bus_center/src/bus_center_adapter.c",
