@@ -14,7 +14,6 @@
 import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-br_connection_deps = []
 br_connection_inc = br_adapter_inc
 if (dsoftbus_feature_conn_br == false) {
   br_connection_src =

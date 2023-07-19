@@ -27,8 +27,8 @@ dsoftbus_server_common_inc =
     auth_server_inc + bus_center_server_inc + conn_manager_inc +
     disc_server_inc + trans_session_inc + softbus_permission_inc
 dsoftbus_server_common_deps =
-    auth_server_deps + bus_center_server_deps + conn_manager_deps +
-    disc_server_deps + trans_session_deps + softbus_permission_deps
+    auth_server_deps + bus_center_server_deps + disc_server_deps +
+    trans_session_deps + softbus_permission_deps
 
 if (defined(ohos_lite)) {
   copy("permission_json") {
@@ -74,6 +74,7 @@ if (defined(ohos_lite)) {
         ]
       }
       deps = dsoftbus_server_common_deps
+      deps += conn_compatible_external_deps
       deps += [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
@@ -116,6 +117,7 @@ if (defined(ohos_lite)) {
       ]
       cflags_cc = cflags
       deps = dsoftbus_server_common_deps
+      deps += conn_compatible_external_deps
       deps += [
         ":permission_json",
         "$dsoftbus_root_path/adapter:softbus_adapter",
