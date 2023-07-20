@@ -938,6 +938,11 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
     return SOFTBUS_OK;
 }
 
+void LnnUpdateStateVersion()
+{
+    return UpDateStateVersionAndStore();
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
