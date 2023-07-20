@@ -52,3 +52,14 @@ void ProcessCipherKeySyncInfo(const void *json, const char *networkId)
     (void)networkId;
     return;
 }
+
+void LoadBleBroadcastKey(void)
+{
+    return;
+}
+
+bool IsCipherManagerFindKey(const char *udid)
+{
+    (void)udid;
+    return false;
+}

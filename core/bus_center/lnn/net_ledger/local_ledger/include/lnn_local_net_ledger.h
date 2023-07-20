@@ -46,6 +46,7 @@ void LnnDeinitLocalLedger(void);
 
 const NodeInfo *LnnGetLocalNodeInfo(void);
 int32_t LnnUpdateLocalNetworkId(const void *id);
+void LnnUpdateStateVersion();
 
 #ifdef __cplusplus
 }
