@@ -38,6 +38,7 @@ static FilePathInfo g_filePath[LNN_FILE_ID_MAX] = {
     { LNN_FILE_ID_LOCAL_DEVICE, "/dsoftbus/localdevinfo" },
     { LNN_FILE_ID_REMOTE_DEVICE, "/dsoftbus/deviceinfo" },
     { LNN_FILE_ID_COMM_KEY, "/dsoftbus/devicecommkey" },
+    { LNN_FILE_ID_BROADCAST_KEY, "/dsoftbus/broadcastkey" },
 };
 
 static int32_t InitStorageConfigPath(void)
