@@ -16,7 +16,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ohos_bt_gatt.h"
+#include "c_header/ohos_bt_gatt.h"
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"

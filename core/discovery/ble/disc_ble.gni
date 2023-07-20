@@ -32,14 +32,18 @@ ble_discovery_inc = [
 
 ble_discovery_deps = []
 
-if (dsoftbus_feature_disc_ble == false) {
+if (!support_bluetooth) {
   ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
 } else {
-  ble_discovery_src = [
-    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
-    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
-    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
-  ]
+  if (!dsoftbus_feature_disc_ble) {
+    ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
+  } else {
+    ble_discovery_src = [
+      "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
+      "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
+      "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
+    ]
+  }
 }
 
 if (enhanced_share) {

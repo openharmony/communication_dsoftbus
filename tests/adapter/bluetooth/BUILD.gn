@@ -36,7 +36,8 @@ if (!defined(ohos_lite)) {
     "hilog:libhilog",
   ]
 
-  if (dsoftbus_feature_conn_ble == true || dsoftbus_feature_conn_br == true) {
+  if (support_bluetooth &&
+      (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
     bt_test_external_deps += [ "bluetooth:btframework" ]
   }
 
@@ -93,7 +94,8 @@ if (!defined(ohos_lite)) {
   group("unittest") {
     testonly = true
     deps = []
-    if (dsoftbus_feature_conn_ble == true || dsoftbus_feature_conn_br == true) {
+    if (support_bluetooth &&
+        (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
       deps += [
         ":AdapterBleGattClientTest",
         ":AdapterBleGattServerTest",
