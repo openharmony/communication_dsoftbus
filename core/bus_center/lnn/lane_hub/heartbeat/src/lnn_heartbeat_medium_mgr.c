@@ -25,6 +25,7 @@
 #include "lnn_ble_heartbeat.h"
 #include "lnn_ble_lpdevice.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
@@ -343,6 +344,10 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BLE);
     if ((ret = LnnSaveRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         LLOGE("don't support ble direct online because update device info fail ret = %d", ret);
+        return true;
+    }
+    if (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid)) {
+        LLOGE("don't support ble direct online because broadcast key");
         return true;
     }
     LLOGI("support ble direct online");
