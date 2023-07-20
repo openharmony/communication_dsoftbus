@@ -20,10 +20,10 @@ group("unittest") {
     "common/unittest:SoftbusConnCommonTest",
     "manager:ConnectionManagerTest",
   ]
-  if (dsoftbus_feature_conn_br) {
+  if (support_bluetooth && dsoftbus_feature_conn_br) {
     deps += [ "br:ConnectionBrTest" ]
   }
-  if (dsoftbus_feature_conn_ble) {
+  if (support_bluetooth && dsoftbus_feature_conn_ble) {
     deps += [ "ble:ConnectionBleTest" ]
   }
   if (dsoftbus_feature_conn_tcp) {

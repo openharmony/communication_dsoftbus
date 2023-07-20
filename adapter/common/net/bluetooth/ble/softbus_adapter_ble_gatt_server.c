@@ -22,8 +22,8 @@
 #include "softbus_log.h"
 #include "softbus_type_def.h"
 
-#include "ohos_bt_def.h"
-#include "ohos_bt_gatt_server.h"
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_gatt_server.h"
 
 #define WAIT_HAL_REG_TIME 5 // ms
 #define WAIT_HAL_REG_RETRY 3
