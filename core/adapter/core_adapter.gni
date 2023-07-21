@@ -22,7 +22,6 @@ br_adapter_inc = [ "$dsoftbus_root_path/core/adapter/br/include" ]
 bus_center_core_adapter_src = [
   "$dsoftbus_root_path/core/adapter/bus_center/src/bus_center_adapter.c",
   "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_deviceinfo_to_profile_virtual.c",
-  "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter.c",
   "$dsoftbus_root_path/core/adapter/transmission/src/data_bus_native_virtual.c",
   "$dsoftbus_root_path/core/adapter/authentication/src/lnn_extdata_config_virtual.c",
 ]
@@ -70,6 +69,7 @@ if (defined(ohos_lite)) {
   if (softbus_os_account == true) {
     bus_center_core_adapter_src += [
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
+      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter.cpp",
     ]
     bus_center_core_adapter_external_deps += [
       "os_account:libaccountkits",
