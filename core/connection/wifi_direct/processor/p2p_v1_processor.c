@@ -40,6 +40,7 @@
 
 #define LOG_LABEL "[WifiDirect] P2pV1Processor: "
 
+#define P2P_VERSION 2
 #define COMMON_BUFFER_LEN 256
 #define REMOVE_LINK_REQUEST_ID 555
 
@@ -101,7 +102,6 @@ static bool IsNeedDhcp(const char *gcIp, struct NegotiateMessage *msg);
 static int32_t CreateLink(struct WifiDirectConnectInfo *connectInfo)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(connectInfo, SOFTBUS_INVALID_PARAM, LOG_LABEL "connect info is null");
-    GetP2pV1Processor()->fastConnect.started = false;
     GetP2pV1Processor()->needReply = false;
     GetP2pV1Processor()->currentRequestId = connectInfo->requestId;
 
@@ -226,15 +226,9 @@ static int32_t ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, stru
 static int32_t OnOperationEvent(int32_t requestId, int32_t result)
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
-    CLOGI(LOG_LABEL "requestId=%d result=%d currentState=%d fastConnect=%d",
-        requestId, result, self->currentState, self->fastConnect.started);
+    CLOGI(LOG_LABEL "requestId=%d result=%d currentState=%d", requestId, result, self->currentState);
 
     if (result != OK) {
-        if (self->fastConnect.started) {
-            self->fastConnect.started = false;
-            return result;
-        }
-
         if (self->currentMsg) {
             return ProcessFailureResponse(self->currentMsg, result);
         }
@@ -1392,15 +1386,6 @@ static int32_t OnCreateGroupComplete(void)
     NotifyNewClient(self->currentRequestId, IF_NAME_P2P, remoteMac);
     StartAuthListening(localIp);
 
-    if (self->fastConnect.started) {
-        CLOGI(LOG_LABEL "group created in fast connecting");
-        if (self->fastConnect.sessionCreated) {
-            CLOGI(LOG_LABEL "fast connect session already created");
-            return self->fastConnect.sendGroupConfig();
-        }
-        return SOFTBUS_OK;
-    }
-
     struct NegotiateMessage *output = NULL;
     if (self->needReply) {
         self->needReply = false;
@@ -1678,59 +1663,6 @@ static bool IsNeedDhcp(const char *gcIp, struct NegotiateMessage *msg)
     return false;
 }
 
-static int FastConnectCreateLink(struct WifiDirectConnectInfo *connectInfo, enum WifiDirectRole *finalRole,
-    const struct WDFastCfg *remoteCfg)
-{
-    CLOGE(LOG_LABEL "p2pv1 not supported yet");
-    (void)connectInfo;
-    (void)finalRole;
-    (void)remoteCfg;
-    return SOFTBUS_ERR;
-}
-
-static int FastConnectSendGroupConfig(void)
-{
-    CLOGE(LOG_LABEL "p2pv1 not supported yet");
-    return SOFTBUS_ERR;
-}
-
-static int OnFastConnectBcastDataReceived(struct WifiDirectConnectInfo *connectInfo,
-    enum WifiDirectRole peerRole, struct WDFastCfg *remoteCfg)
-{
-    CLOGE(LOG_LABEL "p2pv1 not supported yet");
-    (void)connectInfo;
-    (void)peerRole;
-    (void)remoteCfg;
-    return SOFTBUS_ERR;
-}
-
-static int OnFastConnectSessionCreated(struct WifiDirectNegotiateChannel *channel)
-{
-    CLOGE(LOG_LABEL "p2pv1 not supported yet");
-    (void)channel;
-    return SOFTBUS_ERR;
-}
-
-static int OnFastConnectConfigRecvd(struct NegotiateMessage *msg)
-{
-    CLOGE(LOG_LABEL "p2pv1 not supported yet");
-    (void)msg;
-    return SOFTBUS_ERR;
-}
-
-static void OnFastConnectClientConnected(const char *remoteMac)
-{
-    CLOGE(LOG_LABEL "p2pv1 not supported yet");
-    (void)remoteMac;
-}
-
-static void FastConnectStop(bool destroyGroup, const char *remoteMac)
-{
-    CLOGE(LOG_LABEL "p2pv1 not supported yet");
-    (void)destroyGroup;
-    (void)remoteMac;
-}
-
 static struct P2pV1Processor g_processor = {
     .needReply = false,
     .pendingRequestMsg = NULL,
@@ -1742,27 +1674,6 @@ static struct P2pV1Processor g_processor = {
     .onOperationEvent = OnOperationEvent,
     .processUnhandledRequest = ProcessUnhandledRequest,
     .onReversal = OnReversal,
-    .initBasicInnerLink = InitBasicInnerLink,
-    .saveCurrentMessage = SaveCurrentMessage,
-    .setInnerLinkDeviceId = SetInnerLinkDeviceId,
-    .createGroup = CreateGroup,
-    .connectGroup = ConnectGroup,
-    .reuseP2p = ReuseP2p,
-    .removeLink = RemoveLink,
-    .notifyNewClient = NotifyNewClient,
-    .cancelNewClient = CancelNewClient,
-    .getGoMac = GetGoMac,
-
-    .fastConnect.createLink = FastConnectCreateLink,
-    .fastConnect.onBcastDataReceived = OnFastConnectBcastDataReceived,
-    .fastConnect.onSessionCreated = OnFastConnectSessionCreated,
-    .fastConnect.sendGroupConfig = FastConnectSendGroupConfig,
-    .fastConnect.onConfigRecvd = OnFastConnectConfigRecvd,
-    .fastConnect.onClientConnected = OnFastConnectClientConnected,
-    .fastConnect.stop = FastConnectStop,
-    .fastConnect.started = false,
-    .fastConnect.sessionCreated = false,
-
     .name = "P2pV1Processor",
 };
 

@@ -1172,13 +1172,14 @@ NO_SANITIZE("cfi") int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthCon
 bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection)
 {
     LNN_CHECK_AND_RETURN_RET_LOG(uuid, false, "invalid null uuid");
-    LNN_CHECK_AND_RETURN_RET_LOG(uuid[0] == '\0', false, "invalid empty uuid");
+    LNN_CHECK_AND_RETURN_RET_LOG(uuid[0] != '\0', false, "invalid empty uuid");
 
-    AuthConnInfo *connInfo = NULL;
-    if (GetAuthConnInfoByUuid(uuid, type, connInfo) != SOFTBUS_OK) {
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+    if (GetAuthConnInfoByUuid(uuid, type, &connInfo) != SOFTBUS_OK) {
         return false;
     }
-    return checkConnection ? CheckActiveAuthConnection(connInfo) : true;
+    return checkConnection ? CheckActiveAuthConnection(&connInfo) : true;
 }
 
 NO_SANITIZE("cfi")
