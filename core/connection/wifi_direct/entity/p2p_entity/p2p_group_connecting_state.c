@@ -56,7 +56,7 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 {
     struct P2pEntity *entity = GetP2pEntity();
 
-    if (!groupInfo) {
+    if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "connect group failed");
         entity->stopNewClientTimer();
         entity->clearJoiningClient();
@@ -73,11 +73,12 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
 static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirectP2pConnectState state)
 {
+    struct P2pEntity *entity = GetP2pEntity();
+
     if (state == WIFI_DIRECT_P2P_CONNECTING) {
         CLOGI(LOG_LABEL "p2p connecting");
     } else if (state == WIFI_DIRECT_P2P_CONNECTED) {
         CLOGI(LOG_LABEL "p2p connected");
-        struct P2pEntity *entity = GetP2pEntity();
         if (entity->isNeedDhcp) {
             CLOGI(LOG_LABEL "wait connection change event in DHCP mode");
             return;
@@ -95,7 +96,6 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
         entity->notifyOperationComplete(SOFTBUS_OK);
     } else {
         CLOGI(LOG_LABEL "p2p connect failed");
-        struct P2pEntity *entity = GetP2pEntity();
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(ERROR_P2P_CONNECT_GROUP_FAILED);

@@ -43,7 +43,8 @@ static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEven
     }
 
     CLOGE(LOG_LABEL "create group timeout");
-    entity->isConnectStateChangeReceived = entity->isConnectionChangeReceived = false;
+    entity->isConnectionChangeReceived = false;
+    entity->isConnectStateChangeReceived = false;
     GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);
     GetP2pEntity()->notifyOperationComplete(ERROR_P2P_CREATE_GROUP_FAILED);
     GetP2pEntity()->changeState(P2P_ENTITY_STATE_AVAILABLE);
@@ -53,11 +54,12 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 {
     struct P2pEntity *entity = GetP2pEntity();
 
-    if (!groupInfo) {
+    if (groupInfo == NULL) {
         CLOGE(LOG_LABEL "create group error");
         entity->stopNewClientTimer();
         entity->clearJoiningClient();
-        entity->isConnectStateChangeReceived = entity->isConnectionChangeReceived = false;
+        entity->isConnectionChangeReceived = false;
+        entity->isConnectStateChangeReceived = false;
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(ERROR_P2P_CREATE_GROUP_FAILED);
         return;
@@ -69,7 +71,8 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
     if (entity->isConnectionChangeReceived && entity->isConnectStateChangeReceived) {
         CLOGE(LOG_LABEL "create group complete");
-        entity->isConnectStateChangeReceived = entity->isConnectionChangeReceived = false;
+        entity->isConnectionChangeReceived = false;
+        entity->isConnectStateChangeReceived = false;
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(SOFTBUS_OK);
         return;
@@ -90,13 +93,15 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
 
         if (entity->isConnectionChangeReceived && entity->isConnectStateChangeReceived) {
             CLOGE(LOG_LABEL "create group complete");
-            entity->isConnectStateChangeReceived = entity->isConnectionChangeReceived = false;
+            entity->isConnectionChangeReceived = false;
+            entity->isConnectStateChangeReceived = false;
             entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
             entity->notifyOperationComplete(SOFTBUS_OK);
         }
     } else {
         CLOGI(LOG_LABEL "create group error");
-        entity->isConnectStateChangeReceived = entity->isConnectionChangeReceived = false;
+        entity->isConnectionChangeReceived = false;
+        entity->isConnectStateChangeReceived = false;
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(SOFTBUS_OK);

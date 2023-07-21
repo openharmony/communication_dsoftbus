@@ -73,7 +73,7 @@ static int32_t SetCoexistRule(const char *rule)
         }
 
         struct CombinationHead *head = SoftBusCalloc(sizeof(*head));
-        if (!head) {
+        if (head == NULl) {
             CLOGE(LOG_LABEL "malloc head failed");
             continue;
         }
@@ -89,7 +89,7 @@ static int32_t SetCoexistRule(const char *rule)
             }
 
             struct CombinationEntry *entry = SoftBusMalloc(sizeof(*entry));
-            if (!entry) {
+            if (entry == NULL) {
                 CLOGE(LOG_LABEL "malloc entry failed");
                 continue;
             }
@@ -98,6 +98,7 @@ static int32_t SetCoexistRule(const char *rule)
             if (strcpy_s(entry->interface, sizeof(entry->interface), interface) != EOK) {
                 CLOGE(LOG_LABEL "copy interface failed");
                 SoftBusFree(entry);
+                entry = NULL;
                 continue;
             }
             ListTailInsert(&head->subList, &entry->node);
