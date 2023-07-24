@@ -73,7 +73,7 @@ static int32_t SetCoexistRule(const char *rule)
         }
 
         struct CombinationHead *head = SoftBusCalloc(sizeof(*head));
-        if (head == NULl) {
+        if (head == NULL) {
             CLOGE(LOG_LABEL "malloc head failed");
             continue;
         }
