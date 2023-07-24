@@ -111,7 +111,7 @@ static int32_t DestroyServer(struct P2pEntityState *self, struct WifiDirectConne
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
     struct P2pEntity *entity = GetP2pEntity();
-    if (!groupInfo) {
+    if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "no groupInfo");
         entity->stopNewClientTimer();
         entity->clearJoiningClient();

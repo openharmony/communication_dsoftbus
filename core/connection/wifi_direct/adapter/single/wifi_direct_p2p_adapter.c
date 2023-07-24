@@ -176,6 +176,7 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
     if (ret != WIFI_SUCCESS) {
         CLOGE(LOG_LABEL "get current group failed");
         SoftBusFree(groupInfo);
+        groupInfo = NULL;
         return SOFTBUS_ERR;
     }
 
@@ -185,6 +186,7 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
     if (ret != SOFTBUS_OK) {
         CLOGE(LOG_LABEL "convert mac addr to string failed");
         SoftBusFree(groupInfo);
+        groupInfo = NULL;
         return ret;
     }
     CLOGI(LOG_LABEL "groupName=%s, mac=%s, passphrase=%s, frequency=%d",
@@ -193,6 +195,7 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
     ret = sprintf_s(groupConfigString, *groupConfigStringSize, "%s\n%s\n%s\n%d",
                     groupInfo->groupName, macAddrString, groupInfo->passphrase, groupInfo->frequency);
     SoftBusFree(groupInfo);
+    groupInfo = NULL;
     if (ret < 0) {
         CLOGE(LOG_LABEL "convert mac addr to string failed");
         return SOFTBUS_ERR;
