@@ -24,6 +24,18 @@
 #include "softbus_log.h"
 #include "softbus_type_def.h"
 
+#define HIGH_PRIORITY_DEFAULT_LIMIT   32
+#define MIDDLE_PRIORITY_DEFAULT_LIMIT 32
+#define LOW_PRIORITY_DEFAULT_LIMIT    32
+
+#define MICROSECONDS 1000000
+
+static const int32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
+    HIGH_PRIORITY_DEFAULT_LIMIT,
+    MIDDLE_PRIORITY_DEFAULT_LIMIT,
+    LOW_PRIORITY_DEFAULT_LIMIT,
+};
+
 int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *))
 {
     SoftBusThreadAttr attr;
@@ -161,4 +173,73 @@ void ConnDeleteLimitedBuffer(LimitedBuffer **limiteBuffer)
     }
     SoftBusFree(tmp);
     *limiteBuffer = NULL;
+}
+
+static int32_t ConnectSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint32_t timeMillis)
+{
+#define USECTONSEC 1000LL
+    if (timeMillis == 0) {
+        return SoftBusCondWait(cond, mutex, NULL);
+    }
+    SoftBusSysTime now;
+    if (SoftBusGetTime(&now) != SOFTBUS_OK) {
+        CLOGE("BrSoftBusCondWait SoftBusGetTime failed");
+        return SOFTBUS_ERR;
+    }
+    now.sec += (now.usec + (timeMillis * USECTONSEC)) / MICROSECONDS;
+    now.usec = (now.usec + (timeMillis * USECTONSEC)) % MICROSECONDS;
+
+    return SoftBusCondWait(cond, mutex, &now);
+}
+
+int32_t WaitQueueLength(
+    const LockFreeQueue *lockFreeQueue, uint32_t maxLen, uint32_t diffLen, SoftBusCond *cond, SoftBusMutex *mutex)
+{
+#define WAIT_QUEUE_DELAY 1000
+    uint32_t queueCount = 0;
+    while (true) {
+        if (QueueCountGet(lockFreeQueue, &queueCount) != 0) {
+            CLOGE("wait get queue count fail");
+            break;
+        }
+        CLOGI("queue count=%d", queueCount);
+        if (queueCount < (maxLen - diffLen)) {
+            break;
+        }
+        if (ConnectSoftBusCondWait(cond, mutex, WAIT_QUEUE_DELAY) != SOFTBUS_OK) {
+            CLOGE("wait queue length cond wait fail");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GetMsg(ConnectionQueue *queue, void **msg, bool *isFull, QueuePriority leastPriority)
+{
+    uint32_t queueCount;
+    for (uint32_t i = 0; i <= leastPriority; i++) {
+        if (QueueCountGet(queue->queue[i], &queueCount) != 0) {
+            CLOGE("get queue count fail");
+            continue;
+        }
+        if ((int32_t)queueCount >= (QUEUE_LIMIT[i] - WAIT_QUEUE_BUFFER_PERIOD_LEN)) {
+            (*isFull) = true;
+        } else {
+            (*isFull) = false;
+        }
+        if (QueueSingleConsumerDequeue(queue->queue[i], msg) != 0) {
+            continue;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
+}
+
+uint32_t GetQueueLimit(int32_t index)
+{
+    if (index >= QUEUE_NUM_PER_PID || index < 0) {
+        CLOGE("invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return QUEUE_LIMIT[index];
 }
