@@ -175,7 +175,7 @@ static void SaveP2pChannel(struct WifiDirectNegotiateChannel *channel)
     struct InnerLink *link = GetLinkManager()->getLinkByDevice(remoteMac);
     CONN_CHECK_AND_RETURN_LOG(link, LOG_LABEL "link is null");
     struct WifiDirectNegotiateChannel *channelOld = link->getPointer(link, IL_KEY_NEGO_CHANNEL, NULL);
-    if (!channelOld) {
+    if (channelOld == NULL) {
         struct WifiDirectNegotiateChannel *channelNew = channel->duplicate(channel);
         link->putPointer(link, IL_KEY_NEGO_CHANNEL, (void **)&channelNew);
     }
@@ -218,7 +218,7 @@ static struct NegotiateMessage* GenerateNegotiateMessage(struct WifiDirectNegoti
                                                          const uint8_t *data, size_t size)
 {
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    if (!msg) {
+    if (msg == NULL) {
         CLOGE(LOG_LABEL "alloc msg failed");
         return NULL;
     }
@@ -280,7 +280,7 @@ static enum WifiDirectNegotiateCmdType GetNegotiateCmdType(struct NegotiateMessa
 
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
     char remoteDeviceId[UUID_BUF_LEN] = {0};
-    if (channel) {
+    if (channel != NULL) {
         channel->getDeviceId(channel, remoteDeviceId, sizeof(remoteDeviceId));
     }
     DumpCommandString(cmdType, remoteDeviceId);
@@ -297,7 +297,7 @@ static int32_t HandleNegotiationMessageWhenProcessorInvalid(struct NegotiateMess
 
     struct WifiDirectProcessor *processor =
         GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2);
-    if (!processor) {
+    if (processor == NULL) {
         CLOGE(LOG_LABEL "create processor failed");
         return ERROR_WIFI_DIRECT_NO_SUITABLE_PROCESSOR;
     }
@@ -315,7 +315,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
 
     int32_t ret = SOFTBUS_OK;
     struct NegotiateMessage *msg = GenerateNegotiateMessage(channel, data, len);
-    if (!msg) {
+    if (msg == NULL) {
         ret = ERROR_WIFI_DIRECT_UNPACK_DATA_FAILED;
         goto OUT;
     }
@@ -335,14 +335,14 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
     }
 
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getProcessorByNegotiateMessage(msg);
-    if (!processor) {
+    if (processor == NULL) {
         ret = HandleNegotiationMessageWhenProcessorInvalid(msg);
         goto OUT;
     }
 
     ret = self->context.currentState->handleNegotiateMessageFromRemote(processor, cmdType, msg);
 OUT:
-    if (msg) {
+    if (msg != NULL) {
         NegotiateMessageDelete(msg);
     }
     if (ret != SOFTBUS_OK) {
@@ -411,7 +411,7 @@ static void NegotiateSchedule(void)
 {
     struct WifiDirectCommand *command = GetWifiDirectCommandManager()->dequeueCommand();
 
-    if (!command) {
+    if (command == NULL) {
         return;
     }
 
@@ -449,7 +449,7 @@ static void RetryCommandAsync(void *data)
 static int32_t RetryCurrentCommand(void)
 {
     struct WifiDirectCommand *command = GetWifiDirectNegotiator()->context.currentCommand;
-    if (!command) {
+    if (command == NULL) {
         CLOGE(LOG_LABEL "current command is null");
         return SOFTBUS_ERR;
     }
@@ -601,7 +601,7 @@ static void HandleSuccess(struct NegotiateMessage *msg)
                 goto OUT;
             }
             struct InnerLink *innerLink = msg->get(msg, NM_KEY_INNER_LINK, NULL, NULL);
-            if (!innerLink) {
+            if (innerLink == NULL) {
                 CLOGE(LOG_LABEL "inner link is null");
                 goto OUT;
             }

@@ -120,7 +120,10 @@ static void NotifyNewClientJoining(struct WifiDirectConnectParams *params)
     CONN_CHECK_AND_RETURN_LOG(client, LOG_LABEL "malloc connecting client failed");
     ListInit(&client->node);
     client->requestId = params->requestId;
-    strcpy_s(client->remoteMac, sizeof(client->remoteMac), params->remoteMac);
+    int32_t ret = strcpy_s(client->remoteMac, sizeof(client->remoteMac), params->remoteMac);
+    if (ret != EOK) {
+        CLOGE(LOG_LABEL "copy remote mac failed");
+    }
     ListTailInsert(&self->joiningClientList, &client->node);
     self->joiningClientCount++;
     CLOGI(LOG_LABEL "joiningClientCount=%d", self->joiningClientCount);
@@ -309,6 +312,7 @@ static void OnClientJoinTimeout(void *data)
     CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
     ListDelete(&client->node);
     SoftBusFree(client);
+    client = NULL;
 
     struct WifiDirectConnectParams params;
     strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);

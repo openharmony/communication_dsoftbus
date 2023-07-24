@@ -47,7 +47,7 @@ static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEven
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
-    if (!groupInfo) {
+    if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "remove group complete");
         struct P2pEntity *entity = GetP2pEntity();
         entity->stopNewClientTimer();
