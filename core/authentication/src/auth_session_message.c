@@ -19,6 +19,7 @@
 #include <securec.h>
 
 #include "auth_common.h"
+#include "auth_request.h"
 #include "auth_connection.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
@@ -249,8 +250,13 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
     }
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE) {
         ALOGI("use bleInfo deviceIdHash build fastAuthInfo");
-        return (ConvertBytesToUpperCaseHexString(udidBuf, bufLen, info->connInfo.info.bleInfo.deviceIdHash,
-            UDID_SHORT_HASH_LEN_TEMP) == SOFTBUS_OK);
+        AuthRequest request = {0};
+        if (GetAuthRequestNoLock(info->requestId, &request) != SOFTBUS_OK) {
+            LLOGE("GetAuthRequest fail");
+            return false;
+        }
+        return (memcpy_s(udidBuf, bufLen, request.connInfo.info.bleInfo.deviceIdHash,
+            UDID_SHORT_HASH_HEX_STR) == EOK);
     }
     return false;
 }
@@ -750,7 +756,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
             ALOGE("v1 version strcpy networkid fail");
         }
     }
-    ProcessCipherKeySyncInfo(json, info->networkId);
+    ProcessCipherKeySyncInfo(json, info->deviceInfo.deviceUdid);
 
     // unpack p2p info
     OptInt(json, P2P_ROLE, &info->p2pInfo.p2pRole, -1);
