@@ -2160,7 +2160,7 @@ NO_SANITIZE("cfi") int32_t NodeInfoSync(void)
         return SOFTBUS_ERR;
     }
     if (LnnInitCipherKeyManager() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitOffline fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnInitCipherKeyManager fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
