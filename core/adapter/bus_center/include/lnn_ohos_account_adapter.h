@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int32_t GetOsAccountId(char *id, uint32_t *len);
+int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len);
 int64_t GetCurrentAccount(void);
 
 #ifdef __cplusplus
