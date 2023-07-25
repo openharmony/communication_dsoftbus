@@ -250,6 +250,7 @@ typedef struct {
 typedef enum {
     TYPE_NETWORK_ID = 0,  /**< Network ID change */
     TYPE_DEVICE_NAME,     /**< Device name change */
+    TYPE_NETWORK_INFO,    /**< Network Info change */
 } NodeBasicInfoType;
 
 /**
