@@ -49,7 +49,7 @@ NO_SANITIZE("cfi") int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t 
     }
     (void)memset_s(accountInfo, len * HEXIFY_UNIT_LEN, '0', len * HEXIFY_UNIT_LEN);
     uint32_t size = 0;
-    if (GetOsAccountId(accountInfo, &size) != SOFTBUS_OK) {
+    if (GetOsAccountId(accountInfo, len * HEXIFY_UNIT_LEN, &size) != SOFTBUS_OK) {
         LLOGE("get osAccountId fail");
         SoftBusFree(accountInfo);
         return SOFTBUS_ERR;
