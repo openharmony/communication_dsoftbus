@@ -44,6 +44,7 @@ static TypeInfo g_typeConvertMap[] = {
     {GET_TYPE_CAR, TYPE_CAR},
     {GET_TYPE_WATCH, TYPE_WATCH},
     {GET_TYPE_IPCAMERA, TYPE_IPCAMERA},
+    {GET_TYPE_2IN1, TYPE_2IN1},
 };
 
 static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_t outLen)
