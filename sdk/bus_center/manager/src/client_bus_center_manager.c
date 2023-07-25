@@ -989,7 +989,7 @@ NO_SANITIZE("cfi") int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *
         return SOFTBUS_ERR;
     }
 
-    if ((type < 0) || (type > TYPE_DEVICE_NAME)) {
+    if ((type < 0) || (type > TYPE_NETWORK_INFO)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged invalid type: %d", type);
         return SOFTBUS_INVALID_PARAM;
     }
