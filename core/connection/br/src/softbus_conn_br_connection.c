@@ -552,7 +552,7 @@ static void *ListenTask(void *arg)
     return NULL;
 }
 
-int32_t ConnBrStartServer()
+int32_t ConnBrStartServer(void)
 {
     static uint32_t traceIdGenerator = 0;
 
@@ -583,7 +583,7 @@ int32_t ConnBrStartServer()
     return SOFTBUS_OK;
 }
 
-int32_t ConnBrStopServer()
+int32_t ConnBrStopServer(void)
 {
     if (g_serverState == NULL) {
         CLOGE("stop br server, server is not started yet, skip stop action");

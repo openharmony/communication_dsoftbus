@@ -217,17 +217,14 @@ int32_t InitSoftBus(const char *pkgName)
                    "init softbus sdk fail. Package name is empty or length exceeds");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (SoftBusMutexInit(&g_pkgNameLock, NULL) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init pkgName failed");
         return SOFTBUS_LOCK_ERR;
     }
-
     if ((g_isInited == false) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
-
     if (SoftBusMutexLock(&g_isInitedLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -237,7 +234,6 @@ int32_t InitSoftBus(const char *pkgName)
         SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_OK;
     }
-
     if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_isInitedLock);
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddClientPkgName failed.");
@@ -247,12 +243,10 @@ int32_t InitSoftBus(const char *pkgName)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client timer init fail");
         goto EXIT;
     }
-
     if (ClientModuleInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ctx init fail");
         goto EXIT;
     }
-
     if (ClientStubInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "service init fail");
         goto EXIT;

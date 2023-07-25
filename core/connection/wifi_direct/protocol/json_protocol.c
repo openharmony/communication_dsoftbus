@@ -128,7 +128,8 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
 
     switch (self->readPos->type) {
         case cJSON_String: {
-            if (!GetJsonObjectStringItem(self->cJsonOfMsg, keyProperty->content, (char *)self->data, DEFAULT_CAPACITY)) {
+            if (!GetJsonObjectStringItem(self->cJsonOfMsg, keyProperty->content,
+                (char *)self->data, DEFAULT_CAPACITY)) {
                 CLOGE(LOG_LABEL "JsonProtocol unpack: json to msg failed");
                 return false;
             }

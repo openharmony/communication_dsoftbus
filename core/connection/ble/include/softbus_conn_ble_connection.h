@@ -165,9 +165,8 @@ typedef struct {
 ConnBleConnection *ConnBleCreateConnection(
     const char *addr, BleProtocolType protocol, ConnSideType side, int32_t underlayerHandle, bool fastestConnectEnable);
 void ConnBleFreeConnection(ConnBleConnection *connection);
-
-int32_t ConnBleStartServer();
-int32_t ConnBleStopServer();
+int32_t ConnBleStartServer(void);
+int32_t ConnBleStopServer(void);
 int32_t ConnBleConnect(ConnBleConnection *connection);
 int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconnectReason reason);
 int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta);

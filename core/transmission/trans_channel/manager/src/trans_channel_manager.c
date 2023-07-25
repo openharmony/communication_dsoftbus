@@ -160,7 +160,8 @@ static int32_t TransGetRemoteInfo(const SessionParam* param, AppInfo* appInfo)
         if (LnnGetNetworkIdByUuid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by uuid");
         } else {
-            if (strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId), param->peerDeviceId) != SOFTBUS_OK) {
+            if (strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId),
+                param->peerDeviceId) != SOFTBUS_OK) {
                 return SOFTBUS_ERR;
             }
             if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {

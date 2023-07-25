@@ -377,7 +377,6 @@ static void AttempReuseConnect(ConnBleDevice *device, DeviceAction actionIfAbsen
             FreeDevice(device);
             return;
         }
-
         device->state = BLE_DEVICE_STATE_WAIT_SCHEDULE;
         int32_t status = actionIfAbsent(device, anomizeAddress, anomizeUdid);
         if (status != SOFTBUS_OK) {

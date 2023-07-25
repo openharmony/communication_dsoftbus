@@ -97,7 +97,7 @@ static void HexDump(const char *banana, const uint8_t *data, size_t size)
             return;
         }
         pos += ret;
-        if (i % 16 == 0) {
+        if (i % HEX_DUMP_LINE_NUM == 0) {
             pos = 0;
             isLastPrinted = true;
             CLOGI(LOG_LABEL "%s", line);

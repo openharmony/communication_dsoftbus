@@ -364,7 +364,7 @@ static void WaitAck(ConnBrConnection *connection)
             break;
         case SOFTBUS_TIMOUT:
             connection->ackTimeoutCount += 1;
-            if (connection->window > MIN_WINDOW && connection->ackTimeoutCount % 2 == 0) {
+            if (connection->window > MIN_WINDOW && connection->ackTimeoutCount % TIMEOUT_TIMES == 0) {
                 connection->window = connection->window - 1;
             }
             if (connection->window < DEFAULT_WINDOW && connection->ackTimeoutCount > ACK_FAILED_TIMES) {
