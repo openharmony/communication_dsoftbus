@@ -38,6 +38,7 @@ typedef enum {
 #define GET_TYPE_CAR "car"
 #define GET_TYPE_WATCH "wearable"
 #define GET_TYPE_IPCAMERA "smartVision"
+#define GET_TYPE_2IN1 "2in1"
 
 #define TYPE_UNKNOWN "UNKNOWN"
 #define TYPE_PHONE "PHONE"
@@ -48,6 +49,7 @@ typedef enum {
 #define TYPE_IPCAMERA "WiFiCamara"
 #define TYPE_PC "PC"
 #define TYPE_SMART_DISPLAY "SMART_DISPLAY"
+#define TYPE_2IN1 "A2F"
 
 int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
 int32_t GetWlanIpv4Addr(char *ip, uint32_t size);
