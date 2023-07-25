@@ -14,9 +14,8 @@
 import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
-br_connection_deps = []
 br_connection_inc = br_adapter_inc
-if (dsoftbus_feature_conn_br == false) {
+if (!support_bluetooth) {
   br_connection_src =
       [ "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_virtual.c" ]
   br_connection_inc += [
@@ -25,17 +24,28 @@ if (dsoftbus_feature_conn_br == false) {
     "//third_party/cJSON",
   ]
 } else {
-  br_connection_src = br_adapter_src
-  br_connection_src += [
-    "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_connection.c",
-    "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
-    "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_pending_packet.c",
-    "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_send_queue.c",
-    "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
-  ]
-  br_connection_inc += [
-    "$dsoftbus_root_path/core/connection/br/include",
-    "$dsoftbus_root_path/core/common/include",
-    "//third_party/cJSON",
-  ]
+  if (!dsoftbus_feature_conn_br) {
+    br_connection_src = [
+      "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_virtual.c",
+    ]
+    br_connection_inc += [
+      "$dsoftbus_root_path/core/connection/br/include",
+      "$dsoftbus_root_path/core/common/include",
+      "//third_party/cJSON",
+    ]
+  } else {
+    br_connection_src = br_adapter_src
+    br_connection_src += [
+      "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_connection.c",
+      "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
+      "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_pending_packet.c",
+      "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_send_queue.c",
+      "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
+    ]
+    br_connection_inc += [
+      "$dsoftbus_root_path/core/connection/br/include",
+      "$dsoftbus_root_path/core/common/include",
+      "//third_party/cJSON",
+    ]
+  }
 }

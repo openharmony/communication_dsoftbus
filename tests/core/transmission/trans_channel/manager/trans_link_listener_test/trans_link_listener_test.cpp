@@ -66,15 +66,4 @@ HWTEST_F(TransLinkListenerTest, OnP2pRoleChange001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();
 }
-
-/**
- * @tc.name: ReqLinkListener001
- * @tc.desc: ReqLinkListener001, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLinkListenerTest, ReqLinkListener001, TestSize.Level1)
-{
-    ReqLinkListener();
-}
 } // OHOS

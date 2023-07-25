@@ -240,7 +240,7 @@ static bool LaneGetP2PReuseMac(const char *networkId, char *ipAddr, uint32_t max
 static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback,
     BleProtocolType type)
 {
-    const char *udid = LnnConvertDLidToUdid(reqInfo->peerNetworkId, CATEGORY_UDID);
+    const char *udid = LnnConvertDLidToUdid(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID);
     ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, type);
     if ((connection == NULL) || (connection->state != BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO)) {
         return SOFTBUS_ERR;
@@ -262,6 +262,7 @@ static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, co
 static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     if (LaneLinkOfBleReuse(reqId, reqInfo, callback, BLE_GATT) == SOFTBUS_OK) {
+        LLOGI("reuse ble gatt connection");
         return SOFTBUS_OK;
     }
     LaneLinkInfo linkInfo = {0};
@@ -303,9 +304,13 @@ static int32_t LaneLinkOfBleDirectCommon(const LinkRequest *reqInfo, LaneLinkInf
     }
 
     if (memcpy_s(linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN, peerNetwordIdHash,
-            NODEID_SHORT_HASH_LEN) != EOK) { }
+            NODEID_SHORT_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
     if (memcpy_s(linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN, localUdidHash, UDID_SHORT_HASH_LEN) !=
-        EOK) { }
+        EOK) {
+        return SOFTBUS_ERR;
+    }
     linkInfo->type = LANE_BLE_DIRECT;
     return SOFTBUS_OK;
 }
@@ -416,8 +421,12 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
 
     (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
 
-    LLOGI("LnnLaneSelectProtocol protocol = %lld", req.selectedProtocol);
-    return LNN_PROTOCOL_IP;
+    LLOGI("protocol = %d", req.selectedProtocol);
+    if (req.selectedProtocol == 0) {
+        req.selectedProtocol = LNN_PROTOCOL_IP;
+    }
+ 
+    return req.selectedProtocol;
 }
 
 static void FillWlanLinkInfo(

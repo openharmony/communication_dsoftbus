@@ -1160,18 +1160,18 @@ static int32_t ProcessReuseRequest(struct NegotiateMessage *msg)
     int32_t result = V1_ERROR_REUSE_FAILED;
     struct NegotiateMessage *response = NULL;
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
-    if (!channel) {
+    if (channel == NULL) {
         CLOGE(LOG_LABEL "channel is null");
         goto Failed;
     }
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    if (!info) {
+    if (info == NULL) {
         CLOGE(LOG_LABEL "interface info is null");
         goto Failed;
     }
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
     struct InnerLink *oldLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
-    if (!oldLink) {
+    if (oldLink == NULL) {
         CLOGE(LOG_LABEL "link is null");
         goto Failed;
     }

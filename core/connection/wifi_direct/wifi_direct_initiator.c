@@ -23,6 +23,7 @@
 #include "broadcast_receiver.h"
 #include "broadcast_handler.h"
 #include "channel/default_negotiate_channel.h"
+#include "channel/fast_connect_negotiate_channel.h"
 #include "data/resource_manager.h"
 #include "data/link_manager.h"
 #include "utils/wifi_direct_timer_list.h"
@@ -37,6 +38,7 @@ static WifiDirectSubInitFunc g_subInitFunctions[] = {
     WifiDirectWorkQueueInit,
     WifiDirectTimerListInit,
     DefaultNegotiateChannelInit,
+    FastConnectNegotiateChannelInit,
     BroadcastReceiverInit,
     ResourceManagerInit,
     LinkManagerInit,

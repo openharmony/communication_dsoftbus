@@ -47,6 +47,7 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
         !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
         !AddBoolToJsonObject(msg, FIELD_IS_DEVICE_LEVEL, true) ||
         !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, isClient) ||
+        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false) ||
         !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, SESSION_KEY_LENGTH)) {
         ALOGE("add json object fail.");
         cJSON_Delete(msg);
@@ -122,7 +123,8 @@ NO_SANITIZE("cfi") static char *OnRequest(int64_t authSeq, int operationCode, co
     if (!AddNumberToJsonObject(msg, FIELD_CONFIRMATION, REQUEST_ACCEPTED) ||
         !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
         !AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
-        !AddStringToJsonObject(msg, FIELD_DEVICE_ID, localUdid)) {
+        !AddStringToJsonObject(msg, FIELD_DEVICE_ID, localUdid) ||
+        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
         ALOGE("pack request msg fail.");
         cJSON_Delete(msg);
         return NULL;

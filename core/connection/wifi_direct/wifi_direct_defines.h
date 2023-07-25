@@ -57,6 +57,4 @@
 #define CHANNEL_INVALID (-1)
 #define FREQUENCY_INVALID (-1)
 
-#define LINE_SEPARATOR "\n"
-
 #endif

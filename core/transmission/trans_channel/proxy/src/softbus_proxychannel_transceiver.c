@@ -20,6 +20,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_network_manager.h"
 #include "message_handler.h"
+#include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -31,9 +32,9 @@
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
+#include "softbus_proxychannel_pipeline.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
-#include "softbus_adapter_hitrace.h"
 
 #define ID_OFFSET (1)
 
@@ -715,19 +716,22 @@ NO_SANITIZE("cfi") int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, con
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channelId is invalid");
         return SOFTBUS_ERR;
     }
+    ListenerModule module = PROXY;
+    if (connInfo->type == CONNECT_TCP) {
+        module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+        if (module == UNUSE_BUTT) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+                "get listener module failed, protocol = %d", connInfo->socketOption.protocol);
+            return SOFTBUS_INVALID_PARAM;
+        }
+    }
+
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
         ret = TransProxyConnExistProc(&conn, appInfo, chanNewId);
         if (ret == SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED) {
-            ret = TransProxyOpenNewConnChannel(PROXY, appInfo, connInfo, chanNewId);
+            ret = TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
         }
     } else {
-        ListenerModule module = PROXY;
-        if (connInfo->type == CONNECT_TCP) {
-            module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
-            if (module == UNUSE_BUTT) {
-                return SOFTBUS_INVALID_PARAM;
-            }
-        }
         ret = TransProxyOpenNewConnChannel(module, appInfo, connInfo, chanNewId);
         if ((ret == SOFTBUS_TRANS_PROXY_CONN_REPEAT) && (TransGetConn(connInfo, &conn) == SOFTBUS_OK)) {
             ret = TransProxyConnExistProc(&conn, appInfo, chanNewId);
@@ -784,6 +788,10 @@ NO_SANITIZE("cfi") int32_t TransProxyTransInit(void)
     }
     if (TransProxyLoopInit() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create loopInit fail");
+        return SOFTBUS_ERR;
+    }
+    if (TransProxyPipelineInit() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init proxy pipeline failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -28,6 +28,9 @@
 #include "softbus_adapter_json.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"
+#define JSON_KEY_WIFI_CFG "WIFI_CFG"
+#define JSON_KEY_CHAN_LIST_5G "CHAN_LIST_5G"
+#define JSON_KEY_STA_FREQUENCY "STA_FREQUENCY"
 #define JSON_KEY_P2P_MAC "P2P_MAC"
 #define JSON_KEY_GO_MAC "GO_MAC"
 
@@ -40,6 +43,21 @@ static char *LnnGetP2pInfoMsg(const P2pInfo *info)
     }
     if (!AddNumberToJsonObject(json, JSON_KEY_P2P_ROLE, info->p2pRole)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add p2p role fail.");
+        cJSON_Delete(json);
+        return NULL;
+    }
+    if (!AddStringToJsonObject(json, JSON_KEY_WIFI_CFG, info->wifiCfg)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add wifi cfg fail.");
+        cJSON_Delete(json);
+        return NULL;
+    }
+    if (!AddStringToJsonObject(json, JSON_KEY_CHAN_LIST_5G, info->chanList5g)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add chan list 5g fail.");
+        cJSON_Delete(json);
+        return NULL;
+    }
+    if (!AddNumberToJsonObject(json, JSON_KEY_STA_FREQUENCY, info->staFrequency)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add sta frequency fail.");
         cJSON_Delete(json);
         return NULL;
     }
@@ -70,6 +88,21 @@ static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info, uint32_t len)
     }
     if (!JSON_GetInt32FromOject(json, JSON_KEY_P2P_ROLE, &info->p2pRole)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p role not found.");
+        JSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    if (!JSON_GetStringFromOject(json, JSON_KEY_WIFI_CFG, info->wifiCfg, sizeof(info->wifiCfg))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi cfg not found.");
+        JSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    if (!JSON_GetStringFromOject(json, JSON_KEY_CHAN_LIST_5G, info->chanList5g, sizeof(info->chanList5g))) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "chan list 5g not found.");
+        JSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    if (!JSON_GetInt32FromOject(json, JSON_KEY_STA_FREQUENCY, &info->staFrequency)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sta frequency not found.");
         JSON_Delete(json);
         return SOFTBUS_ERR;
     }

@@ -19,13 +19,13 @@ module_output_path = "dsoftbus/connection"
 ohos_unittest("ConnectionManagerTest") {
   module_out_path = module_output_path
 
-  if (dsoftbus_feature_conn_br == true) {
+  if (support_bluetooth && dsoftbus_feature_conn_br) {
     defines = [ "connection_enable_br_test" ]
   } else {
     defines = []
   }
 
-  if (dsoftbus_feature_conn_ble == true) {
+  if (support_bluetooth && dsoftbus_feature_conn_ble) {
     defines += [ "connection_enable_ble_test" ]
   }
 

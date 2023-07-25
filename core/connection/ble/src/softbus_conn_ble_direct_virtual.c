@@ -23,6 +23,12 @@ int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, 
     return SOFTBUS_ERR;
 }
 
+bool ConnBleDirectIsEnable(BleProtocolType protocol)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "do not support ble direct connection");
+    return false;
+}
+
 int32_t ConnBleDirectInit()
 {
     return SOFTBUS_OK;

@@ -30,8 +30,8 @@ enhanced_conn_coc = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                   "$conn_coc_dir",
                                 ],
                                 "value")
-ble_connection_deps = []
-if (dsoftbus_feature_conn_ble == false) {
+ble_connection_external_deps = []
+if (!support_bluetooth) {
   ble_connection_src = [
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_virtual.c",
@@ -41,47 +41,56 @@ if (dsoftbus_feature_conn_ble == false) {
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/common/include",
   ]
-  if (dsoftbus_feature_conn_br == true) {
-    ble_connection_src += adapter_net_br_src
-    ble_connection_inc += adapter_ble_inc
-    ble_connection_deps += adapter_ble_deps
-  }
 } else {
-  ble_connection_src = [
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_client.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_connection.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_manager.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_send_queue.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_server.c",
-    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_trans.c",
-  ]
-  ble_connection_inc = [
-    "$dsoftbus_root_path/core/connection/ble/include",
-    "$dsoftbus_root_path/core/connection/ble/src",
-    "$dsoftbus_root_path/core/common/include",
-  ]
-  if (enhanced_conn_ble == true) {
-    ble_connection_src += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_conn.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_pipeline.c",
+  if (!dsoftbus_feature_conn_ble) {
+    ble_connection_src = [
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c",
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_virtual.c",
     ]
-    ble_connection_inc +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/include" ]
-  } else {
-    ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c" ]
-  }
-  if (enhanced_conn_coc == true) {
-    ble_connection_src += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/ble_protocol_interface_factory.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_adapter_coc.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_conn_ble_coc.c",
+    ble_connection_inc = [
+      "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+      "$dsoftbus_root_path/core/connection/ble/include",
+      "$dsoftbus_root_path/core/common/include",
     ]
-    ble_connection_inc +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/include" ]
+    if (dsoftbus_feature_conn_br) {
+      ble_connection_src += adapter_net_br_src
+      ble_connection_inc += adapter_ble_inc
+      ble_connection_external_deps += adapter_ble_external_deps
+    }
   } else {
-    ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c" ]
+    ble_connection_src = [
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_client.c",
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_connection.c",
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_manager.c",
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_send_queue.c",
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_server.c",
+      "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_trans.c",
+    ]
+    ble_connection_inc = [
+      "$dsoftbus_root_path/core/connection/ble/include",
+      "$dsoftbus_root_path/core/connection/ble/src",
+      "$dsoftbus_root_path/core/common/include",
+    ]
+    if (enhanced_conn_ble == true) {
+      ble_connection_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_conn.c" ]
+      ble_connection_inc +=
+          [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/include" ]
+    } else {
+      ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c" ]
+    }
+    if (enhanced_conn_coc == true) {
+      ble_connection_src += [
+        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/ble_protocol_interface_factory.c",
+        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_adapter_coc.c",
+        "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/src/softbus_conn_ble_coc.c",
+      ]
+      ble_connection_inc +=
+          [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coc/include" ]
+    } else {
+      ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c" ]
+    }
+    ble_connection_src += adapter_ble_src
+    ble_connection_inc += adapter_ble_inc
+    ble_connection_external_deps += adapter_ble_external_deps
   }
-  ble_connection_src += adapter_ble_src
-  ble_connection_inc += adapter_ble_inc
-  ble_connection_deps += adapter_ble_deps
 }

@@ -67,6 +67,8 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
 int32_t AuthDevicePostTransData(int64_t authId, const AuthTransData *dataInfo);
 void AuthDeviceCloseConn(int64_t authId);
 int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
+/*check whether AUTH device is exist or not*/
+bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConnection);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
 int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool isIpConnection);

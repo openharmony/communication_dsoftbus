@@ -198,10 +198,11 @@ if (defined(ohos_lite)) {
       ]
     }
 
+    external_deps = []
     if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
       include_dirs += [ "//base/msdp/algorithm/ble_range/include" ]
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
-      public_deps += [ "//base/msdp/algorithm/ble_range:msdp_ble_range" ]
+      external_deps += [ "algorithm:msdp_ble_range" ]
     } else {
       sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
     }
@@ -215,7 +216,7 @@ if (defined(ohos_lite)) {
     }
     public_configs = [ ":config_adapter_common" ]
     if (is_standard_system) {
-      external_deps = [
+      external_deps += [
         "hilog:libhilog",
         "hisysevent:libhisysevent",
         "hitrace:libhitracechain",

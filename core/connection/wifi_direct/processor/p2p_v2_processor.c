@@ -269,7 +269,7 @@ static int32_t ProcessConnectRequest1(struct NegotiateMessage *msg)
     CLOGI(LOG_LABEL "requestId=%d", msg->getInt(msg, NM_KEY_SESSION_ID, -1));
     GetP2pV2Processor()->needReply = true;
     struct LinkInfo *linkInfo = msg->getContainer(msg, NM_KEY_LINK_INFO);
-    if (!linkInfo) {
+    if (linkInfo == NULL) {
         CLOGE(LOG_LABEL "ERROR_WIFI_DIRECT_SINK_GET_LINK_INFO_FAILED");
         return HandleFailureResponse(msg, NULL, ERROR_WIFI_DIRECT_SINK_GET_LINK_INFO_FAILED);
     }
@@ -321,7 +321,7 @@ static int32_t ProcessConnectRequest1ToBeGo(struct NegotiateMessage *msg, struct
     struct LinkInfo *linkInfo = msg->getContainer(msg, NM_KEY_LINK_INFO);
     char *interface = linkInfo->getString(linkInfo, LI_KEY_LOCAL_INTERFACE, "");
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(interface);
-    if (!info) {
+    if (info == NULL) {
         CLOGE(LOG_LABEL "interface info is null");
         return HandleFailureResponse(msg, NULL, ERROR_SINK_NO_INTERFACE_INFO);
     }
@@ -407,7 +407,7 @@ static int32_t ProcessConnectRequest1ToBeGc(struct NegotiateMessage *msg, struct
     struct LinkInfo *linkInfo = msg->getContainer(msg, NM_KEY_LINK_INFO);
     char *localInterface = linkInfo->getString(linkInfo, LI_KEY_LOCAL_INTERFACE, "");
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(localInterface);
-    if (!info) {
+    if (info == NULL) {
         CLOGE(LOG_LABEL "interface info is null");
         return HandleFailureResponse(msg, NULL, ERROR_SINK_NO_INTERFACE_INFO);
     }
@@ -473,14 +473,14 @@ static int32_t ProcessConnectRequest2(struct NegotiateMessage *msg)
 {
     GetP2pV2Processor()->needReply = true;
     struct LinkInfo *linkInfo = msg->get(msg, NM_KEY_LINK_INFO, NULL, NULL);
-    if (!linkInfo) {
+    if (linkInfo == NULL) {
         CLOGE(LOG_LABEL "link info is null");
         return HandleFailureResponse(msg, NULL, ERROR_WIFI_DIRECT_SINK_GET_LINK_INFO_FAILED);
     }
 
     char *localInterface = linkInfo->getString(linkInfo, LI_KEY_LOCAL_INTERFACE, "");
     struct InterfaceInfo *interfaceInfo = GetResourceManager()->getInterfaceInfo(localInterface);
-    if (!interfaceInfo) {
+    if (interfaceInfo == NULL) {
         CLOGE(LOG_LABEL "interface info is null");
         return HandleFailureResponse(msg, NULL, ERROR_SINK_NO_INTERFACE_INFO);
     }
@@ -563,7 +563,7 @@ static int32_t ProcessConnectRequest3(struct NegotiateMessage *msg)
 {
     GetP2pV2Processor()->needReply = true;
     struct LinkInfo *linkInfo = msg->getContainer(msg, NM_KEY_LINK_INFO);
-    if (!linkInfo) {
+    if (linkInfo == NULL) {
         CLOGE(LOG_LABEL "link info is null");
         return HandleFailureResponse(msg, NULL, ERROR_WIFI_DIRECT_SINK_GET_LINK_INFO_FAILED);
     }
@@ -573,7 +573,7 @@ static int32_t ProcessConnectRequest3(struct NegotiateMessage *msg)
     bool isClient = linkInfo->getBoolean(linkInfo, LI_KEY_IS_CLIENT, false);
     char *remoteMac = linkInfo->getString(linkInfo, LI_KEY_REMOTE_BASE_MAC, "");
     struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
-    if (!innerLink) {
+    if (innerLink == NULL) {
         CLOGE(LOG_LABEL "inner link is null");
         return HandleFailureResponse(msg, NULL, ERROR_SINK_NO_LINK);
     }

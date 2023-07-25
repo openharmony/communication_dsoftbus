@@ -391,3 +391,19 @@ NO_SANITIZE("cfi") void AuthCommonDeinit(void)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth mutex destroy fail.");
     }
 }
+
+int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
+{
+    if (networkId == NULL || udid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "param err.");
+        return SOFTBUS_ERR;
+    }
+    NodeInfo *info = LnnRetrieveDeviceInfoByNetworkId(networkId);
+    if (info != NULL && info->deviceInfo.deviceUdid[0] != '\0') {
+        if (memcpy_s(udid, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
+}

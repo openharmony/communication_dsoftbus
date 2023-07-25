@@ -15,9 +15,9 @@
 #include "softbus_adapter_ble_gatt.h"
 
 #include "adapter_bt_utils.h"
-#include "ohos_bt_def.h"
-#include "ohos_bt_gap.h"
-#include "ohos_bt_gatt.h"
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_gap.h"
+#include "c_header/ohos_bt_gatt.h"
 #include "securec.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"

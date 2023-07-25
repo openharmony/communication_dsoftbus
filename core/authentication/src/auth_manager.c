@@ -840,7 +840,17 @@ static void HandleDeviceIdData(
                 "local device NOT support as server, ignore auth seq=%" PRId64, head->seq);
             return;
         }
-        if (GetAuthFsmByConnId(connId, true) != NULL) {
+        AuthFsm *fsm = GetAuthFsmByConnId(connId, true);
+        if ((fsm != NULL && fsm->info.idType == EXCHANGE_NETWORKID) ||
+            (fsm != NULL && fsm->info.idType == EXCHANGE_FAIL)) {
+            ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
+            if (ret != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+                    "perform auth(=%" PRId64 ") session recv devId fail(=%d)", head->seq, ret);
+            }
+            return;
+        }
+        if (fsm != NULL && fsm->info.idType == EXCHANHE_UDID) {
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
                 "the same connId fsm not support, ignore auth seq=%" PRId64, head->seq);
             HandleRepeatDeviceIdDataDelay(connId, connInfo, fromServer, head, data);
@@ -1157,6 +1167,19 @@ NO_SANITIZE("cfi") int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthCon
     }
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "no active auth, try br connection.");
     return TryGetBrConnInfo(uuid, connInfo);
+}
+
+bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection)
+{
+    LNN_CHECK_AND_RETURN_RET_LOG(uuid, false, "invalid null uuid");
+    LNN_CHECK_AND_RETURN_RET_LOG(uuid[0] != '\0', false, "invalid empty uuid");
+
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+    if (GetAuthConnInfoByUuid(uuid, type, &connInfo) != SOFTBUS_OK) {
+        return false;
+    }
+    return checkConnection ? CheckActiveAuthConnection(&connInfo) : true;
 }
 
 NO_SANITIZE("cfi")

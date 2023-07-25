@@ -15,31 +15,31 @@
 
 #include "lnn_deviceinfo_to_profile.h"
 
-void insertToProfile(NodeInfo *info)
+void InsertToProfile(NodeInfo *info)
 {
     (void)info;
 }
 
-void insertMetaNodeInfoToProfile(MetaNodeInfo *info)
+void InsertMetaNodeInfoToProfile(MetaNodeInfo *info)
 {
     (void)info;
 }
 
-void updateProfile(NodeInfo *info)
+void UpdateProfile(NodeInfo *info)
 {
     (void)info;
 }
 
-void updateMetaNodeProfile(MetaNodeInfo *info)
+void UpdateMetaNodeProfile(MetaNodeInfo *info)
 {
     (void)info;
 }
 
-void deleteFromProfile(const char *udid)
+void DeleteFromProfile(const char *udid)
 {
     (void)udid;
 }
 
-void clearProfile()
+void ClearProfile()
 {
 }

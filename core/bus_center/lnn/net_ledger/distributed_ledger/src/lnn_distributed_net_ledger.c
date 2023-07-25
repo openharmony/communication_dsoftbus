@@ -46,7 +46,7 @@
 #include "bus_center_event.h"
 
 #define TIME_THOUSANDS_FACTOR (1000)
-#define BLE_ADV_LOST_TIME 1200
+#define BLE_ADV_LOST_TIME 5000
 #define LONG_TO_STRING_MAX_LEN 21
 #define LNN_COMMON_LEN_64 8
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
@@ -62,7 +62,7 @@
         }                                                               \
     } while (0)                                                        \
 
-#define CONNECTION_FREEZE_TIMEOUT_MILLIS (20 * 1000)
+#define CONNECTION_FREEZE_TIMEOUT_MILLIS (10 * 1000)
 
 // softbus version for support initConnectFlag
 #define SOFTBUS_VERSION_FOR_INITCONNECTFLAG "11.1.0.001"
@@ -247,6 +247,7 @@ static void RetainOfflineCode(const NodeInfo *oldInfo, NodeInfo *newInfo)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return;
     }
+    // 4 represents the number of destination bytes and source bytes.
     if (memcpy_s(newInfo->offlineCode, 4, oldInfo->offlineCode, 4) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy offlineCode error!");
         return;
@@ -704,7 +705,7 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     uint64_t currentTimeMs = GetCurrentTime();
-    LNN_CHECK_AND_RETURN_RET_LOG(info->connectInfo.latestTime + BLE_ADV_LOST_TIME <= currentTimeMs, SOFTBUS_ERR,
+    LNN_CHECK_AND_RETURN_RET_LOG(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
         "ble mac out date, lastAdvTime:%llu, now:%llu", info->connectInfo.latestTime, currentTimeMs);
 
     if (memcpy_s(buf, len, info->connectInfo.bleMacAddr, MAC_LEN) != EOK) {
@@ -877,6 +878,50 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetWifiCfg(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    const char *wifiCfg = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    wifiCfg = LnnGetWifiCfg(info);
+    if (wifiCfg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi cfg fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(buf, len, wifiCfg) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy wifi cfg to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetChanList5g(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    const char *chanList5g = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    chanList5g = LnnGetChanList5g(info);
+    if (chanList5g == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get chan list 5g fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(buf, len, chanList5g) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy chan list 5g to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetP2pRole(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -906,6 +951,22 @@ static int32_t DlGetStateVersion(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
     *((int32_t *)buf) = info->stateVersion;
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetStaFrequency(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+
+    if (len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    *((int32_t *)buf) = LnnGetStaFrequency(info);
     return SOFTBUS_OK;
 }
 
@@ -968,6 +1029,8 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_WLAN_IP, DlGetWlanIp},
     {STRING_KEY_MASTER_NODE_UDID, DlGetMasterUdid},
     {STRING_KEY_P2P_MAC, DlGetP2pMac},
+    {STRING_KEY_WIFI_CFG, DlGetWifiCfg},
+    {STRING_KEY_CHAN_LIST_5G, DlGetChanList5g},
     {STRING_KEY_P2P_GO_MAC, DlGetP2pGoMac},
     {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
@@ -980,6 +1043,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_FEATURE_CAPA, DlGetFeatureCap},
     {NUM_KEY_DISCOVERY_TYPE, DlGetNetType},
     {NUM_KEY_MASTER_NODE_WEIGHT, DlGetMasterWeight},
+    {NUM_KEY_STA_FREQUENCY, DlGetStaFrequency},
     {NUM_KEY_P2P_ROLE, DlGetP2pRole},
     {NUM_KEY_STATE_VERSION, DlGetStateVersion},
     {NUM_KEY_DATA_CHANGE_FLAG, DlGetNodeDataChangeFlag},
@@ -1266,12 +1330,42 @@ static void NotifyMigrateUpgrade(NodeInfo *info)
     }
 }
 
-static void NodeOnlineProc(NodeInfo *info)
+static void FilterWifiInfo(NodeInfo *info)
 {
+    (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_WIFI);
+    info->authChannelId[CONNECTION_ADDR_WLAN] = 0;
+}
+
+static void FilterBrInfo(NodeInfo *info)
+{
+    (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_BR);
+    info->authChannelId[CONNECTION_ADDR_BR] = 0;
+}
+
+static void BleDirectlyOnlineProc(NodeInfo *info)
+{
+    if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+        return;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {
+        FilterWifiInfo(info);
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
+        FilterBrInfo(info);
+    }
     if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
         LLOGE("save remote devInfo fail");
         return;
     }
+}
+
+static void NodeOnlineProc(NodeInfo *info)
+{
+    NodeInfo nodeInfo;
+    if (memcpy_s(&nodeInfo, sizeof(nodeInfo), info, sizeof(NodeInfo)) != EOK) {
+        return;
+    }
+    BleDirectlyOnlineProc(&nodeInfo);
 }
 
 NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
@@ -1334,7 +1428,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
         info->discoveryType |= oldInfo->discoveryType;
         info->heartbeatTimeStamp = oldInfo->heartbeatTimeStamp;
         MergeLnnInfo(oldInfo, info);
-        updateProfile(info);
+        UpdateProfile(info);
     }
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
@@ -1349,7 +1443,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
         if (!oldWifiFlag && !newWifiFlag && newBleBrFlag) {
             OnlinePreventBrConnection(info);
         }
-        insertToProfile(info);
+        InsertToProfile(info);
         return REPORT_ONLINE;
     }
     if (isMigrateEvent) {
@@ -1946,7 +2040,7 @@ NO_SANITIZE("cfi") int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char 
                 strlen(nodeInfo->deviceInfo.deviceUdid), (uint8_t*)nodeUdidHash) != SOFTBUS_OK) {
                 continue;
             }
-            if (strcmp(nodeUdidHash, udidHash) != 0) {
+            if (memcmp(nodeUdidHash, udidHash, len) != 0) {
                 continue;
             }
             if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
@@ -2095,7 +2189,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uin
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability)
+NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
 {
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -2107,7 +2201,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDLConnCapability(const char *networkId, uint64_
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    nodeInfo->netCapacity = (uint32_t)connCapability;
+    nodeInfo->netCapacity = connCapability;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }

@@ -493,6 +493,40 @@ static int32_t LlGetP2pMac(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t L1GetWifiCfg(void *buf, uint32_t len)
+{
+    if (buf == NULL || len < WIFI_CFG_INFO_MAX_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *wifiCfg = LnnGetWifiCfg(&g_localNetLedger.localInfo);
+    if (wifiCfg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi cfg fail.");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(buf, len, wifiCfg, strlen(wifiCfg)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy wifi cfg failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetChanList5g(void *buf, uint32_t len)
+{
+    if (buf == NULL || len < WIFI_CFG_INFO_MAX_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *chanList5g = LnnGetWifiCfg(&g_localNetLedger.localInfo);
+    if (chanList5g == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get chan list 5g fail.");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(buf, len, chanList5g, strlen(chanList5g)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy chan list 5g failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetP2pGoMac(void *buf, uint32_t len)
 {
     const char *mac = NULL;
@@ -526,6 +560,15 @@ static int32_t LlGetStateVersion(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = g_localNetLedger.localInfo.stateVersion;
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetStaFrequency(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = LnnGetStaFrequency(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 
@@ -799,6 +842,24 @@ static int32_t UpdateP2pMac(const void *mac)
     return LnnSetP2pMac(&g_localNetLedger.localInfo, (char *)mac);
 }
 
+static int32_t UpdateWifiCfg(const void *wifiCfg)
+{
+    if (wifiCfg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetWifiCfg(&g_localNetLedger.localInfo, (char *)wifiCfg);
+}
+
+static int32_t UpdateChanList5g(const void *chanList5g)
+{
+    if (chanList5g == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetChanList5g(&g_localNetLedger.localInfo, (char *)chanList5g);
+}
+
 static int32_t UpdateP2pGoMac(const void *mac)
 {
     if (mac == NULL) {
@@ -815,6 +876,15 @@ static int32_t UpdateP2pRole(const void *p2pRole)
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnSetP2pRole(&g_localNetLedger.localInfo, *(int32_t *)p2pRole);
+}
+
+static int32_t UpdateStaFrequency(const void *staFrequency)
+{
+    if (staFrequency == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetStaFrequency(&g_localNetLedger.localInfo, *(int32_t *)staFrequency);
 }
 
 static int32_t LlUpdateSupportedProtocols(const void *transProtos)
@@ -868,6 +938,11 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
     return SOFTBUS_OK;
 }
 
+void LnnUpdateStateVersion()
+{
+    return UpDateStateVersionAndStore();
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -881,6 +956,8 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_MASTER_NODE_UDID, UDID_BUF_LEN, L1GetMasterNodeUdid, UpdateMasterNodeUdid},
     {STRING_KEY_NODE_ADDR, SHORT_ADDRESS_MAX_LEN, LlGetNodeAddr, LlUpdateNodeAddr},
     {STRING_KEY_P2P_MAC, MAC_LEN, LlGetP2pMac, UpdateP2pMac},
+    { STRING_KEY_WIFI_CFG, WIFI_CFG_INFO_MAX_LEN, L1GetWifiCfg, UpdateWifiCfg},
+    { STRING_KEY_CHAN_LIST_5G, CHANNEL_LIST_STR_LEN, L1GetChanList5g, UpdateChanList5g},
     {STRING_KEY_P2P_GO_MAC, MAC_LEN, LlGetP2pGoMac, UpdateP2pGoMac},
     {STRING_KEY_OFFLINE_CODE, OFFLINE_CODE_LEN, LlGetOffLineCode, LlUpdateLocalOffLineCode},
     {STRING_KEY_EXTDATA, EXTDATA_LEN, LlGetExtData, LlUpdateLocalExtData},
@@ -894,6 +971,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_STATE_VERSION, -1, LlGetStateVersion, UpdateStateVersion},
+    { NUM_KEY_STA_FREQUENCY, -1, L1GetStaFrequency, UpdateStaFrequency},
     {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
     {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},

@@ -24,6 +24,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_log.h"
 #include "softbus_proxychannel_manager.h"
@@ -51,6 +52,12 @@
 static int32_t g_allocProxyChannelId = MAX_FD_ID;
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
+
+typedef struct {
+    int32_t channelType;
+    int32_t businessType;
+    ConfigType configType;
+} ConfigTypeMap;
 
 static int32_t GenerateTdcChannelId()
 {
@@ -317,24 +324,68 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     return SOFTBUS_OK;
 }
 
+static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
+};
+
+static int32_t FindConfigType(int32_t channelType, int32_t businessType)
+{
+    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
+        if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
+            return g_configTypeMap[i].configType;
+        }
+    }
+    return SOFTBUS_CONFIG_TYPE_MAX;
+}
+
+static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
+{
+    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
+    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType[%d] businessType[%d]",
+            channelType, businessType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get fail configType[%d]", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    *len = maxLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get appinfo local config[%d]", *len);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") static void FillAppInfo(AppInfo *appInfo, ConnectOption *connOpt, const SessionParam *param,
     TransInfo *transInfo, LaneConnInfo *connInfo)
 {
     transInfo->channelType = TransGetChannelType(param, connInfo);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
+    (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
 }
 
 static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
 {
-    if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP ||
-        channelType != CHANNEL_TYPE_PROXY) {
+    if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP) {
         return;
     }
-    int32_t module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+
+    int32_t module = UNUSE_BUTT;
+    if (channelType == CHANNEL_TYPE_PROXY) {
+        module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
+    } else if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
+    }
     if (module != UNUSE_BUTT) {
         connOpt->socketOption.moduleId = module;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set nip module = %d", connOpt->socketOption.moduleId);
 }
 
 NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
@@ -412,6 +463,8 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     appInfo->appType = APP_TYPE_AUTH;
     appInfo->myData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;
+    appInfo->businessType = BUSINESS_TYPE_BYTE;
+    appInfo->channelType = CHANNEL_TYPE_AUTH;
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
@@ -431,6 +484,10 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     }
     if (TransGetPkgNameBySessionName(mySessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get PkgName failed");
+        goto EXIT_ERR;
+    }
+    if (TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get local data config failed");
         goto EXIT_ERR;
     }
 

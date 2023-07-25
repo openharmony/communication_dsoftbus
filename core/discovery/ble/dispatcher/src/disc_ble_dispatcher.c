@@ -42,10 +42,10 @@ NO_SANITIZE("cfi") static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uin
 NO_SANITIZE("cfi") static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
-            "dispatch publish action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
+        DLOGE("dispatch publish action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
         return SOFTBUS_ERR;
     }
     switch (type) {
@@ -54,8 +54,7 @@ NO_SANITIZE("cfi") static int32_t BleDispatchPublishOption(const PublishOption *
         case UNPUBLISH_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
-                "dispatch publish action failed: unsupport type '%d', capability '%u'", type,
+            DLOGE("dispatch publish action failed: unsupport type '%d', capability '%u'", type,
                 option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
@@ -64,10 +63,10 @@ NO_SANITIZE("cfi") static int32_t BleDispatchPublishOption(const PublishOption *
 NO_SANITIZE("cfi") static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
-            "dispatch subcribe action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
+        DLOGE("dispatch subcribe action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
         return SOFTBUS_ERR;
     }
     switch (type) {
@@ -76,8 +75,7 @@ NO_SANITIZE("cfi") static int32_t BleDispatchSubscribeOption(const SubscribeOpti
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
-            SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR,
-                "dispatch subcribe action failed: unsupport type '%d', capability '%u'", type,
+            DLOGE("dispatch subcribe action failed: unsupport type '%d', capability '%u'", type,
                 option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
@@ -159,21 +157,21 @@ static DiscoveryFuncInterface g_discBleFrameFuncInterface = {
 NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "discInnerCb err");
+        DLOGE("discInnerCb err");
         return NULL;
     }
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleFrameInit");
     g_dispatcherSize = 0;
     DiscoveryBleDispatcherInterface *softbusInterface = DiscSoftBusBleInit(discInnerCb);
     if (softbusInterface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscSoftBusBleInit err");
+        DLOGE("DiscSoftBusBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = softbusInterface;
 
     DiscoveryBleDispatcherInterface *shareInterface = DiscShareBleInit(discInnerCb);
     if (shareInterface == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscShareBleInit err");
+        DLOGE("DiscShareBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = shareInterface;
