@@ -411,7 +411,6 @@ void InfoContainerDestructor(struct InfoContainer *self, size_t max)
         char *data = self->entries[key].data;
         if (data) {
             uint32_t keyFlag = self->getKeyProperty(self, key)->flag;
-
             if (keyFlag == CONTAINER_FLAG) {
                 ((struct InfoContainer *)data)->destructor((struct InfoContainer *)data);
             } else if (keyFlag == CONTAINER_ARRAY_FLAG) {

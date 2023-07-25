@@ -73,7 +73,7 @@ struct P2pEntity {
     char interface[IF_NAME_LEN];
 };
 
-struct P2pEntity* GetP2pEntity();
+struct P2pEntity* GetP2pEntity(void);
 
 #ifdef __cplusplus
 }

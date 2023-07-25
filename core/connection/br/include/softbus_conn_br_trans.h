@@ -37,6 +37,7 @@ extern "C" {
 #define DEFAULT_WINDOW         20
 #define ACK_FAILED_TIMES       3
 #define WAIT_ACK_TIMEOUT_MILLS 100
+#define TIMEOUT_TIMES          2
 
 enum BrCtlMessageMethod {
     BR_METHOD_NOTIFY_REQUEST = 1,

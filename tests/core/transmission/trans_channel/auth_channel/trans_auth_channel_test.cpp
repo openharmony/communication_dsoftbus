@@ -968,7 +968,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest002, TestSize.Leve
     ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_UID, TRANS_TEST_PID);
     ASSERT_EQ(ret, SOFTBUS_OK);
     bool isClient = true;
-    AuthChannelInfo *info = CreateAuthChannelInfo(g_sessionName,isClient);
+    AuthChannelInfo *info = CreateAuthChannelInfo(g_sessionName, isClient);
     ASSERT_TRUE(info != NULL);
     info->appInfo.myData.channelId = TRANS_TEST_CHANNEL_ID;
     info->authId = TRANS_TEST_AUTH_ID;

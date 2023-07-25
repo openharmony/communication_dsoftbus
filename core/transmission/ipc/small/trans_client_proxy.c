@@ -137,8 +137,8 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int
     return ans;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, const char *uuid, const char *udid,
-    const char *peerIp, int32_t routeType, int32_t pid)
+NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId,
+    const char *uuid, const char *udid, const char *peerIp, int32_t routeType, int32_t pid)
 {
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;

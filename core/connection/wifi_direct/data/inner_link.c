@@ -381,7 +381,7 @@ void InnerLinkDestructor(struct InnerLink *self)
 }
 
 /* new and delete */
-struct InnerLink* InnerLinkNew()
+struct InnerLink* InnerLinkNew(void)
 {
     struct InnerLink *self = SoftBusCalloc(sizeof(*self));
     InnerLinkConstructor(self);

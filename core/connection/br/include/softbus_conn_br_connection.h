@@ -87,8 +87,8 @@ int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json
 int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *json);
 int32_t ConnBrConnect(ConnBrConnection *connection);
 int32_t ConnBrDisconnectNow(ConnBrConnection *connection);
-int32_t ConnBrStartServer();
-int32_t ConnBrStopServer();
+int32_t ConnBrStartServer(void);
+int32_t ConnBrStopServer(void);
 
 int32_t ConnBrConnectionMuduleInit(SoftBusLooper *looper, SppSocketDriver *sppDriver, ConnBrEventListener *listener);
 

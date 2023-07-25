@@ -116,11 +116,11 @@ static enum WifiDirectRole GetFinalRoleWithPeerExpectedRole(enum WifiDirectRole 
     }
 }
 
-static struct WifiDirectRoleNegotiator g_RoleNegotiator = {
+static struct WifiDirectRoleNegotiator g_roleNegotiator = {
     .getFinalRoleWithPeerExpectedRole = GetFinalRoleWithPeerExpectedRole,
 };
 
 struct WifiDirectRoleNegotiator *GetRoleNegotiator(void)
 {
-    return &g_RoleNegotiator;
+    return &g_roleNegotiator;
 }
