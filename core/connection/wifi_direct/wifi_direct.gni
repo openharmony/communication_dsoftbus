@@ -27,9 +27,6 @@ wifi_direct_connection_external_deps = []
 
 wifi_direct_connection_inc = [
   "$dsoftbus_root_path/core/connection/wifi_direct",
-  "$dsoftbus_root_path/core/connection/wifi_direct/adapter",
-  "$dsoftbus_root_path/core/connection/wifi_direct/processor",
-  "$dsoftbus_root_path/core/authentication/include",
   "//foundation/communication/wifi/wifi/interfaces/kits/c",
   "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
 ]
@@ -46,6 +43,7 @@ if (dsoftbus_feature_conn_p2p == true &&
     "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_negotiator.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_role_negotiator.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/channel/default_negotiate_channel.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_negotiate_channel.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/data/info_container.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/data/inner_link.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/data/wifi_config_info.c",
@@ -78,8 +76,6 @@ if (dsoftbus_feature_conn_p2p == true &&
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_anonymous.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_perf_recorder.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_role_option.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/negotiate_state/fast_connecting_state.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor/wifi_direct_processor_factory.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/entity/wifi_direct_entity_factory.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/broadcast_handler.c",
@@ -97,19 +93,15 @@ if (dsoftbus_feature_conn_p2p == true &&
     wifi_direct_connection_inc += wifi_direct_connection_enhance_inc
     wifi_direct_connection_src += wifi_direct_connection_enhance_src
   } else {
-    wifi_direct_connection_src += [
-      "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_fast_connect.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_bcast_channel.c",
-    ]
-    wifi_direct_connection_external_deps = [
-      "napi:ace_napi",
-      "wifi:wifi_sdk",
-    ]
+    wifi_direct_connection_src += []
   }
+
+  wifi_direct_connection_external_deps += [ "wifi:wifi_sdk" ]
 } else {
   wifi_direct_connection_src += [
     "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_initiator_virtual.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_manager_virtual.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/channel/default_negotiate_channel_virtual.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_negotiate_channel_virtual.c",
   ]
 }

@@ -59,7 +59,6 @@ struct WifiDirectNegotiator {
     void (*changeState)(enum NegotiateStateType newState);
     int32_t (*processNewCommand)(void);
     int32_t (*retryCurrentCommand)(void);
-    int32_t (*retryFastConnectCommand)(struct WifiDirectNegotiateChannel *channel);
 
     int32_t (*startTimer)(int64_t timeoutMs, enum NegotiateTimeoutEvent type);
     void (*stopTimer)(void);
@@ -76,7 +75,6 @@ struct WifiDirectNegotiator {
     void (*handleUnhandledRequest)(struct NegotiateMessage *msg);
     void (*onWifiDirectAuthOpened)(uint32_t requestId, int64_t authId);
     void (*syncLnnInfo)(struct InnerLink *innerLink);
-    void (*fastConnectSetProcessor)(struct WifiDirectProcessor *processor);
 
     struct NegotiatorContext context;
     struct NegotiateState *states[NEGO_STATE_MAX];

@@ -23,7 +23,6 @@
 #include "channel/default_negotiate_channel.h"
 #include "data/resource_manager.h"
 #include "utils/wifi_direct_anonymous.h"
-#include "wifi_direct_fast_connect.h"
 
 #define LOG_LABEL "[WifiDirect] ResourceManagerBroadcastHandler: "
 
@@ -148,12 +147,6 @@ static void HandleP2pConnectionChanged(const struct P2pConnChangedInfo *changedI
     UpdateInterfaceInfo(changedInfo->groupInfo);
 }
 
-static void HandleWifiCfgChanged(int state)
-{
-    CLOGI(LOG_LABEL "wifi config changed state %d", state);
-    FastConnectSyncLnnInfo();
-}
-
 static void Listener(enum BroadcastReceiverAction action, const struct BroadcastParam *param)
 {
     if (action == WIFI_P2P_STATE_CHANGED_ACTION) {
@@ -162,9 +155,6 @@ static void Listener(enum BroadcastReceiverAction action, const struct Broadcast
     } else if (action == WIFI_P2P_CONNECTION_CHANGED_ACTION) {
         CLOGI(LOG_LABEL "WIFI_P2P_CONNECTION_CHANGED_ACTION");
         HandleP2pConnectionChanged(&param->changedInfo);
-    } else if (action == WIFI_CFG_CHANGED_ACTION) {
-        CLOGI(LOG_LABEL "WIFI_CFG_CHANGED_ACTION");
-        HandleWifiCfgChanged(param->wifiConnectChangedState);
     }
 }
 
@@ -174,7 +164,6 @@ void ResourceManagerBroadcastHandlerInit(void)
     enum BroadcastReceiverAction actions[] = {
         WIFI_P2P_STATE_CHANGED_ACTION,
         WIFI_P2P_CONNECTION_CHANGED_ACTION,
-        WIFI_CFG_CHANGED_ACTION,
     };
 
     broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "ResourceManager", Listener);
