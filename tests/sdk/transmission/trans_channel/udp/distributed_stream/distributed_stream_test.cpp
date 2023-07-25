@@ -571,6 +571,7 @@ int main(int argc, char *argv[])
     OHOS::DistributeSystemTest::g_pDistributetestEnv =
         new OHOS::DistributeSystemTest::DistributeTestEnvironment("major.desc");
     testing::AddGlobalTestEnvironment(OHOS::DistributeSystemTest::g_pDistributetestEnv);
+    testing::GTEST_FLAG(output) = "xml:./";
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
