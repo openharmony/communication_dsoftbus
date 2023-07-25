@@ -134,7 +134,8 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy brMac fail.");
                 return SOFTBUS_MEM_ERR;
             }
-            if (memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+            if (memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
+                info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy brMac fail.");
                 return SOFTBUS_MEM_ERR;
             }
@@ -530,7 +531,6 @@ NO_SANITIZE("cfi") int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int 
     cJSON_Delete(root);
     return SOFTBUS_OK;
 }
-
 
 NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
     int32_t len, uint16_t *fastDataSize)

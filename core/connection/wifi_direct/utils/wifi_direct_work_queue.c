@@ -107,7 +107,7 @@ struct WifiDirectWork* ObtainWifiDirectWork(WorkFunction function, void *data)
     return work;
 }
 
-struct WifiDirectWorkQueue* GetWifiDirectWorkQueue()
+struct WifiDirectWorkQueue* GetWifiDirectWorkQueue(void)
 {
     return &g_queue;
 }

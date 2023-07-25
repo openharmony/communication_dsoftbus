@@ -99,15 +99,15 @@ static int SetRcvBufFix(int fd, int val)
 
 static int SetSendBuf(int fd)
 {
-    static int g_sendBufSize = 0;
-    if (g_sendBufSize > 0) {
-        return SetSendBufFix(fd, g_sendBufSize);
+    static int sendBufSize = 0;
+    if (sendBufSize > 0) {
+        return SetSendBufFix(fd, sendBufSize);
     }
     // try set buffer size
     for (int size = SEND_BUF_SIZE; size > 0; size -= M_BYTES) {
         int ret = SetSendBufFix(fd, size);
         if (ret == 0) {
-            g_sendBufSize = size;
+            sendBufSize = size;
             return ret;
         }
     }
@@ -116,15 +116,15 @@ static int SetSendBuf(int fd)
 
 static int SetRecvBuf(int fd)
 {
-    static int g_recvBufSize = 0;
-    if (g_recvBufSize > 0) {
-        return SetRcvBufFix(fd, g_recvBufSize);
+    static int recvBufSize = 0;
+    if (recvBufSize > 0) {
+        return SetRcvBufFix(fd, recvBufSize);
     }
     // try set buffer size
     for (int size = RECV_BUF_SIZE; size > 0; size -= M_BYTES) {
         int ret = SetRcvBufFix(fd, size);
         if (ret == 0) {
-            g_recvBufSize = size;
+            recvBufSize = size;
             return ret;
         }
     }

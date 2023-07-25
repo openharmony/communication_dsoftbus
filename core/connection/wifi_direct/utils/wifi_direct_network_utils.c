@@ -64,15 +64,15 @@ static int32_t ChannelToFrequency(int32_t channel)
 }
 
 static int32_t ChannelListToString(int32_t *channelArray, size_t channelArraySize,
-                                   char *ChannelListString, size_t inSize)
+                                   char *channelListString, size_t inSize)
 {
     int32_t ret;
     size_t outLen = 0;
     for (size_t i = 0; i < channelArraySize; i++) {
         if (i == 0) {
-            ret = sprintf_s(ChannelListString + outLen, inSize - outLen, "%d", channelArray[i]);
+            ret = sprintf_s(channelListString + outLen, inSize - outLen, "%d", channelArray[i]);
         } else {
-            ret = sprintf_s(ChannelListString + outLen, inSize - outLen, "##%d", channelArray[i]);
+            ret = sprintf_s(channelListString + outLen, inSize - outLen, "##%d", channelArray[i]);
         }
         CONN_CHECK_AND_RETURN_RET_LOG(ret > 0, SOFTBUS_ERR, LOG_LABEL "format channel failed");
         outLen += (size_t)ret;

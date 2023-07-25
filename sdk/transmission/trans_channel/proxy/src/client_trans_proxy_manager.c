@@ -124,7 +124,7 @@ static int32_t ClientTransProxyListInit()
     return SOFTBUS_OK;
 }
 
-static void ClientTransProxyListDeinit()
+static void ClientTransProxyListDeinit(void)
 {
     if (g_proxyChannelInfoList != NULL) {
         DestroySoftBusList(g_proxyChannelInfoList);

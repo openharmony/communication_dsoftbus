@@ -616,7 +616,8 @@ static int32_t TransProxyGetPeerDataInfo(int16_t myId, AppInfoData *peerDataInfo
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->myId == myId) {
-            (void)memcpy_s(peerDataInfo, sizeof(AppInfoData), &(item->appInfo.peerData), sizeof(item->appInfo.peerData));
+            (void)memcpy_s(peerDataInfo, sizeof(AppInfoData),
+                           &(item->appInfo.peerData), sizeof(item->appInfo.peerData));
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }

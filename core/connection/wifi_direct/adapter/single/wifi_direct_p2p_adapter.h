@@ -43,7 +43,7 @@ struct WifiDirectP2pGroupInfo {
 
 enum WifiDirectP2pState {
     P2P_ENABLED = 0,
-    P2p_DISABLED = 1,
+    P2P_DISABLED = 1,
 };
 
 enum WifiDirectP2pConnectState {
