@@ -24,6 +24,7 @@
 #include "softbus_adapter_crypto.h"
 #include "wifi_direct_defines.h"
 #include "utils/wifi_direct_network_utils.h"
+#include "utils/wifi_direct_anonymous.h"
 #include "data/resource_manager.h"
 
 #define LOG_LABEL "[WifiDirect] WifiDirectP2pAdapter: "
@@ -98,9 +99,9 @@ static int32_t GetStationFrequency(void)
 static int32_t GetRecommendChannel(void)
 {
     RecommendChannelRequest request;
-    memset(&request, 0, sizeof(request));
+    (void)memset_s(&request, sizeof(request), 0, sizeof(request));
     RecommendChannelResponse response;
-    memset(&response, 0, sizeof(response));
+    (void)memset_s(&response, sizeof(response), 0, sizeof(response));
 
     int32_t ret = Hid2dGetRecommendChannel(&request, &response);
     if (ret != WIFI_SUCCESS) {
@@ -159,6 +160,13 @@ static int32_t SetPeerWifiConfigInfo(const char *config)
     return SOFTBUS_OK;
 }
 
+static int32_t SetPeerWifiConfigInfoV2(uint8_t *cfg, size_t size)
+{
+    (void)cfg;
+    (void)size;
+    return SOFTBUS_ERR;
+}
+
 static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigStringSize)
 {
     WifiP2pGroupInfo *groupInfo = (WifiP2pGroupInfo *)SoftBusCalloc(sizeof(*groupInfo));
@@ -168,36 +176,28 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
     if (ret != WIFI_SUCCESS) {
         CLOGE(LOG_LABEL "get current group failed");
         SoftBusFree(groupInfo);
+        groupInfo = NULL;
         return SOFTBUS_ERR;
     }
 
-    struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
-    uint8_t macAddrArray[MAC_ADDR_ARRAY_SIZE];
-    size_t macAddrArraySize = MAC_ADDR_ARRAY_SIZE;
-    ret = netWorkUtils->getInterfaceMacAddr(groupInfo->interface, macAddrArray, &macAddrArraySize);
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "get interface mac addr failed");
-        SoftBusFree(groupInfo);
-        return ret;
-    }
-
     char macAddrString[MAC_ADDR_STR_LEN];
-    ret = netWorkUtils->macArrayToString(macAddrArray, macAddrArraySize, macAddrString, sizeof(macAddrString));
+    ret = GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->owner.devAddr, sizeof(groupInfo->owner.devAddr),
+                                                        macAddrString, sizeof(macAddrString));
     if (ret != SOFTBUS_OK) {
         CLOGE(LOG_LABEL "convert mac addr to string failed");
         SoftBusFree(groupInfo);
+        groupInfo = NULL;
         return ret;
     }
-    CLOGI(LOG_LABEL "groupName=%s", groupInfo->groupName);
-    CLOGE(LOG_LABEL "mac=%s", macAddrString);
-    CLOGE(LOG_LABEL "passphrase=%s", groupInfo->passphrase);
-    CLOGE(LOG_LABEL "frequency=%d", groupInfo->frequency);
+    CLOGI(LOG_LABEL "groupName=%s, mac=%s, passphrase=%s, frequency=%d",
+          groupInfo->groupName, WifiDirectAnonymizeMac(macAddrString), groupInfo->passphrase, groupInfo->frequency);
 
     ret = sprintf_s(groupConfigString, *groupConfigStringSize, "%s\n%s\n%s\n%d",
                     groupInfo->groupName, macAddrString, groupInfo->passphrase, groupInfo->frequency);
+    SoftBusFree(groupInfo);
+    groupInfo = NULL;
     if (ret < 0) {
         CLOGE(LOG_LABEL "convert mac addr to string failed");
-        SoftBusFree(groupInfo);
         return SOFTBUS_ERR;
     }
 
@@ -260,7 +260,12 @@ static int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
     }
 
     char interface[INTERFACE_LENGTH];
-    memcpy(interface, groupInfo->interface, sizeof(groupInfo->interface));
+    int32_t res = memcpy_s(interface, sizeof(interface), groupInfo->interface, sizeof(groupInfo->interface));
+    if (res != EOK) {
+        CLOGE(LOG_LABEL "memcpy_s failed");
+        SoftBusFree(groupInfo);
+        return SOFTBUS_ERR;
+    }
     SoftBusFree(groupInfo);
     CLOGI(LOG_LABEL "interfaceName=%s", interface);
 
@@ -346,7 +351,7 @@ static int32_t P2pConfigGcIp(const char *interface, const char *ip)
     CONN_CHECK_AND_RETURN_RET_LOG(ip, SOFTBUS_INVALID_PARAM, LOG_LABEL "ip is null");
 
     IpAddrInfo addrInfo;
-    memset(&addrInfo, 0, sizeof(addrInfo));
+    (void)memset_s(&addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo));
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     int32_t ret = netWorkUtils->ipStringToIntArray(ip, addrInfo.ip, IPV4_ARRAY_LEN);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "convert ip to int array failed");
@@ -381,7 +386,7 @@ static int32_t P2pConnectGroup(char *groupConfigString)
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "split group config failed");
 
     Hid2dConnectConfig connectConfig;
-    memset(&connectConfig, 0, sizeof(connectConfig));
+    (void)memset_s(&connectConfig, sizeof(connectConfig), 0, sizeof(connectConfig));
 
     ret = strcpy_s(connectConfig.ssid, sizeof(connectConfig.ssid), configs[P2P_GROUP_CONFIG_INDEX_SSID]);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy ssid failed");
@@ -461,7 +466,7 @@ static void SetWifiLinkAttr(const char *interface, const char *attr)
     (void)attr;
 }
 
-static int32_t GetInterfaceCoexistCap(const char **cap)
+static int32_t GetInterfaceCoexistCap(char **cap)
 {
     *cap = NULL;
     return SOFTBUS_OK;
@@ -571,7 +576,7 @@ static struct WifiDirectP2pAdapter g_adapter = {
 
     .getInterfaceCoexistCap = GetInterfaceCoexistCap,
     .getSelfWifiConfigInfoV2 = GetSelfWifiConfigInfo,
-    .setPeerWifiConfigInfoV2 = SetPeerWifiConfigInfo,
+    .setPeerWifiConfigInfoV2 = SetPeerWifiConfigInfoV2,
     .getRecommendChannelV2 = GetRecommendChannelV2,
     .setConnectNotify = SetConnectNotify,
 

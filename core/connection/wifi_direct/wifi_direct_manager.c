@@ -129,7 +129,7 @@ static int32_t GetRemoteUuidByIp(const char *ipString, char *uuid, int32_t uuidS
     CONN_CHECK_AND_RETURN_RET_LOG(uuid, SOFTBUS_INVALID_PARAM, LOG_LABEL "uuid is null");
 
     struct InnerLink *innerLink = GetLinkManager()->getLinkByIp(ipString, true);
-    if (!innerLink) {
+    if (innerLink == NULL) {
         CLOGE(LOG_LABEL "not find inner link");
         return SOFTBUS_ERR;
     }
@@ -217,7 +217,6 @@ static void ConnectCallbackAsyncHandler(void *data)
         }
     }
 
-    SoftBusFree(data);
     SoftBusFree(callbackNode);
 }
 
@@ -247,12 +246,14 @@ static void OnConnectSuccess(int32_t requestId, const struct WifiDirectLink *lin
     if (memcpy_s(&connectResult->link, sizeof(connectResult->link), link, sizeof(struct WifiDirectLink)) != EOK) {
         CLOGE(LOG_LABEL "memcpy_s failed");
         SoftBusFree(connectResult);
+        connectResult = NULL;
         return;
     }
 
     if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
         CLOGE(LOG_LABEL "async fail");
         SoftBusFree(connectResult);
+        connectResult = NULL;
     }
     GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_END);
     ReportPerfData(OK);
@@ -270,6 +271,7 @@ static void OnConnectFailure(int32_t requestId, enum WifiDirectErrorCode reason)
 
     if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
         SoftBusFree(connectResult);
+        connectResult = NULL;
     }
     GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_END);
     ReportPerfData(reason);
@@ -286,6 +288,7 @@ static void OnDisconnectSuccess(int32_t requestId)
 
     if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
         SoftBusFree(connectResult);
+        connectResult = NULL;
     }
 }
 
@@ -301,6 +304,7 @@ static void OnDisconnectFailure(int32_t requestId, enum WifiDirectErrorCode reas
 
     if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
         SoftBusFree(connectResult);
+        connectResult = NULL;
     }
 }
 

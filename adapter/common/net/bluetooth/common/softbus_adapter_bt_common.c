@@ -17,16 +17,16 @@
 
 #include <stdbool.h>
 
-#include "ohos_bt_def.h"
-#include "ohos_bt_gap.h"
-#include "ohos_bt_gatt.h"
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_gap.h"
+#include "c_header/ohos_bt_gatt.h"
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define STATE_LISTENER_MAX_NUM 7
+#define STATE_LISTENER_MAX_NUM 8
 #define BR_STATE_CB_TRANSPORT 1
 
 typedef struct {

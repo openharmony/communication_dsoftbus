@@ -24,6 +24,7 @@ trans_proxy_channel_src = [
   "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_network.c",
   "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_session.c",
   "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_transceiver.c",
+  "$dsoftbus_trans_proxy_channel_path/src/softbus_proxychannel_pipeline.c",
 ]
 trans_proxy_channel_inc = [
   "$dsoftbus_root_path/core/adapter/transmission/include",

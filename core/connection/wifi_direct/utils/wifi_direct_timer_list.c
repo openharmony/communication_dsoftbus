@@ -61,7 +61,7 @@ static void WorkHandler(void *data)
     if (timerStruct->flag == TIMER_FLAG_REPEATED) {
         struct WifiDirectWorkQueue *queue = GetWifiDirectWorkQueue();
         struct WifiDirectWork *work = ObtainWifiDirectWork(WorkHandler, timerStruct);
-        if (!work) {
+        if (work == NULL) {
             CLOGE(LOG_LABEL "obtain new work failed");
             SoftBusMutexLock(&self->mutex);
             ListDelete(&timerStruct->node);
@@ -89,7 +89,7 @@ static int32_t StartTimer(TimeoutHandler handler, int64_t timeoutMs, enum WifiDi
 
     struct WifiDirectWorkQueue *queue = GetWifiDirectWorkQueue();
     struct WifiDirectWork *work = ObtainWifiDirectWork(WorkHandler, timerStruct);
-    if (!work) {
+    if (work == NULL) {
         SoftBusFree(timerStruct);
         return SOFTBUS_MALLOC_ERR;
     }

@@ -20,6 +20,7 @@
 
 #include "auth_device_common_key.h"
 #include "bus_center_manager.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_huks_utils.h"
@@ -82,11 +83,12 @@ static void LnnRestoreLocalDeviceInfo()
             LLOGE("set networkId fail");
         }
     }
+    AuthLoadDeviceKey();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
         LLOGE("load remote deviceInfo fail");
         return;
     }
-    AuthLoadDeviceKey();
+    LoadBleBroadcastKey();
     LLOGI("load remote deviceInfo devicekey success");
 }
 

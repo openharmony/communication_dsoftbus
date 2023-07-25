@@ -1098,6 +1098,11 @@ void VtpStreamSocket::DoStreamRecv()
             }
             auto header = plainData.get();
             StreamDepacketizer decode(streamType_);
+            if (plainDataLength < static_cast<int>(sizeof(CommonHeader))) {
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+                    "failed, plainDataLength = %d, CommonHeaderLen = %u", plainDataLength, sizeof(CommonHeader));
+                break;
+            }
             decode.DepacketizeHeader(header);
 
             auto buffer = plainData.get() + sizeof(CommonHeader);

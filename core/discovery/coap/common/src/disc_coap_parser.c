@@ -35,6 +35,7 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
         DLOGE("parse udid from remote failed.");
         return SOFTBUS_ERR;
     }
+    DLOGI("devId=%s", AnonymizesUDID(device->devId));
     cJSON_Delete(udid);
     return SOFTBUS_OK;
 }
@@ -46,6 +47,8 @@ void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
         return;
     }
     device->addrNum = 1;
+
+    DLOGI("ip=%s", AnonymizesIp(device->addr[0].info.ip.ip));
 }
 
 static void ParseItemDataFromServiceData(char *serviceData, const char *key, char *targetStr, uint32_t len)

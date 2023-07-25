@@ -70,6 +70,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
     info.linkType = appInfo->linkType;
+    info.dataConfig = appInfo->myData.dataConfig;
     if (appInfo->appType == APP_TYPE_AUTH) {
         info.reqId = (char*)appInfo->reqId;
     }
@@ -109,7 +110,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo
             ret = NotifyNormalChannelOpened(channelId, appInfo, isServer);
             break;
         case APP_TYPE_INNER:
-            ret = NotifyNetworkingChannelOpened(channelId, appInfo, isServer);
+            ret = NotifyNetworkingChannelOpened(appInfo->myData.sessionName, channelId, appInfo, isServer);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -136,7 +137,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpenFailed(int32_t channelId, const App
             ret = NotifyNormalChannelOpenFailed(appInfo->myData.pkgName, appInfo->myData.pid, channelId, errCode);
             break;
         case APP_TYPE_INNER:
-            NotifyNetworkingChannelOpenFailed(channelId, appInfo->peerData.deviceId);
+            NotifyNetworkingChannelOpenFailed(appInfo->myData.sessionName, channelId, appInfo->peerData.deviceId);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -160,7 +161,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo
             ret = NotifyNormalChannelClosed(appInfo->myData.pkgName, appInfo->myData.pid, channelId);
             break;
         case APP_TYPE_INNER:
-            NotifyNetworkingChannelClosed(channelId);
+            NotifyNetworkingChannelClosed(appInfo->myData.sessionName, channelId);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -183,7 +184,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelMsgReceived(int32_t channelId, const Ap
             TransOnNormalMsgReceived(appInfo->myData.pkgName, appInfo->myData.pid, channelId, data, len);
             break;
         case APP_TYPE_INNER:
-            NotifyNetworkingMsgReceived(channelId, data, len);
+            NotifyNetworkingMsgReceived(appInfo->myData.sessionName, channelId, data, len);
             break;
         default:
             ret = SOFTBUS_ERR;
@@ -221,7 +222,8 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *connOpt)
+static int32_t TransGetConnectOption(
+    const char *peerNetworkId, ConnectOption *connOpt, const LanePreferredLinkList *preferred)
 {
     uint32_t laneId = 0;
     LaneConnInfo connInfo;
@@ -237,6 +239,12 @@ static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *c
         peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy networkId failed.");
         return SOFTBUS_ERR;
+    }
+    if (preferred != NULL) {
+        for (uint32_t i = 0; i < preferred->linkTypeNum; i++) {
+            option.requestInfo.trans.expectedLink.linkType[i] = preferred->linkType[i];
+        }
+        option.requestInfo.trans.expectedLink.linkTypeNum = preferred->linkTypeNum;
     }
 
     if (TransGetLaneInfoByOption(&option, &connInfo, &laneId) != SOFTBUS_OK) {
@@ -255,7 +263,9 @@ EXIT_ERR:
     return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId)
+NO_SANITIZE("cfi")
+int32_t TransOpenNetWorkingChannel(
+    const char *sessionName, const char *peerNetworkId, const LanePreferredLinkList *preferred)
 {
     AppInfo appInfo;
     ConnectOption connOpt;
@@ -265,7 +275,7 @@ NO_SANITIZE("cfi") int32_t TransOpenNetWorkingChannel(const char *sessionName, c
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         return channelId;
     }
-    if (TransGetConnectOption(peerNetworkId, &connOpt) != SOFTBUS_OK) {
+    if (TransGetConnectOption(peerNetworkId, &connOpt, preferred) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking get connect option fail");
         return channelId;
     }

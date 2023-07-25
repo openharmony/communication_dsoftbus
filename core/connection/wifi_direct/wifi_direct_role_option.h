@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-#include "lnn_ohos_account_adapter.h"
+#ifndef WIFI_DIRECT_ROLE_OPTION_H
+#define WIFI_DIRECT_ROLE_OPTION_H
 
-#include <stdlib.h>
-#include <string.h>
-#include "softbus_errcode.h"
+#include "wifi_direct_types.h"
 
-int32_t GetOsAccountId(char *id, uint32_t *len)
-{
-    (void)id;
-    (void)len;
-    return SOFTBUS_OK;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct WifiDirectRoleOption {
+    enum WifiDirectRole (*getExpectedP2pRole)(const char *networkId);
+    enum WifiDirectRole (*getRemoteExpectedP2pRole)(const char *networkId);
+};
+
+struct WifiDirectRoleOption *GetWifiDirectRoleOption(void);
+
+#ifdef __cplusplus
 }
-
-int64_t GetCurrentAccount(void)
-{
-    return SOFTBUS_OK;
-}
+#endif
+#endif

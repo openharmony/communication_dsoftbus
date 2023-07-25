@@ -21,17 +21,36 @@
 #include "softbus_log.h"
 #include "softbus_transmission_interface.h"
 
-static INetworkingListener g_netChanlistener = {0};
+#define MAX_LISTENER_CNT 2
 
-NO_SANITIZE("cfi") int32_t NotifyNetworkingChannelOpened(int32_t channelId, const AppInfo *appInfo,
-    unsigned char isServer)
+typedef struct {
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    INetworkingListener listener;
+} INetworkingListenerEntry;
+
+static INetworkingListenerEntry g_listeners[MAX_LISTENER_CNT] = { 0 };
+
+static INetworkingListenerEntry *FindListenerEntry(const char *sessionName)
 {
-    if (g_netChanlistener.onChannelOpened == NULL) {
+    for (int32_t i = 0; i < SESSION_NAME_SIZE_MAX; i++) {
+        if (strcmp(sessionName, g_listeners[i].sessionName) == 0) {
+            return &g_listeners[i];
+        }
+    }
+    return NULL;
+}
+
+NO_SANITIZE("cfi")
+int32_t NotifyNetworkingChannelOpened(
+    const char *sessionName, int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
+{
+    INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
+    if (entry == NULL || entry->listener.onChannelOpened == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelOpened is null");
         return SOFTBUS_ERR;
     }
 
-    if (g_netChanlistener.onChannelOpened(channelId, appInfo->peerData.deviceId, isServer) != SOFTBUS_OK) {
+    if (entry->listener.onChannelOpened(channelId, appInfo->peerData.deviceId, isServer) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify channel open fail");
         return SOFTBUS_ERR;
     }
@@ -39,40 +58,60 @@ NO_SANITIZE("cfi") int32_t NotifyNetworkingChannelOpened(int32_t channelId, cons
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void NotifyNetworkingChannelOpenFailed(int32_t channelId, const char *networkId)
+NO_SANITIZE("cfi")
+void NotifyNetworkingChannelOpenFailed(const char *sessionName, int32_t channelId, const char *networkId)
 {
-    if (g_netChanlistener.onChannelOpenFailed == NULL) {
+    INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
+    if (entry == NULL || entry->listener.onChannelOpenFailed == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelOpenFailed is null");
         return;
     }
-    g_netChanlistener.onChannelOpenFailed(channelId, networkId);
+    entry->listener.onChannelOpenFailed(channelId, networkId);
 }
 
-NO_SANITIZE("cfi") void NotifyNetworkingChannelClosed(int32_t channelId)
+NO_SANITIZE("cfi") void NotifyNetworkingChannelClosed(const char *sessionName, int32_t channelId)
 {
-    if (g_netChanlistener.onChannelClosed == NULL) {
+    INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
+    if (entry == NULL || entry->listener.onChannelClosed == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "net onChannelClosed is null");
         return;
     }
-    g_netChanlistener.onChannelClosed(channelId);
+    entry->listener.onChannelClosed(channelId);
 }
 
-NO_SANITIZE("cfi") void NotifyNetworkingMsgReceived(int32_t channelId, const char *data, uint32_t len)
+NO_SANITIZE("cfi")
+void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, const char *data, uint32_t len)
 {
-    if (g_netChanlistener.onMessageReceived == NULL) {
+    INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
+    if (entry == NULL || entry->listener.onMessageReceived == NULL) {
         return;
     }
-    g_netChanlistener.onMessageReceived(channelId, data, len);
+    entry->listener.onMessageReceived(channelId, data, len);
 }
 
-
-NO_SANITIZE("cfi") int TransRegisterNetworkingChannelListener(const INetworkingListener *listener)
+NO_SANITIZE("cfi")
+int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
 {
-    if (memcpy_s(&g_netChanlistener, sizeof(INetworkingListener),
-        listener, sizeof(INetworkingListener)) != EOK) {
+    int32_t unuse = -1;
+    for (int32_t i = 0; i < MAX_LISTENER_CNT; i++) {
+        if (strlen(g_listeners[i].sessionName) == 0) {
+            unuse = i;
+            break;
+        }
+        if (strcmp(sessionName, g_listeners[i].sessionName) == 0) {
+            return SOFTBUS_OK;
+        }
+    }
+    if (unuse == -1) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "exceed %d listener registered", MAX_LISTENER_CNT);
         return SOFTBUS_ERR;
     }
 
+    if (strcpy_s(g_listeners[unuse].sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s session name failed");
+        return SOFTBUS_ERR;
+    }
+    g_listeners[unuse].listener = *listener;
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "register net listener ok");
     return SOFTBUS_OK;
 }

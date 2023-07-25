@@ -33,7 +33,7 @@ enum BroadcastReceiverAction {
 
 struct P2pConnChangedInfo {
     WifiP2pLinkedInfo p2pLinkInfo;
-    struct WifiDirectGroupInfo *groupInfo;
+    struct WifiDirectP2pGroupInfo *groupInfo;
 };
 
 struct BroadcastParam {

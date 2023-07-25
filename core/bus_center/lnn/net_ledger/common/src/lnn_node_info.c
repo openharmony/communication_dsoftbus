@@ -262,6 +262,69 @@ NO_SANITIZE("cfi") int32_t LnnGetP2pRole(const NodeInfo *info)
     return info->p2pInfo.p2pRole;
 }
 
+NO_SANITIZE("cfi") int32_t LnnSetWifiCfg(NodeInfo *info, const char *wifiCfg)
+{
+    if (info == NULL || wifiCfg == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->p2pInfo.wifiCfg, sizeof(info->p2pInfo.wifiCfg), wifiCfg) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s wifi cfg err.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") const char *LnnGetWifiCfg(const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return 0;
+    }
+    return info->p2pInfo.wifiCfg;
+}
+
+NO_SANITIZE("cfi") int32_t LnnSetChanList5g(NodeInfo *info, const char *chanList5g)
+{
+    if (info == NULL || chanList5g == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->p2pInfo.chanList5g, sizeof(info->p2pInfo.chanList5g), chanList5g) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s chan list 5g err.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") const char *LnnGetChanList5g(const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return 0;
+    }
+    return info->p2pInfo.chanList5g;
+}
+
+NO_SANITIZE("cfi") int32_t LnnSetStaFrequency(NodeInfo *info, int32_t staFrequency)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->p2pInfo.staFrequency = staFrequency;
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t LnnGetStaFrequency(const NodeInfo *info)
+{
+    if (info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        return 0;
+    }
+    return info->p2pInfo.staFrequency;
+}
+
 NO_SANITIZE("cfi") int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
 {
     if (info == NULL || p2pMac == NULL) {

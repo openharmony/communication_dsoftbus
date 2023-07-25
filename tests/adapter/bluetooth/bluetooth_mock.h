@@ -18,10 +18,10 @@
 
 #include "gmock/gmock.h"
 
-#include "ohos_bt_gap.h"
-#include "ohos_bt_gatt.h"
-#include "ohos_bt_gatt_client.h"
-#include "ohos_bt_gatt_server.h"
+#include "c_header/ohos_bt_gap.h"
+#include "c_header/ohos_bt_gatt.h"
+#include "c_header/ohos_bt_gatt_client.h"
+#include "c_header/ohos_bt_gatt_server.h"
 
 #include "softbus_adapter_bt_common.h"
 

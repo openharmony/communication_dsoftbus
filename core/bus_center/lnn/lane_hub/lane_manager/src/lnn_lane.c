@@ -90,8 +90,8 @@ static uint32_t AllocLaneId(LaneType type)
         if (((g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] >> (idIndex & ID_CALC_MASK)) & IS_USED) == IS_NOT_USED) {
             g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] |= (IS_USED << (idIndex & ID_CALC_MASK));
             randomId = idIndex + 1;
-            Unlock();
             laneId = randomId | ((uint32_t)type << LANE_ID_TYPE_SHIFT);
+            Unlock();
             return laneId;
         }
     }

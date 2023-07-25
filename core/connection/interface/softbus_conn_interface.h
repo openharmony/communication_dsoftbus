@@ -367,6 +367,14 @@ int32_t ConnStartLocalListening(const LocalListenerInfo *info);
  */
 int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
 
+/**
+ * @ingroup Softbus_conn_manager.
+ * @brief call this interface to check ble direct connect support or not.
+ * @return <b>false</b> if not support.
+ * @return <b>true</b> if support.
+ */
+bool ConnBleDirectIsEnable(BleProtocolType protocol);
+
 bool CheckActiveConnection(const ConnectOption *option);
 
 /**
@@ -395,6 +403,7 @@ int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time);
  * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
  */
 int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
