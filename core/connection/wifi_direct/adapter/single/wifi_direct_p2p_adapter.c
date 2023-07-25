@@ -159,6 +159,13 @@ static int32_t SetPeerWifiConfigInfo(const char *config)
     return SOFTBUS_OK;
 }
 
+static int32_t SetPeerWifiConfigInfoV2(uint8_t *cfg, size_t size)
+{
+    (void)cfg;
+    (void)size;
+    return SOFTBUS_ERR;
+}
+
 static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigStringSize)
 {
     WifiP2pGroupInfo *groupInfo = (WifiP2pGroupInfo *)SoftBusCalloc(sizeof(*groupInfo));
@@ -225,8 +232,6 @@ static int32_t GetGroupInfo(struct WifiDirectP2pGroupInfo **groupInfoOut)
         return SOFTBUS_ERR;
     }
 
-    (void)memcpy_s(groupInfo->groupOwner.address, sizeof(groupInfo->groupOwner.address),
-        info->owner.devAddr, sizeof(info->owner.devAddr));
     groupInfo->isGroupOwner = info->isP2pGroupOwner;
     groupInfo->frequency = info->frequency;
     groupInfo->clientDeviceSize = info->clientDevicesSize;
@@ -468,7 +473,7 @@ static void SetWifiLinkAttr(const char *interface, const char *attr)
     (void)attr;
 }
 
-static int32_t GetInterfaceCoexistCap(const char **cap)
+static int32_t GetInterfaceCoexistCap(char **cap)
 {
     *cap = NULL;
     return SOFTBUS_OK;
@@ -578,7 +583,7 @@ static struct WifiDirectP2pAdapter g_adapter = {
 
     .getInterfaceCoexistCap = GetInterfaceCoexistCap,
     .getSelfWifiConfigInfoV2 = GetSelfWifiConfigInfo,
-    .setPeerWifiConfigInfoV2 = SetPeerWifiConfigInfo,
+    .setPeerWifiConfigInfoV2 = SetPeerWifiConfigInfoV2,
     .getRecommendChannelV2 = GetRecommendChannelV2,
     .setConnectNotify = SetConnectNotify,
 

@@ -222,7 +222,8 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *connOpt)
+static int32_t TransGetConnectOption(
+    const char *peerNetworkId, ConnectOption *connOpt, const LanePreferredLinkList *preferred)
 {
     uint32_t laneId = 0;
     LaneConnInfo connInfo;
@@ -238,6 +239,12 @@ static int32_t TransGetConnectOption(const char *peerNetworkId, ConnectOption *c
         peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy networkId failed.");
         return SOFTBUS_ERR;
+    }
+    if (preferred != NULL) {
+        for (uint32_t i = 0; i < preferred->linkTypeNum; i++) {
+            option.requestInfo.trans.expectedLink.linkType[i] = preferred->linkType[i];
+        }
+        option.requestInfo.trans.expectedLink.linkTypeNum = preferred->linkTypeNum;
     }
 
     if (TransGetLaneInfoByOption(&option, &connInfo, &laneId) != SOFTBUS_OK) {
@@ -257,20 +264,18 @@ EXIT_ERR:
 }
 
 NO_SANITIZE("cfi")
-int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId, ConnectOption *connOpt)
+int32_t TransOpenNetWorkingChannel(
+    const char *sessionName, const char *peerNetworkId, const LanePreferredLinkList *preferred)
 {
     AppInfo appInfo;
-    ConnectOption innerConnOpt;
+    ConnectOption connOpt;
     int32_t channelId = INVALID_CHANNEL_ID;
 
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         return channelId;
     }
-    if (connOpt != NULL) {
-        innerConnOpt = *connOpt;
-    }
-    if (TransGetConnectOption(peerNetworkId, &innerConnOpt) != SOFTBUS_OK) {
+    if (TransGetConnectOption(peerNetworkId, &connOpt, preferred) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking get connect option fail");
         return channelId;
     }
@@ -280,7 +285,7 @@ int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetw
         return channelId;
     }
 
-    if (TransProxyOpenProxyChannel(&appInfo, &innerConnOpt, &channelId) != SOFTBUS_OK) {
+    if (TransProxyOpenProxyChannel(&appInfo, &connOpt, &channelId) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "networking open channel fail");
         channelId = INVALID_CHANNEL_ID;
     }
