@@ -34,7 +34,7 @@ struct WifiDirectWorkQueue {
     bool isInited;
 };
 
-struct WifiDirectWorkQueue *GetWifiDirectWorkQueue();
+struct WifiDirectWorkQueue *GetWifiDirectWorkQueue(void);
 struct WifiDirectWork* ObtainWifiDirectWork(WorkFunction function, void *data);
 int32_t CallMethodAsync(WorkFunction function, void *data, int64_t delayTimeMs);
 

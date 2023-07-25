@@ -134,7 +134,7 @@ void ConnBleFreeConnection(ConnBleConnection *connection)
     SoftBusFree(connection);
 }
 
-int32_t ConnBleStartServer()
+int32_t ConnBleStartServer(void)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
         "ATTENTION UNEXPECTED EXCEPTION: ble start server failed, try to lock failed");
@@ -166,7 +166,7 @@ int32_t ConnBleStartServer()
     return SOFTBUS_OK;
 }
 
-int32_t ConnBleStopServer()
+int32_t ConnBleStopServer(void)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
         "ATTENTION UNEXPECTED EXCEPTION: ble stop server failed, try to lock failed");

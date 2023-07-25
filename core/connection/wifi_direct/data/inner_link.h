@@ -84,7 +84,7 @@ void InnerLinkConstructor(struct InnerLink *self);
 void InnerLinkConstructorWithArgs(struct InnerLink *self, enum WifiDirectConnectType type, bool isClient,
                                   const char *localInterface, const char *remoteMac);
 void InnerLinkDestructor(struct InnerLink *self);
-struct InnerLink* InnerLinkNew();
+struct InnerLink* InnerLinkNew(void);
 void InnerLinkDelete(struct InnerLink *self);
 struct InnerLink* InnerLinkNewArray(size_t size);
 void InnerLinkDeleteArray(struct InnerLink *self, size_t size);

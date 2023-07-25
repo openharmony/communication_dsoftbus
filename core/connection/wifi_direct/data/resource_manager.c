@@ -478,7 +478,7 @@ int32_t ResourceManagerInit(void)
     return SOFTBUS_OK;
 }
 
-struct ResourceManager* GetResourceManager()
+struct ResourceManager* GetResourceManager(void)
 {
     return &g_manager;
 }

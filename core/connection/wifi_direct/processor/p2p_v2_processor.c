@@ -734,7 +734,6 @@ static int32_t ProcessConnectResponse2(struct NegotiateMessage *msg)
 
     InnerLinkDestructor(&innerLink);
     return ret;
-
 }
 
 static int32_t ProcessConnectResponse2AsNone(struct NegotiateMessage *msg, struct InnerLink *innerLink)

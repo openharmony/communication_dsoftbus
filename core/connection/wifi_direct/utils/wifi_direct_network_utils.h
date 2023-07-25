@@ -48,8 +48,6 @@ struct WifiDirectNetWorkUtils {
     int32_t (*macArrayToString)(const uint8_t *array, size_t arraySize, char *macString, size_t macStringSize);
 
     int32_t (*getLocalIpv4InfoArray)(struct WifiDirectIpv4Info *info, size_t *size);
-
-
 };
 
 struct WifiDirectNetWorkUtils* GetWifiDirectNetWorkUtils(void);
