@@ -47,6 +47,7 @@ constexpr int32_t INVALID_TYPE = -1;
 constexpr int32_t TYPE = 1;
 constexpr int32_t LNN_REFRESH_ID = 0;
 constexpr int32_t RESULT_REASON = -1;
+constexpr char PKGNAME[] = "softbustest";
 class ClientBusCentManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -211,7 +212,8 @@ HWTEST_F(ClientBusCentManagerTest, REG_NODE_DEVICE_STATE_CB_INNER_Test_001, Test
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callback) == SOFTBUS_OK);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callback) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(PKGNAME, &callback) == SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 
@@ -669,7 +671,8 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001, Te
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callBcak) == SOFTBUS_OK);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callback) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(PKGNAME, &callback) == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnNodeOnlineStateChanged("", true, reinterpret_cast<void *>(&info)) == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnNodeOnlineStateChanged("", false, reinterpret_cast<void *>(&info)) == SOFTBUS_OK);
     BusCenterClientDeinit();
@@ -698,7 +701,8 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_BASICINFO_CHANGED_Test_001, TestS
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
     EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callBcak) == SOFTBUS_OK);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(nullptr, &callback) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(RegNodeDeviceStateCbInner(PKGNAME, &callback) == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnNodeBasicInfoChanged("", reinterpret_cast<void *>(&info), INVALID_TYPE) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnOnNodeBasicInfoChanged("", reinterpret_cast<void *>(&info), TYPE) == SOFTBUS_OK);
     BusCenterClientDeinit();
