@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #include "clienttranschannelcallback_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include <securec.h>
+#include "softbus_utils.h"
 #include "session.h"
 #include "softbus_def.h"
 #include "client_trans_channel_callback.h"
@@ -25,25 +27,26 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
-#include "softbus_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_log.h"
+
 
 namespace OHOS {
 void ClientTransChannelCallbackTest(const uint8_t* data, size_t size)
 {
+    #define TEST_DATA_LENGTH 1024
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
 
-    char *sessionName = nullptr;
+    char *sessionName = const_cast<char*>(reinterpret_cast<const char*>(data));
     ChannelInfo channel = {0};
     int32_t channelId = *(reinterpret_cast<const int32_t*>(data));
+
     int32_t channelType = *(reinterpret_cast<const int32_t*>(data));
-    char *networkId = nullptr;
+
+    char *networkId = const_cast<char*>(reinterpret_cast<const char*>(data));
     int32_t routeType = *(reinterpret_cast<const int32_t*>(data));
-    const void *clientData = nullptr;
-    uint32_t len = *(reinterpret_cast<const uint32_t*>(data));
-    int32_t pktType = *(reinterpret_cast<const int32_t*>(data));
     int32_t eventId = *(reinterpret_cast<const int32_t*>(data));
     int32_t tvCount = *(reinterpret_cast<const int32_t*>(data));
     QosTv tvList = {};
@@ -52,7 +55,7 @@ void ClientTransChannelCallbackTest(const uint8_t* data, size_t size)
 
     TransOnChannelLinkDown(networkId, routeType);
 
-    TransOnChannelMsgReceived(channelId, channelType, clientData, len, (SessionPktType)pktType);
+    TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, (void*)data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
 
     TransOnChannelQosEvent(channelId, channelType, eventId, tvCount, &tvList);
 }
