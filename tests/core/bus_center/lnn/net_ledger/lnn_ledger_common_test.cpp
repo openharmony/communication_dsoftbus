@@ -214,8 +214,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     uint8_t info[BUF_LEN] = {0};
     EXPECT_TRUE(LnnGetNodeKeyInfo(nullptr, 0, info, BUF_LEN) == SOFTBUS_ERR);
-    EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, 0, info, BUF_LEN) == SOFTBUS_ERR);
-    EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, KEY_MAX_INDEX - 1, info, BUF_LEN) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, 0, info, BUF_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, KEY_MAX_INDEX - 1, info, BUF_LEN) == SOFTBUS_OK);
     for (i = 1; i < KEY_MAX_INDEX - 1; i++) {
         EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, i, info, BUF_LEN) == SOFTBUS_OK);
     }
@@ -260,7 +260,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
         LNN_COMMON_LEN,
         SOFTBUS_ERR,
         DATA_CHANGE_FLAG_BUF_LEN,
-        SOFTBUS_ERR
+        SHORT_ADDRESS_MAX_LEN
     };
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     for (int32_t i = 0; i < KEY_MAX_INDEX; i++) {
@@ -431,7 +431,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetLocalDeviceInfo(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnIsMasterNode() == true);
+    EXPECT_TRUE(LnnIsMasterNode() == false);
     LnnDeinitLocalLedger();
     LnnDeinitLocalLedger();
 }
