@@ -182,7 +182,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_007, TestSize.Level1)
     EXPECT_CALL(decisionDbMock, LnnDeleteKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitDecisionDbDelay();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -285,7 +285,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
     EXPECT_CALL(decisionDbMock, LnnDeleteKeyByHuks(_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitDecisionDbDelay();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*

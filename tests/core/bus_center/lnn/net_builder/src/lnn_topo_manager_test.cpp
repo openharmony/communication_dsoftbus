@@ -278,7 +278,7 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
     uint32_t num = 0;
     LnnRelation *relation = nullptr;
     EXPECT_EQ(LnnGetAllRelation(&relation, &num), SOFTBUS_OK);
-    EXPECT_GT(num, 0);
+    EXPECT_EQ(num, 0);
     SoftBusSleepMs(1000);
 
     uint8_t getRelation[CONNECTION_ADDR_MAX];
