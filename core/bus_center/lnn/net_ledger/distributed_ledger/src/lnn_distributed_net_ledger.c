@@ -93,6 +93,16 @@ typedef struct {
 
 static DistributedNetLedger g_distributedNetLedger;
 
+static void UpdateNetworkInfo(const char *udid)
+{
+    NodeBasicInfo basic = { 0 };
+    if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetBasicInfoByUdid fail.");
+        return;
+    }
+    LnnNotifyBasicInfoChanged(&basic, TYPE_NETWORK_INFO);
+}
+
 static uint64_t GetCurrentTime(void)
 {
     SoftBusSysTime now = { 0 };
@@ -1384,6 +1394,7 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
     bool oldBleFlag = false;
     bool isChanged = false;
     bool isMigrateEvent = false;
+    bool isNetworkChanged = false;
     bool newWifiFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI);
     bool newBleBrFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)
         || LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR);
@@ -1414,9 +1425,11 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
         oldBrFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BR);
         if ((oldBleFlag || oldBrFlag) && newWifiFlag) {
             NewWifiDiscovered(oldInfo, info);
+            isNetworkChanged = true;
         } else if (oldWifiFlag && newBleBrFlag) {
             RetainOfflineCode(oldInfo, info);
             NewBrBleDiscovered(oldInfo, info);
+            isNetworkChanged = true;
         } else {
             RetainOfflineCode(oldInfo, info);
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "flag error");
@@ -1439,6 +1452,9 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
+    if (isNetworkChanged) {
+        UpdateNetworkInfo(info->deviceInfo.deviceUdid);
+    }
     if (isOffline) {
         if (!oldWifiFlag && !newWifiFlag && newBleBrFlag) {
             OnlinePreventBrConnection(info);
@@ -1502,6 +1518,7 @@ NO_SANITIZE("cfi") ReportCategory LnnSetNodeOffline(const char *udid, Connection
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "discoveryType=%u after clear, not need to report offline.",
             info->discoveryType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        UpdateNetworkInfo(udid);
         if (type == CONNECTION_ADDR_WLAN) {
             NotifyMigrateDegrade(udid);
         }
