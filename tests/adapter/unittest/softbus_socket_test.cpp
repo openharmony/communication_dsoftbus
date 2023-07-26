@@ -1155,15 +1155,19 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest005, TestSize.Level0)
 
 /*
 * @tc.name: SoftBusSocketSelectTest006
-* @tc.desc: timeOut is not set
+* @tc.desc: The value of timeOut is 0
 * @tc.type: FUNC
 * @tc.require: 1
 */
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSelectTest006, TestSize.Level0)
 {
+    SoftBusSockTimeOut tv = {
+        .sec = 0,
+        .usec = 0
+    };
     SoftBusFdSet readFds, writeFds, exceptFds;
-    int32_t ret = SoftBusSocketSelect(SET_SIZE, &readFds, &writeFds, &exceptFds, NULL);
-    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+    int32_t ret = SoftBusSocketSelect(SET_SIZE, &readFds, &writeFds, &exceptFds, &tv);
+    EXPECT_TRUE(ret >= 0);
 }
 
 /*
