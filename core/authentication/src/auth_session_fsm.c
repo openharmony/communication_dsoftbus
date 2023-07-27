@@ -435,7 +435,12 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
     }
     AuthUpdateKeyIndex(udidShortHash, authFsm->info.connInfo.type, authFsm->authSeq, authFsm->info.isServer);
     authFsm->info.oldIndex = key.keyIndex;
-    return AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
+    ret = AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
+    if (ret != SOFTBUS_OK) {
+        ALOGE("post save sessionKey event");
+        return SOFTBUS_ERR;
+    }
+    return AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
 
 static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)

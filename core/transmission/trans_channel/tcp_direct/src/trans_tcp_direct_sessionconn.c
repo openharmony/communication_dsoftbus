@@ -126,10 +126,6 @@ NO_SANITIZE("cfi") SessionConn *CreateNewSessinConn(ListenerModule module, bool 
     }
     conn->serverSide = isServerSid;
     conn->channelId = GenerateChannelId(true);
-    if (conn->channelId == INVALID_CHANNEL_ID) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate tdc channel id failed.");
-        return NULL;
-    }
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = -1;
