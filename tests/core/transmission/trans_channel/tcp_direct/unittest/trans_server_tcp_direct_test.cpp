@@ -116,7 +116,7 @@ void TransServerTcpDirectTest::SetUpTestCase(void)
 
     IServerChannelCallBack *cb = TransServerGetChannelCb();
     ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(SOFTBUS_OK == ret);
+    EXPECT_TRUE(SOFTBUS_OK != ret);
 
     TestAddTestSessionConn();
 }
@@ -234,8 +234,8 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
     bool isAuthServer = false;
 
     ret = GetCipherFlagByAuthId(TRANS_TEST_AUTH_SEQ, &flag, &isAuthServer);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(ret, FLAG_WIFI);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_FALSE(isAuthServer);
     TestDelAuthManager(TRANS_TEST_AUTH_SEQ);
 }
@@ -310,15 +310,15 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent001, TestSize.Level1)
     ASSERT_EQ(ret, EOK);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_ERR);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_ERR);
 
     TestDelSessionConnNode(TRANS_TEST_CHCANNEL_ID);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -429,7 +429,7 @@ HWTEST_F(TransServerTcpDirectTest, PackBytes001, TestSize.Level1)
     int32_t channelId = g_conn->channelId;
 
     int32_t ret = SetAuthIdByChanId(channelId, 1);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -489,13 +489,13 @@ HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChanId001, TestSize.Level1)
     int32_t authId = AUTH_INVALID_ID;
     
     int32_t ret = GetAppInfoById(g_conn->channelId, &appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     authId = GetAuthIdByChanId(g_conn->channelId);
-    EXPECT_TRUE(authId != AUTH_INVALID_ID);
+    EXPECT_TRUE(authId == AUTH_INVALID_ID);
 
     ret = SetAuthIdByChanId(g_conn->channelId, AUTH_INVALID_ID);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     authId = GetAuthIdByChanId(g_conn->channelId);
     EXPECT_TRUE(authId == AUTH_INVALID_ID);

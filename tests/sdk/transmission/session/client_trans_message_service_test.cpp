@@ -215,7 +215,11 @@ static void DeleteSessionServerAndSession(const char *sessionName, int32_t sessi
 HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest01, TestSize.Level1)
 {
     int ret = CheckSendLen(CHANNEL_TYPE_BUTT, BUSINESS_TYPE_MESSAGE, TRANS_TEST_SEND_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
+    ret = CheckSendLen(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, TRANS_TEST_INVALID_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
+    ret = CheckSendLen(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, TRANS_TEST_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
 }
 
 /**

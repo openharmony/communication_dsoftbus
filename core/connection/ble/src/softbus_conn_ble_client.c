@@ -539,7 +539,7 @@ static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t m
     int32_t rc = ConnPostMsgToLooper(&g_bleGattClientAsyncHandler, MSG_CLIENT_MTU_SETTED, 0, 0, ctx, 0);
     if (rc != SOFTBUS_OK) {
         CLOGE("receive gatt client callback, MTU configured handle failed: post msg to looper failed: underlayer "
-              "handle=%d, status=%d, mtu size =%d, status=%d, error=%d",
+              "handle=%d, mtu size =%d, status=%d, error=%d",
             underlayerHandle, mtuSize, status, rc);
         SoftBusFree(ctx);
     }
