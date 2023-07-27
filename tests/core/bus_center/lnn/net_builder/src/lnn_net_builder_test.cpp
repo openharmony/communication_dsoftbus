@@ -212,7 +212,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnUpdateNodeAddr(MASTER_UDID);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
     ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnUpdateNodeAddr(MASTER_UDID);

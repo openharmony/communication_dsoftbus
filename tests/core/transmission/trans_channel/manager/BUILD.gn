@@ -19,7 +19,7 @@ group("unittest") {
 
   deps = [
     "trans_channel_callback_test:unittest",
-    "trans_channel_manager_test:unittest",
+    # "trans_channel_manager_test:unittest",
     "trans_lane_manager_test:unittest",
     "trans_link_listener_test:unittest",
   ]

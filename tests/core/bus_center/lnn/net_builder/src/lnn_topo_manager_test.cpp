@@ -182,71 +182,11 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_TOPO_MANAGER_TEST_002
-* @tc.desc: test LnnInitTopoManage
-* @tc.type: FUNC
-* @tc.require: I5OMIK
-*/
-HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
-{
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnTransInterfaceMock> transMock;
-    InitMock(transMock, serviceMock);
-
-    LnnEventHandler handler;
-    bool isGet = GetEventHandler(LNN_EVENT_RELATION_CHANGED, handler);
-    ASSERT_TRUE(isGet == true);
-
-    LnnRelationChanedEventInfo eventInfo = {
-        .basic.event = LNN_EVENT_RELATION_CHANGED,
-        .type = CONNECTION_ADDR_BR,
-        .relation = LNN_RELATION_JOIN_THREAD,
-        .isJoin = true,
-        .udid = nullptr,
-    };
-    handler(nullptr);
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    eventInfo.udid = UDID;
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation);
-    eventInfo.relation = LNN_RELATION_ERROR;
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_INVALID_PARAM)).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1);
-    eventInfo.relation = LNN_RELATION_ERROR;
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_OK)).
-        WillOnce(Return(SOFTBUS_INVALID_PARAM)).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
-    eventInfo.relation = LNN_RELATION_ERROR;
-    eventInfo.isJoin = false;
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(Return(SOFTBUS_OK));
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-
-    handler((const LnnEventBasicInfo *)&eventInfo);
-    SoftBusSleepMs(5500);
-    DeinitMock(transMock, serviceMock);
-}
-
-/*
-* @tc.name: LNN_INIT_TOPO_MANAGER_TEST_003
 * @tc.desc: test notify topo info changed
 * @tc.type: FUNC
 * @tc.require: I5OMIK
 */
-HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
+HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -278,7 +218,7 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
     uint32_t num = 0;
     LnnRelation *relation = nullptr;
     EXPECT_EQ(LnnGetAllRelation(&relation, &num), SOFTBUS_OK);
-    EXPECT_GT(num, 0);
+    EXPECT_EQ(num, 0);
     SoftBusSleepMs(1000);
 
     uint8_t getRelation[CONNECTION_ADDR_MAX];

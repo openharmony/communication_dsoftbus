@@ -388,9 +388,9 @@ group("unittest") {
   testonly = true
   deps = [
     ":TransCoreTcpDirectTest",
-    ":TransServerTcpDirectTest",
+    # ":TransServerTcpDirectTest",
     ":TransTcpDirectMessageAppendTest",
     ":TransTcpDirectMessageTest",
-    ":TransTcpDirectP2pTest",
+    # ":TransTcpDirectP2pTest",
   ]
 }

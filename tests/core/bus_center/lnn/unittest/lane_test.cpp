@@ -248,17 +248,16 @@ HWTEST_F(LaneTest, LANE_ID_APPLY_Test_002, TestSize.Level1)
 */
 HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
 {
-    LanePreferredLinkList *recommendList = nullptr;
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     uint32_t listNum = 0;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_FILE;
     selectParam.expectedBw = 0;
-    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, recommendList, &listNum);
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_TRUE(recommendList != nullptr);
     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
-    SoftBusFree(recommendList);
 }
 
 /*
@@ -269,7 +268,8 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
 */
 HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
 {
-    LanePreferredLinkList *recommendList = nullptr;
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     uint32_t listNum = 0;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
@@ -278,11 +278,9 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
     selectParam.list.linkTypeNum = LANE_PREFERRED_LINK_NUM;
     selectParam.list.linkType[0] = LANE_WLAN_5G;
     selectParam.list.linkType[1] = LANE_BR;
-    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, recommendList, &listNum);
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_TRUE(recommendList != nullptr);
     EXPECT_TRUE(listNum == LANE_PREFERRED_LINK_NUM);
-    SoftBusFree(recommendList);
 }
 
 /*

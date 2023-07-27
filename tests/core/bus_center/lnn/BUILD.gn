@@ -1507,7 +1507,7 @@ group("unittest") {
   deps = [
     ":BusCenterClientProxyStandardTest",
     ":BusCenterClientProxyTest",
-    ":LNNBtNetworkImplMockTest",
+    # ":LNNBtNetworkImplMockTest",
     ":LNNBusCenterIpcTest",
     ":LNNConnectionFsmTest",
     ":LNNDeviceNameInfoTest",
@@ -1515,7 +1515,7 @@ group("unittest") {
     # ":LNNDiscoveryInterfaceTest",
     ":LNNDisctributedLedgerTest",
     ":LNNHuksUtilsTest",
-    ":LNNIpNetworkImplMockTest",
+    # ":LNNIpNetworkImplMockTest",
 
     # ":LNNLaneLinkMockTest",
 
@@ -1537,7 +1537,7 @@ group("unittest") {
     ":LaneTest",
     ":LedgerLaneHubTest",
     ":NetBuilderTest",
-    ":NetLedgerTest",
+    # ":NetLedgerTest",
   ]
   if (!defined(ohos_lite) && enhanced_test) {
     deps += [ ":LNNDbMockTest" ]

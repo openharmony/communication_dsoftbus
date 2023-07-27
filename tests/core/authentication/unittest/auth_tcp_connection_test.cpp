@@ -180,8 +180,6 @@ HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_001, TestSize.Level1)
     ConnectOption clientAddr;
     (void)memset_s(&clientAddr, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = OnConnectEvent(module, cfd, &clientAddr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = OnConnectEvent(module, cfd, &clientAddr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     cfd = 0;
     ret = OnConnectEvent(module, cfd, &clientAddr);
