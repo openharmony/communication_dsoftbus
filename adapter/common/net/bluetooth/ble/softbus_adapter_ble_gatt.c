@@ -797,9 +797,9 @@ NO_SANITIZE("cfi") int SoftBusStopAdv(int advId)
         return SOFTBUS_ERR;
     }
     if (!g_advChannel[advId].isAdvertising) {
-        CLOGW("SoftBusStopAdv, wait condition inner-advId: %d, "
-            "bt-advId: %d", advId, g_advChannel[advId].advId);
-        SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock, NULL);
+        CLOGI("SoftBusStopAdv, adv %d is not advertising", advId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_OK;
     }
     int ret = BleStopAdv(g_advChannel[advId].advId);
     CLOGI("SoftBusStopAdv, inner-advId: %d, "
