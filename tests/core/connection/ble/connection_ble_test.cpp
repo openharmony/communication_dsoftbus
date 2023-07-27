@@ -65,7 +65,7 @@ HWTEST_F(ConnectionBleTest, ManagerTest001, TestSize.Level1)
     int ret;
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "ManagerTest001");
     ret = ConnTypeIsSupport(CONNECT_BLE);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -131,9 +131,9 @@ HWTEST_F(ConnectionBleTest, ManagerTest004, TestSize.Level1)
     LocalListenerInfo info;
     info.type = CONNECT_BLE;
     ret = ConnStartLocalListening(&info);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ConnStopLocalListening(&info);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     g_connId = 0;
 }

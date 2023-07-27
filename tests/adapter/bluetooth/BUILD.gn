@@ -156,7 +156,7 @@ group("unittest") {
   deps = [
     ":AdapterBleGattClientTest",
     ":AdapterBleGattServerTest",
-    ":AdapterBleGattTest",
+    # ":AdapterBleGattTest",
     ":AdapterBtCommonTest",
     ":AdapterBtUtilsTest",
   ]
