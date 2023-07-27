@@ -96,11 +96,11 @@ static int32_t GetRemoteBtMacByUdidHash(const char *udidHash, char *brMac, int32
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     if (LnnGetNetworkIdByUdidHash(udidHash, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetRemoteBtMacByUdidHash fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "LnnGetNetworkIdByUdidHash fail");
         return SOFTBUS_NOT_FIND;
     }
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, len) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetRemoteBtMacByUdidHash UDID fail");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetRemoteBtMac fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -186,6 +186,7 @@ static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get connInfo fail connId[%d]", connId);
         return AUTH_INVALID_ID;
     }
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cipher:%d, connInfoType:%d", cipher, connInfo.type);
     bool isBle = ((cipher & USE_BLE_CIPHER) != 0);
     if (isBle && connInfo.type == AUTH_LINK_TYPE_BR) {
         if (ConvertBrConnInfo2BleConnInfo(&connInfo) != SOFTBUS_OK) {
