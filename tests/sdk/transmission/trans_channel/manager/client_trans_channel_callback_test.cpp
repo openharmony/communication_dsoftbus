@@ -217,7 +217,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest001, TestS
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_BUTT, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
