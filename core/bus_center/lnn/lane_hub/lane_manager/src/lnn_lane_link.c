@@ -247,6 +247,12 @@ static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     }
     LaneLinkInfo linkInfo = {0};
     (void)memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+    if (SoftBusGenerateStrHash((uint8_t*)connection->udid, strlen(connection->udid),
+        (uint8_t*)linkInfo.linkInfo.ble.deviceIdHash) != SOFTBUS_OK) {
+        LLOGE("generate deviceId hash err");
+        ConnBleReturnConnection(&connection);
+        return SOFTBUS_ERR;
+    }
     linkInfo.linkInfo.ble.protoType = type;
     if (type == BLE_COC) {
         linkInfo.type = LANE_COC;
@@ -268,6 +274,16 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
     LaneLinkInfo linkInfo = {0};
     if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_BLE_MAC, linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN)
         != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LLOGE("get udid error");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusGenerateStrHash((uint8_t*)peerUdid, strlen(peerUdid),
+        (uint8_t*)linkInfo.linkInfo.ble.deviceIdHash) != SOFTBUS_OK) {
+        LLOGE("generate deviceId hash err");
         return SOFTBUS_ERR;
     }
     linkInfo.linkInfo.ble.protoType = BLE_GATT;
