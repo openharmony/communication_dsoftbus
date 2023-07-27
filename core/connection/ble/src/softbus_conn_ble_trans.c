@@ -47,7 +47,8 @@ static int32_t UnpackTransHeader(uint8_t *data, uint32_t dataLen, BleTransHeader
     header->total = ntohl(tmp->total);
     if ((header->size != dataLen - BLE_TRANS_HEADER_SIZE) || (header->total > MAX_DATA_LEN) ||
         (header->size > header->total) || (header->total - header->size < header->offset)) {
-        CLOGE("unpack ble trans header failed, dataLen=%u, total=%u, current packet size=%u, current packet len");
+        CLOGE("unpack ble trans header failed, dataLen=%u, total=%u, current packet size=%u, current packet len",
+        dataLen, header->total, header->size);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
