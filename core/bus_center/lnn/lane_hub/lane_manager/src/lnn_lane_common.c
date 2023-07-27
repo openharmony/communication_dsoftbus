@@ -49,6 +49,10 @@ static int32_t BleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
         linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
         return SOFTBUS_ERR;
     }
+    if (memcpy_s(connInfo->connInfo.ble.deviceIdHash, UDID_HASH_LEN,
+        linkInfo->linkInfo.ble.deviceIdHash, UDID_HASH_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
     connInfo->connInfo.ble.protoType = linkInfo->linkInfo.ble.protoType;
     connInfo->connInfo.ble.psm = linkInfo->linkInfo.ble.psm;
     profile->linkType = LANE_BLE;
@@ -126,6 +130,10 @@ static int32_t CocInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     connInfo->type = LANE_COC;
     if (memcpy_s(connInfo->connInfo.ble.bleMac, BT_MAC_LEN,
         linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(connInfo->connInfo.ble.deviceIdHash, UDID_HASH_LEN,
+        linkInfo->linkInfo.ble.deviceIdHash, UDID_HASH_LEN) != EOK) {
         return SOFTBUS_ERR;
     }
     connInfo->connInfo.ble.psm = linkInfo->linkInfo.ble.psm;

@@ -55,6 +55,7 @@ typedef struct {
 typedef struct {
     BleProtocolType protoType;
     char bleMac[BT_MAC_LEN];
+    char deviceIdHash[UDID_HASH_LEN];
     int32_t psm;
 } BleLinkInfo;
 
