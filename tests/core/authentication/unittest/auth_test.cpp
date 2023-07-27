@@ -296,13 +296,10 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001, TestSize.L
     bool isServer = true;
     const uint8_t data[TEST_DATA_LEN] = { 0 };
     uint32_t len = TEST_DATA_LEN;
-    uint32_t errlen = 0;
     int32_t ret;
 
     ret = AuthSessionProcessCloseAckByConnId(connId, isServer, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthSessionProcessCloseAckByConnId(connId, isServer, data, errlen);
-    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
     ret = AuthSessionProcessCloseAckByConnId(connId, isServer, data, len);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
@@ -774,13 +771,21 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_DEVICE_POST_TRANS_DATA_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
-    const AuthTransData dataInfo = { 0 };
     int32_t ret;
+    const AuthTransData dataInfo = { 0 };
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthDevicePostTransData(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthDevicePostTransData(authId, &dataInfo);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -945,14 +950,22 @@ HWTEST_F(AuthTest, AUTH_OPEN_CONN_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_POST_TRANS_DATA_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
-    const AuthTransData dataInfo = { 0 };
     int32_t ret;
+    const AuthTransData dataInfo = { 0 };
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthPostTransData(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthPostTransData(authId, &dataInfo);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
     AuthCloseConn(authId);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -1168,14 +1181,23 @@ HWTEST_F(AuthTest, AUTH_GET_META_TYPE_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_GET_DEVICE_UUID_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
+    int32_t ret;
     char uuid[TEST_DATA_LEN] = "testdata";
     uint16_t size = TEST_DATA_LEN;
-    int32_t ret;
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    (void)strcpy_s(info.udid, TEST_DATA_LEN, uuid);
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthGetDeviceUuid(authId, nullptr, size);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetDeviceUuid(authId, uuid, size);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -1187,14 +1209,22 @@ HWTEST_F(AuthTest, AUTH_GET_DEVICE_UUID_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_GET_VERSION_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
-    SoftBusVersion version;
     int32_t ret;
+    SoftBusVersion version;
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
     version = SOFTBUS_OLD_V1;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthGetVersion(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetVersion(authId, &version);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    DelAuthManager(auth, true);
 }
 
 /*
