@@ -87,6 +87,7 @@ public:
 void TestAddTestSessionConn(void)
 {
     g_conn = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, false);
+    g_conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (g_conn == NULL) {
         printf("create session conn failed.\n");
         return;
@@ -103,6 +104,9 @@ void TestDelSessionConn(void)
 {
     int32_t channelId = 1;
     TransDelSessionConnById(channelId);
+    if (g_conn != nullptr) {
+        SoftBusFree(g_conn);
+    }
 }
 
 void TransServerTcpDirectTest::SetUpTestCase(void)
@@ -310,15 +314,15 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent001, TestSize.Level1)
     ASSERT_EQ(ret, EOK);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_ERR);
+    ASSERT_EQ(ret, SOFTBUS_MALLOC_ERR);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_ERR);
+    ASSERT_EQ(ret, SOFTBUS_MALLOC_ERR);
 
     TestDelSessionConnNode(TRANS_TEST_CHCANNEL_ID);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_ERR);
+    ASSERT_EQ(ret, SOFTBUS_MALLOC_ERR);
 }
 
 /**
