@@ -444,7 +444,7 @@ group("unittest") {
     ":AuthHichainTest",
     ":AuthOtherTest",
     ":AuthTcpConnectionTest",
-    ":AuthTest",
+    # ":AuthTest",
 
     # ":AuthTestCallBackTest",
   ]

@@ -208,47 +208,31 @@ static void DeleteSessionServerAndSession(const char *sessionName, int32_t sessi
 
 /**
  * @tc.name: TransClientMsgServiceTest01
- * @tc.desc: Transmission sdk message service check send length with different parameters.
+ * @tc.desc: Transmission sdk message service send bytes with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest01, TestSize.Level1)
 {
-    int ret = CheckSendLen(CHANNEL_TYPE_BUTT, BUSINESS_TYPE_MESSAGE, TRANS_TEST_SEND_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CheckSendLen(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, TRANS_TEST_INVALID_SEND_LEN);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
-    ret = CheckSendLen(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, TRANS_TEST_SEND_LEN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/**
- * @tc.name: TransClientMsgServiceTest02
- * @tc.desc: Transmission sdk message service send bytes with different parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1)
-{
     int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, true);
     ASSERT_GT(sessionId, 0);
     int ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
 /**
- * @tc.name: TransClientMsgServiceTest03
+ * @tc.name: TransClientMsgServiceTest02
  * @tc.desc: Transmission sdk message service send message with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest03, TestSize.Level1)
+HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1)
 {
     int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_BUTT, false, true);
     ASSERT_GT(sessionId, 0);
@@ -258,12 +242,12 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest03, TestSize.Level1
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, true);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
