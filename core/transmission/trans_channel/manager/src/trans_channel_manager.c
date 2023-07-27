@@ -187,6 +187,10 @@ static int32_t TransGetRemoteInfo(const SessionParam* param, AppInfo* appInfo)
 
 static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
 {
+    if (param == NULL || param->attr == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parm is null");
+        return SOFTBUS_ERR;
+    }
     if (param->attr->fastTransData != NULL && param->attr->fastTransDataSize > 0 &&
         param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
         if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
