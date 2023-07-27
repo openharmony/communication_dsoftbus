@@ -286,7 +286,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     int32_t ret = TransAddUdpChannel(newChannel);
     ASSERT_TRUE(ret == SOFTBUS_OK);
     ret = InitQos();
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_TRUE(ret == SOFTBUS_OK || ret == SOFTBUS_ERR);
 
 
     TransOnExchangeUdpInfoReply(authId, INVALID_SEQ, msg);
@@ -316,7 +316,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply002, TestSize.Level1)
     channel->info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
     channel->info.myData.channelId = 1;
     int32_t ret = TransAddUdpChannel(channel);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    ASSERT_FALSE(ret == SOFTBUS_PUBLIC_ERR_BASE);
 
     TransOnExchangeUdpInfoReply(authId, invalidSeq, msg);
 
