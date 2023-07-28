@@ -149,6 +149,15 @@ static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
     return connInfo.type == AUTH_LINK_TYPE_P2P;
 }
 
+static bool IsMetaChannel(struct WifiDirectNegotiateChannel *base)
+{
+    struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
+    bool isMeta = false;
+    int32_t ret = AuthGetMetaType(self->authId, &isMeta);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get meta type failed");
+    return isMeta;
+}
+
 static bool GetTlvFeature(struct DefaultNegotiateChannel *self)
 {
     char uuid[UUID_BUF_LEN] = {0};
@@ -189,6 +198,7 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
+    self->isMetaChannel = IsMetaChannel;
     self->duplicate = Duplicate;
     self->destructor = Destructor;
 
@@ -214,13 +224,21 @@ void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self)
 }
 
 int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
+                                    struct WifiDirectNegotiateChannel *srcChannel,
                                     struct DefaultNegoChannelOpenCallback *callback)
 {
-    CLOGI(LOG_LABEL "remoteIp=%s remotePort=%d", WifiDirectAnonymizeIp(remoteIp), remotePort);
+    bool isMeta = false;
+    if (srcChannel && srcChannel->isMetaChannel) {
+        isMeta = srcChannel->isMetaChannel(srcChannel);
+    }
+    CLOGI(LOG_LABEL "remoteIp=%s remotePort=%d isMeta=%d", WifiDirectAnonymizeIp(remoteIp), remotePort, isMeta);
 
     AuthConnInfo authConnInfo;
     authConnInfo.type = AUTH_LINK_TYPE_P2P;
     authConnInfo.info.ipInfo.port = remotePort;
+    if (isMeta) {
+        authConnInfo.info.ipInfo.authId = ((struct DefaultNegotiateChannel*)srcChannel)->authId;
+    }
     int32_t ret = strcpy_s(authConnInfo.info.ipInfo.ip, sizeof(authConnInfo.info.ipInfo.ip), remoteIp);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, "copy ip failed");
 
@@ -229,7 +247,7 @@ int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
         .onConnOpenFailed = callback->onConnectFailure,
     };
 
-    ret = AuthOpenConn(&authConnInfo, AuthGenRequestId(), &authConnCallback, false);
+    ret = AuthOpenConn(&authConnInfo, AuthGenRequestId(), &authConnCallback, isMeta);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "auth open connect failed");
 
     return SOFTBUS_OK;

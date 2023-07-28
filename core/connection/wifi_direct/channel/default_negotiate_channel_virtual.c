@@ -38,10 +38,12 @@ void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self)
 }
 
 int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
+                                    struct WifiDirectNegotiateChannel *srcChannel,
                                     struct DefaultNegoChannelOpenCallback *callback)
 {
     (void)remoteIp;
     (void)remotePort;
+    (void)srcChannel;
     (void)callback;
     return 0;
 }
