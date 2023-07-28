@@ -684,10 +684,6 @@ int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register ip addr change event handler failed");
         return SOFTBUS_ERR;
     }
-    // if (LnnRegisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateChangeEventHandler) != SOFTBUS_OK) {
-    //     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register ip addr change event handler failed");
-    //     return SOFTBUS_ERR;
-    // }
     if (SetLocalIpInfo(LNN_LOOPBACK_IP, LNN_LOOPBACK_IFNAME) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local ip as loopback failed!");
         return SOFTBUS_ERR;

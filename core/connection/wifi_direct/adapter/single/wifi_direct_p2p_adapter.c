@@ -56,7 +56,7 @@ static bool IsWideBandSupported(void)
 
 static int32_t GetChannel5GListIntArray(int32_t *array, size_t *size)
 {
-    int32_t ret = Hid2dGetChannelListFor5G(array, (int32_t) * size);
+    int32_t ret = Hid2dGetChannelListFor5G(array, (int32_t) *size);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR, LOG_LABEL "hid2d get channels failed ret=%d", ret);
 
     int32_t count = 0;
