@@ -148,6 +148,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
 int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo);
 void AuthCloseConn(int64_t authId);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
+void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
 int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta);
