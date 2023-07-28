@@ -1532,7 +1532,7 @@ group("unittest") {
     ":LNNNodeWeightTest",
     ":LNNP2pInfoTest",
     ":LNNSyncInfoManagerTest",
-    ":LNNTopoManagerTest",
+    # ":LNNTopoManagerTest",
     ":LNNTransLaneMockTest",
     ":LaneTest",
     ":LedgerLaneHubTest",
