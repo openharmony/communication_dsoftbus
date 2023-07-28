@@ -366,6 +366,29 @@ NO_SANITIZE("cfi") TrustedReturnType AuthHasTrustedRelation(void)
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 
+void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType)
+{
+    AuthLinkType linkType;
+    switch (discoveryType) {
+        case DISCOVERY_TYPE_WIFI:
+            linkType = AUTH_LINK_TYPE_WIFI;
+            break;
+        case DISCOVERY_TYPE_BLE:
+            linkType = AUTH_LINK_TYPE_BLE;
+            break;
+        case DISCOVERY_TYPE_BR:
+            linkType = AUTH_LINK_TYPE_BR;
+            break;
+        case DISCOVERY_TYPE_P2P:
+            linkType = AUTH_LINK_TYPE_P2P;
+            break;
+        default:
+            ALOGE("unkown support type:%d", discoveryType);
+            return;
+    }
+    AuthRemoveDeviceKey(udid, (int32_t)linkType);
+}
+
 NO_SANITIZE("cfi") int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {
