@@ -117,8 +117,7 @@ static bool IsHeartbeatEnable(void)
         g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
         g_hbConditionState.heartbeatEnable, !g_hbConditionState.isRequestDisable);
     return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock &&
-        (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
-        !g_hbConditionState.isRequestDisable;
+        (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd;
 }
 
 SoftBusScreenState GetScreenState(void)

@@ -382,6 +382,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
     }
     HbDumpRecvDeviceInfo(device, weight, masterWeight, hbType, nowTime);
     NodeInfo nodeInfo;
+    bool isConnect = false;
     (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         if (!HbIsNeedReAuth(&nodeInfo, device->accountHash)) {
@@ -390,6 +391,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         }
         LLOGD("HB recv account changed, offline to auth again, udidHash:%s", AnonymizesUDID(device->devId));
         LnnRequestLeaveSpecific(nodeInfo.networkId, LnnConvertHbTypeToConnAddrType(hbType));
+        isConnect = true;
     }
     if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
         LLOGD("HB recv but ignore repeated join lnn request, udidHash:%s, isNeedOnline:%d",
@@ -398,7 +400,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-    bool isConnect = IsNeedConnectOnLine(device, hbResp);
+    isConnect = isConnect ? true : IsNeedConnectOnLine(device, hbResp);
     LLOGI("heartbeat(HB) find device, udidHash:%s, ConnectionAddrType:%02X, isConnect = %d",
         AnonymizesUDID(device->devId), device->addr[0].type, isConnect);
     if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
