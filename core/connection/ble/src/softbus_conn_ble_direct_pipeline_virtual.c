@@ -38,11 +38,12 @@ int32_t ConnBleDirectPipelineSendMessage(int32_t channelId, const uint8_t *data,
     return SOFTBUS_ERR;
 }
 
-void PipelineRegisterIpPortVerifyCallBack(const OnMessageReceivedFunc cb) {
-	return;
+void PipelineRegisterIpPortVerifyCallBack(const OnMessageReceivedFunc cb)
+{
+    return;
 }
 
 int32_t GetPipelineIdByPeerNetworkId(const char* peerNetworkId)
 {
-	return INVALID_CHANNEL_ID;
+    return INVALID_CHANNEL_ID;
 }
