@@ -28,6 +28,7 @@ extern "C" {
     int32_t (*getP2pMac)(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize); \
     void (*setP2pMac)(struct WifiDirectNegotiateChannel *base, const char *p2pMac); \
     bool (*isP2pChannel)(struct WifiDirectNegotiateChannel *base); \
+    bool (*isMetaChannel)(struct WifiDirectNegotiateChannel *base); \
     struct WifiDirectNegotiateChannel* (*duplicate)(struct WifiDirectNegotiateChannel *base); \
     void (*destructor)(struct WifiDirectNegotiateChannel *base)
 
