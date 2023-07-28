@@ -297,7 +297,8 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
     *len = item.size();
     int32_t i = 0;
     for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
-        const char* valueString = it.value().get<std::string>().c_str();
+        std::string str = it.value().get<std::string>();
+        const char *valueString = str.c_str();
         uint32_t len = strlen(valueString) + 1;
         value[i] = (char*)SoftBusCalloc(len);
         if (value[i] == NULL) {

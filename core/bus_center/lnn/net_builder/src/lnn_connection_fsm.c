@@ -497,7 +497,6 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     if (needReportOffline) {
         LnnNotifyOnlineState(false, &basic);
     }
-    // DeviceStateChangeProcess(basic.udid, connInfo->addr.type, false);
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     connFsm->isDead = true;
     LnnNotifyAuthHandleLeaveLNN(connInfo->authId);
