@@ -217,6 +217,7 @@ static void ConnectCallbackAsyncHandler(void *data)
         }
     }
 
+    SoftBusFree(data);
     SoftBusFree(callbackNode);
 }
 

@@ -42,6 +42,7 @@ struct DefaultNegoChannelOpenCallback {
 };
 
 int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
+                                    struct WifiDirectNegotiateChannel *srcChannel,
                                     struct DefaultNegoChannelOpenCallback *callback);
 void CloseDefaultNegotiateChannel(struct DefaultNegotiateChannel *self);
 int32_t StartListeningForDefaultChannel(const char *localIp);
