@@ -418,7 +418,7 @@ static int32_t ConnectGroup(struct NegotiateMessage *msg)
     char *groupConfig = msg->getString(msg, NM_KEY_GROUP_CONFIG, "");
     char *gcIp = msg->getString(msg, NM_KEY_GC_IP, "");
     GetP2pV1Processor()->goPort = goPort;
-    CLOGI(LOG_LABEL "goPort=%d gcIp=%s groupConfig=%s", goPort, WifiDirectAnonymizeIp(gcIp), groupConfig);
+    CLOGI(LOG_LABEL "goPort=%d gcIp=%s", goPort, WifiDirectAnonymizeIp(gcIp));
 
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
