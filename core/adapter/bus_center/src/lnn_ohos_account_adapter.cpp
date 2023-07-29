@@ -34,15 +34,15 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
         return SOFTBUS_ERR;
     }
 
-    if (accountInfo.second.uid_.empty()) {
+    if (accountInfo.second.name_.empty()) {
         LLOGE("accountInfo uid is empty");
         return SOFTBUS_ERR;
     }
 
-    *len = accountInfo.second.uid_.length();
-    LLOGI("uid:%s len:%d", accountInfo.second.uid_.c_str(), *len);
+    *len = accountInfo.second.name_.length();
+    LLOGI("uid:%s len:%d", accountInfo.second.name_.c_str(), *len);
 
-    if (memcpy_s(id, idLen, accountInfo.second.uid_.c_str(), *len) != EOK) {
+    if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
         LLOGE("memcpy_s uid failed, idLen:%d len:%d", idLen, *len);
         return SOFTBUS_ERR;
     }
