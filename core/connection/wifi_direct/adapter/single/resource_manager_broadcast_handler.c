@@ -116,7 +116,7 @@ static void UpdateInterfaceInfo(struct WifiDirectP2pGroupInfo *groupInfo)
         size_t groupConfigInfoSize = GROUP_CONFIG_STR_LEN;
         ret = GetWifiDirectP2pAdapter()->getGroupConfig(groupConfigInfo, &groupConfigInfoSize);
         CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "get group config failed");
-        CLOGI(LOG_LABEL "set groupConfig=%s", groupConfigInfo);
+        CLOGI(LOG_LABEL "set groupConfig");
         ret = info.setP2pGroupConfig(&info, groupConfigInfo);
         CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "interface set group config failed");
         CLOGI(LOG_LABEL "myRole=WIFI_DIRECT_ROLE_GO");
