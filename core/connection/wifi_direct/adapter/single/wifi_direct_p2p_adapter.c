@@ -195,11 +195,6 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
         SoftBusFree(groupInfo);
         return ret;
     }
-    CLOGI(LOG_LABEL "groupName=%s", groupInfo->groupName);
-    CLOGE(LOG_LABEL "mac=%s", macAddrString);
-    CLOGE(LOG_LABEL "passphrase=%s", groupInfo->passphrase);
-    CLOGE(LOG_LABEL "frequency=%d", groupInfo->frequency);
-
     ret = sprintf_s(groupConfigString, *groupConfigStringSize, "%s\n%s\n%s\n%d",
                     groupInfo->groupName, macAddrString, groupInfo->passphrase, groupInfo->frequency);
     if (ret < 0) {
@@ -413,11 +408,6 @@ static int32_t P2pConnectGroup(char *groupConfigString)
     if (configsSize == P2P_GROUP_CONFIG_INDEX_MAX && !strcmp(configs[P2P_GROUP_CONFIG_INDEX_MODE], "1")) {
         connectConfig.dhcpMode = CONNECT_AP_DHCP;
     }
-    CLOGI(LOG_LABEL "ssid=%s", connectConfig.ssid);
-    CLOGI(LOG_LABEL "bssid=%s", configs[P2P_GROUP_CONFIG_INDEX_BSSID]);
-    CLOGI(LOG_LABEL "preSharedKey=%s", connectConfig.preSharedKey);
-    CLOGI(LOG_LABEL "frequency=%d", connectConfig.frequency);
-
     ret = Hid2dConnect(&connectConfig);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR, LOG_LABEL "connect group failed");
 
