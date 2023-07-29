@@ -24,6 +24,7 @@
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_ohos_account.h"
+#include "lnn_heartbeat_strategy.h"
 #include "want.h"
 
 #include "softbus_adapter_mem.h"
@@ -54,6 +55,7 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
         LnnUpdateOhosAccount();
+        LnnStartHeartbeat(0);
     }
 
     SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;
