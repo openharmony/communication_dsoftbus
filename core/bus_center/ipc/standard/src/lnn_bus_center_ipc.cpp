@@ -353,6 +353,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t pub
 static bool IsRepeatRfreshLnnRequest(const char *pkgName, int32_t callingPid)
 {
     std::vector<RefreshLnnRequestInfo *>::iterator iter;
+    std::lock_guard<std::mutex> autoLock(g_lock);
     for (iter = g_refreshLnnRequestInfo.begin(); iter != g_refreshLnnRequestInfo.end(); ++iter) {
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) == 0 && (*iter)->pid == callingPid) {
             return true;
@@ -374,6 +375,7 @@ static int32_t AddRefreshLnnInfo(const char *pkgName, int32_t callingPid, int32_
     }
     info->pid = callingPid;
     info->subscribeId = subscribeId;
+    std::lock_guard<std::mutex> autoLock(g_lock);
     g_refreshLnnRequestInfo.push_back(info);
     return SOFTBUS_OK;
 }
@@ -399,7 +401,6 @@ NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t calling
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
         return SOFTBUS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatRfreshLnnRequest(pkgName, callingPid)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "repeat refresh lnn request from: %s", pkgName);
     } else {
