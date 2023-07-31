@@ -70,7 +70,8 @@ public:
     MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int listenerId), (override));
 
-    MOCK_METHOD(int, SoftBusAddScanListener, (const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan), (override));
+    MOCK_METHOD(int, SoftBusAddScanListener,
+        (const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan), (override));
     MOCK_METHOD(int, SoftBusRemoveScanListener, (int listenerId), (override));
 
     MOCK_METHOD(int, SoftBusDeregisterScanCallbacks, (int32_t scannerId), (override));
@@ -78,7 +79,8 @@ public:
     MOCK_METHOD(int, SoftBusSetScanFilter, (int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize),
                 (override));
 
-    MOCK_METHOD(int, SoftBusGetAdvChannel, (const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan), (override));
+    MOCK_METHOD(int, SoftBusGetAdvChannel, (const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan),
+        (override));
     MOCK_METHOD(int, SoftBusReleaseAdvChannel, (int channel), (override));
 
     MOCK_METHOD(int, SoftBusStartScan, (int listenerId, int scannerId, const SoftBusBleScanParams *param), (override));
