@@ -40,7 +40,8 @@ public:
 
     // BLE广播相关
     virtual int BleGattRegisterCallbacks(BtGattCallbacks *func) = 0;
-    virtual int BleStartScanEx(int scannerId, BleScanConfigs *configs, BleScanNativeFilter *filter, unsigned int filterSize) = 0;
+    virtual int BleStartScanEx(int scannerId, BleScanConfigs *configs, BleScanNativeFilter *filter,
+        unsigned int filterSize) = 0;
     virtual int BleStopScan(int scannerId) = 0;
     virtual int BleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam) = 0;
     virtual int BleStopAdv(int advId) = 0;
@@ -91,8 +92,8 @@ public:
     MOCK_METHOD(bool, SetDevicePairingConfirmation, (const BdAddr *bdAddr, int transport, bool accept), (override));
 
     MOCK_METHOD(int, BleGattRegisterCallbacks, (BtGattCallbacks *func), (override));
-    MOCK_METHOD(int, BleStartScanEx, (int scannerId, BleScanConfigs * configs, BleScanNativeFilter *filter, unsigned int filterSize),
-        (override));
+    MOCK_METHOD(int, BleStartScanEx,
+        (int scannerId, BleScanConfigs * configs, BleScanNativeFilter *filter, unsigned int filterSize), (override));
     MOCK_METHOD(int, BleStopScan, (int scannerId), (override));
     MOCK_METHOD(int, BleStartAdvEx, (int *advId, const StartAdvRawData rawData, BleAdvParams advParam), (override));
     MOCK_METHOD(int, BleStopAdv, (int advId), (override));
