@@ -1216,7 +1216,7 @@ static void OpenAuthConnection(struct WifiDirectNegotiateChannel *channel, struc
         .onConnectSuccess = OnAuthConnectSuccess,
         .onConnectFailure = OnAuthConnectFailure,
     };
-    ret = OpenDefaultNegotiateChannel(remoteIp, remotePort, &callback);
+    ret = OpenDefaultNegotiateChannel(remoteIp, remotePort, channel, &callback);
     CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "open p2p auth failed");
 }
 

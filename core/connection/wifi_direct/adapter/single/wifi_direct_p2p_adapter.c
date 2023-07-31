@@ -56,7 +56,7 @@ static bool IsWideBandSupported(void)
 
 static int32_t GetChannel5GListIntArray(int32_t *array, size_t *size)
 {
-    int32_t ret = Hid2dGetChannelListFor5G(array, *(int32_t *)size);
+    int32_t ret = Hid2dGetChannelListFor5G(array, (int32_t) *size);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR, LOG_LABEL "hid2d get channels failed ret=%d", ret);
 
     int32_t count = 0;
@@ -189,8 +189,7 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
         groupInfo = NULL;
         return ret;
     }
-    CLOGI(LOG_LABEL "groupName=%s, mac=%s, passphrase=%s, frequency=%d",
-          groupInfo->groupName, WifiDirectAnonymizeMac(macAddrString), groupInfo->passphrase, groupInfo->frequency);
+    CLOGI(LOG_LABEL "groupName=%s, frequency=%d", groupInfo->groupName, groupInfo->frequency);
 
     ret = sprintf_s(groupConfigString, *groupConfigStringSize, "%s\n%s\n%s\n%d",
                     groupInfo->groupName, macAddrString, groupInfo->passphrase, groupInfo->frequency);
@@ -406,11 +405,6 @@ static int32_t P2pConnectGroup(char *groupConfigString)
     if (configsSize == P2P_GROUP_CONFIG_INDEX_MAX && !strcmp(configs[P2P_GROUP_CONFIG_INDEX_MODE], "1")) {
         connectConfig.dhcpMode = CONNECT_AP_DHCP;
     }
-    CLOGI(LOG_LABEL "ssid=%s", connectConfig.ssid);
-    CLOGI(LOG_LABEL "bssid=%s", configs[P2P_GROUP_CONFIG_INDEX_BSSID]);
-    CLOGI(LOG_LABEL "preSharedKey=%s", connectConfig.preSharedKey);
-    CLOGI(LOG_LABEL "frequency=%d", connectConfig.frequency);
-
     ret = Hid2dConnect(&connectConfig);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR, LOG_LABEL "connect group failed");
 

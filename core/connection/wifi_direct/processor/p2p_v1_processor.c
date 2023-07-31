@@ -418,7 +418,7 @@ static int32_t ConnectGroup(struct NegotiateMessage *msg)
     char *groupConfig = msg->getString(msg, NM_KEY_GROUP_CONFIG, "");
     char *gcIp = msg->getString(msg, NM_KEY_GC_IP, "");
     GetP2pV1Processor()->goPort = goPort;
-    CLOGI(LOG_LABEL "goPort=%d gcIp=%s groupConfig=%s", goPort, WifiDirectAnonymizeIp(gcIp), groupConfig);
+    CLOGI(LOG_LABEL "goPort=%d gcIp=%s", goPort, WifiDirectAnonymizeIp(gcIp));
 
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
@@ -1332,7 +1332,7 @@ static void OpenAuthConnection(struct WifiDirectNegotiateChannel *channel, struc
         .onConnectSuccess = OnAuthConnectSuccess,
         .onConnectFailure = OnAuthConnectFailure,
     };
-    ret = OpenDefaultNegotiateChannel(remoteIp, remotePort, &callback);
+    ret = OpenDefaultNegotiateChannel(remoteIp, remotePort, channel, &callback);
     CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "open p2p auth failed");
 }
 
