@@ -347,9 +347,8 @@ int32_t SoftBusClientStub::OnChannelLinkDownInner(MessageParcel &data, MessagePa
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnChannelLinkDown(networkId, routeType);
-    if (!reply.WriteInt32(retReply)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDownInner write reply failed!");
-        return SOFTBUS_ERR;
+    if (retReply != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDown proc error!");
     }
     return SOFTBUS_OK;
 }
