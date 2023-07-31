@@ -1062,7 +1062,14 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_Test_001, TestSize.Level1)
     uint32_t outLen = CRYPT_DATA_LEN;
     uint32_t errLen = 0;
     int32_t ret;
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthEncrypt(authId, nullptr, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthEncrypt(authId, inData, inLen, nullptr, &outLen);
@@ -1073,6 +1080,7 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthEncrypt(authId, inData, inLen, outData, &errLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -1090,7 +1098,14 @@ HWTEST_F(AuthTest, AUTH_DECRYPT_Test_001, TestSize.Level1)
     uint32_t outLen = CRYPT_DATA_LEN;
     uint32_t errLen = 0;
     int32_t ret;
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthDecrypt(authId, nullptr, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthDecrypt(authId, inData, inLen, nullptr, &outLen);
@@ -1103,6 +1118,7 @@ HWTEST_F(AuthTest, AUTH_DECRYPT_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthDecrypt(authId, inData, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -1115,13 +1131,21 @@ HWTEST_F(AuthTest, AUTH_SET_P2P_MAC_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
     int32_t ret;
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthSetP2pMac(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthSetP2pMac(authId, P2P_MAC);
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
     ret = AuthSetP2pMac(authId, P2P_MAC2);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -1134,9 +1158,17 @@ HWTEST_F(AuthTest, AUTH_GET_CONN_INFO_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
     int32_t ret;
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthGetConnInfo(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -1149,9 +1181,17 @@ HWTEST_F(AuthTest, AUTH_GET_SERVER_SIDE_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
     int32_t ret;
+    AuthSessionInfo info;
 
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isServer = true;
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
+
+    AuthManager *auth = NewAuthManager(authId, &info);
+    EXPECT_TRUE(auth != nullptr);
     ret = AuthGetServerSide(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    DelAuthManager(auth, true);
 }
 
 /*
@@ -1212,11 +1252,11 @@ HWTEST_F(AuthTest, AUTH_GET_VERSION_Test_001, TestSize.Level1)
     int32_t ret;
     SoftBusVersion version;
     AuthSessionInfo info;
+    version = SOFTBUS_OLD_V1;
 
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isServer = true;
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    version = SOFTBUS_OLD_V1;
 
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
