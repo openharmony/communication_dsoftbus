@@ -83,7 +83,6 @@ static IRefreshCallback g_refreshCB = {
 };
 
 // Device A:
-
 int main(void)
 {
     const char *pkgNameA = "pkgNameA.demo";
@@ -115,7 +114,6 @@ int main(void)
 }
 
 // Device B:
-
 int main(void)
 {
     const char *pkgNameB = "pkgNameB.demo";

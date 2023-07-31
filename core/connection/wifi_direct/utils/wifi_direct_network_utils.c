@@ -38,7 +38,7 @@ static int32_t SplitString(char *input, char *splitter, char **outputArray, size
 {
     char *context = NULL;
     char *subString = strtok_s(input, splitter, &context);
-    CONN_CHECK_AND_RETURN_RET_LOG(subString, SOFTBUS_ERR, LOG_LABEL "split failed");
+    CONN_CHECK_AND_RETURN_RET_LOG(subString != NULL, SOFTBUS_ERR, LOG_LABEL "split failed");
 
     size_t count = 0;
     do {

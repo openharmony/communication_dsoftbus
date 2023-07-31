@@ -28,7 +28,7 @@ static __thread char g_anonymousIp[ANONYMOUS_BUF_NUM][IP_ADDR_STR_LEN];
 
 const char* WifiDirectAnonymizeMac(const char *mac)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(mac, NULL, "mac is null");
+    CONN_CHECK_AND_RETURN_RET_LOG(mac != NULL, NULL, "mac is null");
     g_macIndex = (g_macIndex + 1) % ANONYMOUS_BUF_NUM;
     int32_t ret = strcpy_s(g_anonymousMac[g_macIndex], MAC_ADDR_STR_LEN, mac);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, NULL, "copy mac string failed");
@@ -40,17 +40,17 @@ const char* WifiDirectAnonymizeMac(const char *mac)
 
 const char* WifiDirectAnonymizeIp(const char *ip)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(ip, NULL, "ip is null");
+    CONN_CHECK_AND_RETURN_RET_LOG(ip != NULL, NULL, "ip is null");
     g_ipIndex = (g_ipIndex + 1) % ANONYMOUS_BUF_NUM;
     int32_t ret = strcpy_s(g_anonymousIp[g_ipIndex], IP_ADDR_STR_LEN, ip);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, NULL, "copy ip string failed");
 
     char *startPos = strstr(g_anonymousIp[g_ipIndex], ".");
-    CONN_CHECK_AND_RETURN_RET_LOG(startPos, NULL, "find start dot failed");
+    CONN_CHECK_AND_RETURN_RET_LOG(startPos != NULL, NULL, "find start dot failed");
     startPos++;
-    CONN_CHECK_AND_RETURN_RET_LOG(*startPos, NULL, "ip length invalid");
+    CONN_CHECK_AND_RETURN_RET_LOG(*startPos != '\0', NULL, "ip length invalid");
     char *endPos = strstr(startPos, ".");
-    CONN_CHECK_AND_RETURN_RET_LOG(endPos, NULL, "find end dot failed");
+    CONN_CHECK_AND_RETURN_RET_LOG(endPos != NULL, NULL, "find end dot failed");
 
     for (char *pos = startPos; pos < endPos; pos++) {
         *pos = '*';
