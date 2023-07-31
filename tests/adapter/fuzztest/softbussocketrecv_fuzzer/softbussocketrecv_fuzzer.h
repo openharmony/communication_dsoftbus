@@ -13,4 +13,16 @@
  * limitations under the License.
  */
 
-FUZZ
+#ifndef SOFTBUSSOCKETRECV_FUZZER_H
+#define SOFTBUSSOCKETRECV_FUZZER_H
+
+#include <cstdint>
+#include <unistd.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <fcntl.h>
+
+#define FUZZ_PROJECT_NAME "softbussocketrecv_fuzzer"
+
+#endif
