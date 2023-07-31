@@ -169,11 +169,11 @@ static void SaveP2pChannel(struct WifiDirectNegotiateChannel *channel)
         return;
     }
 
-    char remoteMac[MAC_ADDR_STR_LEN] = {0};
-    int32_t ret = channel->getP2pMac(channel, remoteMac, sizeof(remoteMac));
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "get p2p mac failed");
-    struct InnerLink *link = GetLinkManager()->getLinkByDevice(remoteMac);
-    CONN_CHECK_AND_RETURN_LOG(link, LOG_LABEL "link is null");
+    char remoteUuid[UUID_BUF_LEN] = {0};
+    int32_t ret = channel->getDeviceId(channel, remoteUuid, sizeof(remoteUuid));
+    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "get remote uuid failed");
+    struct InnerLink *link = GetLinkManager()->getLinkByUuid(remoteUuid);
+    CONN_CHECK_AND_RETURN_LOG(link, LOG_LABEL "no link for %s", AnonymizesUUID(remoteUuid));
     struct WifiDirectNegotiateChannel *channelOld = link->getPointer(link, IL_KEY_NEGO_CHANNEL, NULL);
     if (channelOld == NULL) {
         struct WifiDirectNegotiateChannel *channelNew = channel->duplicate(channel);

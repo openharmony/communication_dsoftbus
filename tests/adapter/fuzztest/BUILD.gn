@@ -17,5 +17,6 @@ group("fuzztest") {
     "softbusadapterhisysevent_fuzzer:fuzztest",
     "softbusadapterrange_fuzzer:fuzztest",
     "softbusdecryptdata_fuzzer:SoftBusDecryptDataFuzzTest",
+    "softbussocketrecv_fuzzer:fuzztest",
   ]
 }

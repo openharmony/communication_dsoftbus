@@ -497,7 +497,6 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     if (needReportOffline) {
         LnnNotifyOnlineState(false, &basic);
     }
-    // DeviceStateChangeProcess(basic.udid, connInfo->addr.type, false);
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     connFsm->isDead = true;
     LnnNotifyAuthHandleLeaveLNN(connInfo->authId);
@@ -654,8 +653,8 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]auth failed, authId=%" PRId64 ", requestId=%u, reason=%d, connType=%d", connFsm->id, connInfo->authId,
-            connInfo->requestId, *retCode, connFsm->connInfo.addr.type);
+            "[id=%u]auth failed, authId=%" PRId64 ", requestId=%u, reason=%d, connType=%d",
+            connFsm->id, connInfo->authId, connInfo->requestId, *retCode, connFsm->connInfo.addr.type);
         CompleteJoinLNN(connFsm, NULL, *retCode);
     }
     SoftBusFree(retCode);
