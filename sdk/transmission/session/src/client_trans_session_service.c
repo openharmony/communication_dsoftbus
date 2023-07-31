@@ -603,6 +603,7 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
 }
 
 static const char *g_busName = "DistributedFileService";
+static const char *g_deviceStatusName = "ohos.msdp.device_status";
 
 static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
 {
@@ -612,7 +613,8 @@ static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get dfs session name failed");
         return SOFTBUS_ERR;
     }
-    if (strncmp(sessionName, g_busName, strlen(g_busName)) != 0) {
+    if (strncmp(sessionName, g_busName, strlen(g_busName)) != 0 &&
+        strncmp(sessionName, g_deviceStatusName, strlen(g_deviceStatusName)) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session name");
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
