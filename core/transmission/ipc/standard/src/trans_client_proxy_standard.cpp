@@ -214,17 +214,12 @@ int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t route
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (remote->SendRequest(CLIENT_ON_CHANNEL_LINKDOWN, data, reply, option) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnChannelLinkDwon send request failed");
         return SOFTBUS_ERR;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnChannelLinkDwon read serverRet failed");
-        return SOFTBUS_ERR;
-    }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
