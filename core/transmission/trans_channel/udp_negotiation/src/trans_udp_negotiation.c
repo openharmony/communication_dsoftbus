@@ -614,6 +614,24 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "UdpOnAuthConnOpenFailed end");
 }
 
+static void TransCloseUdpChannelByRequestId(uint32_t requestId)
+{
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseUdpChannelByRequestId: requestId=%u", requestId);
+    UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    if (channel == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransCloseUdpChannelByRequestId malloc fail");
+        return;
+    }
+    if (TransGetUdpChannelByRequestId(requestId, channel) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransCloseUdpChannelByRequestId get channel fail");
+        SoftBusFree(channel);
+        return;
+    }
+    ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, true);
+    SoftBusFree(channel);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseUdpChannelByRequestId end");
+}
+
 static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta)
 {
     AuthConnInfo auth;
@@ -623,6 +641,7 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "UdpOpenAuthConn get info fail: ret=%d", ret);
+        TransCloseUdpChannelByRequestId(requestId);
         return ret;
     }
 
