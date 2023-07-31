@@ -87,15 +87,9 @@ int32_t LnnRegistBleHeartbeatMediumMgr(void)
     return LnnRegistHeartbeatMediumMgr(&g_bleMgr);
 }
 
-int32_t HbUpdateBleScanFilter(int32_t listenerId)
+int32_t HbUpdateBleScanFilter(int32_t listenerId, LnnHeartbeatType type)
 {
     (void)listenerId;
+    (void)type;
     return SOFTBUS_OK;
 }
-
-void SetBleTypeIsSupportLpDevice(int32_t type)
-{
-    (void)type;
-    return;
-}
-
