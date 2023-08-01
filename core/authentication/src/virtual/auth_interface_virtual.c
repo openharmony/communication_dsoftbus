@@ -120,10 +120,10 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
+int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta)
 {
     (void)uuid;
-    (void)isIpConnection;
+    (void)type;
     (void)isMeta;
     return AUTH_INVALID_ID;
 }

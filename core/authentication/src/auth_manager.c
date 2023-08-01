@@ -1290,7 +1290,7 @@ NO_SANITIZE("cfi") void UnregGroupChangeListener(void)
     g_groupChangeListener.onDeviceBound = NULL;
 }
 
-NO_SANITIZE("cfi") int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool isIpConnection)
+NO_SANITIZE("cfi") int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type)
 {
     if (uuid == NULL || uuid[0] == '\0') {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "uuid is empty.");
@@ -1301,9 +1301,9 @@ NO_SANITIZE("cfi") int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool is
     }
     uint32_t num = 0;
     AuthManager *auth[4] = { NULL, NULL, NULL, NULL }; /* 4: max size for (BR + BLE) * (CLIENT+ SERVER) */
-    if (isIpConnection) {
-        auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, false);
-        auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, true);
+    if ((type == AUTH_LINK_TYPE_WIFI) || (type == AUTH_LINK_TYPE_BLE)) {
+        auth[num++] = FindAuthManagerByUuid(uuid, type, false);
+        auth[num++] = FindAuthManagerByUuid(uuid, type, true);
     } else {
         auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_BR, false);
         auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_BR, true);

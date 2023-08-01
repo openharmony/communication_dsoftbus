@@ -794,15 +794,15 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001, TestSize.Level1)
     char uuid[TEST_DATA_LEN] = "testdata";
     int64_t ret;
 
-    ret = AuthDeviceGetLatestIdByUuid(nullptr, true);
+    ret = AuthDeviceGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     uuid[0] = '\0';
-    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), true);
+    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     uuid[0] = '1';
-    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), true);
+    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), false);
+    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_BR);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
@@ -983,12 +983,12 @@ HWTEST_F(AuthTest, AUTH_GET_LATESTID_BY_UUID_Test_001, TestSize.Level1)
     char uuid[TEST_DATA_LEN] = "testdata";
     int64_t ret;
 
-    ret = AuthGetLatestIdByUuid(nullptr, true, false);
+    ret = AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), true, true);
+    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI, true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     uuid[0] = '\0';
-    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), true, false);
+    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 

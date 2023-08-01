@@ -80,9 +80,9 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, true, false);
+    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false);
     if ((newConn->authId == AUTH_INVALID_ID) && (connInfo->type == CONNECT_P2P_REUSE)) {
-        newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, false, false);
+        newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false);
     }
 
     if (newConn->authId == AUTH_INVALID_ID) {
