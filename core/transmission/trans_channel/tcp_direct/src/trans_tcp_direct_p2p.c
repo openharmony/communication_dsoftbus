@@ -554,9 +554,9 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
         conn->requestId = requestId;
         ret = OpenNewAuthConn(appInfo, conn, newChannelId, conn->requestId);
     } else {
-        conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, true, false);
+        conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false);
         if (conn->authId == AUTH_INVALID_ID) {
-            conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, false, false);
+            conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false);
         }
         TRAN_CHECK_AND_RETURN_RET_LOG(conn->authId != AUTH_INVALID_ID, SOFTBUS_ERR, "get auth id failed");
         conn->requestId = AUTH_INVALID_ID;

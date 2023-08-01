@@ -1136,6 +1136,19 @@ NO_SANITIZE("cfi") void TransProxyonMessageReceived(const ProxyMessage *msg)
     }
 }
 
+static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
+{
+    if (type == CONNECT_TCP) {
+        return AUTH_LINK_TYPE_WIFI;
+    } else if ((type == CONNECT_BLE) || (type == CONNECT_BLE_DIRECT)) {
+        return AUTH_LINK_TYPE_BLE;
+    } else if (type == CONNECT_BR) {
+        return AUTH_LINK_TYPE_BR;
+    } else {
+        return AUTH_LINK_TYPE_P2P;
+    }
+}
+
 NO_SANITIZE("cfi") int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
 {
     chan->myId = channelId;
@@ -1147,7 +1160,8 @@ NO_SANITIZE("cfi") int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int3
     }
 
     if (appInfo->appType != APP_TYPE_AUTH) {
-        chan->authId = AuthGetLatestIdByUuid(appInfo->peerData.deviceId, chan->type == CONNECT_TCP, false);
+        chan->authId = AuthGetLatestIdByUuid(appInfo->peerData.deviceId,
+            ConvertConnectType2AuthLinkType(chan->type), false);
         if (chan->authId == AUTH_INVALID_ID) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get authId for cipher err");
             return SOFTBUS_ERR;
