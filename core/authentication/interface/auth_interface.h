@@ -151,7 +151,7 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
 void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
-int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta);
+int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta);
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
 int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta);
 

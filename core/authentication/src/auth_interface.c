@@ -157,12 +157,12 @@ NO_SANITIZE("cfi") int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo 
 }
 
 /* for ProxyChannel & P2P TcpDirectchannel */
-NO_SANITIZE("cfi") int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
+NO_SANITIZE("cfi") int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta)
 {
     if (isMeta) {
         return AUTH_INVALID_ID;
     }
-    return AuthDeviceGetLatestIdByUuid(uuid, isIpConnection);
+    return AuthDeviceGetLatestIdByUuid(uuid, type);
 }
 
 NO_SANITIZE("cfi") int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)

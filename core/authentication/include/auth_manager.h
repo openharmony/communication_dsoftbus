@@ -71,7 +71,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
 bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConnection);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
-int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, bool isIpConnection);
+int64_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type);
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
