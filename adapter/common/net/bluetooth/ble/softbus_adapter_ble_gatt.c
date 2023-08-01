@@ -1055,6 +1055,7 @@ int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data)
         CLOGE("SetAdvData failed, advId: %d, btadvId: %d", advId, btAdvId);
         return SOFTBUS_ERR;
     }
+    CLOGI("BleSetAdvData, advId: %d, btadvId: %d", advId, btAdvId);
     StartAdvRawData advData = {0};
     ConvertAdvData(data, &advData);
     ret = BleOhosStatusToSoftBus(BleSetAdvData(btAdvId, advData));
