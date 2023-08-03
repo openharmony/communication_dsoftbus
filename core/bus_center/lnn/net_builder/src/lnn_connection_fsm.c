@@ -333,6 +333,10 @@ static void PostPcOnlineUniquely(NodeInfo *info)
 
 static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool isOnline)
 {
+    if (udid == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "udid is NULL");
+        return;
+    }
     if (type != CONNECTION_ADDR_BLE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send mlps only support ble");
         return;
@@ -482,10 +486,11 @@ static void ReportLeaveLNNResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
 static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-    NodeBasicInfo basic;
+    NodeBasicInfo basic = {0};
     bool needReportOffline = false;
     ReportLeaveLNNResultEvt(connFsm, retCode);
     if (CheckDeadFlag(connFsm, true)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deadFlag is true");
         return;
     }
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN_TIMEOUT);
@@ -496,6 +501,10 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     NotifyLeaveResult(connFsm, networkId, retCode);
     if (needReportOffline) {
         LnnNotifyOnlineState(false, &basic);
+    }
+    NodeInfo info = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
+        DeviceStateChangeProcess(info.deviceInfo.deviceUdid, connInfo->addr.type, false);
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
     connFsm->isDead = true;
