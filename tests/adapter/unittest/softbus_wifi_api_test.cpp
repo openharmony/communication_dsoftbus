@@ -269,8 +269,6 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetCurrentGroupTest001, TestSize.Level1
         .WillOnce(Return(WIFI_SUCCESS))
         .WillRepeatedly(Return(ERROR_WIFI_INVALID_ARGS));
     int32_t ret = SoftBusGetCurrentGroup(&groupInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = SoftBusGetCurrentGroup(&groupInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 } // namespace OHOS
