@@ -573,7 +573,7 @@ HWTEST_F(TransUdpNegoTest, OpenAuthConnForUdpNegotiation001, TestSize.Level1)
 
     channel->info.myData.channelId = 0;
     ret = OpenAuthConnForUdpNegotiation(channel);
-    EXPECT_TRUE(ret == SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
 }
 
 /**
