@@ -180,9 +180,18 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
         return SOFTBUS_ERR;
     }
 
+    struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
+    uint8_t macAddrArray[MAC_ADDR_ARRAY_SIZE];
+    size_t macAddrArraySize = MAC_ADDR_ARRAY_SIZE;
+    ret = netWorkUtils->getInterfaceMacAddr(groupInfo->interface, macAddrArray, &macAddrArraySize);
+    if (ret != SOFTBUS_OK) {
+        CLOGE(LOG_LABEL "get interface mac addr failed");
+        SoftBusFree(groupInfo);
+        return ret;
+    }
+
     char macAddrString[MAC_ADDR_STR_LEN];
-    ret = GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->owner.devAddr, sizeof(groupInfo->owner.devAddr),
-                                                        macAddrString, sizeof(macAddrString));
+    ret = netWorkUtils->macArrayToString(macAddrArray, macAddrArraySize, macAddrString, sizeof(macAddrString));
     if (ret != SOFTBUS_OK) {
         CLOGE(LOG_LABEL "convert mac addr to string failed");
         SoftBusFree(groupInfo);

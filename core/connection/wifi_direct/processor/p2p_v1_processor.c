@@ -503,6 +503,8 @@ static struct NegotiateMessage* BuildConnectRequestAsGo(const char *remoteMac, c
     request->putInt(request, NM_KEY_GO_PORT, interfaceInfo->getInt(interfaceInfo, II_KEY_PORT, -1));
     request->putString(request, NM_KEY_GC_MAC, remoteMac);
     request->putString(request, NM_KEY_GC_IP, remoteIp);
+    request->putBoolean(request, NM_KEY_BRIDGE_SUPPORTED, false);
+    request->putString(request, NM_KEY_SELF_WIFI_CONFIG, "");
     request->putPointer(request, NM_KEY_NEGO_CHANNEL, (void **)&channel);
 
     return request;
@@ -548,6 +550,7 @@ static struct NegotiateMessage* BuildConnectRequestAsNone(const char *remoteMac,
 
     /* gc info */
     request->putString(request, NM_KEY_GC_MAC, myMac);
+    request->putString(request, NM_KEY_GO_MAC, "");
     request->putString(request, NM_KEY_GC_CHANNEL_LIST, channelString);
     request->putInt(request, NM_KEY_STATION_FREQUENCY, adapter->getStationFrequency());
     request->putBoolean(request, NM_KEY_WIDE_BAND_SUPPORTED, adapter->isWideBandSupported());
@@ -634,6 +637,7 @@ static struct NegotiateMessage* BuildConnectResponseAsNone(const char *remoteMac
     response->putString(response, NM_KEY_IP, localIp);
     response->putString(response, NM_KEY_GC_MAC, myMac);
     response->putString(response, NM_KEY_GC_CHANNEL_LIST, channelString);
+    response->putString(response, NM_KEY_GO_MAC, remoteMac);
     response->putInt(response, NM_KEY_STATION_FREQUENCY, adapter->getStationFrequency());
     response->putBoolean(response, NM_KEY_WIDE_BAND_SUPPORTED, adapter->isWideBandSupported());
     response->putString(response, NM_KEY_SELF_WIFI_CONFIG, (char *)selfWifiConfig);
