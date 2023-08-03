@@ -341,8 +341,7 @@ if (defined(ohos_lite)) {
       ":ClientTransChannelManagerTest",
       ":ClientTransPendingTest",
       ":ClientTransProxyFileCommonTest",
-
-      # ":ClientTransProxyFileManagerTest",
+      ":ClientTransProxyFileManagerTest",
       ":ClientTransProxyManagerTest",
       ":ClientTransSessionImplTest",
       ":ClientTransUdpManagerStaticTest",
