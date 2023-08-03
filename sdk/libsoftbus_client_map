@@ -351,6 +351,8 @@
         "ClientTransOnScanResultCallback";
         "ClientAddEventListener";
         "ClientDeleteEventListener";
+        "TransProxyPackAndSendData";
+        "ClientTransProxyGetInfoByChannelId";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
