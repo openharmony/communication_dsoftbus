@@ -432,5 +432,10 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalDeviceInfo(info);
 }
+
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return GetNetLedgerInterface()->LnnGetLocalNumU64Info(key, info);
+}
 }
 }

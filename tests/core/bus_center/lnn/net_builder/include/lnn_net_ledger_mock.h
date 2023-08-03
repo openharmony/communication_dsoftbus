@@ -80,6 +80,7 @@ public:
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
+    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -133,6 +134,7 @@ public:
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
