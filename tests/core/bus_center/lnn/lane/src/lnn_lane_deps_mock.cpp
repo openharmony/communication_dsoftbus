@@ -139,5 +139,71 @@ bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
 {
     return GetLaneDepsInterface()->LnnVisitPhysicalSubnet(callback, data);
 }
+
+const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+{
+    return GetLaneDepsInterface()->LnnConvertDLidToUdid(id, type);
+}
+
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return GetLaneDepsInterface()->LnnGetLocalNumU64Info(key, info);
+}
+
+int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNumU64Info(networkId, key, info);
+}
+
+bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection)
+{
+    return GetLaneDepsInterface()->AuthDeviceCheckConnInfo(uuid, type, checkConnection);
+}
+
+uint32_t AuthGenRequestId(void)
+{
+    return GetLaneDepsInterface()->AuthGenRequestId();
+}
+
+int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+{
+    return GetLaneDepsInterface()->AuthPostTransData(authId, dataInfo);
+}
+
+int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+{
+    return GetLaneDepsInterface()->AuthGetConnInfo(authId, connInfo);
+}
+
+int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
+{
+    return GetLaneDepsInterface()->AuthGetMetaType(authId, isMetaAuth);
+}
+
+void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId)
+{
+    return GetLaneDepsInterface()->LnnDisconnectP2p(networkId, pid, laneLinkReqId);
+}
+
+void LnnDestoryP2p(void)
+{
+    return GetLaneDepsInterface()->LnnDestoryP2p();
+}
+
+int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
+                      const LaneLinkCb *callback)
+{
+    return GetLaneDepsInterface()->LnnConnectP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+}
+
+ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol)
+{
+    return GetLaneDepsInterface()->ConnBleGetClientConnectionByUdid(udid, protocol);
+}
+
+void ConnBleReturnConnection(ConnBleConnection **connection)
+{
+    return GetLaneDepsInterface()->ConnBleReturnConnection(connection);
+}
 }
 } // namespace OHOS

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "bus_center_manager.h"
+#include "bus_center_mock.h"
 #include "disc_manager_mock.h"
 #include "lnn_coap_discovery_impl.h"
 #include "lnn_coap_discovery_impl.c"
@@ -85,6 +86,8 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level
 
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&addtions, sizeof(InnerDeviceInfoAddtions), 0, sizeof(InnerDeviceInfoAddtions));
+    BusCenterMock busCenterMock;
+    busCenterMock.SetupSuccessStub();
     DeviceFound(nullptr, &addtions);
     DeviceFound(&device, &addtions);
     device.addr[0].type = CONNECTION_ADDR_WLAN;
