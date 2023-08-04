@@ -99,7 +99,7 @@ static bool IsLinkTypeValid(LaneLinkType type)
     return true;
 }
 
-static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw)
+static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw, bool isIgnoreScore)
 {
     if (!IsLinkTypeValid(linkType)) {
         return false;
@@ -110,6 +110,10 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
     }
     if (linkAttr->IsEnable(networkId) != true) {
         return false;
+    }
+    if (isIgnoreScore) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ignore score");
+        return true;
     }
 
     if (linkAttr->GetLinkScore(networkId, expectedBw) <= UNACCEPT_SCORE) {
@@ -152,14 +156,37 @@ static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
     LLOGD("the %u priority link: %s", priority, GetLinkTypeStrng(preferredLink));
 }
 
+static bool IsIgnoreLinkScore(const char *networkId, LaneLinkType *list, uint32_t num)
+{
+    if (list == NULL || num == 0) {
+        return false;
+    }
+    NodeInfo node = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LLOGW("can not get peer node");
+        return false;
+    }
+    if (node.discoveryType == (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) {
+        LLOGI("lnn discoveryType is only wifi");
+        return true;
+    }
+    for (uint32_t i = 0; i < num; i++) {
+        if (list[i] != LANE_WLAN_2P4G && list[i] != LANE_WLAN_5G) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType *preferredList = (LaneLinkType *)&(request->list.linkType[0]);
     uint32_t listNum = request->list.linkTypeNum;
     *resNum = 0;
+    bool isIgnoreScore = IsIgnoreLinkScore(networkId, preferredList, listNum);
     for (uint32_t i = 0; i < listNum; i++) {
-        if (!IsValidLane(networkId, preferredList[i], request->expectedBw)) {
+        if (!IsValidLane(networkId, preferredList[i], request->expectedBw, isIgnoreScore)) {
             continue;
         }
         resList[(*resNum)] = preferredList[i];
@@ -181,7 +208,7 @@ static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *re
     }
     *resNum = 0;
     for (uint32_t i = 0; i < optLinkNum; i++) {
-        if (!IsValidLane(networkId, optionalLink[i], request->expectedBw)) {
+        if (!IsValidLane(networkId, optionalLink[i], request->expectedBw, false)) {
             continue;
         }
         resList[(*resNum)++] = optionalLink[i];
