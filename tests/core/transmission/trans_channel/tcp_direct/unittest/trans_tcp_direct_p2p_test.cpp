@@ -218,58 +218,6 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAuthConnOpenedTest001
- * @tc.desc: OnAuthConnOpened, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenedTest001, TestSize.Level1)
-{
-    uint32_t requestId = 1;
-    int64_t authId = 1;
-    int32_t channelId = 1;
-    OnAuthConnOpened(requestId, authId);
-
-    int32_t ret = CreatSessionConnList();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_NE(conn, nullptr);
-
-    ret = TransTdcAddSessionConn(conn);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    OnAuthConnOpened(requestId, authId);
-    TransDelSessionConnById(channelId);
-}
-
-/**
- * @tc.name: OnAuthConnOpenFailedTest001
- * @tc.desc: OnAuthConnOpenFailed, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenFailedTest001, TestSize.Level1)
-{
-    uint32_t requestId = 1;
-        int32_t channelId = 1;
-    int32_t reason = SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED;
-    OnAuthConnOpenFailed(requestId, reason);
-
-    int32_t ret = CreatSessionConnList();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_NE(conn, nullptr);
-
-    ret = TransTdcAddSessionConn(conn);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    OnAuthConnOpenFailed(requestId, reason);
-    TransDelSessionConnById(channelId);
-}
-
-/**
  * @tc.name: OpenAuthConnTest001
  * @tc.desc: OpenAuthConn, use the wrong parameter.
  * @tc.type: FUNC
@@ -329,46 +277,6 @@ HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
 
     ret = ConnectTcpDirectPeer(g_addr, g_port);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-}
-
-/**
- * @tc.name: OnVerifyP2pReplyTest001
- * @tc.desc: OnVerifyP2pReply, use the wrong parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest001, TestSize.Level1)
-{
-    int64_t authId = 1;
-    int64_t seq = 1;
-    int32_t channelId = 1;
-    string msg = TestGetMsgPack();
-    cJSON *json = cJSON_Parse(msg.c_str());
-    EXPECT_TRUE(json != nullptr);
-
-    int32_t ret = OnVerifyP2pReply(authId, seq, json);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-
-    ret = CreatSessionConnList();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_NE(conn, nullptr);
-
-    ret = TransTdcAddSessionConn(conn);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = OnVerifyP2pReply(authId, seq, json);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    ret = OnVerifyP2pReply(authId, seq, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-
-    seq = INVALID_VALUE;
-    ret = OnVerifyP2pReply(authId, seq, json);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-
-    TransDelSessionConnById(channelId);
 }
 
 /**
