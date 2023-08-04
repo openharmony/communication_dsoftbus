@@ -78,6 +78,7 @@ typedef struct {
     char *data;
     uint32_t connId;
     int64_t authId; /* for cipher */
+    int32_t keyIndex;
 } ProxyMessage;
 
 #define VERSION 1
@@ -87,6 +88,7 @@ typedef struct {
 #define ENCRYPTED 0x1
 #define AUTH_SERVER_SIDE 0x2
 #define USE_BLE_CIPHER 0x4
+#define BAD_CIPHER 0x8
 #define CS_MODE 0x10
 #define PROXY_BYTES_LENGTH_MAX (4 * 1024 * 1024)
 #define PROXY_MESSAGE_LENGTH_MAX 1024
@@ -165,6 +167,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
 char* TransProxyPackIdentity(const char *identity);
 int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len);
 char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen);
+int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo);
 
 #ifdef __cplusplus
 #if __cplusplus

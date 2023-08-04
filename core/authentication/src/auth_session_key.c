@@ -161,6 +161,25 @@ NO_SANITIZE("cfi") int32_t GetSessionKeyByIndex(const SessionKeyList *list, int3
     return SOFTBUS_ERR;
 }
 
+NO_SANITIZE("cfi") void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index)
+{
+    CHECK_NULL_PTR_RETURN_VOID(list);
+    bool isFind = false;
+    SessionKeyItem *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (item->index == index) {
+            isFind = true;
+            break;
+        }
+    }
+    if (isFind) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    } else {
+        ALOGE("Remove Session key not found, index=%d.", index);
+    }
+}
+
 NO_SANITIZE("cfi") int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen)
 {

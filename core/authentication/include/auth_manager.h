@@ -61,6 +61,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
 
 /* Note: must call DelAuthManager to free. */
 AuthManager *GetAuthManagerByAuthId(int64_t authId);
+void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index);
 void DelAuthManager(AuthManager *auth, bool removeAuthFromList);
 void RemoveAuthManagerByAuthId(int64_t authId);
 int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);

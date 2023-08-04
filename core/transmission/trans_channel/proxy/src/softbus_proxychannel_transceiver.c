@@ -743,6 +743,31 @@ NO_SANITIZE("cfi") int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, con
     return ret;
 }
 
+static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg)
+{
+    ProxyDataInfo dataInfo;
+    dataInfo.inData = (uint8_t *)msg->data;
+    dataInfo.inLen = msg->dateLen;
+    dataInfo.outData = NULL;
+    dataInfo.outLen = 0;
+
+    msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msg->msgHead.cipher |= BAD_CIPHER;
+
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send bad key msg myId:%d, peerId:%d",
+        msg->msgHead.myId, msg->msgHead.peerId);
+    
+    if (PackPlaintextMessage(&msg->msgHead, &dataInfo) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (TransProxyTransSendMsg(msg->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, 0) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send bad key buf fail");
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void TransProxyOnDataReceived(
     uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
@@ -759,8 +784,17 @@ static void TransProxyOnDataReceived(
     }
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     msg.connId = connectionId;
-    if (TransProxyParseMessage((char *)data, len, &msg) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse proxy msg err");
+
+    int32_t ret = TransProxyParseMessage((char *)data, len, &msg);
+    if (((ret == SOFTBUS_AUTH_NOT_FOUND) || (ret == SOFTBUS_DECRYPT_ERR)) &&
+        (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE)) {
+        if (TransProxySendBadKeyMessage(&msg) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send bad key msg err: %d", ret);
+            return;
+        }
+    }
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse proxy msg err: %d", ret);
         return;
     }
     if (msg.msgHead.type != PROXYCHANNEL_MSG_TYPE_NORMAL) {
