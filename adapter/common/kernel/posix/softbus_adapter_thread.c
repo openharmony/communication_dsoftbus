@@ -472,7 +472,12 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
         tv.tv_sec = time->sec;
         tv.tv_nsec = time->usec * USECTONSEC;
         ret = pthread_cond_timedwait((pthread_cond_t *)*cond, (pthread_mutex_t *)*mutex, &tv);
-        if (ret != 0 && ret != ETIMEDOUT) {
+        if (ret == ETIMEDOUT) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondTimedWait timeout, ret[%{public}d]", ret);
+            return SOFTBUS_TIMOUT;
+        }
+
+        if (ret != 0) {
             HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondTimedWait failed, ret[%{public}d]", ret);
             return SOFTBUS_ERR;
         }
