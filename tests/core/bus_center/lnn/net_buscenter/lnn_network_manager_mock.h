@@ -42,13 +42,11 @@ public:
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium) = 0;
     virtual void LnnStopPublish(void) = 0;
-    // virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual int32_t LnnStartPublish(void) = 0;
     virtual void LnnUpdateOhosAccount(void) = 0;
     virtual void LnnOnOhosAccountLogout(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect) = 0;
-    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis) = 0;
@@ -67,13 +65,11 @@ public:
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(DiscLinkStatusChanged, void (LinkStatus, ExchangeMedium));
     MOCK_METHOD0(LnnStopPublish, void (void));
-    // MOCK_METHOD2(LnnRegisterEventHandler, int32_t (LnnEventType, LnnEventHandler));
     MOCK_METHOD0(LnnStartPublish, int32_t (void));
     MOCK_METHOD0(LnnUpdateOhosAccount, void (void));
     MOCK_METHOD0(LnnOnOhosAccountLogout, void (void));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD2(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, bool));
-    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char*, IdCategory, NodeInfo *));
     MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t (const bool *, uint32_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
 };

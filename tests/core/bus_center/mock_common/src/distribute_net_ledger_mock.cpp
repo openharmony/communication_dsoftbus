@@ -60,5 +60,9 @@ const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
 {
     return GetDistriLedgerInterface()->LnnConvertDLidToUdid(id, type);
 }
+int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+{
+    return GetDistriLedgerInterface()->LnnGetRemoteNumU64Info(networkId, key, info);
+}
 }
 } // namespace OHOS

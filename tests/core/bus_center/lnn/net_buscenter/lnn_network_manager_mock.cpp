@@ -76,10 +76,6 @@ void LnnStopPublish(void)
 {
     return GetNetworkManagerInterface()->LnnStopPublish();
 }
-// int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
-// {
-//     return GetNetworkManagerInterface()->LnnRegisterEventHandler(event, handler);
-// }
 int32_t LnnStartPublish(void)
 {
     return GetNetworkManagerInterface()->LnnStartPublish();
@@ -91,10 +87,6 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
 {
     return GetNetworkManagerInterface()->LnnNotifyDiscoveryDevice(addr, isNeedConnect);
-}
-int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
-{
-    return GetNetworkManagerInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
 {
