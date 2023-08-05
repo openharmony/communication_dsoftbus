@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "auth_hichain_adapter.h"
 #include "bus_center_manager.h"
 #include "lnn_node_info.h"
 #include "lnn_distributed_net_ledger.h"
@@ -80,6 +81,13 @@ public:
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
+    virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
+    virtual bool LnnIsDefaultOhosAccount() = 0;
+    virtual bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise) = 0;
+    virtual bool LnnIsPotentialHomeGroup(const char *udid) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual int32_t LnnRegisterBleLpDeviceMediumMgr(void) = 0;
+    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -133,6 +141,13 @@ public:
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
+    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool ());
+    MOCK_METHOD3(IsPotentialTrustedDevice, bool (TrustedRelationIdType idType, const char *deviceId, bool isPrecise));
+    MOCK_METHOD1(LnnIsPotentialHomeGroup, bool (const char *udid));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
+    MOCK_METHOD0(LnnRegisterBleLpDeviceMediumMgr, int32_t (void));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey key, uint64_t *info));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
