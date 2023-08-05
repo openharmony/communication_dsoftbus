@@ -263,7 +263,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOnceMsgTest_01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatFSMTest, OnSendOneHbBeginTest_01, TestSize.Level1)
 {
-    HeartBeatFSMInterfaceMock heartbeatFsmMock;
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
     void *para = SoftBusCalloc(sizeof(LnnHeartbeatSendBeginData));
     EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSendBegin).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = OnSendOneHbBegin(nullptr, TEST_ARGS, nullptr);

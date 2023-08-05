@@ -779,6 +779,9 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
 ohos_unittest("LNNNetworkManagerMockTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_common_utils.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
     "net_builder/src/lnn_auth_mock.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_buscenter/lnn_network_manager_mock.cpp",
@@ -813,9 +816,11 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
   ]
@@ -1528,7 +1533,7 @@ group("unittest") {
     ":LNNNetLedgerCommonTest",
     ":LNNNetworkInfoTest",
 
-    # ":LNNNetworkManagerMockTest",
+    ":LNNNetworkManagerMockTest",
     ":LNNNodeWeightTest",
     ":LNNP2pInfoTest",
     ":LNNSyncInfoManagerTest",
