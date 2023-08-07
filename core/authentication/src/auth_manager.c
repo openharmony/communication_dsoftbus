@@ -30,6 +30,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "lnn_feature_capability.h"
+#include "lnn_net_builder.h"
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
@@ -208,6 +209,49 @@ static int32_t UpdateAuthManagerByAuthId(
     }
     ReleaseAuthLock();
     return SOFTBUS_OK;
+}
+
+static ConnectionAddrType ConvertAuthLinkTypeToConnect(AuthLinkType type)
+{
+    if (type == AUTH_LINK_TYPE_WIFI) {
+        return CONNECTION_ADDR_WLAN;
+    } else if (type == AUTH_LINK_TYPE_BLE) {
+        return CONNECTION_ADDR_BLE;
+    } else if (type == AUTH_LINK_TYPE_BR) {
+        return CONNECTION_ADDR_BR;
+    }
+    return CONNECTION_ADDR_MAX;
+}
+
+void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
+{
+    if (!RequireAuthLock()) {
+        return;
+    }
+    AuthManager *auth = FindAuthManagerByAuthId(authId);
+    if (auth == NULL) {
+        ALOGE("auth manager already removed, authId=%" PRId64, authId);
+        ReleaseAuthLock();
+        return;
+    }
+    RemoveSessionkeyByIndex(&auth->sessionKeyList, index);
+    bool keyClear = IsListEmpty(&auth->sessionKeyList);
+    ConnectionAddrType connType = CONNECTION_ADDR_MAX;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = SOFTBUS_ERR;
+    if (keyClear) {
+        connType = ConvertAuthLinkTypeToConnect(auth->connInfo.type);
+        ret = LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId));
+    }
+    char udid[UDID_BUF_LEN] = {0};
+    AuthLinkType type = auth->connInfo.type;
+    (void)memcpy_s(udid, UDID_BUF_LEN, auth->udid, UDID_BUF_LEN);
+    ReleaseAuthLock();
+    AuthRemoveDeviceKey(udid, type);
+    if ((ret == SOFTBUS_OK) && (connType != CONNECTION_ADDR_MAX) && (keyClear)) {
+        ALOGI("ahthId=%d key clear empty, Lnn offline" PRId64, authId);
+        LnnRequestLeaveSpecific(networkId, connType);
+    }
 }
 
 NO_SANITIZE("cfi") void RemoveAuthManagerByAuthId(int64_t authId)
