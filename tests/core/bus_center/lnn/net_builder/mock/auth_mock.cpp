@@ -47,9 +47,9 @@ uint32_t AuthGenRequestId(void)
 }
 
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-    const AuthVerifyCallback *callback)
+    const AuthVerifyCallback *callback, bool isFastAuth)
 {
-    return GetAuthInterface()->AuthStartVerify(connInfo, requestId, callback);
+    return GetAuthInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
 }
 
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)

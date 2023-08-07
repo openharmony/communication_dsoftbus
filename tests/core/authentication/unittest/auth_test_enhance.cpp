@@ -177,7 +177,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback);
+    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     SoftBusSleepMs(MILLIS);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     AuthDeviceDeinit();
@@ -204,7 +204,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
     EXPECT_CALL(socketMock, ConnOpenClientSocket).WillRepeatedly(Return(2));
     EXPECT_CALL(socketMock, ConnSetTcpKeepAlive).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnShutdownSocket);
-    ret = AuthStartVerify(&g_connInfo2, g_requestId, &g_callback);
+    ret = AuthStartVerify(&g_connInfo2, g_requestId, &g_callback, true);
     SoftBusSleepMs(MILLIS);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     AuthDeviceDeinit();
@@ -234,7 +234,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofOnConnectFailed);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback);
+    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
     AuthDeviceDeinit();
@@ -264,7 +264,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofOnConnectSuccessed);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback);
+    ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
     AuthDeviceDeinit();
