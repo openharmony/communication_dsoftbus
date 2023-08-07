@@ -95,7 +95,8 @@ typedef struct {
 } AuthVerifyCallback;
 
 uint32_t AuthGenRequestId(void);
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback);
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+    const AuthVerifyCallback *callback, bool isFastAuth);
 void AuthHandleLeaveLNN(int64_t authId);
 int32_t AuthFlushDevice(const char *uuid);
 

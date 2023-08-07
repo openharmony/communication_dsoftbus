@@ -166,7 +166,7 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ON_CALL(*mockInterface->ledgerMock, LnnGetBtMac).WillByDefault(Return(TEST_MAC));
     const unsigned char val = 0x01;
     SoftbusSetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, &val, sizeof(val));
-    ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack);
+    ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack, true);
 
     EXPECT_TRUE(ret == SOFTBUS_OK);
     AuthSessionStartAuth(SEQ_SERVER, REQUEST_ID, g_connId, &g_connInfo, isServer);
