@@ -21,10 +21,12 @@
 
 #include "auth_interface.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_score.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
 #include "bus_center_manager.h"
+#include "softbus_conn_ble_connection.h"
 #include "softbus_network_utils.h"
 #include "p2plink_interface.h"
 #include "lnn_physical_subnet_manager.h"
@@ -54,6 +56,20 @@ public:
     virtual int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info) = 0;
     virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
     virtual bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data) = 0;
+    virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
+    virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
+    virtual bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection) = 0;
+    virtual uint32_t AuthGenRequestId(void) = 0;
+    virtual int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo) = 0;
+    virtual int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo) = 0;
+    virtual int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth) = 0;
+    virtual void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId) = 0;
+    virtual void LnnDestoryP2p(void) = 0;
+    virtual int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
+        const LaneLinkCb *callback) = 0;
+    virtual ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol) = 0;
+    virtual void ConnBleReturnConnection(ConnBleConnection **connection) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -78,6 +94,19 @@ public:
     MOCK_METHOD1(P2pLinkDisconnectDevice, int32_t (const P2pLinkDisconnectInfo*));
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
     MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
+    MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
+    MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
+    MOCK_METHOD3(AuthDeviceCheckConnInfo, bool (const char *, AuthLinkType, bool));
+    MOCK_METHOD0(AuthGenRequestId, uint32_t ());
+    MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
+    MOCK_METHOD2(AuthGetConnInfo, int32_t (int64_t, AuthConnInfo *));
+    MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
+    MOCK_METHOD3(LnnDisconnectP2p, void (const char *, int32_t, uint32_t));
+    MOCK_METHOD0(LnnDestoryP2p, void ());
+    MOCK_METHOD5(LnnConnectP2p, int32_t (const char *, int32_t, bool, uint32_t, const LaneLinkCb *));
+    MOCK_METHOD2(ConnBleGetClientConnectionByUdid, ConnBleConnection *(const char *, BleProtocolType));
+    MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));
 
     void SetDefaultResult(void);
 };
