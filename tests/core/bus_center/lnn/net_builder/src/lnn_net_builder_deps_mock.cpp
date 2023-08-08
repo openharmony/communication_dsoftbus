@@ -456,9 +456,9 @@ void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
     return GetNetBuilderDepsInterface()->LnnDestroyConnectionFsm(connFsm);
 }
 
-LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName)
+LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName, bool isNeedConnect)
 {
-    return GetNetBuilderDepsInterface()->LnnCreateConnectionFsm(target, pkgName);
+    return GetNetBuilderDepsInterface()->LnnCreateConnectionFsm(target, pkgName, false);
 }
 
 int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
