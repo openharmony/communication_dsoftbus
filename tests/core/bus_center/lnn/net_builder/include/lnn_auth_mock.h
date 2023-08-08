@@ -36,7 +36,7 @@ class LnnAuthtInterfaceMock : public LnnAuthInterface {
 public:
     LnnAuthtInterfaceMock();
     ~LnnAuthtInterfaceMock() override;
-    MOCK_METHOD3(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, bool));
+    MOCK_METHOD4(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, bool));
     MOCK_METHOD2(AuthGetVersion, int32_t (int64_t, SoftBusVersion *));
     MOCK_METHOD1(RegGroupChangeListener, int32_t (const GroupChangeListener *));
 };
