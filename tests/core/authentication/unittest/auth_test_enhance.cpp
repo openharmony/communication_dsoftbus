@@ -14,6 +14,7 @@
  */
 
 #include "auth_common.h"
+#include "auth_common_mock.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
@@ -24,6 +25,7 @@
 #include "lnn_socket_mock.h"
 #include "message_handler.h"
 #include "softbus_access_token_test.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -169,6 +171,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     LnnSocketInterfaceMock socketMock;
     AuthNetLedgertInterfaceMock ledgermock;
+    AuthCommonInterfaceMock commMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
@@ -222,6 +225,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     AuthNetLedgertInterfaceMock ledgermock;
     LnnSocketInterfaceMock socketMock;
+    AuthCommonInterfaceMock commMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
@@ -252,6 +256,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     AuthNetLedgertInterfaceMock ledgermock;
     LnnSocketInterfaceMock socketMock;
+    AuthCommonInterfaceMock commMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
