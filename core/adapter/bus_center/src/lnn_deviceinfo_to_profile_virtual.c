@@ -25,7 +25,7 @@ void InsertMetaNodeInfoToProfile(MetaNodeInfo *info)
     (void)info;
 }
 
-void UpdateProfile(NodeInfo *info)
+void UpdateProfile(const NodeInfo *info)
 {
     (void)info;
 }
