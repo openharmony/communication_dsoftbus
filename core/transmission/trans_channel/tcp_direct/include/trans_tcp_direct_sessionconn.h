@@ -28,6 +28,8 @@ extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+#define REQUEST_INVALID 0
+
 typedef enum {
     TCP_DIRECT_CHANNEL_STATUS_INIT,
     TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL,
