@@ -363,7 +363,6 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
     LnnConnectInterfaceMock connMock;
     LnnNetLedgertInterfaceMock lnnNetLedgerMock;
-    // ON_CALL(distriLedgerMock, LnnConvertDLidToUdid).WillByDefault(Return(TEST_UDID));
     ON_CALL(heartbeatFsmMock, LnnRequestLeaveSpecific).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(distriLedgerMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, CheckActiveConnection).WillRepeatedly(Return(true));
