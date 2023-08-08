@@ -75,6 +75,7 @@ int32_t FindRequestIdByAddr(ConnectionAddr *connetionAddr, uint32_t *requestId);
 NodeInfo *FindNodeInfoByRquestId(uint32_t requestId);
 AuthVerifyCallback *LnnGetVerifyCallback(void);
 AuthVerifyCallback *LnnGetMetaVerifyCallback(void);
+AuthVerifyCallback *LnnGetReAuthVerifyCallback(void);
 void SetWatchdogFlag(bool flag);
 bool GetWatchdogFlag(void);
 

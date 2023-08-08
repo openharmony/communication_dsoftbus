@@ -27,7 +27,7 @@ extern "C" {
 
 void InsertToProfile(NodeInfo *info);
 void InsertMetaNodeInfoToProfile(MetaNodeInfo *info);
-void UpdateProfile(NodeInfo *info);
+void UpdateProfile(const NodeInfo *info);
 void UpdateMetaNodeProfile(MetaNodeInfo *info);
 void DeleteFromProfile(const char *udid);
 void ClearProfile();

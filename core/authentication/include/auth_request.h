@@ -29,6 +29,7 @@ extern "C" {
 typedef enum {
     REQUEST_TYPE_VERIFY = 0,
     REQUEST_TYPE_RECONNECT,
+    REQUEST_TYPE_CONNECT,
 } RequestType;
 
 typedef struct {
@@ -40,6 +41,8 @@ typedef struct {
     AuthConnCallback connCb;
     RequestType type;
     ListNode node;
+    uint64_t addTime;
+    bool isFastAuth;
 } AuthRequest;
 
 bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb);
