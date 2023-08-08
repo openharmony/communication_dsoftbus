@@ -1900,14 +1900,14 @@ static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeI
         connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);
         if (connFsm == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
-                "start new connection fsm fail: %"PRId64, authId);
+                "start new connection fsm fail: %" PRId64, authId);
             return;
         }
         connFsm->connInfo.authId = authId;
         connFsm->connInfo.nodeInfo = DupNodeInfo(info);
         connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_AUTO;
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "[id=%u]start a connection fsm, authId = %" PRId64, connFsm->id, authId);
+            "[id=%u]start a connection fsm, authId=%" PRId64, connFsm->id, authId);
         if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
             connFsm->connInfo.nodeInfo = NULL;
             StopConnectionFsm(connFsm);
