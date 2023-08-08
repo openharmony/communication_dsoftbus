@@ -28,6 +28,7 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_medium_mgr_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
   ]
 

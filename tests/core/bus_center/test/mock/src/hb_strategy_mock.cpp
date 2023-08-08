@@ -66,5 +66,9 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
 {
     return HeartBeatStrategyInterface()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);
 }
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+{
+    return HeartBeatStrategyInterface()->LnnRequestLeaveSpecific(networkId, addrType);
+}
 }
 } // namespace OHOS
