@@ -19,6 +19,7 @@
 #include <sys/time.h>
 
 #include "auth_common.h"
+#include "auth_common_mock.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
@@ -29,6 +30,7 @@
 #include "lnn_socket_mock.h"
 #include "message_handler.h"
 #include "softbus_access_token_test.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -342,6 +344,8 @@ HWTEST_F(AuthTestCallBackTest, OnFinish_Test_002, TestSize.Level1)
     LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data2, TEST_DATA_LEN);
     WaitForSignal();
     SoftBusFree(data2);
+    AuthCommonInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
     LnnHichainInterfaceMock::g_devAuthCb.onSessionKeyReturned(SEQ_SERVER, g_sessionKey, SESSION_KEY_LENGTH);
     WaitForSignal();
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));

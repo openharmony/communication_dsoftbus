@@ -559,7 +559,7 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
             conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false);
         }
         TRAN_CHECK_AND_RETURN_RET_LOG(conn->authId != AUTH_INVALID_ID, SOFTBUS_ERR, "get auth id failed");
-        conn->requestId = AUTH_INVALID_ID;
+        conn->requestId = REQUEST_INVALID;
         char *msg = VerifyP2pPack(conn->appInfo.myData.addr, conn->appInfo.myData.port);
         if (msg == NULL) {
             return SOFTBUS_ERR;
