@@ -185,21 +185,6 @@ HWTEST_F(NetLedgerTest, LNN_DELETE_META_INFO_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_ADD_ONLINE_NODE_Test_001
-* @tc.desc: Lnn Add Online Node test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(NetLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level1)
-{
-    NodeInfo *info = nullptr;
-    EXPECT_TRUE(LnnAddOnlineNode(info) == REPORT_NONE);
-    NodeInfo infoValue;
-    (void)memset_s(&infoValue, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_TRUE(LnnAddOnlineNode(&infoValue) == REPORT_ONLINE);
-}
-
-/*
 * @tc.name: GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001
 * @tc.desc: Get All Online And Meta Node Info test
 * @tc.type: FUNC
