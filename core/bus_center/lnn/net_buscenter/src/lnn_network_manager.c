@@ -492,7 +492,8 @@ static void SaveBrNetworkDevices(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "night mode on: get all online node info fail.");
     }
 
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     for (int32_t i = 0; i < infoNum; i++) {
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "night mode on: GetRemoteNodeInfo fail.");

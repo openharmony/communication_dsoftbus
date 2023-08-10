@@ -134,7 +134,8 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         LLOGD("isn't ble directly online, ignore");
         return;
     }
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LLOGD("get nodeInfo fail");
         return;
@@ -313,7 +314,8 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         return true;
     }
     int32_t ret;
-    NodeInfo deviceInfo = {0};
+    NodeInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (!IsLocalSupportBleDirectOnline()) {
         LLOGI("ble don't support ble direct online");
         return true;
@@ -393,7 +395,8 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     HbDumpRecvDeviceInfo(device, weight, masterWeight, hbType, nowTime);
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         if (!HbIsNeedReAuth(&nodeInfo, device->accountHash)) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);

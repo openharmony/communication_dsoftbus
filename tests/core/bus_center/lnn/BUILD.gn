@@ -752,6 +752,7 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/authentication/include",
   ]
 
   deps = [
@@ -779,6 +780,9 @@ ohos_unittest("LNNBtNetworkImplMockTest") {
 ohos_unittest("LNNNetworkManagerMockTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_common_utils.c",
     "net_builder/src/lnn_auth_mock.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_buscenter/lnn_network_manager_mock.cpp",
@@ -798,6 +802,7 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -813,9 +818,11 @@ ohos_unittest("LNNNetworkManagerMockTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
   ]
@@ -883,6 +890,7 @@ ohos_unittest("LNNIpNetworkImplMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/authentication/include",
   ]
 
   deps = [
@@ -1538,8 +1546,7 @@ group("unittest") {
     ":LNNNetBuilderTest",
     ":LNNNetLedgerCommonTest",
     ":LNNNetworkInfoTest",
-
-    # ":LNNNetworkManagerMockTest",
+    ":LNNNetworkManagerMockTest",
     ":LNNNodeWeightTest",
     ":LNNP2pInfoTest",
     ":LNNSyncInfoManagerTest",
