@@ -70,5 +70,10 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
 {
     return HeartBeatStrategyInterface()->LnnRequestLeaveSpecific(networkId, addrType);
 }
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+    const AuthVerifyCallback *callback, bool isFastAuth)
+{
+    return GetNetLedgerInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
+}
 }
 } // namespace OHOS

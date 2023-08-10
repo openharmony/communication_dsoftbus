@@ -35,6 +35,8 @@ public:
     virtual int32_t LnnStartHbByTypeAndStrategy(
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
     virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+        const AuthVerifyCallback *callback, bool isFastAuth) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -48,6 +50,7 @@ public:
     MOCK_METHOD1(LnnSetHbAsMasterNodeState, int32_t(bool));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
     MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType));
+    MOCK_METHOD4(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, bool));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
