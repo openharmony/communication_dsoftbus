@@ -461,9 +461,5 @@ int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalNumU64Info(key, info);
 }
-uint32_t AuthGenRequestId(void)
-{
-    return GetNetLedgerInterface()->AuthGenRequestId();
-}
 }
 }
