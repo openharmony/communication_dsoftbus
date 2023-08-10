@@ -82,7 +82,7 @@ public:
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
-    virtual bool LnnIsDefaultOhosAccount() = 0;
+    virtual bool LnnIsDefaultOhosAccount(void) = 0;
     virtual bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise) = 0;
     virtual bool LnnIsPotentialHomeGroup(const char *udid) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
