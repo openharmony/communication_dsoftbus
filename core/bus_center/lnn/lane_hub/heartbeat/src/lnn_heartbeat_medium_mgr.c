@@ -395,7 +395,8 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     HbDumpRecvDeviceInfo(device, weight, masterWeight, hbType, nowTime);
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         if (!HbIsNeedReAuth(&nodeInfo, device->accountHash)) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
