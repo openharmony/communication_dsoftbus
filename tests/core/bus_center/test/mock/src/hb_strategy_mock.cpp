@@ -79,5 +79,9 @@ AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
 {
     return HeartBeatStrategyInterface()->LnnGetReAuthVerifyCallback();
 }
+uint32_t AuthGenRequestId(void)
+{
+    return HeartBeatStrategyInterface()->AuthGenRequestId();
+}
 }
 } // namespace OHOS
