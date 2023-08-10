@@ -83,7 +83,7 @@ NO_SANITIZE("cfi") static void DeviceFound(const DeviceInfo *device, const Inner
         device->devName, ToSecureStrDeviceID(device->devId, &anoyUdid));
     SoftBusFree(anoyUdid);
     ConvertDeviceInfo(device, &tmpInfo);
-    if (!AuthIsPotentialTrusted(&tmpInfo)) {
+    if (!AuthIsPotentialTrusted(&tmpInfo, false)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "discovery device is not potential trusted, devId:%s, "
             "accountHash:%02X%02X", AnonymizesUDID(tmpInfo.devId), tmpInfo.accountHash[0], tmpInfo.accountHash[1]);
         return;
