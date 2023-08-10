@@ -1880,7 +1880,8 @@ static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeI
         LLOGE("auth request not found");
         return;
     }
-    ConnectionAddr addr = {0};
+    ConnectionAddr addr;
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     if (!LnnConvertAuthConnInfoToAddr(&addr, &authRequest.connInfo, GetCurrentConnectType())) {
         LLOGE("ConvertToConnectionAddr failed");
         return;
