@@ -1406,7 +1406,8 @@ static int32_t ProcessLeaveSpecific(const void *para)
     }
 
     do {
-        NodeInfo nodeInfo = {0};
+        NodeInfo nodeInfo;
+        (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         if (LnnGetRemoteNodeInfoById(msgPara->networkId, CATEGORY_NETWORK_ID, &nodeInfo)) {
             break;
         }
