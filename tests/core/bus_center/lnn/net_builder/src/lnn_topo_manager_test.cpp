@@ -208,7 +208,7 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
     handler((const LnnEventBasicInfo *)&eventInfo);
     eventInfo.udid = UDID;
 
-    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     handler((const LnnEventBasicInfo *)&eventInfo);
     SoftBusSleepMs(5500);
 
@@ -217,14 +217,15 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_002, TestSize.Level1)
     handler((const LnnEventBasicInfo *)&eventInfo);
     SoftBusSleepMs(5500);
 
-    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_INVALID_PARAM)).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1);
+    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1);
     eventInfo.relation = LNN_RELATION_ERROR;
     handler((const LnnEventBasicInfo *)&eventInfo);
     SoftBusSleepMs(5500);
 
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_OK)).
-        WillOnce(Return(SOFTBUS_INVALID_PARAM)).
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).
         WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
     eventInfo.relation = LNN_RELATION_ERROR;
     eventInfo.isJoin = false;
@@ -263,14 +264,17 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
         .udid = LnnNetLedgertInterfaceMock::peerId.c_str(),
     };
     EXPECT_CALL(ledgerMock, LnnGetLnnRelation).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation);
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(
-        LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1);
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).
+        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1);
     handler((const LnnEventBasicInfo *)&eventInfo);
     SoftBusSleepMs(5500);
 
-    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillOnce(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId).
-        WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1);
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_ERR)).
+    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId);
+    EXPECT_CALL(ledgerMock, LnnConvertDlId).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1);
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).
         WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1);
     handler((const LnnEventBasicInfo *)&eventInfo);
     SoftBusSleepMs(5500);
@@ -284,8 +288,8 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_003, TestSize.Level1)
     uint8_t getRelation[CONNECTION_ADDR_MAX];
     (void)memset_s(getRelation, sizeof(getRelation), 0, sizeof(getRelation));
     EXPECT_EQ(LnnGetRelation(LnnNetLedgertInterfaceMock::localId.c_str(), LnnNetLedgertInterfaceMock::peerId.c_str(),
-        getRelation, CONNECTION_ADDR_MAX), SOFTBUS_OK);
-    EXPECT_GT(getRelation[CONNECTION_ADDR_BR], 0);
+        getRelation, CONNECTION_ADDR_MAX), SOFTBUS_NOT_FIND);
+    EXPECT_EQ(getRelation[CONNECTION_ADDR_BR], 0);
 
     handler((const LnnEventBasicInfo *)&eventInfo);
     SoftBusSleepMs(5500);

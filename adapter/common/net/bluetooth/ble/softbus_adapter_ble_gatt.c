@@ -30,6 +30,7 @@
 #define BT_UUID "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
 #define DELIVERY_MODE_REPLY 0xF0 // Lpdevice delivery mode: reply adv when filter matched
 #define ADV_DURATION_MS 0
+#define ADV_WAIT_TIME_SEC 2
 static int32_t g_scannerId = -1;
 typedef struct {
     int advId;
@@ -767,7 +768,19 @@ NO_SANITIZE("cfi") int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *par
     }
     if (g_advChannel[advId].isAdvertising) {
         CLOGW("SoftBusStartAdv, wait condition inner-advId: %d", advId);
-        SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock, NULL);
+        SoftBusSysTime absTime = {0};
+        if (SoftBusGetTime(&absTime) != SOFTBUS_OK) {
+            CLOGE("Softbus get time failed");
+            SoftBusMutexUnlock(&g_advLock);
+            return SOFTBUS_ERR;
+        }
+
+        absTime.sec += ADV_WAIT_TIME_SEC;
+        if (SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock, &absTime) != SOFTBUS_OK) {
+            CLOGE("SoftBusStartAdv, wait timeout");
+            SoftBusMutexUnlock(&g_advLock);
+            return SOFTBUS_ERR;
+        }
     }
     int btAdvId = -1;
     BleAdvParams dstParam;

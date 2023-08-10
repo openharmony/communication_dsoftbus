@@ -551,8 +551,8 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set ble mac err");
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(connOpt->bleOption.deviceIdHash, sizeof(connOpt->bleOption.deviceIdHash),
-            bleInfo->deviceIdHash) != EOK) {
+    if (memcpy_s(connOpt->bleOption.deviceIdHash, sizeof(connOpt->bleOption.deviceIdHash),
+            bleInfo->deviceIdHash, sizeof(bleInfo->deviceIdHash)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set deviceId hash err");
         return SOFTBUS_ERR;
     }

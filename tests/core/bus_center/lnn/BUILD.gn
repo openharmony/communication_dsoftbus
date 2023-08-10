@@ -1342,6 +1342,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/common/bus_center/include/",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
@@ -1382,29 +1383,41 @@ ohos_unittest("LNNTransLaneMockTest") {
 ohos_unittest("LNNDiscoveryInterfaceTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/authentication/src/auth_hichain_adapter.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_interface.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c",
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/bus_center_mock.cpp",
     "disc_mgr/disc_manager_mock.cpp",
     "disc_mgr/lnn_discovery_interface_test.cpp",
   ]
 
   include_dirs = [
     "disc_mgr",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
+    "//base/security/device_auth/interfaces/inner_api",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 
   deps = [
@@ -1519,15 +1532,13 @@ group("unittest") {
     ":LNNBusCenterIpcTest",
     ":LNNConnectionFsmTest",
     ":LNNDeviceNameInfoTest",
-
-    # ":LNNDiscoveryInterfaceTest",
+    ":LNNDiscoveryInterfaceTest",
     ":LNNDisctributedLedgerTest",
     ":LNNHuksUtilsTest",
     ":LNNIpNetworkImplMockTest",
+    ":LNNLaneLinkMockTest",
+    ":LNNLaneMockTest",
 
-    # ":LNNLaneLinkMockTest",
-
-    # ":LNNLaneMockTest",
     # ":LNNLedgerMockTest",
     ":LNNMetaNodeLedgerTest",
 

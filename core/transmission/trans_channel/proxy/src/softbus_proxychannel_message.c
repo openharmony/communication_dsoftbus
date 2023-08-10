@@ -225,18 +225,19 @@ NO_SANITIZE("cfi") int32_t TransProxyParseMessage(char *data, int32_t len, Proxy
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
                 "get authId for decrypt fail, connId[%d], myId[%d], type[%d]",
                 msg->connId, msg->msgHead.myId, msg->msgHead.type);
-            return SOFTBUS_ERR;
+            return SOFTBUS_AUTH_NOT_FOUND;
         }
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         if (decData == NULL) {
             return SOFTBUS_ERR;
         }
+        msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
         if (AuthDecrypt(msg->authId, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
             decData, &decDataLen) != SOFTBUS_OK) {
             SoftBusFree(decData);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse msg decrypt fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_DECRYPT_ERR;
         }
         msg->data = (char *)decData;
         msg->dateLen = (int32_t)decDataLen;
@@ -251,7 +252,7 @@ NO_SANITIZE("cfi") int32_t TransProxyParseMessage(char *data, int32_t len, Proxy
     return SOFTBUS_OK;
 }
 
-static int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
+int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
 {
     uint32_t connHeadLen = ConnGetHeadSize();
     uint32_t size = PROXY_CHANNEL_HEAD_LEN + connHeadLen + dataInfo->inLen;

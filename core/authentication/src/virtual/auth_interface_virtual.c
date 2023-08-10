@@ -34,7 +34,8 @@ uint32_t AuthGenRequestId(void)
     return 0;
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+    const AuthVerifyCallback *callback, bool isFastAuth)
 {
     (void)connInfo;
     (void)requestId;

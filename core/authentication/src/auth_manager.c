@@ -30,6 +30,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "lnn_feature_capability.h"
+#include "lnn_net_builder.h"
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
@@ -208,6 +209,49 @@ static int32_t UpdateAuthManagerByAuthId(
     }
     ReleaseAuthLock();
     return SOFTBUS_OK;
+}
+
+static ConnectionAddrType ConvertAuthLinkTypeToConnect(AuthLinkType type)
+{
+    if (type == AUTH_LINK_TYPE_WIFI) {
+        return CONNECTION_ADDR_WLAN;
+    } else if (type == AUTH_LINK_TYPE_BLE) {
+        return CONNECTION_ADDR_BLE;
+    } else if (type == AUTH_LINK_TYPE_BR) {
+        return CONNECTION_ADDR_BR;
+    }
+    return CONNECTION_ADDR_MAX;
+}
+
+void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
+{
+    if (!RequireAuthLock()) {
+        return;
+    }
+    AuthManager *auth = FindAuthManagerByAuthId(authId);
+    if (auth == NULL) {
+        ALOGE("auth manager already removed, authId=%" PRId64, authId);
+        ReleaseAuthLock();
+        return;
+    }
+    RemoveSessionkeyByIndex(&auth->sessionKeyList, index);
+    bool keyClear = IsListEmpty(&auth->sessionKeyList);
+    ConnectionAddrType connType = CONNECTION_ADDR_MAX;
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = SOFTBUS_ERR;
+    if (keyClear) {
+        connType = ConvertAuthLinkTypeToConnect(auth->connInfo.type);
+        ret = LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId));
+    }
+    char udid[UDID_BUF_LEN] = {0};
+    AuthLinkType type = auth->connInfo.type;
+    (void)memcpy_s(udid, UDID_BUF_LEN, auth->udid, UDID_BUF_LEN);
+    ReleaseAuthLock();
+    AuthRemoveDeviceKey(udid, type);
+    if ((ret == SOFTBUS_OK) && (connType != CONNECTION_ADDR_MAX) && (keyClear)) {
+        ALOGI("ahthId=%d key clear empty, Lnn offline" PRId64, authId);
+        LnnRequestLeaveSpecific(networkId, connType);
+    }
 }
 
 NO_SANITIZE("cfi") void RemoveAuthManagerByAuthId(int64_t authId)
@@ -538,7 +582,7 @@ NO_SANITIZE("cfi") static void OnDeviceBound(const char *udid, const char *group
 }
 
 static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
-    const AuthConnCallback *connCb)
+    const AuthConnCallback *connCb, bool isFastAuth)
 {
     int64_t traceId = GenSeq(false);
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)traceId);
@@ -555,7 +599,10 @@ static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInf
     request.requestId = requestId;
     request.connInfo = *connInfo;
     request.authId = AUTH_INVALID_ID;
-    request.type = REQUEST_TYPE_VERIFY;
+    request.type =
+        (verifyCb == NULL && connInfo->type == AUTH_LINK_TYPE_BLE) ? REQUEST_TYPE_CONNECT : REQUEST_TYPE_VERIFY;
+    request.addTime = GetCurrentTimeMs();
+    request.isFastAuth = isFastAuth;
     uint32_t waitNum = AddAuthRequest(&request);
     if (waitNum == 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add verify request to list fail, requestId=%u.", requestId);
@@ -598,6 +645,8 @@ static int32_t StartReconnectDevice(
     request.connInfo = *connInfo;
     request.requestId = requestId;
     request.type = REQUEST_TYPE_RECONNECT;
+    request.addTime = GetCurrentTimeMs();
+    request.isFastAuth = true;
     if (AddAuthRequest(&request) == 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add reconnect request fail, requestId=%u.", requestId);
         return SOFTBUS_ERR;
@@ -1059,13 +1108,14 @@ NO_SANITIZE("cfi") uint32_t AuthGenRequestId(void)
 }
 
 NO_SANITIZE("cfi")
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+    const AuthVerifyCallback *callback, bool isFastAuth)
 {
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "%s: invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
-    return StartVerifyDevice(requestId, connInfo, callback, NULL);
+    return StartVerifyDevice(requestId, connInfo, callback, NULL, isFastAuth);
 }
 
 NO_SANITIZE("cfi") void AuthHandleLeaveLNN(int64_t authId)
@@ -1209,7 +1259,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             if (authId != AUTH_INVALID_ID) {
                 return StartReconnectDevice(authId, info, requestId, callback);
             }
-            return StartVerifyDevice(requestId, info, NULL, callback);
+            return StartVerifyDevice(requestId, info, NULL, callback, true);
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "unknown connType: %d", info->type);
             return SOFTBUS_ERR;
