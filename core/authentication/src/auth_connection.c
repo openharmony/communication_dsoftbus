@@ -569,7 +569,7 @@ NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnI
             if (SoftBusGetBtState() != BLE_ENABLE) {
                 ret = SOFTBUS_AUTH_CONN_FAIL;
                 break;
-            }.
+            }
             /* fall-through */
             [[fallthrough]]
         case AUTH_LINK_TYPE_P2P:
