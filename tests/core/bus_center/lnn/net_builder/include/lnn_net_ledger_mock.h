@@ -142,7 +142,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
-    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool ());
+    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
     MOCK_METHOD3(IsPotentialTrustedDevice, bool (TrustedRelationIdType idType, const char *deviceId, bool isPrecise));
     MOCK_METHOD1(LnnIsPotentialHomeGroup, bool (const char *udid));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
