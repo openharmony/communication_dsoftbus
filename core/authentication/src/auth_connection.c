@@ -562,12 +562,14 @@ NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnI
             ret = PostAuthEvent(EVENT_CONNECT_CMD, HandleConnConnectCmd, &info, sizeof(ConnCmdInfo), 0);
             break;
         }
-        case AUTH_LINK_TYPE_BLE: /* fall-through */
+        case AUTH_LINK_TYPE_BLE:
+            /* fall-through */
         case AUTH_LINK_TYPE_BR:
             if (SoftBusGetBtState() != BLE_ENABLE) {
                 ret = SOFTBUS_AUTH_CONN_FAIL;
                 break;
             }
+            /* fall-through */
         case AUTH_LINK_TYPE_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
@@ -606,9 +608,11 @@ NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)
         case AUTH_LINK_TYPE_WIFI:
             SocketDisconnectDevice(AUTH, GetFd(connId));
             break;
-        case AUTH_LINK_TYPE_BLE: /* fall-through */
+        case AUTH_LINK_TYPE_BLE:
+            /* fall-through */
         case AUTH_LINK_TYPE_BR:
             ConnDisconnectDevice(GetConnId(connId));
+            /* fall-through */
         case AUTH_LINK_TYPE_P2P:
             break;
         default:
