@@ -844,7 +844,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest22, TestSize.Level1)
                                    &value, TRANS_TEST_INVALID_VALUE_SIZE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &value, sizeof(value));
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
     ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT, &value, sizeof(value));
     EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
 }
@@ -862,7 +862,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest23, TestSize.Level1)
                                      &value, TRANS_TEST_INVALID_VALUE_SIZE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReadMaxSendMessageSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &value, sizeof(value));
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
     ret = ReadMaxSendMessageSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT, &value, sizeof(value));
     EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
 }
