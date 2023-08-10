@@ -75,5 +75,9 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
 {
     return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
 }
+AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
+{
+    return HeartBeatStrategyInterface()->LnnGetReAuthVerifyCallback();
+}
 }
 } // namespace OHOS
