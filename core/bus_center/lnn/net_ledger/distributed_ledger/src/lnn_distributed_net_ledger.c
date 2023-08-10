@@ -1471,6 +1471,56 @@ NO_SANITIZE("cfi") ReportCategory LnnAddOnlineNode(NodeInfo *info)
     return REPORT_NONE;
 }
 
+NO_SANITIZE("cfi") int32_t LnnUpdateAccountInfo(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LLOGE("info is null");
+    }
+    const char *udid = NULL;
+    DoubleHashMap *map = NULL;
+    NodeInfo *oldInfo = NULL;
+    udid = LnnGetDeviceUdid(info);
+    map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LLOGE("lock mutex fail!");
+        return REPORT_NONE;
+    }
+    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (oldInfo != NULL) {
+        oldInfo->accountId = info->accountId;
+        UpdateNewNodeAccountHash(oldInfo);
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") int32_t LnnUpdateGroupType(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LLOGE("info is null");
+        return SOFTBUS_ERR;
+    }
+    const char *udid = NULL;
+    DoubleHashMap *map = NULL;
+    NodeInfo *oldInfo = NULL;
+    udid = LnnGetDeviceUdid(info);
+    int32_t groupType = AuthGetGroupType(udid, info->uuid);
+    LLOGI("groupType = %d", groupType);
+    int32_t ret = SOFTBUS_ERR;
+    map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LLOGE("lock mutex fail!");
+        return REPORT_NONE;
+    }
+    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (oldInfo != NULL) {
+        oldInfo->groupType = groupType;
+        ret = SOFTBUS_OK;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return ret;
+}
+
 static void NotifyMigrateDegrade(const char *udid)
 {
     NodeBasicInfo basic;

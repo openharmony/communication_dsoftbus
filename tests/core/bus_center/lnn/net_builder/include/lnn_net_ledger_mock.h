@@ -147,7 +147,7 @@ public:
     MOCK_METHOD1(LnnIsPotentialHomeGroup, bool (const char *udid));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
     MOCK_METHOD0(LnnRegisterBleLpDeviceMediumMgr, int32_t (void));
-    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey key, uint64_t *info));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);

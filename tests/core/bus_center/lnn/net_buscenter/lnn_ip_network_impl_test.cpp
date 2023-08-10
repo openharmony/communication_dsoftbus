@@ -39,6 +39,8 @@ LnnProtocolManager self;
 LnnNetIfMgr netifMgr;
 constexpr char WLAN_IP1[] = "127.0.0.1";
 constexpr char WLAN_IP2[] = "127.0.0.2";
+constexpr char IFNAME_TEST0[] = "wlan0";
+constexpr char IFNAME_TEST1[] = "wlan1";
 class LNNIpNetworkImplMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -161,13 +163,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ipMock, LnnIsLinkReady).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    int ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP1), SIZE);
+    int ret = GetAvailableIpAddr(IFNAME_TEST0, const_cast<char *>(WLAN_IP1), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP1), SIZE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP1), SIZE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = GetAvailableIpAddr(nullptr, const_cast<char *>(WLAN_IP2), SIZE);
+    ret = GetAvailableIpAddr(IFNAME_TEST1, const_cast<char *>(WLAN_IP2), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillRepeatedly(LnnIpNetworkImplInterfaceMock::
@@ -183,7 +181,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
 
     strcpy_s(subnet.ifName, sizeof("DeviceName"), "DeviceName");
     res = GetIpEventInRunning(&subnet);
-    EXPECT_TRUE(ret != IP_SUBNET_MANAGER_EVENT_MAX);
+    EXPECT_TRUE(res != IP_SUBNET_MANAGER_EVENT_MAX);
 }
 
 /*

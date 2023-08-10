@@ -20,6 +20,7 @@
 #include <inttypes.h>
 
 #include "auth_interface.h"
+#include "auth_request.h"
 #include "auth_hichain_adapter.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
@@ -46,6 +47,7 @@
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -1863,6 +1865,77 @@ static AuthVerifyCallback g_verifyCallback = {
 NO_SANITIZE("cfi") AuthVerifyCallback *LnnGetVerifyCallback(void)
 {
     return &g_verifyCallback;
+}
+
+static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeInfo *info)
+{
+    LLOGI("reAuth verify passed: requestId=%u, authId=%" PRId64, requestId, authId);
+    if (info == NULL) {
+        LLOGE("reAuth verify result error");
+        return;
+    }
+    AuthRequest authRequest = {0};
+    if (GetAuthRequest(requestId, &authRequest) != SOFTBUS_OK) {
+        LLOGE("auth request not found");
+        return;
+    }
+    ConnectionAddr addr = {0};
+    if (!LnnConvertAuthConnInfoToAddr(&addr, &authRequest.connInfo, GetCurrentConnectType())) {
+        LLOGE("ConvertToConnectionAddr failed");
+        return;
+    }
+    int32_t ret = SoftBusGenerateStrHash((unsigned char *)info->deviceInfo.deviceUdid,
+        strlen(info->deviceInfo.deviceUdid), (unsigned char *)addr.info.ble.udidHash);
+    if (ret != SOFTBUS_OK) {
+        LLOGE("gen udidHash fail");
+        return;
+    }
+    LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&addr);
+    if (connFsm != NULL && ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_JOIN_PASSIVE) == 0)) {
+        if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
+            UpdateProfile(info);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "reauth finish and updateProfile");
+        }
+    } else {
+        connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);
+        if (connFsm == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+                "start new connection fsm fail: %" PRId64, authId);
+            return;
+        }
+        connFsm->connInfo.authId = authId;
+        connFsm->connInfo.nodeInfo = DupNodeInfo(info);
+        connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_AUTO;
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+            "[id=%u]start a connection fsm, authId=%" PRId64, connFsm->id, authId);
+        if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
+            connFsm->connInfo.nodeInfo = NULL;
+            StopConnectionFsm(connFsm);
+            SoftBusFree(connFsm->connInfo.nodeInfo);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
+                "[id=%u]post auth result to connection fsm fail: %" PRId64, connFsm->id, authId);
+        }
+    }
+}
+
+static void OnReAuthVerifyFailed(uint32_t requestId, int32_t reason)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
+        "verify failed: requestId=%u, reason=%d", requestId, reason);
+    if (reason != SOFTBUS_AUTH_HICHAIN_AUTH_ERROR) {
+        return;
+    }
+    PostVerifyResult(requestId, reason, AUTH_INVALID_ID, NULL);
+}
+
+static AuthVerifyCallback g_reAuthVerifyCallback = {
+    .onVerifyPassed = OnReAuthVerifyPassed,
+    .onVerifyFailed = OnReAuthVerifyFailed,
+};
+
+NO_SANITIZE("cfi") AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
+{
+    return &g_reAuthVerifyCallback;
 }
 
 void OnAuthMetaVerifyPassed(uint32_t requestId, int64_t authMetaId, const NodeInfo *info)

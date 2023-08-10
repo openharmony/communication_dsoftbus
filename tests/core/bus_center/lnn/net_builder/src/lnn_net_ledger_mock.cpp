@@ -456,6 +456,7 @@ int32_t LnnRegisterBleLpDeviceMediumMgr(void)
 {
     return GetNetLedgerInterface()->LnnRegisterBleLpDeviceMediumMgr();
 }
+
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalNumU64Info(key, info);

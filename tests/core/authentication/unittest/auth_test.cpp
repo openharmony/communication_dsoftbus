@@ -710,9 +710,9 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
     int32_t ret;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    ret = AuthStartVerify(nullptr, requestId, &callback);
+    ret = AuthStartVerify(nullptr, requestId, &callback, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthStartVerify(&connInfo, requestId, nullptr);
+    ret = AuthStartVerify(&connInfo, requestId, nullptr, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
@@ -1021,6 +1022,11 @@ NO_SANITIZE("cfi") void TransProxyProcessResetMsg(const ProxyMessage *msg)
     } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
         (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
+    }
+    if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "clear bad key authId:%d",
+            msg->authId, msg->keyIndex);
+        RemoveAuthSessionKeyByIndex(msg->authId, msg->keyIndex);
     }
     SoftBusFree(info);
 }
