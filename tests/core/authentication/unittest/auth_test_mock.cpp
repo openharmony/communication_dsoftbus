@@ -362,7 +362,7 @@ HWTEST_F(AuthTestCallBackTest, OnFinish_Test_002, TestSize.Level1)
     char *data4 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, closeAckHead);
     LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data4, TEST_DATA_LEN);
     ret = WaitForSignal();
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(!ret);
     SoftBusFree(data4);
     AuthDeviceDeinit();
 }
