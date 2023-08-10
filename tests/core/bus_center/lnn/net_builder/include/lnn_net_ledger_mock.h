@@ -89,8 +89,6 @@ public:
     virtual int32_t LnnRegisterBleLpDeviceMediumMgr(void) = 0;
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-        const AuthVerifyCallback *callback, bool isFastAuth) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -152,7 +150,6 @@ public:
     MOCK_METHOD0(LnnRegisterBleLpDeviceMediumMgr, int32_t (void));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
     MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
-    MOCK_METHOD4(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, bool));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);

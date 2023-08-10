@@ -465,10 +465,5 @@ uint32_t AuthGenRequestId(void)
 {
     return GetNetLedgerInterface()->AuthGenRequestId();
 }
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-    const AuthVerifyCallback *callback, bool isFastAuth)
-{
-    return GetNetLedgerInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
-}
 }
 }
