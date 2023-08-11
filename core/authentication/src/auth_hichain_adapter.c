@@ -15,20 +15,23 @@
 
 #include "auth_hichain_adapter.h"
 
+#include <regex.h>
 #include <stdlib.h>
 #include <string.h>
 #include <securec.h>
 
 #include "auth_common.h"
+#include "auth_hichain.h"
 #include "auth_session_fsm.h"
 #include "device_auth.h"
 #include "device_auth_defines.h"
-
-#include "auth_hichain.h"
+#include "lnn_decision_db.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
+#define UDID_REGEX_PATTERN "[0-9A-Fa-f]{16,}"
+#define CUST_UDID_LEN 16
 #define AUTH_APPID "softbus_auth"
 #define RETRY_TIMES 16
 #define RETRY_MILLSECONDS 500
@@ -135,9 +138,52 @@ void DestroyDeviceAuth(void)
 bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise)
 {
     (void)idType;
-    (void)deviceId;
     (void)isPrecise;
-    return true;
+    AUTH_CHECK_AND_RETURN_RET_LOG(deviceId != NULL, false, "invalid param");
+
+    uint32_t num = 0;
+    char *udidArray = NULL;
+    if (LnnGetTrustedDevInfoFromDb(&udidArray, &num) != SOFTBUS_OK) {
+        ALOGE("get trusted dev info fail");
+        return false;
+    }
+    if (udidArray == NULL || num == 0) {
+        ALOGI("get none trusted node");
+        return false;
+    }
+    regex_t regComp;
+    if (regcomp(&regComp, UDID_REGEX_PATTERN, REG_EXTENDED | REG_NOSUB) != 0) {
+        ALOGE("get trusted dev udid regcomp fail");
+        SoftBusFree(udidArray);
+        return true;
+    }
+    for (uint32_t i = 0; i < num; i++) {
+        char udidSubStr[UDID_BUF_LEN] = {0};
+        char hashStr[CUST_UDID_LEN + 1] = {0};
+        uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+        if (regexec(&regComp, udidArray + i * UDID_BUF_LEN, 0, NULL, 0) != 0) {
+            continue;
+        }
+        if (memcpy_s(udidSubStr, UDID_BUF_LEN, udidArray + i * UDID_BUF_LEN, UDID_BUF_LEN) != EOK) {
+            ALOGE("memcpy_s udidSubStr fail");
+            break;
+        }
+        if (SoftBusGenerateStrHash((const unsigned char *)udidSubStr, strlen(udidSubStr), udidHash) != SOFTBUS_OK) {
+            continue;
+        }
+        if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash,
+            CUST_UDID_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+            continue;
+        }
+        if (strncmp(hashStr, deviceId, strlen(deviceId)) == 0) {
+            SoftBusFree(udidArray);
+            regfree(&regComp);
+            return true;
+        }
+    }
+    SoftBusFree(udidArray);
+    regfree(&regComp);
+    return false;
 }
 
 uint32_t HichainGetJoinedGroups(int32_t groupType)

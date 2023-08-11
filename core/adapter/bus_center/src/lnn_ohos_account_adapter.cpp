@@ -20,6 +20,7 @@
 #include "softbus_log.h"
 
 #define ACCOUNT_STRTOLL_BASE 10
+#define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 {
@@ -42,6 +43,10 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     *len = accountInfo.second.name_.length();
     LLOGI("uid:%s len:%d", accountInfo.second.name_.c_str(), *len);
 
+    if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
+        LLOGE("not login account");
+        return SOFTBUS_ERR;
+    }
     if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
         LLOGE("memcpy_s uid failed, idLen:%d len:%d", idLen, *len);
         return SOFTBUS_ERR;
@@ -63,6 +68,11 @@ int64_t GetCurrentAccount(void)
     }
 
     LLOGI("name_:%s", accountInfo.second.name_.c_str());
+    if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(),
+        accountInfo.second.name_.length()) == 0) {
+        LLOGE("not login account");
+        return 0;
+    }
     int64_t account = strtoll(accountInfo.second.name_.c_str(), nullptr, ACCOUNT_STRTOLL_BASE);
     if (account == 0) {
         LLOGE("strtoll failed");

@@ -39,6 +39,20 @@ bool LnnIsDefaultOhosAccount()
     return BusCenterMock::GetMock()->LnnIsDefaultOhosAccount();
 }
 
+int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
+{
+    return BusCenterMock::GetMock()->LnnEncryptDataByHuks(keyAlias, inData, outData);
+}
+
+int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
+{
+    return BusCenterMock::GetMock()->LnnDecryptDataByHuks(keyAlias, inData, outData);
+}
+
+int32_t LnnGenerateRandomByHuks(uint8_t *randomKey, uint32_t len)
+{
+    return BusCenterMock::GetMock()->LnnGenerateRandomByHuks(randomKey, len);
+}
 /* definition for class BusCenterMock */
 BusCenterMock::BusCenterMock()
 {
