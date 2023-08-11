@@ -1390,6 +1390,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_interface.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_file_utils.c",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/bus_center_mock.cpp",
     "disc_mgr/disc_manager_mock.cpp",
     "disc_mgr/lnn_discovery_interface_test.cpp",

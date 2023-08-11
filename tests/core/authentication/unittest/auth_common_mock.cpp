@@ -81,5 +81,10 @@ int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen)
 {
     return GetCommonInterface()->LnnDecryptAesGcm(in, out, outLen);
 }
+
+int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+{
+    return GetCommonInterface()->LnnGetTrustedDevInfoFromDb(udidArray, num);
+}
 }
 } // namespace OHOS

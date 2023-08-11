@@ -22,6 +22,7 @@
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
+#include "lnn_huks_utils.h"
 
 class BusCenterInterface {
 public:
@@ -29,6 +30,11 @@ public:
     virtual int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual bool LnnIsDefaultOhosAccount() = 0;
+    virtual int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias,
+        const struct HksBlob *inData, struct HksBlob *outData) = 0;
+    virtual int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias,
+        const struct HksBlob *inData, struct HksBlob *outData) = 0;
+    virtual int32_t LnnGenerateRandomByHuks(uint8_t *randomKey, uint32_t len) = 0;
 };
 
 class BusCenterMock : public BusCenterInterface {
@@ -45,7 +51,11 @@ public:
     MOCK_METHOD(int32_t, LnnConvertDeviceTypeToId, (const char *deviceType, uint16_t *typeId), (override));
     MOCK_METHOD(int32_t, LnnGetLocalByteInfo, (InfoKey key, uint8_t *info, uint32_t len), (override));
     MOCK_METHOD(bool, LnnIsDefaultOhosAccount, (), (override));
-
+    MOCK_METHOD(int32_t, LnnEncryptDataByHuks, (const struct HksBlob *keyAlias,
+        const struct HksBlob *inData, struct HksBlob *outData), (override));
+    MOCK_METHOD(int32_t, LnnDecryptDataByHuks, (const struct HksBlob *keyAlias,
+        const struct HksBlob *inData, struct HksBlob *outData), (override));
+    MOCK_METHOD(int32_t, LnnGenerateRandomByHuks, (uint8_t *randomKey, uint32_t len), (override));
     void SetupSuccessStub();
 
     static int32_t ActionOfLnnGetLocalStrInfo(InfoKey key, char *out, uint32_t outSize);
