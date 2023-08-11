@@ -422,6 +422,7 @@ ohos_unittest("LNNNetBuilderMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
@@ -945,6 +946,7 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -965,6 +967,7 @@ ohos_unittest("LNNLedgerMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
@@ -1539,11 +1542,9 @@ group("unittest") {
     ":LNNIpNetworkImplMockTest",
     ":LNNLaneLinkMockTest",
     ":LNNLaneMockTest",
-
-    # ":LNNLedgerMockTest",
+    ":LNNLedgerMockTest",
     ":LNNMetaNodeLedgerTest",
-
-    # ":LNNNetBuilderMockTest",
+    ":LNNNetBuilderMockTest",
     ":LNNNetBuilderTest",
     ":LNNNetLedgerCommonTest",
     ":LNNNetworkInfoTest",
