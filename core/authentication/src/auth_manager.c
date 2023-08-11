@@ -37,6 +37,8 @@
 #define BLE_CONNECTION_CLOSE_DELAY         (10 * 1000L)
 #define FLAG_REPLY 1
 #define FLAG_ACTIVE 0
+#define RETRY_REGDATA_TIMES    3
+#define RETRY_REGDATA_MILLSECONDS    300
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
@@ -44,6 +46,8 @@ static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
 static AuthVerifyListener g_verifyListener = { 0 };
 static GroupChangeListener g_groupChangeListener = { 0 };
 static AuthTransCallback g_transCallback = { 0 };
+static bool g_regDataChangeListener = false;
+
 /* Auth Manager */
 NO_SANITIZE("cfi") AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
 {
@@ -581,12 +585,40 @@ NO_SANITIZE("cfi") static void OnDeviceBound(const char *udid, const char *group
     }
 }
 
+static int32_t RetryRegTrustDataChangeListener()
+{
+    TrustDataChangeListener trustListener = {
+        .onGroupCreated = OnGroupCreated,
+        .onGroupDeleted = OnGroupDeleted,
+        .onDeviceNotTrusted = OnDeviceNotTrusted,
+        .onDeviceBound = OnDeviceBound,
+    };
+    for (int32_t i = 1; i <= RETRY_REGDATA_TIMES; i++) {
+        int32_t ret = RegTrustDataChangeListener(&trustListener);
+        if (ret == SOFTBUS_OK) {
+            ALOGI("hichain regDataChangeListener success, times = %d", i);
+            return SOFTBUS_OK;
+        }
+        ALOGW("hichain retry regDataChangeListener, current retry times = %d, err = %d", i, ret);
+        (void)SoftBusSleepMs(RETRY_REGDATA_MILLSECONDS);
+    }
+    return SOFTBUS_ERR;
+}
+
 static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
     const AuthConnCallback *connCb, bool isFastAuth)
 {
     int64_t traceId = GenSeq(false);
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)traceId);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "start verify device: requestId=%u.", requestId);
+    if (!g_regDataChangeListener) {
+        if (RetryRegTrustDataChangeListener() != SOFTBUS_OK) {
+            ALOGE("hichain regDataChangeListener failed.");
+            SoftbusHitraceStop();
+            return SOFTBUS_AUTH_INIT_FAIL;
+        }
+        g_regDataChangeListener = true;
+    }
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     if (connCb != NULL) {
@@ -1569,10 +1601,10 @@ NO_SANITIZE("cfi") int32_t AuthDeviceInit(const AuthTransCallback *callback)
     };
     if (RegTrustDataChangeListener(&trustListener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "RegTrustDataChangeListener fail.");
-        AuthConnDeinit();
-        AuthCommonDeinit();
+        g_regDataChangeListener = false;
         return SOFTBUS_AUTH_INIT_FAIL;
     }
+    g_regDataChangeListener = true;
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth init succ.");
     return SOFTBUS_OK;
 }
