@@ -60,6 +60,8 @@ public:
         uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual void AuthHandleLeaveLNN(int64_t authId) = 0;
+    virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target,
+        const char *pkgName, bool isNeedConnect);
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info);
     virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info);
@@ -140,8 +142,6 @@ public:
     virtual int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
     virtual void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
-    virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target,
-        const char *pkgName, bool isNeedConnect);
     virtual int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
     virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
     virtual int32_t LnnInitFastOffline(void);
@@ -236,7 +236,7 @@ public:
     MOCK_METHOD1(LnnSendJoinRequestToConnFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD3(LnnNotifyJoinResult, void (ConnectionAddr *, const char *, int32_t));
     MOCK_METHOD1(LnnDestroyConnectionFsm, void (LnnConnectionFsm *));
-    MOCK_METHOD3(LnnCreateConnectionFsm, LnnConnectionFsm * (const ConnectionAddr *, const char *, bool));
+    MOCK_METHOD3(LnnCreateConnectionFsm, LnnConnectionFsm * (const ConnectionAddr *target, const char *pkgName, bool isNeedConnect));
     MOCK_METHOD1(LnnStartConnectionFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD3(LnnNotifyMasterNodeChanged, void (bool, const char*, int32_t));
     MOCK_METHOD0(LnnInitFastOffline, int32_t ());
