@@ -1533,15 +1533,12 @@ group("unittest") {
     ":LNNIpNetworkImplMockTest",
     ":LNNLaneLinkMockTest",
     ":LNNLaneMockTest",
-
     ":LNNLedgerMockTest",
     ":LNNMetaNodeLedgerTest",
-
     ":LNNNetBuilderMockTest",
     ":LNNNetBuilderTest",
     ":LNNNetLedgerCommonTest",
     ":LNNNetworkInfoTest",
-
     ":LNNNetworkManagerMockTest",
     ":LNNNodeWeightTest",
     ":LNNP2pInfoTest",
