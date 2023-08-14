@@ -75,7 +75,8 @@ static void CreateDataShareHelperInstance(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance remoteObject NULL");
         return;
     }
-    g_dataShareHelper =  DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI, SETTINGS_DATA_EXT_URI);
+    g_dataShareHelper =  DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI,
+        SETTINGS_DATA_EXT_URI);
     if (g_dataShareHelper == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance create fail.");
         return;
