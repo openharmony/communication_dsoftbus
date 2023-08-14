@@ -1556,9 +1556,8 @@ static int32_t PickIntersectionFrequency(int32_t *gcChannelArray, size_t gcChann
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
 
     for (size_t i = 0; i < goChannelArraySize; i++) {
-        if (netWorkUtils->isInChannelList(goChannelArray[goChannelArraySize - i - 1], gcChannelArray,
-                                          gcChannelArraySize)) {
-            return netWorkUtils->channelToFrequency(goChannelArray[goChannelArraySize - i - 1]);
+        if (netWorkUtils->isInChannelList(goChannelArray[i], gcChannelArray, gcChannelArraySize)) {
+            return netWorkUtils->channelToFrequency(goChannelArray[i]);
         }
     }
 
