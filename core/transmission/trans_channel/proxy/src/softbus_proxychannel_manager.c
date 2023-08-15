@@ -19,9 +19,13 @@
 
 #include "auth_interface.h"
 #include "auth_manager.h"
+#include "auth_session_fsm.h"
+#include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "data_bus_native.h"
+#include "lnn_lane_link.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -39,12 +43,8 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 #include "trans_channel_limit.h"
-#include "trans_pending_pkt.h"
 #include "trans_channel_manager.h"
-#include "auth_session_fsm.h"
-#include "data_bus_native.h"
-#include "bus_center_event.h"
-#include "lnn_lane_link.h"
+#include "trans_pending_pkt.h"
 #include "trans_session_manager.h"
 
 #define ID_OFFSET (1)
