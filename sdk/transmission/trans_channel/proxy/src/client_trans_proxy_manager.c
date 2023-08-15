@@ -508,7 +508,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc dataLen[%d] inputLen[%d]", head->dataLen,
-        data);
+        len);
     if (head->dataLen + sizeof(PacketHead) != len) {
         return SOFTBUS_ERR;
     }
