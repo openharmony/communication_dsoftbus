@@ -216,6 +216,7 @@ typedef enum {
  *
  */
 typedef enum  {
+    BLE_PROTOCOL_ANY = -1,
     BLE_GATT = 0,
     BLE_COC,
     BLE_PROTOCOL_MAX

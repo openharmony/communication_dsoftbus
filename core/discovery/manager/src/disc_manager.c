@@ -401,7 +401,7 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
     option->dataLen = info->dataLen;
 
     if (info->dataLen != 0) {
-        option->capabilityData = (uint8_t *)SoftBusCalloc(info->dataLen + 1);
+        option->capabilityData = (uint8_t *)SoftBusCalloc(info->dataLen);
         if (option->capabilityData == NULL) {
             DLOGE("alloc capability data failed");
             SoftBusFree(infoNode);
@@ -440,7 +440,7 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
     option->isWakeRemote = info->isWakeRemote;
 
     if (info->dataLen != 0) {
-        option->capabilityData = (uint8_t *)SoftBusCalloc(info->dataLen + 1);
+        option->capabilityData = (uint8_t *)SoftBusCalloc(info->dataLen);
         if (option->capabilityData == NULL) {
             DLOGE("alloc capability data failed");
             SoftBusFree(infoNode);

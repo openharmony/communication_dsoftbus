@@ -366,9 +366,10 @@ static void AttempReuseConnect(ConnBleDevice *device, DeviceAction actionIfAbsen
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, device->udid);
 
-    ConnBleConnection *udidConnection = ConnBleGetConnectionByUdid(device->addr, device->udid, device->protocol);
-    ConnBleConnection *clientConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_CLIENT, device->protocol);
-    ConnBleConnection *serverConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_SERVER, device->protocol);
+    // ignore protocol type
+    ConnBleConnection *udidConnection = ConnBleGetConnectionByUdid(device->addr, device->udid, BLE_PROTOCOL_ANY);
+    ConnBleConnection *clientConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_CLIENT, BLE_PROTOCOL_ANY);
+    ConnBleConnection *serverConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_SERVER, BLE_PROTOCOL_ANY);
     if (udidConnection == NULL && clientConnection == NULL && serverConnection == NULL) {
         if (BleCheckPreventing(device->udid)) {
             CLOGI("ble manager reject connect request as udid is in prevent list, address=%s, udid=%s", anomizeAddress,
@@ -743,8 +744,7 @@ static void BleServerAccepted(uint32_t connectionId)
     ConnBleDevice *it = NULL;
     ConnBleDevice *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_bleManager.waitings, ConnBleDevice, node) {
-        if (it->protocol == connection->protocol &&
-            (StrCmpIgnoreCase(it->addr, connection->addr) == 0 || IsSameDevice(it->udid, connection->udid))) {
+        if ((StrCmpIgnoreCase(it->addr, connection->addr) == 0 || IsSameDevice(it->udid, connection->udid))) {
             if (BleReuseConnection(it, connection)) {
                 ListDelete(&it->node);
                 FreeDevice(it);
@@ -955,7 +955,8 @@ static void BleReuseConnectionRequestOnConnectingState(const ConnBleReuseConnect
         return;
     }
 
-    if (ctx->protocol != g_bleManager.connecting->protocol || !IsSameDevice(ctx->udid, g_bleManager.connecting->udid)) {
+    if ((BleProtocolType)ctx->protocol != g_bleManager.connecting->protocol ||
+        !IsSameDevice(ctx->udid, g_bleManager.connecting->udid)) {
         ctx->waitResult->result = SOFTBUS_ERR;
         sem_post(&ctx->waitResult->wait);
         return;
@@ -1116,7 +1117,8 @@ static bool ConnectionCompareByAddress(ConnBleConnection *connection, const BleC
 {
     return StrCmpIgnoreCase(connection->addr, option->addressOption.addr) == 0 &&
         (option->addressOption.side == CONN_SIDE_ANY ? true : connection->side == option->addressOption.side) &&
-        connection->protocol == option->addressOption.protocol;
+        ((BleProtocolType)option->addressOption.protocol == BLE_PROTOCOL_ANY ? true :
+            connection->protocol == option->addressOption.protocol);
 }
 
 static bool ConnectionCompareByUnderlayHandle(ConnBleConnection *connection, const BleConnectionCompareOption *option)
@@ -1125,7 +1127,8 @@ static bool ConnectionCompareByUnderlayHandle(ConnBleConnection *connection, con
         (option->underlayerHandleOption.side == CONN_SIDE_ANY ?
                 true :
                 connection->side == option->underlayerHandleOption.side) &&
-        connection->protocol == option->underlayerHandleOption.protocol;
+        ((BleProtocolType)option->underlayerHandleOption.protocol == BLE_PROTOCOL_ANY ? true :
+        connection->protocol == option->underlayerHandleOption.protocol);
 }
 
 static bool ConnectionCompareByUdidDiffAddress(ConnBleConnection *connection, const BleConnectionCompareOption *option)
@@ -1133,14 +1136,16 @@ static bool ConnectionCompareByUdidDiffAddress(ConnBleConnection *connection, co
     ConnBleInnerComplementDeviceId(connection);
     return StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0 &&
         IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
-        connection->protocol == option->udidAddressOption.protocol;
+        ((BleProtocolType)option->udidAddressOption.protocol == BLE_PROTOCOL_ANY ? true :
+        connection->protocol == option->udidAddressOption.protocol);
 }
 
 static bool ConnectionCompareByUdidClientSide(ConnBleConnection *connection, const BleConnectionCompareOption *option)
 {
     ConnBleInnerComplementDeviceId(connection);
     return connection->side == CONN_SIDE_CLIENT && IsSameDevice(connection->udid, option->udidClientOption.udid) &&
-        connection->protocol == option->udidClientOption.protocol;
+        ((BleProtocolType)option->udidClientOption.protocol == BLE_PROTOCOL_ANY ? true :
+        connection->protocol == option->udidClientOption.protocol);
 }
 
 static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption *option)
@@ -1539,6 +1544,12 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     return SOFTBUS_OK;
 }
 
+static int32_t ConnBlePostBytes(
+    uint32_t connectionId, uint8_t *data, uint32_t dataLen, int32_t pid, int32_t flag, int32_t module, int64_t seq)
+{
+    return ConnBlePostBytesInner(connectionId, data, dataLen, pid, flag, module, seq, NULL);
+}
+
 static int32_t BleDisconnectDevice(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
@@ -1696,7 +1707,7 @@ void OnConnectionResume(uint32_t connectionId)
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_RESUME, connectionId, 0, NULL, 0);
 }
 
-void OnPostByteFinshed(
+void onPostBytesFinished(
     uint32_t connectionId, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, int32_t error)
 {
     CLOGI("ble post bytes finished, connection id=%u, pid=%u, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64
@@ -1843,7 +1854,8 @@ static bool ConflictPostBytes(int32_t underlayHandle, uint8_t *data, uint32_t da
         SoftBusFree(payload);
         return false;
     }
-    return ConnBlePostBytes(connectionId, payload, payloadLen, 0, 0, MODULE_OLD_NEARBY, seq) == SOFTBUS_OK;
+    return ConnBlePostBytesInner(connectionId, payload, payloadLen, 0, 0, MODULE_OLD_NEARBY, seq,
+        NULL) == SOFTBUS_OK;
 }
 
 static void ConflictDisconnect(int32_t handle, bool isForce)
@@ -2048,7 +2060,7 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         status == SOFTBUS_OK, NULL, "conn init ble failed: init ble connection mudule failed, error=%d", status);
 
     ConnBleTransEventListener transEventListener = {
-        .onPostByteFinshed = OnPostByteFinshed,
+        .onPostBytesFinished = onPostBytesFinished,
     };
     status = ConnBleInitTransModule(&transEventListener);
     CONN_CHECK_AND_RETURN_RET_LOG(
