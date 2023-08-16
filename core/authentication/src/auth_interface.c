@@ -319,7 +319,7 @@ NO_SANITIZE("cfi") int32_t AuthGetGroupType(const char *udid, const char *uuid)
     return type;
 }
 
-NO_SANITIZE("cfi") bool AuthIsPotentialTrusted(const DeviceInfo *device)
+NO_SANITIZE("cfi") bool AuthIsPotentialTrusted(const DeviceInfo *device, bool validAccount)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
     DeviceInfo defaultInfo;
@@ -327,30 +327,28 @@ NO_SANITIZE("cfi") bool AuthIsPotentialTrusted(const DeviceInfo *device)
 
     if (device == NULL) {
         ALOGE("device is null");
+        return false;
+    }
+    if (memcmp(device->devId, defaultInfo.devId, SHA_256_HASH_LEN) == 0) {
+        ALOGI("devId is empty");
+        return false;
+    }
+    if (!validAccount) {
+        return true;
+    }
+    if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false)) {
+        ALOGI("device is potential trusted, continue verify progress");
         return true;
     }
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         ALOGE("get local accountHash fail");
-        return true;
-    }
-    if (memcmp(device->accountHash, defaultInfo.accountHash, SHORT_ACCOUNT_HASH_LEN) == 0) {
-        ALOGD("accountHash is empty, continue verify progress");
-        return true;
-    }
-    if (memcmp(device->devId, defaultInfo.devId, SHA_256_HASH_LEN) == 0) {
-        ALOGD("devId is empty, continue verify progress");
-        return true;
+        return false;
     }
     if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
         ALOGD("account:%02X%02X is same, continue verify progress", device->accountHash[0], device->accountHash[1]);
         return true;
     }
-    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false) && !LnnIsPotentialHomeGroup(device->devId)) {
-        ALOGD("device is not potential trusted, udidHash:%s, accountHash:%02X%02X",
-            AnonymizesUDID(device->devId), device->accountHash[0], device->accountHash[1]);
-        return false;
-    }
-    return true;
+    return false;
 }
 
 NO_SANITIZE("cfi") TrustedReturnType AuthHasTrustedRelation(void)

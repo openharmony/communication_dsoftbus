@@ -437,6 +437,11 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     pid_t callingUid;
     pid_t callingPid;
     const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CreateSessionServerInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+
     const char *sessionName = data.ReadCString();
     uint32_t code = SERVER_CREATE_SESSION_SERVER;
     SoftbusRecordCalledApiInfo(pkgName, code);
@@ -473,6 +478,11 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
     pid_t callingUid;
     pid_t callingPid;
     const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveSessionServerInner read pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+
     const char *sessionName = data.ReadCString();
     uint32_t code = SERVER_REMOVE_SESSION_SERVER;
     SoftbusRecordCalledApiInfo(pkgName, code);

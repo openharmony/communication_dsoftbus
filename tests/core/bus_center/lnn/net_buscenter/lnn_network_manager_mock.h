@@ -20,6 +20,10 @@
 #include <mutex>
 
 #include "bus_center_event.h"
+#include "disc_interface.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_async_callback_utils.h"
+#include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
 #include "softbus_config_type.h"
@@ -36,6 +40,16 @@ public:
     virtual int32_t LnnStartDiscovery(void) = 0;
     virtual void SetCallLnnStatus(bool flag) = 0;
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium) = 0;
+    virtual void LnnStopPublish(void) = 0;
+    virtual int32_t LnnStartPublish(void) = 0;
+    virtual void LnnUpdateOhosAccount(void) = 0;
+    virtual void LnnOnOhosAccountLogout(void) = 0;
+    virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect) = 0;
+    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+        void *para, uint64_t delayMillis) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -49,6 +63,15 @@ public:
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
     MOCK_METHOD1(SetCallLnnStatus, void (bool));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
+    MOCK_METHOD2(DiscLinkStatusChanged, void (LinkStatus, ExchangeMedium));
+    MOCK_METHOD0(LnnStopPublish, void (void));
+    MOCK_METHOD0(LnnStartPublish, int32_t (void));
+    MOCK_METHOD0(LnnUpdateOhosAccount, void (void));
+    MOCK_METHOD0(LnnOnOhosAccountLogout, void (void));
+    MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
+    MOCK_METHOD2(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, bool));
+    MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t (const bool *, uint32_t));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H

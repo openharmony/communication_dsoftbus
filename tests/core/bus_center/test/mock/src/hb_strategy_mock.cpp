@@ -66,5 +66,22 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
 {
     return HeartBeatStrategyInterface()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);
 }
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+{
+    return HeartBeatStrategyInterface()->LnnRequestLeaveSpecific(networkId, addrType);
+}
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+    const AuthVerifyCallback *callback, bool isFastAuth)
+{
+    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
+}
+AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
+{
+    return HeartBeatStrategyInterface()->LnnGetReAuthVerifyCallback();
+}
+uint32_t AuthGenRequestId(void)
+{
+    return HeartBeatStrategyInterface()->AuthGenRequestId();
+}
 }
 } // namespace OHOS

@@ -432,6 +432,30 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalDeviceInfo(info);
 }
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetNetLedgerInterface()->LnnGetLocalByteInfo(key, info, len);
+}
+bool LnnIsDefaultOhosAccount()
+{
+    return GetNetLedgerInterface()->LnnIsDefaultOhosAccount();
+}
+bool LnnIsPotentialHomeGroup(const char *udid)
+{
+    return GetNetLedgerInterface()->LnnIsPotentialHomeGroup(udid);
+}
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetNetLedgerInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise)
+{
+    return GetNetLedgerInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise);
+}
+int32_t LnnRegisterBleLpDeviceMediumMgr(void)
+{
+    return GetNetLedgerInterface()->LnnRegisterBleLpDeviceMediumMgr();
+}
 
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
