@@ -29,7 +29,7 @@
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE   0x200000 // 2M
 #define RECV_BUF_SIZE   0x100000 // 1M
-#define USER_TIMEOUT_MS 500000   // 500000us
+#define USER_TIMEOUT_MS 2000000   // 2000000us
 
 static const SocketInterface *g_socketInterfaces[MAX_SOCKET_TYPE] = { 0 };
 static SoftBusMutex g_socketsMutex;
