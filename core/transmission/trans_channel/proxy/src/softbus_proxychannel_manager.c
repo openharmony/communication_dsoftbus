@@ -1107,6 +1107,9 @@ NO_SANITIZE("cfi") void TransProxyProcessDataRecv(const ProxyMessage *msg)
 
 NO_SANITIZE("cfi") void TransProxyonMessageReceived(const ProxyMessage *msg)
 {
+    if (msg == NULL) {
+        return;
+    }
     switch (msg->msgHead.type) {
         case PROXYCHANNEL_MSG_TYPE_HANDSHAKE: {
             TransProxyProcessHandshakeMsg(msg);
