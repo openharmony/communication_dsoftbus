@@ -218,6 +218,39 @@ HWTEST_F(AuthOtherTest, ON_WIFI_DATA_RECEIVED_TEST_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: ON_WIFI_CONNECTED_TEST_001
+ * @tc.desc: on wifi connected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
+{
+    int32_t fd = 0;
+    AuthDataHead head;
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
+
+    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    OnWiFiConnected(AUTH, fd, false);
+    OnWiFiConnected(AUTH, fd, true);
+}
+
+/*
+ * @tc.name: ON_WIFI_CONNECTED_TEST_001
+ * @tc.desc: on wifi connected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
+{
+    int32_t fd = 0;
+    AuthConnListener *listener
+    (void)memset_s(&listener, sizeof(AuthConnListener), 0, sizeof(AuthConnListener));
+    ret = AuthConnInit(&listener);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    OnWiFiDisconnected(fd);
+}
+
+/*
  * @tc.name: ON_COMM_DISCONNECTED_TEST_001
  * @tc.desc: on comm disconnected test
  * @tc.type: FUNC
@@ -522,6 +555,43 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
     int32_t ret = PostCloseAckMessage(authSeq, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostCloseAckMessage(authSeq, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: UN_PACK_AUTH_DATA_TEST_001
+ * @tc.desc: un pack auth data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, UN_PACK_AUTH_DATA_TEST_001, TestSize.Level1)
+{
+    AuthDataHead head;
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
+
+    (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
+    uint8_t ret = UnpackAuthData(data, AUTH_CONN_DATA_HEAD_SIZE - 1, &head);
+    EXPECT_TRUE(ret == NULL);
+    ret = UnpackAuthData(data, AUTH_CONN_DATA_HEAD_SIZE, &head);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: PACK_AUTH_DATA_TEST_001
+ * @tc.desc: pack auth data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
+{
+    AuthDataHead head;
+    uint8_t *buf;
+    const uint8_t data[TEST_DATA_LEN] = { 0 };
+
+    (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
+    int32_t ret = PackAuthData(&head, data, buf, AUTH_CONN_DATA_HEAD_SIZE - 1);
+    EXPECT_TRUE(ret == NULL);
+    ret = PackAuthData(&head, data, buf, AUTH_CONN_DATA_HEAD_SIZE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS
