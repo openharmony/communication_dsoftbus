@@ -62,4 +62,3 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* co
 }
 #endif /* __cplusplus */
 #endif
-

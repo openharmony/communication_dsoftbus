@@ -236,6 +236,7 @@ NO_SANITIZE("cfi") static void InnerDeviceFound(DiscInfo *infoNode, const Device
     }
 
     if (GetCallLnnStatus()) {
+        DLOGI("call from inner module.");
         if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
             DfxRecordDeviceFound(infoNode, device, additions);
             infoNode->item->callback.innerCb.OnDeviceFound(device, additions);

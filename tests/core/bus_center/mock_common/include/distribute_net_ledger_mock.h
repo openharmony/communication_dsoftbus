@@ -31,6 +31,7 @@ public:
     virtual int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, const uint64_t timestamp) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
 };
 class DistributeLedgerInterfaceMock : public DistributeLedgerInterface {
@@ -43,6 +44,7 @@ public:
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t(const char *, InfoKey, char *, uint32_t));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
+    MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t(const char *networkId, InfoKey key, uint64_t *info));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

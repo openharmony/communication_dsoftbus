@@ -19,19 +19,19 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "softbus_message_open_channel.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_def.h"
+#include "softbus_datahead_transform.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
+#include "softbus_message_open_channel.h"
+#include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
-#include "softbus_datahead_transform.h"
-#include "softbus_adapter_socket.h"
-#include "softbus_proxychannel_callback.h"
 
 static int g_proxyPktHeadSeq = 2048;
 

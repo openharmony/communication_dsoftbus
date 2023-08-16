@@ -453,12 +453,12 @@ NO_SANITIZE("cfi") static int32_t TcpOpenClientSocketErr(const ConnectOption *op
     ConnectStatistics *statistics, const ConnectResult *result)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClient failed.");
-        result->OnConnectFailed(requestId, SOFTBUS_ERR);
-        statistics->reqId = requestId;
-        DfxRecordTcpConnectFail(
-            DEFAULT_PID, (ConnectOption *)option, NULL, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
-        SoftBusFree(statistics);
-        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+    result->OnConnectFailed(requestId, SOFTBUS_ERR);
+    statistics->reqId = requestId;
+    DfxRecordTcpConnectFail(
+        DEFAULT_PID, (ConnectOption *)option, NULL, statistics, SOFTBUS_HISYSEVT_TCP_CONNECTION_SOCKET_ERR);
+    SoftBusFree(statistics);
+    return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
 }
 
 NO_SANITIZE("cfi") int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
