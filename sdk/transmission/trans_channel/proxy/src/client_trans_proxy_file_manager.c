@@ -1671,7 +1671,7 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t seq = frame->seq;
-    if (seq >= fileInfo->startSeq + FILE_SEND_ACK_INTERVAL) {
+    if (seq < 1 || seq >= fileInfo->startSeq + FILE_SEND_ACK_INTERVAL) {
         return SOFTBUS_ERR;
     }
     uint64_t fileOffset = 0;
