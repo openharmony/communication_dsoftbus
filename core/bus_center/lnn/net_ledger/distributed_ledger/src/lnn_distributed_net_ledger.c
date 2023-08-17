@@ -1355,6 +1355,33 @@ static void FilterBrInfo(NodeInfo *info)
 static void BleDirectlyOnlineProc(NodeInfo *info)
 {
     if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+        NodeInfo deviceInfo = {0};
+        uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+        char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+        if (SoftBusGenerateStrHash((const unsigned char *)info->deviceInfo.deviceUdid,
+            strlen(info->deviceInfo.deviceUdid), udidHash) != SOFTBUS_OK) {
+            LLOGE("generate udidhash fail");
+            return;
+        }
+        if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1, udidHash,
+            SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+            LLOGE("convert udidhash to hexstr fail");
+            return;
+        }
+        if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+            LLOGE("get deviceInfo by udidhash fail");
+            return;
+        }
+        LLOGI("old networkId=%s, new networkid=%s", AnonymizesNetworkID(deviceInfo.networkId),
+            AnonymizesNetworkID(info->networkId));
+        if (strcpy_s(deviceInfo.networkId, sizeof(deviceInfo.networkId), info->networkId) != EOK) {
+            LLOGE("strcpy_s networkId fail");
+            return;
+        }
+        if(LnnSaveRemoteDeviceInfo(&deviceInfo) != SOFTBUS_OK) {
+            LLOGE("save remote devInfo fail");
+            return;
+        }
         return;
     }
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI)) {

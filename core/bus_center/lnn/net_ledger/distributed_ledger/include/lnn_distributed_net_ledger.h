@@ -27,6 +27,7 @@ extern "C" {
 #define INT_TO_STR_SIZE 12
 #define INVALID_CONNECTION_CODE_VALUE -1
 #define SHORT_UDID_HASH_LEN 8
+#define SHORT_UDID_HASH_HEX_LEN 16
 typedef struct {
     InfoKey key;
     int32_t (*getInfo)(const char *netWorkId, void *info, uint32_t len);
