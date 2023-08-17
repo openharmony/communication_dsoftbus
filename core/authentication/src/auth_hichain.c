@@ -297,3 +297,8 @@ NO_SANITIZE("cfi") void HichainDestroy(void)
     DestroyDeviceAuth();
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain destroy succ.");
 }
+
+NO_SANITIZE("cfi") void HichainCancelRequest(int64_t authReqId)
+{
+    CancelRequest(authReqId, AUTH_APPID);
+}
