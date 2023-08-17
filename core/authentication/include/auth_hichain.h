@@ -43,6 +43,7 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid);
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len);
 uint32_t HichainGetJoinedGroups(int32_t groupType);
 
+void HichainCancelRequest(int64_t authReqId);
 void HichainDestroy(void);
 
 #ifdef __cplusplus
