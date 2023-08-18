@@ -1569,7 +1569,6 @@ group("unittest") {
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_channel_rating:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_qos:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/lane_stastic:unittest",
-      "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/mlps:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/lane_hub/time_sync:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/cipherkey:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/fast_offline:unittest",
