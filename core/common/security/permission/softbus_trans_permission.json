@@ -18,7 +18,7 @@
     "SEC_LEVEL": "public",
     "APP_INFO": [
       {
-        "TYPE": "normal_app",
+        "TYPE": "system_app",
         "PKG_NAME": "ohos.distributeddata",
         "ACTIONS": "create,open"
       }
