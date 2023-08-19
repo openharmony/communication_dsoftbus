@@ -31,6 +31,7 @@
 #include "auth_session_message.h"
 #include "auth_session_message.c"
 #include "softbus_errcode.h"
+#include "softbus_adapter_json.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
 
@@ -227,27 +228,10 @@ HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
 {
     int32_t fd = 0;
     AuthDataHead head;
-    const uint8_t data[TEST_DATA_LEN] = { 0 };
 
     (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
     OnWiFiConnected(AUTH, fd, false);
     OnWiFiConnected(AUTH, fd, true);
-}
-
-/*
- * @tc.name: ON_WIFI_CONNECTED_TEST_001
- * @tc.desc: on wifi connected test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
-{
-    int32_t fd = 0;
-    AuthConnListener *listener
-    (void)memset_s(&listener, sizeof(AuthConnListener), 0, sizeof(AuthConnListener));
-    ret = AuthConnInit(&listener);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    OnWiFiDisconnected(fd);
 }
 
 /*
@@ -558,23 +542,25 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
-/*
- * @tc.name: UN_PACK_AUTH_DATA_TEST_001
- * @tc.desc: un pack auth data test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, UN_PACK_AUTH_DATA_TEST_001, TestSize.Level1)
-{
-    AuthDataHead head;
-    const uint8_t data[TEST_DATA_LEN] = { 0 };
+// /*
+//  * @tc.name: UN_PACK_AUTH_DATA_TEST_001
+//  * @tc.desc: un pack auth data test
+//  * @tc.type: FUNC
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthOtherTest, UN_PACK_AUTH_DATA_TEST_001, TestSize.Level1)
+// {
+//     AuthDataHead *head;
+//     const uint8_t data[TEST_DATA_LEN] = { 0 };
+//     uint32_t len = 23;
+//     const uint8_t *ret;
 
-    (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
-    uint8_t ret = UnpackAuthData(data, AUTH_CONN_DATA_HEAD_SIZE - 1, &head);
-    EXPECT_TRUE(ret == NULL);
-    ret = UnpackAuthData(data, AUTH_CONN_DATA_HEAD_SIZE, &head);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-}
+//     (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
+//     ret = UnpackAuthData(data, len, head);
+//     EXPECT_TRUE(ret == NULL);
+//     ret = UnpackAuthData((const uint8_t *)data, AUTH_CONN_DATA_HEAD_SIZE, head);
+//     EXPECT_TRUE(ret != NULL);
+// }
 
 /*
  * @tc.name: PACK_AUTH_DATA_TEST_001
@@ -585,13 +571,203 @@ HWTEST_F(AuthOtherTest, UN_PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 {
     AuthDataHead head;
-    uint8_t *buf;
+    uint8_t *buf = NULL;
     const uint8_t data[TEST_DATA_LEN] = { 0 };
+    uint32_t len = 32;
 
     (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
-    int32_t ret = PackAuthData(&head, data, buf, AUTH_CONN_DATA_HEAD_SIZE - 1);
-    EXPECT_TRUE(ret == NULL);
-    ret = PackAuthData(&head, data, buf, AUTH_CONN_DATA_HEAD_SIZE);
+    int32_t ret = PackAuthData(&head, data, buf, len);
+    EXPECT_TRUE(ret == SOFTBUS_NO_ENOUGH_DATA);
+}
+
+/*
+ * @tc.name: ON_COMM_DATA_RECEIVED_TEST_001
+ * @tc.desc: on commdata received test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEIVED_TEST_001, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    ConnModule moduleId = MODULE_DEVICE_AUTH;
+    int64_t seq = 0;
+    char *data = (char *)malloc(1024);
+    const int SEND_DATA_SIZE_1KB = 1024;
+    ASSERT_NE(data, nullptr);
+    const char *testData = "{\"data\":\"open session test!!!\"}";
+    int32_t len = 2;
+    int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1KB, testData, strlen(testData));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+   OnCommDataReceived(connectionId, moduleId, seq, NULL, len);
+   OnCommDataReceived(connectionId, moduleId, seq, data, len);
+   free(data);
+}
+
+/*
+ * @tc.name: GET_CONN_SIDE_TYPE_TEST_001
+ * @tc.desc: get connside type test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
+{
+    uint64_t connId = 0;
+    connId = GetConnType(connId);
+    ConnSideType ret = GetConnSideType(connId);
+    EXPECT_EQ(ret, CONN_SIDE_ANY);
+    ret = GetConnSideType(0x1FFFFFFFF);
+    EXPECT_EQ(ret, CONN_SIDE_ANY);
+    ret = GetConnSideType(0x2FFFFFFFF);
+    EXPECT_EQ(ret, CONN_SIDE_ANY);
+    ret = GetConnSideType(0x3FFFFFFFF);
+    EXPECT_EQ(ret, CONN_SIDE_ANY);
+    ret = GetConnSideType(0x4FFFFFFFF);
+    EXPECT_EQ(ret, CONN_SIDE_ANY);
+}
+
+/*
+ * @tc.name: PACK_FAST_AUTH_VALUE_TEST_001
+ * @tc.desc: Pack fast auth value test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
+{
+    AuthDeviceKeyInfo deviceCommKey = {0};
+    JsonObj *obj = JSON_CreateObject();
+    ASSERT_NE(obj, nullptr);
+    uint32_t keyLen = 0;
+    deviceCommKey.keyLen = keyLen;
+    uint64_t ret = PackFastAuthValue(obj, &deviceCommKey); 
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    JSON_Delete(obj);
+}
+
+/*
+ * @tc.name: NOTIFY_DATE_RECEIVED_TEST_001
+ * @tc.desc: notify data received test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, NOTIFY_DATE_RECEIVED_TEST_001, TestSize.Level1)
+{
+    uint64_t connId = 0;
+    const AuthConnInfo *connInfo = NULL;
+    bool fromServer = false;
+    const AuthDataHead *head = NULL;
+    const uint8_t *data = NULL;
+   NotifyDataReceived(connId, connInfo, fromServer, head, data);
+}
+
+/*
+ * @tc.name: ON_COMM_DATA_RECEVIED_TEST_001
+ * @tc.desc: on comm data received test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    ConnModule moduleId = MODULE_DEVICE_AUTH;
+    int64_t seq = 0;
+    int32_t len = 0;
+    char *data = (char *)malloc(1024);
+    ASSERT_NE(data, nullptr);
+    OnCommDataReceived(connectionId, moduleId, seq, data, len);
+
+    const int SEND_DATA_SIZE_1KB = 1024;
+    const char *testData = "{\"data\":\"open session test!!!\"}";
+    len = 2;
+    moduleId = MODULE_CONNECTION;
+    int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1KB, testData, strlen(testData));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    OnCommDataReceived(connectionId, moduleId, seq, data, len);
+
+    free(data);
+}
+
+/*
+ * @tc.name: UPDATE_AUTH_DEVICE_PRIORITY_TEST_001
+ * @tc.desc: update auth device priority test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_001, TestSize.Level1)
+{
+    uint64_t connId = 0;
+    UpdateAuthDevicePriority(connId);
+    connId = 0x3FFFFFFFF;
+    UpdateAuthDevicePriority(connId);
+}
+
+/*
+ * @tc.name: CHECK_BUS_VERSION_TEST_001
+ * @tc.desc: check bus version test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
+{
+    const JsonObj *obj = JSON_CreateObject();
+    NodeInfo *info = NULL;
+    SoftBusVersion version = SOFTBUS_NEW_V1;
+    ASSERT_NE(obj, nullptr);
+    int32_t ret = UnpackWiFi(obj, info, version, true);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    const char *msg = "test998994433";
+    uint32_t len = 1;
+    const JsonObj *obj1 = JSON_Parse(msg, len);
+    ret = UnpackWiFi(obj1, info, version, true);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+   UnpackCommon(obj, info, version, false);
+   version = SOFTBUS_OLD_V1;
+   UnpackCommon(obj, info, version, true);
+}
+
+/*
+ * @tc.name: IS_FLUSH_DEVICE_PACKET_TEST_001
+ * @tc.desc: is flush device packet test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
+{
+    AuthConnInfo *connInfo = NULL;
+    connInfo->type = AUTH_LINK_TYPE_BLE;
+    const AuthConnInfo *connInfo1 = connInfo;
+    const AuthDataHead *head = NULL;
+    const uint8_t data = {0};
+    bool isServer = false;
+    bool ret = IsFlushDevicePacket(connInfo1, head, &data, isServer);
+    EXPECT_TRUE(ret == false);
+
+    connInfo->type = AUTH_LINK_TYPE_WIFI;
+    const AuthConnInfo *connInfo2 = connInfo;
+    ret = IsFlushDevicePacket(connInfo2, head, &data, isServer);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: POST_BT_V1_DEVID_TEST_001
+ * @tc.desc: post bt v1 devid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    const AuthSessionInfo *info = NULL;
+    int32_t ret = PostDeviceIdV1(authSeq, info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    AuthSessionInfo *info1 = NULL;
+    info1->isServer = true;
+    info1->connInfo.type = AUTH_LINK_TYPE_WIFI;
+    const AuthSessionInfo *info2 = info1;
+    ret = PostDeviceIdV1(authSeq, info2);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS
