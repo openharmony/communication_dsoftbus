@@ -29,7 +29,9 @@ ohos_fuzztest("SoftBusServerStubFuzzTest") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/frame/standard/init/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/sdk/common/include",
+    "../../../../../../ipc/interfaces/innerkits/c/ipc/include",
   ]
 
   cflags = [
@@ -50,6 +52,7 @@ ohos_fuzztest("SoftBusServerStubFuzzTest") {
   external_deps = [
     "c_utils:utils",
     "ipc:ipc_single",
+    "samgr:samgr_proxy",
   ]
 }
 
