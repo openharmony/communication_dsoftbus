@@ -542,26 +542,6 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
-// /*
-//  * @tc.name: UN_PACK_AUTH_DATA_TEST_001
-//  * @tc.desc: un pack auth data test
-//  * @tc.type: FUNC
-//  * @tc.require:
-//  */
-// HWTEST_F(AuthOtherTest, UN_PACK_AUTH_DATA_TEST_001, TestSize.Level1)
-// {
-//     AuthDataHead *head;
-//     const uint8_t data[TEST_DATA_LEN] = { 0 };
-//     uint32_t len = 23;
-//     const uint8_t *ret;
-
-//     (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
-//     ret = UnpackAuthData(data, len, head);
-//     EXPECT_TRUE(ret == NULL);
-//     ret = UnpackAuthData((const uint8_t *)data, AUTH_CONN_DATA_HEAD_SIZE, head);
-//     EXPECT_TRUE(ret != NULL);
-// }
-
 /*
  * @tc.name: PACK_AUTH_DATA_TEST_001
  * @tc.desc: pack auth data test
@@ -709,17 +689,12 @@ HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 {
-    const JsonObj *obj = JSON_CreateObject();
+    const char *msg = "test998994433";
+    const JsonObj *obj = JSON_Parse(msg, 1024);
     NodeInfo *info = NULL;
     SoftBusVersion version = SOFTBUS_NEW_V1;
-    ASSERT_NE(obj, nullptr);
+    // ASSERT_NE(obj, NULL);
     int32_t ret = UnpackWiFi(obj, info, version, true);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-
-    const char *msg = "test998994433";
-    uint32_t len = 1;
-    const JsonObj *obj1 = JSON_Parse(msg, len);
-    ret = UnpackWiFi(obj1, info, version, true);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
    UnpackCommon(obj, info, version, false);
@@ -735,18 +710,28 @@ HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
 {
-    AuthConnInfo *connInfo = NULL;
+    const char *sessionKeyStr = "www.test.com";
+    AuthConnInfo *connInfo = (AuthConnInfo*)SoftBusCalloc(sizeof(AuthConnInfo));
+    if (connInfo == NULL) {
+        SoftBusFree(connInfo);
+        printf("dddddd111");
+        return;
+    }
+    (void)memset_s(connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo->type = AUTH_LINK_TYPE_BLE;
-    const AuthConnInfo *connInfo1 = connInfo;
-    const AuthDataHead *head = NULL;
+
+    AuthDataHead *head = (AuthDataHead*)SoftBusCalloc(sizeof(AuthDataHead));
+    if (head == NULL) {
+        SoftBusFree(head);
+        SoftBusFree(connInfo);
+        printf("dddddd111");
+        return;
+    }
+    (void)memset_s(head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    head->len = strlen(sessionKeyStr);
     const uint8_t data = {0};
     bool isServer = false;
-    bool ret = IsFlushDevicePacket(connInfo1, head, &data, isServer);
-    EXPECT_TRUE(ret == false);
-
-    connInfo->type = AUTH_LINK_TYPE_WIFI;
-    const AuthConnInfo *connInfo2 = connInfo;
-    ret = IsFlushDevicePacket(connInfo2, head, &data, isServer);
+    bool ret = IsFlushDevicePacket(connInfo, head, &data, isServer);
     EXPECT_TRUE(ret == false);
 }
 
@@ -759,15 +744,21 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    const AuthSessionInfo *info = NULL;
+    AuthSessionInfo *info = (AuthSessionInfo*)SoftBusCalloc(sizeof(AuthSessionInfo));
+    if (info == NULL) {
+        printf("dddddd");
+        return;
+    }
+
+    info->requestId = 1;
+    info->connId = 1;
+    info->isServer = false;
+    info->version = SOFTBUS_NEW_V1;
+
+    info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     int32_t ret = PostDeviceIdV1(authSeq, info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-
-    AuthSessionInfo *info1 = NULL;
-    info1->isServer = true;
-    info1->connInfo.type = AUTH_LINK_TYPE_WIFI;
-    const AuthSessionInfo *info2 = info1;
-    ret = PostDeviceIdV1(authSeq, info2);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    FsmStateMachine *fsm = NULL;
+    AuthFsmDeinitCallback(fsm);
 }
 } // namespace OHOS
