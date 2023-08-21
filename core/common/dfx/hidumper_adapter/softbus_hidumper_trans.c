@@ -109,7 +109,7 @@ NO_SANITIZE("cfi") static int SoftBusTransDumpHandler(int fd, int argc, const ch
         return SOFTBUS_ERR;
     }
     if (argc == 0 || ((argc == 1) && (strcmp(argv[0], "-h") == 0)) || (argc == 1 && strcmp(argv[0], "-l") == 0)) {
-        SoftBusDumpSubModuleHelp(fd, MODULE_NAME_TRAN, &g_trans_var_list);
+        SoftBusDumpSubModuleHelp(fd, (char *)MODULE_NAME_TRAN, &g_trans_var_list);
         return SOFTBUS_OK;
     }
 
@@ -127,7 +127,7 @@ NO_SANITIZE("cfi") static int SoftBusTransDumpHandler(int fd, int argc, const ch
         }
         if (isModuleExist == SOFTBUS_DUMP_NOT_EXIST) {
             SoftBusDumpErrInfo(fd, argv[1]);
-            SoftBusDumpSubModuleHelp(fd, MODULE_NAME_TRAN, &g_trans_var_list);
+            SoftBusDumpSubModuleHelp(fd, (char *)MODULE_NAME_TRAN, &g_trans_var_list);
         }
     }
     return ret;
@@ -135,7 +135,7 @@ NO_SANITIZE("cfi") static int SoftBusTransDumpHandler(int fd, int argc, const ch
 
 int32_t SoftBusTransDumpHandlerInit(void)
 {
-    int32_t ret = SoftBusRegHiDumperHandler((char*)MODULE_NAME_TRAN, SOFTBUS_TRANS_MODULE_HELP,
+    int32_t ret = SoftBusRegHiDumperHandler((char*)MODULE_NAME_TRAN, (char*)SOFTBUS_TRANS_MODULE_HELP,
         &SoftBusTransDumpHandler);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusTransDumpHander regist fail");
