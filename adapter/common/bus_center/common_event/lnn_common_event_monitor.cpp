@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "auth_interface.h"
 #include "bus_center_event.h"
 #include "common_event_data.h"
 #include "common_event_manager.h"
@@ -55,6 +56,10 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
         LnnUpdateOhosAccount();
+        if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "not trusted releation, heartbeat(HB) process start later");
+            return;
+        }
         LnnStartHeartbeat(0);
     }
 
