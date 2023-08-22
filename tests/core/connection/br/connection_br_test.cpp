@@ -19,15 +19,19 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "connection_br_mock.h"
+#include "softbus_conn_br_trans.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_br_connection.h"
+#include "softbus_conn_br_pending_packet.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
+#include "softbus_conn_br_send_queue.h"
 
 static const uint32_t CONN_HEAD_SIZE = 24;
 #define TEST_BR_MAC "24:DA:33:6A:06:EC"
@@ -39,6 +43,7 @@ static unsigned int g_secondConnId = 0;
 #define WAIT_CONNECTION_SLEEP_TIME 1
 
 using namespace testing::ext;
+using namespace testing;
 
 namespace OHOS {
 void ConnectedCB(unsigned int connectionId, const ConnectionInfo *info)
@@ -518,4 +523,368 @@ HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
     }
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
 };
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket001, TestSize.Level1)
+{
+    int ret;
+    ConnectOption info;
+    uint32_t time = 1;
+
+    ret = ConnPreventConnection(NULL, time);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    time = 0;
+    ret = ConnPreventConnection(&info, time);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+
+    time = 30000;
+    ret = ConnPreventConnection(&info, time);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+
+    time = 1;
+    info.type = CONNECT_BLE;
+    ret = ConnPreventConnection(&info, time);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket002, TestSize.Level1)
+{
+    int ret;
+    ConnectOption info;
+    uint32_t time = 1;
+
+    info.type = CONNECT_BR;
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.brOption.brMac);
+    ret = ConnPreventConnection(&info, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket003, TestSize.Level1)
+{
+    int ret;
+    ConnectOption info;
+
+    info.type = CONNECT_BR;
+    info.brOption.sideType = CONN_SIDE_ANY;
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.brOption.brMac);
+    ret = CheckActiveConnection(&info);
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket004, TestSize.Level1)
+{
+    int ret;
+    uint32_t id = 1;
+    ConnectionInfo info;
+
+    ret = ConnGetConnectionInfo(id, NULL);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+
+    id = 0;
+    ret = ConnGetConnectionInfo(id, &info);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket005, TestSize.Level1)
+{
+    int ret;
+    uint32_t id = 0x20000;
+    ConnectOption info;
+
+    info.type = CONNECT_BR;
+    (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.brOption.brMac);
+    ret = ConnDisconnectDeviceAllConn(&info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    usleep(50);
+    ret = ConnDisconnectDevice(id);
+    EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket006, TestSize.Level1)
+{
+    int ret;
+    uint32_t id = 1;
+    int64_t seq = 1000;
+    uint32_t waitMillis = 1000;
+    void *data = NULL;
+
+    ret = ConnBrInitBrPendingPacket();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnBrCreateBrPendingPacket(id, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnBrCreateBrPendingPacket(id, seq);
+    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
+
+    ret = ConnBrGetBrPendingPacket(id, seq, waitMillis, &data);
+    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+
+    ConnBrDelBrPendingPacket(id, seq);
+    ret = ConnBrGetBrPendingPacket(id, seq, waitMillis, &data);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    ret = ConnBrCreateBrPendingPacket(id, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ConnBrSetBrPendingPacket(id, seq, data);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnBrGetBrPendingPacket(id, seq, waitMillis, &data);
+    EXPECT_EQ(SOFTBUS_ALREADY_TRIGGERED, ret);
+
+    ConnBrDelBrPendingPacket(id, seq);
+    ret = ConnBrSetBrPendingPacket(id, seq, data);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket007, TestSize.Level1)
+{
+    int ret;
+    ConnBrConnection connection;
+
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(false));
+    connection.connectionId = 1;
+    ret = ConnBrOnAckRequest(&connection, NULL);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+
+    EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, GetJsonObjectNumber64Item).WillRepeatedly(Return(true));
+    ret = ConnBrOnAckRequest(&connection, NULL);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
+    SoftBusMutexInit(&connection.lock, NULL);
+    connection.connectionId = 0;
+    ret = ConnBrOnAckRequest(&connection, NULL);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, AddNumber64ToJsonObject).WillRepeatedly(Return(true));
+    SoftBusMutexInit(&connection.lock, NULL);
+    connection.connectionId = 0;
+    ret = ConnBrOnAckRequest(&connection, NULL);
+    EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrPendingPacket008, TestSize.Level1)
+{
+    int ret;
+    uint32_t id = 1;
+    int64_t seq = 1000;
+    void *data = NULL;
+    ConnBrConnection connection;
+
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(false));
+    connection.connectionId = 1;
+    ret = ConnBrOnAckResponse(&connection, NULL);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, GetJsonObjectNumber64Item).WillRepeatedly(Return(true));
+    ConnBrDelBrPendingPacket(id, seq);
+    ret = ConnBrSetBrPendingPacket(id, seq, data);
+    ret = ConnBrOnAckResponse(&connection, NULL);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrQueue001, TestSize.Level1)
+{
+    int ret;
+    SendBrQueueNode queueNode;
+
+    ret = ConnBrInnerQueueInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnBrEnqueueNonBlock(NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    queueNode.flag = CONN_HIGH;
+    queueNode.pid = 0;
+    queueNode.isInner = 1;
+    ret = ConnBrEnqueueNonBlock(&queueNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    queueNode.flag = CONN_MIDDLE;
+    queueNode.pid = 1;
+    queueNode.isInner = 1;
+    ret = ConnBrEnqueueNonBlock(&queueNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    queueNode.flag = CONN_LOW;
+    queueNode.pid = 1;
+    queueNode.isInner = 1;
+    ret = ConnBrEnqueueNonBlock(&queueNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ConnBrInnerQueueDeinit();
+}
+
+HWTEST_F(ConnectionBrTest, testBrQueue002, TestSize.Level1)
+{
+    int ret;
+    void *msg = NULL;
+    SendBrQueueNode queueNode;
+
+    ret = ConnBrInnerQueueInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    queueNode.flag = CONN_LOW;
+    queueNode.pid = 1;
+    queueNode.isInner = 1;
+    ret = ConnBrEnqueueNonBlock(&queueNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ConnBrDequeueBlock(&msg);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnBrDequeueBlock(NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ConnBrIsQueueEmpty();
+    EXPECT_EQ(false, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrBrans001, TestSize.Level1)
+{
+    int ret;
+    uint32_t connectionId;
+    int32_t socketHandle = 0;
+    LimitedBuffer buffer;
+    uint8_t *outData = NULL;
+    ConnPktHead head;
+
+    head.magic = MAGIC_NUMBER;
+    head.len = 70;
+    buffer.capacity = 140;
+    buffer.length = 100;
+    buffer.buffer = (uint8_t *)(&head);
+    connectionId = 1;
+    ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    head.magic = MAGIC_NUMBER + 1;
+    head.len = 70;
+    buffer.capacity = 140;
+    buffer.length = 100;
+    buffer.buffer = (uint8_t *)(&head);
+    connectionId = 1;
+    ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
+    EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrBrans002, TestSize.Level1)
+{
+    int ret;
+    uint32_t connectionId;
+    int32_t socketHandle = 0;
+    LimitedBuffer buffer;
+    uint8_t *outData = NULL;
+    ConnPktHead head;
+
+    head.magic = MAGIC_NUMBER;
+    head.len = 70;
+    buffer.capacity = 70;
+    buffer.length = 100;
+    buffer.buffer = (uint8_t *)(&head);
+    connectionId = 1;
+    ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
+    EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrBrans003, TestSize.Level1)
+{
+    int ret;
+    uint32_t connectionId;
+    int32_t socketHandle = 0;
+    LimitedBuffer buffer;
+    uint8_t *outData = NULL;
+    ConnPktHead head;
+
+    head.magic = MAGIC_NUMBER;
+    head.len = 70;
+    buffer.capacity = 140;
+    buffer.length = 90;
+    buffer.buffer = (uint8_t *)(&head);
+    connectionId = 1;
+    ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
+    EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrBrans004, TestSize.Level1)
+{
+    int64_t ret;
+    BrCtlMessageSerializationContext ctx;
+    uint8_t *outData = NULL;
+    uint32_t outDataLen;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, AddNumber64ToJsonObject).WillRepeatedly(Return(true));
+    ctx.method = BR_METHOD_ACK_RESPONSE;
+    ctx.connectionId = 1;
+    ret = ConnBrPackCtlMessage(ctx, &outData, &outDataLen);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
+    ctx.method = BR_METHOD_NOTIFY_REQUEST;
+    ctx.connectionId = 1;
+    ret = ConnBrPackCtlMessage(ctx, &outData, &outDataLen);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
+    ctx.method = BR_METHOD_NOTIFY_RESPONSE;
+    ctx.connectionId = 1;
+    ret = ConnBrPackCtlMessage(ctx, &outData, &outDataLen);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
+    ctx.method = BR_METHOD_NOTIFY_ACK;
+    ctx.connectionId = 1;
+    ret = ConnBrPackCtlMessage(ctx, &outData, &outDataLen);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
+    ctx.method = BR_METHOD_ACK_RESPONSE;
+    ctx.connectionId = 1;
+    ret = ConnBrPackCtlMessage(ctx, &outData, &outDataLen);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
+
+    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
+    ctx.method = (enum BrCtlMessageMethod)3;
+    ctx.connectionId = 1;
+    ret = ConnBrPackCtlMessage(ctx, &outData, &outDataLen);
+    EXPECT_EQ(SOFTBUS_CONN_BR_INTERNAL_ERR, ret);
+}
+
+HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
+{
+    int ret;
+    uint32_t connectionId = 1;
+    uint8_t *data = NULL;
+    uint32_t len = 0;
+    int32_t pid = 0;
+    int32_t flag = 0;
+    int32_t module = 0;
+    int64_t seq = 0;
+
+    ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    len = MAX_DATA_LEN + 1;
+    data = (uint8_t *)SoftBusCalloc(len);
+    ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    len = MAX_DATA_LEN;
+    data = (uint8_t *)SoftBusCalloc(len);
+    connectionId = 0x20001;
+    ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
+    EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
+}
 }
