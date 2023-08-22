@@ -298,6 +298,8 @@ HWTEST_F(HeartBeatFSMTest, OnSendOneHbEndTest_01, TestSize.Level1)
     void *para4 = SoftBusCalloc(sizeof(LnnHeartbeatType));
     ret = OnStartHbProcess(nullptr, TEST_ARGS, para4);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = OnReStartHbProcess(nullptr, TEST_ARGS, para4);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
@@ -536,5 +538,267 @@ HWTEST_F(HeartBeatFSMTest, LnnPostNextSendOnceMsgToHbFsmTest_01, TestSize.Level1
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
+}
+/*
+ * @tc.name: RemoveSendOneEndMsgTest_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_01, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnHeartbeatSendEndData *msgPara = nullptr;
+    LnnRemoveSendEndMsgPara delMsgPara;
+    bool isRemoved = false;
+    msgPara = (LnnHeartbeatSendEndData *)SoftBusMalloc(sizeof(LnnHeartbeatSendEndData));
+    msgPara->wakeupFlag = false;
+    delMsgPara.wakeupFlag = true;
+    delMsgPara.isRemoved = &isRemoved;
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    msgPara->wakeupFlag = true;
+    delMsgPara.wakeupFlag = false;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+/*
+ * @tc.name: RemoveSendOneEndMsgTest_02
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_02, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnHeartbeatSendEndData *msgPara = nullptr;
+    LnnRemoveSendEndMsgPara delMsgPara;
+    bool isRemoved = false;
+    msgPara = (LnnHeartbeatSendEndData *)SoftBusMalloc(sizeof(LnnHeartbeatSendEndData));
+    msgPara->wakeupFlag = true;
+    delMsgPara.wakeupFlag = true;
+    delMsgPara.isRemoved = &isRemoved;
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    msgPara->hbType = 0;
+    msgPara->isRelay = true;
+    msgPara->hbType |= HEARTBEAT_TYPE_BLE_V0;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    delMsgPara.hbType = 0;
+    delMsgPara.isRelay = true;
+    msgPara->isRelay = false;
+    msgPara->hbType = 0;
+    delMsgPara.hbType |= HEARTBEAT_TYPE_BLE_V0;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+/*
+ * @tc.name: RemoveSendOneEndMsgTest_03
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_03, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnHeartbeatSendEndData *msgPara = nullptr;
+    LnnRemoveSendEndMsgPara delMsgPara;
+    bool isRemoved = false;
+    msgPara = (LnnHeartbeatSendEndData *)SoftBusMalloc(sizeof(LnnHeartbeatSendEndData));
+    msgPara->wakeupFlag = true;
+    msgPara->isRelay = false;
+    delMsgPara.wakeupFlag = true;
+    delMsgPara.isRelay =false;
+    delMsgPara.isRemoved = &isRemoved;
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    msgPara->hbType = HEARTBEAT_TYPE_BLE_V1;
+    delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V0;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    msgPara->hbType = HEARTBEAT_TYPE_BLE_V0;
+    delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V1;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+/*
+ * @tc.name: RemoveSendOneEndMsgTest_04
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_04, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnHeartbeatSendEndData *msgPara = nullptr;
+    LnnRemoveSendEndMsgPara delMsgPara;
+    bool isRemoved = false;
+    msgPara = (LnnHeartbeatSendEndData *)SoftBusMalloc(sizeof(LnnHeartbeatSendEndData));
+    msgPara->wakeupFlag = true;
+    msgPara->isRelay = false;
+    delMsgPara.wakeupFlag = true;
+    delMsgPara.isRelay =false;
+    delMsgPara.isRemoved = &isRemoved;
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    msgPara->hbType = HEARTBEAT_TYPE_BLE_V0;
+    delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V0;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    msgPara->hbType = HEARTBEAT_TYPE_BLE_V1;
+    delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V1;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+/*
+ * @tc.name: RemoveSendOneEndMsgTest_05
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_05, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnHeartbeatSendEndData *msgPara = nullptr;
+    LnnRemoveSendEndMsgPara delMsgPara;
+    bool isRemoved = false;
+    msgPara = (LnnHeartbeatSendEndData *)SoftBusMalloc(sizeof(LnnHeartbeatSendEndData));
+    msgPara->wakeupFlag = true;
+    msgPara->isRelay = false;
+    delMsgPara.wakeupFlag = true;
+    delMsgPara.isRelay =false;
+    delMsgPara.isRemoved = &isRemoved;
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    msgPara->hbType = 0;
+    delMsgPara.hbType = 0;
+    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+/*
+ * @tc.name: RemoveScreenOffCheckStatus_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_01, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnCheckDevStatusMsgPara *msgPara = nullptr;
+    LnnCheckDevStatusMsgPara delMsgPara = {};
+    msgPara = (LnnCheckDevStatusMsgPara *)SoftBusMalloc(sizeof(LnnCheckDevStatusMsgPara));
+    msgPara->hasNetworkId = true;
+    delMsgPara.hasNetworkId = false;
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    ret = RemoveScreenOffCheckStatus(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    msgPara->hasNetworkId = false;
+    delMsgPara.hasNetworkId = false;
+    msgPara->hbType = 0;
+    delMsgPara.hbType = 0;
+    ret = RemoveScreenOffCheckStatus(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+/*
+ * @tc.name: RemoveScreenOffCheckStatus_02
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_02, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnCheckDevStatusMsgPara *msgPara = nullptr;
+    LnnCheckDevStatusMsgPara delMsgPara = {};
+    msgPara = (LnnCheckDevStatusMsgPara *)SoftBusMalloc(sizeof(LnnCheckDevStatusMsgPara));
+    msgPara->hasNetworkId = true;
+    delMsgPara.hasNetworkId = true;
+    msgPara->hbType = 0;
+    delMsgPara.hbType = 0;
+    strcpy_s((char *)(msgPara->networkId), sizeof(msgPara->networkId), "123");
+    strcpy_s((char *)(delMsgPara.networkId), sizeof(delMsgPara.networkId), "123");
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    ret = RemoveScreenOffCheckStatus(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+/*
+ * @tc.name: RemoveScreenOffCheckStatus_03
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_03, TestSize.Level1)
+{
+    int32_t ret;
+    FsmCtrlMsgObj ctrlMsgObj;
+    SoftBusMessage delMsg;
+    LnnCheckDevStatusMsgPara *msgPara = nullptr;
+    LnnCheckDevStatusMsgPara delMsgPara = {};
+    msgPara = (LnnCheckDevStatusMsgPara *)SoftBusMalloc(sizeof(LnnCheckDevStatusMsgPara));
+    msgPara->hasNetworkId = true;
+    delMsgPara.hasNetworkId = true;
+    msgPara->hbType = 0;
+    delMsgPara.hbType = 0;
+    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
+    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+
+    ret = RemoveScreenOffCheckStatus(&ctrlMsgObj, &delMsg);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+/*
+ * @tc.name: OnScreeOffCheckDevStatus_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_01, TestSize.Level1)
+{
+    int32_t ret;
+    LnnHeartbeatFsm hbFsm = {};
+    LnnCheckDevStatusMsgPara msgParas = {};
+    LnnCheckDevStatusMsgPara *msgPara = nullptr;
+    msgPara = (LnnCheckDevStatusMsgPara *)SoftBusMalloc(sizeof(LnnCheckDevStatusMsgPara));
+
+    ret = OnScreeOffCheckDevStatus(nullptr, 0, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = OnScreeOffCheckDevStatus(nullptr, 0, reinterpret_cast<void *>(msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    LnnRemoveScreenOffCheckStatusMsg(nullptr, &msgParas);
+    LnnRemoveScreenOffCheckStatusMsg(&hbFsm, nullptr);
+    LnnRemoveScreenOffCheckStatusMsg(&hbFsm, &msgParas);
+    ReportSendBroadcastResultEvt();
 }
 } // namespace OHOS
