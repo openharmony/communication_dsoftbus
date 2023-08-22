@@ -67,11 +67,27 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("TransDfxTest") {
+    module_out_path = module_output_path
+    sources = [ "trans_dfx_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+      "$dsoftbus_root_path/core/common/dfx/hidumper_adapter",
+    ]
+    deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+    ]
+    external_deps = [ "hilog:libhilog" ]
+  }
+
   group("unittest") {
     testonly = true
     deps = [
       ":DiscConnDfxTest",
       ":LnnDfxTest",
+      ":TransDfxTest",
     ]
   }
 }
