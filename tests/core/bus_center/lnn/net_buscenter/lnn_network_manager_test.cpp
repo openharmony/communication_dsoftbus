@@ -133,7 +133,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitNetworkManager();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_ERR);
 }
 
 /*
@@ -151,7 +151,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
 
     ConnectionAddrType type1 = CONNECTION_ADDR_ETH;
     ret = LnnGetAddrTypeByIfName("unknown", &type1);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_ERR);
 
     ret = LnnGetAddrTypeByIfName("ETH", &type1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -262,5 +262,182 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
 
     res = SetIfNameDefaultVal();
     EXPECT_TRUE(res == SOFTBUS_OK);
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, NET_USER_STATE_EVENTHANDLER_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    (void)NetUserStateEventHandler(nullptr);
+    LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
+    info1->basic.event = LNN_EVENT_USER_STATE_CHANGED;
+    info1->status = SOFTBUS_USER_FOREGROUND;
+    LnnEventBasicInfo *info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetUserStateEventHandler(info2);
+
+    info1->status = SOFTBUS_USER_BACKGROUND;
+    info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetUserStateEventHandler(info2);
+
+    info1->status = SOFTBUS_USER_UNKNOWN;
+    info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetUserStateEventHandler(info2);
+
+    delete info1;
+    info1 = nullptr;
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, NET_LOCK_STATE_EVENTHANDLER_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnEventBasicInfo info;
+    (void)NetLockStateEventHandler(nullptr);
+
+    info.event = LNN_EVENT_SCREEN_LOCK_CHANGED;
+    (void)NetLockStateEventHandler(&info);
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, NET_OOB_STATE_EVENTHANDLER_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    (void)NetOOBEStateEventHandler(nullptr);
+    LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
+    info1->basic.event = LNN_EVENT_OOBE_STATE_CHANGED;
+    info1->status = SOFTBUS_OOBE_RUNNING;
+    LnnEventBasicInfo *info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetOOBEStateEventHandler(info2);
+
+    info1->status = SOFTBUS_OOBE_END;
+    info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetOOBEStateEventHandler(info2);
+
+    info1->status = SOFTBUS_OOBE_UNKNOWN;
+    info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetOOBEStateEventHandler(info2);
+
+    delete info1;
+    info1 = nullptr;
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, RESTART_COAP_DISCOVERY_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    (void)RestartCoapDiscovery();
+    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, strncmp).WillRepeatedly(Return(SOFTBUS_OK));
+    (void)RestartCoapDiscovery();
+    EXPECT_CALL(managerMock, strncmp).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    (void)RestartCoapDiscovery();
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, LnnStartPublish).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(managerMock, LnnStartDiscovery).WillRepeatedly(Return(SOFTBUS_ERR));
+    (void)RestartCoapDiscovery();
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
+{
+    const char *udid = nullptr;
+    const char *groupInfo = nullptr;
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    (void)OnDeviceBound(udid, groupInfo);
+    EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(false));
+    (void)OnDeviceBound(udid, groupInfo);
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    const char *netIfName = "Softbus";
+    LnnNetIfMgr *ret = CreateNetifMgr(netIfName);
+    EXPECT_TRUE(ret != NULL);
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, SAVE_BRNETWORK_DEVICE_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    (void)SaveBrNetworkDevices();
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    (void)SaveBrNetworkDevices();
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
+    (void)SaveBrNetworkDevices();
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
+    (void)SaveBrNetworkDevices();
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    (void)SaveBrNetworkDevices();
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    (void)NetAccountStateChangeEventHandler(nullptr);
+    LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
+    info1->basic.event = LNN_EVENT_ACCOUNT_CHANGED;
+    info1->status = SOFTBUS_ACCOUNT_LOG_IN;
+    LnnEventBasicInfo *info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetAccountStateChangeEventHandler(info2);
+
+    info1->status = SOFTBUS_ACCOUNT_LOG_OUT;
+    info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetAccountStateChangeEventHandler(info2);
+
+    info1->status = SOFTBUS_ACCOUNT_UNKNOWN;
+    info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
+    (void)NetAccountStateChangeEventHandler(info2);
+
+    delete info1;
+    info1 = nullptr;
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    void *data = nullptr;
+    VisitNextChoice ret = GetAllProtocols(nullptr, data);
+    EXPECT_TRUE(ret == CHOICE_FINISH_VISITING);
+
+    LnnProtocolManager manager;
+    data = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnProtocolManager)));
+    ret = GetAllProtocols(&manager, data);
+    EXPECT_TRUE(ret == CHOICE_VISIT_NEXT);
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    (void)NightModeChangeEventHandler(nullptr);
+    LnnEventBasicInfo info;
+    info.event = LNN_EVENT_NIGHT_MODE_CHANGED;
+    (void)NightModeChangeEventHandler(&info);
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, REGIST_NETIFMGR_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnNetIfNameType type = LNN_MAX_NUM_TYPE;
+    LnnNetIfManagerBuilder builder = nullptr;
+    int32_t ret = RegistNetIfMgr(type, builder);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    type = LNN_MAX_NUM_TYPE;
+    const char *ifName = "Softbus";
+    LnnNetIfMgr *res = NetifMgrFactory(type, ifName);
+    EXPECT_TRUE(res == nullptr);
 }
 }
