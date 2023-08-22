@@ -689,17 +689,49 @@ HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 {
-    const char *msg = "test998994433";
-    const JsonObj *obj = JSON_Parse(msg, 1024);
-    NodeInfo *info = NULL;
+    JsonObj *obj = JSON_CreateObject();
+    if (obj == NULL) {
+        return;
+    }
+
+    NodeInfo *info = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
+    if (info == NULL) {
+        return;
+    }
+    (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+
     SoftBusVersion version = SOFTBUS_NEW_V1;
-    // ASSERT_NE(obj, NULL);
-    int32_t ret = UnpackWiFi(obj, info, version, true);
+    ASSERT_NE(obj, NULL);
+    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) ||
+        !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
+        !JSON_AddInt32ToObject(obj, "BUS_MIN_VERSION", (int32_t)1) ||
+        !JSON_AddInt32ToObject(obj, "AUTH_PORT", (int32_t)8710) ||
+        !JSON_AddInt32ToObject(obj, "SESSION_PORT", (int32_t)26) ||
+        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) ||
+        !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
+        return;
+    }
+    JSON_AddStringToObject(obj, BLE_OFFLINE_CODE, "10244");
+
+    info->connectInfo.authPort = 8710;
+    info->connectInfo.sessionPort = 26;
+    info->connectInfo.proxyPort = 80;
+    info->supportedProtocols = LNN_PROTOCOL_BR;
+    
+    int32_t ret = UnpackWiFi(obj, info, version, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)-1);
+    ret = UnpackWiFi(obj, info, version, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
-   UnpackCommon(obj, info, version, false);
-   version = SOFTBUS_OLD_V1;
-   UnpackCommon(obj, info, version, true);
+    JSON_AddStringToObject(obj, "MASTER_UDID", "1122334554444");
+    JSON_AddStringToObject(obj, "NODE_ADDR", "1122334554444");
+    UnpackCommon(obj, info, version, false);
+    version = SOFTBUS_OLD_V1;
+    JSON_AddInt32ToObject(obj, "MASTER_WEIGHT", (int32_t)10);
+    UnpackCommon(obj, info, version, true);
+    JSON_Delete(obj);
+    SoftBusFree(info);
 }
 
 /*
@@ -714,7 +746,6 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
     AuthConnInfo *connInfo = (AuthConnInfo*)SoftBusCalloc(sizeof(AuthConnInfo));
     if (connInfo == NULL) {
         SoftBusFree(connInfo);
-        printf("dddddd111");
         return;
     }
     (void)memset_s(connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -724,7 +755,6 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
     if (head == NULL) {
         SoftBusFree(head);
         SoftBusFree(connInfo);
-        printf("dddddd111");
         return;
     }
     (void)memset_s(head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
@@ -732,6 +762,9 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
     const uint8_t data = {0};
     bool isServer = false;
     bool ret = IsFlushDevicePacket(connInfo, head, &data, isServer);
+    EXPECT_TRUE(ret == false);
+    connInfo->type = AUTH_LINK_TYPE_WIFI;
+    ret = IsFlushDevicePacket(connInfo, head, &data, isServer);
     EXPECT_TRUE(ret == false);
 }
 
@@ -746,7 +779,6 @@ HWTEST_F(AuthOtherTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     int64_t authSeq = 0;
     AuthSessionInfo *info = (AuthSessionInfo*)SoftBusCalloc(sizeof(AuthSessionInfo));
     if (info == NULL) {
-        printf("dddddd");
         return;
     }
 
@@ -760,5 +792,6 @@ HWTEST_F(AuthOtherTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     FsmStateMachine *fsm = NULL;
     AuthFsmDeinitCallback(fsm);
+    SoftBusFree(info);
 }
 } // namespace OHOS
