@@ -41,7 +41,7 @@ using namespace testing::ext;
 namespace OHOS {
 void ConnectedCB(unsigned int connectionId, const ConnectionInfo *info)
 {
-        if (info->type == CONNECT_BLE) {
+    if (info->type == CONNECT_BLE) {
         g_connId = connectionId;
     }
     return;
@@ -124,8 +124,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.info.bleOption.bleMac);
+    (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    printf("bleMac: %s\n", info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -177,8 +177,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     optionInfo.type = CONNECT_BLE;
-    (void)memcpy_s(optionInfo.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("bleMac: %s\n", optionInfo.info.bleOption.bleMac);
+    (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    printf("bleMac: %s\n", optionInfo.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -222,8 +222,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger003, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.info.bleOption.bleMac);
+    (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -279,7 +279,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     optionInfo.type = CONNECT_BLE;
-    (void)memcpy_s(optionInfo.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -328,7 +328,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger005, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -384,7 +384,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
 
@@ -444,8 +444,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     optionInfo.type = CONNECT_BLE;
-    (void)memcpy_s(optionInfo.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("bleMac: %s\n", optionInfo.info.bleOption.bleMac);
+    (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    printf("bleMac: %s\n", optionInfo.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     req1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -493,8 +493,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.info.bleOption.bleMac);
+    (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    printf("brMac: %s\n", info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -553,7 +553,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     optionInfo.type = CONNECT_BLE;
-    (void)memcpy_s(optionInfo.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -602,7 +602,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -643,65 +643,73 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
 };
 
 /*
-* @tc.name: testConnmanger011
-* @tc.desc: Test set unset callback and twice ConnConnectDevice and connect twice post disconnectAll post.
+* @tc.name: testConnmanger0011
+* @tc.desc: Test set unset callback and connect twice has same ConnectID and update connection.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
-* @tc.require: The ConnSetConnectCallback and ConnPostBytes operates normally.
+* @tc.require:The ConnUpdateConnection operates normally.
 */
-HWTEST_F(ConnectionBleSwitchTest, testConnmanger011, TestSize.Level1)
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0011, TestSize.Level1)
 {
     int ret;
     ConnectCallback connCb;
+    ConnectOption optionInfo;
     ConnectResult connRet;
-    ConnPostData data;
-    ConnectOption info;
-    const char *str = "send msg local2\r\n";
+    ConnectResult connRet2;
+    UpdateOption option;
 
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
     ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    info.type = CONNECT_BLE;
-    (void)memcpy_s(info.info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+
+    optionInfo.type = CONNECT_BLE;
+    (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    int reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
 
-    int reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
-    ret = ConnConnectDevice(&info, reqId1, &connRet);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = ConnConnectDevice(&info, reqId1, &connRet);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    connRet2.OnConnectFailed = ConnectFailedCB;
+    connRet2.OnConnectSuccessed = SecondConnectSuccessedCB;
     int reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
-    ret = ConnConnectDevice(&info, reqId2, &connRet);
+    ret = ConnConnectDevice(&optionInfo, reqId2, &connRet2);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = ConnConnectDevice(&info, reqId2, &connRet);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    sleep(1);
+    if ((g_connId) && (g_secondConnId)) {
+        EXPECT_EQ(g_connId, g_secondConnId);
+    }
 
-    if (g_connId != 0) {
-        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
-        ASSERT_TRUE(data.buf != NULL);
-        (void)strcpy_s(data.buf + 1, strlen(str), str);
-        data.len = CONN_HEAD_SIZE + 20;
-        data.module = MODULE_TRUST_ENGINE;
-        data.pid = 0;
-        data.flag = 1;
-        data.seq = 1;
-
-        ret = ConnPostBytes(g_connId, &data);
-        ASSERT_EQ(SOFTBUS_OK, ret);
-        ret = ConnDisconnectDeviceAllConn(&info);
+    if (g_connId) {
+        option.type = CONNECT_BLE;
+        option.bleOption.priority = CONN_BLE_PRIORITY_BALANCED;
+        ret = ConnUpdateConnection(g_connId, &option);
         EXPECT_EQ(SOFTBUS_OK, ret);
-        ret = ConnPostBytes(g_connId, &data);
-        ASSERT_NE(SOFTBUS_OK, ret);
-
+        ret = ConnDisconnectDeviceAllConn(&optionInfo);
         g_connId = 0;
-        if (data.buf != nullptr) {
-            free(data.buf);
-        }
+        EXPECT_EQ(SOFTBUS_OK, ret);
     }
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+};
+
+/*
+* @tc.name: testConnmanger0012
+* @tc.desc: check active  ble connection.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0012, TestSize.Level1)
+{
+    ConnectOption optionInfo;
+
+    optionInfo.type = CONNECT_BLE;
+    optionInfo.bleOption.protocol = BLE_GATT;
+    (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
+    bool isActive = CheckActiveConnection(&optionInfo);
+    EXPECT_TRUE(isActive == false);
 };
 }
