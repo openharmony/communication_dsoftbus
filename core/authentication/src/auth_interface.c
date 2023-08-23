@@ -364,6 +364,12 @@ NO_SANITIZE("cfi") TrustedReturnType AuthHasTrustedRelation(void)
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 
+bool IsAuthHasTrustedRelation()
+{
+    bool hasTrustedRelation = (AuthHasTrustedRelation() == TRUSTED_RELATION_YES) ? true : false;
+    return hasTrustedRelation;
+}
+
 void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType)
 {
     AuthLinkType linkType;

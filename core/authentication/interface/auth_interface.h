@@ -122,6 +122,7 @@ void UnregGroupChangeListener(void);
 
 TrustedReturnType AuthHasTrustedRelation(void);
 bool AuthIsPotentialTrusted(const DeviceInfo *device, bool validAccount);
+bool IsAuthHasTrustedRelation();
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port);
 void AuthStopListening(AuthLinkType type);
