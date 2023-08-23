@@ -30,6 +30,7 @@ typedef struct {
     int64_t seq;
     uint32_t dataLen;
     uint8_t *data;
+    void (*onPostBytesFinished)(uint32_t connectionId, int32_t error);
 } SendQueueNode;
 
 int32_t ConnBleInitSendQueue(void);
