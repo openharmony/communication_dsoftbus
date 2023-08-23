@@ -19,6 +19,7 @@ declare_args() {
   dsoftbus_feature_conn_br = false
   dsoftbus_feature_conn_ble = false
   dsoftbus_feature_conn_p2p = false
+  dsoftbus_feature_conn_wifi = true
 
   dsoftbus_feature_protocol_newip = false
 

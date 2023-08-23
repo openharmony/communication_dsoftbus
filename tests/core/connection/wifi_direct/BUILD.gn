@@ -16,15 +16,23 @@ import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection"
 
-ohos_unittest("WifiDirectUtilsTest") {
+ohos_unittest("WifiDirectTest") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/wifi_direct/utils",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct/processor",
     "$dsoftbus_root_path/core/connection/wifi_direct/data",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct/protocol",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
     "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct/negotiate_state",
+    "$dsoftbus_root_path/core/common/softbus_property/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
     "//third_party/googletest/googletest/include",
@@ -37,6 +45,7 @@ ohos_unittest("WifiDirectUtilsTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -44,10 +53,15 @@ ohos_unittest("WifiDirectUtilsTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  sources = [ "wifi_direct_utils_test.cpp" ]
+  sources = [
+    "negotiate_state_test.cpp",
+    "wifi_direct_mock_test.cpp",
+    "wifi_direct_utils_test.cpp",
+    "wifi_protocol_test.cpp",
+  ]
 }
 
 group("unittest") {
   testonly = true
-  deps = [ ":WifiDirectUtilsTest" ]
+  deps = [ ":WifiDirectTest" ]
 }
