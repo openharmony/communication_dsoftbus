@@ -31,6 +31,7 @@
         "dsoftbus_feature_conn_br",
         "dsoftbus_feature_conn_ble",
         "dsoftbus_feature_lnn_net",
+        "dsoftbus_feature_conn_wifi",
         "dsoftbus_feature_trans_udp_stream",
         "dsoftbus_feature_trans_udp_file",
         "dsoftbus_get_devicename",
