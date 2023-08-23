@@ -563,13 +563,13 @@ NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnI
             break;
         }
         case AUTH_LINK_TYPE_BLE:
-            /* fall-through */
+            __attribute__((fallthrough));
         case AUTH_LINK_TYPE_BR:
             if (SoftBusGetBtState() != BLE_ENABLE) {
                 ret = SOFTBUS_AUTH_CONN_FAIL;
                 break;
             }
-            /* fall-through */
+            __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
@@ -609,10 +609,10 @@ NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)
             SocketDisconnectDevice(AUTH, GetFd(connId));
             break;
         case AUTH_LINK_TYPE_BLE:
-            /* fall-through */
+            __attribute__((fallthrough));
         case AUTH_LINK_TYPE_BR:
             ConnDisconnectDevice(GetConnId(connId));
-            /* fall-through */
+            __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
             break;
         default:
