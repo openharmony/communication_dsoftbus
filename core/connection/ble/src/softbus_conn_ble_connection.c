@@ -250,6 +250,20 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
     return interface->bleServerDisconnect(connection);
 }
 
+
+static void OnDisconnectedDataFinished(uint32_t connectionId, int32_t error)
+{
+    if (error != SOFTBUS_OK) {
+        return;
+    }
+    int32_t status = ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
+        connectionId, 0, NULL, WAIT_NEGOTIATION_CLOSING_TIMEOUT_MILLIS);
+    if (status != SOFTBUS_OK) {
+        CLOGE("post closing timeout event failed, err=%d", status);
+    }
+}
+
+
 int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
 {
     int32_t status = SoftBusMutexLock(&connection->lock);
@@ -264,8 +278,7 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
         connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
-    CLOGI("ble notify refrence, connection id=%u, side=%d, delta=%d, after update reference, localRc=%d,"
-          "underlayer handle=%d",
+    CLOGI("connId=%u, side=%d, delta=%d, after update reference, localRc=%d,underlayer handle=%d",
         connection->connectionId, connection->side, delta, localRc, underlayerHandle);
 
     if (localRc <= 0) {
@@ -276,8 +289,6 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
             ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_NO_REFERENCE);
             return SOFTBUS_OK;
         }
-        ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
-            connection->connectionId, 0, NULL, WAIT_NEGOTIATION_CLOSING_TIMEOUT_MILLIS);
     }
 
     int32_t flag = delta >= 0 ? CONN_HIGH : CONN_LOW;
@@ -294,11 +305,16 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
     uint32_t dataLen = 0;
     int64_t seq = ConnBlePackCtlMessage(ctx, &data, &dataLen);
     if (seq < 0) {
-        CLOGE("ATTENTION, ble pack notify request message failed, connection id=%u, underlayer handle=%d, error=%d",
+        CLOGE("ble pack notify request message failed, connection id=%u, underlayer handle=%d, error=%d",
             connection->connectionId, underlayerHandle, (int32_t)seq);
         return (int32_t)seq;
     }
-    status = ConnBlePostBytes(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+    if (localRc <= 0) {
+        status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq,
+            OnDisconnectedDataFinished);
+    } else {
+        status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
+    }
     return status;
 }
 
@@ -362,7 +378,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
             (int32_t)seq);
         return (int32_t)seq;
     }
-    status = ConnBlePostBytes(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+    status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
     return status;
 }
 
@@ -507,7 +523,7 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
             SoftBusFree(buf);
             break;
         }
-        status = ConnBlePostBytes(connection->connectionId, buf, bufLen, 0, CONN_HIGH, MODULE_BLE_NET, 0);
+        status = ConnBlePostBytesInner(connection->connectionId, buf, bufLen, 0, CONN_HIGH, MODULE_BLE_NET, 0, NULL);
         CLOGI("ble send basic info, connection id=%u, side=%s, status=%d", connection->connectionId,
             connection->side == CONN_SIDE_CLIENT ? "client" : "server", status);
         if (status != SOFTBUS_OK) {
