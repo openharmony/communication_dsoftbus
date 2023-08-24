@@ -71,8 +71,8 @@ void LNNLaneMockTest::SetUpTestCase()
 
 void LNNLaneMockTest::TearDownTestCase()
 {
-    LaneDepsInterfaceMock linkMock;
-    EXPECT_CALL(linkMock, LnnDestoryP2p).WillRepeatedly(Return());
+    LnnWifiAdpterInterfaceMock wifiMock;
+    EXPECT_CALL(wifiMock, LnnDestoryP2p).WillRepeatedly(Return());
     DeinitLane();
     LooperDeinit();
     GTEST_LOG_(INFO) << "LNNLaneMockTest end";
@@ -588,8 +588,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     DestroyLink(NODE_NETWORK_ID, 0, LANE_BLE, 0);
-    LaneDepsInterfaceMock linkMock;
-    EXPECT_CALL(linkMock, LnnDestoryP2p).WillRepeatedly(Return());
+    LnnWifiAdpterInterfaceMock wifiMock;
+    EXPECT_CALL(wifiMock, LnnDestoryP2p).WillRepeatedly(Return());
     DestroyLink(NODE_NETWORK_ID, 0, LANE_P2P, 0);
     DestroyLink(nullptr, 0, LANE_P2P, 0);
 }

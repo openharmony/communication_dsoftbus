@@ -14,6 +14,7 @@
  */
 
 #include "lnn_wifi_adpter_mock.h"
+#include "lnn_lane_link.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,6 +50,22 @@ int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
 SoftBusBand SoftBusGetLinkBand(void)
 {
     return GetWifiAdpterInterface()->SoftBusGetLinkBand();
+}
+
+void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId)
+{
+    return GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, pid, laneLinkReqId);
+}
+
+void LnnDestoryP2p(void)
+{
+    return GetWifiAdpterInterface()->LnnDestoryP2p();
+}
+
+int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
+                      const LaneLinkCb *callback)
+{
+    return GetWifiAdpterInterface()->LnnConnectP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
 }
 }
 }
