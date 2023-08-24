@@ -90,7 +90,7 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
         if (strcmp(ssid, (result + i)->ssid) != 0) {
             continue;
         }
-        if (FillTargetWifiConfig(targetBssid, ssid, &targetDeviceConf, result + i) != SOFTBUS_OK) {
+        if (FillTargetWifiConfig(targetBssid, ssid, result + i, &targetDeviceConf) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill device config failed.");
             SoftBusFree(result);
             return SOFTBUS_ERR;
