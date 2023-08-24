@@ -22,7 +22,7 @@ ohos_distributedtest("DistriStreamTest") {
   include_dirs = [
     "./",
     "$dsoftbus_root_path/tests/sdk/common/include",
-    "//test/developertest/aw/cxx/distributed",
+    "//test/testfwk/developer_test/aw/cxx/distributed",
   ]
   deps = [
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
