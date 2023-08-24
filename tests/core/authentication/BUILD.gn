@@ -393,8 +393,8 @@ ohos_unittest("AuthTcpConnectionTest") {
 ohos_unittest("AuthHichainTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "$dsoftbus_root_path/tests/core/authentication/unittest/auth_common_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "unittest/auth_hichain_test.cpp",
   ]
 
