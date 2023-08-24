@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "wifi_direct_mock_test.h"
+#include "json_mock.h"
 
 #include <gtest/gtest.h>
 #include <securec.h>

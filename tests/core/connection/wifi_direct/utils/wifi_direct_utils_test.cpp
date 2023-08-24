@@ -241,14 +241,14 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest004, TestSize.Level1)
 
 /* wifi_direct_network_utils.c */
 /*
-* @tc.name: testDirectUtilsTest006
+* @tc.name: testDirectUtilsTest005
 * @tc.desc: test ChannelToFrequency
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest006, TestSize.Level1)
+HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest005, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest006, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest005, Start");
     struct WifiDirectNetWorkUtils* self = GetWifiDirectNetWorkUtils();
     int32_t channel = CHANNEL_2G;
     int32_t ret = self->channelToFrequency(channel);
@@ -265,18 +265,18 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest006, TestSize.Level1)
     ret = self->getLocalIpv4InfoArray(ipv4, &size);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusFree(ipv4);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest006, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest005, End");
 };
 
 /*
-* @tc.name: testDirectUtilsTest007
+* @tc.name: testDirectUtilsTest006
 * @tc.desc: test ChannelListToString
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest007, TestSize.Level1)
+HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest006, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest007, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest006, Start");
     struct WifiDirectNetWorkUtils* self = GetWifiDirectNetWorkUtils();
     int32_t array[ARRARY_COUNT] = {TEST_DATA1, TEST_DATA2};
     int32_t *channelArray = array;
@@ -286,18 +286,18 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest007, TestSize.Level1)
     int32_t ret = self->channelListToString(channelArray, channelArraySize, channelListString, inSize);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusFree(channelListString);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest007, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest006, End");
 };
 
 /*
-* @tc.name: testDirectUtilsTest008
+* @tc.name: testDirectUtilsTest007
 * @tc.desc: test frequencyToChannel
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest008, TestSize.Level1)
+HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest007, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest008, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest007, Start");
     struct WifiDirectNetWorkUtils* self = GetWifiDirectNetWorkUtils();
     int32_t frequency = FREQUENCY_2G;
     int32_t ret = self->frequencyToChannel(frequency);
@@ -310,19 +310,19 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest008, TestSize.Level1)
     frequency = FREQUENCY_INVALID_NUM;
     ret = self->frequencyToChannel(frequency);
     EXPECT_TRUE(ret == CHANNEL_INVALID);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest008, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest007, End");
 };
 
 /* wifi_direct_ipv4_info.c */
 /*
-* @tc.name: testDirectUtilsTest001
+* @tc.name: testDirectUtilsTest008
 * @tc.desc: test WifiDirectIpv4InfoToBytes
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest009, TestSize.Level1)
+HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest008, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest009, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest008, Start");
     struct WifiDirectIpv4Info *ipv4 = static_cast<struct WifiDirectIpv4Info*>(SoftBusCalloc(sizeof(*ipv4)));
     ipv4->address = TEST_DATA1;
     ipv4->prefixLength = MIN_NUM;
@@ -337,18 +337,18 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest009, TestSize.Level1)
     uint8_t ipv4Bytes = MIN_NUM;
     WifiDirectIpv4BytesToInfo(&ipv4Bytes, ipv4BytesLen, ipv4, &ipv4Count);
     SoftBusFree(ipv4);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest009, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest008, End");
 };
 
 /*
-* @tc.name: testDirectUtilsTest010
+* @tc.name: testDirectUtilsTest009
 * @tc.desc: test WifiDirectIpv4InfoToBytes
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest010, TestSize.Level1)
+HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest009, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest010, Start");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest009, Start");
     struct WifiDirectIpv4Info *ipv4 = static_cast<struct WifiDirectIpv4Info*>(SoftBusCalloc(sizeof(*ipv4)));
     ipv4->address = TEST_DATA1;
     ipv4->prefixLength = MIN_NUM;
@@ -364,6 +364,6 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest010, TestSize.Level1)
     ipv4Count = MIN_NUM;
     WifiDirectIpv4BytesToInfo(&ipv4Bytes, ipv4BytesLen, ipv4, &ipv4Count);
     SoftBusFree(ipv4);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest010, End");
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectUtilsTest, testDirectUtilsTest009, End");
 };
 } //namespace OHOS
