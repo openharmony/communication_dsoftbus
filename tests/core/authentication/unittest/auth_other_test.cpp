@@ -745,7 +745,6 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
     const char *sessionKeyStr = "www.test.com";
     AuthConnInfo *connInfo = (AuthConnInfo*)SoftBusCalloc(sizeof(AuthConnInfo));
     if (connInfo == NULL) {
-        SoftBusFree(connInfo);
         return;
     }
     (void)memset_s(connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -753,8 +752,6 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
 
     AuthDataHead *head = (AuthDataHead*)SoftBusCalloc(sizeof(AuthDataHead));
     if (head == NULL) {
-        SoftBusFree(head);
-        SoftBusFree(connInfo);
         return;
     }
     (void)memset_s(head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
@@ -766,6 +763,8 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
     connInfo->type = AUTH_LINK_TYPE_WIFI;
     ret = IsFlushDevicePacket(connInfo, head, &data, isServer);
     EXPECT_TRUE(ret == false);
+    SoftBusFree(head);
+    SoftBusFree(connInfo);
 }
 
 /*
