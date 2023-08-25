@@ -242,4 +242,40 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_005, TestSize.Level1)
     LnnDisconnectP2p(network, pid, laneLinkReqId);
     LnnDestoryP2p();
 }
+
+/*
+* @tc.name: GET_WLAN_LINKED_FREQUENCY_TEST_001
+* @tc.desc: LnnQueryLaneResource test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_001, TestSize.Level1)
+{
+   int32_t ret = GetWlanLinkedFrequency();
+   EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: GET_WLAN_LINKED_FREQUENCY_TEST_001
+* @tc.desc: LnnQueryLaneResource test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_002, TestSize.Level1)
+{
+   typedef enum {
+    TEST_BR = -1,
+   }TestLinkType;
+
+   TestLinkType testLink = TEST_BR;
+   LaneLinkType linkType = (LaneLinkType)testLink;
+   LinkAttribute *ret = GetLinkAttrByLinkType(linkType);
+   EXPECT_TRUE(ret == NULL);
+   linkType = LANE_LINK_TYPE_BUTT;
+   ret = GetLinkAttrByLinkType(linkType);
+   EXPECT_TRUE(ret == NULL);
+   linkType = LANE_P2P;
+   ret = GetLinkAttrByLinkType(linkType);
+   EXPECT_TRUE(ret != NULL);
+}
 } // namespace OHOS

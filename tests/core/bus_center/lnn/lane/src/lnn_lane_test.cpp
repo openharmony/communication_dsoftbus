@@ -565,6 +565,17 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
+    LnnWifiAdpterInterfaceMock wifiMock;
+    EXPECT_CALL(wifiMock, LnnConnectP2p)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
     cb.OnLaneLinkException = nullptr;
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -588,7 +599,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     DestroyLink(NODE_NETWORK_ID, 0, LANE_BLE, 0);
-    LnnWifiAdpterInterfaceMock wifiMock;
+    
     EXPECT_CALL(wifiMock, LnnDestoryP2p).WillRepeatedly(Return());
     DestroyLink(NODE_NETWORK_ID, 0, LANE_P2P, 0);
     DestroyLink(nullptr, 0, LANE_P2P, 0);
