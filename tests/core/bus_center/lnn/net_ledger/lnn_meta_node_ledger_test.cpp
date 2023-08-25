@@ -123,4 +123,56 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1
     EXPECT_TRUE(LnnDeactiveMetaNode(nullptr) == SOFTBUS_INVALID_PARAM);
     LnnDeinitMetaNodeLedger();
 }
+
+HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_001, TestSize.Level1)
+{
+    const char *networkId = nullptr;
+    char *udid = nullptr;
+    int32_t ret = LnnGetMetaNodeUdidByNetworkId(networkId, udid);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
+{
+    const char *networkId = nullptr;
+    char *udid = nullptr;
+    MetaNodeConfigInfo info;
+    (void)memset_s(&info, sizeof(MetaNodeConfigInfo), 0, sizeof(MetaNodeConfigInfo));
+    info.addrNum = CONNECTION_ADDR_WLAN;
+    (void)strncpy_s(info.udid, UUID_BUF_LEN, NODE_UDID, strlen(NODE_UDID));
+    (void)strncpy_s(info.deviceName, DEVICE_NAME_BUF_LEN, NODE_DEVICE_NAME, strlen(NODE_DEVICE_NAME));
+    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+
+    int32_t ret = LnnActiveMetaNode(&info, metaNodeId);
+    networkId = info.bypassInfo;
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnGetMetaNodeUdidByNetworkId(networkId, udid);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_001, TestSize.Level1)
+{
+    const char *networkId = nullptr;
+    MetaNodeInfo *nodeInfo = nullptr;
+    int32_t ret = LnnGetMetaNodeInfoByNetworkId(networkId, nodeInfo);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_002, TestSize.Level1)
+{
+    const char *networkId = nullptr;
+    MetaNodeInfo *nodeInfo = nullptr;
+    MetaNodeConfigInfo info;
+    (void)memset_s(&info, sizeof(MetaNodeConfigInfo), 0, sizeof(MetaNodeConfigInfo));
+    info.addrNum = CONNECTION_ADDR_WLAN;
+    (void)strncpy_s(info.udid, UUID_BUF_LEN, NODE_UDID, strlen(NODE_UDID));
+    (void)strncpy_s(info.deviceName, DEVICE_NAME_BUF_LEN, NODE_DEVICE_NAME, strlen(NODE_DEVICE_NAME));
+    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+
+    int32_t ret = LnnActiveMetaNode(&info, metaNodeId);
+    networkId = info.bypassInfo;
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnGetMetaNodeInfoByNetworkId(networkId, nodeInfo);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
 } // namespace OHOS
