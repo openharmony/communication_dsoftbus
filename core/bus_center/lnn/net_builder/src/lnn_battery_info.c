@@ -16,6 +16,7 @@
 #define JSON_KEY_BATTERY_LEAVEL "BatteryLeavel"
 #define JSON_KEY_IS_CHARGING "IsCharging"
 
+#include <securec.h>
 #include "lnn_battery_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_sync_info_manager.h"
@@ -43,7 +44,8 @@ int32_t LnnSyncBatteryInfo(const char *udid, int32_t level, bool isCharging)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "format elect packet fail");
         return SOFTBUS_ERR;
     }
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
     if (ret != SOFTBUS_OK) {
         LLOGE("not target node");
