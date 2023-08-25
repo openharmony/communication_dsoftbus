@@ -501,5 +501,25 @@ void LnnDeinitOffline(void)
     return GetNetBuilderDepsInterface()->LnnDeinitOffline();
 }
 
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
+bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetNetBuilderDepsInterface()->LnnHasDiscoveryType(info, type);
+}
+
+const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+{
+    return GetNetBuilderDepsInterface()->LnnConvertDLidToUdid(id, type);
+}
+
+int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
+{
+    return GetNetBuilderDepsInterface()->GetAuthRequest(requestId, request);
+}
+
 } // extern "C"
 } // namespace OHOS
