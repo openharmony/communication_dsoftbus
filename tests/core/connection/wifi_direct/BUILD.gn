@@ -17,5 +17,6 @@ group("unittest") {
     "negotiate_state:unittest",
     "protocol:unittest",
     "utils:unittest",
+	"data:unittest",
   ]
 }
