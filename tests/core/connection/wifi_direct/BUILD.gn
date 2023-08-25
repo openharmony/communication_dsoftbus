@@ -11,12 +11,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
+import("../../../../dsoftbus.gni")
+
+module_output_path = "dsoftbus/connection"
+
+ohos_unittest("WifiDirectTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct/protocol",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct/negotiate_state",
+    "$dsoftbus_root_path/core/common/softbus_property/include",
+    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "//third_party/googletest/googletest/include",
+    "//third_party/googletest/googletest/src",
+    "//third_party/bounds_checking_function/include",
+    "//foundation/communication/wifi/wifi/interfaces/kits/c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$softbus_adapter_common/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+  sources = [ "wifi_direct_test.cpp" ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":WifiDirectTest",
+    "data:unittest",
     "negotiate_state:unittest",
     "protocol:unittest",
     "utils:unittest",
-	"data:unittest",
   ]
 }
