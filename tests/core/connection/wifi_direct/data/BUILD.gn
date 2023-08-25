@@ -37,9 +37,7 @@ ohos_unittest("WifiDirectDataTest") {
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
   ]
-  sources = [
-    "connection_wifi_data_test.cpp",
-  ]
+  sources = [ "wifi_direct_data_test.cpp" ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
@@ -56,7 +54,5 @@ ohos_unittest("WifiDirectDataTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":WifiDirectDataTest",
-  ]
+  deps = [ ":WifiDirectDataTest" ]
 }

@@ -55,10 +55,7 @@ public:
     void TearDown() override {}
 };
 
-void WifiDirectDataTest::SetUpTestCase()
-{
-
-}
+void WifiDirectDataTest::SetUpTestCase() {}
 
 // interface_info.c
 /*
@@ -989,7 +986,6 @@ HWTEST_F(WifiDirectDataTest, testWifiConfigInfoGetContainerName001, TestSize.Lev
 */
 HWTEST_F(WifiDirectDataTest, testWifiConfigInfoUnmarshalling001, TestSize.Level1)
 {
-
     struct WifiConfigInfo configInfo;
     size_t configSize = WIFI_CFG_INFO_MAX_LEN;
     uint8_t config[WIFI_CFG_INFO_MAX_LEN] = {0};
@@ -1496,7 +1492,7 @@ HWTEST_F(WifiDirectDataTest, testInfoContainerGet001, TestSize.Level1)
     size_t key = LENGTH_HEADER;
     size_t size = FOUR_NUM;
     size_t count = THIRD_NUM;
-    container->get(container,key, &size, &count);
+    container->get(container, key, &size, &count);
     InterfaceInfoDelete(self);
     EXPECT_EQ(key, LENGTH_HEADER);
 }
