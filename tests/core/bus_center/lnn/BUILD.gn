@@ -1261,16 +1261,16 @@ ohos_unittest("LNNLaneMockTest") {
 ohos_unittest("LNNLaneLinkTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_p2p.c",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src/softbus_proxychannel_pipeline.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_manager_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_negotiate_channel_virtual.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/channel/default_negotiate_channel_virtual.c",
     "$dsoftbus_root_path/adapter/common/net/wifi/common/softbus_wifi_api_adapter_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_select_rule.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_p2p.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_select.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_select_rule.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel/default_negotiate_channel_virtual.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_negotiate_channel_virtual.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_manager_virtual.c",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src/softbus_proxychannel_listener.c",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src/softbus_proxychannel_pipeline.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_test.cpp",
   ]
