@@ -34,6 +34,7 @@
 #include "softbus_adapter_json.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
+#include "lnn_lane_score.h"
 
 namespace OHOS {
 using namespace testing::ext;
