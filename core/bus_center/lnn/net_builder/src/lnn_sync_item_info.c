@@ -57,6 +57,13 @@ static int32_t FillTargetWifiConfig(const unsigned char *targetBssid, const char
     return SOFTBUS_OK;
 }
 
+static void ResultClean(SoftBusWifiDevConf *result)
+{
+    (void)memset_s(result, sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE, 0,
+                   sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
+    SoftBusFree(result);
+}
+
 static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const char *ssid)
 {
     SoftBusWifiDevConf *result = NULL;
@@ -76,13 +83,13 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
     retVal = SoftBusGetWifiDeviceConfig(result, &wifiConfigSize);
     if (retVal != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get wifi device config fail");
-        SoftBusFree(result);
+        ResultClean(result);
         return SOFTBUS_ERR;
     }
 
     if (wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi device config size is invalid.");
-        SoftBusFree(result);
+        ResultClean(result);
         return SOFTBUS_ERR;
     }
 
@@ -92,23 +99,27 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
         }
         if (FillTargetWifiConfig(targetBssid, ssid, result + i, &targetDeviceConf) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill device config failed.");
-            SoftBusFree(result);
+            (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
+            ResultClean(result);
             return SOFTBUS_ERR;
         }
         break;
     }
     if (SoftBusDisconnectDevice() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dis connect device failed.");
-        SoftBusFree(result);
+        (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
+        ResultClean(result);
         return SOFTBUS_ERR;
     }
 
     if (SoftBusConnectToDevice(&targetDeviceConf) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connect to target ap failed.");
-        SoftBusFree(result);
+        (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
+        ResultClean(result);
         return SOFTBUS_ERR;
     }
-    SoftBusFree(result);
+    (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
+    ResultClean(result);
     return SOFTBUS_OK;
 }
 
