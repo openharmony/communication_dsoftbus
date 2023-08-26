@@ -147,44 +147,6 @@ NO_SANITIZE("cfi") void TransChannelDeinit(void)
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
-static int32_t TransGetRemoteInfo(const SessionParam* param, AppInfo* appInfo)
-{
-    if (param == NULL || appInfo == NULL) {
-        return SOFTBUS_ERR;
-    }
-    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "direct get remote node uuid err");
-        char peerNetworkId[NETWORK_ID_BUF_LEN];
-        (void)memset_s(peerNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
-        if (LnnGetNetworkIdByUuid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by uuid");
-        } else {
-            if (strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId),
-                param->peerDeviceId) != SOFTBUS_OK) {
-                return SOFTBUS_ERR;
-            }
-            if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
-                return SOFTBUS_ERR;
-            }
-            return SOFTBUS_OK;
-        }
-        if (LnnGetNetworkIdByUdid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by udid");
-            return SOFTBUS_ERR;
-        }
-        if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
-        }
-        if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-            appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
-            return SOFTBUS_ERR;
-        }
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
 {
     if (param == NULL || param->attr == NULL) {
@@ -226,8 +188,9 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
         return SOFTBUS_ERR;
     }
-    if (TransGetRemoteInfo(param, appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node info err");
+    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
+        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
