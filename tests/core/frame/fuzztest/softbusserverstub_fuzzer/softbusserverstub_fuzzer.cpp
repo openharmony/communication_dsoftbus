@@ -129,6 +129,29 @@ bool UnPublishServiceFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
+bool CreateSessionServerFuzzTest(const uint8_t* data, size_t size)
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return false;
+    }
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(SOFTBUS_SERVER_SA_ID);
+    if (object == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
+    datas.WriteBuffer(data, size);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    SetAceessTokenPermission("SoftBusServerStubTest");
+    if (object->SendRequest(SERVER_CREATE_SESSION_SERVER, datas, reply, option) != ERR_NONE) {
+        return false;
+    }
+    return true;
+}
+
 bool RemoveSessionServerFuzzTest(const uint8_t* data, size_t size)
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -940,6 +963,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 
     OHOS::OpenSessionFuzzTest(data, size);
     OHOS::OpenAuthSessionFuzzTest(data, size);
+    OHOS::CreateSessionServerFuzzTest(data, size);
     OHOS::RemoveSessionServerFuzzTest(data, size);
     OHOS::NotifyAuthSuccessFuzzTest(data, size);
     OHOS::CloseChannelFuzzTest(data, size);
