@@ -65,7 +65,7 @@ public:
     virtual int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo) = 0;
     virtual int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth) = 0;
     virtual void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId) = 0;
-    virtual void LnnDestoryP2p(void) = 0;
+    virtual void LnnDestroyP2p(void) = 0;
     virtual int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
         const LaneLinkCb *callback) = 0;
     virtual ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol) = 0;
@@ -103,7 +103,7 @@ public:
     MOCK_METHOD2(AuthGetConnInfo, int32_t (int64_t, AuthConnInfo *));
     MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
     MOCK_METHOD3(LnnDisconnectP2p, void (const char *, int32_t, uint32_t));
-    MOCK_METHOD0(LnnDestoryP2p, void ());
+    MOCK_METHOD0(LnnDestroyP2p, void ());
     MOCK_METHOD5(LnnConnectP2p, int32_t (const char *, int32_t, bool, uint32_t, const LaneLinkCb *));
     MOCK_METHOD2(ConnBleGetClientConnectionByUdid, ConnBleConnection *(const char *, BleProtocolType));
     MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));

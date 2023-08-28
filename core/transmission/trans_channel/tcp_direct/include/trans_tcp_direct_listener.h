@@ -21,6 +21,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+    ListNode node;
+    char myIp[IP_LEN];
+    int32_t myPort;
+    ListenerModule moudleType;
+} HmlListenerInfo;
+
 int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer);
 
 int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info);

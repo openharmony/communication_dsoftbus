@@ -99,6 +99,15 @@ extern "C" {
 #define EVENT_NODE_STATUS_CHANGED 0x08
 
 /**
+ * @brief Indicates the mask bit for a LNN node network status change event.
+ * If you want to receive such events, set the mask bit in {@link INodeStateCb.events}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define EVENT_NODE_STATE_NETWORK_CHANGED 0x10
+
+/**
  * @brief Indicates mask bits for {@link INodeStateCb.events}.
  *
  * @since 1.0
@@ -250,7 +259,7 @@ typedef struct {
 typedef enum {
     TYPE_NETWORK_ID = 0,  /**< Network ID change */
     TYPE_DEVICE_NAME,     /**< Device name change */
-    TYPE_NETWORK_INFO,    /**< Network Info change */
+    TYPE_NETWORK_INFO,    /**< Device network info change */
 } NodeBasicInfoType;
 
 /**

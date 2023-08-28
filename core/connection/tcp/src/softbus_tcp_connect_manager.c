@@ -64,7 +64,7 @@ static const ConnectCallback *g_tcpConnCallback;
 static ConnectFuncInterface g_tcpInterface;
 
 static int32_t AddTcpConnInfo(TcpConnInfoNode *item);
-static void DelTcpConnInfo(uint32_t connectionId);
+static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t fd);
 static void DelAllConnInfo(ListenerModule moduleId);
 static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr);
 static int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd);
@@ -133,31 +133,46 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void DelTcpConnInfo(uint32_t connectionId)
+NO_SANITIZE("cfi") static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t fd)
 {
-    if (g_tcpConnInfoList == NULL) {
+    CONN_CHECK_AND_RETURN_LOG(g_tcpConnInfoList, "global connection list is null");
+    int32_t status = SoftBusMutexLock(&g_tcpConnInfoList->lock);
+    if (status != SOFTBUS_OK) {
+        CLOGE("lock failed, connid=%u, error=%d", connectionId, status);
         return;
     }
-    TcpConnInfoNode *item = NULL;
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CLOGE("lock failed");
-        return;
-    }
-    LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
-        if (item->connectionId == connectionId) {
-            (void)DelTrigger((ListenerModule)(item->info.socketInfo.moduleId), item->info.socketInfo.fd, RW_TRIGGER);
-            ConnShutdownSocket(item->info.socketInfo.fd);
-            ListDelete(&item->node);
-            g_tcpConnInfoList->cnt--;
-            (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
-            g_tcpConnCallback->OnDisconnected(connectionId, &item->info);
-            SoftBusFree(item);
-            return;
+
+    TcpConnInfoNode *target = NULL;
+    TcpConnInfoNode *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
+        if (it->connectionId == connectionId) {
+            target = it;
+            break;
         }
     }
+    if (target != NULL) {
+        ListDelete(&target->node);
+        status = DelTrigger((ListenerModule)target->info.socketInfo.moduleId,
+            target->info.socketInfo.fd, RW_TRIGGER);
+        if (status != SOFTBUS_TCPFD_NOT_IN_TRIGGER) {
+            ConnShutdownSocket(it->info.socketInfo.fd);
+        }
+        g_tcpConnInfoList->cnt--;
+        (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
+        g_tcpConnCallback->OnDisconnected(connectionId, &target->info);
+        SoftBusFree(target);
+        return;
+    }
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
-    CLOGE("DelTcpConnInfo failed. ConnectionId:%08x not found.", connectionId);
-    return;
+
+    CLOGE("delete tcp conn failed. connid=%u not found, module=%d, fd=%d", connectionId, module, fd);
+    if (module >= UNUSE_BUTT || module < 0 || fd < 0) {
+        return;
+    }
+    status = DelTrigger(module, fd, RW_TRIGGER);
+    if (status != SOFTBUS_TCPFD_NOT_IN_TRIGGER) {
+        ConnShutdownSocket(fd);
+    }
 }
 
 static void DelTcpConnNode(uint32_t connectionId)
@@ -289,8 +304,9 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TcpOnDataEventOut(int32_t fd)
+static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
 {
+    (void)module;
     TcpConnInfoNode tcpInfo;
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
 
@@ -322,16 +338,16 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEventOut(int32_t fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TcpOnDataEventIn(int32_t fd)
+static int32_t TcpOnDataEventIn(ListenerModule module, int32_t fd)
 {
     uint32_t connectionId = CalTcpConnectionId(fd);
-    ConnPktHead head;
+    ConnPktHead head = {0};
     uint32_t headSize = sizeof(ConnPktHead);
     ssize_t bytes = ConnRecvSocketData(fd, (char *)&head, headSize, g_tcpTimeOut);
     UnpackConnPktHead(&head);
     if (bytes < 0) {
         CLOGI("TcpOnDataEvent Disconnect fd:%d", fd);
-        DelTcpConnInfo(connectionId);
+        DelTcpConnInfo(connectionId, module, fd);
         return SOFTBUS_OK;
     } else if (bytes != (ssize_t)headSize) {
         CLOGE("Recv Head failed.");
@@ -339,7 +355,7 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEventIn(int32_t fd)
     }
     char *data = RecvData(&head, fd, head.len);
     if (data == NULL) {
-        DelTcpConnInfo(connectionId);
+        DelTcpConnInfo(connectionId, module, fd);
         return SOFTBUS_ERR;
     }
     g_tcpConnCallback->OnDataReceived(connectionId, (ConnModule)(head.module),
@@ -352,16 +368,16 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEvent(ListenerModule module, int32_t events,
 {
     (void)module;
     if (events == SOFTBUS_SOCKET_IN) {
-        return TcpOnDataEventIn(fd);
+        return TcpOnDataEventIn(module, fd);
     }
 
     if (events == SOFTBUS_SOCKET_OUT) {
         CLOGI("recv tcp write events fd=%d", fd);
-        return TcpOnDataEventOut(fd);
+        return TcpOnDataEventOut(module, fd);
     }
     CLOGI("recv tcp invalid events=%d fd=%d", events, fd);
     uint32_t connectionId = CalTcpConnectionId(fd);
-    DelTcpConnInfo(connectionId);
+    DelTcpConnInfo(connectionId, module, fd);
     return SOFTBUS_ERR;
 }
 NO_SANITIZE("cfi") static void DelAllConnInfo(ListenerModule moduleId)
@@ -517,7 +533,7 @@ int32_t TcpDisconnectDevice(uint32_t connectionId)
     if (TcpGetConnectionInfo(connectionId, &info) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    DelTcpConnInfo(connectionId);
+    DelTcpConnInfo(connectionId, UNUSE_BUTT, -1);
     return SOFTBUS_OK;
 }
 

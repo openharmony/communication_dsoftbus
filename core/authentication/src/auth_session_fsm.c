@@ -379,6 +379,11 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
             if (authFsm->info.isNodeInfoReceived && authFsm->info.isCloseAckReceived) {
                 SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN,
                     "auth fsm[%" PRId64 "] wait for the finish event, ignore this disconnect event", authFsm->authSeq);
+                /*
+                * Note: Local hichain NOT onFinish, but remote hichain already onFinish
+                *      Regard this situation as auth finish
+                */
+                CompleteAuthSession(authFsm, SOFTBUS_OK);
                 break;
             }
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
@@ -701,7 +706,12 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
         TryFinishAuthSession(authFsm);
         return;
     }
-
+    if (info->connInfo.type == AUTH_LINK_TYPE_BLE &&
+        strlen(info->nodeInfo.deviceInfo.deviceUdid) != 0) {
+            (void)SoftBusGenerateStrHash((unsigned char *)info->nodeInfo.deviceInfo.deviceUdid,
+                strlen(info->nodeInfo.deviceInfo.deviceUdid),
+                (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash);
+    }
     if (PostCloseAckMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "post close ack fail.");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_SEND_FAIL);
@@ -877,7 +887,7 @@ static void SetAuthStartTime(AuthFsm *authFsm)
 }
 
 NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
-    uint64_t connId, const AuthConnInfo *connInfo, bool isServer)
+    uint64_t connId, const AuthConnInfo *connInfo, bool isServer, bool isFastAuth)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     if (!RequireAuthLock()) {
@@ -888,6 +898,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t reques
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;
     }
+    authFsm->info.isNeedFastAuth = isFastAuth;
     if (LnnFsmStart(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "start auth fsm[%" PRId64 "]", authFsm->authSeq);
         DestroyAuthFsm(authFsm);

@@ -304,13 +304,19 @@ NO_SANITIZE("cfi") uint32_t ConnGetHeadSize(void)
     return sizeof(ConnPktHead);
 }
 
+SoftBusMutex g_ReqLock;
+static uint32_t g_ReqId = 1;
+
 NO_SANITIZE("cfi") uint32_t ConnGetNewRequestId(ConnModule moduleId)
 {
 #define REQID_MAX 1000000
     (void)moduleId;
-    static uint32_t reqId = 1;
-    reqId++;
-    reqId = reqId % REQID_MAX + 1;
+    CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_ReqLock) == SOFTBUS_OK, g_ReqId, "lock failed");
+    g_ReqId++;
+    g_ReqId = g_ReqId % REQID_MAX + 1;
+
+    uint32_t reqId = g_ReqId;
+    (void)SoftBusMutexUnlock(&g_ReqLock);
     return reqId;
 }
 
@@ -665,6 +671,8 @@ NO_SANITIZE("cfi") int32_t ConnServerInit(void)
         }
     }
     InitTimeNodeList();
+    CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexInit(&g_ReqLock, NULL) == SOFTBUS_OK, SOFTBUS_ERR,
+        "g_ReqLock init lock failed.");
 
     g_isInited = true;
     CLOGI("connect manager init success.");
@@ -689,6 +697,7 @@ NO_SANITIZE("cfi") void ConnServerDeinit(void)
     }
 
     DeinitBaseListener();
+    SoftBusMutexDestroy(&g_ReqLock);
 
     g_isInited = false;
 }

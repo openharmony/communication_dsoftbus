@@ -31,6 +31,7 @@
 #include "trans_auth_message.h"
 #include "trans_channel_limit.h"
 #include "trans_session_manager.h"
+#include "trans_channel_manager.h"
 
 #define AUTH_CHANNEL_REQ 0
 #define AUTH_CHANNEL_REPLY 1
@@ -53,7 +54,6 @@ typedef struct {
 } ConfigTypeMap;
 
 static SoftBusList *g_authChannelList = NULL;
-static int32_t g_channelId = 0;
 static IServerChannelCallBack *g_cb = NULL;
 
 static void TransPostAuthChannelErrMsg(int32_t authId, int32_t errcode, const char *errMsg);
@@ -62,12 +62,6 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isCl
 static int32_t AddAuthChannelInfo(AuthChannelInfo *info);
 static void DelAuthChannelInfoByChanId(int32_t channelId);
 static void DelAuthChannelInfoByAuthId(int32_t authId);
-
-static int32_t GenerateAuthChannelId(void)
-{
-    g_channelId++;
-    return g_channelId;
-}
 
 static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *dstInfo)
 {
@@ -621,7 +615,6 @@ NO_SANITIZE("cfi") void TransAuthDeinit(void)
 {
     UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
     UnregAuthChannelListener(MODULE_AUTH_MSG);
-    g_channelId = 1;
     g_cb = NULL;
 }
 
@@ -696,7 +689,7 @@ static AuthChannelInfo *CreateAuthChannelInfo(const char *sessionName, bool isCl
     if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
         goto EXIT_ERR;
     }
-    info->appInfo.myData.channelId = GenerateAuthChannelId();
+    info->appInfo.myData.channelId = GenerateChannelId(true);
     SoftBusMutexUnlock(&g_authChannelList->lock);
     if (GetAppInfo(sessionName, info->appInfo.myData.channelId, &info->appInfo, isClient) != SOFTBUS_OK) {
         goto EXIT_ERR;

@@ -119,7 +119,9 @@ struct WifiDirectConnectInfo {
     int32_t pid;
     enum WifiDirectConnectType connectType;
     struct WifiDirectNegotiateChannel *negoChannel;
-    enum WifiDirectRole expectRole;
+    uint32_t expectApiRole;
+    bool isStrict;
+    char remoteNetworkId[NETWORK_ID_BUF_LEN];
     char remoteMac[MAC_ADDR_STR_LEN];
     bool isNetworkDelegate;
     int32_t linkId;

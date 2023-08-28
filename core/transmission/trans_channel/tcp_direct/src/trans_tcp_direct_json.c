@@ -22,6 +22,7 @@
 #define MSG_CODE "CODE"
 #define P2P_IP "P2P_IP"
 #define P2P_PORT "P2P_PORT"
+#define PEER_IP "PEER_IP"
 #define ERR_CODE "ERR_CODE"
 #define ERR_DESC "ERR_DESC"
 
@@ -45,7 +46,7 @@ NO_SANITIZE("cfi") char *VerifyP2pPackError(int32_t code, int32_t errCode, const
     return data;
 }
 
-NO_SANITIZE("cfi") char *VerifyP2pPack(const char *myIp, int32_t myPort)
+NO_SANITIZE("cfi") char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp)
 {
     if (myIp == NULL || myPort <= 0) {
         return NULL;
@@ -53,6 +54,9 @@ NO_SANITIZE("cfi") char *VerifyP2pPack(const char *myIp, int32_t myPort)
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         return NULL;
+    }
+    if (peerIp != NULL) {
+        AddStringToJsonObject(json, PEER_IP, peerIp);
     }
     if (!AddNumberToJsonObject(json, MSG_CODE, CODE_VERIFY_P2P) ||
         !AddStringToJsonObject(json, P2P_IP, myIp) ||

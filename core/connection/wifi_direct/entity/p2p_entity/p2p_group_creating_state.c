@@ -56,7 +56,6 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
     if (groupInfo == NULL) {
         CLOGE(LOG_LABEL "create group error");
-        entity->stopNewClientTimer();
         entity->clearJoiningClient();
         entity->isConnectionChangeReceived = false;
         entity->isConnectStateChangeReceived = false;

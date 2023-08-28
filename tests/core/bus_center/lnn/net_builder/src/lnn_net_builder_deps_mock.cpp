@@ -133,9 +133,9 @@ int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
     return GetNetBuilderDepsInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
 }
 
-bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
+bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
 {
-    return GetNetBuilderDepsInterface()->LnnIsSameConnectionAddr(addr1, addr2);
+    return GetNetBuilderDepsInterface()->LnnIsSameConnectionAddr(addr1, addr2, isShort);
 }
 
 bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
@@ -189,9 +189,9 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     return GetNetBuilderDepsInterface()->LnnAddMetaInfo(info);
 }
 
-int32_t LnnGetAllAuthSeq(const char *udid, int64_t *authSeq, uint32_t num)
+int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *authSeq, uint32_t num)
 {
-    return GetNetBuilderDepsInterface()->LnnGetAllAuthSeq(udid, authSeq, num);
+    return GetNetBuilderDepsInterface()->AuthGetLatestAuthSeqList(udid, authSeq, num);
 }
 
 int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,

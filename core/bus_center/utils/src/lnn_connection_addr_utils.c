@@ -22,8 +22,9 @@
 #include "softbus_log.h"
 
 #define LNN_MAX_PRINT_ADDR_LEN 100
+#define SHORT_UDID_HASH_LEN 8
 
-NO_SANITIZE("cfi") bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
+NO_SANITIZE("cfi") bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
 {
     if (addr1 == NULL || addr2 == NULL) {
         return false;
@@ -35,8 +36,13 @@ NO_SANITIZE("cfi") bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, con
         return strncmp(addr1->info.br.brMac, addr2->info.br.brMac, BT_MAC_LEN) == 0;
     }
     if (addr1->type == CONNECTION_ADDR_BLE) {
-        return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, UDID_HASH_LEN) == 0 &&
-        strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
+        if (isShort) {
+            return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, SHORT_UDID_HASH_LEN) == 0 ||
+                strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
+        } else {
+            return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, UDID_HASH_LEN) == 0 ||
+                strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
+        }
     }
     if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0) &&

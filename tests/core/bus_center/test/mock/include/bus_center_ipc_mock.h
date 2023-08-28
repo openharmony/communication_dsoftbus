@@ -29,7 +29,7 @@ public:
     BusCenterIpcInterface() {};
     virtual ~BusCenterIpcInterface() {};
 
-    virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2) = 0;
+    virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort) = 0;
     virtual int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid,
         ConnectionAddr *addr, CustomData *customData) = 0;
     virtual int32_t MetaNodeServerLeave(const char *networkId) = 0;
@@ -76,7 +76,7 @@ public:
     BusCenterIpcInterfaceMock();
     ~BusCenterIpcInterfaceMock() override;
 
-    MOCK_METHOD2(LnnIsSameConnectionAddr, bool(const ConnectionAddr *, const ConnectionAddr *));
+    MOCK_METHOD3(LnnIsSameConnectionAddr, bool(const ConnectionAddr *, const ConnectionAddr *, bool));
     MOCK_METHOD4(MetaNodeServerJoin, int32_t(const char*, int32_t, ConnectionAddr *, CustomData *));
     MOCK_METHOD2(LnnServerLeave, int32_t(const char *, const char *));
     MOCK_METHOD1(MetaNodeServerLeave, int32_t(const char *));

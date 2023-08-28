@@ -18,6 +18,7 @@
 
 #include "lnn_sync_info_manager.h"
 #include "lnn_trans_mock.h"
+#include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -42,6 +43,7 @@ void LNNSyncInfoManagerTest::SetUpTestCase()
 {
     LooperInit();
     NiceMock<LnnTransInterfaceMock> transMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener).WillRepeatedly(
         DoAll(LnnTransInterfaceMock::ActionOfTransRegister, Return(SOFTBUS_OK)));
     int32_t ret = LnnInitSyncInfoManager();
@@ -50,6 +52,7 @@ void LNNSyncInfoManagerTest::SetUpTestCase()
 
 void LNNSyncInfoManagerTest::TearDownTestCase()
 {
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     LnnDeinitSyncInfoManager();
     LooperDeinit();
 }

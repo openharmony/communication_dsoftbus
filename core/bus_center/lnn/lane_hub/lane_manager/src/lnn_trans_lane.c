@@ -34,6 +34,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "softbus_protocol_def.h"
+#include "wifi_direct_error_code.h"
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
@@ -66,6 +67,8 @@ typedef struct {
     uint32_t listNum;
     uint32_t linkRetryIdx;
     bool networkDelegate;
+    bool p2pOnly;
+    int32_t p2pErrCode;
 } LaneLinkNodeInfo;
 
 static ListNode g_multiLinkList;
@@ -174,6 +177,8 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
     linkNode->transType = request->transType;
     linkNode->pid = request->pid;
     linkNode->networkDelegate = request->networkDelegate;
+    linkNode->p2pOnly = request->p2pOnly;
+    linkNode->p2pErrCode = SOFTBUS_OK;
     ListInit(&linkNode->node);
     if (Lock() != SOFTBUS_OK) {
         SoftBusFree(linkNode);
@@ -242,13 +247,18 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
         return SOFTBUS_MEM_ERR;
     }
     LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    if (recommendLinkList == NULL) {
+        return SOFTBUS_ERR;
+    }
     recommendLinkList->linkTypeNum = 0;
     uint32_t listNum = 0;
     if (SelectLane((const char *)transRequest->networkId, &selectParam, recommendLinkList, &listNum) != SOFTBUS_OK) {
+        SoftBusFree(recommendLinkList);
         return SOFTBUS_ERR;
     }
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no link resources available, alloc fail");
+        SoftBusFree(recommendLinkList);
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "select lane link success, linkNum:%d", listNum);
@@ -394,8 +404,8 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocFail(uint32_t laneId, int32_t reas
     if (GetLaneReqInfo(laneId, &reqInfo) != SOFTBUS_OK) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Notify laneAlloc fail, laneId:0x%x, reason:%d", laneId, reason);
-    reqInfo.listener.OnLaneRequestFail(laneId, LANE_LINK_FAILED);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Notify laneAlloc fail, laneId:%d, reason:%d", laneId, reason);
+    reqInfo.listener.OnLaneRequestFail(laneId, reason);
     if (Lock() != SOFTBUS_OK) {
         return;
     }
@@ -461,6 +471,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         return;
     }
     requestInfo.networkDelegate = nodeInfo->networkDelegate;
+    requestInfo.p2pOnly = nodeInfo->p2pOnly;
     requestInfo.linkType = nodeInfo->linkList->linkType[nodeInfo->linkRetryIdx];
     nodeInfo->linkRetryIdx++;
     Unlock();
@@ -506,10 +517,17 @@ static void LaneLinkFail(SoftBusMessage *msg)
         Unlock();
         return;
     }
+    if ((reason >= ERROR_WIFI_DIRECT_END && reason <= ERROR_WIFI_DIRECT_START) ||
+        (reason >= V1_ERROR_END && reason <= V1_ERROR_START)) {
+        nodeInfo->p2pErrCode = reason;
+    }
     if (nodeInfo->linkRetryIdx >= nodeInfo->listNum) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "All linkTypes failed, notify the result");
         Unlock();
         DeleteLaneLinkNode(laneId);
+        if (nodeInfo->p2pErrCode != SOFTBUS_OK) {
+            reason = nodeInfo->p2pErrCode;
+        }
         NotifyLaneAllocFail(laneId, reason);
         return;
     }
