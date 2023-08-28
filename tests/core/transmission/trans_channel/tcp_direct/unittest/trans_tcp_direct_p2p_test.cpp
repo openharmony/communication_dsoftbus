@@ -210,10 +210,10 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
 {
     int64_t authId = 1;
     int64_t seq = 1;
-    int32_t ret = VerifyP2p(authId, nullptr, 0, seq);
+    int32_t ret = VerifyP2p(authId, nullptr, nullptr, 0, seq);
     ASSERT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2p(authId, g_ip, g_port, seq);
+    ret = VerifyP2p(authId, g_ip, nullptr, g_port, seq);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 

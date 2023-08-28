@@ -260,7 +260,7 @@ static int32_t SetMsgParamNameAndType(SoftBusEvtReportMsg *msg, SoftBusEvtParamS
         param = &msg->paramArray[i];
         param->paramType = paramSize[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, paramSize[i].paramName) != EOK) {
-            MLOGE("set msg strcpy_s param name %s fail", paramSize[i].paramName);
+            MLOGE("copy param name %s fail", paramSize[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -327,11 +327,11 @@ static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, ConnResultRecor
     msg->paramNum = CONN_RESULT_DURATION_PARAM_NUM;
 
     if (SetMsgParamNameAndType(msg, g_connResultParam) != SOFTBUS_OK) {
-        MLOGE("conn duration event msg set param name and type fail");
+        MLOGE("set name and type fail");
         return SOFTBUS_ERR;
     }
     if (SetDevConnResultMsgParamValue(msg, record, pkgName, connType) != SOFTBUS_OK) {
-        MLOGE("conn duration event msg set param value fail");
+        MLOGE("set param value fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -347,11 +347,11 @@ static int32_t SoftBusCreateProcStepMsg(SoftBusEvtReportMsg *msg, SoftBusConnTyp
     msg->paramNum = PROCESS_STEP_DURATION_PARAM_NUM;
 
     if (SetMsgParamNameAndType(msg, g_processStepParam) != SOFTBUS_OK) {
-        MLOGE("process step duration msg set param name and type fail");
+        MLOGE("set param name and type fail");
         return SOFTBUS_ERR;
     }
     if (SetDevProcStepMsgParamValue(msg, record, connType, step) != SOFTBUS_OK) {
-        MLOGE("process step duration msg set param value fail");
+        MLOGE("set param value fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -366,7 +366,7 @@ static inline void ClearConnResultMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportConnResultRecordEvt(void)
 {
-    MLOGI("report conn duration event");
+    MLOGD("report conn duration event");
     int32_t ret = SoftBusMutexLock(&g_connResApiLock);
     COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "g_connResApiLock fail");
 
@@ -414,7 +414,7 @@ static inline void ClearProcStepMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportProcessStepRecordEvt()
 {
-    MLOGI("report process step duration event");
+    MLOGD("report process step duration event");
     int32_t ret = SoftBusMutexLock(&g_procStepLock);
     COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "process step duration lock fail");
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(PROCESS_STEP_DURATION_PARAM_NUM);
@@ -449,7 +449,7 @@ static int32_t SoftBusReportProcessStepRecordEvt()
 int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName)
 {
     COMM_CHECK_AND_RETURN_RET_LOG(IsValidString(pkgName, PKG_NAME_SIZE_MAX), SOFTBUS_ERR, "invalid param!");
-    MLOGI("record pid and pkg name, pid=%d, pkgName=%s", pId, pkgName);
+    MLOGD("record pid and pkg name, pid=%d, pkgName=%s", pId, pkgName);
     int32_t ret = SoftBusMutexLock(&g_pIdOfNameLock);
     COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "pId of name lock fail");
     PIdOfPkgNameNode *pIdOfPkgNameNode = GetPkgNameByPId(pId);
@@ -488,7 +488,7 @@ static void ConnResultRecordCount(ConnResultRecord *record, uint64_t costTime)
 
 static int32_t SoftbusReportConnFault(SoftBusConnType connType, int32_t errCode, char *pkgName)
 {
-    MLOGI("report conn fault event");
+    MLOGD("report conn fault event");
     SoftBusFaultEvtInfo connFaultInfo;
     (void)memset_s(&connFaultInfo, sizeof(SoftBusFaultEvtInfo), 0, sizeof(SoftBusFaultEvtInfo));
     connFaultInfo.moduleType = MODULE_TYPE_CONNECT;
@@ -508,7 +508,7 @@ static int32_t SoftbusReportConnFault(SoftBusConnType connType, int32_t errCode,
 int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusConnStatus status,
                                 uint64_t costTime, int32_t errCode)
 {
-    MLOGI("record conn duration connType=%d, status=%d, costTime=%" PRIu64, connType, status, costTime);
+    MLOGD("record conn duration connType=%d, status=%d, costTime=%" PRIu64, connType, status, costTime);
     if (connType < SOFTBUS_HISYSEVT_CONN_TYPE_BR || connType >= SOFTBUS_HISYSEVT_CONN_TYPE_BUTT ||
         status > SOFTBUS_EVT_CONN_FAIL) {
         MLOGE("param is invalid");
@@ -546,6 +546,11 @@ int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusC
     record->mConnFailTime += costTime;
     record->mConnFailCount++;
     SoftBusMutexUnlock(&g_connResApiLock);
+    if (connType == SOFTBUS_HISYSEVT_CONN_TYPE_BR) {
+        errCode = GetErrorCodeEx(errCode, SOFTBUS_HISYSEVT_CONN_TYPE_BR);
+    } else {
+        errCode = GetErrorCodeEx(errCode, SOFTBUS_MOD_CONNECT);
+    }
     COMM_CHECK_AND_RETURN_RET_LOG(SoftbusReportConnFault(connType, errCode, pkgName) == SOFTBUS_OK, SOFTBUS_ERR,
                                   "report conn fault event fail!");
     return SOFTBUS_OK;
@@ -554,7 +559,7 @@ int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusC
 int32_t SoftbusRecordProccessDuration(uint32_t pId, SoftBusConnType connType, SoftBusConnStatus status,
                                       ProcessStepTime *stepTime, int32_t errCode)
 {
-    MLOGI("record process step duration");
+    MLOGD("record process step duration");
     if (stepTime == NULL || connType >= SOFTBUS_HISYSEVT_CONN_TYPE_BUTT || connType < SOFTBUS_HISYSEVT_CONN_TYPE_P2P) {
         MLOGE("param is invalid");
         return SOFTBUS_INVALID_PARAM;

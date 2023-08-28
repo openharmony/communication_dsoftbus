@@ -181,11 +181,9 @@ static void SaveP2pChannel(struct WifiDirectNegotiateChannel *channel)
     }
 }
 
-static int32_t UnpackData(const uint8_t *data, size_t size, struct NegotiateMessage *msg)
+static int32_t UnpackData(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t size,
+                          struct NegotiateMessage *msg)
 {
-    struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOG(channel, SOFTBUS_ERR, LOG_LABEL "channel is null");
-
     struct WifiDirectDecisionCenter *decisionCenter = GetWifiDirectDecisionCenter();
     struct WifiDirectProtocol *protocol = decisionCenter->getProtocol(channel);
     CONN_CHECK_AND_RETURN_RET_LOG(protocol, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, LOG_LABEL "no suitable protocol");
@@ -223,15 +221,20 @@ static struct NegotiateMessage* GenerateNegotiateMessage(struct WifiDirectNegoti
         return NULL;
     }
 
-    msg->putInt(msg, NM_KEY_SESSION_ID, GetWifiDirectNegotiator()->context.currentRequestId);
-    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
-
-    if ((UnpackData(data, size, msg)) != SOFTBUS_OK) {
+    if ((UnpackData(channel, data, size, msg)) != SOFTBUS_OK) {
         CLOGE(LOG_LABEL "unpack msg failed");
         NegotiateMessageDelete(msg);
         return NULL;
     }
 
+    if (msg->isEmpty(msg)) {
+        CLOGE(LOG_LABEL "msg is empty");
+        NegotiateMessageDelete(msg);
+        return NULL;
+    }
+
+    msg->putInt(msg, NM_KEY_SESSION_ID, GetWifiDirectNegotiator()->context.currentRequestId);
+    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     return msg;
 }
 
@@ -257,6 +260,7 @@ static void DumpCommandString(enum WifiDirectNegotiateCmdType cmdType, const cha
         CmdStringItemDefine(CMD_CONN_V2_RESP_3),
         CmdStringItemDefine(CMD_DISCONNECT_V2_REQ),
         CmdStringItemDefine(CMD_DISCONNECT_V2_RESP),
+        CmdStringItemDefine(CMD_CLIENT_JOIN_FAIL_NOTIFY),
         CmdStringItemDefine(CMD_PC_GET_INTERFACE_INFO_REQ),
         CmdStringItemDefine(CMD_PC_GET_INTERFACE_INFO_RESP),
     };
@@ -316,6 +320,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
     int32_t ret = SOFTBUS_OK;
     struct NegotiateMessage *msg = GenerateNegotiateMessage(channel, data, len);
     if (msg == NULL) {
+        CLOGE(LOG_LABEL "GenerateNegotiateMessage failed");
         ret = ERROR_WIFI_DIRECT_UNPACK_DATA_FAILED;
         goto OUT;
     }
@@ -326,7 +331,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
     }
     if (cmdType == CMD_INVALID) {
         CLOGE(LOG_LABEL "CMD_INVALID");
-        ret = ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG;
+        msg->dump(msg);
         goto OUT;
     }
     ret = msg->getInt(msg, NM_KEY_RESULT_CODE, OK);
@@ -342,13 +347,12 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
 
     ret = self->context.currentState->handleNegotiateMessageFromRemote(processor, cmdType, msg);
 OUT:
-    if (msg != NULL) {
-        NegotiateMessageDelete(msg);
-    }
+    NegotiateMessageDelete(msg);
     if (ret != SOFTBUS_OK) {
         self->handleFailure(ret);
         CLOGE(LOG_LABEL "process remote message failed");
     }
+    CLOGI(LOG_LABEL "finish");
 }
 
 static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *channel)
@@ -356,15 +360,15 @@ static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *ch
     if (!channel->isP2pChannel(channel)) {
         return;
     }
+    char uuid[UUID_BUF_LEN] = {0};
+    channel->getDeviceId(channel, uuid, sizeof(uuid));
     CLOGD(LOG_LABEL "enter");
-    GetLinkManager()->clearNegoChannelForLink(channel);
+    GetLinkManager()->clearNegoChannelForLink(uuid, false);
 }
 
 static void OnOperationComplete(int32_t requestId, int32_t result)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    self->stopTimer();
-
     struct WifiDirectProcessor *processor = self->context.currentProcessor;
     CONN_CHECK_AND_RETURN_LOG(processor, LOG_LABEL "processor is null");
 
@@ -490,6 +494,8 @@ static void ResetContext(void)
     self->context.currentTimerId = TIMER_ID_INVALID;
     self->context.currentLinkId = LINK_ID_INVALID;
     self->context.currentTaskType = TASK_TYPE_INVALID;
+    (void)memset_s(self->context.currentRemoteDeviceId, sizeof(self->context.currentRemoteDeviceId), 0,
+                   sizeof(self->context.currentRemoteDeviceId));
     if (self->context.currentCommand) {
         FreeWifiDirectCommand(self->context.currentCommand);
         self->context.currentCommand = NULL;
@@ -597,53 +603,65 @@ static void HandleSuccess(struct NegotiateMessage *msg)
         struct WifiDirectManager *manager = GetWifiDirectManager();
         if (self->context.currentTaskType == TASK_TYPE_CONNECT) {
             if (msg == NULL) {
-                CLOGE(LOG_LABEL "msg is null");
-                goto OUT;
+                self->handleFailure(ERROR_NO_CONTEXT);
+                return;
             }
             struct InnerLink *innerLink = msg->get(msg, NM_KEY_INNER_LINK, NULL, NULL);
             if (innerLink == NULL) {
-                CLOGE(LOG_LABEL "inner link is null");
-                goto OUT;
+                CLOGE(LOG_LABEL " no inner link");
+                self->handleFailure(ERROR_NO_CONTEXT);
+                return;
             }
 
             struct WifiDirectLink link;
             (void)memset_s(&link, sizeof(link), 0, sizeof(link));
             innerLink->getLink(innerLink, self->context.currentRequestId, self->context.currentPid, &link);
-            CLOGI(LOG_LABEL "notify connect success, requestId=%d linkId=%d", self->context.currentRequestId,
-                  link.linkId);
+            CLOGI(LOG_LABEL "connect requestId=%d linkId=%d", self->context.currentRequestId, link.linkId);
             SyncLnnInfo(innerLink);
             manager->onConnectSuccess(self->context.currentRequestId, &link);
         } else if (self->context.currentTaskType == TASK_TYPE_DISCONNECT) {
-            CLOGI(LOG_LABEL "notify disconnect success, requestId=%d linkId=%d remoteMac=%s",
-                  self->context.currentRequestId, self->context.currentLinkId,
-                  WifiDirectAnonymizeMac(self->context.currentRemoteMac));
+            CLOGI(LOG_LABEL "disconnect requestId=%d linkId=%d", self->context.currentRequestId,
+                  self->context.currentLinkId);
             GetLinkManager()->recycleLinkId(self->context.currentLinkId, self->context.currentRemoteMac);
             manager->onDisconnectSuccess(self->context.currentRequestId);
         }
     }
 
-    CLOGI(LOG_LABEL "--dump links--");
     GetResourceManager()->dump();
     GetLinkManager()->dump();
-OUT:
     ChangeState(NEGO_STATE_AVAILABLE);
     ResetContext();
 }
 
+static int32_t g_retryErrorCodeTable[] = {
+    V1_ERROR_BUSY,
+    V1_ERROR_REUSE_FAILED,
+    V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE,
+    ERROR_MANAGER_BUSY,
+    ERROR_ENTITY_BUSY,
+    ERROR_ENTITY_UNAVAILABLE,
+    ERROR_SINK_NO_LINK,
+    ERROR_SOURCE_NO_LINK,
+    ERROR_WIFI_DIRECT_LOCAL_DISCONNECTED_REMOTE_CONNECTED,
+    ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE,
+    ERROR_WIFI_DIRECT_BIDIRECTIONAL_SIMULTANEOUS_REQ,
+    ERROR_P2P_SHARE_LINK_REUSE_FAILED,
+};
+
 static bool IsNeedRetry(int32_t reason)
 {
-    return reason == V1_ERROR_BUSY || reason == ERROR_MANAGER_BUSY || reason == V1_ERROR_REUSE_FAILED ||
-        reason == ERROR_ENTITY_BUSY ||
-        reason == ERROR_WIFI_DIRECT_LOCAL_DISCONNECTED_REMOTE_CONNECTED ||
-        reason == ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE ||
-        reason == ERROR_WIFI_DIRECT_BIDIRECTIONAL_SIMULTANEOUS_REQ ||
-        reason == ERROR_P2P_SHARE_LINK_REUSE_FAILED;
+    for (size_t i = 0; i < ARRAY_SIZE(g_retryErrorCodeTable); i++) {
+        if (reason == g_retryErrorCodeTable[i]) {
+            return true;
+        }
+    }
+    return false;
 }
 
 static void HandleFailure(int32_t reason)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    CLOGI(LOG_LABEL "currentRequestId=%d reason=%d", self->context.currentRequestId, reason);
+    CLOGI(LOG_LABEL "curRequestId=%d reason=%d", self->context.currentRequestId, reason);
     if (self->context.currentRequestId < 0) {
         CLOGI(LOG_LABEL "no caller");
         goto OUT;
@@ -664,7 +682,6 @@ static void HandleFailure(int32_t reason)
     }
 
 OUT:
-    CLOGI(LOG_LABEL "--dump links--");
     GetResourceManager()->dump();
     GetLinkManager()->dump();
     ChangeState(NEGO_STATE_AVAILABLE);
@@ -674,7 +691,7 @@ OUT:
 static void HandleFailureWithoutChangeState(int32_t reason)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    CLOGI(LOG_LABEL "currentRequestId=%d reason=%d", self->context.currentRequestId, reason);
+    CLOGI(LOG_LABEL "curRequestId=%d reason=%d", self->context.currentRequestId, reason);
     if (self->context.currentRequestId < 0) {
         CLOGI(LOG_LABEL "no caller");
         goto OUT;
@@ -695,7 +712,6 @@ static void HandleFailureWithoutChangeState(int32_t reason)
     }
 
 OUT:
-    CLOGI(LOG_LABEL "--dump links--");
     GetResourceManager()->dump();
     GetLinkManager()->dump();
     ResetContext();

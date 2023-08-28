@@ -40,7 +40,7 @@ extern "C" {
 typedef struct {
     char deviceName[DEVICE_NAME_BUF_LEN];
     char unifiedName[DEVICE_NAME_BUF_LEN];
-    char displayName[DEVICE_NAME_BUF_LEN];
+    char nickName[DEVICE_NAME_BUF_LEN];
     char unifiedDefaultName[DEVICE_NAME_BUF_LEN];
     char deviceUdid[UDID_BUF_LEN];
     uint16_t deviceTypeId;

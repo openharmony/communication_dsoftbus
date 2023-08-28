@@ -32,10 +32,12 @@
 #define TRANS_REQUEST_PENDING_TIMEOUT (5000)
 #define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
 #define SESSION_NAME_CASTPLUS "CastPlusSessionName"
+#define SESSION_NAME_DISTRIBUTE_COMMUNICATION "com.huawei.boosterd.user"
 
 typedef struct {
     ListNode node;
     uint32_t laneId;
+    int32_t errCode;
     SoftBusCond cond;
     bool bSucc;
     bool isFinished;
@@ -119,6 +121,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc lane request item err.");
         return SOFTBUS_MALLOC_ERR;
     }
+    item->errCode = SOFTBUS_ERR;
     item->laneId = laneId;
     item->bSucc = false;
     item->isFinished = false;
@@ -144,7 +147,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneConnInfo *connInfo)
+static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneConnInfo *connInfo, int32_t *errCode)
 {
     if (bSucc == NULL || connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param err.");
@@ -163,6 +166,7 @@ static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneCon
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
         if (item->laneId == laneId) {
             *bSucc = item->bSucc;
+            *errCode = item->errCode;
             if (memcpy_s(connInfo, sizeof(LaneConnInfo), &(item->connInfo), sizeof(LaneConnInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
                 return SOFTBUS_ERR;
@@ -176,7 +180,8 @@ static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneCon
     return SOFTBUS_ERR;
 }
 
-static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc, const LaneConnInfo *connInfo)
+static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc,
+    const LaneConnInfo *connInfo, int32_t errCode)
 {
     if (g_reqLanePendingList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lane request list hasn't initialized.");
@@ -191,6 +196,7 @@ static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc, cons
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
         if (item->laneId == laneId) {
             item->bSucc = bSucc;
+            item->errCode = errCode;
             if ((connInfo != NULL) &&
                 (memcpy_s(&(item->connInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK)) {
                 (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
@@ -210,16 +216,16 @@ static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc, cons
 static void TransOnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *connInfo)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans on lane[%u] request success.", laneId);
-    if (TransUpdateLaneConnInfoByLaneId(laneId, true, connInfo) != SOFTBUS_OK) {
+    if (TransUpdateLaneConnInfoByLaneId(laneId, true, connInfo, SOFTBUS_OK) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "update lane connInfo failed, id[%u].", laneId);
     }
     return;
 }
 
-static void TransOnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void TransOnLaneRequestFail(uint32_t laneId, int32_t reason)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans on lane[%u] request failed, reason[%u].", laneId, reason);
-    if (TransUpdateLaneConnInfoByLaneId(laneId, false, NULL) != SOFTBUS_OK) {
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans on lane[%u] request failed, reason[%d].", laneId, reason);
+    if (TransUpdateLaneConnInfoByLaneId(laneId, false, NULL, reason) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "update lane connInfo failed, id[%u].", laneId);
     }
     return;
@@ -331,6 +337,10 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     if (strcmp(param->sessionName, SESSION_NAME_PHONEPAD) == 0 ||
         strcmp(param->sessionName, SESSION_NAME_CASTPLUS) == 0) {
         requestOption->requestInfo.trans.networkDelegate = true;
+    }
+    requestOption->requestInfo.trans.p2pOnly = false;
+    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0) {
+        requestOption->requestInfo.trans.p2pOnly = true;
     }
     requestOption->requestInfo.trans.transType = transType;
     requestOption->requestInfo.trans.expectedBw = 0; /* init expectBW */
@@ -457,7 +467,8 @@ NO_SANITIZE("cfi") int32_t TransGetLaneInfoByOption(const LaneRequestOption *req
         return SOFTBUS_ERR;
     }
     bool bSuccess = false;
-    if (TransGetLaneReqItemByLaneId(*laneId, &bSuccess, connInfo) != SOFTBUS_OK) {
+    int32_t errCode = SOFTBUS_ERR;
+    if (TransGetLaneReqItemByLaneId(*laneId, &bSuccess, connInfo, &errCode) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lane req item failed. id[%u].", *laneId);
         (void)TransDelLaneReqFromPendingList(*laneId);
         return SOFTBUS_ERR;
@@ -466,7 +477,7 @@ NO_SANITIZE("cfi") int32_t TransGetLaneInfoByOption(const LaneRequestOption *req
     int32_t ret = SOFTBUS_OK;
     if (!bSuccess) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "request lane conninfo failed. id[%u].", *laneId);
-        ret = SOFTBUS_ERR;
+        ret = errCode;
     } else {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "request lane conninfo success. id[%u].", *laneId);
     }

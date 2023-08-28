@@ -19,7 +19,6 @@
 #include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "broadcast_handler.h"
 #include "broadcast_receiver.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "data/resource_manager.h"
@@ -128,14 +127,26 @@ static void NotifyNewClientJoining(struct WifiDirectConnectParams *params)
     self->joiningClientCount++;
     CLOGI(LOG_LABEL "joiningClientCount=%d", self->joiningClientCount);
 
-    self->startNewClientTimer(TIMEOUT_WAIT_CLIENT_JOIN_MS, client);
+    client->timerId = GetWifiDirectTimerList()->startTimer(OnClientJoinTimeout, TIMEOUT_WAIT_CLIENT_JOIN_MS,
+                                                           TIMER_FLAG_ONE_SHOOT, client);
 }
 
 static void CancelNewClientJoining(struct WifiDirectConnectParams *params)
 {
     struct P2pEntity *self = GetP2pEntity();
-    self->stopNewClientTimer();
-    self->removeJoiningClient(params->remoteMac);
+    struct P2pEntityConnectingClient *client = NULL;
+    struct P2pEntityConnectingClient *clientNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
+        if (strcmp(client->remoteMac, params->remoteMac) == 0 && params->requestId == client->requestId) {
+            CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
+            GetWifiDirectTimerList()->stopTimer(client->timerId);
+            ListDelete(&client->node);
+            SoftBusFree(client);
+            self->joiningClientCount--;
+            break;
+        }
+    }
+    CLOGI(LOG_LABEL "joiningClientCount=%d", self->joiningClientCount);
 }
 
 static void RegisterListener(struct EntityListener *listener)
@@ -186,27 +197,6 @@ static void StopTimer(void)
     if (self->currentTimerId != TIMER_ID_INVALID) {
         (void)GetWifiDirectTimerList()->stopTimer(self->currentTimerId);
         self->currentTimerId = TIMER_ID_INVALID;
-    }
-}
-
-static void StartNewClientTimer(int64_t timeMs, struct P2pEntityConnectingClient *client)
-{
-    struct P2pEntity *self = GetP2pEntity();
-    if (self->joiningClientTimerId != TIMER_ID_INVALID) {
-        CLOGE(LOG_LABEL "timer conflict");
-        return;
-    }
-
-    self->joiningClientTimerId =
-        GetWifiDirectTimerList()->startTimer(OnClientJoinTimeout, timeMs, TIMER_FLAG_ONE_SHOOT, client);
-}
-
-static void StopNewClientTimer(void)
-{
-    struct P2pEntity *self = GetP2pEntity();
-    if (self->joiningClientTimerId != TIMER_ID_INVALID) {
-        (void)GetWifiDirectTimerList()->stopTimer(self->joiningClientTimerId);
-        self->joiningClientTimerId = TIMER_ID_INVALID;
     }
 }
 
@@ -264,33 +254,36 @@ static void ConfigIp(const char *interface)
     }
 }
 
-static void ClearJoiningClient(void)
-{
-    struct P2pEntity *self = GetP2pEntity();
-    struct P2pEntityConnectingClient *client = NULL;
-    struct P2pEntityConnectingClient *clientNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
-        CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
-        ListDelete(&client->node);
-        SoftBusFree(client);
-        self->joiningClientCount--;
-    }
-    CLOGD(LOG_LABEL "joiningClientCount=%d", self->joiningClientCount);
-}
-
 static void RemoveJoiningClient(const char *remoteMac)
 {
     struct P2pEntity *self = GetP2pEntity();
     struct P2pEntityConnectingClient *client = NULL;
     struct P2pEntityConnectingClient *clientNext = NULL;
+
     LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
-        if (strcmp(client->remoteMac, remoteMac) == 0) {
-            CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
+        if (strcmp(remoteMac, client->remoteMac) == 0) {
+            CLOGI(LOG_LABEL "request=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
+            GetWifiDirectTimerList()->stopTimer(client->timerId);
             ListDelete(&client->node);
             SoftBusFree(client);
             self->joiningClientCount--;
-            break;
         }
+    }
+    CLOGD(LOG_LABEL "joiningClientCount=%d", self->joiningClientCount);
+}
+
+static void ClearJoiningClient(void)
+{
+    struct P2pEntity *self = GetP2pEntity();
+    struct P2pEntityConnectingClient *client = NULL;
+    struct P2pEntityConnectingClient *clientNext = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
+        CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
+        GetWifiDirectTimerList()->stopTimer(client->timerId);
+        ListDelete(&client->node);
+        SoftBusFree(client);
+        self->joiningClientCount--;
     }
     CLOGD(LOG_LABEL "joiningClientCount=%d", self->joiningClientCount);
 }
@@ -307,11 +300,12 @@ static void OnEntityTimeout(void *data)
 
 static void OnClientJoinTimeout(void *data)
 {
-    GetP2pEntity()->joiningClientTimerId = TIMER_ID_INVALID;
     struct P2pEntityConnectingClient *client = data;
-    CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
     ListDelete(&client->node);
     SoftBusFree(client);
+    GetP2pEntity()->joiningClientCount--;
+    CLOGD(LOG_LABEL "requestId=%d remoteMac=%s joiningClientCount=%d", client->requestId,
+          WifiDirectAnonymizeMac(client->remoteMac), GetP2pEntity()->joiningClientCount);
     client = NULL;
 
     struct WifiDirectConnectParams params;
@@ -344,15 +338,14 @@ static void P2pEntityConstructor(struct P2pEntity *self)
     self->changeState = ChangeState;
     self->startTimer = StartTimer;
     self->stopTimer = StopTimer;
-    self->startNewClientTimer = StartNewClientTimer;
-    self->stopNewClientTimer = StopNewClientTimer;
     self->notifyOperationComplete = NotifyOperationComplete;
     self->enable = Enable;
     self->handleConnectionChange = HandleConnectionChange;
     self->handleConnectStateChange = HandleConnectStateChange;
     self->configIp = ConfigIp;
-    self->clearJoiningClient = ClearJoiningClient;
+
     self->removeJoiningClient = RemoveJoiningClient;
+    self->clearJoiningClient = ClearJoiningClient;
 
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     if (adapter->isWifiP2pEnabled()) {
@@ -381,7 +374,6 @@ static struct P2pEntity g_entity = {
     .isInited = false,
     .currentRequestId = REQUEST_ID_INVALID,
     .currentTimerId = TIMER_ID_INVALID,
-    .joiningClientTimerId = TIMER_ID_INVALID,
     .listener = NULL,
     .isConnectionChangeReceived = false,
     .isConnectStateChangeReceived = false,

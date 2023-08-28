@@ -52,6 +52,7 @@ void LNNNetworkInfoTest::SetUpTestCase()
 {
     LooperInit();
     NiceMock<LnnTransInterfaceMock> transMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfTransRegister enter1");
     EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener(NotNull())).WillRepeatedly(
         LnnTransInterfaceMock::ActionOfTransRegister);
@@ -61,6 +62,7 @@ void LNNNetworkInfoTest::SetUpTestCase()
 
 void LNNNetworkInfoTest::TearDownTestCase()
 {
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     LnnDeinitSyncInfoManager();
     LooperDeinit();
 }

@@ -1557,7 +1557,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     uint32_t requestId = 0;
     uint64_t connId = 0;
     AuthConnInfo *connInfo = nullptr;
-    int32_t ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, connInfo, false);
+    int32_t ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, connInfo, false, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

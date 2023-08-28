@@ -19,10 +19,12 @@
 #include <string.h>
 
 #include "bus_center_manager.h"
+#include "lnn_device_info.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "wifi_direct_manager.h"
 
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -82,6 +84,7 @@ static bool HbHasActiveBrConnection(const char *networkId)
     ConnectOption option = {0};
     char brMac[BT_MAC_LEN] = {0};
 
+    uint8_t binaryAddr[BT_ADDR_LEN] = {0};
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, brMac, sizeof(brMac)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get bt mac err");
         return false;
@@ -89,6 +92,10 @@ static bool HbHasActiveBrConnection(const char *networkId)
     option.type = CONNECT_BR;
     if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, brMac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strcpy_s bt mac err");
+        return false;
+    }
+    if (ConvertBtMacToBinary(brMac, BT_ADDR_LEN, binaryAddr, BT_ADDR_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB convert bt mac err");
         return false;
     }
     ret = CheckActiveConnection(&option);
@@ -143,6 +150,7 @@ NO_SANITIZE("cfi") bool LnnHasActiveConnection(const char *networkId, Connection
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check active connection get invalid param");
         return ret;
     }
+
     switch (addrType) {
         case CONNECTION_ADDR_WLAN:
         case CONNECTION_ADDR_ETH:
@@ -224,6 +232,26 @@ NO_SANITIZE("cfi") int32_t LnnGenerateHexStringHash(const unsigned char *str, ch
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
+{
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
+
+    if (accountHash == NULL || len < HB_SHORT_ACCOUNT_HASH_LEN || len > SHA_256_HASH_LEN) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get accountHash get invaild param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local accountHash fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(accountHash, len, localAccountHash, len) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB get accountHash memcpy_s fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get accountHash [%02x %02x]", accountHash[0], accountHash[1]);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen)
 {
     if (btMac == NULL || brMacHash == NULL) {
@@ -258,7 +286,7 @@ NO_SANITIZE("cfi") int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMac
     }
     if (ConvertBytesToHexString(hashLower, BT_MAC_HASH_STR_LEN, (const uint8_t *)hash,
         BT_MAC_HASH_LEN) != SOFTBUS_OK) {
-        DLOGE("ConvertBytesToHexString failed");
+        LLOGE("ConvertBytesToHexString failed");
         return SOFTBUS_ERR;
     }
     if (StringToUpperCase(hashLower, brMacHash, BT_MAC_HASH_STR_LEN) != SOFTBUS_OK) {
@@ -267,4 +295,30 @@ NO_SANITIZE("cfi") int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMac
     }
     LLOGI("brmacHash :%s", AnonymizesUDID(brMacHash));
     return SOFTBUS_OK;
+}
+
+NO_SANITIZE("cfi") void LnnDumpLocalBasicInfo(void)
+{
+    char *anoyUdid = NULL;
+    char *anoyUuid = NULL;
+    char *anoyNetworkId = NULL;
+    char localIp[IP_LEN] = {0};
+    char localP2PMac[MAC_LEN] = {0};
+    char localBtMac[BT_MAC_LEN] = {0};
+    int32_t onlineNodeNum = 0;
+    NodeBasicInfo localInfo = {0};
+
+    (void)LnnGetLocalDeviceInfo(&localInfo);
+    LLOGI("local DeviceInfo [networkId:%s]", ToSecureStrDeviceID(localInfo.networkId, &anoyNetworkId));
+    const char *devTypeStr = LnnConvertIdToDeviceType(localInfo.deviceTypeId);
+    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN);
+    (void)LnnGetLocalStrInfo(STRING_KEY_P2P_MAC, localP2PMac, MAC_LEN);
+    (void)LnnGetLocalStrInfo(STRING_KEY_BT_MAC, localBtMac, BT_MAC_LEN);
+    (void)LnnGetAllOnlineNodeNum(&onlineNodeNum);
+    LLOGI("devType:%s, deviceTypeId:%hu, deviceName:%s, ip=..*%s, brMac=::::%s, p2pMac=::::%s, "
+        "onlineNodeNum:%d]", devTypeStr, localInfo.deviceTypeId, localInfo.deviceName, AnonymizesIp(localIp),
+        AnonymizesMac(localBtMac), AnonymizesMac(localP2PMac), onlineNodeNum);
+    SoftBusFree(anoyUdid);
+    SoftBusFree(anoyUuid);
+    SoftBusFree(anoyNetworkId);
 }

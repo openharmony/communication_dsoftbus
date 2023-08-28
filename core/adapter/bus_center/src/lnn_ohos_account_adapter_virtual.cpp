@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef LNN_DEVICENAME_INFO_H
-#define LNN_DEVICENAME_INFO_H
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_error_code.h"
 
-#include <stdint.h>
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void UpdateDeviceName(void *p);
-int32_t LnnInitDevicename(void);
-void LnnDeinitDevicename(void);
-
-#ifdef __cplusplus
+int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
+{
+    return SOFTBUS_OK;
 }
-#endif
 
-#endif /* LNN_DEVICENAME_INFO_H */
+int64_t GetCurrentAccount(void)
+{
+    return 0;
+}

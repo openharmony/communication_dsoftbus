@@ -64,14 +64,14 @@ int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
     PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
-            CLOGE("PendingPacket existed. id=%u, seq=%" PRId64, id, seq);
+            CLOGE("PendingPacket exist, id=%u, seq=%" PRId64, id, seq);
             (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_ALREADY_EXISTED;
         }
     }
     pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
     if (pending == NULL) {
-        CLOGE("ConnBrCreateBrPendingPacket SoftBusCalloc failed, id=%u, seq=%" PRId64, id, seq);
+        CLOGE("calloc failed, id=%u, seq=%" PRId64, id, seq);
         (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -144,7 +144,7 @@ int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, 
         SoftBusSysTime outtime;
         SoftBusSysTime now;
         (void)SoftBusGetTime(&now);
-        int64_t time = (int64_t)(now.sec * USECTONSEC * USECTONSEC + now.usec + waitMillis * USECTONSEC);
+        int64_t time = (now.sec * USECTONSEC * USECTONSEC + now.usec + (int64_t)(waitMillis * USECTONSEC));
         outtime.sec = time / USECTONSEC / USECTONSEC;
         outtime.usec = time % (USECTONSEC * USECTONSEC);
         (void)SoftBusCondWait(&pending->cond, &pending->lock, &outtime);
@@ -169,7 +169,7 @@ int32_t ConnBrSetBrPendingPacket(uint32_t id, int64_t seq, void *data)
 {
     PendingPacket *item = NULL;
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        CLOGE("ConnBrSetBrPendingPacket SoftBusMutexLock failed");
+        CLOGE("lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
@@ -193,21 +193,20 @@ int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
     int64_t peerSeq = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||
         !GetJsonObjectNumber64Item(json, KEY_ACK_SEQ_NUM, &peerSeq)) {
-        CLOGE("connection %u ack request message failed: parse window or seq fields failed", connection->connectionId);
+        CLOGE("parse window or seq failed, conn id=%u", connection->connectionId);
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! connection %u ack request message failed: try to lock failed, error=%d",
-            connection->connectionId, status);
+        CLOGE("lock failed, conn id=%u, error=%d", connection->connectionId, status);
         return SOFTBUS_LOCK_ERR;
     }
 
     int32_t localWindows = connection->window;
     (void)SoftBusMutexUnlock(&connection->lock);
 
-    CLOGI("connection %u ack request message: local window=%d, peer window=%d, peer seq=%" PRId64,
+    CLOGD("connection %u ack request message: local window=%d, peer window=%d, peer seq=%" PRId64,
         connection->connectionId, localWindows, peerWindows, peerSeq);
 
     int32_t flag = CONN_HIGH;
@@ -224,8 +223,7 @@ int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
     uint32_t dataLen = 0;
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     if (seq < 0) {
-        CLOGI("connection %u ack request message: pack ack reply message failed: local window=%d, peer "
-              "window=%d, peer seq=%" PRId64 ", error=%d",
+        CLOGE("pack msg failed: conn id=%u, local window=%d, peer window=%d, peer seq=%" PRId64 ", error=%d",
             connection->connectionId, localWindows, peerWindows, peerSeq, (int32_t)seq);
         return (int32_t)seq;
     }
@@ -238,15 +236,13 @@ int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json)
     uint64_t seq = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||
         !GetJsonObjectNumber64Item(json, KEY_ACK_SEQ_NUM, (int64_t *)&seq)) {
-        CLOGE("connection %u ack response message failed: parse window or seq fields failed", connection->connectionId);
+        CLOGE("parse window or seq fields failed, conn id=%u", connection->connectionId);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    CLOGI(
-        "connection %u ack response message: peer window=%d, seq=%" PRId64, connection->connectionId, peerWindows, seq);
+    CLOGD("conn id=%u, peer window=%d, seq=%"PRId64, connection->connectionId, peerWindows, seq);
     int32_t status = ConnBrSetBrPendingPacket(connection->connectionId, seq, NULL);
     if (status != SOFTBUS_OK) {
-        CLOGE("connection %u ack response message failed: set br pending packet failed, error=%d",
-            connection->connectionId, status);
+        CLOGE("set br pending packet failed, conn id=%u, error=%d", connection->connectionId, status);
     }
     return status;
 }

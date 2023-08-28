@@ -347,11 +347,12 @@ NO_SANITIZE("cfi") int32_t SocketConnectDevice(const char *ip, int32_t port, boo
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy remote ip fail.");
         return AUTH_INVALID_FD;
     }
-    int32_t fd = ConnOpenClientSocket(&option, localIp, !isBlockMode);
-    if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConnOpenClientSocket fail.");
-        return AUTH_INVALID_FD;
+    int32_t ret = ConnOpenClientSocket(&option, localIp, !isBlockMode);
+    if (ret < 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ConnOpenClientSocket fail, error=%d", ret);
+        return ret;
     }
+    int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     if (AddTrigger(AUTH, fd, triggerMode) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AddTrigger fail.");
@@ -406,6 +407,7 @@ NO_SANITIZE("cfi") int32_t NipSocketConnectDevice(ListenerModule module,
 NO_SANITIZE("cfi") void SocketDisconnectDevice(ListenerModule module, int32_t fd)
 {
     if (fd < 0) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "invalid fd:%d, maybe has shutdown", fd);
         return;
     }
     (void)DelTrigger(module, fd, RW_TRIGGER);

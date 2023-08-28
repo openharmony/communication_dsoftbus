@@ -44,7 +44,7 @@ static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
 
 static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info);
-static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason);
+static void OnLaneRequestFail(uint32_t laneId, int32_t errCode);
 static void OnLaneStateChange(uint32_t laneId, LaneState state);
 static ILaneListener g_listener = {
     .OnLaneRequestSuccess = OnLaneRequestSuccess,
@@ -72,7 +72,7 @@ void LNNLaneMockTest::SetUpTestCase()
 void LNNLaneMockTest::TearDownTestCase()
 {
     LaneDepsInterfaceMock linkMock;
-    EXPECT_CALL(linkMock, LnnDestoryP2p).WillRepeatedly(Return());
+    EXPECT_CALL(linkMock, LnnDestroyP2p).WillRepeatedly(Return());
     DeinitLane();
     LooperDeinit();
     GTEST_LOG_(INFO) << "LNNLaneMockTest end";
@@ -121,7 +121,7 @@ static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
     CondSignal();
 }
 
-static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void OnLaneRequestFail(uint32_t laneId, int32_t errCode)
 {
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -589,7 +589,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
 
     DestroyLink(NODE_NETWORK_ID, 0, LANE_BLE, 0);
     LaneDepsInterfaceMock linkMock;
-    EXPECT_CALL(linkMock, LnnDestoryP2p).WillRepeatedly(Return());
+    EXPECT_CALL(linkMock, LnnDestroyP2p).WillRepeatedly(Return());
     DestroyLink(NODE_NETWORK_ID, 0, LANE_P2P, 0);
     DestroyLink(nullptr, 0, LANE_P2P, 0);
 }

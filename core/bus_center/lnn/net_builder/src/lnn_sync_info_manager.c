@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "bus_center_event.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
@@ -187,7 +188,7 @@ NO_SANITIZE("cfi") static void CloseUnusedChannel(void *para)
     int64_t diff;
 
     (void)para;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "try close unused channel");
+    LLOGI("try close unused channel");
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "close unused channel lock fail");
         return;
@@ -383,6 +384,41 @@ static INetworkingListener g_networkListener = {
     OnMessageReceived,
 };
 
+static void LnnSyncManagerHandleOffline(const char *networkId)
+{
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        LLOGE("Lock fail");
+        return;
+    }
+    SyncChannelInfo *item = FindSyncChannelInfoByNetworkId(networkId);
+    if (item == NULL) {
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        return;
+    }
+    ListDelete(&item->node);
+    (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+    LLOGI("close sync channel: client=%d server=%d", item->clientChannelId, item->serverChannelId);
+    if (item->clientChannelId != INVALID_CHANNEL_ID) {
+        (void)TransCloseNetWorkingChannel(item->clientChannelId);
+    }
+    if (item->serverChannelId != INVALID_CHANNEL_ID) {
+        (void)TransCloseNetWorkingChannel(item->serverChannelId);
+    }
+    ClearSyncInfoMsg(item, &item->syncMsgList);
+    SoftBusFree(item);
+}
+
+static void OnLnnOnlineStateChange(const LnnEventBasicInfo *info)
+{
+    if ((info == NULL) || (info->event != LNN_EVENT_NODE_ONLINE_STATE_CHANGED)) {
+        return;
+    }
+    LnnOnlineStateEventInfo *onlineStateInfo = (LnnOnlineStateEventInfo*)info;
+    if (!onlineStateInfo->isOnline) {
+        LnnSyncManagerHandleOffline(onlineStateInfo->networkId);
+    }
+}
+
 NO_SANITIZE("cfi") int32_t LnnInitSyncInfoManager(void)
 {
     int32_t i;
@@ -390,6 +426,10 @@ NO_SANITIZE("cfi") int32_t LnnInitSyncInfoManager(void)
     ListInit(&g_syncInfoManager.channelInfoList);
     for (i = 0; i < LNN_INFO_TYPE_COUNT; ++i) {
         g_syncInfoManager.handlers[i] = NULL;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange) != SOFTBUS_OK) {
+        LLOGE("reg online lister fail");
+        return SOFTBUS_ERR;
     }
     if (TransRegisterNetworkingChannelListener(CHANNEL_NAME, &g_networkListener) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "reg proxy channel lister fail");
@@ -405,10 +445,10 @@ NO_SANITIZE("cfi") int32_t LnnInitSyncInfoManager(void)
 NO_SANITIZE("cfi") void LnnDeinitSyncInfoManager(void)
 {
     int32_t i;
-
     for (i = 0; i < LNN_INFO_TYPE_COUNT; ++i) {
         g_syncInfoManager.handlers[i] = NULL;
     }
+    LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange);
     ClearSyncChannelInfo();
     SoftBusMutexDestroy(&g_syncInfoManager.lock);
 }

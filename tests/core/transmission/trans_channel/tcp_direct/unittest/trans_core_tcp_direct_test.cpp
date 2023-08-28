@@ -334,10 +334,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
-    char *ret = VerifyP2pPack(g_ip, g_port);
+    char *ret = VerifyP2pPack(g_ip, g_port, NULL);
     EXPECT_TRUE(ret != nullptr);
 
-    ret = VerifyP2pPack(nullptr, g_port);
+    ret = VerifyP2pPack(nullptr, g_port, NULL);
     EXPECT_TRUE(ret == nullptr);
 }
 
@@ -355,7 +355,7 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
-    char *pack = VerifyP2pPack(g_ip, g_port);
+    char *pack = VerifyP2pPack(g_ip, g_port, NULL);
     EXPECT_TRUE(pack != nullptr);
 
     int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
