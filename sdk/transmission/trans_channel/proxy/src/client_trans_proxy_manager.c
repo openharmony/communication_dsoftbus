@@ -40,7 +40,7 @@
 #include "trans_server_proxy.h"
 #include "trans_pending_pkt.h"
 
-#define SLICE_LEN 1024
+#define SLICE_LEN (32 * 1024)
 #define PROXY_ACK_SIZE 4
 
 static IClientSessionCallBack g_sessionCb;
@@ -508,7 +508,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NoSubPacketProc dataLen[%d] inputLen[%d]", head->dataLen,
-        data);
+        len);
     if (head->dataLen + sizeof(PacketHead) != len) {
         return SOFTBUS_ERR;
     }

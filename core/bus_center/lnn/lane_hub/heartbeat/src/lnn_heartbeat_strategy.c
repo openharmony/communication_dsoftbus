@@ -312,18 +312,18 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
         if (splitHbType < HEARTBEAT_TYPE_MIN) {
             break;
         }
-        if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", splitHbType);
-            return SOFTBUS_ERR;
-        }
         if (i == sendCnt - 1) {
+            if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", splitHbType);
+                return SOFTBUS_ERR;
+            }
             msgPara->isSyncData = true;
-        }
-        if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara,
-            i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
-            msgPara->isSyncData = false;
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin fail, hbType:%d", splitHbType);
-            return SOFTBUS_ERR;
+            if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara,
+                i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
+                msgPara->isSyncData = false;
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin fail, hbType:%d", splitHbType);
+                return SOFTBUS_ERR;
+            }
         }
     }
 

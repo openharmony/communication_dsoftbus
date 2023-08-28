@@ -23,6 +23,7 @@
 #include "disc_interface.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
@@ -50,6 +51,7 @@ public:
     virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis) = 0;
+    virtual int strncmp(const char *strDest, const char *strSrc, size_t len) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -72,6 +74,7 @@ public:
     MOCK_METHOD2(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, bool));
     MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t (const bool *, uint32_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD3(strncmp, int (const char *, const char *, size_t));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H

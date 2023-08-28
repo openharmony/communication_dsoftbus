@@ -762,7 +762,6 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg)
     }
     if (TransProxyTransSendMsg(msg->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, 0) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send bad key buf fail");
-        SoftBusFree(dataInfo.outData);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

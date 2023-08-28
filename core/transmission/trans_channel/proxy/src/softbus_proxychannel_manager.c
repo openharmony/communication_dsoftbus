@@ -744,6 +744,7 @@ NO_SANITIZE("cfi") void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg
         uint32_t outLen;
         char *buf = TransProxyPackFastData(&info->appInfo, &outLen);
         if (buf == NULL) {
+            SoftBusFree(info);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
             return;
         }
@@ -1005,15 +1006,15 @@ NO_SANITIZE("cfi") void TransProxyProcessResetMsg(const ProxyMessage *msg)
     info->peerId = msg->msgHead.peerId;
     info->myId = msg->msgHead.myId;
 
-    if (TransProxyResetChan(info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "reset chan fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &info->appInfo) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
         SoftBusFree(info);
         return;
     }
 
-    if (CheckAppTypeAndMsgHead(&msg->msgHead, &info->appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "only auth channel surpport plain text data");
+    if (TransProxyResetChan(info) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "reset chan fail myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
         SoftBusFree(info);
         return;
     }

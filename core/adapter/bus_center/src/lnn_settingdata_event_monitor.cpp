@@ -38,6 +38,7 @@ namespace OHOS {
 namespace BusCenter {
 static const std::string SETTINGS_DATA_BASE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+static const std::string SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 static const std::string SETTINGS_DATA_FIELD_KEYWORD = "KEYWORD";
 static const std::string SETTINGS_DATA_FIELD_VALUE = "VALUE";
 static const std::string PREDICATES_STRING = "settings.general.device_name";
@@ -74,7 +75,8 @@ static void CreateDataShareHelperInstance(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance remoteObject NULL");
         return;
     }
-    g_dataShareHelper =  DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI);
+    g_dataShareHelper =  DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI,
+        SETTINGS_DATA_EXT_URI);
     if (g_dataShareHelper == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance create fail.");
         return;

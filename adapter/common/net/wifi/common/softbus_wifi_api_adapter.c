@@ -98,12 +98,16 @@ NO_SANITIZE("cfi") int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *config
     retVal = GetDeviceConfigs(result, &wifiConfigSize);
     if (retVal != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi device config fail");
+        (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
+                       sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
         SoftBusFree(result);
         return SOFTBUS_ERR;
     }
 
     if (wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi device config size is invalid.");
+        (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
+                       sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
         SoftBusFree(result);
         return SOFTBUS_ERR;
     }
@@ -111,6 +115,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *config
     for (i = 0; i < wifiConfigSize; i++) {
         if (ConvertSoftBusWifiConfFromWifiDev(result, configList) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert wifi config failed.");
+            (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
+                           sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
             SoftBusFree(result);
             return SOFTBUS_ERR;
         }
@@ -118,6 +124,8 @@ NO_SANITIZE("cfi") int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *config
         configList++;
     }
     *num = wifiConfigSize;
+    (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
+                   sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
     SoftBusFree(result);
     return SOFTBUS_OK;
 }

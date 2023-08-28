@@ -289,8 +289,9 @@ NO_SANITIZE("cfi") static int32_t ConnGattTransSend(ConnBleConnection *connectio
     return SOFTBUS_OK;
 }
 
-int32_t ConnBlePostBytes(
-    uint32_t connectionId, uint8_t *data, uint32_t dataLen, int32_t pid, int32_t flag, int32_t module, int64_t seq)
+int32_t ConnBlePostBytesInner(
+    uint32_t connectionId, uint8_t *data, uint32_t dataLen, int32_t pid, int32_t flag, int32_t module, int64_t seq,
+    PostBytesFinishAction postBytesFinishAction)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(data != NULL, SOFTBUS_INVALID_PARAM,
         "ble post bytes failed, invalid param, data is null, connection id=%u, pid=%d, "
@@ -349,6 +350,7 @@ int32_t ConnBlePostBytes(
     node->seq = seq;
     node->dataLen = dataLen;
     node->data = data;
+    node->onPostBytesFinished = postBytesFinishAction;
     status = ConnBleEnqueueNonBlock((const void *)node);
     if (status != SOFTBUS_OK) {
         CLOGE("ble post bytes failed: enqueue send node failed, connection id=%u, pid=%d, "
@@ -534,8 +536,11 @@ void *BleSendTask(void *arg)
                 break;
         }
         ConnBleReturnConnection(&connection);
-        g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->dataLen, sendNode->pid, sendNode->flag,
-            sendNode->module, sendNode->seq, status);
+        g_transEventListener.onPostBytesFinished(sendNode->connectionId, sendNode->dataLen, sendNode->pid,
+            sendNode->flag, sendNode->module, sendNode->seq, status);
+        if (sendNode->onPostBytesFinished != NULL) {
+            sendNode->onPostBytesFinished(sendNode->connectionId, status);
+        }
         FreeSendNode(sendNode);
         sendNode = NULL;
     }
@@ -545,7 +550,7 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(
         listener != NULL, SOFTBUS_INVALID_PARAM, "init ble trans failed: invalid param, listener is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(listener->onPostByteFinshed != NULL, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOG(listener->onPostBytesFinished != NULL, SOFTBUS_INVALID_PARAM,
         "init ble trans failed: invalid param, listener onPostByteFinshed is null");
 
     int32_t status = ConnBleInitSendQueue();
