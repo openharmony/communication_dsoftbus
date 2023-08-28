@@ -382,6 +382,7 @@ static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgP
                 break;
             }
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
+            HichainCancelRequest(authFsm->authSeq);
             break;
         default:
             SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
