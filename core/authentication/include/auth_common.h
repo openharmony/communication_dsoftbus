@@ -77,6 +77,7 @@ if (expression) { \
 #define INT32_MASK 0xFFFFFFFF
 #define MASK_UINT64_L32 0x00000000FFFFFFFF
 #define MASK_UINT64_H32 0xFFFFFFFF00000000
+#define AUTH_REQUEST_TIMTOUR 30000
 
 #define TO_INT32(value) ((int32_t)(((uint32_t)(value)) & INT32_MASK))
 #define TO_UINT32(value) ((uint32_t)(((uint32_t)(value)) & INT32_MASK))
@@ -126,6 +127,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
 int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option);
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo);
 int32_t GetPeerUdidByNetworkId(const char *networkId, char *udidHash);
+DiscoveryType ConvertToDiscoveryType(AuthLinkType type);
 
 int32_t AuthCommonInit(void);
 void AuthCommonDeinit(void);

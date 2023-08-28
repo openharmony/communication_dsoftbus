@@ -52,10 +52,11 @@ bus_center_server_deps =
     bus_center_net_mgr_deps + bus_center_ledger_deps + bus_center_monitor_deps +
     bus_center_utils_deps + bus_center_decision_center_deps
 
-bus_center_server_src +=
-    [ "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c" ]
-bus_center_server_src +=
-    [ "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c" ]
+bus_center_server_src += [
+  "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
+  "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
+  "$dsoftbus_root_path/core/bus_center/service/src/bus_center_decision_center.c",
+]
 
 bus_center_server_inc += [
   "$dsoftbus_root_path/core/bus_center/interface",

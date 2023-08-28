@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2);
+bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort);
 bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
 bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option, ConnectionAddrType hintType);
 DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);

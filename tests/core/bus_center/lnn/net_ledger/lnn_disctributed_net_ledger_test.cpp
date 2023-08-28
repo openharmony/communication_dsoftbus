@@ -346,23 +346,6 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UDID_Test_001, TestSize
 }
 
 /*
-* @tc.name: LNN_GET_ALL_AUTH_SEQ_Test_001
-* @tc.desc: lnn get all auth seq test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ALL_AUTH_SEQ_Test_001, TestSize.Level1)
-{
-    int64_t authSeq[DISCOVERY_TYPE_COUNT] = {0};
-    int32_t ret = LnnGetAllAuthSeq(nullptr, authSeq, DISCOVERY_TYPE_COUNT);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnGetAllAuthSeq(NODE1_UDID, authSeq, DISCOVERY_TYPE_COUNT);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnGetAllAuthSeq(NODE2_UDID, authSeq, DISCOVERY_TYPE_COUNT);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-}
-
-/*
 * @tc.name: LNN_GET_DLHEARTBEAT_TIMER_STAMP_Test_001
 * @tc.desc: lnn get dl heartbeat time stamp test
 * @tc.type: FUNC

@@ -23,8 +23,8 @@ extern "C" {
 #endif
 
 struct WifiDirectRoleOption {
-    enum WifiDirectRole (*getExpectedP2pRole)(const char *networkId);
-    enum WifiDirectRole (*getRemoteExpectedP2pRole)(const char *networkId);
+    int32_t (*getExpectedRole)(const char *networkId, enum WifiDirectConnectType type, uint32_t *expectedRole,
+                               bool *isStrict);
 };
 
 struct WifiDirectRoleOption *GetWifiDirectRoleOption(void);

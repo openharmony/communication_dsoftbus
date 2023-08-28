@@ -70,7 +70,7 @@ public:
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info);
-    virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2);
+    virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort);
     virtual bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
     virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);
     virtual ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type);
@@ -83,7 +83,7 @@ public:
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
     virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
     virtual int32_t LnnAddMetaInfo(NodeInfo *info);
-    virtual int32_t LnnGetAllAuthSeq(const char *udid, int64_t *authSeq, uint32_t num);
+    virtual int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *authSeq, uint32_t num);
     virtual int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type);
@@ -171,7 +171,7 @@ public:
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *, char *, uint32_t));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char *, InfoKey, char *, uint32_t));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char *, InfoKey, int32_t *));
-    MOCK_METHOD2(LnnIsSameConnectionAddr, bool (const ConnectionAddr *, const ConnectionAddr *));
+    MOCK_METHOD3(LnnIsSameConnectionAddr, bool (const ConnectionAddr *, const ConnectionAddr *, bool));
     MOCK_METHOD2(LnnConvertAddrToOption, bool (const ConnectionAddr *, ConnectOption *));
     MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
     MOCK_METHOD1(LnnDiscTypeToConnAddrType, ConnectionAddrType (DiscoveryType));
@@ -183,7 +183,7 @@ public:
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo * (const char *, IdCategory));
     MOCK_METHOD1(LnnUpdateNodeInfo, int32_t (NodeInfo *));
     MOCK_METHOD1(LnnAddMetaInfo, int32_t (NodeInfo *));
-    MOCK_METHOD3(LnnGetAllAuthSeq, int32_t (const char *, int64_t *, uint32_t));
+    MOCK_METHOD3(AuthGetLatestAuthSeqList, int32_t (const char *, int64_t *, uint32_t));
     MOCK_METHOD5(LnnConvertDlId, int32_t (const char *, IdCategory, IdCategory, char *, uint32_t));
     MOCK_METHOD2(LnnGetOnlineStateById, bool (const char *, IdCategory));
     MOCK_METHOD1(LnnIsNodeOnline, bool (const NodeInfo *));

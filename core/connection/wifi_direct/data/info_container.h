@@ -93,6 +93,7 @@ static struct InfoContainerKeyProperty type##KeyProperties[max]
     /* debug */                                                                                     \
     void (*dump)(struct type *self);                                                                \
                                                                                                     \
+    bool (*isEmpty)(struct type *self);                                                             \
     void (*remove)(struct type *self, size_t key);                                                  \
     struct InfoContainerKeyProperty* (*getKeyProperty)(struct type *self, uint32_t key);            \
                                                                                                     \
@@ -104,6 +105,7 @@ static struct InfoContainerKeyProperty type##KeyProperties[max]
     void (*destructor)(struct type *self);                                                          \
                                                                                                     \
     /* data member */                                                                               \
+    bool dumpFilter;                                                                                \
     struct InfoContainerKeyProperty *keyProperties;                                                 \
     struct {                                                                                        \
         void *data;                                                                                 \

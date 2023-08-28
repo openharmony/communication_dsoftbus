@@ -99,6 +99,7 @@ NO_SANITIZE("cfi") int32_t AddSessionKey(SessionKeyList *list, int32_t index, co
 {
     CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
+    ALOGD("keyLen:%d", key->len);
     SessionKeyItem *item = (SessionKeyItem *)SoftBusMalloc(sizeof(SessionKeyItem));
     if (item == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc SessionKeyItem fail.");
@@ -192,6 +193,7 @@ NO_SANITIZE("cfi") int32_t EncryptData(const SessionKeyList *list, const uint8_t
     SessionKey sessionKey;
     if (GetLatestSessionKey(list, &index, &sessionKey) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get key fail.");
+        ALOGD("keyLen:%d", sessionKey.len);
         return SOFTBUS_ENCRYPT_ERR;
     }
     /* pack key index */
@@ -317,7 +319,7 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
         return;
     }
     if (AuthSessionStartAuth(GenSeq(false), AuthGenRequestId(),
-        auth->connId, &auth->connInfo, false) != SOFTBUS_OK) {
+        auth->connId, &auth->connInfo, false, false) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
             "start auth session to update session key fail, authId=%" PRId64, authId);
     }

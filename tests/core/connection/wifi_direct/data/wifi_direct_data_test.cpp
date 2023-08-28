@@ -432,7 +432,7 @@ HWTEST_F(WifiDirectDataTest, testIsInterfaceAvailable001, TestSize.Level1)
 {
     ResourceManager* self = GetResourceManager();
     const char *interface = "isEnable";
-    bool ret = self->isInterfaceAvailable(interface);
+    bool ret = self->isInterfaceAvailable(interface, false);
     EXPECT_TRUE(ret == false);
 }
 
@@ -446,7 +446,7 @@ HWTEST_F(WifiDirectDataTest, testIsInterfaceAvailable002, TestSize.Level1)
 {
     ResourceManager* self = GetResourceManager();
     const char *interface = "registerListener";
-    bool ret = self->isInterfaceAvailable(interface);
+    bool ret = self->isInterfaceAvailable(interface, false);
     EXPECT_TRUE(ret == false);
 }
 

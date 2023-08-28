@@ -54,6 +54,7 @@ typedef struct {
     int32_t p2pRequestId;
     int32_t p2pModuleGenId;
     bool networkDelegate;
+    bool p2pOnly;
 } P2pRequestInfo;
 
 typedef struct {
@@ -365,7 +366,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
-        wifiDirectInfo->expectRole = GetExpectedP2pRole(item->laneRequestInfo.networkId);
+        wifiDirectInfo->expectApiRole = GetExpectedP2pRole(item->laneRequestInfo.networkId);
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
@@ -398,8 +399,12 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
-        wifiDirectInfo->expectRole = GetExpectedP2pRole(item->laneRequestInfo.networkId);
+        int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
+                               item->laneRequestInfo.networkId);
+        LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "copy networkId failed");
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
+        wifiDirectInfo->connectType =
+            item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_P2P : WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
         return SOFTBUS_OK;
@@ -564,7 +569,6 @@ static void OnAuthConnOpened(uint32_t authRequestId, int64_t authId)
     LLOGI("authRequestId:%d, authId:%" PRId64 "", authRequestId, authId);
     struct WifiDirectConnectInfo info;
     info.requestId = GetWifiDirectManager()->getRequestId();
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
     struct DefaultNegotiateChannel channel;
     DefaultNegotiateChannelConstructor(&channel, authId);
     info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel;
@@ -594,14 +598,15 @@ static void OnAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)
 }
 
 static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, uint32_t laneLinkReqId,
-    int32_t channelRequestId, const char *networkId, bool networkDelegate, int32_t pid, const LaneLinkCb *callback)
+    const LinkRequest *request, int32_t channelRequestId, const LaneLinkCb *callback)
 {
     P2pLinkReqList *item = (P2pLinkReqList *)SoftBusCalloc(sizeof(P2pLinkReqList));
     if (item == NULL) {
         LLOGE("malloc conn request item err");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (strcpy_s(item->laneRequestInfo.networkId, sizeof(item->laneRequestInfo.networkId), networkId) != EOK) {
+    if (strcpy_s(item->laneRequestInfo.networkId, sizeof(item->laneRequestInfo.networkId),
+        request->peerNetworkId) != EOK) {
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
@@ -610,11 +615,12 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
         return SOFTBUS_MEM_ERR;
     }
     item->laneRequestInfo.laneLinkReqId = laneLinkReqId;
-    item->laneRequestInfo.pid = pid;
+    item->laneRequestInfo.pid = request->pid;
     item->auth.authId = INVAILD_AUTH_ID;
     item->auth.requestId = authRequestId;
     item->p2pInfo.p2pModuleGenId = INVALID_P2P_REQUEST_ID;
-    item->p2pInfo.networkDelegate = networkDelegate;
+    item->p2pInfo.networkDelegate = request->networkDelegate;
+    item->p2pInfo.p2pOnly = request->p2pOnly;
     item->p2pInfo.p2pRequestId = p2pRequestId;
     item->proxyChannelInfo.requestId = channelRequestId;
     if (LinkLock() != 0) {
@@ -731,7 +737,7 @@ static void OnProxyChannelOpenFailed(int32_t channelRequestId, int32_t reason)
     NotifyLinkFail(ASYNC_RESULT_CHANNEL, channelRequestId, reason);
 }
 
-static int32_t OpenProxyChannelToConnP2p(const char *networkId, int32_t pid, bool networkDelegate,
+static int32_t OpenProxyChannelToConnP2p(const LinkRequest *request,
                                          uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
     LLOGI("enter");
@@ -743,11 +749,11 @@ static int32_t OpenProxyChannelToConnP2p(const char *networkId, int32_t pid, boo
         .onChannelOpenFailed = OnProxyChannelOpenFailed,
     };
     int32_t requestId = TransProxyPipelineGenRequestId();
-    int32_t ret = TransProxyPipelineOpenChannel(requestId, networkId, &option, &channelCallback);
+    int32_t ret = TransProxyPipelineOpenChannel(requestId, request->peerNetworkId, &option, &channelCallback);
     LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "open channel failed, ret=%d", ret);
     CLOGI("requestId=%d", requestId);
 
-    ret = AddConnRequestItem(0, 0, laneLinkReqId, requestId, networkId, networkDelegate, pid, callback);
+    ret = AddConnRequestItem(0, 0, laneLinkReqId, request, requestId, callback);
     if (ret != SOFTBUS_OK) {
         LLOGE("add new connect node failed");
         return ret;
@@ -756,18 +762,17 @@ static int32_t OpenProxyChannelToConnP2p(const char *networkId, int32_t pid, boo
     return SOFTBUS_OK;
 }
 
-static int32_t OpenAuthToConnP2p(const char *networkId, int32_t pid,
-    bool networkDelegate, uint32_t laneLinkReqId, const LaneLinkCb *callback)
+static int32_t OpenAuthToConnP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    bool isMetaAuth = GetAuthType(networkId);
-    if (GetPreferAuth(networkId, &connInfo, isMetaAuth) != SOFTBUS_OK) {
+    bool isMetaAuth = GetAuthType(request->peerNetworkId);
+    if (GetPreferAuth(request->peerNetworkId, &connInfo, isMetaAuth) != SOFTBUS_OK) {
         LLOGE("no auth conn exist");
         return SOFTBUS_ERR;
     }
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AddConnRequestItem(authRequestId, 0, laneLinkReqId, 0, networkId, networkDelegate, pid, callback);
+    int32_t ret = AddConnRequestItem(authRequestId, 0, laneLinkReqId, request, 0, callback);
     LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "add new connect node failed");
 
     AuthConnCallback cb = {
@@ -804,21 +809,21 @@ static int32_t LnnP2pInit(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
+int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId,
                       const LaneLinkCb *callback)
 {
-    LNN_CHECK_AND_RETURN_RET_LOG(networkId && callback, SOFTBUS_ERR, "invalid null network id or callback");
+    LNN_CHECK_AND_RETURN_RET_LOG(request && callback, SOFTBUS_ERR, "invalid null request or callback");
     if (g_p2pLinkList == NULL) {
         LNN_CHECK_AND_RETURN_RET_LOG(LnnP2pInit() == SOFTBUS_OK, SOFTBUS_ERR, "p2p not init");
     }
 
-    bool isMetaAuth = GetAuthType(networkId);
+    bool isMetaAuth = GetAuthType(request->peerNetworkId);
     if (isMetaAuth) {
-        return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+        return OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
 
     char uuid[UUID_BUF_LEN] = { 0 };
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfo(request->peerNetworkId, STRING_KEY_UUID, uuid, sizeof(uuid)) != SOFTBUS_OK) {
         LLOGE("get peer uuid fail");
         return SOFTBUS_ERR;
     }
@@ -826,7 +831,7 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, 
     if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
-        return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+        return OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
 
     uint64_t local = 0;
@@ -836,7 +841,7 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, 
         return ret;
     }
     uint64_t remote = 0;
-    ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &remote);
+    ret = LnnGetRemoteNumU64Info(request->peerNetworkId, NUM_KEY_FEATURE_CAPA, &remote);
     if (ret != SOFTBUS_OK) {
         LLOGE("get remote feature capa failed, error=%u, remote=%u", ret, remote);
         return ret;
@@ -845,14 +850,14 @@ int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, 
     if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0) ||
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0)) {
         LLOGI("open auth to connect p2p, local=%u, remot=%u", local, remote);
-        return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+        return OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
 
     LLOGI("open channel to connect p2p");
-    ret = OpenProxyChannelToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+    ret = OpenProxyChannelToConnP2p(request, laneLinkReqId, callback);
     if (ret != SOFTBUS_OK) {
         LLOGE("open channel to connect p2p failed, backward to auth", ret);
-        return OpenAuthToConnP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+        return OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
     return SOFTBUS_OK;
 }
@@ -896,7 +901,7 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
     return;
 }
 
-void LnnDestoryP2p(void)
+void LnnDestroyP2p(void)
 {
     if (g_p2pLinkList == NULL || g_p2pLinkedList == NULL) {
         return;

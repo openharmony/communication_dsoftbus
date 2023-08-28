@@ -94,29 +94,29 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Le
     addr2.info.session.type = NODE2_SESSION_TYPE;
     addr1.type = CONNECTION_ADDR_BR;
     addr2.type = CONNECTION_ADDR_BLE;
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(nullptr, nullptr));
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(nullptr, nullptr, false));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2, false));
     addr2.type = CONNECTION_ADDR_BR;
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2));
-    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2, false));
+    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1, false));
     addr1.type = CONNECTION_ADDR_BLE;
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2));
-    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2, false));
+    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1, false));
     addr1.type = CONNECTION_ADDR_WLAN;
     addr2.type = CONNECTION_ADDR_WLAN;
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2));
-    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2, false));
+    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1, false));
     addr1.type = CONNECTION_ADDR_ETH;
     addr2.type = CONNECTION_ADDR_ETH;
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2));
-    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2, false));
+    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1, false));
     addr1.type = CONNECTION_ADDR_SESSION;
     addr2.type = CONNECTION_ADDR_SESSION;
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2));
-    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2, false));
+    EXPECT_TRUE(LnnIsSameConnectionAddr(&addr1, &addr1, false));
     addr1.type = CONNECTION_ADDR_MAX;
     addr2.type = CONNECTION_ADDR_MAX;
-    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2));
+    EXPECT_TRUE(!LnnIsSameConnectionAddr(&addr1, &addr2, false));
 }
 
 /*

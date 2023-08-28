@@ -60,7 +60,7 @@ void DiscardBuffer(ConnBleReadBuffer *buffer, bool quiet)
     ConnBlePacket *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &buffer->packets, ConnBlePacket, node) {
         if (!quiet) {
-            CLOGE("discard packet (Sequence/Total/Size/Offset)=(%u/%u/%u/%u)", it->header.seq, it->header.total,
+            CLOGE("discard packet (Seq/Total/Size/Offset)=(%u/%u/%u/%u)", it->header.seq, it->header.total,
                 it->header.size, it->header.offset);
         }
         ListDelete(&it->node);
@@ -84,43 +84,41 @@ uint8_t *ConnGattTransRecv(
 
     BleTransHeader header = { 0 };
     CONN_CHECK_AND_RETURN_RET_LOG(UnpackTransHeader(data, dataLen, &header) == SOFTBUS_OK, NULL,
-        "ble recv packet failed: connection id=%u, unpack ble trans header failed, data len=%u, discard this "
-        "packet",
-        connectionId, dataLen);
+        "connId=%u, unpack ble trans header failed, data len=%u, discard this packet", connectionId, dataLen);
 
     if (header.size == header.total) {
         if (buffer->seq != 0) {
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet warning: connection id=%u, there is incomple data "
-                  "waitting to receive, but another complete data received this time, this packet data len=%u, "
-                  "(Sequence/Total/Size/Offset)=(%u/%u/%u/%u), incomple payload (Sequence/Total/Received)=(%u/%u/%u)",
+            CLOGE("connId=%u, there is incomple data waitting to receive, but another complete data received this time,"
+                  " this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u), incomple payload"
+                  "(Seq/Total/Received)=(%u/%u/%u)",
                 connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
                 buffer->received);
         }
         uint32_t valueLen = header.total;
         uint8_t *value = SoftBusCalloc(sizeof(uint8_t) * valueLen);
         CONN_CHECK_AND_RETURN_RET_LOG(value != NULL, NULL,
-            "ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, calloc value failed, this packet "
-            "data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u), discard this packet)",
+            "connId=%u, calloc value failed, this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u), discard "
+            "this packet)",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset);
         if (memcpy_s(value, valueLen, data + BLE_TRANS_HEADER_SIZE, header.size) != EOK) {
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, memcpy_s value failed, this "
-                  "packet data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u), discard this packet",
+            CLOGE("connId=%u, memcpy_s value failed, this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u), "
+                  "discard this packet",
                 connectionId, dataLen, header.seq, header.total, header.size, header.offset);
             SoftBusFree(value);
             return NULL;
         }
-        CLOGI("ble recv packet: connection id=%u, receive a complete packet data len=%u, "
-              "(Sequence/Total/Size/Offset)=(%u/%u/%u/%u)",
+        CLOGI(
+            "ble recv packet: connId=%u, receive a complete packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u)",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset);
         *outLen = valueLen;
         return value;
     }
 
     if (buffer->seq != 0 && (buffer->seq != header.seq || buffer->total != header.total)) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, there is incomple data waitting "
-              "to receive, but another incomplete data received this time or total is difference, discard all received "
-              "segmental packet, this packet data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u). incomple payload "
-              "(Sequence/Total/Received)=(%u/%u/%u)",
+        CLOGE("connId=%u, there is incomple data waitting to receive, but another incomplete data received this time "
+              "or total is difference, discard all received "
+              "segmental packet, this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u). incomple payload "
+              "(Seq/Total/Received)=(%u/%u/%u)",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
             buffer->received);
         DiscardBuffer(buffer, false);
@@ -131,20 +129,19 @@ uint8_t *ConnGattTransRecv(
     LIST_FOR_EACH_ENTRY(it, &buffer->packets, ConnBlePacket, node) {
         if (header.offset < it->header.offset) {
             // mis-order packet received, we try to re-order it
-            CLOGE(
-                "ATTENTION UNEXPECTED SITUATION! ble recv packet: connection id=%u, it received an mis-order packet, "
-                "this time, this packet data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u) is received early than "
-                "this packet (Sequence/Total/Size/Offset)=(%u/%u/%u/%u). There may be more times mis-order occured "
-                "actually, it is not big deal, try to re-order them",
+            CLOGE("ble recv packet: connection id=%u, it received an mis-order packet, "
+                  "this time, this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u) is received early than "
+                  "this packet (Seq/Total/Size/Offset)=(%u/%u/%u/%u). There may be more times mis-order occured, "
+                  "try to re-order them",
                 connectionId, dataLen, it->header.seq, it->header.total, it->header.size, it->header.offset, header.seq,
                 header.total, header.size, header.offset);
             target = it;
             break;
         }
         if (header.offset == it->header.offset) {
-            CLOGE("ATTENTION UNEXPECTED SITUATION! ble recv packet: connection id=%u, it received a duplicate packet "
-                  "this time, this packet data len=%d, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u), cached packet "
-                  "(Sequence/Total/Size/Offset)=(%u/%u/%u/%u), just discart this packet",
+            CLOGE("ble recv packet: connId=%u, it received a duplicate packet "
+                  "this time, this packet data len=%d, (Seq/Total/Size/Offset)=(%u/%u/%u/%u), cached packet "
+                  "(Seq/Total/Size/Offset)=(%u/%u/%u/%u), just discart this packet",
                 connectionId, dataLen, header.seq, header.total, header.size, header.offset, it->header.seq,
                 it->header.total, it->header.size, it->header.offset);
             return NULL;
@@ -154,9 +151,9 @@ uint8_t *ConnGattTransRecv(
     ConnBlePacket *packet = SoftBusCalloc(sizeof(ConnBlePacket));
     uint8_t *copyData = SoftBusCalloc(dataLen);
     if (packet == NULL || copyData == NULL || memcpy_s(copyData, dataLen, data, dataLen) != EOK) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, calloc ble package or copy data "
-              "failed, this packet data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u), discard all received "
-              "segmental packet, incomple payload (Sequence/Total/Received)=(%u/%u/%u)",
+        CLOGE("ble recv packet failed: connId=%u, calloc ble package or copy data "
+              "failed, this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u), discard all received "
+              "segmental packet, incomple payload (Seq/Total/Received)=(%u/%u/%u)",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
             buffer->received);
         DiscardBuffer(buffer, false);
@@ -176,15 +173,15 @@ uint8_t *ConnGattTransRecv(
     buffer->received += header.size;
     buffer->total = header.total;
     if (buffer->received < buffer->total) {
-        CLOGI("ble recv packet: connection id=%u, receive a segmental packet data len=%u, "
-              "(Sequence/Total/Size/Offset)=(%u/%u/%u/%u), it is cached to join together after receiving them all",
+        CLOGI("ble recv packet: connId=%u, receive a segmental packet data len=%u, "
+              "(Seq/Total/Size/Offset)=(%u/%u/%u/%u)",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset);
         return NULL;
     }
 
     if (buffer->received > buffer->total) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, receive data length more than "
-              "expected, this packet data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u), sequence=%u, expected "
+        CLOGE("ble recv packet failed: connId=%u, receive data length more than "
+              "expected, this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u), seq=%u, expected "
               "total len=%u, received len=%u, discard all received segmental packet",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
             buffer->received);
@@ -195,8 +192,8 @@ uint8_t *ConnGattTransRecv(
     uint32_t valueLen = buffer->total;
     uint8_t *value = SoftBusCalloc(sizeof(uint8_t) * valueLen);
     if (value == NULL) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, calloc out value failed, this "
-              "packet data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u) sequence=%u, total len=%u, received "
+        CLOGE("calloc out value failed: connId=%u, this "
+              "packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u) seq=%u, total len=%u, received "
               "len=%u, discard all received segmental packet",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
             buffer->received);
@@ -206,9 +203,9 @@ uint8_t *ConnGattTransRecv(
     uint32_t offset = 0;
     LIST_FOR_EACH_ENTRY(it, &buffer->packets, ConnBlePacket, node) {
         if (it->header.offset != offset) {
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, the packet offset is illegal, "
-                  "this packet data len=%u, (Sequence/Total/Size/Offset)=(%u/%u/%u/%u), packet "
-                  "(Sequence/Total/Size/Offset)=(%u/%u/%u/%u) is not continous, discard all received segmental packet",
+            CLOGE("the packet offset is illegal: connId=%u, "
+                  "this packet data len=%u, (Seq/Total/Size/Offset)=(%u/%u/%u/%u), packet "
+                  "(Seq/Total/Size/Offset)=(%u/%u/%u/%u) is not continous, discard all received segmental packet",
                 connectionId, dataLen, header.seq, header.total, header.size, header.offset, it->header.seq,
                 it->header.total, it->header.size, it->header.offset);
             DiscardBuffer(buffer, false);
@@ -216,8 +213,8 @@ uint8_t *ConnGattTransRecv(
             return NULL;
         }
         if (memcpy_s(value + offset, valueLen - offset, it->data + BLE_TRANS_HEADER_SIZE, it->header.size) != EOK) {
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble recv packet failed: connection id=%u, memcpy_s packet to value "
-                  "failed, this packet data len=%u (Sequence/Total/Size/Offset)=(%u/%u/%u/%u), value len=%u, current "
+            CLOGE("memcpy_s packet to value failed: connId=%u, "
+                  "this packet data len=%u (Seq/Total/Size/Offset)=(%u/%u/%u/%u), value len=%u, current "
                   "value offset=%u, discard all received segmental packet",
                 connectionId, dataLen, header.seq, header.total, header.size, header.offset, valueLen, offset);
             DiscardBuffer(buffer, false);
@@ -227,8 +224,8 @@ uint8_t *ConnGattTransRecv(
         offset += it->header.size;
     }
     DiscardBuffer(buffer, true);
-    CLOGI("ble recv packet: connection id=%u, join segmental packets together, this packet data len=%u, "
-          "(Sequence/Total/Size/Offset)=(%u/%u/%u/%u)",
+    CLOGI("ble recv packet: connId=%u, join segmental packets together, this packet data len=%u, "
+          "(Seq/Total/Size/Offset)=(%u/%u/%u/%u)",
         connectionId, dataLen, header.seq, header.total, header.size, header.offset);
     *outLen = valueLen;
     return value;
@@ -242,8 +239,8 @@ static void FreeSendNode(SendQueueNode *node)
     SoftBusFree(node);
 }
 
-NO_SANITIZE("cfi") static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *data,
-    uint32_t dataLen, int32_t module)
+NO_SANITIZE("cfi")
+static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
 #define BLE_SEND_PACKET_DELAY_MILLIS 10
     const uint8_t *waitSendData = data;
@@ -270,7 +267,7 @@ NO_SANITIZE("cfi") static int32_t ConnGattTransSend(ConnBleConnection *connectio
         header->seq = htonl(sequence);
 
         int32_t status = ConnBleSend(connection, buff, sendLen + BLE_TRANS_HEADER_SIZE, module);
-        CLOGE("ble send packet: connection id=%u, module=%d, payload (Sequence/Total/Size/Offset)=(%u/%d/%d/%u), "
+        CLOGE("ble send packet: connId=%u, module=%d, (Seq/Total/Size/Offset)=(%u/%d/%d/%u), "
               "status=%d",
             connection->connectionId, module, sequence, dataLen, sendLen, offset, status);
         if (status != SOFTBUS_OK) {
@@ -294,12 +291,12 @@ int32_t ConnBlePostBytesInner(
     PostBytesFinishAction postBytesFinishAction)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(data != NULL, SOFTBUS_INVALID_PARAM,
-        "ble post bytes failed, invalid param, data is null, connection id=%u, pid=%d, "
+        "ble post bytes failed, invalid param, data is null, connId=%u, pid=%d, "
         "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
         connectionId, pid, dataLen, flag, module, seq);
 
     if (dataLen == 0 || dataLen > MAX_DATA_LEN) {
-        CLOGE("ble post bytes failed, invalid param, data len is 0 or exceed max send length, connection id=%u, "
+        CLOGE("invalid param, data len is 0 or exceed max send length, connId=%u, "
               "pid=%d, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
             connectionId, pid, dataLen, flag, module, seq);
         SoftBusFree(data);
@@ -308,7 +305,7 @@ int32_t ConnBlePostBytesInner(
 
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     if (connection == NULL) {
-        CLOGE("ble post bytes failed, connection not exist, connection id=%u, pid=%d, "
+        CLOGE("connection not exist, connId=%u, pid=%d, "
               "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
             connectionId, pid, dataLen, flag, module, seq);
         SoftBusFree(data);
@@ -316,8 +313,8 @@ int32_t ConnBlePostBytesInner(
     }
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble post bytes failed: try to lock failed, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), error=%d",
+        CLOGE("try to lock failed, connId=%u, pid=%d, "
+              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), err=%d",
             connectionId, pid, dataLen, flag, module, seq, status);
         ConnBleReturnConnection(&connection);
         SoftBusFree(data);
@@ -326,7 +323,7 @@ int32_t ConnBlePostBytesInner(
     enum ConnBleConnectionState state = connection->state;
     (void)SoftBusMutexUnlock(&connection->lock);
     if (state != BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO && module != MODULE_CONNECTION && module != MODULE_BLE_NET) {
-        CLOGE("ble post bytes failed: connection is not ready, connection id=%u, pid=%d, "
+        CLOGE("connection is not ready, connId=%u, pid=%d, "
               "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), connection state=%d",
             connectionId, pid, dataLen, flag, module, seq, state);
         ConnBleReturnConnection(&connection);
@@ -336,7 +333,7 @@ int32_t ConnBlePostBytesInner(
 
     SendQueueNode *node = (SendQueueNode *)SoftBusCalloc(sizeof(SendQueueNode));
     if (node == NULL) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble post bytes failed, calloc send node failde, connection id=%u, pid=%d, "
+        CLOGE("calloc send node failed, connId=%u, pid=%d, "
               "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
             connectionId, pid, dataLen, flag, module, seq);
         ConnBleReturnConnection(&connection);
@@ -353,17 +350,16 @@ int32_t ConnBlePostBytesInner(
     node->onPostBytesFinished = postBytesFinishAction;
     status = ConnBleEnqueueNonBlock((const void *)node);
     if (status != SOFTBUS_OK) {
-        CLOGE("ble post bytes failed: enqueue send node failed, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), error=%d",
+        CLOGE("enqueue send node failed, connId=%u, pid=%d, "
+              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), err=%d",
             connectionId, pid, dataLen, flag, module, seq, status);
         FreeSendNode(node);
         ConnBleReturnConnection(&connection);
         return status;
     }
     ConnBleRefreshIdleTimeout(connection);
-    CLOGE("ble post bytes: receive post byte request, connection id=%u, pid=%d, "
-          "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
-        connectionId, pid, dataLen, flag, module, seq);
+    CLOGE("ble post bytes: connId=%u, pid=%d, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")", connectionId, pid,
+        dataLen, flag, module, seq);
     ConnBleReturnConnection(&connection);
     return SOFTBUS_OK;
 }
@@ -442,8 +438,7 @@ int64_t ConnBlePackCtlMessage(BleCtlMessageSerializationContext ctx, uint8_t **o
     return seq;
 }
 
-uint8_t *ConnCocTransRecv(
-    uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen)
+uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen)
 {
     uint32_t pktHeadLen = sizeof(ConnPktHead);
     if (buffer->length < pktHeadLen) {
@@ -489,17 +484,17 @@ uint8_t *ConnCocTransRecv(
     }
 
     buffer->length -= packLen;
-    CLOGI("[debug]coc socket read limited buffer: left length=%d", buffer->length);
+    CLOGI("coc socket read limited buffer: left length=%d", buffer->length);
     *outLen = packLen;
     return dataCopy;
 }
 
-NO_SANITIZE("cfi") static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *data,
-    uint32_t dataLen, int32_t module)
+NO_SANITIZE("cfi")
+static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
     int32_t status = ConnBleSend(connection, data, dataLen, module);
-    CLOGE("coc send packet: connection id=%u, module=%d, payload (Total=%u), status=%d",
-        connection->connectionId, module, dataLen, status);
+    CLOGE("coc send packet: connId=%u, module=%d, payload (Total=%u), status=%d", connection->connectionId, module,
+        dataLen, status);
     return status;
 }
 
@@ -515,7 +510,7 @@ void *BleSendTask(void *arg)
         }
         ConnBleConnection *connection = ConnBleGetConnectionById(sendNode->connectionId);
         if (connection == NULL) {
-            CLOGE("ble send data failed: connection is not exist, connection id=%u, pid=%d, payload "
+            CLOGE("connection is not exist, connId=%u, pid=%d, payload "
                   "(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
                 sendNode->connectionId, sendNode->dataLen, sendNode->pid, sendNode->dataLen, sendNode->flag,
                 sendNode->module, sendNode->seq);
@@ -555,11 +550,11 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
 
     int32_t status = ConnBleInitSendQueue();
     CONN_CHECK_AND_RETURN_RET_LOG(
-        status == SOFTBUS_OK, status, "init ble trans failed: init send queue failed, error=%d", status);
+        status == SOFTBUS_OK, status, "init ble trans failed: init send queue failed, err=%d", status);
 
     status = ConnStartActionAsync(NULL, BleSendTask);
     CONN_CHECK_AND_RETURN_RET_LOG(
-        status == SOFTBUS_OK, status, "init ble trans failed: start send task failed, error=%d", status);
+        status == SOFTBUS_OK, status, "init ble trans failed: start send task failed, err=%d", status);
     g_transEventListener = *listener;
     return SOFTBUS_OK;
 }

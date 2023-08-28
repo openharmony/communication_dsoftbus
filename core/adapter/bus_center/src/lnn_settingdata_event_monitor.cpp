@@ -53,7 +53,7 @@ public:
 void LnnSettingDataEventMonitor::OnChange()
 {
     if (g_eventHandler != nullptr) {
-        g_eventHandler();
+        g_eventHandler(DEVICE_NAME_TYPE_DEV_NAME, nullptr);
     }
 }
 
@@ -179,4 +179,36 @@ int32_t LnnInitDeviceNameMonitorImpl(void)
 NO_SANITIZE("cfi") void RegisterNameMonitor(void)
 {
     OHOS::BusCenter::RegisterNameMonitorHelper();
+}
+
+int32_t LnnGetUnifiedDeviceName(char *unifiedName, uint32_t len)
+{
+    (void)unifiedName;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetUnifiedDefaultDeviceName(char *unifiedDefaultName, uint32_t len)
+{
+    (void)unifiedDefaultName;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, char *nickName, uint32_t len)
+{
+    (void)defaultName;
+    (void)unifiedName;
+    (void)nickName;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len)
+{
+    (void)nickName;
+    (void)defaultName;
+    (void)deviceName;
+    (void)len;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

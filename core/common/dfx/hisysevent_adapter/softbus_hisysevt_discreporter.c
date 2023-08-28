@@ -182,11 +182,11 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint32_t m
     msg->paramNum = FIRST_DISC_DURATION_PARAM_NUM;
 
     if (SetMsgParamNameAndType(msg, g_firstDsicTimeParam) != SOFTBUS_OK) {
-        MLOGE("disc first time duration event msg set param name and type fail");
+        MLOGE("set param name and type fail");
         return SOFTBUS_ERR;
     }
     if (SetDevFirstDiscMsgParamValve(msg, medium) != SOFTBUS_OK) {
-        MLOGE("disc first time duration event msg set param valve fail");
+        MLOGE("set param valve fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -310,7 +310,7 @@ static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportFirstDiscDurationEvt(void)
 {
-    MLOGI("report first disc duration event");
+    MLOGD("report first disc duration event");
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(FIRST_DISC_DURATION_PARAM_NUM);
     COMM_CHECK_AND_RETURN_RET_LOG(msg != NULL, SOFTBUS_ERR, "create reportMsg fail");
     for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
@@ -354,7 +354,7 @@ static inline void FreeDiscDetailsMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportDiscDetailsEvt(void)
 {
-    MLOGI("report disc detail event");
+    MLOGD("report disc detail event");
     int32_t ret = SoftBusMutexLock(&g_discDetailLock);
     COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "disc detail lock fail");
 
@@ -393,7 +393,7 @@ static inline void FreeDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportDiscBleRssiEvt(void)
 {
-    MLOGI("report disc ble rssi event");
+    MLOGD("report disc ble rssi event");
     int32_t ret = SoftBusMutexLock(&g_bleRssiRangeLock);
     COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "ble rssi range lock fail");
 
@@ -420,7 +420,7 @@ static int32_t SoftBusReportDiscBleRssiEvt(void)
 
 int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
 {
-    MLOGI("record first disc time start");
+    MLOGD("record first disc time start");
     if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT || medium < SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE) {
         MLOGE("medium is invalid");
         return SOFTBUS_INVALID_PARAM;
@@ -457,7 +457,7 @@ int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
 int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_t repTimes, uint32_t devNum,
                                     uint32_t discTimes)
 {
-    MLOGI("record ble disc detail");
+    MLOGD("record ble disc detail");
     COMM_CHECK_AND_RETURN_RET_LOG(IsValidString(moduleName, MODULE_NAME_MAX_LEN), SOFTBUS_ERR, "invalid param!");
     int32_t ret = SoftBusMutexLock(&g_discDetailLock);
     COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "disc detail lock fail");
@@ -480,7 +480,7 @@ int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_
 
 int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
 {
-    MLOGI("record disc ble rssi");
+    MLOGD("record disc ble rssi");
     if (rssi > MAX_RANGE_ID || rssi <= MIN_RANGE_ID) {
         MLOGE("invalid param");
         return SOFTBUS_INVALID_PARAM;

@@ -870,6 +870,7 @@ void SoftbusReportTransErrorEvt(int32_t errcode)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Alloc EvtReport Msg Fail!");
         return;
     }
+    errcode = GetErrorCodeEx(errcode, SOFTBUS_MOD_TRANS);
     CreateTransErrMsg(msg, errcode);
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);

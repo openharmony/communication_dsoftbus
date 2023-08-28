@@ -28,6 +28,7 @@
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
+#define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
 
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
@@ -48,7 +49,7 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
         !AddBoolToJsonObject(msg, FIELD_IS_DEVICE_LEVEL, true) ||
         !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, isClient) ||
         !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false) ||
-        !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, SESSION_KEY_LENGTH)) {
+        !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, KEY_LENGTH)) {
         ALOGE("add json object fail.");
         cJSON_Delete(msg);
         return NULL;

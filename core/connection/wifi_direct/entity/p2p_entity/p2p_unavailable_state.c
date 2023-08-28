@@ -15,7 +15,6 @@
 
 #include "entity/p2p_entity/p2p_unavailable_state.h"
 #include "softbus_log.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
@@ -36,13 +35,13 @@ static void Exit(struct P2pEntityState *self)
 static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
     CLOGE(LOG_LABEL "entity unavailable");
-    return SOFTBUS_ERR;
+    return ERROR_ENTITY_UNAVAILABLE;
 }
 
 static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
     CLOGE(LOG_LABEL "entity unavailable");
-    return SOFTBUS_ERR;
+    return ERROR_ENTITY_UNAVAILABLE;
 }
 
 static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectParams *params)

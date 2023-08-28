@@ -71,6 +71,7 @@ typedef struct {
     LnnHeartbeatType hbType;
     ConnectionAddrType addrType;
     bool hasNetworkId;
+    bool isWakeUp;
     const char networkId[NETWORK_ID_BUF_LEN];
 } LnnCheckDevStatusMsgPara;
 
