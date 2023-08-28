@@ -56,14 +56,13 @@ const std::u16string SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN = u"OHOS.ISoftBusClient
 
 bool OnChannelOpenedInnerTest(const uint8_t* data, size_t size)
 {
-    const char* charStr = reinterpret_cast<const char*>(data);
-    constexpr int32_t intNum = 8;
+    (void)size;
+    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
     constexpr size_t len = 4;
     MessageParcel datas;
     bool boolNum = true;
     const char* test = "test";
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteCString(charStr);
     datas.WriteInt32(intNum);
     datas.WriteBool(boolNum);
     datas.WriteRawData(test, len);
@@ -102,12 +101,10 @@ bool OnChannelOpenFailedInnerTest(const uint8_t* data, size_t size)
 
 bool OnChannelLinkDownInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    const char* charStr = reinterpret_cast<const char*>(data);
     constexpr int32_t intNum = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.WriteInt32(intNum);
     datas.RewindRead(0);
     MessageParcel reply;
@@ -149,14 +146,13 @@ bool OnChannelMsgReceivedInnerTest(const uint8_t* data, size_t size)
     constexpr int32_t type = 2;
     constexpr size_t lenStr = 4;
     const char* test = "test";
-    const char* dataInfo = reinterpret_cast<const char*>(data);
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
     datas.WriteInt32(channelId);
     datas.WriteInt32(channelType);
     datas.WriteUint32(len);
     datas.WriteRawData(test, lenStr);
-    datas.WriteCString(dataInfo);
+    datas.WriteBuffer(data, size);
     datas.WriteInt32(type);
     datas.RewindRead(0);
     MessageParcel reply;
@@ -197,10 +193,9 @@ bool OnChannelQosEventInnerTest(const uint8_t* data, size_t size)
 
 bool OnDeviceFoundInnerTest(const uint8_t* data, size_t size)
 {
-    const char* charStr = reinterpret_cast<const char*>(data);
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(charStr, size);
+    datas.WriteBuffer(data, size);
     datas.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
@@ -214,18 +209,16 @@ bool OnDeviceFoundInnerTest(const uint8_t* data, size_t size)
 
 bool OnJoinLNNResultInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
     constexpr uint32_t addrTypeLen = 10;
     constexpr int32_t retCode = 2;
     const char* test = "test";
     constexpr size_t len = 4;
-    const char* charStr = reinterpret_cast<const char*>(data);
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
     datas.WriteUint32(addrTypeLen);
     datas.WriteInt32(retCode);
     datas.WriteRawData(test, len);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
@@ -239,18 +232,16 @@ bool OnJoinLNNResultInnerTest(const uint8_t* data, size_t size)
 
 bool OnJoinMetaNodeResultInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
     constexpr uint32_t addrTypeLen = 12;
     constexpr int32_t retCode = 2;
     const char* test = "test";
     constexpr size_t len = 4;
-    const char* charStr = reinterpret_cast<const char*>(data);
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
     datas.WriteUint32(addrTypeLen);
     datas.WriteInt32(retCode);
     datas.WriteRawData(test, len);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
@@ -264,12 +255,10 @@ bool OnJoinMetaNodeResultInnerTest(const uint8_t* data, size_t size)
 
 bool OnLeaveLNNResultInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    const char* charStr = "package name test";
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    constexpr int32_t intNum = 2;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.WriteInt32(intNum);
     datas.RewindRead(0);
     MessageParcel reply;
@@ -284,12 +273,10 @@ bool OnLeaveLNNResultInnerTest(const uint8_t* data, size_t size)
 
 bool OnLeaveMetaNodeResultInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    const char* charStr = "package name test";
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    constexpr int32_t intNum = 2;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.WriteInt32(intNum);
     datas.RewindRead(0);
     MessageParcel reply;
@@ -304,14 +291,13 @@ bool OnLeaveMetaNodeResultInnerTest(const uint8_t* data, size_t size)
 
 bool OnNodeOnlineStateChangedInnerTest(const uint8_t* data, size_t size)
 {
-    const char* charStr = reinterpret_cast<const char*>(data);
     constexpr uint32_t infoTypeLen = 10;
     bool boolNum = true;
     const char* test = "test";
     constexpr size_t len = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.WriteBool(boolNum);
     datas.WriteUint32(infoTypeLen);
     datas.WriteRawData(test, len);
@@ -328,14 +314,13 @@ bool OnNodeOnlineStateChangedInnerTest(const uint8_t* data, size_t size)
 
 bool OnNodeBasicInfoChangedInnerTest(const uint8_t* data, size_t size)
 {
-    const char* charStr = reinterpret_cast<const char*>(data);
     constexpr int32_t type = 2;
     constexpr uint32_t infoTypeLen = 10;
     const char* test = "test";
     constexpr size_t len = 4;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.WriteRawData(test, len);
     datas.WriteInt32(type);
     datas.WriteUint32(infoTypeLen);
@@ -434,12 +419,10 @@ bool OnRefreshDeviceFoundInnerTest(const uint8_t* data, size_t size)
 
 bool OnClientPermissonChangeInnerTest(const uint8_t* data, size_t size)
 {
-    (void)size;
-    const char* charStr = reinterpret_cast<const char*>(data);
-    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    constexpr int32_t intNum = 2;
     MessageParcel datas;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteCString(charStr);
+    datas.WriteBuffer(data, size);
     datas.WriteInt32(intNum);
     datas.RewindRead(0);
     MessageParcel reply;
@@ -449,6 +432,86 @@ bool OnClientPermissonChangeInnerTest(const uint8_t* data, size_t size)
         return false;
     }
     softBusClientStub->OnRemoteRequest(CLIENT_ON_PERMISSION_CHANGE, datas, reply, option);
+    return true;
+}
+
+bool OnDiscoverFailedInnerTest(const uint8_t* data, size_t size)
+{
+    (void)size;
+    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    constexpr int32_t reason = 2;
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(intNum);
+    datas.WriteInt32(reason);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    softBusClientStub->OnRemoteRequest(CLIENT_DISCOVERY_FAIL, datas, reply, option);
+    return true;
+}
+
+bool OnDiscoverySuccessInnerTest(const uint8_t* data, size_t size)
+{
+    (void)size;
+    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    constexpr int32_t reason = 2;
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(intNum);
+    datas.WriteInt32(reason);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    softBusClientStub->OnRemoteRequest(CLIENT_DISCOVERY_SUCC, datas, reply, option);
+    return true;
+}
+
+bool OnPublishSuccessInnerTest(const uint8_t* data, size_t size)
+{
+    (void)size;
+    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    constexpr int32_t reason = 2;
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(intNum);
+    datas.WriteInt32(reason);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    softBusClientStub->OnRemoteRequest(CLIENT_PUBLISH_SUCC, datas, reply, option);
+    return true;
+}
+
+bool OnPublishFailInnerTest(const uint8_t* data, size_t size)
+{
+    (void)size;
+    int32_t intNum = *(reinterpret_cast<const int32_t*>(data));
+    constexpr int32_t reason = 2;
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(intNum);
+    datas.WriteInt32(reason);
+    datas.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    softBusClientStub->OnRemoteRequest(CLIENT_PUBLISH_FAIL, datas, reply, option);
     return true;
 }
 }
@@ -466,7 +529,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size == 0 || size > OHOS::FOO_MAX_LEN) {
+    if (size > OHOS::FOO_MAX_LEN) {
         return 0;
     }
     OHOS::OnChannelOpenedInnerTest(data, size);
@@ -487,5 +550,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::OnRefreshLNNResultInnerTest(data, size);
     OHOS::OnRefreshDeviceFoundInnerTest(data, size);
     OHOS::OnClientPermissonChangeInnerTest(data, size);
+    OHOS::OnDiscoverFailedInnerTest(data, size);
+    OHOS::OnDiscoverySuccessInnerTest(data, size);
+    OHOS::OnPublishSuccessInnerTest(data, size);
+    OHOS::OnPublishFailInnerTest(data, size);
     return 0;
 }
