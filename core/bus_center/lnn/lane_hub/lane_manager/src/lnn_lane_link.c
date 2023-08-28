@@ -299,14 +299,14 @@ static int32_t LaneLinkOfBleDirectCommon(const LinkRequest *reqInfo, LaneLinkInf
     unsigned char peerNetwordIdHash[SHA_256_HASH_LEN];
     unsigned char localUdidHash[SHA_256_HASH_LEN];
 
-    if (SoftBusGenerateStrHash((const unsigned char*)reqInfo->peerNetworkId, NETWORK_ID_BUF_LEN,
+    if (SoftBusGenerateStrHash((const unsigned char*)reqInfo->peerNetworkId, strlen(reqInfo->peerNetworkId),
         peerNetwordIdHash) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
     const NodeInfo* nodeInfo = LnnGetLocalNodeInfo();
-    if (SoftBusGenerateStrHash((const unsigned char*)nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN,
-        localUdidHash) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash((const unsigned char*)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), localUdidHash) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
