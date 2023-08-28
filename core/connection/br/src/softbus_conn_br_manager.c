@@ -1707,6 +1707,10 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
     status = InitBrManager();
     CONN_CHECK_AND_RETURN_RET_LOG(
         status == SOFTBUS_OK, NULL, "conn init br failed: init manager failed, error=%d", status);
+    status = ConnBrInitBrPendingPacket();
+    CONN_CHECK_AND_RETURN_RET_LOG(
+        status == SOFTBUS_OK, NULL, "conn init br failed: init pending packet failed, error=%d", status);
+
     g_connectCallback = *callback;
     static ConnectFuncInterface connectFuncInterface = {
         .ConnectDevice = BrConnectDevice,

@@ -24,10 +24,16 @@ group("unittest") {
     deps += [ "br:ConnectionBrTest" ]
   }
   if (support_bluetooth && dsoftbus_feature_conn_ble) {
-    deps += [ "ble:ConnectionBleTest" ]
+    deps += [
+      "ble:ConnectionBleSwitchTest",
+      "ble:ConnectionBleTest",
+    ]
   }
   if (dsoftbus_feature_conn_tcp) {
     deps += [ "tcp:TcpManagerTest" ]
+  }
+  if (softbus_communication_wifi_feature) {
+    deps += [ "wifi_direct:unittest" ]
   }
 }
 

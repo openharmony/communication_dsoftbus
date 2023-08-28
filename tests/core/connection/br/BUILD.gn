@@ -48,7 +48,7 @@ ohos_unittest("ConnectionBrTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -56,5 +56,8 @@ ohos_unittest("ConnectionBrTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  sources = [ "connection_br_test.cpp" ]
+  sources = [
+    "connection_br_mock.cpp",
+    "connection_br_test.cpp",
+  ]
 }

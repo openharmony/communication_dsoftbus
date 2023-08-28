@@ -586,9 +586,6 @@ NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, Prox
             !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, appInfo->myData.sessionName,
                                  sizeof(appInfo->myData.sessionName))) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack handshake ack old version");
-            appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
-            appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
-            appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
         }
         if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId))) {
                 appInfo->peerHandleId = -1;
@@ -628,6 +625,7 @@ static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         appInfo->fastTransData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + FAST_EXT_BYTE_SIZE);
         if (appInfo->fastTransData == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fast data fail.");
+            SoftBusFree(encodeFastData);
             return SOFTBUS_ERR;
         }
 

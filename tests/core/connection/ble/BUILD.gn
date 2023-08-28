@@ -54,3 +54,36 @@ ohos_unittest("ConnectionBleTest") {
   ]
   sources = [ "connection_ble_test.cpp" ]
 }
+
+ohos_unittest("ConnectionBleSwitchTest") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$softbus_adapter_common/include",
+    "$softbus_adapter_common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+  sources = [ "connection_ble_switch_test.cpp" ]
+}

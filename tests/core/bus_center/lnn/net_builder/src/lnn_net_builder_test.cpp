@@ -85,6 +85,10 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
     int32_t ret = LnnNotifyDiscoveryDevice(&target, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnNotifyDiscoveryDevice(nullptr, false);
+    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
 }
 
 /*
@@ -100,6 +104,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnRequestLeaveByAddrType(nullptr, TYPE_LENTH);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnRequestLeaveByAddrType(type, TYPE_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnRequestLeaveByAddrType(type, TYPE_LENTH);
@@ -261,6 +267,8 @@ HWTEST_F(LNNNetBuilderTest, META_NODE_SERVER_LEAVE_TEST_001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = MetaNodeServerLeave(networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = MetaNodeServerLeave(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
 }
 
 /*
@@ -275,6 +283,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
     LnnSyncOfflineComplete(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, len);
     int32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_CAPABILITY, nullptr, MSG, len);
     LnnSyncOfflineComplete(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, len);
 }
 
@@ -292,6 +301,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnServerLeave(NETWORKID, "pkaName");
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnServerLeave(nullptr, "pkaName");
+    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
 }
 
 /*
@@ -313,5 +324,80 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnServerJoin(&addr, "pkgName");
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnServerJoin(nullptr, "pkgName");
+    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
+    ret = LnnServerJoin(&addr, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
+}
+
+/*
+* @tc.name: FIND_REQUEST_ID_BY_ADDR_TEST_001
+* @tc.desc: test FindRequestIdByAddr
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
+{
+    ConnectionAddr addr = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = PORT
+    };
+    (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
+    uint32_t requestId = 0;
+    uint32_t ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = FindRequestIdByAddr(nullptr, &requestId);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: FIND_NODE_INFO_BY_RQUESTID_TEST_001
+* @tc.desc: test FindNodeInfoByRquestId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level0)
+{
+    ConnectionAddr addr = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = PORT
+    };
+    (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
+    NodeInfo *info = nullptr;
+    uint32_t requestId = 0;
+    int32_t ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    info = FindNodeInfoByRquestId(requestId);
+    EXPECT_TRUE(info == nullptr);
+}
+
+/*
+* @tc.name: LNN_GET_VERIFY_CALLBACK_TEST_001
+* @tc.desc: test three verify callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
+{
+    ConnectionAddr addr = {
+        .type = CONNECTION_ADDR_WLAN,
+        .info.ip.port = PORT
+    };
+    (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
+    NodeInfo *info = nullptr;
+    NodeInfo info1 = {};
+    uint32_t requestId = 0;
+    int64_t authId = 123456;
+    int32_t ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
+    authVerifyCallback->onVerifyPassed(requestId, authId, info);
+    authVerifyCallback->onVerifyPassed(requestId, authId, &info1);
+    authVerifyCallback = LnnGetMetaVerifyCallback();
+    authVerifyCallback->onVerifyPassed(requestId, authId, info);
+    authVerifyCallback->onVerifyPassed(requestId, authId, &info1);
+    authVerifyCallback = LnnGetReAuthVerifyCallback();
+    authVerifyCallback->onVerifyPassed(requestId, authId, info);
+    authVerifyCallback->onVerifyPassed(requestId, authId, &info1);
 }
 } // namespace OHOS

@@ -31,6 +31,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_def.h"
 #include "wifi_direct_types.h"
+#include "wifi_direct_p2p_adapter.h"
 
 #define MSG_LEN 10
 #define BITS 8
@@ -41,6 +42,7 @@ static SoftBusWifiState g_wifiState = SOFTBUS_WIFI_UNKNOWN;
 static bool g_isWifiDirectSupported = false;
 static bool g_isApCoexistSupported = false;
 static bool g_isWifiEnable = false;
+static bool g_isApEnable = false;
 
 static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, int32_t len)
 {
@@ -226,10 +228,20 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             break;
         case SOFTBUS_WIFI_DISABLED:
             g_isWifiEnable = false;
-            (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+            if (!g_isApEnable) {
+                (void)LnnClearNetCapability(capability, BIT_WIFI);
+                (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
+                (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+                if (!GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
+                    (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+                }
+            } else if (!IsP2pAvailable(true)) {
+                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+            }
             *needSync = true;
             break;
         case SOFTBUS_AP_ENABLED:
+            g_isApEnable = true;
             (void)LnnSetNetCapability(capability, BIT_WIFI);
             (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
             (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
@@ -241,6 +253,7 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             *needSync = true;
             break;
         case SOFTBUS_AP_DISABLED:
+            g_isApEnable = false;
             if (IsP2pAvailable(false)) {
                 (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
             } else {

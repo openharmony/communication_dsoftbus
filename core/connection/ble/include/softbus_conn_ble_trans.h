@@ -68,12 +68,14 @@ typedef struct {
 } BleCtlMessageSerializationContext;
 
 typedef struct {
-    void (*onPostByteFinshed)(
+    void (*onPostBytesFinished)(
         uint32_t connectionId, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, int32_t error);
 } ConnBleTransEventListener;
 
-int32_t ConnBlePostBytes(
-    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq);
+typedef void (*PostBytesFinishAction)(uint32_t connectionId, int32_t error);
+int32_t ConnBlePostBytesInner(
+    uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq,
+    PostBytesFinishAction postBytesFinishAction);
 uint8_t *ConnGattTransRecv(
     uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen);
 uint8_t *ConnCocTransRecv(
