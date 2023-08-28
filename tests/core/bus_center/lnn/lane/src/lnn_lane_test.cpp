@@ -691,5 +691,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ADD_P2P_ADDRESS_TEST_001, TestSize.Level1)
     const char *ipAddr = "127.0.0.1";
     uint16_t port = 1022;
     LaneAddP2pAddress(networkId, ipAddr, port);
+    LaneAddP2pAddressByIp(ipAddr, port);
+    LaneUpdateP2pAddressByIp(ipAddr, networkId);
 }
 } // namespace OHOS
