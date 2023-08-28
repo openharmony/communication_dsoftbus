@@ -521,7 +521,13 @@ static void BleConnectRequestOnAvailableState(const ConnBleConnectRequestContext
         ctx->result.OnConnectFailed(ctx->requestId, status);
         return;
     }
-    AttempReuseConnect(device, BleConnectDeviceDirectly);
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
+    char anomizeUdid[UDID_BUF_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, device->udid);
+    device->state = BLE_DEVICE_STATE_WAIT_SCHEDULE;
+    PendingDevice(device, anomizeAddress, anomizeUdid);
+    ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_NEXT_CMD, 0, 0, NULL, 0);
 }
 
 static void BleConnectRequestOnConnectingState(const ConnBleConnectRequestContext *ctx)
