@@ -95,7 +95,10 @@ static DistributedNetLedger g_distributedNetLedger;
 
 static void UpdateNetworkInfo(const char *udid)
 {
-    NodeBasicInfo basic = { 0 };
+    NodeBasicInfo basic;
+    if (memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo)) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memset_s basic fail!");
+    }
     if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetBasicInfoByUdid fail.");
         return;
@@ -558,7 +561,7 @@ static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (strncpy_s(buf, len, info->uuid, strlen(info->uuid)) != EOK) {
+    if (strncpy_s((char*)buf, len, info->uuid, strlen(info->uuid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -586,7 +589,7 @@ static int32_t DlGetDeviceUdid(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get device udid fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, udid, strlen(udid)) != EOK) {
+    if (strncpy_s((char*)buf, len, udid, strlen(udid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -597,7 +600,7 @@ static int32_t DlGetNodeSoftBusVersion(const char *networkId, void *buf, uint32_
 {
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (strncpy_s(buf, len, info->softBusVersion, strlen(info->softBusVersion)) != EOK) {
+    if (strncpy_s((char*)buf, len, info->softBusVersion, strlen(info->softBusVersion)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -614,7 +617,7 @@ static int32_t DlGetDeviceType(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deviceType fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, deviceType, strlen(deviceType)) != EOK) {
+    if (strncpy_s((char*)buf, len, deviceType, strlen(deviceType)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "MEM COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -647,7 +650,7 @@ static int32_t DlGetDeviceName(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get device name fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, deviceName, strlen(deviceName)) != EOK) {
+    if (strncpy_s((char*)buf, len, deviceName, strlen(deviceName)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -664,7 +667,7 @@ static int32_t DlGetBtMac(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strncpy_s((char*)buf, len, mac, strlen(mac)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -681,7 +684,7 @@ static int32_t DlGetWlanIp(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi ip fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, ip, strlen(ip)) != EOK) {
+    if (strncpy_s((char*)buf, len, ip, strlen(ip)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -702,7 +705,7 @@ static int32_t DlGetMasterUdid(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get master uiid fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, masterUdid, strlen(masterUdid)) != EOK) {
+    if (strncpy_s((char*)buf, len, masterUdid, strlen(masterUdid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy master udid to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -843,7 +846,7 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail");
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(buf, len, mac) != EOK) {
+    if (strcpy_s((char*)buf, len, mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p mac to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -859,7 +862,7 @@ static int32_t DlGetNodeAddr(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
 
-    if (strcpy_s(buf, len, info->nodeAddress) != EOK) {
+    if (strcpy_s((char*)buf, len, info->nodeAddress) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy node addr to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -881,7 +884,7 @@ static int32_t DlGetP2pGoMac(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p go mac fail");
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(buf, len, mac) != EOK) {
+    if (strcpy_s((char*)buf, len, mac) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p go mac to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -903,7 +906,7 @@ static int32_t DlGetWifiCfg(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi cfg fail");
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(buf, len, wifiCfg) != EOK) {
+    if (strcpy_s((char*)buf, len, wifiCfg) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy wifi cfg to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -925,7 +928,7 @@ static int32_t DlGetChanList5g(const char *networkId, void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get chan list 5g fail");
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(buf, len, chanList5g) != EOK) {
+    if (strcpy_s((char*)buf, len, chanList5g) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy chan list 5g to buf fail");
         return SOFTBUS_MEM_ERR;
     }
@@ -1304,7 +1307,7 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
         LLOGE("get local node info fail");
         return;
     }
-    ConnectOption option = {0};
+    ConnectOption option;
     option.type = CONNECT_BR;
     if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, info->connectInfo.macAddr) != EOK) {
         LLOGE("copy br mac fail");
@@ -1313,7 +1316,7 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
 
     bool preventFlag = false;
     do {
-        LLOGI("check the ble start timestamp, local:%"PRId64", peer:%"PRId64"",
+        LLOGI("check the ble start timestamp, local:%" PRId64", peer:%" PRId64"",
             localNodeInfo->bleStartTimestamp, info->bleStartTimestamp);
         if (localNodeInfo->bleStartTimestamp < info->bleStartTimestamp) {
             LLOGI("peer later, prevent br connection");
@@ -1367,7 +1370,10 @@ static void FilterBrInfo(NodeInfo *info)
 static void BleDirectlyOnlineProc(NodeInfo *info)
 {
     if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
-        NodeInfo deviceInfo = {0};
+        NodeInfo deviceInfo;
+        if (memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memset_s basic fail!");
+        }
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
         if (SoftBusGenerateStrHash((const unsigned char *)info->deviceInfo.deviceUdid,
@@ -2045,7 +2051,7 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
             ret = SOFTBUS_OK;
             break;
         }
-        *info = SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
+        *info = (NodeBasicInfo*)SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo));
         if (*info == NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc node info buffer failed");
             break;
@@ -2463,7 +2469,7 @@ NO_SANITIZE("cfi") int32_t LnnInitDistributedLedger(void)
         g_distributedNetLedger.status = DL_INIT_FAIL;
         return SOFTBUS_ERR;
     }
-    if (SoftBusRegBusCenterVarDump(SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO,
+    if (SoftBusRegBusCenterVarDump((char*)SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO,
         &SoftBusDumpBusCenterRemoteDeviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegBusCenterVarDump regist fail");
         return SOFTBUS_ERR;
