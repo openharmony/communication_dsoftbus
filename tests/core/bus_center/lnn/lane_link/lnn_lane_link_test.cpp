@@ -263,7 +263,7 @@ HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_002, TestSize.Level1)
 {
-   typedef enum {
+    typedef enum {
     TEST_BR = -1,
    }TestLinkType;
 

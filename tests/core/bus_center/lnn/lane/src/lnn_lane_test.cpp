@@ -622,7 +622,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
-     LnnWifiAdpterInterfaceMock wifiMock;
+    LnnWifiAdpterInterfaceMock wifiMock;
     LaneDepsInterfaceMock mock;
     const char *udid = "testuuid";
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -637,7 +637,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
-
 
 /*
 * @tc.name: LNN_BUILD_LINK_003
@@ -656,11 +655,11 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
-     LnnWifiAdpterInterfaceMock wifiMock;
+    LnnWifiAdpterInterfaceMock wifiMock;
     LaneDepsInterfaceMock mock;
     
     ConnBleConnection *connection = (ConnBleConnection*)SoftBusCalloc(sizeof(ConnBleConnection));
-   if (connection == NULL) {
+    if (connection == NULL) {
         return;
     }
     const char *udid = "testuuid";
@@ -678,5 +677,19 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusFree(connection);
     SoftBusFree(nodeInfo);
+}
+
+/*
+* @tc.name: LANE_ADD_P2P_ADDRESS_TEST_001
+* @tc.desc: LANE ADD P2P ADDRESS TEST
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ADD_P2P_ADDRESS_TEST_001, TestSize.Level1)
+{
+    const char *networkId = "testnetworkid123";
+    const char *ipAddr = "127.0.0.1";
+    uint16_t port = 1022;
+    LaneAddP2pAddress(networkId, ipAddr, port);
 }
 } // namespace OHOS

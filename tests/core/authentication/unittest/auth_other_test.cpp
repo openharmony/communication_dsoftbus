@@ -580,9 +580,9 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEIVED_TEST_001, TestSize.Level1)
     int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1KB, testData, strlen(testData));
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-   OnCommDataReceived(connectionId, moduleId, seq, NULL, len);
-   OnCommDataReceived(connectionId, moduleId, seq, data, len);
-   free(data);
+    OnCommDataReceived(connectionId, moduleId, seq, NULL, len);
+    OnCommDataReceived(connectionId, moduleId, seq, data, len);
+    free(data);
 }
 
 /*
@@ -638,7 +638,7 @@ HWTEST_F(AuthOtherTest, NOTIFY_DATE_RECEIVED_TEST_001, TestSize.Level1)
     bool fromServer = false;
     const AuthDataHead *head = NULL;
     const uint8_t *data = NULL;
-   NotifyDataReceived(connId, connInfo, fromServer, head, data);
+    NotifyDataReceived(connId, connInfo, fromServer, head, data);
 }
 
 /*
