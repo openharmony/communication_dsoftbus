@@ -37,9 +37,9 @@ static BusCenterIpcInterface *BusCenterIpcInterfaceInstance()
 }
 
 extern "C" {
-bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
+bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
 {
-    return BusCenterIpcInterfaceInstance()->LnnIsSameConnectionAddr(addr1, addr2);
+    return BusCenterIpcInterfaceInstance()->LnnIsSameConnectionAddr(addr1, addr2, isShort);
 }
 
 int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid, ConnectionAddr *addr, CustomData *customData)

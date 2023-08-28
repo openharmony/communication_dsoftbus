@@ -85,7 +85,8 @@ typedef struct P2pAddrNode {
     char networkId[NETWORK_ID_BUF_LEN];
     char addr[MAX_SOCKET_ADDR_LEN];
     uint16_t port;
-}P2pAddrNode;
+    uint16_t cnt;
+} P2pAddrNode;
 
 static SoftBusList g_P2pAddrList;
 
@@ -96,7 +97,7 @@ static void LaneInitP2pAddrList()
     SoftBusMutexInit(&g_P2pAddrList.lock, NULL);
 }
 
-void LaneDeleteP2pAddress(const char *networkId)
+void LaneDeleteP2pAddress(const char *networkId, bool isDestroy)
 {
     P2pAddrNode* item = NULL;
     P2pAddrNode* nextItem = NULL;
@@ -106,8 +107,10 @@ void LaneDeleteP2pAddress(const char *networkId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_P2pAddrList.list, P2pAddrNode, node) {
         if (strcmp(item->networkId, networkId) == 0) {
-            ListDelete(&item->node);
-            SoftBusFree(item);
+            if (isDestroy || (--item->cnt) == 0) {
+                ListDelete(&item->node);
+                SoftBusFree(item);
+            }
         }
     }
     SoftBusMutexUnlock(&g_P2pAddrList.lock);
@@ -135,6 +138,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
             return;
         }
         item->port = port;
+        item->cnt++;
     } else {
         P2pAddrNode *p2pAddrNode = (P2pAddrNode*)SoftBusMalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
@@ -152,6 +156,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
             return;
         }
         p2pAddrNode->port = port;
+        p2pAddrNode->cnt--;
         ListAdd(&g_P2pAddrList.list, &p2pAddrNode->node);
     }
 
@@ -176,6 +181,7 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
     }
     if (find) {
         item->port = port;
+        item->cnt++;
     } else {
         P2pAddrNode *p2pAddrNode = (P2pAddrNode*)SoftBusMalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
@@ -189,6 +195,7 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
         }
         p2pAddrNode->networkId[0] = 0;
         p2pAddrNode->port = port;
+        p2pAddrNode->cnt--;
         ListAdd(&g_P2pAddrList.list, &p2pAddrNode->node);
     }
 
@@ -295,18 +302,18 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
 
 static int32_t LaneLinkOfBleDirectCommon(const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
 {
-    unsigned char peerUdid[UDID_BUF_LEN];
-    unsigned char peerNetwordIdHash[SHA_256_HASH_LEN];
-    unsigned char localUdidHash[SHA_256_HASH_LEN];
+    unsigned char peerUdid[UDID_BUF_LEN] = {0};
+    unsigned char peerNetwordIdHash[SHA_256_HASH_LEN] = {0};
+    unsigned char localUdidHash[SHA_256_HASH_LEN] = {0};
 
-    if (SoftBusGenerateStrHash((const unsigned char*)reqInfo->peerNetworkId, NETWORK_ID_BUF_LEN,
+    if (SoftBusGenerateStrHash((const unsigned char*)reqInfo->peerNetworkId, strlen(reqInfo->peerNetworkId),
         peerNetwordIdHash) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
     const NodeInfo* nodeInfo = LnnGetLocalNodeInfo();
-    if (SoftBusGenerateStrHash((const unsigned char*)nodeInfo->deviceInfo.deviceUdid, UDID_BUF_LEN,
-        localUdidHash) != SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash((const unsigned char*)nodeInfo->deviceInfo.deviceUdid,
+        strlen(nodeInfo->deviceInfo.deviceUdid), localUdidHash) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
@@ -345,7 +352,7 @@ static int32_t LaneLinkOfGattDirect(uint32_t reqId, const LinkRequest *reqInfo, 
 
 static int32_t LaneLinkOfP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
-    return LnnConnectP2p(reqInfo->peerNetworkId, reqInfo->pid, reqInfo->networkDelegate, reqId, callback);
+    return LnnConnectP2p(reqInfo, reqId, callback);
 }
 
 static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
@@ -588,7 +595,7 @@ void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32
     }
     if (type == LANE_P2P) {
         LLOGI("type=LANE_P2P");
-        LaneDeleteP2pAddress(networkId);
+        LaneDeleteP2pAddress(networkId, false);
         LnnDisconnectP2p(networkId, pid, reqId);
     } else {
         LLOGI("ignore this link request,link:%d", type);
@@ -603,6 +610,6 @@ int32_t InitLaneLink(void)
 
 void DeinitLaneLink(void)
 {
-    LnnDestoryP2p();
+    LnnDestroyP2p();
     return;
 }

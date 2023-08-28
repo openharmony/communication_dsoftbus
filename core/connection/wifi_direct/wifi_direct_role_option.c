@@ -35,75 +35,74 @@ static enum WifiDirectRole GetExpectedP2pRole(const char *networkId)
 {
     int32_t localDevTypeId = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, "get local dev type id failed");
-    CLOGD("localDevTypeId=0x%03X", localDevTypeId);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, LOG_LABEL "get local dev type id failed");
+    CLOGD(LOG_LABEL "localDevTypeId=0x%03X", localDevTypeId);
 
     if (IsPowerAlwaysOn(localDevTypeId)) {
-        CLOGI("local device's power is always-on");
+        CLOGI(LOG_LABEL "local device's power is always-on");
         return WIFI_DIRECT_ROLE_GO;
     }
 
     int32_t remoteDevTypeId = 0;
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, "get remote dev type id failed");
-    CLOGD("remoteDevTypeId=0x%03X", remoteDevTypeId);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, LOG_LABEL "get remote dev type id failed");
+    CLOGD(LOG_LABEL "remoteDevTypeId=0x%03X", remoteDevTypeId);
 
     if (IsPowerAlwaysOn(remoteDevTypeId)) {
-        CLOGI("remote device's power is always-on");
+        CLOGI(LOG_LABEL "remote device's power is always-on");
         return WIFI_DIRECT_ROLE_GC;
     }
 
     if (IsGoPreferred(localDevTypeId)) {
-        CLOGI("local device prefers Go");
+        CLOGI(LOG_LABEL "local device prefers Go");
         return WIFI_DIRECT_ROLE_GO;
     }
 
     if (IsGoPreferred(remoteDevTypeId)) {
-        CLOGI("remote device prefers Go");
+        CLOGI(LOG_LABEL "remote device prefers Go");
         return WIFI_DIRECT_ROLE_GC;
     }
 
     return WIFI_DIRECT_ROLE_AUTO;
 }
 
-static enum WifiDirectRole GetRemoteExpectedP2pRole(const char *networkId)
+static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType type, uint32_t *expectdRole,
+                               bool *isStrict)
 {
-    int32_t remoteDevTypeId = 0;
-    int32_t ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, "get remote dev type id failed");
-    CLOGD("remoteDevTypeId=0x%03X", remoteDevTypeId);
-
-    if (IsPowerAlwaysOn(remoteDevTypeId)) {
-        CLOGI("remote device's power is always-on");
-        return WIFI_DIRECT_ROLE_GO;
+    if (type == WIFI_DIRECT_CONNECT_TYPE_HML) {
+        *expectdRole = WIFI_DIRECT_API_ROLE_HML;
+        *isStrict = true;
+    } else if (type == WIFI_DIRECT_CONNECT_TYPE_P2P) {
+        enum WifiDirectRole role = GetExpectedP2pRole(networkId);
+        if (role == WIFI_DIRECT_ROLE_GC) {
+            *expectdRole = WIFI_DIRECT_API_ROLE_GC;
+        } else if (role == WIFI_DIRECT_ROLE_GO) {
+            *expectdRole = WIFI_DIRECT_API_ROLE_GO;
+        } else {
+            *expectdRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO;
+        }
+        *isStrict = true;
+    } else if (type == WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT) {
+        enum WifiDirectRole role = GetExpectedP2pRole(networkId);
+        if (role == WIFI_DIRECT_ROLE_GC) {
+            *expectdRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_HML;
+        } else if (role == WIFI_DIRECT_ROLE_GO) {
+            *expectdRole = WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
+        } else {
+            *expectdRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
+        }
+        *isStrict = false;
+    } else {
+        CLOGE(LOG_LABEL "type=%d invalid", type);
+        return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t localDevTypeId = 0;
-    ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, "get local dev type id failed");
-    CLOGD("localDevTypeId=0x%03X", localDevTypeId);
-
-    if (IsPowerAlwaysOn(localDevTypeId)) {
-        CLOGI("local device's power is always-on");
-        return WIFI_DIRECT_ROLE_GC;
-    }
-
-    if (IsGoPreferred(remoteDevTypeId)) {
-        CLOGI("remote device prefers Go");
-        return WIFI_DIRECT_ROLE_GO;
-    }
-
-    if (IsGoPreferred(localDevTypeId)) {
-        CLOGI("local device prefers Go");
-        return WIFI_DIRECT_ROLE_GC;
-    }
-
-    return WIFI_DIRECT_ROLE_AUTO;
+    CLOGI(LOG_LABEL "expectdRole=0x%x isStrict=%d", *expectdRole, *isStrict);
+    return SOFTBUS_OK;
 }
 
 static struct WifiDirectRoleOption g_roleOption = {
-    .getExpectedP2pRole = GetExpectedP2pRole,
-    .getRemoteExpectedP2pRole = GetRemoteExpectedP2pRole,
+    .getExpectedRole = GetExpectedRole,
 };
 
 struct WifiDirectRoleOption *GetWifiDirectRoleOption(void)

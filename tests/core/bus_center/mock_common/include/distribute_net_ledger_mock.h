@@ -33,6 +33,7 @@ public:
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
+    virtual int32_t ConvertBtMacToBinary(const char *, uint32_t, uint8_t *, uint32_t) = 0;
 };
 class DistributeLedgerInterfaceMock : public DistributeLedgerInterface {
 public:
@@ -45,6 +46,7 @@ public:
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t(const char *networkId, InfoKey key, uint64_t *info));
+    MOCK_METHOD4(ConvertBtMacToBinary, int32_t(const char *, uint32_t, uint8_t *, uint32_t));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

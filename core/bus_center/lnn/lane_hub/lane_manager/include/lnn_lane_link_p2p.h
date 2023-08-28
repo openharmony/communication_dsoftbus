@@ -22,10 +22,9 @@
 extern "C" {
 #endif
 
-int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
-    const LaneLinkCb *callback);
+int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback);
 void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId);
-void LnnDestoryP2p(void);
+void LnnDestroyP2p(void);
 
 #ifdef __cplusplus
 }

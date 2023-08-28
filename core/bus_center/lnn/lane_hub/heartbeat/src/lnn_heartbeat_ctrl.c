@@ -233,7 +233,7 @@ static void HbConditionChanged(bool isOnlySetState)
     }
 }
 
-static uint64_t GettDisEnableBleDiscoveryTime(long modeDuration)
+static uint64_t GettDisEnableBleDiscoveryTime(int64_t modeDuration)
 {
     uint64_t timeout = 0L;
     if (modeDuration < MIN_DISABLE_BLE_DISCOVERY_TIME) {
@@ -256,7 +256,7 @@ static void RequestEnableDiscovery(void *para)
     HbConditionChanged(false);
 }
 
-void LnnRequestBleDiscoveryProcess(int strategy, long timeout)
+void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 {
     if (strategy == REQUEST_DISABLE_BLE_DISCOVERY) {
         if (g_hbConditionState.isRequestDisable) {
@@ -280,21 +280,6 @@ void LnnRequestBleDiscoveryProcess(int strategy, long timeout)
     return;
 }
 
-static void HbProcOfflineNodeWithoutSoftbus(void)
-{
-    int32_t infoNum = 0;
-    NodeBasicInfo *info = NULL;
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LLOGE("HB proc offline case, get node info fail");
-        return;
-    }
-    if (info == NULL || infoNum == 0) {
-        LLOGE("HB get online node is 0");
-        return;
-    }
-    SoftBusFree(info);
-}
-
 static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_BT_STATE_CHANGED) {
@@ -309,11 +294,14 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB handle SOFTBUS_BLE_TURN_ON");
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
             HbConditionChanged(false);
+            if (LnnStartHbByTypeAndStrategy(
+                HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD, false) != SOFTBUS_OK) {
+                LLOGE("HB start ble heartbeat fail");
+            }
             break;
         case SOFTBUS_BLE_TURN_OFF:
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB handle SOFTBUS_BLE_TURN_OFF");
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_CLOSE_INFO);
-            HbProcOfflineNodeWithoutSoftbus();
             HbConditionChanged(false);
             break;
         default:
@@ -493,8 +481,8 @@ static void HbHomeGroupStateChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusHomeGroupState homeGroupState = (SoftBusHomeGroupState)event->status;
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     switch (homeGroupState) {
-        case SOFTBUS_HOME_GROUP_JOIN:
-            LLOGI("HB handle SOFTBUS_HOME_GROUP_JOIN");
+        case SOFTBUS_HOME_GROUP_CHANGE:
+            LLOGI("HB handle SOFTBUS_HOME_GROUP_CHANGE");
             HbConditionChanged(false);
             break;
         case SOFTBUS_HOME_GROUP_LEAVE:
@@ -613,9 +601,19 @@ static void HbTryRecoveryNetwork(void)
     HbConditionChanged(true);
 }
 
+static void PeriodDumpLocalInfo(void *para)
+{
+    (void)para;
+
+    LnnDumpLocalBasicInfo();
+    (void)IsHeartbeatEnable();
+    LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), PeriodDumpLocalInfo, NULL, HB_PERIOD_DUMP_LOCAL_INFO_LEN);
+}
+
 NO_SANITIZE("cfi") int32_t LnnStartHeartbeatFrameDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) FSM start.");
+    LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), PeriodDumpLocalInfo, NULL, HB_PERIOD_DUMP_LOCAL_INFO_LEN);
     if (LnnHbMediumMgrInit() != SOFTBUS_OK) {
         LLOGE("HB medium manager init fail");
         return SOFTBUS_ERR;
@@ -738,7 +736,7 @@ int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbea
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ShiftLNNGear get online node is 0");
         return SOFTBUS_ERR;
     }
-    int ret;
+    int32_t ret;
     NodeInfo nodeInfo = {0};
     for (i = 0; i < infoNum; ++i) {
         ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);

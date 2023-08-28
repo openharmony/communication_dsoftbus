@@ -33,6 +33,8 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.c"
+#include <cstring>
 
 namespace OHOS {
 using namespace testing::ext;
@@ -65,6 +67,12 @@ public:
     void SetUp();
     void TearDown();
 };
+
+void TestFunc(NodeBasicInfo *info)
+{
+    (void)info;
+    return;
+}
 
 void LNNDisctributedLedgerTest::SetUpTestCase()
 {
@@ -346,23 +354,6 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UDID_Test_001, TestSize
 }
 
 /*
-* @tc.name: LNN_GET_ALL_AUTH_SEQ_Test_001
-* @tc.desc: lnn get all auth seq test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ALL_AUTH_SEQ_Test_001, TestSize.Level1)
-{
-    int64_t authSeq[DISCOVERY_TYPE_COUNT] = {0};
-    int32_t ret = LnnGetAllAuthSeq(nullptr, authSeq, DISCOVERY_TYPE_COUNT);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnGetAllAuthSeq(NODE1_UDID, authSeq, DISCOVERY_TYPE_COUNT);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnGetAllAuthSeq(NODE2_UDID, authSeq, DISCOVERY_TYPE_COUNT);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-}
-
-/*
 * @tc.name: LNN_GET_DLHEARTBEAT_TIMER_STAMP_Test_001
 * @tc.desc: lnn get dl heartbeat time stamp test
 * @tc.type: FUNC
@@ -445,6 +436,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetRemoteNum16Info(NODE2_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnGetRemoteNum16Info(NODE2_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -491,5 +484,368 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DL_DEVICE_INFO_NAME_Test_001, TestSi
     EXPECT_TRUE(ret == true);
     ret = LnnSetDLDeviceInfoName(NODE2_UDID, NODE2_DEVICE_NAME);
     EXPECT_TRUE(ret == false);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, GET_NODEINFO_FORMMAP_Test_001, TestSize.Level1)
+{
+    (void)GetCurrentTime();
+    NodeInfo *res = GetNodeInfoFromMap(nullptr, nullptr);
+    EXPECT_TRUE(res == nullptr);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, INIT_DISTRIBUTED_INFO_Test_001, TestSize.Level1)
+{
+    int32_t ret = InitDistributedInfo(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = InitConnectionCode(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    (void)DeinitConnectionCode(nullptr);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, NEW_BRBLE_DISCOVERED_Test_001, TestSize.Level1)
+{
+    NodeInfo oldInfo;
+    NodeInfo newInfo;
+    (void)NewWifiDiscovered(nullptr, nullptr);
+    (void)NewWifiDiscovered(&oldInfo, &newInfo);
+    (void)NewBrBleDiscovered(nullptr, nullptr);
+    (void)NewBrBleDiscovered(&oldInfo, &newInfo);
+    (void)RetainOfflineCode(nullptr, nullptr);
+    (void)ConvertNodeInfoToBasicInfo(nullptr, nullptr);
+    bool ret = IsNetworkIdChanged(nullptr, nullptr);
+    EXPECT_TRUE(ret == false);
+    ret = IsNetworkIdChanged(&newInfo, &oldInfo);
+    EXPECT_TRUE(ret == false);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, IS_META_NODE_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    info.metaInfo.isMetaNode = true;
+    bool ret = isMetaNode(nullptr);
+    EXPECT_TRUE(ret == false);
+    ret = isMetaNode(&info);
+    EXPECT_TRUE(ret == true);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, POST_ONLINE_NODESTOCB_Test_001, TestSize.Level1)
+{
+    INodeStateCb callBack;
+    callBack.onNodeOnline = nullptr;
+    (void)PostOnlineNodesToCb(&callBack);
+    callBack.onNodeOnline = TestFunc;
+    (void)PostOnlineNodesToCb(&callBack);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NODEINFO_BYID_Test_001, TestSize.Level1)
+{
+    IdCategory type = CATEGORY_UDID;
+    NodeInfo *ret = LnnGetNodeInfoById(nullptr, type);
+    EXPECT_TRUE(ret == nullptr);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NODE_Test_001, TestSize.Level1)
+{
+    int32_t ret = LnnGetRemoteNodeInfoByKey(nullptr, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    const char *key = "dsoftBus";
+    NodeInfo info;
+    ret = LnnGetRemoteNodeInfoByKey(key, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, DLGET_DEVICE_TYPEID_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    char bleMac = '0';
+    uint32_t len = 0;
+    int32_t ret = DlGetDeviceTypeId(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetNodeBleMac(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    (void)LnnUpdateNodeBleMac(nullptr, nullptr, len);
+    (void)LnnUpdateNodeBleMac(networkId, &bleMac, len);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, DL_GET_WIFICFG_Test_001, TestSize.Level1)
+{
+    uint32_t len = 0;
+    int32_t ret = DlGetWifiCfg(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetChanList5g(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetP2pRole(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetStateVersion(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetStaFrequency(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = LNN_COMMON_LEN;
+    ret = DlGetStateVersion(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetStaFrequency(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetNodeDataChangeFlag(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = DATA_CHANGE_FLAG_BUF_LEN;
+    ret = DlGetNodeDataChangeFlag(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetMasterWeight(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetNetType(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetProxyPort(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetSessionPort(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetAuthPort(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, DLGET_NODETTLV_NEGOFLAG_Test_001, TestSize.Level1)
+{
+    uint32_t len = 0;
+    int32_t ret = DlGetNodeTlvNegoFlag(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = DlGetAccountHash(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = sizeof(bool);
+    ret = DlGetNodeTlvNegoFlag(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = SHA_256_HASH_LEN;
+    ret = DlGetAccountHash(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    (void)DestroyCnnCodeKey(nullptr);
+    (void)DeinitDistributedInfo(nullptr);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, ADD_CNN_CODE_Test_001, TestSize.Level1)
+{
+    Map cnnCode;
+    const char *uuid = "softBus";
+    DiscoveryType type = DISCOVERY_TYPE_WIFI;
+    int64_t authSeqNum = 0;
+    int32_t ret = AddCnnCode(&cnnCode, nullptr, type, authSeqNum);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = AddCnnCode(&cnnCode, uuid, type, authSeqNum);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, REMOVE_CNN_CODE_Test_001, TestSize.Level1)
+{
+    Map cnnCode;
+    const char *uuid = "softBus";
+    DiscoveryType type = DISCOVERY_TYPE_WIFI;
+    (void)RemoveCnnCode(&cnnCode, nullptr, type);
+    (void)RemoveCnnCode(&cnnCode, uuid, type);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, NOTIFY_MIGRATE_UPGRADE_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    memset_s(info.deviceInfo.deviceUdid, sizeof(info.deviceInfo.deviceUdid), '\0', sizeof(info.deviceInfo.deviceUdid));
+    (void)NotifyMigrateUpgrade(&info);
+    int32_t ret = LnnUpdateAccountInfo(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_GROUPTYPE_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    int32_t ret = LnnUpdateGroupType(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    char str[] = "softBus";
+    strcpy_s(info.deviceInfo.deviceUdid, sizeof(str), str);
+    ret = LnnUpdateGroupType(&info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    const char *udid = "softBus";
+    (void)NotifyMigrateDegrade(udid);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    InfoKey key = BYTE_KEY_END;
+    uint8_t info;
+    uint32_t len = 0;
+    int32_t ret = LnnGetRemoteByteInfo(nullptr, key, &info, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(networkId, key, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(networkId, key, &info, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    key = BYTE_KEY_BEGIN;
+    ret = LnnGetRemoteByteInfo(networkId, key, &info, len);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_ISLSA_NODE_Test_001, TestSize.Level1)
+{
+    NodeBasicInfo info;
+    memset_s(info.networkId, sizeof(info.networkId), '\0', sizeof(info.networkId));
+    bool ret = LnnIsLSANode(&info);
+    EXPECT_TRUE(ret == false);
+
+    int32_t nodeNum = 0;
+    int32_t res = LnnGetAllOnlineNodeNum(nullptr);
+    EXPECT_TRUE(res == SOFTBUS_INVALID_PARAM);
+    res = LnnGetAllOnlineNodeNum(&nodeNum);
+    EXPECT_TRUE(res == SOFTBUS_OK);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GETNETWORKID_BYUDIDHASH_Test_001, TestSize.Level1)
+{
+    const char *udidHash = "softBus";
+    char buf = '0';
+    uint32_t len = 0;
+    int32_t ret = LnnGetNetworkIdByUdidHash(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetNetworkIdByUdidHash(udidHash, &buf, len);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GETDL_ONLINETIMESTAMP_Test_001, TestSize.Level1)
+{
+    uint64_t timestamp = 0;
+    int32_t ret = LnnGetDLOnlineTimestamp(nullptr, &timestamp);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BATTERYINFO_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    BatteryInfo info;
+    int32_t ret = LnnSetDLBatteryInfo(nullptr, &info);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnSetDLBatteryInfo(networkId, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BSSTRANSINFO_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    BssTransInfo info;
+    int32_t ret = LnnSetDLBssTransInfo(nullptr, &info);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnSetDLBssTransInfo(networkId, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_PROXYPORT_Test_001, TestSize.Level1)
+{
+    IdCategory type = CATEGORY_NETWORK_ID;
+    int32_t proxyPort = 0;
+    int32_t ret = LnnSetDLProxyPort(nullptr, type, proxyPort);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_SESSIONPORT_Test_001, TestSize.Level1)
+{
+    IdCategory type = CATEGORY_NETWORK_ID;
+    int32_t sessionPort = 0;
+    int32_t ret = LnnSetDLSessionPort(nullptr, type, sessionPort);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_AUTHPORT_Test_001, TestSize.Level1)
+{
+    const char *id = "softBus";
+    IdCategory type = CATEGORY_NETWORK_ID;
+    int32_t authPort = 0;
+    int32_t ret = LnnSetDLAuthPort(nullptr, type, authPort);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnSetDLAuthPort(id, type, authPort);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, SOFTBUS_DUMPBUSCENTER_Test_001, TestSize.Level1)
+{
+    int32_t fd = 0;
+    int32_t ret = SoftBusDumpBusCenterRemoteDeviceInfo(fd);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEINFO_BYDEVID_Test_001, TestSize.Level1)
+{
+    InnerDeviceInfoAddtions addtions;
+    addtions.medium = AUTO;
+    (void)RefreshDeviceInfoByDevId(nullptr, &addtions);
+    addtions.medium = COAP;
+    (void)RefreshDeviceInfoByDevId(nullptr, &addtions);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEONLINE_STATEINFO_Test_001, TestSize.Level1)
+{
+    DeviceInfo device;
+    memset_s(device.devId, sizeof(device.devId), '\0', sizeof(device.devId));
+    InnerDeviceInfoAddtions addtions;
+    addtions.medium = COAP;
+    (void)RefreshDeviceOnlineStateInfo(&device, &addtions);
+    addtions.medium = BLE;
+    (void)RefreshDeviceOnlineStateInfo(&device, &addtions);
+    (void)LnnRemoveNode(nullptr);
+    NodeInfo info;
+    (void)OnlinePreventBrConnection(&info);
+    (void)UpdateNetworkInfo(nullptr);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_BOOLINFO_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    InfoKey key = BOOL_KEY_END;
+    bool info = false;
+    int32_t ret = LnnGetRemoteBoolInfo(nullptr, key, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteBoolInfo(networkId, key, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteBoolInfo(networkId, key, &info);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    key = BOOL_KEY_BEGIN;
+    ret = LnnGetRemoteBoolInfo(networkId, key, &info);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_NUMU64INFO_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    InfoKey key = BOOL_KEY_END;
+    uint64_t info = 0;
+    int32_t ret = LnnGetRemoteNumU64Info(nullptr, key, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteNumU64Info(networkId, key, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteNumU64Info(networkId, key, &info);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    key = BOOL_KEY_BEGIN;
+    ret = LnnGetRemoteNumU64Info(networkId, key, &info);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_NODEINFO_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    IdCategory type = CATEGORY_NETWORK_ID;
+    NodeInfo info;
+    int32_t ret = LnnGetRemoteNodeInfoById(networkId, type, &info);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, LNN_REFRESH_DEVICEONLINE_ANDINFO_Test_001, TestSize.Level1)
+{
+    DeviceInfo device;
+    InnerDeviceInfoAddtions addtions;
+    (void)LnnRefreshDeviceOnlineStateAndDevIdInfo(nullptr, &device, &addtions);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
+{
+    const char *networkId = "softBus";
+    uint32_t len = 0;
+    int32_t ret = DlGetFeatureCap(networkId, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = LNN_COMMON_LEN_64;
+    ret = DlGetFeatureCap(networkId, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

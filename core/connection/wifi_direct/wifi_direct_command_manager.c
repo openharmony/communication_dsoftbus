@@ -46,24 +46,33 @@ static bool IsNeedRetry(struct WifiDirectCommand *self)
 
 static void EnqueueCommand(struct WifiDirectCommand *command)
 {
+    struct WifiDirectCommandManager *self = GetWifiDirectCommandManager();
+    SoftBusMutexLock(&self->mutex);
     ListTailInsert(&GetWifiDirectCommandManager()->commands, &command->node);
+    SoftBusMutexUnlock(&self->mutex);
 }
 
 static struct WifiDirectCommand* DequeueCommand(void)
 {
-    struct WifiDirectCommandManager *manager = GetWifiDirectCommandManager();
-    if (IsListEmpty(&manager->commands)) {
+    struct WifiDirectCommandManager *self = GetWifiDirectCommandManager();
+    SoftBusMutexLock(&self->mutex);
+    if (IsListEmpty(&self->commands)) {
+        SoftBusMutexUnlock(&self->mutex);
         return NULL;
     }
 
-    struct WifiDirectCommand *command = LIST_ENTRY(manager->commands.next, struct WifiDirectCommand, node);
+    struct WifiDirectCommand *command = LIST_ENTRY(self->commands.next, struct WifiDirectCommand, node);
     ListDelInit(&command->node);
+    SoftBusMutexUnlock(&self->mutex);
     return command;
 }
 
 static void RemoveCommand(struct WifiDirectCommand *command)
 {
+    struct WifiDirectCommandManager *self = GetWifiDirectCommandManager();
+    SoftBusMutexLock(&self->mutex);
     ListDelInit(&command->node);
+    SoftBusMutexUnlock(&self->mutex);
 }
 
 static struct WifiDirectCommandManager g_manager = {
@@ -135,5 +144,11 @@ void FreeWifiDirectCommand(struct WifiDirectCommand *command)
 int32_t WifiDirectCommandManagerInit(void)
 {
     ListInit(&g_manager.commands);
+    SoftBusMutexAttr attr;
+    int32_t ret = SoftBusMutexAttrInit(&attr);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "init mutex attr failed");
+    attr.type = SOFTBUS_MUTEX_RECURSIVE;
+    ret = SoftBusMutexInit(&g_manager.mutex, &attr);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "init mutex ailed");
     return SOFTBUS_OK;
 }

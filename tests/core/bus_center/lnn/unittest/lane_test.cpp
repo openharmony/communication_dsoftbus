@@ -183,9 +183,9 @@ static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void OnLaneRequestFail(uint32_t laneId, int32_t errCode)
 {
-    printf("LaneRequestFail: laneId:0x%x, reason:%d\n", laneId, reason);
+    printf("LaneRequestFail: laneId:0x%x, reason:%d\n", laneId, errCode);
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }

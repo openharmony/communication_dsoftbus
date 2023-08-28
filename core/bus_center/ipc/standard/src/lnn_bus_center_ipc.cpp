@@ -71,7 +71,7 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, cons
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0 || (*iter)->pid != callingPid) {
             continue;
         }
-        if (LnnIsSameConnectionAddr(addr, &(*iter)->addr)) {
+        if (LnnIsSameConnectionAddr(addr, &(*iter)->addr, false)) {
             return true;
         }
     }
@@ -85,7 +85,7 @@ static bool IsRepeatJoinMetaNodeRequest(const char *pkgName, int32_t callingPid,
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0 || (*iter)->pid != callingPid) {
             continue;
         }
-        if (LnnIsSameConnectionAddr(addr, &(*iter)->addr)) {
+        if (LnnIsSameConnectionAddr(addr, &(*iter)->addr, false)) {
             return true;
         }
     }
@@ -453,7 +453,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeL
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinLNNRequestInfo.begin(); iter != g_joinLNNRequestInfo.end();) {
-        if (!LnnIsSameConnectionAddr(connAddr, &(*iter)->addr)) {
+        if (!LnnIsSameConnectionAddr(connAddr, &(*iter)->addr, false)) {
             ++iter;
             continue;
         }
@@ -480,7 +480,7 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addr
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinMetaNodeRequestInfo.begin(); iter != g_joinMetaNodeRequestInfo.end();) {
-        if (!LnnIsSameConnectionAddr(connAddr, &(*iter)->addr)) {
+        if (!LnnIsSameConnectionAddr(connAddr, &(*iter)->addr, false)) {
             ++iter;
             continue;
         }

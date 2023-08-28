@@ -137,7 +137,7 @@ void ConnBleFreeConnection(ConnBleConnection *connection)
 int32_t ConnBleStartServer(void)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        "ATTENTION UNEXPECTED EXCEPTION: ble start server failed, try to lock failed");
+        "ble start server failed, try to lock failed");
     g_serverCoordination.expect = BLE_SERVER_STATE_STARTED;
     enum BleServerState actual = g_serverCoordination.actual;
     (void)SoftBusMutexUnlock(&g_serverCoordination.lock);
@@ -160,7 +160,7 @@ int32_t ConnBleStartServer(void)
         }
     }
     CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        "ATTENTION UNEXPECTED EXCEPTION: ble start server failed, try to lock failed");
+        "ble start server failed, try to lock failed");
     g_serverCoordination.actual = BLE_SERVER_STATE_STARTING;
     (void)SoftBusMutexUnlock(&g_serverCoordination.lock);
     return SOFTBUS_OK;
@@ -169,7 +169,7 @@ int32_t ConnBleStartServer(void)
 int32_t ConnBleStopServer(void)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        "ATTENTION UNEXPECTED EXCEPTION: ble stop server failed, try to lock failed");
+        "ble stop server failed, try to lock failed");
     g_serverCoordination.expect = BLE_SERVER_STATE_STOPPED;
     enum BleServerState actual = g_serverCoordination.actual;
     (void)SoftBusMutexUnlock(&g_serverCoordination.lock);
@@ -192,7 +192,7 @@ int32_t ConnBleStopServer(void)
         }
     }
     CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        "ATTENTION UNEXPECTED EXCEPTION: ble close server failed, try to lock failed");
+        "ble close server failed, try to lock failed");
     g_serverCoordination.actual = BLE_SERVER_STATE_STOPPING;
     (void)SoftBusMutexUnlock(&g_serverCoordination.lock);
     return SOFTBUS_OK;
@@ -238,8 +238,8 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
     "ble connection disconnect failed, protocol not support");
-    CLOGW("receive ble disconnect now, connection id=%u, side=%d, reason=%d", connection->connectionId,
-        connection->side, reason);
+    CLOGW("receive ble disconnect now, connId=%u, side=%d, reason=%d", connection->connectionId, connection->side,
+        reason);
     ConnRemoveMsgFromLooper(
         &g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
     if (connection->side == CONN_SIDE_CLIENT) {
@@ -278,15 +278,16 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
         connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
-    CLOGI("connId=%u, side=%d, delta=%d, after update reference, localRc=%d,underlayer handle=%d",
-        connection->connectionId, connection->side, delta, localRc, underlayerHandle);
+    CLOGI("ble notify refrence, connId=%u, handle=%d, side=%d, delta=%d, after update, localRc=%d,",
+        connection->connectionId, underlayerHandle, connection->side, delta, localRc);
 
     if (localRc <= 0) {
         if ((featureBitSet & (1 << BLE_FEATURE_SUPPORT_REMOTE_DISCONNECT)) == 0) {
-            CLOGW("ble connection reference count <= 0 and peer not support negotiation disconnect by notify msg, "
-                  "disconnect directly, connection id=%u, underlayer handle=%d, support feature bitset=%u",
+            CLOGW("reference count <= 0 and peer not support negotiation disconnect by notify msg, "
+                  "disconnect directly after 200 ms, connId=%u, handle=%d, support feature bitset=%u",
                 connection->connectionId, underlayerHandle, featureBitSet);
-            ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_NO_REFERENCE);
+            ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
+                connection->connectionId, 0, NULL, CLOSING_TIMEOUT_MILLIS);
             return SOFTBUS_OK;
         }
     }
@@ -324,24 +325,21 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
     int32_t peerRc = 0;
     if (!GetJsonObjectSignedNumberItem(json, CTRL_MSG_KEY_DELTA, &delta) ||
         !GetJsonObjectSignedNumberItem(json, CTRL_MSG_KEY_REF_NUM, &peerRc)) {
-        CLOGE("ble connection %u reference request message failed: parse delta or reference number fields failed, "
-              "delta=%d, peer reference count=%d",
+        CLOGE("connId=%u, parse delta or reference number fields failed, delta=%d, peer reference count=%d",
             connection->connectionId, delta, peerRc);
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble connection %u reference request message failed: try to lock failed, "
-              "error=%d",
-            connection->connectionId, status);
+        CLOGE("connId=%u, try to lock failed, err=%d", connection->connectionId, status);
         return SOFTBUS_LOCK_ERR;
     }
     connection->connectionRc += delta;
     int32_t localRc = connection->connectionRc;
 
-    CLOGI("ble received reference request, connection id=%u, delta=%d, peerRef=%d, localRc=%d",
-        connection->connectionId, delta, peerRc, localRc);
+    CLOGI("ble received reference request, connId=%u, delta=%d, peerRef=%d, localRc=%d", connection->connectionId,
+        delta, peerRc, localRc);
     if (peerRc > 0) {
         if (connection->state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
             ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
@@ -374,8 +372,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
     uint32_t dataLen = 0;
     int64_t seq = ConnBlePackCtlMessage(ctx, &data, &dataLen);
     if (seq < 0) {
-        CLOGI("connection %u reference request message: pack reply message faild, error=%d", connection->connectionId,
-            (int32_t)seq);
+        CLOGI("connId=%u, pack reply message faild, err=%d", connection->connectionId, (int32_t)seq);
         return (int32_t)seq;
     }
     status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
@@ -425,14 +422,12 @@ void ConnBleInnerComplementDeviceId(ConnBleConnection *connection)
         return;
     }
     if (strlen(connection->networkId) == 0) {
-        CLOGE("complementation ble connection device id failed: network id not exchange yet, connection id=%u, "
-              "protocol=%d",
-            connection->connectionId, connection->protocol);
+        CLOGE("network id not exchange yet, connId=%u, protocol=%d", connection->connectionId, connection->protocol);
         return;
     }
     int32_t status = LnnGetRemoteStrInfo(connection->networkId, STRING_KEY_DEV_UDID, connection->udid, UDID_BUF_LEN);
-    CLOGI("complementation ble connection device id, connection id=%u, protocol=%d, status=%d",
-        connection->connectionId, connection->protocol, status);
+    CLOGD("complementation ble connection device id, connId=%u, protocol=%d, status=%d", connection->connectionId,
+        connection->protocol, status);
 }
 
 static void ConnBlePackCtrlMsgHeader(ConnPktHead *header, uint32_t dataLen)
@@ -466,22 +461,21 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
             break;
     }
     if (status != SOFTBUS_OK) {
-        CLOGE("ble send basic info failed: get devid from net ledger failed, connection id=%u, protocol=%d, error=%d",
-            connection->connectionId, connection->protocol, status);
+        CLOGE("get devid from net ledger failed, connId=%u, protocol=%d, err=%d", connection->connectionId,
+            connection->protocol, status);
         return status;
     }
 
     int32_t deviceType = 0;
     status = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceType);
     if (status != SOFTBUS_OK) {
-        CLOGE("ble send basic info failed: get device type from net ledger failed, connection id=%u, error=%d",
-            connection->connectionId, status);
+        CLOGE("get device type from net ledger failed, connId=%u, err=%d", connection->connectionId, status);
         return status;
     }
 
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        CLOGE("ble send basic info failed: create json object failed, connection id=%u", connection->connectionId);
+        CLOGE("create json object failed, connId=%u", connection->connectionId);
         return SOFTBUS_CREATE_JSON_ERR;
     }
     char *payload = NULL;
@@ -490,7 +484,7 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
             !AddNumberToJsonObject(json, BASIC_INFO_KEY_ROLE, connection->side) ||
             !AddNumberToJsonObject(json, BASIC_INFO_KEY_DEVTYPE, deviceType) ||
             !AddNumberToJsonObject(json, BASIC_INFO_KEY_FEATURE, g_featureBitSet)) {
-            CLOGE("ble send basic info failed: add json info failed, connection id=%u", connection->connectionId);
+            CLOGE("add json info failed, connId=%u", connection->connectionId);
             status = SOFTBUS_CREATE_JSON_ERR;
             break;
         }
@@ -500,9 +494,7 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
         uint32_t bufLen = dataLen + (connection->protocol == BLE_COC ? sizeof(ConnPktHead) : 0);
         uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
         if (buf == NULL) {
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble send basic info failed: malloc buf failed, connection id=%u, buf "
-                  "len=%u",
-                connection->connectionId, bufLen);
+            CLOGE("malloc buf failed, connId=%u, bufLen=%u", connection->connectionId, bufLen);
             status = SOFTBUS_MALLOC_ERR;
             break;
         }
@@ -517,14 +509,14 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
         netCtrlMsgHeader[0] = NET_CTRL_MSG_TYPE_BASIC_INFO;
         offset += NET_CTRL_MSG_TYPE_HEADER_SIZE;
         if (memcpy_s(buf + offset, bufLen - offset, payload, payloadLen) != EOK) {
-            CLOGE("ble send basic info failed: memcpy_s buf failed, connection id=%u, buf len=%u, paylaod len=%u",
-                connection->connectionId, bufLen, payloadLen);
+            CLOGE("memcpy_s buf failed, connId=%u, bufLen=%u, paylaodLen=%u", connection->connectionId, bufLen,
+                payloadLen);
             status = SOFTBUS_MEM_ERR;
             SoftBusFree(buf);
             break;
         }
         status = ConnBlePostBytesInner(connection->connectionId, buf, bufLen, 0, CONN_HIGH, MODULE_BLE_NET, 0, NULL);
-        CLOGI("ble send basic info, connection id=%u, side=%s, status=%d", connection->connectionId,
+        CLOGI("ble send basic info, connId=%u, side=%s, status=%d", connection->connectionId,
             connection->side == CONN_SIDE_CLIENT ? "client" : "server", status);
         if (status != SOFTBUS_OK) {
             break;
@@ -540,8 +532,7 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
 static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen)
 {
     if (dataLen <= NET_CTRL_MSG_TYPE_HEADER_SIZE) {
-        CLOGI("ble parse basic info failed: date len exceed, connection id=%u, data len=%d", connection->connectionId,
-            dataLen);
+        CLOGI("date len exceed, connId=%u, data len=%d", connection->connectionId, dataLen);
         return SOFTBUS_ERR;
     }
     int offset = 0;
@@ -550,14 +541,13 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
     }
     int32_t *netCtrlMsgHeader = (int32_t *)(data + offset);
     if (netCtrlMsgHeader[0] != NET_CTRL_MSG_TYPE_BASIC_INFO) {
-        CLOGI("ble parse basic info failed: not basic info type, connection id=%u, type=%d", connection->connectionId,
-            netCtrlMsgHeader[0]);
+        CLOGI("not basic info type, connId=%u, type=%d", connection->connectionId, netCtrlMsgHeader[0]);
         return SOFTBUS_ERR;
     }
     offset += NET_CTRL_MSG_TYPE_HEADER_SIZE;
     cJSON *json = cJSON_ParseWithLength((char *)(data + offset), dataLen - offset);
     if (json == NULL) {
-        CLOGI("ble parse basic info failed: parse json failed, connection id=%u", connection->connectionId);
+        CLOGI("parse json failed, connId=%u", connection->connectionId);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     // mandatory fields
@@ -566,41 +556,37 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
     if (!GetJsonObjectStringItem(json, BASIC_INFO_KEY_DEVID, devId, DEVID_BUFF_LEN) ||
         !GetJsonObjectNumberItem(json, BASIC_INFO_KEY_ROLE, &type)) {
         cJSON_Delete(json);
-        CLOGE("ble parse basic info failed: basic info field not exist, connection id=%u", connection->connectionId);
+        CLOGE("basic info field not exist, connId=%u", connection->connectionId);
         return SOFTBUS_ERR;
     }
     // optional field
     int32_t deviceType = 0;
     if (!GetJsonObjectNumberItem(json, BASIC_INFO_KEY_DEVTYPE, &deviceType)) {
-        CLOGE("ble parse basic info warning, 'devType' is not exist, connection id=%u", connection->connectionId);
+        CLOGE("ble parse basic info warning, 'devType' is not exist, connId=%u", connection->connectionId);
         // fall through
     }
     int32_t feature = 0;
     if (!GetJsonObjectNumberItem(json, BASIC_INFO_KEY_FEATURE, &feature)) {
-        CLOGE(
-            "ble parse basic info warning, 'FEATURE_SUPPORT' is not exist, connection id=%u", connection->connectionId);
+        CLOGE("ble parse basic info warning, 'FEATURE_SUPPORT' is not exist, connId=%u", connection->connectionId);
         // fall through
     }
     cJSON_Delete(json);
 
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("ATTENTION UNEXPECTED ERROR! ble parse basic info failed: try to lock connection failed, connection "
-              "id=%u, error=%d",
-            connection->connectionId, status);
+        CLOGE("try to lock connection failed, connId=%u, err=%d", connection->connectionId, status);
         return SOFTBUS_LOCK_ERR;
     }
     if (connection->protocol == BLE_GATT) {
         if (memcpy_s(connection->udid, UDID_BUF_LEN, devId, DEVID_BUFF_LEN) != EOK) {
             (void)SoftBusMutexUnlock(&connection->lock);
-            CLOGE("ble parse basic info failed: memcpy_s udid failed, connection id=%u", connection->connectionId);
+            CLOGE("memcpy_s udid failed, connId=%u", connection->connectionId);
             return SOFTBUS_MEM_ERR;
         }
     } else {
         if (memcpy_s(connection->networkId, NETWORK_ID_BUF_LEN, devId, DEVID_BUFF_LEN) != EOK) {
             (void)SoftBusMutexUnlock(&connection->lock);
-            CLOGE(
-                "ble parse basic info failed: memcpy_s network id failed, connection id=%u", connection->connectionId);
+            CLOGE("memcpy_s network id failed, connId=%u", connection->connectionId);
             return SOFTBUS_MEM_ERR;
         }
         ConnBleInnerComplementDeviceId(connection);
@@ -616,23 +602,20 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
               "connection info, actual peer side role=%d from basic info",
             expectedPeerType, type);
     }
-    CLOGE("ble parse basic info, connection id=%u, side=%s, device type=%d, support feature=%u",
-        connection->connectionId, connection->side == CONN_SIDE_CLIENT ? "client" : "server", deviceType, feature);
+    CLOGE("ble parse basic info, connId=%u, side=%s, device type=%d, support feature=%u", connection->connectionId,
+        connection->side == CONN_SIDE_CLIENT ? "client" : "server", deviceType, feature);
     return SOFTBUS_OK;
 }
 
 void BleOnClientConnected(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOG(
-        connection != NULL, "ble on client connected failed: connection not exist, connection id=%u", connectionId);
+    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection not exist, connId=%u", connectionId);
     int32_t status = SOFTBUS_OK;
     do {
         status = SoftBusMutexLock(&connection->lock);
         if (status != SOFTBUS_OK) {
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble on client connected failed: try to lock failed, connection id=%u, "
-                  "error=%d",
-                connectionId, status);
+            CLOGE("try to lock failed, connId=%u, err=%d", connectionId, status);
             break;
         }
         connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
@@ -640,15 +623,12 @@ void BleOnClientConnected(uint32_t connectionId)
         status = ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_EXCHANGE_BASIC_INFO_TIMEOUT,
             connectionId, 0, NULL, BASIC_INFO_EXCHANGE_TIMEOUT);
         if (status != SOFTBUS_OK) {
-            CLOGE("ble on client connected failed: post basic info exchange timeout event failed,connection id=%u, "
-                  "error=%d",
-                connectionId, status);
+            CLOGE("post basic info exchange timeout event failed, connId=%u, err=%d", connectionId, status);
             break;
         }
         status = SendBasicInfo(connection);
         if (status != SOFTBUS_OK) {
-            CLOGE("ble on client connected failed: send basic info message failed, connection id=%u, error=%d",
-                connectionId, status);
+            CLOGE("send basic info message failed, connId=%u, err=%d", connectionId, status);
             break;
         }
     } while (false);
@@ -669,13 +649,13 @@ void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     if (connection == NULL) {
-        CLOGE("ble connection data received failed, connection not exist, connection id=%u", connectionId);
+        CLOGE("connection not exist, connId=%u", connectionId);
         SoftBusFree(data);
         return;
     }
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     if (interface == NULL) {
-        CLOGE("ble connection data received failed, protocol not support, connection id=%u", connectionId);
+        CLOGE("protocol not support, connId=%u", connectionId);
         SoftBusFree(data);
         return;
     }
@@ -692,9 +672,7 @@ void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t
             SoftBusFree(data);
             // NOT notify client 'onConnectFailed' or server disconnect as it can not get state safely here,
             // connection will fail after basic info change timeout, all resouces will cleanup in timeout handle method
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble connection data received failed, try to lock failed, connection "
-                  "id=%u, error=%d",
-                connectionId, status);
+            CLOGE("try to lock failed, connId=%u, err=%d", connectionId, status);
             break;
         }
         enum ConnBleConnectionState state = connection->state;
@@ -710,9 +688,8 @@ void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t
         status = ParseBasicInfo(connection, data, dataLen);
         SoftBusFree(data);
         if (status != SOFTBUS_OK) {
-            CLOGE("ble connection data received failed, parse basic info failed, connection id=%u, side=%d, "
-                  "underlayer handle=%d, error=%d",
-                connectionId, connection->side, underlayerHandle, status);
+            CLOGE("parse basic info failed, connId=%u, side=%d, handle=%d, err=%d", connectionId, connection->side,
+                underlayerHandle, status);
             if (connection->side == CONN_SIDE_CLIENT) {
                 g_connectionListener.onConnectFailed(connection->connectionId, status);
             } else {
@@ -725,22 +702,18 @@ void BleOnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t
         if (connection->side == CONN_SIDE_SERVER) {
             status = SendBasicInfo(connection);
             if (status != SOFTBUS_OK) {
-                CLOGE("ble connection data received failed, send server side basic info failed, connection id=%u, "
-                      "underlayer handle=%d, error=%d",
-                    connectionId, underlayerHandle, status);
+                CLOGE("send server side basic info failed, connId=%u, handle=%d, err=%d", connectionId,
+                    underlayerHandle, status);
                 interface->bleServerDisconnect(connection);
                 break;
             }
             status = interface->bleServerConnect(connection);
-            CLOGI("ble connection data received, server side finish exchange basic info, connection id=%u, "
-                  "underlayer handle=%d, server connect status=%d",
+            CLOGI("server side finish exchange basic info, connId=%u, handle=%d, server connect status=%d",
                 connectionId, underlayerHandle, status);
             ConnBleRefreshIdleTimeout(connection);
             g_connectionListener.onServerAccepted(connection->connectionId);
         } else {
-            CLOGI("ble connection data received, client side finish exchange basic info, connection id=%u, "
-                  "underlayer handle=%d",
-                connectionId, underlayerHandle);
+            CLOGI("client side finish exchange basic info, connId=%u, handle=%d", connectionId, underlayerHandle);
             ConnBleRefreshIdleTimeout(connection);
             g_connectionListener.onConnected(connection->connectionId);
         }
@@ -757,10 +730,10 @@ void BleOnConnectionClosed(uint32_t connectionId, int32_t status)
 
 void BleOnServerStarted(BleProtocolType protocol, int32_t status)
 {
-    CLOGI("receive ble server started event, status=%d", status);
+    CLOGD("receive ble server started event, status=%d", status);
 
     CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK,
-        "ATTENTION UNEXPECTED EXCEPTION: on server start event handle failed, try to lock failed");
+        "on server start event handle failed, try to lock failed");
     g_serverCoordination.status[protocol] = status;
     g_serverCoordination.actual =
         (g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK && g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
@@ -775,10 +748,10 @@ void BleOnServerStarted(BleProtocolType protocol, int32_t status)
 
 void BleOnServerClosed(BleProtocolType protocol, int32_t status)
 {
-    CLOGI("receive ble server closed event, status=%d", status);
+    CLOGD("receive ble server closed event, status=%d", status);
 
     CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK,
-        "ATTENTION UNEXPECTED EXCEPTION: on server close event handle failed, try to lock failed");
+        "on server close event handle failed, try to lock failed");
     g_serverCoordination.status[protocol] = status;
     g_serverCoordination.actual =
         (g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK && g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
@@ -794,8 +767,7 @@ void BleOnServerClosed(BleProtocolType protocol, int32_t status)
 void BleOnServerAccepted(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOG(
-        connection != NULL, "ble server accepted failed, connection not exist, connection id=%u", connectionId);
+    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection not exist, connId=%u", connectionId);
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_LOG(
         interface != NULL, "ble server accepted failed, interface not support, connection id=%u", connectionId);
@@ -803,9 +775,7 @@ void BleOnServerAccepted(uint32_t connectionId)
     do {
         status = SoftBusMutexLock(&connection->lock);
         if (status != SOFTBUS_OK) {
-            CLOGE("ATTENTION UNEXPECTED ERROR! ble server accepted failed, try to lock failed, connection id=%u, "
-                  "error=%d",
-                connectionId, status);
+            CLOGE("try to lock failed, connId=%u, err=%d", connectionId, status);
             break;
         }
         connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
@@ -813,9 +783,7 @@ void BleOnServerAccepted(uint32_t connectionId)
         status = ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_EXCHANGE_BASIC_INFO_TIMEOUT,
             connectionId, 0, NULL, BASIC_INFO_EXCHANGE_TIMEOUT);
         if (status != SOFTBUS_OK) {
-            CLOGE(
-                "ble server accepted failed, post basic info exchange timeout event failed,connection id=%u, error=%d",
-                connectionId, status);
+            CLOGE("post basic info exchange timeout event failed, connId=%u, err=%d", connectionId, status);
             break;
         }
     } while (false);
@@ -851,7 +819,7 @@ static int32_t DoRetryAction(enum BleServerState expect)
 static void RetryServerStatConsistentHandler(void)
 {
     CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK,
-        "ATTENTION UNEXPECTED EXCEPTION: retry server state consistent msg handle, try to lock failed");
+        "retry server state consistent msg handle, try to lock failed");
     enum BleServerState expect = g_serverCoordination.expect;
     enum BleServerState actual = g_serverCoordination.actual;
     (void)SoftBusMutexUnlock(&g_serverCoordination.lock);
@@ -872,7 +840,7 @@ static void RetryServerStatConsistentHandler(void)
         return;
     }
     CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_serverCoordination.lock) == SOFTBUS_OK,
-        "ATTENTION UNEXPECTED EXCEPTION: retry server state consistent msg handle, try to lock failed");
+        "retry server state consistent msg handle, try to lock failed");
     g_serverCoordination.actual =
         (expect == BLE_SERVER_STATE_STARTED ? BLE_SERVER_STATE_STARTING : BLE_SERVER_STATE_STOPPING);
     (void)SoftBusMutexUnlock(&g_serverCoordination.lock);
@@ -882,11 +850,11 @@ static void BasicInfoExchangeTimeoutHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(connection != NULL,
-        "ble basic info exchange timeout handle failed, connection not exist, connection id=%u", connectionId);
+        "ble basic info exchange timeout handle failed, connection not exist, connId=%u", connectionId);
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_LOG(interface != NULL,
-        "ble basic info exchange timeout handle failed, protocol not support, connection id=%u", connectionId);
-    CLOGW("ble basic info exchange timeout, connection id=%u, side=%s", connectionId,
+        "ble basic info exchange timeout handle failed, protocol not support, connId=%u", connectionId);
+    CLOGW("ble basic info exchange timeout, connId=%u, side=%s", connectionId,
         connection->side == CONN_SIDE_CLIENT ? "client" : "server");
     if (connection->side == CONN_SIDE_CLIENT) {
         g_connectionListener.onConnectFailed(connectionId, SOFTBUS_CONN_BLE_EXCHANGE_BASIC_INFO_TIMEOUT_ERR);
@@ -900,17 +868,16 @@ static void WaitNegotiationClosingTimeoutHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(connection != NULL,
-        "ble wait negotiation closing timeout handler failed: connection not exist, connection id=%u", connectionId);
+        "ble wait negotiation closing timeout handler failed: connection not exist, connId=%u", connectionId);
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE(
-            "ble wait negotiation closing timeout handler failed: try to lock failed, connection id=%u", connectionId);
+        CLOGE("try to lock failed, connId=%u", connectionId);
         ConnBleReturnConnection(&connection);
         return;
     }
     enum ConnBleConnectionState state = connection->state;
     (void)SoftBusMutexUnlock(&connection->lock);
-    CLOGW("ble wait negotiation closing timeout handler, connection id=%u, state=%d", connectionId, state);
+    CLOGW("ble wait negotiation closing timeout, connId=%u, state=%d", connectionId, state);
     if (state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
         ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_NEGOTIATION_WAIT_TIMEOUT);
     }
@@ -921,9 +888,9 @@ static void ConnectionIdleDisconnectTimeoutHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(connection != NULL,
-        "connection idle disconnect timeout handler failed: connection not exist, connection id=%u", connectionId);
+        "connection idle disconnect timeout handler failed: connection not exist, connId=%u", connectionId);
     CLOGW("connection idle disconnect timeout handler, connection idle exceed more %u ms, forgot call disconnect? "
-          "disconnect now, connection id=%u",
+          "disconnect now, connId=%u",
         CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS, connectionId);
     ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_IDLE_WAIT_TIMEOUT);
     ConnBleReturnConnection(&connection);
@@ -971,7 +938,7 @@ static int BleCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *
             break;
     }
     if (ctx->arg1 != 0 || ctx->arg2 != 0 || ctx->obj != NULL) {
-        CLOGE("ble compare connection looper event failed: there is compare context value not use, forgot implement? "
+        CLOGE("there is compare context value not use, forgot implement? "
               "compare failed to avoid fault silence, what=%d, arg1=%" PRIu64 ", arg2=%" PRIu64 ", obj is null? %d",
             ctx->what, ctx->arg1, ctx->arg2, ctx->obj == NULL);
         return COMPARE_FAILED;
@@ -1019,14 +986,14 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         }
         status = interface->bleClientInitModule(looper, &clientEventListener);
         CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
-            "init ble connection failed: init ble %d client failed, error=%d", i, status);
+            "init ble connection failed: init ble %d client failed, err=%d", i, status);
         status = interface->bleServerInitModule(looper, &serverEventListener);
         CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
-            "init ble connection failed: init ble %d server failed, error=%d", i, status);
+            "init ble connection failed: init ble %d server failed, err=%d", i, status);
     }
     status = SoftBusMutexInit(&g_serverCoordination.lock, NULL);
     CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, status,
-        "init ble connection failed: init server coordination lock failed, error=%d", status);
+        "init ble connection failed: init server coordination lock failed, err=%d", status);
     g_bleConnectionAsyncHandler.handler.looper = looper;
     g_connectionListener = *listener;
     return SOFTBUS_OK;

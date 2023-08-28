@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "wrapper_br_interface.h"
 
 #include "message_handler.h"
@@ -146,6 +147,12 @@ static SppSocketDriver g_sppSocketDriver = {
     .Read = Read,
     .GetRemoteDeviceInfo = GetRemoteDeviceInfo
 };
+
+bool IsAclConnected(const BT_ADDR mac)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "IsAclConnected not implement");
+    return false;
+}
 
 NO_SANITIZE("cfi") SppSocketDriver *InitSppSocketDriver()
 {

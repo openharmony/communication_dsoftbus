@@ -25,6 +25,10 @@
 #include "trans_tcp_direct_p2p.h"
 #include "wifi_direct_manager.h"
 #include "data_bus_native.h"
+#include "softbus_conn_interface.h"
+
+#define NETWORK_ID_LEN 7
+#define HML_IP_PREFIX "172.30."
 
 static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid)
 {
@@ -34,6 +38,19 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
     memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
     TRAN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "LnnGetRemoteNodeInfoById failed");
+
+    char myIp[IP_LEN] = {0};
+    if (GetWifiDirectManager()->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) == SOFTBUS_OK) {
+        if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+            ListenerModule type = GetMoudleByHmlIp(myIp);
+            if (type != UNUSE_BUTT) {
+                StopHmlListener(type);
+                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StopHmlListener succ");
+            }
+        }
+    } else {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "WifiDirectDeviceOffLine do not get localip");
+    }
 
     TransOnLinkDown(nodeInfo.networkId, nodeInfo.uuid, nodeInfo.masterUdid, peerIp, WIFI_P2P);
     TLOGI("Notify Degrade MigrateEvents start");
@@ -49,6 +66,9 @@ static void OnWifiDirectRoleChange(enum WifiDirectRole myRole)
     if (myRole == WIFI_DIRECT_ROLE_NONE) {
         TLOGI("my role change to NONE");
         StopP2pSessionListener();
+        for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
+            StopHmlListener(i);
+        }
     }
 }
 

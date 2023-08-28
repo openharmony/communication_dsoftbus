@@ -16,6 +16,7 @@
 #define WIFI_DIRECT_COMMAND_MANAGER_H
 
 #include "common_list.h"
+#include "softbus_adapter_thread.h"
 #include "wifi_direct_types.h"
 
 #ifdef __cplusplus
@@ -46,6 +47,7 @@ struct WifiDirectCommandManager {
     void (*removeCommand)(struct WifiDirectCommand *command);
 
     struct ListNode commands;
+    SoftBusMutex mutex;
 };
 
 struct WifiDirectCommandManager* GetWifiDirectCommandManager(void);

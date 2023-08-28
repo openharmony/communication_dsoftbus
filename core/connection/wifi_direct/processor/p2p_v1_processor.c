@@ -97,6 +97,7 @@ static int32_t ChoseFrequency(int32_t gcFreq, int32_t *gcChannelArray, size_t gc
 static int32_t SaveCurrentMessage(struct NegotiateMessage *msg);
 static void SetInnerLinkDeviceId(struct NegotiateMessage *msg, struct InnerLink *innerLink);
 static bool IsNeedDhcp(const char *gcIp, struct NegotiateMessage *msg);
+static enum WifiDirectRole TransferExpectedRole(uint32_t expectApiRole);
 
 /* public interface */
 static int32_t CreateLink(struct WifiDirectConnectInfo *connectInfo)
@@ -129,7 +130,9 @@ static int32_t CreateLink(struct WifiDirectConnectInfo *connectInfo)
         info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE));
     CLOGI(LOG_LABEL "myRole=%d", myRole);
     if (myRole == WIFI_DIRECT_ROLE_NONE) {
-        ret = CreateLinkAsNone(connectInfo->remoteMac, connectInfo->expectRole, &link, connectInfo->negoChannel);
+        enum WifiDirectRole expectRole = TransferExpectedRole(connectInfo->expectApiRole);
+        CLOGI(LOG_LABEL "expectRole=%d", expectRole);
+        ret = CreateLinkAsNone(connectInfo->remoteMac, expectRole, &link, connectInfo->negoChannel);
     } else if (myRole == WIFI_DIRECT_ROLE_GO) {
         ret = CreateLinkAsGo(connectInfo->requestId, connectInfo->remoteMac, &link, connectInfo->negoChannel);
     } else {
@@ -297,7 +300,7 @@ static int32_t CreateLinkAsNone(char *remoteMac, enum WifiDirectRole expectRole,
                                 struct WifiDirectNegotiateChannel *channel)
 {
     CLOGI(LOG_LABEL "enter");
-    if (!GetResourceManager()->isInterfaceAvailable(IF_NAME_P2P)) {
+    if (!GetResourceManager()->isInterfaceAvailable(IF_NAME_P2P, false)) {
         CLOGE(LOG_LABEL "V1_ERROR_IF_NOT_AVAILABLE");
         return V1_ERROR_IF_NOT_AVAILABLE;
     }
@@ -347,8 +350,8 @@ static int32_t CreateLinkAsGo(int32_t requestId, char *remoteMac, struct InnerLi
 static int32_t CreateLinkAsGc(int32_t requestId, char *remoteMac, struct InnerLink *innerLink,
                               struct WifiDirectNegotiateChannel *channel)
 {
-    CLOGE(LOG_LABEL "ERROR_P2P_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE");
-    return V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE;
+    CLOGE(LOG_LABEL "V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE");
+    return V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE;
 }
 
 static int32_t GetRoleInfo(struct NegotiateMessage *msg, enum WifiDirectRole *myRoleOut,
@@ -687,7 +690,7 @@ static struct NegotiateMessage* BuildReuseResponse(int32_t result, struct WifiDi
     response->putInt(response, NM_KEY_COMMAND_TYPE, CMD_REUSE_RESP);
     response->putString(response, NM_KEY_MAC, myMac);
     response->putPointer(response, NM_KEY_NEGO_CHANNEL, (void **)&channel);
-    response->putInt(response, NM_KEY_RESULT, result);
+    response->putInt(response, NM_KEY_RESULT, ErrorCodeToV1ProtocolCode(result));
 
     return response;
 }
@@ -729,7 +732,7 @@ static struct NegotiateMessage* BuildNegotiateResult(enum WifiDirectErrorCode re
     result->putString(result, NM_KEY_IP, localIp);
     result->putInt(result, NM_KEY_COMMAND_TYPE, CMD_CONN_V1_RESP);
     result->putInt(result, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_RESULT);
-    result->putInt(result, NM_KEY_RESULT, reason);
+    result->putInt(result, NM_KEY_RESULT, ErrorCodeToV1ProtocolCode(reason));
     result->putPointer(result, NM_KEY_NEGO_CHANNEL, (void **)&channel);
 
     return result;
@@ -957,7 +960,7 @@ static int32_t ProcessConnectRequest(struct NegotiateMessage *msg)
     int32_t ret = GetRoleInfo(msg, &myRole, &peerRole, &expectRole);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get role info failed");
 
-    if (myRole == WIFI_DIRECT_ROLE_NONE && !GetResourceManager()->isInterfaceAvailable(IF_NAME_P2P)) {
+    if (myRole == WIFI_DIRECT_ROLE_NONE && !GetResourceManager()->isInterfaceAvailable(IF_NAME_P2P, false)) {
         CLOGE(LOG_LABEL "V1_ERROR_IF_NOT_AVAILABLE");
         ProcessFailureResponse(msg, V1_ERROR_IF_NOT_AVAILABLE);
         return SOFTBUS_OK;
@@ -999,7 +1002,7 @@ static int32_t ProcessConnectResponseAsGo(struct NegotiateMessage *msg)
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
     CLOGI(LOG_LABEL "remoteMac=%s", WifiDirectAnonymizeMac(remoteMac));
 
-    enum WifiDirectErrorCode result = msg->getInt(msg, NM_KEY_RESULT, -1);
+    enum WifiDirectErrorCode result = ErrorCodeFromV1ProtocolCode(msg->getInt(msg, NM_KEY_RESULT, -1));
     if (result != OK) {
         CLOGE(LOG_LABEL "peer response error %d", result);
         RemoveLink(remoteMac);
@@ -1007,7 +1010,7 @@ static int32_t ProcessConnectResponseAsGo(struct NegotiateMessage *msg)
     }
     struct InnerLink link;
     InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_CONNECT_TYPE_P2P, false, IF_NAME_P2P, remoteMac);
-    link.putInt(&link, IL_KEY_STATE, INNER_LINK_STATE_CONNECTED);
+    link.setState(&link, INNER_LINK_STATE_CONNECTED);
     link.putRemoteIpString(&link, msg->getString(msg, NM_KEY_IP, ""));
     GetLinkManager()->notifyLinkChange(&link);
     InnerLinkDestructor(&link);
@@ -1115,7 +1118,7 @@ static int32_t ProcessConnectResponseAsNone(struct NegotiateMessage *msg)
         return ProcessConnectResponseWithGcInfoAsNone(msg);
     }
 
-    enum WifiDirectErrorCode errorCode = msg->getInt(msg, NM_KEY_RESULT, -1);
+    enum WifiDirectErrorCode errorCode = ErrorCodeFromV1ProtocolCode(msg->getInt(msg, NM_KEY_RESULT, -1));
     CLOGI(LOG_LABEL "errorCode=%d", errorCode);
     return errorCode;
 }
@@ -1201,7 +1204,7 @@ Failed:
 
 static int32_t ProcessReuseResponse(struct NegotiateMessage *msg)
 {
-    int32_t result = msg->getInt(msg, NM_KEY_RESULT, SOFTBUS_ERR);
+    int32_t result = ErrorCodeFromV1ProtocolCode(msg->getInt(msg, NM_KEY_RESULT, SOFTBUS_ERR));
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
 
     CLOGI(LOG_LABEL "result=%d remoteMac=%s", result, WifiDirectAnonymizeMac(remoteMac));
@@ -1415,7 +1418,7 @@ static void UpdateInnerLinkOnConnectGroupComplete(const char *localMac, const ch
     link.putString(&link, IL_KEY_LOCAL_BASE_MAC, localMac);
     link.putRemoteIpString(&link, remoteIp);
     link.putLocalIpString(&link, localIp);
-    link.putInt(&link, IL_KEY_STATE, INNER_LINK_STATE_CONNECTED);
+    link.setState(&link, INNER_LINK_STATE_CONNECTED);
     GetLinkManager()->notifyLinkChange(&link);
 
     InnerLinkDestructor(&link);
@@ -1437,6 +1440,7 @@ static int32_t OnConnectGroupComplete(void)
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "no p2p interface info");
     char *localMac = info->getString(info, II_KEY_BASE_MAC, "");
+    info->setP2pGroupConfig(info, msg->getString(msg, NM_KEY_GROUP_CONFIG, ""));
 
     char localIp[IP_ADDR_STR_LEN] = {0};
     int32_t ret = info->getIpString(info, localIp, sizeof(localIp));
@@ -1524,7 +1528,7 @@ static void InitBasicInnerLink(struct InnerLink *innerLink, bool isClient)
     innerLink->putInt(innerLink, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_P2P);
     innerLink->putString(innerLink, IL_KEY_LOCAL_INTERFACE, IF_NAME_P2P);
     innerLink->putString(innerLink, IL_KEY_REMOTE_INTERFACE, IF_NAME_P2P);
-    innerLink->putInt(innerLink, IL_KEY_STATE, INNER_LINK_STATE_CONNECTING);
+    innerLink->setState(innerLink, INNER_LINK_STATE_CONNECTING);
     innerLink->putBoolean(innerLink, IL_KEY_IS_CLIENT, isClient);
 }
 
@@ -1664,6 +1668,22 @@ static bool IsNeedDhcp(const char *gcIp, struct NegotiateMessage *msg)
     CLOGI(LOG_LABEL "DHCP is false");
     SoftBusFree(groupConfigCopy);
     return false;
+}
+
+static enum WifiDirectRole TransferExpectedRole(uint32_t expectApiRole)
+{
+    expectApiRole &= ~(WIFI_DIRECT_API_ROLE_HML);
+    switch (expectApiRole) {
+        case WIFI_DIRECT_API_ROLE_GC:
+            return WIFI_DIRECT_ROLE_GC;
+        case WIFI_DIRECT_API_ROLE_GO:
+            return WIFI_DIRECT_ROLE_GO;
+        case WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO:
+            return WIFI_DIRECT_ROLE_AUTO;
+        default:
+            CLOGE(LOG_LABEL "invalid api role 0x%x", expectApiRole);
+            return WIFI_DIRECT_ROLE_INVALID;
+    }
 }
 
 static struct P2pV1Processor g_processor = {

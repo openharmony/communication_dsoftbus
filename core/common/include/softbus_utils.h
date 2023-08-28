@@ -82,6 +82,10 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
 
 int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen);
 
+int32_t ConvertBtMacToU64(const char *strMac, uint32_t strMacLen, uint64_t *u64Mac);
+
+int32_t ConvertU64MacToStr(uint64_t u64Mac, char *strMac, uint32_t strMacLen);
+
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2);
 
 int32_t StringToUpperCase(const char *str, char *buf, int32_t size);

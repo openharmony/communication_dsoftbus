@@ -31,6 +31,8 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
+#include "bus_center_manager.h"
 
 #define HB_GEARMODE_MAX_SET_CNT 100
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)
@@ -58,6 +60,7 @@ static LnnHeartbeatParamManager *g_hbParamMgr[HB_MAX_TYPE_COUNT] = {0};
 static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
 static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
 static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
+static bool IsSupportBurstFeature(const char *newtworkId);
 
 static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
     [STRATEGY_HB_SEND_SINGLE] = {
@@ -125,7 +128,10 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
             continue;
         }
         /* Priority to send high-frequency heartbeat */
-        if (mode->cycle != 0 && mode->cycle <= info->mode.cycle) {
+        if (mode->cycle != 0 && mode->cycle < info->mode.cycle) {
+            continue;
+        }
+        if (mode->cycle == info->mode.cycle && !info->mode.wakeupFlag) {
             continue;
         }
         if (memcpy_s(mode, sizeof(GearMode), &info->mode, sizeof(GearMode)) != EOK) {
@@ -381,7 +387,7 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB send once but dont check status, hbType:%d", registedHbType);
         return SOFTBUS_OK;
     }
-    LnnCheckDevStatusMsgPara checkMsg = {.hbType = registedHbType, .hasNetworkId = false};
+    LnnCheckDevStatusMsgPara checkMsg = {.hbType = registedHbType, .hasNetworkId = false, .isWakeUp = wakeupFlag};
     LnnRemoveCheckDevStatusMsg(hbFsm, &checkMsg);
     if (LnnPostCheckDevStatusMsgToHbFsm(hbFsm, &checkMsg, HB_CHECK_DELAY_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once post check msg fail, hbType:%d", registedHbType);
@@ -672,6 +678,22 @@ NO_SANITIZE("cfi") int32_t LnnStartNewHbStrategyFsm(void)
     return SOFTBUS_OK;
 }
 
+static bool IsSupportBurstFeature(const char *networkId)
+{
+    uint64_t localFeature;
+    uint64_t peerFeature;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK ||
+        LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &peerFeature) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get local or remote feature fail");
+        return false;
+    }
+    if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
+        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
+        return true;
+    }
+    return false;
+}
+
 NO_SANITIZE("cfi") int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
     GearMode mode = {0};
@@ -679,6 +701,10 @@ NO_SANITIZE("cfi") int32_t LnnStartOfflineTimingStrategy(const char *networkId, 
 
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (IsSupportBurstFeature(networkId)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "target device support burst, dont't need post offline info");
+        return SOFTBUS_OK;
     }
     if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start offline timing strcpy_s networkId fail");

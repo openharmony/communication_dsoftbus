@@ -53,6 +53,7 @@ uint32_t AddAuthRequest(const AuthRequest *request);
 int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
 int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request);
 int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request);
+int32_t FindAndDelAuthRequestByConnInfo(uint32_t requestId, const AuthConnInfo *connInfo);
 void DelAuthRequest(uint32_t requestId);
 void ClearAuthRequest(void);
 

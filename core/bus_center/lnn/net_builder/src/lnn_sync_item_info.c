@@ -72,7 +72,7 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
     SoftBusWifiDevConf targetDeviceConf;
     uint32_t i;
 
-    result = SoftBusMalloc(sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
+    result = (SoftBusWifiDevConf *)SoftBusMalloc(sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
     if (result == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi device config fail");
         return SOFTBUS_ERR;

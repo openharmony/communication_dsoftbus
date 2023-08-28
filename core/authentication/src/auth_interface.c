@@ -361,6 +361,7 @@ NO_SANITIZE("cfi") TrustedReturnType AuthHasTrustedRelation(void)
         return TRUSTED_RELATION_IGNORE;
     }
     SoftBusFree(udidArray);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "auth get trusted relation num:%d", num);
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 

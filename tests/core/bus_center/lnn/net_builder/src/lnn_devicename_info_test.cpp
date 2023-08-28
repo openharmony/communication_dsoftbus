@@ -83,7 +83,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_UPDATE_DEVICE_NAME_TEST_001, TestSize.Level1
     EXPECT_CALL(connMock, DiscDeviceInfoChanged).WillRepeatedly(Return());
     UpdateDeviceName(nullptr);
     LnnDeviceNameHandler HandlerGetDeviceName = LnnServicetInterfaceMock::g_deviceNameHandler;
-    HandlerGetDeviceName();
+    HandlerGetDeviceName(DEVICE_NAME_TYPE_DEV_NAME, nullptr);
     SoftBusSleepMs(10000);
     LooperDeinit();
 }

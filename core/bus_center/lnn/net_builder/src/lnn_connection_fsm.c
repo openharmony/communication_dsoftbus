@@ -17,10 +17,11 @@
 
 #include <securec.h>
 
-#include "auth_interface.h"
 #include "auth_hichain.h"
+#include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_ble_lpdevice.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_decision_db.h"
@@ -31,6 +32,7 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
+#include "softbus_adapter_bt_common.h"
 #include "lnn_feature_capability.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "softbus_adapter_mem.h"
@@ -386,12 +388,12 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     }
     ReportLnnResultEvt(connFsm, retCode);
     if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
-        int32_t groupType = AuthGetGroupType(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->nodeInfo->uuid);
-        connInfo->nodeInfo->groupType = groupType;
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "groupType = %d", groupType);
         report = LnnAddOnlineNode(connInfo->nodeInfo);
+        if (LnnUpdateGroupType(connInfo->nodeInfo) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update grouptype fail");
+        }
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-            "peer feature = %lld, local=%lld", connInfo->nodeInfo->feature, localFeature);
+            "peer feature=%" PRIu64 ", local=%" PRIu64 "", connInfo->nodeInfo->feature, localFeature);
         if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
             IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
             DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
@@ -429,10 +431,12 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     const char *udid = NULL;
     bool needReportOffline = false;
     bool isMetaAuth = false;
+    bool isCleanInfo = connInfo->cleanInfo != NULL ? true : false;
     uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     ReportCategory report;
-
-    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+    const char *findNetworkId = isCleanInfo ? connInfo->cleanInfo->networkId : networkId;
+    if (LnnGetRemoteNodeInfoById(findNetworkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LLOGW("get node info by networkId fail, isCleanInfo = %d", isCleanInfo);
         return needReportOffline;
     }
     isMetaAuth = (info.AuthTypeValue & (1 << ONLINE_METANODE)) != 0;
@@ -440,15 +444,19 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     report = LnnSetNodeOffline(udid, connInfo->addr.type, (int32_t)connInfo->authId);
     LnnGetLnnRelation(udid, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
     LnnNotifyLnnRelationChanged(udid, connInfo->addr.type, relation[connInfo->addr.type], false);
+    if (LnnGetBasicInfoByUdid(udid, basic) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]get basic info fail", connFsm->id);
+        needReportOffline = false;
+    }
+    if (isCleanInfo) {
+        if (strcpy_s(basic->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
+            LLOGE("get node info by networkId fail, isCleanInfo = %d", isCleanInfo);
+            return needReportOffline;
+        }
+    }
     if (report == REPORT_OFFLINE) {
         needReportOffline = true;
-        (void)memset_s(basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-        if (LnnGetBasicInfoByUdid(udid, basic) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]get basic info fail", connFsm->id);
-            needReportOffline = false;
-        } else {
-            DeleteFromProfile(udid);
-        }
+        DeleteFromProfile(udid);
         // just remove node when peer device is not trusted
         if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0 && !isMetaAuth) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[id=%u]remove node", connFsm->id);
@@ -497,10 +505,13 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     if (retCode == SOFTBUS_OK) {
         needReportOffline = UpdateLeaveToLedger(connFsm, networkId, &basic);
         LnnNotifyNodeStateChanged(&connInfo->addr);
+        LnnNotifySingleOffLineEvent(&connInfo->addr, &basic);
     }
     NotifyLeaveResult(connFsm, networkId, retCode);
     if (needReportOffline) {
         LnnNotifyOnlineState(false, &basic);
+    } else if (retCode == SOFTBUS_OK) {
+        LnnNotifySingleOffLineEvent(&connInfo->addr, &basic);
     }
     NodeInfo info = {0};
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
@@ -613,7 +624,6 @@ static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
     NodeInfo *nodeInfo = connInfo->nodeInfo;
     nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
     nodeInfo->authSeqNum = connInfo->authId;
-    connInfo->nodeInfo->authSeq[LnnConvAddrTypeToDiscType(connInfo->addr.type)] = connInfo->authId;
     nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
     nodeInfo->relation[connInfo->addr.type]++;
     if (AuthGetVersion(connInfo->authId, &version) != SOFTBUS_OK) {
@@ -1091,6 +1101,11 @@ NO_SANITIZE("cfi") int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm
         return SOFTBUS_INVALID_PARAM;
     }
     SetWatchdogFlag(false);
+    if ((connFsm->connInfo.addr.type == CONNECTION_ADDR_BLE || connFsm->connInfo.addr.type == CONNECTION_ADDR_BR) &&
+        SoftBusGetBtState() != BLE_ENABLE) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send join request while bt is turn off");
+        return SOFTBUS_ERR;
+    }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, NULL);
 }
 

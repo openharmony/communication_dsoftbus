@@ -261,7 +261,8 @@ NO_SANITIZE("cfi") void TransDelSessionConnById(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
-            if (item->listenMod == DIRECT_CHANNEL_SERVER_P2P && item->authId != AUTH_INVALID_ID &&
+            if ((item->listenMod == DIRECT_CHANNEL_SERVER_P2P || (item->listenMod >= DIRECT_CHANNEL_SERVER_HML_START &&
+                item->listenMod <= DIRECT_CHANNEL_SERVER_HML_END)) && item->authId != AUTH_INVALID_ID &&
                 !item->serverSide && item->appInfo.routeType != WIFI_P2P_REUSE && item->requestId != REQUEST_INVALID) {
                 AuthCloseConn(item->authId);
             }
