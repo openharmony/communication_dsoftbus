@@ -124,7 +124,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnConnectP2p(network, 5, networkDelegate, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-}   
+}
 
 /*
 * @tc.name: LNN_LANE_LINK_002
@@ -143,9 +143,9 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
     LaneDepsInterfaceMock linkMock;
     EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(SOFTBUS_ERR));  
+    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(SOFTBUS_OK));  
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
@@ -166,8 +166,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
     ret = LnnConnectP2p(network, 2, networkDelegate, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
-
-
 
 /*
 * @tc.name: LNN_LANE_LINK_003
@@ -251,8 +249,8 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_005, TestSize.Level1)
 */
 HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_001, TestSize.Level1)
 {
-   int32_t ret = GetWlanLinkedFrequency();
-   EXPECT_TRUE(ret == SOFTBUS_ERR);
+    int32_t ret = GetWlanLinkedFrequency();
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -265,17 +263,17 @@ HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_002, TestSize.Level1)
 {
     typedef enum {
     TEST_BR = -1,
-   }TestLinkType;
+   } TestLinkType;
 
-   TestLinkType testLink = TEST_BR;
-   LaneLinkType linkType = (LaneLinkType)testLink;
-   LinkAttribute *ret = GetLinkAttrByLinkType(linkType);
-   EXPECT_TRUE(ret == NULL);
-   linkType = LANE_LINK_TYPE_BUTT;
-   ret = GetLinkAttrByLinkType(linkType);
-   EXPECT_TRUE(ret == NULL);
-   linkType = LANE_P2P;
-   ret = GetLinkAttrByLinkType(linkType);
-   EXPECT_TRUE(ret != NULL);
+    TestLinkType testLink = TEST_BR;
+    LaneLinkType linkType = (LaneLinkType)testLink;
+    LinkAttribute *ret = GetLinkAttrByLinkType(linkType);
+    EXPECT_TRUE(ret == NULL);
+    linkType = LANE_LINK_TYPE_BUTT;
+    ret = GetLinkAttrByLinkType(linkType);
+    EXPECT_TRUE(ret == NULL);
+    linkType = LANE_P2P;
+    ret = GetLinkAttrByLinkType(linkType);
+    EXPECT_TRUE(ret != NULL);
 }
 } // namespace OHOS

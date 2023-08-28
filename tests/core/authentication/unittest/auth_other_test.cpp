@@ -620,7 +620,7 @@ HWTEST_F(AuthOtherTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
     ASSERT_NE(obj, nullptr);
     uint32_t keyLen = 0;
     deviceCommKey.keyLen = keyLen;
-    uint64_t ret = PackFastAuthValue(obj, &deviceCommKey); 
+    uint64_t ret = PackFastAuthValue(obj, &deviceCommKey);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     JSON_Delete(obj);
 }
