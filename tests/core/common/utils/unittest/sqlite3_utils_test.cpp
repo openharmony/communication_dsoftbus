@@ -563,4 +563,185 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_002, TestSize.Level0)
     EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
     EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
 }
+
+/*
+* @tc.name: Open_Database_Test_001
+* @tc.desc: open database test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_001, TestSize.Level0)
+{
+    DbContext *ctxPtr = nullptr;
+    bool *isExist = nullptr;
+
+    EXPECT_EQ(CheckTableExist(ctxPtr, TABLE_TRUSTED_DEV_INFO, isExist), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctxPtr), SOFTBUS_OK);
+    isExist = nullptr;
+    int testid = CheckTableExist(ctxPtr, TABLE_TRUSTED_DEV_INFO, isExist);
+    EXPECT_EQ(testid, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: Insert_Record_Test_001
+* @tc.desc: insert record test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(Sqlite3UtilsTest, Insert_Record_Test_001, TestSize.Level0)
+{
+    DbContext *ctx = nullptr;
+    uint8_t *g_record = NULL;
+    EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, g_record), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    int testid = InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, g_record);
+    EXPECT_EQ(testid, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: Close_Database_Test_001
+* @tc.desc: close database test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(Sqlite3UtilsTest, Close_Database_Test_001, TestSize.Level0)
+{
+    DbContext *ctx = nullptr;
+
+    EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: Db_Password_Test_001
+* @tc.desc: db password test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
+{
+    DbContext *ctx = nullptr;
+    uint8_t *password = nullptr;
+    uint32_t len = 0;
+
+    EXPECT_EQ(EncryptedDb(ctx, password, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    ASSERT_TRUE(ctx != nullptr);
+    EXPECT_EQ(EncryptedDb(ctx, password, len), SOFTBUS_INVALID_PARAM);
+    int testid = EncryptedDb(ctx, PASSWORD1, len);
+    EXPECT_EQ(testid, SOFTBUS_ERR);
+    
+    ctx = nullptr;
+    EXPECT_EQ(UpdateDbPassword(ctx, password, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    ASSERT_TRUE(ctx != nullptr);
+    EXPECT_EQ(UpdateDbPassword(ctx, password, len), SOFTBUS_INVALID_PARAM);
+    testid = UpdateDbPassword(ctx, PASSWORD1, len);
+    EXPECT_EQ(testid, SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: Remove_Record_Key_001
+* @tc.desc: remove record key
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(Sqlite3UtilsTest, Remove_Record_Key_001, TestSize.Level0)
+{
+    DbContext *ctx = nullptr;
+    char *record = (char *)SoftBusCalloc(0 * UDID_BUF_LEN);
+    uint8_t *g_record = NULL;
+
+    EXPECT_EQ(RemoveRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, g_record), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(RemoveRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, g_record), SOFTBUS_INVALID_PARAM);
+    ctx = nullptr;
+    EXPECT_EQ(RemoveAllRecord(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), SOFTBUS_OK);
+    EXPECT_EQ(QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID,
+        (uint8_t **)&record, 0), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(CloseTransaction(ctx, CLOSE_TRANS_COMMIT), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: Get_Query_Result_001
+* @tc.desc: Get Record Key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(Sqlite3UtilsTest, Get_Query_Result_001, TestSize.Level0)
+{
+    DbContext *ctx = nullptr;
+    int32_t icol = -1;
+    char *text = nullptr;
+    int32_t value32 = 1;
+    int64_t value64 = 1;
+    double valuedouble = 1;
+
+    EXPECT_EQ(GetQueryResultColText(ctx, icol, text, UDID_BUF_LEN), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(GetQueryResultColText(ctx, icol, text, UDID_BUF_LEN), SOFTBUS_INVALID_PARAM);
+    icol = 1;
+    EXPECT_EQ(GetQueryResultColText(ctx, icol, text, UDID_BUF_LEN), SOFTBUS_INVALID_PARAM);
+
+    ctx = nullptr;
+    icol = -1;
+    EXPECT_EQ(GetQueryResultColInt(ctx, icol, &value32), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetQueryResultColInt64(ctx, icol, &value64), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetQueryResultColDouble(ctx, icol, &valuedouble), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(GetQueryResultColInt(ctx, icol, &value32), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetQueryResultColInt64(ctx, icol, &value64), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetQueryResultColDouble(ctx, icol, &valuedouble), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetQueryResultColCount(ctx, &value32), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: Bind_Para_Test_001
+* @tc.desc: bind para test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(Sqlite3UtilsTest, Bind_Para_Test_001, TestSize.Level0)
+{
+    DbContext *ctx = nullptr;
+    DbContext *ctx_1 = nullptr;
+    int32_t idx = -1;
+    int32_t value32 = 1;
+    int32_t value64 = 1;
+    double valuedouble = 0.0;
+    char *valuetext = nullptr;
+    char ch[] = "abcdefghijklmn";
+    char *valuetext1 = ch;
+    int32_t result = 0;
+
+    EXPECT_EQ(BindParaInt(ctx, idx, value32), SQLITE_ERROR);
+    EXPECT_EQ(BindParaInt64(ctx, idx, value64), SQLITE_ERROR);
+    EXPECT_EQ(BindParaDouble(ctx, idx, valuedouble), SQLITE_ERROR);
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(BindParaInt(ctx, idx, value32), SQLITE_ERROR);
+    EXPECT_EQ(BindParaInt64(ctx, idx, value64), SQLITE_ERROR);
+    EXPECT_EQ(BindParaDouble(ctx, idx, valuedouble), SQLITE_ERROR);
+    idx = 1;
+    result = BindParaInt(ctx, idx, value32);
+    EXPECT_EQ(result, 1);
+    result = BindParaInt64(ctx, idx, value64);
+    EXPECT_EQ(result, 1);
+    result = BindParaDouble(ctx, idx, valuedouble);
+    EXPECT_EQ(result, 1);
+
+    ctx_1 = nullptr;
+    EXPECT_EQ(BindParaText(ctx_1, idx, valuetext, 0), SQLITE_ERROR);
+    EXPECT_EQ(OpenDatabase(&ctx_1), SOFTBUS_OK);
+    idx = -1;
+    EXPECT_EQ(BindParaText(ctx_1, idx, valuetext, 0), SQLITE_ERROR);
+    idx = 1;
+    EXPECT_EQ(BindParaText(ctx_1, idx, valuetext, 0), SQLITE_ERROR);
+    valuetext1[0] = '\0';
+    EXPECT_EQ(BindParaText(ctx_1, idx, valuetext1, strlen(valuetext1)), SQLITE_ERROR);
+    valuetext1[0] = '1';
+    EXPECT_EQ(BindParaText(ctx_1, idx, valuetext1, strlen(valuetext1)), SQLITE_ERROR);
+}
 } // namespace OHOS
