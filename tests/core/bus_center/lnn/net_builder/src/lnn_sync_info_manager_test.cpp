@@ -29,7 +29,7 @@ using namespace testing::ext;
 constexpr char NETWORLID[65] = "abcdefg";
 constexpr uint8_t MSG[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 constexpr uint32_t LEN = 10;
-
+constexpr uint32_t LENGTH = 8192;
 class LNNSyncInfoManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -96,10 +96,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
 {
     int32_t ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_COUNT, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    
     ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_OFFLINE, Handler);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
     LnnRegSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
     ret = LnnUnregSyncInfoHandler(LNN_INFO_TYPE_TOPO_UPDATE, Handler);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -115,5 +113,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level
 {
     int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_COUNT, NETWORLID, MSG, LEN, Complete);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_ROUTE_LSU, NETWORLID, MSG, LENGTH, Complete);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS
