@@ -203,3 +203,12 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
     }
     return groupCnt;
 }
+
+void CancelRequest(int64_t authReqId, const char *appId)
+{
+    if (g_hichain == NULL) {
+        g_hichain = InitHichain();
+    }
+    AUTH_CHECK_AND_RETURN_LOG(g_hichain != NULL, "hichain not initialized");
+    g_hichain->cancelRequest(authReqId, appId);
+}
