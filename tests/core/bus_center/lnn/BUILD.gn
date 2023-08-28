@@ -1064,8 +1064,10 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/sync_info/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/common/include",
@@ -1076,6 +1078,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/utils/src",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -1098,11 +1101,6 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
-  if (dsoftbus_feature_lnn_net) {
-    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c" ]
-  } else {
-    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_virtual.c" ]
-  }
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
@@ -1121,7 +1119,6 @@ ohos_unittest("LNNDisctributedLedgerTest") {
 ohos_unittest("LNNMetaNodeLedgerTest") {
   module_out_path = module_output_path
   sources = [
-    "net_ledger/lnn_disctributed_net_ledger_test.cpp",
     "net_ledger/lnn_ledger_common_test.cpp",
     "net_ledger/lnn_meta_node_ledger_test.cpp",
   ]
