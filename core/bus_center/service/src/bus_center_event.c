@@ -18,9 +18,11 @@
 #include <securec.h>
 #include <stdlib.h>
 
+#include "bus_center_decision_center.h"
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_network_id.h"
+#include "lnn_distributed_net_ledger.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -91,6 +93,7 @@ static void HandleOnlineStateChangedMessage(SoftBusMessage *msg)
     }
     bool isOnline = (bool)msg->arg1;
     LnnIpcNotifyOnlineState(isOnline, msg->obj, sizeof(NodeBasicInfo));
+    LnnDCProcessOnlineState(isOnline, (NodeBasicInfo *)msg->obj);
 }
 
 static void HandleNodeBasicInfoChangedMessage(SoftBusMessage *msg)
@@ -559,6 +562,21 @@ NO_SANITIZE("cfi") void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_NETWORK_STATE_CHANGED, .status = state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+NO_SANITIZE("cfi") void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo)
+{
+    if (addr == NULL || basicInfo == NULL) {
+        LLOGE("addr or basicInfo is null");
+        return;
+    }
+    LnnSingleNetworkOffLineEvent event = {.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE, .type = addr->type};
+    event.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE;
+    event.type = addr->type;
+    event.udid = "";
+    event.uuid = "";
+    event.networkId = basicInfo->networkId;
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 

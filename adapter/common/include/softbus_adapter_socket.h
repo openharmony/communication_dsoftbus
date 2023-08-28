@@ -115,13 +115,13 @@ typedef struct {
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd);
 int32_t SoftBusSocketSetOpt(int32_t socketFd, int32_t level, int32_t optName,  const void *optVal, int32_t optLen);
 int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName,  void *optVal, int32_t *optLen);
-int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen);
-int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen);
+int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr);
+int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr);
 
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen);
 int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog);
-int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *addrLen, int32_t *acceptFd);
-int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen);
+int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *acceptFd);
+int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr);
 
 void SoftBusSocketFdZero(SoftBusFdSet *set);
 void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set);

@@ -57,6 +57,7 @@ void LnnRemoveNode(const char *udid);
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
 int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info); /* key means udid/uuid/networkId/macAddr/ip */
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
+bool LnnSetDLDeviceNickName(const char *networkId, const char *name);
 bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info);
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
 int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
@@ -72,13 +73,14 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability);
 int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
 int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info);
 int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info);
-int32_t LnnGetAllAuthSeq(const char *udid, int64_t *authSeq, uint32_t num);
 const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash);
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
+int32_t LnnUpdateNetworkId(const NodeInfo *newInfo);
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo);
 int32_t LnnAddMetaInfo(NodeInfo *info);
 int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type);
+int32_t UpdateGroupType(NodeInfo *info);
 int32_t LnnUpdateGroupType(const NodeInfo *info);
 int32_t LnnUpdateAccountInfo(const NodeInfo *info);
 int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);

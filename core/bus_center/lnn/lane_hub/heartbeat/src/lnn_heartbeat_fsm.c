@@ -63,6 +63,7 @@ static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *par
 static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
+static bool IsSupportBurstFeature(const char *newworkId);
 
 static LnnHeartbeatStateHandler g_hbNoneStateHandler[] = {
     {EVENT_HB_CHECK_DEV_STATUS, OnCheckDevStatus},
@@ -644,7 +645,7 @@ static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
             break;
         }
         LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
-        if (*hbType == (HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1)) {
+        if ((*hbType & HEARTBEAT_TYPE_BLE_V0) != 0) {
             LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_CHECK_DEV_STATUS);
             LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE);
             LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
@@ -755,7 +756,7 @@ static bool ProcOfflineWithoutSoftbus(const char *networkId, ConnectionAddrType 
     return false;
 }
 
-static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType addrType)
+static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType addrType, bool isWakeUp)
 {
     char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     char *anoyNetworkId = NULL;
@@ -781,6 +782,10 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost start new offline timing err");
             return SOFTBUS_ERR;
         }
+        return SOFTBUS_OK;
+    }
+    if (IsSupportBurstFeature(networkId) && isWakeUp) {
+        LLOGI("HB is support burst and is not wakeup, don't check");
         return SOFTBUS_OK;
     }
     const char *udid = LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID);
@@ -840,12 +845,13 @@ static bool IsSupportBurstFeature(const char *networkId)
     return false;
 }
 
-static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnHeartbeatType hbType,
+static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnCheckDevStatusMsgPara *msgPara,
     uint64_t nowTime)
 {
     uint64_t oldTimeStamp;
     DiscoveryType discType;
 
+    LnnHeartbeatType hbType = msgPara->hbType;
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
@@ -874,11 +880,7 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check dev status stop offline timing fail");
         return;
     }
-    if (IsSupportBurstFeature(networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "target device support burst, don't need post offline info");
-        return;
-    }
-    if (ProcessLostHeartbeat(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
+    if (ProcessLostHeartbeat(networkId, LnnConvertHbTypeToConnAddrType(hbType), msgPara->isWakeUp) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB process dev lost err, networkId:%s",
             AnonymizesNetworkID(networkId));
     }
@@ -952,7 +954,7 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
         }
         LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
         if (msgPara->hasNetworkId) {
-            CheckDevStatusByNetworkId(hbFsm, msgPara->networkId, msgPara->hbType, nowTime);
+            CheckDevStatusByNetworkId(hbFsm, msgPara->networkId, msgPara, nowTime);
             ret = SOFTBUS_OK;
             break;
         }
@@ -971,7 +973,7 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
             if (LnnIsLSANode(&info[i])) {
                 continue;
             }
-            CheckDevStatusByNetworkId(hbFsm, info[i].networkId, msgPara->hbType, nowTime);
+            CheckDevStatusByNetworkId(hbFsm, info[i].networkId, msgPara, nowTime);
         }
         SoftBusFree(info);
         ret = SOFTBUS_OK;

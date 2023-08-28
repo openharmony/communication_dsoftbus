@@ -314,6 +314,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         return true;
     }
     int32_t ret;
+    int32_t stateVersion;
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (!IsLocalSupportBleDirectOnline()) {
@@ -321,8 +322,14 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         return true;
     }
     if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK) {
-        LLOGI("don't support ble direct online because device info not exist");
+        LLOGI("don't support ble direct online because peer state version change, ver:%d->%d",
+            deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
         return true;
+    }
+    if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK &&
+        stateVersion != deviceInfo.localStateVersion) {
+        LLOGI("don't support ble direct online because local state version change, ver:%d->%d",
+            deviceInfo.localStateVersion, stateVersion);
     }
     if ((int32_t)hbResp->stateVersion != deviceInfo.stateVersion) {
         LLOGI("don't support ble direct online because state version change");
@@ -401,6 +408,11 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         if (!HbIsNeedReAuth(&nodeInfo, device->accountHash)) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
+        }
+        if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
+            LLOGE("reauth request repeated");
+            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+            return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
         }
         if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
             LLOGE("reauth request repeated");
@@ -497,7 +509,7 @@ NO_SANITIZE("cfi") static void HbMediumMgrRelayProcess(const char *udidHash, Con
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay get invalid param");
         return;
     }
-    LLOGD("HB mgr relay process, udidhash:%s", AnonymizesUDID(udidHash));
+    LLOGD("HB mgr relay process, udidhash:%s, hbType:%d", AnonymizesUDID(udidHash), hbType);
     if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay process fail");
         return;
@@ -849,7 +861,7 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist manager convert type fail");
         return false;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Regeist medium manager id = %d", id);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB Regeist medium manager id=%d", id);
     g_hbMeidumMgr[id] = mgr;
     return true;
 }

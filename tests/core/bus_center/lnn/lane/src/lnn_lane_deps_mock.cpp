@@ -185,9 +185,9 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
     return GetLaneDepsInterface()->LnnDisconnectP2p(networkId, pid, laneLinkReqId);
 }
 
-void LnnDestoryP2p(void)
+void LnnDestroyP2p(void)
 {
-    return GetLaneDepsInterface()->LnnDestoryP2p();
+    return GetLaneDepsInterface()->LnnDestroyP2p();
 }
 
 int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,

@@ -112,7 +112,7 @@ public:
     MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
     MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char *, AuthConnInfo *, bool));
 
-    MOCK_METHOD3(AuthGetLatestIdByUuid, int64_t (const char *, bool, bool));
+    MOCK_METHOD3(AuthGetLatestIdByUuid, int64_t (const char *, AuthLinkType, bool));
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
     MOCK_METHOD4(AuthGetIdByP2pMac, int64_t (const char *, AuthLinkType, bool, bool));
 

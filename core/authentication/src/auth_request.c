@@ -38,11 +38,28 @@ static uint32_t GetAuthRequestWaitNum(AuthRequest *request)
 {
     uint32_t num = 0;
     AuthRequest *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_authRequestList, AuthRequest, node) {
-        if (item->type == request->type &&
-            CompareConnInfo(&request->connInfo, &item->connInfo, true)) {
-            num++;
+    AuthRequest *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authRequestList, AuthRequest, node) {
+        if (item->type != request->type || !CompareConnInfo(&request->connInfo, &item->connInfo, true)) {
+            continue;
         }
+        if (item->requestId == request->requestId) {
+            num++;
+            continue;
+        }
+        if (request->addTime - item->addTime < AUTH_REQUEST_TIMTOUR) {
+            ALOGD("requestId=%u addr same to requestId=%u", request->requestId, item->requestId);
+            num++;
+            continue;
+        }
+        if (CheckAuthConnCallback(&item->connCb)) {
+            item->connCb.onConnOpenFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
+        } else if (CheckVerifyCallback(&item->verifyCb)) {
+            item->verifyCb.onVerifyFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
+        }
+        ListDelete(&item->node);
+        SoftBusFree(item);
+        num++;
     }
     return num;
 }
@@ -114,6 +131,35 @@ NO_SANITIZE("cfi") int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInf
     return SOFTBUS_NOT_FIND;
 }
 
+NO_SANITIZE("cfi") int32_t FindAndDelAuthRequestByConnInfo(uint32_t requestId, const AuthConnInfo *connInfo)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
+    if (!RequireAuthLock()) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthRequest *item = NULL;
+    AuthRequest *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authRequestList, AuthRequest, node) {
+        if (!CompareConnInfo(&item->connInfo, connInfo, true)) {
+            continue;
+        }
+        if (item->requestId == requestId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            continue;
+        }
+        if (CheckAuthConnCallback(&item->connCb)) {
+            item->connCb.onConnOpenFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
+        } else if (CheckVerifyCallback(&item->verifyCb)) {
+            item->verifyCb.onVerifyFailed(item->requestId, SOFTBUS_AUTH_CONN_FAIL);
+        }
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    ReleaseAuthLock();
+    return SOFTBUS_NOT_FIND;
+}
+
 NO_SANITIZE("cfi") void DelAuthRequest(uint32_t requestId)
 {
     if (!RequireAuthLock()) {
@@ -124,6 +170,7 @@ NO_SANITIZE("cfi") void DelAuthRequest(uint32_t requestId)
         ReleaseAuthLock();
         return;
     }
+    LLOGD("del auth request requestId=%u", requestId);
     ListDelete(&item->node);
     SoftBusFree(item);
     ReleaseAuthLock();

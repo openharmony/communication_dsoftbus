@@ -199,7 +199,7 @@ static void AddToAvailableLinkList(struct InterfaceInfo *local, struct Interface
 
     struct LinkInfo *link = NULL;
     if (IsLinkModeSupportedOnCap(localCap, remoteCap, LINK_MODE_HML_HML)) {
-        CLOGI(LOG_LABEL "LINK_MODE_HML_HML");
+        CLOGI(LOG_LABEL "LINK_MODE_HML_HML rate=%d", rate);
         link = LinkInfoNewWithNameAndMode(localName, remoteName, WIFI_DIRECT_API_ROLE_HML, WIFI_DIRECT_API_ROLE_HML);
         if (link) {
             link->putInt(link, LI_KEY_MAX_PHYSICAL_RATE, rate);
@@ -210,7 +210,7 @@ static void AddToAvailableLinkList(struct InterfaceInfo *local, struct Interface
     }
     if (IsLinkModeSupportedOnCap(localCap, remoteCap, LINK_MODE_GC_GO) &&
         IsLinkModeSupportedOnRole(localMode, remoteMode, LINK_MODE_GC_GO)) {
-        CLOGI(LOG_LABEL "LINK_MODE_GC_GO");
+        CLOGI(LOG_LABEL "LINK_MODE_GC_GO rate=%d", rate);
         link = LinkInfoNewWithNameAndMode(localName, remoteName, WIFI_DIRECT_API_ROLE_GC, WIFI_DIRECT_API_ROLE_GO);
         if (link) {
             link->putInt(link, LI_KEY_MAX_PHYSICAL_RATE, rate);
@@ -221,7 +221,7 @@ static void AddToAvailableLinkList(struct InterfaceInfo *local, struct Interface
     }
     if (IsLinkModeSupportedOnCap(localCap, remoteCap, LINK_MODE_GO_GC) &&
         IsLinkModeSupportedOnRole(localMode, remoteMode, LINK_MODE_GO_GC)) {
-        CLOGI(LOG_LABEL "LINK_MODE_GO_GC");
+        CLOGI(LOG_LABEL "LINK_MODE_GO_GC rate=%d", rate);
         link = LinkInfoNewWithNameAndMode(localName, remoteName, WIFI_DIRECT_API_ROLE_GO, WIFI_DIRECT_API_ROLE_GC);
         if (link) {
             link->putInt(link, LI_KEY_MAX_PHYSICAL_RATE, rate);
@@ -258,7 +258,9 @@ static bool LinkCompare(struct LinkInfo *left, struct LinkInfo *right)
     if (rate1 > rate2) {
         return true;
     }
-
+    if (rate1 < rate2) {
+        return false;
+    }
     int32_t localMode1 = left->getInt(left, LI_KEY_LOCAL_LINK_MODE, WIFI_DIRECT_API_ROLE_NONE);
     int32_t localMode2 = right->getInt(right, LI_KEY_LOCAL_LINK_MODE, WIFI_DIRECT_API_ROLE_NONE);
     if (localMode1 == localMode2) {
@@ -273,7 +275,10 @@ static bool LinkCompare(struct LinkInfo *left, struct LinkInfo *right)
     if (localMode1 == WIFI_DIRECT_API_ROLE_GC) {
         return true;
     }
-    return false;
+    if (localMode2 == WIFI_DIRECT_API_ROLE_GC) {
+        return false;
+    }
+    return true;
 }
 
 static void SortLinkList(ListNode *list)

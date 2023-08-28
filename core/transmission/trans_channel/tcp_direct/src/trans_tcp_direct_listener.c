@@ -125,6 +125,8 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     conn->timeout = 0;
     conn->listenMod = module;
     conn->authId = AUTH_INVALID_ID;
+    conn->appInfo.routeType = ((module == DIRECT_CHANNEL_SERVER_P2P) || (module >= DIRECT_CHANNEL_SERVER_HML_START &&
+        module <= DIRECT_CHANNEL_SERVER_HML_END)) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
 
@@ -223,7 +225,7 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
     }
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd[%d] is not exist tdc info. appfd=%d", fd, conn->appInfo.fd);
-        for (uint32_t i = DIRECT_CHANNEL_SERVER_P2P; i <= DIRECT_CHANNEL_SERVER_WIFI; i++) {
+        for (uint32_t i = DIRECT_CHANNEL_SERVER_P2P; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
             DelTrigger(i, fd, READ_TRIGGER);
             DelTrigger(i, fd, WRITE_TRIGGER);
             DelTrigger(i, fd, EXCEPT_TRIGGER);

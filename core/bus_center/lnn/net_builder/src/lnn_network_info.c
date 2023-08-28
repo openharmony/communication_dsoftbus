@@ -84,6 +84,16 @@ static void HandlePeerNetCapchanged(const char *networkId, uint32_t capability)
     }
 }
 
+static void UpdateNetworkInfo(const char *udid)
+{
+    NodeBasicInfo basic = {0};
+    if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetBasicInfoByUdid fail");
+        return;
+    }
+    LnnNotifyBasicInfoChanged(&basic, TYPE_NETWORK_INFO);
+}
+
 static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv capability info, type:%d, len: %d", type, len);
@@ -101,7 +111,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert msg to capability fail");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "capability:%d", capability);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "capability:%d", capability);
     // update ledger
     NodeInfo info = {0};
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
@@ -111,6 +121,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     if (info.discoveryType != capability) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "capability change, need to updateProfile");
         UpdateProfile(&info);
+        UpdateNetworkInfo(info.deviceInfo.deviceUdid);
     }
     if (LnnSetDLConnCapability(networkId, capability)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update conn capability fail.");
@@ -161,7 +172,7 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         return;
     }
     if (infoNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "online device num is 0, not need to network info");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "online device num is 0, not need to send network info");
         SoftBusFree(msg);
         return;
     }
@@ -269,7 +280,7 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
 static void WifiStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_WIFI_STATE_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN_EVENT_WIFI_STATE_CHANGED get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bt state change evt handler get invalid param");
         return;
     }
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
@@ -317,8 +328,8 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
             return;
     }
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bt state change netCapability= %d, isSend = %d",
-            netCapability, isSend);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bt state change netCapability = %d, isSend = %d",
+        netCapability, isSend);
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set cap to local ledger fail");
         return;
@@ -352,7 +363,7 @@ static bool IsSupportApCoexist(const char *coexistCap)
         bool p2pCap = false;
         for (int j = 0; j < cJSON_GetArraySize(subItems); j++) {
             cJSON *subItem = cJSON_GetArrayItem(subItems, j);
-            char interface[STRING_INTERFACE_BUFFER_LEN] = {0};
+            char interface[IF_NAME_LEN] = {0};
             if (!GetJsonObjectStringItem(subItem, "IF", interface, sizeof(interface))) {
                 LLOGE("get interface failed");
                 continue;

@@ -44,6 +44,7 @@ int32_t UnregChangeListener(const char *appId);
 int32_t AuthDevice(int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb);
 int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb);
 bool CheckDeviceInGroupByType(const char *udid, const char *uuid, HichainGroup groupType);
+bool CheckHasRelatedGroupInfo(HichainGroup groupType);
 void DestroyDeviceAuth(void);
 bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise);
 void CancelRequest(int64_t authReqId, const char *appId);

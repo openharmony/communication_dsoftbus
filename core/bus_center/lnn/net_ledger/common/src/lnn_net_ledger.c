@@ -51,6 +51,12 @@ NO_SANITIZE("cfi") int32_t LnnInitNetLedger(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init huks interface fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
+        LLOGE("load local deviceinfo fail");
+    }
+    if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
+        LLOGE("load remote deviceinfo fail");
+    }
     return SOFTBUS_OK;
 }
 

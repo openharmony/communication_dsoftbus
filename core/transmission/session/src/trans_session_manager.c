@@ -331,7 +331,7 @@ NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, const char *uuid,
     }
 
     if (routeType == WIFI_P2P) {
-        LaneDeleteP2pAddress(networkId);
+        LaneDeleteP2pAddress(networkId, true);
     }
     TransListDelete(&sessionServerList);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown end");

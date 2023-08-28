@@ -367,19 +367,20 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
     LnnNetLedgertInterfaceMock lnnNetLedgerMock;
     ON_CALL(heartbeatFsmMock, LnnRequestLeaveSpecific).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(distriLedgerMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(distriLedgerMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, CheckActiveConnection).WillRepeatedly(Return(true));
     EXPECT_CALL(heartbeatFsmMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_ERR));
-    int32_t ret = ProcessLostHeartbeat(nullptr, CONNECTION_ADDR_BLE);
+    int32_t ret = ProcessLostHeartbeat(nullptr, CONNECTION_ADDR_BLE, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(distriLedgerMock, LnnGetOnlineStateById).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnNetLedgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BR);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BR, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_ETH);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_ETH, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusSleepMs(20);
 }
@@ -436,16 +437,17 @@ HWTEST_F(HeartBeatFSMTest, CheckDevStatusByNetworkIdTest_01, TestSize.Level1)
     EXPECT_CALL(heartbeatFsmMock, LnnStopOfflineTimingStrategy)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
+    LnnCheckDevStatusMsgPara msgPara = { .hbType = HEARTBEAT_TYPE_BLE_V0 };
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
     EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<1>(oldTimeStamp), Return(SOFTBUS_OK)));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME3);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME3);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
     SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }

@@ -70,6 +70,8 @@ struct InnerLink {
     void (*addId)(struct InnerLink *self, int32_t linkId, int32_t requestId, int32_t pid);
     void (*removeId)(struct InnerLink *self, int32_t linkId);
     bool (*containId)(struct InnerLink *self, int32_t linkId);
+    void (*setState)(struct InnerLink *self, enum InnerLinkState state);
+    bool (*isProtected)(struct InnerLink *self);
     void (*dumpLinkId)(struct InnerLink *self);
 
     /* for link manager */

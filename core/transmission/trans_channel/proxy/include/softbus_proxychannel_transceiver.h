@@ -49,6 +49,7 @@ void TransCreateConnByConnId(uint32_t connId);
 int32_t TransDecConnRefByConnId(uint32_t connId);
 int32_t TransAddConnRefByConnId(uint32_t connId);
 int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo);
+int32_t TransDelConnByReqId(uint32_t reqId);
 
 #ifdef __cplusplus
 }

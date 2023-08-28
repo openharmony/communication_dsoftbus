@@ -26,20 +26,25 @@
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
+#include "softbus_adapter_errcode.h"
 
 #define AUTH_CONN_DATA_HEAD_SIZE           24
 #define AUTH_CONN_CONNECT_TIMEOUT_MS       10000
 #define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY 1000
+#define AUTH_CONN_MAX_RETRY_TIMES          1
+#define AUTH_CONN_RETRY_DELAY_MILLIS       3000
 
 typedef struct {
     uint32_t requestId;
     AuthConnInfo connInfo;
+    uint32_t retryTimes;
 } ConnCmdInfo;
 
 typedef struct {
     uint32_t requestId;
     int32_t fd;
     AuthConnInfo connInfo;
+    uint32_t retryTimes;
     ListNode node;
 } ConnRequest;
 
@@ -90,9 +95,15 @@ uint32_t GetConnId(uint64_t connId)
     return (uint32_t)(connId & MASK_UINT64_L32);
 }
 
-static int32_t GetFd(uint64_t connId)
+int32_t GetFd(uint64_t connId)
 {
     return (int32_t)(connId & MASK_UINT64_L32);
+}
+ 
+void UpdateFd(uint64_t *connId, int32_t id)
+{
+    *connId &= MASK_UINT64_H32;
+    *connId |= (((uint64_t)id) & MASK_UINT64_L32);
 }
 
 /* Conn Request */
@@ -356,6 +367,23 @@ static void OnCommConnected(uint32_t connectionId, const ConnectionInfo *info)
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "(ignored)OnCommConnected: connectionId=%u.", connectionId);
 }
 
+DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
+{
+    switch (type) {
+        case AUTH_LINK_TYPE_WIFI:
+            return DISCOVERY_TYPE_WIFI;
+        case AUTH_LINK_TYPE_BLE:
+            return DISCOVERY_TYPE_BLE;
+        case AUTH_LINK_TYPE_BR:
+            return DISCOVERY_TYPE_BR;
+        case AUTH_LINK_TYPE_P2P:
+            return DISCOVERY_TYPE_P2P;
+        default:
+            break;
+    }
+    return DISCOVERY_TYPE_UNKNOWN;
+}
+
 static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "OnCommDisconnected: connectionId=%u.", connectionId);
@@ -558,6 +586,7 @@ NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnI
             ConnCmdInfo info = {
                 .requestId = requestId,
                 .connInfo = *connInfo,
+                .retryTimes = 0,
             };
             ret = PostAuthEvent(EVENT_CONNECT_CMD, HandleConnConnectCmd, &info, sizeof(ConnCmdInfo), 0);
             break;
@@ -600,18 +629,23 @@ void UpdateAuthDevicePriority(uint64_t connId)
         GetConnType(connId), GetConnId(connId), ret);
 }
 
-NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t connId)
+NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t *connId)
 {
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "DisconnectDevice: connType=%d, id=%u.", GetConnType(connId),
-        GetConnId(connId));
-    switch (GetConnType(connId)) {
+    if (connId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "connId nulptr");
+        return;
+    }
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "DisconnectDevice: connType=%d, id=%u.", GetConnType(*connId),
+        GetConnId(*connId));
+    switch (GetConnType(*connId)) {
         case AUTH_LINK_TYPE_WIFI:
-            SocketDisconnectDevice(AUTH, GetFd(connId));
+            SocketDisconnectDevice(AUTH, GetFd(*connId));
+            UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_BLE:
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_BR:
-            ConnDisconnectDevice(GetConnId(connId));
+            ConnDisconnectDevice(GetConnId(*connId));
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
             break;
