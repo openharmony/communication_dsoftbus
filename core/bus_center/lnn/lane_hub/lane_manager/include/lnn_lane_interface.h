@@ -109,7 +109,7 @@ typedef struct {
 
 typedef struct {
     void (*OnLaneRequestSuccess)(uint32_t laneId, const LaneConnInfo *info);
-    void (*OnLaneRequestFail)(uint32_t laneId, LaneRequestFailReason reason);
+    void (*OnLaneRequestFail)(uint32_t laneId, int32_t errCode);
     void (*OnLaneStateChange)(uint32_t laneId, LaneState state);
 } ILaneListener;
 
@@ -145,6 +145,7 @@ typedef struct {
     int32_t pid;
     LanePreferredLinkList expectedLink;
     bool networkDelegate;
+    bool p2pOnly;
     ProtocolType acceptableProtocols;
 } TransOption;
 

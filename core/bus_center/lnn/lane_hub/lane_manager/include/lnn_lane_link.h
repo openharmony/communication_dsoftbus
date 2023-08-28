@@ -30,6 +30,7 @@ typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     int32_t pid;
     bool networkDelegate;
+    bool p2pOnly;
     LaneTransType transType;
     LaneLinkType linkType;
     ProtocolType acceptableProtocols;
@@ -90,7 +91,7 @@ void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
 void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32_t pid);
 
-void LaneDeleteP2pAddress(const char *networkId);
+void LaneDeleteP2pAddress(const char *networkId, bool isDestroy);
 void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port);
 
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);

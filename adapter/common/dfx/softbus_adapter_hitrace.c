@@ -21,7 +21,7 @@
 void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
 {
     HiTraceIdStruct pId = HiTraceChainGetId();
-    pId.valid = flags;
+    pId.valid = (uint32_t)flags;
     pId.chainId = chainId > 0 ? chainId : (uint64_t)SoftBusCryptoRand();
     HiTraceChainSetId(&pId);
 }

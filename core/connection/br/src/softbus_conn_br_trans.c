@@ -43,19 +43,18 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     UnpackConnPktHead(head);
     if ((uint32_t)(head->magic) != MAGIC_NUMBER) {
         buffer->length = 0;
-        CLOGE("connection %u received unknown data: magic error 0x%x, just discard", connectionId, head->magic);
+        CLOGE("recv unknown data: conn id=%u, magic 0x%x", connectionId, head->magic);
         return NULL;
     }
     if (buffer->capacity - pktHeadLen < head->len) {
         buffer->length = 0;
-        CLOGE("connection %u received unexpected data: it is too big to receive, just discard, module=%d, seq=%" PRId64
-              ", datalen=%d",
+        CLOGE("recv data too big: conn id=%u, module=%d, seq=%" PRId64", datalen=%d",
             connectionId, head->module, head->seq, head->len);
         return NULL;
     }
     uint32_t packLen = head->len + sizeof(ConnPktHead);
     if (buffer->length < packLen) {
-        CLOGI("connection %u received an incomplete packet, continue", connectionId);
+        CLOGI("recv incomplete packet, conn id=%u", connectionId);
         return NULL;
     }
     uint8_t *dataCopy = SoftBusCalloc(packLen);

@@ -171,7 +171,7 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack, true);
 
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    AuthSessionStartAuth(SEQ_SERVER, REQUEST_ID, g_connId, &g_connInfo, isServer);
+    AuthSessionStartAuth(SEQ_SERVER, REQUEST_ID, g_connId, &g_connInfo, isServer, false);
     SoftBusSleepMs(DELAY_TIME);
 }
 
@@ -242,6 +242,18 @@ void AuthTestCallBackTest::TearDown()
     LooperDeinit();
 }
 
+void AuthInitMock(LnnConnectInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock, GroupAuthManager authManager,
+    DeviceGroupManager groupManager)
+{
+    groupManager.regDataChangeListener = LnnHichainInterfaceMock::InvokeDataChangeListener;
+    authManager.authDevice = LnnHichainInterfaceMock::InvokeAuthDevice;
+    groupManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
+    ON_CALL(connMock, ConnSetConnectCallback(_, _)).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(hichainMock, InitDeviceAuthService()).WillByDefault(Return(0));
+    ON_CALL(hichainMock, GetGaInstance()).WillByDefault(Return(&authManager));
+    ON_CALL(hichainMock, GetGmInstance()).WillByDefault(Return(&groupManager));
+}
+
 /*
  * @tc.name: ON_DATA_RECEVIED_Test_001
  * @tc.desc: client devicedid received
@@ -262,6 +274,7 @@ HWTEST_F(AuthTestCallBackTest, CLINET_ON_DATA_RECEVIED_Test_001, TestSize.Level1
         .ledgerMock = &ledgerMock,
         .socketMock = &socketMock,
     };
+    AuthInitMock(connMock, hichainMock, authManager, groupManager);
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     authManager.authDevice = LnnHichainInterfaceMock::AuthDeviceConnSend;
     char *data = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devIdHead);

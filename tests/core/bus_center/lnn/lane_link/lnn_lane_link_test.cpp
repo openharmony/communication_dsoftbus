@@ -20,6 +20,7 @@
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_link.h"
 #include "softbus_error_code.h"
+#include "softbus_adapter_mem.h"
 #include "lnn_select_rule.h"
 #include "lnn_lane_link_p2p.h"
 
@@ -82,9 +83,8 @@ static void OnLaneLinkException(uint32_t reqId, int32_t reason)
 */
 HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
 {
-    bool networkDelegate = false;
     uint32_t laneLinkReqId = 0;
-    int32_t ret = LnnConnectP2p(nullptr, 0, networkDelegate, laneLinkReqId, nullptr);
+    int32_t ret = LnnConnectP2p(nullptr, laneLinkReqId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
  
     const LaneLinkCb cb = {
@@ -92,8 +92,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
         .OnLaneLinkFail = OnLaneLinkFail,
         .OnLaneLinkException = OnLaneLinkException,
     };
-
-    const char *network = "network_123";
     LaneDepsInterfaceMock linkMock;
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
         .WillOnce(Return(SOFTBUS_ERR))
@@ -109,21 +107,33 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
+    if (request == NULL) {
+       return;
+    }
+    
+    request->pid = 1024;
+    request->networkDelegate = false;
+    request->p2pOnly = false;
+    request->transType = LANE_T_BYTE;
+    request->linkType = LANE_BLE;
+    request->acceptableProtocols = 0;
 
-    ret = LnnConnectP2p(network, 0, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnConnectP2p(network, 1, networkDelegate, laneLinkReqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-
-    ret = LnnConnectP2p(network, 2, networkDelegate, laneLinkReqId, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnConnectP2p(network, 3, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
-    ret = LnnConnectP2p(network, 4, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = LnnConnectP2p(network, 5, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    SoftBusFree(request);
 }
 
 /*
@@ -134,10 +144,19 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
 {
-    const char *network = "network123test1122";
-    bool networkDelegate = false;
     uint32_t laneLinkReqId = 22;
-    uint32_t ret = LnnConnectP2p(network, 0, networkDelegate, laneLinkReqId, nullptr);
+    LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
+    if (request == NULL) {
+       return;
+    }
+    
+    request->pid = 1024;
+    request->networkDelegate = true;
+    request->p2pOnly = false;
+    request->transType = LANE_T_MIX;
+    request->linkType = LANE_BR;
+    request->acceptableProtocols = 1;
+    uint32_t ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     
     LaneDepsInterfaceMock linkMock;
@@ -157,14 +176,15 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
 
-    ret = LnnConnectP2p(network, 11, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnConnectP2p(network, 221, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnConnectP2p(network, 0, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnConnectP2p(network, 2, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    SoftBusFree(request);
 }
 
 /*
@@ -175,10 +195,19 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
 */
 HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
 {
-    const char *network = "123";
-    bool networkDelegate = true;
     uint32_t laneLinkReqId = 1;
-    uint32_t ret = LnnConnectP2p(network, 0, networkDelegate, laneLinkReqId, nullptr);
+    LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
+    if (request == NULL) {
+       return;
+    }
+    request->pid = 1024;
+    request->networkDelegate = false;
+    request->p2pOnly = false;
+    request->transType = LANE_T_BYTE;
+    request->linkType = LANE_BLE;
+    request->acceptableProtocols = 0;
+
+    uint32_t ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     
     LaneDepsInterfaceMock linkMock;
@@ -193,8 +222,9 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
 
-    ret = LnnConnectP2p(network, 11, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    SoftBusFree(request);
 }
 
 /*
@@ -205,10 +235,20 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
 {
-    const char *network = "123";
-    bool networkDelegate = true;
+    LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
+    if (request == NULL) {
+       return;
+    }
+
+    request->pid = 1024;
+    request->networkDelegate = false;
+    request->p2pOnly = false;
+    request->transType = LANE_T_BYTE;
+    request->linkType = LANE_BLE;
+    request->acceptableProtocols = 0;
+
     uint32_t laneLinkReqId = 1;
-    uint32_t ret = LnnConnectP2p(network, 0, networkDelegate, laneLinkReqId, nullptr);
+    uint32_t ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     
     LaneDepsInterfaceMock linkMock;
@@ -221,8 +261,9 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
 
-    ret = LnnConnectP2p(network, 11, networkDelegate, laneLinkReqId, &cb);
+    ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+    SoftBusFree(request);
 }
 
 
@@ -238,7 +279,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_005, TestSize.Level1)
     int32_t pid = 123;
     uint32_t laneLinkReqId = 2334;
     LnnDisconnectP2p(network, pid, laneLinkReqId);
-    LnnDestoryP2p();
+    LnnDestroyP2p();
 }
 
 /*

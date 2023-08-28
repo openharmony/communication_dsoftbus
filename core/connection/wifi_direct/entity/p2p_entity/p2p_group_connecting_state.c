@@ -58,7 +58,6 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
     if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "connect group failed");
-        entity->stopNewClientTimer();
         entity->clearJoiningClient();
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(ERROR_P2P_CONNECT_GROUP_FAILED);

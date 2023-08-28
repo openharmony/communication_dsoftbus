@@ -190,6 +190,17 @@ static void Remove(struct InfoContainer *self, size_t key)
     self->entries[key].remove = true;
 }
 
+static bool IsEmpty(struct InfoContainer *self)
+{
+    size_t keySize = self->getKeySize();
+    for (size_t key = 0; key < keySize; key++) {
+        if (self->entries[key].data) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static int32_t GetInt(struct InfoContainer *self, size_t key, int32_t defaultValue)
 {
     int32_t *value = self->get(self, key, NULL, NULL);
@@ -345,7 +356,7 @@ static void Dump(struct InfoContainer *self)
     size_t keyMax = self->getKeySize();
     for (size_t key = 0; key < keyMax; key++) {
         struct InfoContainerKeyProperty *keyProperty = self->getKeyProperty(self, key);
-        if (!(keyProperty->flag & DUMP_FLAG)) {
+        if (self->dumpFilter && !(keyProperty->flag & DUMP_FLAG)) {
             continue;
         }
         size_t totalSize = 0;
@@ -375,6 +386,7 @@ static void Dump(struct InfoContainer *self)
 
 void InfoContainerConstructor(struct InfoContainer *self, struct InfoContainerKeyProperty *keyProperties, size_t max)
 {
+    self->dumpFilter = true;
     for (size_t key = 0; key < max; key++) {
         self->entries[key].data = NULL;
         self->entries[key].size = 0;
@@ -399,6 +411,7 @@ void InfoContainerConstructor(struct InfoContainer *self, struct InfoContainerKe
     self->getContainer = GetContainer;
     self->getContainerArray = GetContainerArray;
     self->getRawData = GetRawData;
+    self->isEmpty = IsEmpty;
     self->remove = Remove;
     self->getKeyProperty = GetKeyProperty;
     self->dump = Dump;

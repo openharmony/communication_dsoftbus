@@ -128,6 +128,7 @@ typedef struct {
     int32_t localStateVersion;
     int32_t groupType;
     bool initPreventFlag;
+    int64_t networkIdTimestamp;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

@@ -130,7 +130,7 @@ int32_t ConnBrEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         ConnectionQueue *newQueue = CreateBrQueue(queueNode->pid);
         if (newQueue == NULL) {
-            CLOGE("br enqueue create queue fail");
+            CLOGE("create queue fail");
             goto END;
         }
         ListTailInsert(&g_brQueueList, &(newQueue->node));
@@ -188,9 +188,9 @@ int32_t ConnBrDequeueBlock(void **msg)
             status = SOFTBUS_OK;
             break;
         }
-        CLOGI("br queue is empty, dequeue start wait ...");
+        CLOGD("br queue is empty, dequeue start wait ...");
         if (SoftBusCondWait(&g_sendCond, &g_brQueueLock, NULL) != SOFTBUS_OK) {
-            CLOGI("BrSendCondWait failed");
+            CLOGD("BrSendCondWait failed");
             status = SOFTBUS_ERR;
             break;
         }
@@ -219,7 +219,7 @@ int32_t ConnBrInnerQueueInit(void)
     }
     g_innerQueue = CreateBrQueue(0);
     if (g_innerQueue == NULL) {
-        CLOGE("ConnBrInnerQueueInit CreateBrQueue(0) failed");
+        CLOGE("CreateBrQueue failed");
         (void)SoftBusMutexDestroy(&g_brQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);

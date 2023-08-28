@@ -24,71 +24,77 @@ enum WifiDirectErrorCode {
     /* Error code representing OK */
     OK = 0,
 
+    /* Error code representing start position of V1 errors. */
+    V1_ERROR_START = -401000,
+
     /* Indicating cannot build a p2p link because the device is already connected with a mismatch role. */
-    V1_ERROR_CONNECTED_WITH_MISMATCHED_ROLE = -1,
+    V1_ERROR_CONNECTED_WITH_MISMATCHED_ROLE = V1_ERROR_START - 1,
 
     /* Indicating cannot build a p2p link because this device is already be GC. */
-    V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE = -2,
+    V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE = V1_ERROR_START - 2,
 
     /* Indicating cannot build a p2p link because this device cannot be connected with the specified role. */
-    V1_ERROR_AVAILABLE_WITH_MISMATCHED_ROLE = -3,
+    V1_ERROR_AVAILABLE_WITH_MISMATCHED_ROLE = V1_ERROR_START - 3,
 
     /* Indicating cannot build a p2p link because the remote device is already be GC. */
-    V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE = -4,
+    V1_ERROR_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE = V1_ERROR_START - 4,
 
     /* Indicating cannot build a p2p link because both the devices are GO. */
-    V1_ERROR_BOTH_GO = -5,
+    V1_ERROR_BOTH_GO = V1_ERROR_START - 5,
 
     /* Indicating that two devices initiate a connection to peer device at the same time. */
-    V1_ERROR_TWO_WAY_SIMULTANEOUS_CONNECTION = -6,
+    V1_ERROR_TWO_WAY_SIMULTANEOUS_CONNECTION = V1_ERROR_START - 6,
 
     /* Indicating that this connect request has timed out. */
-    V1_ERROR_CONNECT_TIMEOUT = -7,
+    V1_ERROR_CONNECT_TIMEOUT = V1_ERROR_START - 7,
 
     /* Indicating that failure occurred when reusing p2p link. */
-    V1_ERROR_REUSE_FAILED = -8,
+    V1_ERROR_REUSE_FAILED = V1_ERROR_START - 8,
 
     /* Indicating that p2p link is used by another service. */
-    V1_ERROR_LINK_USED_BY_ANOTHER_SERVICE = -9,
+    V1_ERROR_LINK_USED_BY_ANOTHER_SERVICE = V1_ERROR_START - 9,
 
     /* Indicating that GOInfo is wrong. */
-    V1_ERROR_WRONG_GO_INFO = -10,
+    V1_ERROR_WRONG_GO_INFO = V1_ERROR_START - 10,
 
     /* Indicating that GCInfo is wrong. */
-    V1_ERROR_WRONG_GC_INFO = -11,
+    V1_ERROR_WRONG_GC_INFO = V1_ERROR_START - 11,
 
     /* Indicating that post message to remote device via AuthConnection has failed. */
-    V1_ERROR_POST_MESSAGE_FAILED = -12,
+    V1_ERROR_POST_MESSAGE_FAILED = V1_ERROR_START - 12,
 
     /* Indicating that cannot build a p2p link because current device is busy. */
-    V1_ERROR_BUSY = -15,
+    V1_ERROR_BUSY = V1_ERROR_START - 15,
 
     /* Indicating that peer device is not a trusted device. */
-    V1_ERROR_NOT_TRUSTED_DEVICE = -17,
+    V1_ERROR_NOT_TRUSTED_DEVICE = V1_ERROR_START - 17,
 
     /* Indicating that connect group failed. */
-    V1_ERROR_CONNECT_GROUP_FAILED = -18,
+    V1_ERROR_CONNECT_GROUP_FAILED = V1_ERROR_START - 18,
 
     /* Indicating that create group failed. */
-    V1_ERROR_CREATE_GROUP_FAILED = -19,
+    V1_ERROR_CREATE_GROUP_FAILED = V1_ERROR_START - 19,
 
     /* Indicating that connect group timeout. */
-    V1_ERROR_PEER_CONNECT_GROUP_FAILED = -20,
+    V1_ERROR_PEER_CONNECT_GROUP_FAILED = V1_ERROR_START - 20,
 
     /* Indicating that create group timeout. */
-    V1_ERROR_PEER_CREATE_GROUP_FAILED = -21,
+    V1_ERROR_PEER_CREATE_GROUP_FAILED = V1_ERROR_START - 21,
 
     /* Indicating that create group timeout. */
-    V1_ERROR_RPT_ENABLED = -22,
+    V1_ERROR_RPT_ENABLED = V1_ERROR_START - 22,
 
     /* Indicating that create group timeout. */
-    V1_ERROR_PEER_RPT_ENABLED = -23,
+    V1_ERROR_PEER_RPT_ENABLED = V1_ERROR_START - 23,
 
     /* Indicating unknown reason. */
-    V1_ERROR_UNKNOWN = -24,
+    V1_ERROR_UNKNOWN = V1_ERROR_START - 24,
 
     /* Indicating p2p interface is not available */
-    V1_ERROR_IF_NOT_AVAILABLE = -25,
+    V1_ERROR_IF_NOT_AVAILABLE = V1_ERROR_START - 25,
+
+    /* Error code representing end position of v1 errors. */
+    V1_ERROR_END = V1_ERROR_START - 30,
 
     /* Base error code */
     ERROR_BASE = -200000,
@@ -285,9 +291,34 @@ enum WifiDirectErrorCode {
     /* Error code representing Peer device 3 vap conflict */
     ERROR_PEER_THREE_VAP_CONFLICT = ERROR_BASE - 6604,
 
+    /* Error code representing Local device 3 vap dbac conflict */
+    ERROR_LOCAL_THREE_VAP_DBAC_CONFLICT = ERROR_BASE - 6605,
+
+    /* Error code representing Peer device 3 vap dbac conflict */
+    ERROR_PEER_THREE_VAP_DBAC_CONFLICT = ERROR_BASE - 6606,
+
+    /* Error code representing Entity is unavailable */
+    ERROR_ENTITY_UNAVAILABLE = ERROR_BASE - 6607,
+
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
 };
+
+static inline int32_t ErrorCodeToV1ProtocolCode(int32_t reason)
+{
+    if (reason > V1_ERROR_END && reason < V1_ERROR_START) {
+        return reason - V1_ERROR_START;
+    }
+    return reason;
+}
+
+static inline int32_t ErrorCodeFromV1ProtocolCode(int32_t reason)
+{
+    if (reason < 0 && reason > V1_ERROR_END - V1_ERROR_START) {
+        return reason + V1_ERROR_START;
+    }
+    return reason;
+}
 
 #ifdef __cplusplus
 }

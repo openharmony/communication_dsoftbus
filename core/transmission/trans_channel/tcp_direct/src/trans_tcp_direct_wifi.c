@@ -26,8 +26,12 @@
 #include "softbus_socket.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "trans_tcp_direct_p2p.h"
+#include "wifi_direct_manager.h"
 
 #define ID_OFFSET (1)
+#define HML_IP_PREFIX "172.30."
+#define NETWORK_ID_LEN 7
 
 NO_SANITIZE("cfi") static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, SessionConn *newConn,
     ListenerModule module)
@@ -52,6 +56,26 @@ NO_SANITIZE("cfi") static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId,
     return SOFTBUS_OK;
 }
 
+static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
+{
+    ListenerModule module = UNUSE_BUTT;
+    if (type == CONNECT_P2P_REUSE) {
+        char myIp[IP_LEN] = {0};
+        if (GetWifiDirectManager()->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetMoudleType get p2p ip fail.");
+            return module;
+        }
+        if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+            module = GetMoudleByHmlIp(myIp);
+        } else {
+            module = DIRECT_CHANNEL_SERVER_P2P;
+        }
+    } else {
+        module = DIRECT_CHANNEL_SERVER_WIFI;
+    }
+    return module;
+}
+
 NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
 {
@@ -60,14 +84,13 @@ NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const Co
         return SOFTBUS_INVALID_PARAM;
     }
 
-    ListenerModule module = connInfo->type == CONNECT_P2P_REUSE ?
-        DIRECT_CHANNEL_SERVER_P2P : DIRECT_CHANNEL_SERVER_WIFI;
+    ListenerModule module = GetMoudleType(connInfo->type, connInfo->socketOption.addr);
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
     if (module == DIRECT_CHANNEL_SERVER_WIFI) {
         module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
-        if (module == UNUSE_BUTT) {
-            return SOFTBUS_INVALID_PARAM;
-        }
+    }
+    if (module == UNUSE_BUTT) {
+        return SOFTBUS_ERR;
     }
 
     SessionConn *newConn = CreateNewSessinConn(module, false);

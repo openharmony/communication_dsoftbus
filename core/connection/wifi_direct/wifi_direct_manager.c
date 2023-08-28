@@ -21,6 +21,7 @@
 #include "softbus_hisysevt_connreporter.h"
 #include "wifi_direct_command_manager.h"
 #include "wifi_direct_negotiator.h"
+#include "wifi_direct_role_option.h"
 #include "data/resource_manager.h"
 #include "data/link_manager.h"
 #include "utils/wifi_direct_work_queue.h"
@@ -74,8 +75,10 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     CONN_CHECK_AND_RETURN_RET_LOG(connectInfo && callback, SOFTBUS_INVALID_PARAM, "invalid parameters");
     char uuid[UUID_BUF_LEN] = {0};
     (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
-    CLOGI(LOG_LABEL "requestId=%d pid=%d connectType=%d expectRole=%d remoteMac=%s uuid=%s",
-          connectInfo->requestId, connectInfo->pid, connectInfo->connectType, connectInfo->expectRole,
+    int32_t ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
+                                                             &connectInfo->expectApiRole, &connectInfo->isStrict);
+    CLOGI(LOG_LABEL "requestId=%d pid=%d type=%d expectRole=0x%x remoteMac=%s uuid=%s",
+          connectInfo->requestId, connectInfo->pid, connectInfo->connectType, connectInfo->expectApiRole,
           WifiDirectAnonymizeMac(connectInfo->remoteMac), AnonymizesUUID(uuid));
 
     GetWifiDirectPerfRecorder()->clear();
@@ -84,7 +87,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     struct WifiDirectCommand *command = GenerateWifiDirectConnectCommand(connectInfo);
     CONN_CHECK_AND_RETURN_RET_LOG(command, SOFTBUS_MALLOC_ERR, "alloc connect command failed");
 
-    int32_t ret = SetupCommandAndCallback(command, connectInfo, callback);
+    ret = SetupCommandAndCallback(command, connectInfo, callback);
     if (ret != SOFTBUS_OK) {
         FreeWifiDirectCommand(command);
         return ret;

@@ -57,15 +57,14 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
     return GetWifiAdpterInterface()->LnnDisconnectP2p(networkId, pid, laneLinkReqId);
 }
 
-void LnnDestoryP2p(void)
+void LnnDestroyP2p(void)
 {
-    return GetWifiAdpterInterface()->LnnDestoryP2p();
+    return GetWifiAdpterInterface()->LnnDestroyP2p();
 }
 
-int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
-                      const LaneLinkCb *callback)
+int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
-    return GetWifiAdpterInterface()->LnnConnectP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
+    return GetWifiAdpterInterface()->LnnConnectP2p(request, laneLinkReqId, callback);
 }
 }
 }

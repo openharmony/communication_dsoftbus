@@ -54,7 +54,8 @@ static int32_t HandleNegotiateMessageFromRemote(struct WifiDirectProcessor *proc
             GetWifiDirectNegotiator()->context.currentProcessor = processor;
             return processor->processNegotiateMessage(cmd, msg);
         default:
-            CLOGE(LOG_LABEL "ignore unhandled msg");
+            CLOGE(LOG_LABEL "unhandled cmd=%d", cmd);
+            GetWifiDirectNegotiator()->handleUnhandledRequest(msg);
             return SOFTBUS_OK;
     }
 }

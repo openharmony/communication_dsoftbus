@@ -241,11 +241,11 @@ static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
 
 static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(option != NULL, -1, "invalid param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "invalid param, option is null");
     CONN_CHECK_AND_RETURN_RET_LOG(option->type == CONNECT_TCP || option->type == CONNECT_P2P ||
-        option->type == CONNECT_P2P_REUSE, -1, "invalid param, unsupport type=%d", option->type);
+        option->type == CONNECT_P2P_REUSE, SOFTBUS_ERR, "invalid param, unsupport type=%d", option->type);
     CONN_CHECK_AND_RETURN_RET_LOG(
-        option->socketOption.port > 0, -1, "invalid param, invalid port=%d", option->socketOption.port);
+        option->socketOption.port > 0, SOFTBUS_ERR, "invalid param, invalid port=%d", option->socketOption.port);
 
     char animizedIp[IP_LEN] = { 0 };
     ConvertAnonymizeIpAddress(animizedIp, IP_LEN, option->socketOption.addr, IP_LEN);
@@ -255,12 +255,12 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     if (ret != SOFTBUS_OK) {
         CLOGE("create socket failed, server ip=%s, server port=%d, error=%d",
             animizedIp, option->socketOption.port, ret);
-        return -1;
+        return ret;
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
         CLOGE("set nonblock failed, server ip=%s, server port=%d, fd=%d", animizedIp, option->socketOption.port, fd);
         SoftBusSocketClose(fd);
-        return -1;
+        return SOFTBUS_ERR;
     }
     SetClientOption(fd);
     ret = BindTcpClientAddr(fd, myIp);
@@ -268,20 +268,20 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
         CLOGE("bind client address failed, server ip=%s, server port=%d, error=%d", animizedIp,
             option->socketOption.port, ret);
         ConnShutdownSocket(fd);
-        return -1;
+        return ret;
     }
 
     SoftBusSockAddrIn addr = { 0 };
     addr.sinFamily = SOFTBUS_AF_INET;
     SoftBusInetPtoN(SOFTBUS_AF_INET, option->socketOption.addr, &addr.sinAddr);
     addr.sinPort = SoftBusHtoNs((uint16_t)option->socketOption.port);
-    int rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
-    if ((rc != SOFTBUS_ADAPTER_OK) && (rc != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
-        (rc != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
+    ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr));
+    if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
+        (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
         CLOGE("client connect failed, server ip=%s, server port=%d, fd=%d, error=%d, errno=%d", animizedIp,
-            option->socketOption.port, fd, rc, errno);
+            option->socketOption.port, fd, ret, errno);
         ConnShutdownSocket(fd);
-        return -1;
+        return ret;
     }
     CLOGI("client open tcp socket, server ip=%s, server port=%d, fd=%d", animizedIp, option->socketOption.port, fd);
     return fd;
@@ -290,9 +290,8 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
 static int32_t GetTcpSockPort(int32_t fd)
 {
     SoftBusSockAddrIn addr;
-    int32_t addrLen = sizeof(addr);
 
-    int rc = SoftBusSocketGetLocalName(fd, (SoftBusSockAddr *)&addr, &addrLen);
+    int rc = SoftBusSocketGetLocalName(fd, (SoftBusSockAddr *)&addr);
     if (rc != 0) {
         CLOGE("fd=%d,GetTcpSockPort rc=%d", fd, rc);
         return rc;
@@ -373,9 +372,9 @@ static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
         CLOGE("memset failed");
         return SOFTBUS_MEM_ERR;
     }
-    uint32_t addrLen = sizeof(addr);
+
     int32_t ret =
-        SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, (int32_t *)&addrLen, cfd));
+        SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, cfd));
     if (ret != SOFTBUS_OK) {
         CLOGE("accept failed, ret=%" PRId32 " cfd=%d, fd=%d", ret, *cfd, fd);
         return ret;

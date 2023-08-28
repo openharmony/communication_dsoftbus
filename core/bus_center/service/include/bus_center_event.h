@@ -48,6 +48,7 @@ typedef enum {
     LNN_EVENT_NODE_MASTER_STATE_CHANGED,
     LNN_EVENT_NODE_ADDR_CHANGED,
     LNN_EVENT_NETWORK_STATE_CHANGED,
+    LNN_EVENT_SINGLE_NETWORK_OFFLINE,
     LNN_EVENT_NODE_HB_REPEAT_CYCLE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
@@ -124,7 +125,8 @@ typedef enum {
 } SoftBusOOBEState;
 
 typedef enum {
-    SOFTBUS_HOME_GROUP_JOIN = 1,
+    SOFTBUS_HOME_GROUP_CHANGE = 0X1,
+    SOFTBUS_HOME_GROUP_JOIN,
     SOFTBUS_HOME_GROUP_LEAVE,
     SOFTBUS_HOME_GROUP_UNKNOWN,
 } SoftBusHomeGroupState;
@@ -194,6 +196,14 @@ typedef struct {
     bool isLocal;
 } LnnNodeAddrChangedEvent;
 
+typedef struct {
+    LnnEventBasicInfo basic;
+    ConnectionAddrType type;
+    const char *networkId;
+    const char *uuid;
+    const char *udid;
+} LnnSingleNetworkOffLineEvent;
+
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 int32_t LnnInitBusCenterEvent(void);
@@ -235,6 +245,8 @@ void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32
 void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal);
 
 void LnnNotifyNetworkStateChanged(SoftBusNetworkState state);
+
+void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo);
 void LnnNotifyHBRepeat(void);
 
 #ifdef __cplusplus

@@ -50,7 +50,7 @@ void AuthConnDeinit(void);
 
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType);
 void UpdateAuthDevicePriority(uint64_t connId);
-void DisconnectAuthDevice(uint64_t connId);
+void DisconnectAuthDevice(uint64_t *connId);
 int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data);
 
 ConnSideType GetConnSideType(uint64_t connId);
@@ -59,6 +59,7 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo);
 const char *GetConnTypeStr(uint64_t connId);
 uint32_t GetConnId(uint64_t connId);
 int32_t GetConnType(uint64_t connId);
+int32_t GetFd(uint64_t connId);
 uint64_t GenConnId(int32_t connType, int32_t id);
 
 uint32_t GetAuthDataSize(uint32_t len);
