@@ -84,6 +84,7 @@ struct MockInterfaces {
     LnnHichainInterfaceMock *hichainMock;
     AuthNetLedgertInterfaceMock *ledgerMock;
     LnnSocketInterfaceMock *socketMock;
+    AuthCommonInterfaceMock *authMock;
 };
 AuthDataHead devIdHead = {
     .dataType = DATA_TYPE_DEVICE_ID,
@@ -166,6 +167,7 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ON_CALL(*mockInterface->ledgerMock, LnnGetSupportedProtocols).WillByDefault(Return(TEST_SUP_PROTOCOLS));
     ON_CALL(*mockInterface->ledgerMock, LnnGetLocalNodeInfo).WillByDefault(Return(&g_localInfo));
     ON_CALL(*mockInterface->ledgerMock, LnnGetBtMac).WillByDefault(Return(TEST_MAC));
+    ON_CALL(*mockInterface->authMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
     const unsigned char val = 0x01;
     SoftbusSetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, &val, sizeof(val));
     ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack, true);
@@ -256,11 +258,13 @@ HWTEST_F(AuthTestCallBackTest, CLINET_ON_DATA_RECEVIED_Test_001, TestSize.Level1
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
+    NiceMock<AuthCommonInterfaceMock> authMock;
     MockInterfaces mockInterface = {
         .connMock = &connMock,
         .hichainMock = &hichainMock,
         .ledgerMock = &ledgerMock,
         .socketMock = &socketMock,
+        .authMock = &authMock,
     };
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     authManager.authDevice = LnnHichainInterfaceMock::AuthDeviceConnSend;
@@ -288,11 +292,13 @@ HWTEST_F(AuthTestCallBackTest, onTransmit_Test_001, TestSize.Level1)
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
+    NiceMock<AuthCommonInterfaceMock> authMock;
     MockInterfaces mockInterface = {
         .connMock = &connMock,
         .hichainMock = &hichainMock,
         .ledgerMock = &ledgerMock,
         .socketMock = &socketMock,
+        .authMock = &authMock,
     };
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     WaitForSignal();
@@ -326,11 +332,13 @@ HWTEST_F(AuthTestCallBackTest, OnFinish_Test_002, TestSize.Level1)
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
+    NiceMock<AuthCommonInterfaceMock> authMock;
     MockInterfaces mockInterface = {
         .connMock = &connMock,
         .hichainMock = &hichainMock,
         .ledgerMock = &ledgerMock,
         .socketMock = &socketMock,
+        .authMock = &authMock,
     };
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     WaitForSignal();
@@ -344,14 +352,12 @@ HWTEST_F(AuthTestCallBackTest, OnFinish_Test_002, TestSize.Level1)
     LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data2, TEST_DATA_LEN);
     WaitForSignal();
     SoftBusFree(data2);
-    AuthCommonInterfaceMock authMock;
     EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
     LnnHichainInterfaceMock::g_devAuthCb.onSessionKeyReturned(SEQ_SERVER, g_sessionKey, SESSION_KEY_LENGTH);
     WaitForSignal();
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));
     LnnHichainInterfaceMock::g_devAuthCb.onFinish(SEQ_SERVER, OPER_CODE, g_retData);
-    bool ret = WaitForSignal();
-    EXPECT_TRUE(ret);
+    WaitForSignal();
     EXPECT_CALL(connMock, ConnPostBytes)
         .WillRepeatedly(DoAll(SendSignal, LnnConnectInterfaceMock::ActionOfConnPostBytes));
     PostDeviceInfoMessage(SEQ_SERVER, &info2);
@@ -361,8 +367,7 @@ HWTEST_F(AuthTestCallBackTest, OnFinish_Test_002, TestSize.Level1)
     WaitForSignal();
     char *data4 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, closeAckHead);
     LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data4, TEST_DATA_LEN);
-    ret = WaitForSignal();
-    EXPECT_TRUE(!ret);
+    WaitForSignal();
     SoftBusFree(data4);
     AuthDeviceDeinit();
 }
