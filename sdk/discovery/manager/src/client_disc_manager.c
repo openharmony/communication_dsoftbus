@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,29 +108,49 @@ NO_SANITIZE("cfi") void DiscClientOnDeviceFound(const DeviceInfo *device)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDeviceFound, capabilityBitmap = %d",
         device->capabilityBitmap[0]);
+    if (g_discInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDeviceFound callback failed!");
+        return;
+    }
     g_discInfo->subscribeCb.OnDeviceFound(device);
 }
 
 NO_SANITIZE("cfi") void DiscClientOnDiscoverySuccess(int32_t subscribeId)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverySuccess, subscribeId = %d", subscribeId);
+    if (g_discInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess callback failed!");
+        return;
+    }
     g_discInfo->subscribeCb.OnDiscoverySuccess(subscribeId);
 }
 
 NO_SANITIZE("cfi") void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverFailed, subscribeId = %d", subscribeId);
+    if (g_discInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed callback failed!");
+        return;
+    }
     g_discInfo->subscribeCb.OnDiscoverFailed(subscribeId, failReason);
 }
 
 NO_SANITIZE("cfi") void DiscClientOnPublishSuccess(int32_t publishId)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishSuccess, publishId = %d", publishId);
+    if (g_discInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishSuccess callback failed!");
+        return;
+    }
     g_discInfo->publishCb.OnPublishSuccess(publishId);
 }
 
 NO_SANITIZE("cfi") void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishFail, publishId = %d", publishId);
+    if (g_discInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishFail callback failed!");
+        return;
+    }
     g_discInfo->publishCb.OnPublishFail(publishId, reason);
 }
