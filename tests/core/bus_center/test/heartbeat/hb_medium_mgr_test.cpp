@@ -273,7 +273,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_OFFLINE);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED);
 }
 
 /*

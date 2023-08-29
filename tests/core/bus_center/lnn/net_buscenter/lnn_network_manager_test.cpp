@@ -124,6 +124,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
         WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnSetLocalNum64Info).WillOnce(Return(SOFTBUS_ERR)).
         WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
     int ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitNetworkManager();
