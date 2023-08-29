@@ -16,9 +16,12 @@
 #include "softbus_proxychannel_network.h"
 
 #include <securec.h>
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
+#include "softbus_proxychannel_manager.h"
 #include "softbus_transmission_interface.h"
 
 #define MAX_LISTENER_CNT 2
@@ -79,14 +82,58 @@ NO_SANITIZE("cfi") void NotifyNetworkingChannelClosed(const char *sessionName, i
     entry->listener.onChannelClosed(channelId);
 }
 
+static int32_t TransNotifyDecryptNetworkingMsg(const char *sessionKey,
+    const char *in, uint32_t inLen, char *out, uint32_t *outLen)
+{
+    AesGcmCipherKey cipherKey = {0};
+    cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        return SOFTBUS_ERR;
+    }
+    int32_t ret = SoftBusDecryptData(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen);
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusDecryptData fail(=%d).", ret);
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi")
 void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, const char *data, uint32_t len)
 {
-    INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
-    if (entry == NULL || entry->listener.onMessageReceived == NULL) {
+    if (sessionName == NULL || data == NULL || len <= OVERHEAD_LEN)  {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param channelid[%d] len[%u]", channelId, len);
         return;
     }
-    entry->listener.onMessageReceived(channelId, data, len);
+
+    char sessionKey[SESSION_KEY_LENGTH] = {0};
+    uint32_t sessionKeySize = SESSION_KEY_LENGTH;
+    if (TransProxyGetSessionKeyByChanId(channelId, sessionKey, sessionKeySize) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get sessionkey fail channelid[%d]", channelId);
+        return;
+    }
+
+    uint32_t outDataLen = len - OVERHEAD_LEN;
+    char *outData = (char *)SoftBusCalloc(outDataLen);
+    if (outData == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc len[%u] fail", outDataLen);
+        return;
+    }
+    if (TransNotifyDecryptNetworkingMsg(sessionKey, data, len, outData, &outDataLen) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "decrypt msg fail channelid[%d]", channelId);
+        SoftBusFree(outData);
+        return;
+    }
+
+    INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
+    if (entry == NULL || entry->listener.onMessageReceived == NULL) {
+        SoftBusFree(outData);
+        return;
+    }
+    entry->listener.onMessageReceived(channelId, outData, outDataLen);
+    SoftBusFree(outData);
 }
 
 NO_SANITIZE("cfi")
