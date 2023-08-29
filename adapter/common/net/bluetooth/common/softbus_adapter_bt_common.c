@@ -78,19 +78,23 @@ static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
 
 static StateListener g_stateListener[STATE_LISTENER_MAX_NUM];
 static bool g_isRegCb = false;
-
-NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, const int status)
+static void SoftBusOnBtSateChanged(int32_t status)
 {
-    CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
     int listenerId;
-    int st = ConvertBtState(transport, status);
     for (listenerId = 0; listenerId < STATE_LISTENER_MAX_NUM; listenerId++) {
         if (g_stateListener[listenerId].isUsed &&
             g_stateListener[listenerId].listener != NULL &&
             g_stateListener[listenerId].listener->OnBtStateChanged != NULL) {
-            g_stateListener[listenerId].listener->OnBtStateChanged(listenerId, st);
+            g_stateListener[listenerId].listener->OnBtStateChanged(listenerId, status);
         }
     }
+}
+
+NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, const int status)
+{
+    CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
+    int st = ConvertBtState(transport, status);
+    SoftBusOnBtSateChanged(st);
 }
 
 static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state, unsigned int reason)
@@ -240,4 +244,12 @@ NO_SANITIZE("cfi") int SoftBusSetBtName(const char *name)
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;
+}
+
+
+void SoftBusBtInit(void)
+{
+    if (SoftBusGetBtState() == BLE_ENABLE) {
+        SoftBusOnBtSateChanged(SOFTBUS_BT_STATE_TURN_ON);
+    }
 }
