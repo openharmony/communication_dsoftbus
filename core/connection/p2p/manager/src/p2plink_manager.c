@@ -499,7 +499,7 @@ static void P2pLinkUpdateRole(const P2pLinkGroup *group)
     P2pLinkSetRole(group->role);
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkMagicInit(void)
+int32_t P2pLinkMagicInit(void)
 {
     int32_t ret;
     char myIp[P2P_IP_LEN] = {0};
@@ -534,7 +534,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkMagicInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void P2pLinkClean(void)
+void P2pLinkClean(void)
 {
 #define CLEAN_DELAY_100MS 100000
     CLOGI("p2p clean.");
@@ -551,7 +551,7 @@ NO_SANITIZE("cfi") void P2pLinkClean(void)
     usleep(CLEAN_DELAY_100MS);
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkManagerInit(void)
+int32_t P2pLinkManagerInit(void)
 {
     P2pLinkNegoCb cb = {0};
     int32_t ret;

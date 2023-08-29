@@ -175,7 +175,7 @@ static void FreeUnhandledHbMessage(int32_t msgType, void *para)
     }
 }
 
-NO_SANITIZE("cfi") static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *para)
+static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
     int32_t i, eventNum, ret;
     LnnHeartbeatStateHandler *stateHandler = NULL;
@@ -329,7 +329,7 @@ static int32_t RemoveScreenOffCheckStatus(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMess
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
+static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
 {
     if (!CheckRemoveHbMsgParams(msg, args)) {
         return 1;
@@ -370,7 +370,7 @@ static void RemoveHbMsgByCustObj(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType e
     }
 }
 
-NO_SANITIZE("cfi") void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
     bool isRelay, bool *isRemoved)
 {
     if (hbFsm == NULL || isRemoved == NULL) {
@@ -389,7 +389,7 @@ NO_SANITIZE("cfi") void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeat
     msgPara.isRemoved = NULL;
 }
 
-NO_SANITIZE("cfi") void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara)
+void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara)
 {
     if (hbFsm == NULL || msgPara == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB remove check msg get invalid param");
@@ -398,7 +398,7 @@ NO_SANITIZE("cfi") void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCh
     RemoveHbMsgByCustObj(hbFsm, EVENT_HB_CHECK_DEV_STATUS, (void *)msgPara);
 }
 
-NO_SANITIZE("cfi") void LnnRemoveScreenOffCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara)
+void LnnRemoveScreenOffCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara)
 {
     if (hbFsm == NULL || msgPara == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB remove check msg get invalid param");
@@ -407,7 +407,7 @@ NO_SANITIZE("cfi") void LnnRemoveScreenOffCheckStatusMsg(LnnHeartbeatFsm *hbFsm,
     RemoveHbMsgByCustObj(hbFsm, EVENT_HB_SCREEN_OFF_CHECK_STATUS, (void *)msgPara);
 }
 
-NO_SANITIZE("cfi") void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType,
+void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType,
     LnnHeartbeatStrategyType strategyType)
 {
     if (hbFsm == NULL) {
@@ -1029,7 +1029,7 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
     return ret;
 }
 
-NO_SANITIZE("cfi") void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
+void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
     if (hbFsm == NULL) {
         return;
@@ -1077,7 +1077,7 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void)
+LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void)
 {
     LnnHeartbeatFsm *hbFsm = NULL;
 
@@ -1096,7 +1096,7 @@ NO_SANITIZE("cfi") LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void)
     return hbFsm;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
+int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start fsm is null");
@@ -1110,7 +1110,7 @@ NO_SANITIZE("cfi") int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
+int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop fsm is null");
@@ -1123,7 +1123,7 @@ NO_SANITIZE("cfi") int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     return LnnFsmDeinit(&hbFsm->fsm);
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para,
+int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para,
     uint64_t delayMillis)
 {
     LnnProcessSendOnceMsgPara *dupPara = NULL;
@@ -1148,7 +1148,7 @@ NO_SANITIZE("cfi") int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
+int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
     bool wakeupFlag, LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "LnnPostSendBeginMsgToHbFsm enter hbType=%d, isSyncData=%d",
@@ -1177,7 +1177,7 @@ NO_SANITIZE("cfi") int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, Ln
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData *custData,
+int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData *custData,
     uint64_t delayMillis)
 {
     LnnHeartbeatSendEndData *dupData = NULL;
@@ -1200,7 +1200,7 @@ NO_SANITIZE("cfi") int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnH
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm, uint64_t delayMillis)
+int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm, uint64_t delayMillis)
 {
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post start msg get invalid param");
@@ -1209,7 +1209,7 @@ NO_SANITIZE("cfi") int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm, uint64
     return LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_START_PROCESS, NULL, delayMillis);
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type)
+int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type)
 {
     LnnHeartbeatType *newType = NULL;
 
@@ -1231,7 +1231,7 @@ NO_SANITIZE("cfi") int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHear
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType)
+int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType)
 {
     if (hbFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post trans state msg get invalid hbFsm");
@@ -1244,7 +1244,7 @@ NO_SANITIZE("cfi") int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, L
     return LnnFsmPostMessage(&hbFsm->fsm, evtType, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbeatMediumParam *para)
+int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnHeartbeatMediumParam *para)
 {
     LnnHeartbeatMediumParam *dupPara = NULL;
 
@@ -1266,7 +1266,7 @@ NO_SANITIZE("cfi") int32_t LnnPostSetMediumParamMsgToHbFsm(LnnHeartbeatFsm *hbFs
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
+int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
     const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis)
 {
     LnnCheckDevStatusMsgPara *dupPara = NULL;
@@ -1296,7 +1296,7 @@ NO_SANITIZE("cfi") int32_t LnnPostCheckDevStatusMsgToHbFsm(LnnHeartbeatFsm *hbFs
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
+int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *hbFsm,
     const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis)
 {
     LnnCheckDevStatusMsgPara *dupPara = NULL;
@@ -1327,7 +1327,7 @@ NO_SANITIZE("cfi") int32_t LnnPostScreenOffCheckDevMsgToHbFsm(LnnHeartbeatFsm *h
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type)
+int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type)
 {
     if (hbFsm == NULL || type <= UPDATE_HB_INFO_MIN || type >= UPDATE_HB_MAX_INFO) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB post update info msg get invalid param");

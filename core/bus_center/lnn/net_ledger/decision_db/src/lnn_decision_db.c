@@ -219,7 +219,7 @@ static void CompleteUpdateTrustedDevInfo(void *para)
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
 }
 
-NO_SANITIZE("cfi") static void InsertTrustedDevInfoRecord(void *param)
+static void InsertTrustedDevInfoRecord(void *param)
 {
     DbContext *ctx = NULL;
     TrustedDevInfoRecord record;
@@ -294,7 +294,7 @@ static void RemoveTrustedDevInfoRecord(void *param)
     SoftBusFree(udid);
 }
 
-NO_SANITIZE("cfi") int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
+int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
 {
     char *dupUdid = NULL;
 
@@ -321,7 +321,7 @@ NO_SANITIZE("cfi") int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
     char *dupUdid = NULL;
 
@@ -379,7 +379,7 @@ static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHas
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountHexHash[SHA_256_HEX_HASH_LEN] = {0};
@@ -471,7 +471,7 @@ bool LnnIsPotentialHomeGroup(const char *udid)
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitDecisionDbDelay(void)
+int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate decision db huks key fail");

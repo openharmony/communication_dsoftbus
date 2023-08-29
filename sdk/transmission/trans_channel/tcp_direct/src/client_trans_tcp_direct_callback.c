@@ -36,24 +36,24 @@ int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel)
 {
     return g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_BYTES);
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionClosed(int32_t channelId)
+int32_t ClientTransTdcOnSessionClosed(int32_t channelId)
 {
     (void)TransDelDataBufNode(channelId);
     (void)TransTdcCloseChannel(channelId);
     return g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT);
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode)
+int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode)
 {
     return g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_TCP_DIRECT, errCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransTdcOnDataReceived(int32_t channelId,
+int32_t ClientTransTdcOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type)
 {
     return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_TCP_DIRECT, data, len, type);

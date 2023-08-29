@@ -50,13 +50,13 @@ static int32_t OpenSppServer(const char *name, int32_t nameLen, const char *uuid
     return SppServerCreate(&socketPara, name, nameLen);
 }
 
-NO_SANITIZE("cfi") static void CloseSppServer(int32_t serverFd)
+static void CloseSppServer(int32_t serverFd)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[CloseServer Connect, and serverFd = %d]", serverFd);
     SppServerClose(serverFd);
 }
 
-NO_SANITIZE("cfi") static int32_t Connect(const char *uuid, const BT_ADDR mac)
+static int32_t Connect(const char *uuid, const BT_ADDR mac)
 {
     if (mac == NULL) {
         return SOFTBUS_ERR;
@@ -83,7 +83,7 @@ NO_SANITIZE("cfi") static int32_t Connect(const char *uuid, const BT_ADDR mac)
     return ret;
 }
 
-NO_SANITIZE("cfi") static int32_t DisConnect(int32_t clientFd)
+static int32_t DisConnect(int32_t clientFd)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[DisConnect, and clientFd = %d]", clientFd);
     return SppDisconnect(clientFd);
@@ -95,7 +95,7 @@ static bool IsConnected(int32_t clientFd)
     return IsSppConnected(clientFd);
 }
 
-NO_SANITIZE("cfi") static int32_t Accept(int32_t serverFd)
+static int32_t Accept(int32_t serverFd)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[Accept remote device to connect, and serverFd = %d]", serverFd);
     int32_t ret = SppServerAccept(serverFd);
@@ -105,7 +105,7 @@ NO_SANITIZE("cfi") static int32_t Accept(int32_t serverFd)
     return ret;
 }
 
-NO_SANITIZE("cfi") static int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t len)
+static int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t len)
 {
     return SppWrite(clientFd, (const char *)buf, len);
 }
@@ -154,7 +154,7 @@ bool IsAclConnected(const BT_ADDR mac)
     return false;
 }
 
-NO_SANITIZE("cfi") SppSocketDriver *InitSppSocketDriver()
+SppSocketDriver *InitSppSocketDriver()
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[InitSppSocketDriver]");
     Init(&g_sppSocketDriver);

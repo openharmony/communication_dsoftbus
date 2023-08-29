@@ -30,7 +30,7 @@ static sptr<DiscClientProxy> GetClientProxy(const char *pkgName)
     return clientProxy;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device,
+int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
@@ -40,7 +40,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnDeviceFound(const char *pkgName, const Dev
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason)
+int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");
@@ -49,7 +49,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int su
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
+int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");
@@ -58,7 +58,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcDiscoverySuccess(const char *pkgName, int su
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
+int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");
@@ -67,7 +67,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnPublishSuccess(const char *pkgName, int pu
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
+int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
 {
     sptr<DiscClientProxy> clientProxy = GetClientProxy(pkgName);
     DISC_CHECK_AND_RETURN_RET_LOG(clientProxy != nullptr, SOFTBUS_ERR, "client proxy is nullptr");

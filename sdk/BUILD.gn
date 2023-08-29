@@ -85,6 +85,11 @@ target(build_type, "softbus_client") {
     }
     ldflags = [ "-lstdc++" ]
   } else {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     version_script = "libsoftbus_client_map"
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]

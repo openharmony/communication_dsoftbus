@@ -218,12 +218,12 @@ int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitOffline(void)
+int32_t LnnInitOffline(void)
 {
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_OFFLINE, OnReceiveBrOffline);
 }
 
-NO_SANITIZE("cfi") void LnnDeinitOffline(void)
+void LnnDeinitOffline(void)
 {
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_OFFLINE, OnReceiveBrOffline);
 }

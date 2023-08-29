@@ -141,7 +141,7 @@ int SessionServiceImpl::RemovePermission(const std::string &busName)
     return RemovePermissionInner(busName.c_str());
 }
 
-NO_SANITIZE("cfi") int SessionServiceImpl::OpenSessionCallback(int sessionId)
+int SessionServiceImpl::OpenSessionCallback(int sessionId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::OpenSessionCallback");
     int isServer;
@@ -204,7 +204,7 @@ NO_SANITIZE("cfi") int SessionServiceImpl::OpenSessionCallback(int sessionId)
     return listener->OnSessionOpened(session);
 }
 
-NO_SANITIZE("cfi") void SessionServiceImpl::CloseSessionCallback(int sessionId)
+void SessionServiceImpl::CloseSessionCallback(int sessionId)
 {
     std::shared_ptr<ISessionListener> listener;
     std::shared_ptr<Session> session;
@@ -214,7 +214,7 @@ NO_SANITIZE("cfi") void SessionServiceImpl::CloseSessionCallback(int sessionId)
     listener->OnSessionClosed(session);
 }
 
-NO_SANITIZE("cfi") void SessionServiceImpl::BytesReceivedCallback(int sessionId, const void *data, unsigned int len)
+void SessionServiceImpl::BytesReceivedCallback(int sessionId, const void *data, unsigned int len)
 {
     std::shared_ptr<ISessionListener> listener;
     std::shared_ptr<Session> session;

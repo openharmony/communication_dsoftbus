@@ -30,7 +30,7 @@
 
 static SoftBusList *g_sessionConnList = NULL;
 
-NO_SANITIZE("cfi") uint64_t TransTdcGetNewSeqId(void)
+uint64_t TransTdcGetNewSeqId(void)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcGetNewSeqId GetLock fail");
@@ -47,7 +47,7 @@ NO_SANITIZE("cfi") uint64_t TransTdcGetNewSeqId(void)
     return retseq;
 }
 
-NO_SANITIZE("cfi") int32_t CreatSessionConnList(void)
+int32_t CreatSessionConnList(void)
 {
     if (g_sessionConnList == NULL) {
         g_sessionConnList = CreateSoftBusList();
@@ -59,7 +59,7 @@ NO_SANITIZE("cfi") int32_t CreatSessionConnList(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") SoftBusList *GetSessionConnList(void)
+SoftBusList *GetSessionConnList(void)
 {
     if (g_sessionConnList == NULL) {
         return NULL;
@@ -67,7 +67,7 @@ NO_SANITIZE("cfi") SoftBusList *GetSessionConnList(void)
     return g_sessionConnList;
 }
 
-NO_SANITIZE("cfi") int32_t GetSessionConnLock(void)
+int32_t GetSessionConnLock(void)
 {
     if (g_sessionConnList == NULL) {
         return SOFTBUS_NO_INIT;
@@ -78,7 +78,7 @@ NO_SANITIZE("cfi") int32_t GetSessionConnLock(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void ReleaseSessonConnLock(void)
+void ReleaseSessonConnLock(void)
 {
     if (g_sessionConnList == NULL) {
         return;
@@ -86,7 +86,7 @@ NO_SANITIZE("cfi") void ReleaseSessonConnLock(void)
     (void)SoftBusMutexUnlock(&g_sessionConnList->lock);
 }
 
-NO_SANITIZE("cfi") SessionConn *GetSessionConnByRequestId(uint32_t requestId)
+SessionConn *GetSessionConnByRequestId(uint32_t requestId)
 {
     if (g_sessionConnList == NULL) {
         return NULL;
@@ -102,7 +102,7 @@ NO_SANITIZE("cfi") SessionConn *GetSessionConnByRequestId(uint32_t requestId)
     return NULL;
 }
 
-NO_SANITIZE("cfi") SessionConn *GetSessionConnByReq(int64_t req)
+SessionConn *GetSessionConnByReq(int64_t req)
 {
     if (g_sessionConnList == NULL) {
         return NULL;
@@ -118,7 +118,7 @@ NO_SANITIZE("cfi") SessionConn *GetSessionConnByReq(int64_t req)
     return NULL;
 }
 
-NO_SANITIZE("cfi") SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
+SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
@@ -139,7 +139,7 @@ NO_SANITIZE("cfi") SessionConn *CreateNewSessinConn(ListenerModule module, bool 
     return conn;
 }
 
-NO_SANITIZE("cfi") SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn)
+SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn)
 {
     SessionConn *connInfo = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -159,7 +159,7 @@ NO_SANITIZE("cfi") SessionConn *GetSessionConnByFd(int32_t fd, SessionConn *conn
     return NULL;
 }
 
-NO_SANITIZE("cfi") SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
+SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
 {
     SessionConn *connInfo = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -180,7 +180,7 @@ NO_SANITIZE("cfi") SessionConn *GetSessionConnById(int32_t channelId, SessionCon
     return NULL;
 }
 
-NO_SANITIZE("cfi") int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
+int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
 {
     SessionConn *conn = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -198,7 +198,7 @@ NO_SANITIZE("cfi") int32_t SetAppInfoById(int32_t channelId, const AppInfo *appI
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
+int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
 {
     SessionConn *conn = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -216,7 +216,7 @@ NO_SANITIZE("cfi") int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
+int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
 {
     SessionConn *conn = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -233,7 +233,7 @@ NO_SANITIZE("cfi") int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int64_t GetAuthIdByChanId(int32_t channelId)
+int64_t GetAuthIdByChanId(int32_t channelId)
 {
     int64_t authId;
     SessionConn *conn = NULL;
@@ -251,7 +251,7 @@ NO_SANITIZE("cfi") int64_t GetAuthIdByChanId(int32_t channelId)
     return AUTH_INVALID_ID;
 }
 
-NO_SANITIZE("cfi") void TransDelSessionConnById(int32_t channelId)
+void TransDelSessionConnById(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransDelSessionConnById: channelId=%d", channelId);
     SessionConn *item = NULL;
@@ -276,7 +276,7 @@ NO_SANITIZE("cfi") void TransDelSessionConnById(int32_t channelId)
     ReleaseSessonConnLock();
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcAddSessionConn(SessionConn *conn)
+int32_t TransTdcAddSessionConn(SessionConn *conn)
 {
     if (conn == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -291,7 +291,7 @@ NO_SANITIZE("cfi") int32_t TransTdcAddSessionConn(SessionConn *conn)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLen)
+void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLen)
 {
     if (sessionKey == NULL || keyLen <= 0) {
         return;
@@ -317,7 +317,7 @@ NO_SANITIZE("cfi") void SetSessionKeyByChanId(int32_t chanId, const char *sessio
     ReleaseSessonConnLock();
 }
 
-NO_SANITIZE("cfi") int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
+int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -335,7 +335,7 @@ NO_SANITIZE("cfi") int32_t SetSessionConnStatusById(int32_t channelId, uint32_t 
     return SOFTBUS_NOT_FIND;
 }
 
-NO_SANITIZE("cfi") int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
+int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;

@@ -36,7 +36,7 @@ int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_busCenter_var_list);
 }
 
-NO_SANITIZE("cfi") static int32_t SoftBusBusCenterDumpHander(int fd, int32_t argc, const char **argv)
+static int32_t SoftBusBusCenterDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         return SOFTBUS_ERR;

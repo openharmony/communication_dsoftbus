@@ -77,7 +77,7 @@ static int32_t ConvertWifiDevConfFromSoftBusWifiConf(const SoftBusWifiDevConf *r
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)
+int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num)
 {
     WifiDeviceConfig *result = NULL;
     uint32_t wifiConfigSize;
@@ -130,7 +130,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *config
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
+int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
 {
     WifiDeviceConfig wifiDevConfig;
 
@@ -152,7 +152,7 @@ NO_SANITIZE("cfi") int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifi
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusDisconnectDevice(void)
+int32_t SoftBusDisconnectDevice(void)
 {
     return Disconnect();
 }
@@ -160,7 +160,7 @@ NO_SANITIZE("cfi") int32_t SoftBusDisconnectDevice(void)
 static ISoftBusScanResult *g_scanResultCb[MAX_CALLBACK_NUM] = {NULL};
 static bool g_registerFlag = true;
 
-NO_SANITIZE("cfi") int32_t SoftBusStartWifiScan(void)
+int32_t SoftBusStartWifiScan(void)
 {
     int32_t ret;
 
@@ -172,7 +172,7 @@ NO_SANITIZE("cfi") int32_t SoftBusStartWifiScan(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void SoftBusWifiScanStateChanged(int state, int size)
+static void SoftBusWifiScanStateChanged(int state, int size)
 {
     for (int i = 0; i < MAX_CALLBACK_NUM; i++) {
         if (g_scanResultCb[i] != NULL) {
@@ -200,7 +200,7 @@ static int32_t FindFreeCallbackIndex(void)
     return i;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
+int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
 {
     int32_t ret;
 
@@ -252,7 +252,7 @@ static int32_t ConvertSoftBusWifiScanInfoFromWifi(WifiScanInfo *info, SoftBusWif
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
+int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
 {
     if (size == NULL || result == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para size or result is NULL.");
@@ -300,7 +300,7 @@ static bool IsScanResultCbEmpty(void)
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
+int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
 {
     int32_t ret;
 
@@ -322,7 +322,7 @@ NO_SANITIZE("cfi") int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
+int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
 {
     if (channelList == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para channelList is NULL.");
@@ -336,7 +336,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int3
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") SoftBusBand SoftBusGetLinkBand(void)
+SoftBusBand SoftBusGetLinkBand(void)
 {
     WifiLinkedInfo result;
     GetLinkedInfo(&result);
@@ -354,7 +354,7 @@ NO_SANITIZE("cfi") SoftBusBand SoftBusGetLinkBand(void)
     }
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
+int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
 {
     WifiLinkedInfo result;
     if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
@@ -370,7 +370,7 @@ NO_SANITIZE("cfi") int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
+int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
 {
     WifiP2pGroupInfo result;
     if (GetCurrentGroup(&result) != WIFI_SUCCESS) {

@@ -36,7 +36,7 @@ static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
     return false;
 }
 
-NO_SANITIZE("cfi") static void FreeFsmHandleMsg(SoftBusMessage *msg)
+static void FreeFsmHandleMsg(SoftBusMessage *msg)
 {
     if (msg != NULL) {
         if (msg->obj != NULL) {
@@ -154,7 +154,7 @@ static void ProcessStopMessage(SoftBusMessage *msg)
 }
 
 /* remove message when return 0, else return 1 */
-NO_SANITIZE("cfi") static int32_t RemoveAllMessageFunc(const SoftBusMessage *msg, void *para)
+static int32_t RemoveAllMessageFunc(const SoftBusMessage *msg, void *para)
 {
     (void)para;
 
@@ -162,7 +162,7 @@ NO_SANITIZE("cfi") static int32_t RemoveAllMessageFunc(const SoftBusMessage *msg
     return 0;
 }
 
-NO_SANITIZE("cfi") static void ProcessDeinitMessage(SoftBusMessage *msg)
+static void ProcessDeinitMessage(SoftBusMessage *msg)
 {
     FsmCtrlMsgObj *ctrlMsgObj = msg->obj;
     FsmStateMachine *fsm = NULL;
@@ -182,7 +182,7 @@ NO_SANITIZE("cfi") static void ProcessDeinitMessage(SoftBusMessage *msg)
     }
 }
 
-NO_SANITIZE("cfi") static void FsmStateMsgHandler(SoftBusMessage *msg)
+static void FsmStateMsgHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;
@@ -209,7 +209,7 @@ NO_SANITIZE("cfi") static void FsmStateMsgHandler(SoftBusMessage *msg)
     }
 }
 
-NO_SANITIZE("cfi") static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg1,
+static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg1,
     uint64_t arg2, void *obj)
 {
     SoftBusMessage *msg = NULL;
@@ -224,7 +224,7 @@ NO_SANITIZE("cfi") static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t
 }
 
 /* remove message when return 0, else return 1 */
-NO_SANITIZE("cfi") static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
+static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
 {
     int32_t msgType;
 
@@ -240,7 +240,7 @@ NO_SANITIZE("cfi") static int32_t RemoveMessageFunc(const SoftBusMessage *msg, v
     return 1;
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *looper, char *name, FsmDeinitCallback cb)
+int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *looper, char *name, FsmDeinitCallback cb)
 {
     if (fsm == NULL || name == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -260,7 +260,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *loope
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmDeinit(FsmStateMachine *fsm)
+int32_t LnnFsmDeinit(FsmStateMachine *fsm)
 {
     if (fsm == NULL || fsm->looper == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -268,7 +268,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmDeinit(FsmStateMachine *fsm)
     return PostMessageToFsm(fsm, FSM_CTRL_MSG_DEINIT, 0, 0, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state)
+int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || fsm->looper == NULL || state == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -283,7 +283,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmStart(FsmStateMachine *fsm, FsmState *initialState)
+int32_t LnnFsmStart(FsmStateMachine *fsm, FsmState *initialState)
 {
     if (fsm == NULL || fsm->looper == NULL || initialState == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -291,7 +291,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmStart(FsmStateMachine *fsm, FsmState *initialSt
     return PostMessageToFsm(fsm, FSM_CTRL_MSG_START, 0, 0, initialState);
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmStop(FsmStateMachine *fsm)
+int32_t LnnFsmStop(FsmStateMachine *fsm)
 {
     if (fsm == NULL || fsm->looper == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -299,7 +299,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmStop(FsmStateMachine *fsm)
     return PostMessageToFsm(fsm, FSM_CTRL_MSG_STOP, 0, 0, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmPostMessage(FsmStateMachine *fsm, uint32_t msgType, void *data)
+int32_t LnnFsmPostMessage(FsmStateMachine *fsm, uint32_t msgType, void *data)
 {
     if (fsm == NULL || fsm->looper == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -307,7 +307,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmPostMessage(FsmStateMachine *fsm, uint32_t msgT
     return PostMessageToFsm(fsm, FSM_CTRL_MSG_DATA, msgType, 0, data);
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
+int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
     void *data, uint64_t delayMillis)
 {
     SoftBusMessage *msg = NULL;
@@ -324,7 +324,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
+int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType)
 {
     if (fsm == NULL || fsm->looper == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -334,7 +334,7 @@ NO_SANITIZE("cfi") int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msg
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
+int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
     int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
     if (fsm == NULL || fsm->looper == NULL) {

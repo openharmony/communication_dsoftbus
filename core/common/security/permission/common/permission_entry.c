@@ -427,7 +427,7 @@ int32_t LoadPermissionJson(const char *fileName)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void ClearAppInfo(const ListNode *appInfo)
+void ClearAppInfo(const ListNode *appInfo)
 {
     if (appInfo == NULL) {
         return;
@@ -439,7 +439,7 @@ NO_SANITIZE("cfi") void ClearAppInfo(const ListNode *appInfo)
     }
 }
 
-NO_SANITIZE("cfi") void DeinitPermissionJson(void)
+void DeinitPermissionJson(void)
 {
     if (g_permissionEntryList == NULL) {
         return;
@@ -455,7 +455,7 @@ NO_SANITIZE("cfi") void DeinitPermissionJson(void)
     DestroySoftBusList(g_permissionEntryList);
 }
 
-NO_SANITIZE("cfi") SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
+SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
     const char *pkgName, uint32_t actions)
 {
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
@@ -470,7 +470,7 @@ NO_SANITIZE("cfi") SoftBusPermissionItem *CreatePermissionItem(int32_t permType,
     return pItem;
 }
 
-NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
+int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
 {
     if (sessionName == NULL || pItem == NULL || g_permissionEntryList == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -514,7 +514,7 @@ NO_SANITIZE("cfi") int32_t CheckPermissionEntry(const char *sessionName, const S
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-NO_SANITIZE("cfi") bool PermIsSecLevelPublic(const char *sessionName)
+bool PermIsSecLevelPublic(const char *sessionName)
 {
     if (sessionName == NULL) {
         return false;
@@ -541,7 +541,7 @@ NO_SANITIZE("cfi") bool PermIsSecLevelPublic(const char *sessionName)
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t InitDynamicPermission(void)
+int32_t InitDynamicPermission(void)
 {
     if (g_dynamicPermissionList == NULL) {
         g_dynamicPermissionList = CreateSoftBusList();
@@ -598,7 +598,7 @@ static int32_t NewDynamicPermissionEntry(SoftBusPermissionEntry *permissionEntry
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
+int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
 {
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     if (g_dynamicPermissionList->cnt >= DYNAMIC_PERMISSION_MAX_SIZE) {
@@ -636,7 +636,7 @@ NO_SANITIZE("cfi") int32_t AddDynamicPermission(int32_t callingUid, int32_t call
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DeleteDynamicPermission(const char *sessionName)
+int32_t DeleteDynamicPermission(const char *sessionName)
 {
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     SoftBusPermissionEntry *pe = NULL;

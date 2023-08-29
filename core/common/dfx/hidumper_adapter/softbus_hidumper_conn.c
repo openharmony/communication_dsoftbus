@@ -35,7 +35,7 @@ int32_t SoftBusRegConnVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_conn_var_list);
 }
 
-NO_SANITIZE("cfi") static int32_t SoftBusConnDumpHander(int fd, int32_t argc, const char **argv)
+static int32_t SoftBusConnDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         return SOFTBUS_ERR;

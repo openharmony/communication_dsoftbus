@@ -186,7 +186,7 @@ static void PostBusyConnResponse(void)
     }
 }
 
-NO_SANITIZE("cfi") static void OnConnectFailed(int32_t failedReason)
+static void OnConnectFailed(int32_t failedReason)
 {
     if (g_p2pLinkNegoFsm.linkInfo.requestId != 0) {
         if (g_p2pLinkNegoCb.onConnectFailed != NULL) {
@@ -531,7 +531,7 @@ static int32_t DecideMyRoleAsNone(int32_t peerRole, int32_t peerExpectRole, cons
     }
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkNegoGetFinalRole(int32_t peerRole, int32_t peerExpectRole, const char *peerGoMac,
+int32_t P2pLinkNegoGetFinalRole(int32_t peerRole, int32_t peerExpectRole, const char *peerGoMac,
     bool isSupportBridge)
 {
     int32_t myRole = P2pLinkGetRole();
@@ -817,7 +817,7 @@ static void IdleStateProcess(P2pLoopMsg msgType, void *param)
     }
 }
 
-NO_SANITIZE("cfi") static void OnConnectSuccess(const P2pLinkNegoConnResult *conneResult)
+static void OnConnectSuccess(const P2pLinkNegoConnResult *conneResult)
 {
     CLOGI("connected success");
     int32_t ret = AuthSetP2pMac(conneResult->authId, conneResult->peerMac);
@@ -888,7 +888,7 @@ static void WaitStateOnRepsonseRecv(const P2pRespMsg *response)
     OnConnectSuccess(&(g_p2pLinkNegoFsm.result));
 }
 
-NO_SANITIZE("cfi") static void TimeoutErrorProcess(int32_t localErrCode, int32_t peerErrCode)
+static void TimeoutErrorProcess(int32_t localErrCode, int32_t peerErrCode)
 {
     CLOGE("invoke timeout, errcode %d.", localErrCode);
     if (g_p2pLinkNegoFsm.linkInfo.requestId != 0) {
@@ -1299,7 +1299,7 @@ static void P2pLinkNeoConnRequestProc(int64_t authId, const cJSON *data)
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, CONN_REQUEST, (void *)data);
 }
 
-NO_SANITIZE("cfi") void P2pLinkNegoMsgProc(int64_t authId, int32_t cmdType, const cJSON *data)
+void P2pLinkNegoMsgProc(int64_t authId, int32_t cmdType, const cJSON *data)
 {
     if (data == NULL) {
         CLOGE("p2p link negotiation data is null.");
@@ -1313,7 +1313,7 @@ NO_SANITIZE("cfi") void P2pLinkNegoMsgProc(int64_t authId, int32_t cmdType, cons
     }
 }
 
-NO_SANITIZE("cfi") void P2pLinkNegoOnGroupChanged(const P2pLinkGroup *group)
+void P2pLinkNegoOnGroupChanged(const P2pLinkGroup *group)
 {
     CLOGI("p2p link negotiation recv group changed.");
     if (group == NULL) {
@@ -1324,13 +1324,13 @@ NO_SANITIZE("cfi") void P2pLinkNegoOnGroupChanged(const P2pLinkGroup *group)
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, MAGICLINK_ON_GROUP_CHANGED, (void *)group);
 }
 
-NO_SANITIZE("cfi") void P2pLinkNegoOnConnectState(int32_t state)
+void P2pLinkNegoOnConnectState(int32_t state)
 {
     CLOGI("p2p link negotiation recv connect state changed.");
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, MAGICLINK_ON_CONNECTED, (void *)&state);
 }
 
-NO_SANITIZE("cfi") P2pLinkNegoState GetP2pLinkNegoStatus(void)
+P2pLinkNegoState GetP2pLinkNegoStatus(void)
 {
     uint8_t state;
     for (state = 0; state < P2PLINK_NEG_MAX_STATE; state++) {
@@ -1342,17 +1342,17 @@ NO_SANITIZE("cfi") P2pLinkNegoState GetP2pLinkNegoStatus(void)
     return (P2pLinkNegoState)state;
 }
 
-NO_SANITIZE("cfi") char *P2pLinkNegoGetCurrentPeerMac(void)
+char *P2pLinkNegoGetCurrentPeerMac(void)
 {
     return g_p2pLinkNegoFsm.linkInfo.peerMac;
 }
 
-NO_SANITIZE("cfi") void P2pLinkNegoStart(const P2pLinkNegoConnInfo *connInfo)
+void P2pLinkNegoStart(const P2pLinkNegoConnInfo *connInfo)
 {
     P2pLinkFsmMsgProc(g_p2pLinkNegoFsm.fsm, START_NEGOTIATION, (void *)connInfo);
 }
 
-NO_SANITIZE("cfi") void P2pLinkNegoStop(void)
+void P2pLinkNegoStop(void)
 {
     P2pLinkFsmMsgProcDelayDel(CONN_REQUEST_TIME_OUT);
     P2pLinkFsmMsgProcDelayDel(MAGICLINK_CONN_GROUP_TIME_OUT);
@@ -1369,7 +1369,7 @@ NO_SANITIZE("cfi") void P2pLinkNegoStop(void)
     P2pLinkFsmTransactState(g_p2pLinkNegoFsm.fsm, g_p2pLinkNegoState + P2PLINK_NEG_IDLE);
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback)
+int32_t P2pLinkNegoInit(const P2pLinkNegoCb *callback)
 {
     if (callback == NULL) {
         CLOGE("invalid param.");

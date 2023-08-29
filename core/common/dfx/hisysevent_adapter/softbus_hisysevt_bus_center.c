@@ -284,7 +284,7 @@ AuthResultRecord g_authResultRecord[SOFTBUS_HISYSEVT_LINK_TYPE_BUTT];
 DevOnlineDurRecord g_devOnlineDurRecord;
 DevDiscoveryRecord g_devDiscoveryRecord;
 
-NO_SANITIZE("cfi") int64_t LnnUpTimeMs(void)
+int64_t LnnUpTimeMs(void)
 {
     SoftBusSysTime t;
     t.sec = 0;

@@ -24,7 +24,7 @@ namespace OHOS {
 typedef std::pair<std::unordered_multimap<std::string, ClientObjPair>::iterator,
     std::unordered_multimap<std::string, ClientObjPair>::iterator> ClientObjRange;
 
-NO_SANITIZE("cfi") SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
+SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
 {
     static SoftbusClientInfoManager instance;
     return instance;

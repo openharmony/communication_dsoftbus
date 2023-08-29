@@ -19,7 +19,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
+int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel, int32_t pid)
 {
     (void)pkgName;
@@ -27,7 +27,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const c
     return TransOnChannelOpened(sessionName, channel);
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
+int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
     int32_t errCode, int32_t pid)
 {
     (void)pkgName;
@@ -35,7 +35,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int
     return TransOnChannelOpenFailed(channelId, channelType, errCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId,
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId,
     const char *uuid, const char *udid, const char *peerIp, int32_t routeType, int32_t pid)
 {
     (void)pkgName;
@@ -46,7 +46,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const
     return TransOnChannelLinkDown(networkId, routeType);
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
+int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
     int32_t pid)
 {
     (void)pkgName;
@@ -54,7 +54,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t
     return TransOnChannelClosed(channelId, channelType);
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
     TransReceiveData *receiveData, int32_t pid)
 {
     (void)pkgName;
@@ -63,7 +63,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, in
         (SessionPktType)receiveData->dataType);
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
+int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
 {
     (void)pkgName;
     (void)param;
