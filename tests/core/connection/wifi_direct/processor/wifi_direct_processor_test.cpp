@@ -94,7 +94,7 @@ HWTEST_F(WifiProcessorTest, testV1DisconnectLink001, TestSize.Level1)
     connectInfo.requestId = 2;
     connectInfo.pid = 3;
     connectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
-    connectInfo.expectRole = WIFI_DIRECT_ROLE_GO;
+    connectInfo.expectApiRole = WIFI_DIRECT_ROLE_GO;
     const char str[] = "00-1A-2B-3C-4D-56";
     strcpy_s(connectInfo.remoteMac, sizeof(32), str);
     connectInfo.isNetworkDelegate = true;
