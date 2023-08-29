@@ -71,7 +71,7 @@ static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(buf, len, info->softBusVersion, strlen(info->softBusVersion)) != EOK) {
+    if (strncpy_s((char *)buf, len, info->softBusVersion, strlen(info->softBusVersion)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -94,7 +94,7 @@ static int32_t LlGetDeviceUdid(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid invalid!\n");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, udid, strlen(udid)) != EOK) {
+    if (strncpy_s((char *)buf, len, udid, strlen(udid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -107,7 +107,7 @@ static int32_t LlGetNetworkId(void *buf, uint32_t len)
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(buf, len, info->networkId, strlen(info->networkId)) != EOK) {
+    if (strncpy_s((char *)buf, len, info->networkId, strlen(info->networkId)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -148,7 +148,7 @@ static int32_t LlGetUuid(void *buf, uint32_t len)
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(buf, len, info->uuid, strlen(info->uuid)) != EOK) {
+    if (strncpy_s((char *)buf, len, info->uuid, strlen(info->uuid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -176,7 +176,7 @@ static int32_t LlGetDeviceType(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deviceType fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, deviceType, strlen(deviceType)) != EOK) {
+    if (strncpy_s((char *)buf, len, deviceType, strlen(deviceType)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -267,7 +267,7 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get device name fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, deviceName, strlen(deviceName)) != EOK) {
+    if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -280,7 +280,7 @@ static int32_t LlGetUnifiedName(void *buf, uint32_t len)
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(buf, len, info->deviceInfo.unifiedName, strlen(info->deviceInfo.unifiedName)) != EOK) {
+    if (strncpy_s((char *)buf, len, info->deviceInfo.unifiedName, strlen(info->deviceInfo.unifiedName)) != EOK) {
         LLOGE("strcpy err");
         return SOFTBUS_MEM_ERR;
     }
@@ -293,7 +293,7 @@ static int32_t LlGetUnifiedDefaultName(void *buf, uint32_t len)
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(buf, len, info->deviceInfo.unifiedDefaultName,
+    if (strncpy_s((char *)buf, len, info->deviceInfo.unifiedDefaultName,
         strlen(info->deviceInfo.unifiedDefaultName)) != EOK) {
         LLOGE("strcpy err");
         return SOFTBUS_MEM_ERR;
@@ -307,7 +307,7 @@ static int32_t LlGetNickName(void *buf, uint32_t len)
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(buf, len, info->deviceInfo.nickName, strlen(info->deviceInfo.nickName)) != EOK) {
+    if (strncpy_s((char *)buf, len, info->deviceInfo.nickName, strlen(info->deviceInfo.nickName)) != EOK) {
         LLOGE("strcpy err");
         return SOFTBUS_MEM_ERR;
     }
@@ -326,7 +326,7 @@ static int32_t LlGetBtMac(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strncpy_s((char *)buf, len, mac, strlen(mac)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -346,7 +346,7 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get LocalIp =%s", AnonymizesIp(ip));
-    if (strncpy_s(buf, len, ip, strlen(ip)) != EOK) {
+    if (strncpy_s((char *)buf, len, ip, strlen(ip)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -365,7 +365,7 @@ static int32_t LlGetNetIfName(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, ifName, strlen(ifName)) != EOK) {
+    if (strncpy_s((char *)buf, len, ifName, strlen(ifName)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
@@ -386,7 +386,7 @@ static int32_t L1GetMasterNodeUdid(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get master udid fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, udid, strlen(udid)) != EOK) {
+    if (strncpy_s((char *)buf, len, udid, strlen(udid)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy master udid failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -529,7 +529,7 @@ static int32_t LlGetP2pMac(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p mac fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strncpy_s((char *)buf, len, mac, strlen(mac)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p mac failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -546,7 +546,7 @@ static int32_t L1GetWifiCfg(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get wifi cfg fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, wifiCfg, strlen(wifiCfg)) != EOK) {
+    if (strncpy_s((char *)buf, len, wifiCfg, strlen(wifiCfg)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy wifi cfg failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -563,7 +563,7 @@ static int32_t L1GetChanList5g(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get chan list 5g fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, chanList5g, strlen(chanList5g)) != EOK) {
+    if (strncpy_s((char *)buf, len, chanList5g, strlen(chanList5g)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy chan list 5g failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -581,7 +581,7 @@ static int32_t LlGetP2pGoMac(void *buf, uint32_t len)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get p2p go mac fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(buf, len, mac, strlen(mac)) != EOK) {
+    if (strncpy_s((char *)buf, len, mac, strlen(mac)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy p2p go mac failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -747,7 +747,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     const char *beforeName = LnnGetDeviceName(&g_localNetLedger.localInfo.deviceInfo);
-    if (strcmp(beforeName, name) != 0) {
+    if (strcmp(beforeName, (char *)name) != 0) {
         if (LnnSetDeviceName(&g_localNetLedger.localInfo.deviceInfo, (char *)name) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set device name fail.");
             return SOFTBUS_ERR;
@@ -763,9 +763,9 @@ static int32_t UpdateUnifiedName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     const char *beforeName = g_localNetLedger.localInfo.deviceInfo.unifiedName;
-    if (strcmp(beforeName, name) != 0) {
+    if (strcmp(beforeName, (char *)name) != 0) {
         if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedName,
-            DEVICE_NAME_BUF_LEN, name) != EOK) {
+            DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
             return SOFTBUS_ERR;
         }
         UpdateStateVersionAndStore();
@@ -779,9 +779,9 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     const char *beforeName = g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName;
-    if (strcmp(beforeName, name) != 0) {
+    if (strcmp(beforeName, (char *)name) != 0) {
         if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName,
-            DEVICE_NAME_BUF_LEN, name) != EOK) {
+            DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
             return SOFTBUS_ERR;
         }
     }
@@ -794,9 +794,9 @@ static int32_t UpdateNickName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     const char *beforeName = g_localNetLedger.localInfo.deviceInfo.nickName;
-    if (strcmp(beforeName, name) != 0) {
+    if (strcmp(beforeName, (char *)name) != 0) {
         if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.nickName,
-            DEVICE_NAME_BUF_LEN, name) != EOK) {
+            DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
             return SOFTBUS_ERR;
         }
         UpdateStateVersionAndStore();
@@ -889,8 +889,8 @@ static int32_t UpdateLocalDeviceIp(const void *ip)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
-    LnnSetWiFiIp(&g_localNetLedger.localInfo, ip);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set LocalIp =%s", AnonymizesIp(ip));
+    LnnSetWiFiIp(&g_localNetLedger.localInfo, (char *)ip);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set LocalIp =%s", AnonymizesIp((char *)ip));
     return SOFTBUS_OK;
 }
 
@@ -923,7 +923,7 @@ static int32_t UpdateMasterNodeUdid(const void *udid)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid fail");
     } else {
         role = g_localNetLedger.localInfo.role;
-        if (strcmp(localUdid, udid) == 0) {
+        if (strcmp(localUdid, (char *)udid) == 0) {
             g_localNetLedger.localInfo.role = ROLE_CONTROLLER;
         } else {
             g_localNetLedger.localInfo.role = ROLE_LEAF;
@@ -1375,7 +1375,7 @@ NO_SANITIZE("cfi") int32_t LnnInitLocalLedger(void)
         goto EXIT;
     }
     if (SoftBusRegBusCenterVarDump(
-        SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
+        (char *)SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegBusCenterVarDump regist fail");
         return SOFTBUS_ERR;
     }
