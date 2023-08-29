@@ -66,7 +66,7 @@ static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearc
 static ConnBleClientEventListener g_clientEventListener = { 0 };
 static SoftBusHandlerWrapper g_bleGattClientAsyncHandler = {
     .handler = {
-        .name = "BleGattClientAsyncHandler",
+        .name = (char *)"BleGattClientAsyncHandler",
         .HandleMessage = BleGattClientMsgHandler,
         // assign when initiation
         .looper = NULL,
@@ -139,7 +139,7 @@ static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, i
         return;
     }
 
-    CommonStatusContext *ctx = SoftBusCalloc(sizeof(CommonStatusContext));
+    CommonStatusContext *ctx = (CommonStatusContext *)SoftBusCalloc(sizeof(CommonStatusContext));
     if (ctx == NULL) {
         CLOGE("connection state changed handle failed: calloc failed, handle=%d ,status=%d", underlayerHandle, status);
         return;
@@ -257,7 +257,7 @@ static void BleGattcSearchServiceCallback(int32_t underlayerHandle, int32_t stat
 {
     CLOGI("gatt client callback, service searched, handle=%d, status=%d", underlayerHandle, status);
 
-    CommonStatusContext *ctx = SoftBusCalloc(sizeof(CommonStatusContext));
+    CommonStatusContext *ctx = (CommonStatusContext *)SoftBusCalloc(sizeof(CommonStatusContext));
     if (ctx == NULL) {
         CLOGE("service searched handle failed: calloc failed, handle=%d ,status=%d", underlayerHandle, status);
         return;
@@ -295,7 +295,7 @@ static void SearchedMsgHandler(const CommonStatusContext *ctx)
             break;
         }
         SoftBusBtUuid serviceUuid = {
-            .uuid = SOFTBUS_SERVICE_UUID,
+            .uuid = (char *)SOFTBUS_SERVICE_UUID,
             .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
         };
         rc = SoftbusGattcGetService(ctx->underlayerHandle, &serviceUuid);
@@ -310,11 +310,11 @@ static void SearchedMsgHandler(const CommonStatusContext *ctx)
             break;
         }
         SoftBusBtUuid connCharacteristicUuid = {
-            .uuid = SOFTBUS_CHARA_BLECONN_UUID,
+            .uuid = (char *)SOFTBUS_CHARA_BLECONN_UUID,
             .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
         };
         SoftBusBtUuid descriptorUuid = {
-            .uuid = SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
+            .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
             .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
         };
         rc = SoftbusGattcRegisterNotification(
@@ -348,7 +348,7 @@ static void BleGattcRegisterNotificationCallback(int32_t underlayerHandle, int32
 {
     CLOGI("gatt client callback, notification registered, handle=%d, status=%d", underlayerHandle, status);
 
-    CommonStatusContext *ctx = SoftBusCalloc(sizeof(CommonStatusContext));
+    CommonStatusContext *ctx = (CommonStatusContext *)SoftBusCalloc(sizeof(CommonStatusContext));
     if (ctx == NULL) {
         CLOGE("calloc failed, handle=%d ,status=%d", underlayerHandle, status);
         return;
@@ -432,15 +432,15 @@ static int32_t NotificatedConnHandler(int32_t underlayerHandle, ConnBleConnectio
     }
 
     SoftBusBtUuid serviceUuid = {
-        .uuid = SOFTBUS_SERVICE_UUID,
+        .uuid = (char *)SOFTBUS_SERVICE_UUID,
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     SoftBusBtUuid netUuid = {
-        .uuid = SOFTBUS_CHARA_BLENET_UUID,
+        .uuid = (char *)SOFTBUS_CHARA_BLENET_UUID,
         .uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
     };
     SoftBusBtUuid descriptorUuid = {
-        .uuid = SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
+        .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
         .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
     };
     status = SoftbusGattcRegisterNotification(underlayerHandle, &serviceUuid, &netUuid, &descriptorUuid);
@@ -484,7 +484,7 @@ static int32_t NotificatedNetHandler(int32_t underlayerHandle, ConnBleConnection
 static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t mtuSize, int32_t status)
 {
     CLOGI("gatt client callback, MTU configured, handle=%d, mtu =%d, status=%d", underlayerHandle, mtuSize, status);
-    MtuConfiguredContext *ctx = SoftBusCalloc(sizeof(MtuConfiguredContext));
+    MtuConfiguredContext *ctx = (MtuConfiguredContext *)SoftBusCalloc(sizeof(MtuConfiguredContext));
     if (ctx == NULL) {
         CLOGE("calloc mtu failed, handle=%d, mtu =%d, status=%d", underlayerHandle, mtuSize, status);
         return;
@@ -667,9 +667,9 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
 static char *GetBleAttrUuid(int32_t module)
 {
     if (module == MODULE_BLE_NET) {
-        return SOFTBUS_CHARA_BLENET_UUID;
+        return (char *)SOFTBUS_CHARA_BLENET_UUID;
     } else {
-        return SOFTBUS_CHARA_BLECONN_UUID;
+        return (char *)SOFTBUS_CHARA_BLECONN_UUID;
     }
 }
 
