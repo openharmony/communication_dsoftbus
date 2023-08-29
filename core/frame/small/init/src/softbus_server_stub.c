@@ -242,7 +242,7 @@ void __attribute__((weak)) HOS_SystemInit(void)
     return;
 }
 
-NO_SANITIZE("cfi") int ServerStubInit(void)
+int ServerStubInit(void)
 {
     HOS_SystemInit();
 

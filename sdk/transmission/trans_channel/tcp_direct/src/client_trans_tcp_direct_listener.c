@@ -51,7 +51,7 @@ static void TdcLockInit(void)
     }
     return;
 }
-NO_SANITIZE("cfi") static int32_t ClientTdcOnConnectEvent(ListenerModule module, int cfd,
+static int32_t ClientTdcOnConnectEvent(ListenerModule module, int cfd,
     const ConnectOption *clientAddr)
 {
     (void)module;
@@ -60,7 +60,7 @@ NO_SANITIZE("cfi") static int32_t ClientTdcOnConnectEvent(ListenerModule module,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t fd)
+static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t fd)
 {
     (void)module;
     TcpDirectChannelInfo channel;

@@ -175,7 +175,7 @@ static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, co
     return destroyNode;
 }
 
-NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList)
+static void ClientDestroySession(const ListNode *destroyList)
 {
     if (IsListEmpty(destroyList)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destroyList is empty fail.");

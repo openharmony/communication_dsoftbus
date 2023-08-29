@@ -133,7 +133,7 @@ static int32_t GetChannelInfoByAuthId(int32_t authId, AuthChannelInfo *dstInfo)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServer)
+static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServer)
 {
     ChannelInfo channelInfo = {0};
     channelInfo.channelType = CHANNEL_TYPE_AUTH;
@@ -154,23 +154,23 @@ NO_SANITIZE("cfi") static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *ap
         appInfo->myData.sessionName, &channelInfo);
 }
 
-NO_SANITIZE("cfi") static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t channelId,
+static int32_t NotifyOpenAuthChannelFailed(const char *pkgName, int32_t pid, int32_t channelId,
     int32_t errCode)
 {
     return g_cb->OnChannelOpenFailed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH, errCode);
 }
 
-NO_SANITIZE("cfi") static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
+static int32_t NofifyCloseAuthChannel(const char *pkgName, int32_t pid, int32_t channelId)
 {
     return g_cb->OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_AUTH);
 }
 
-NO_SANITIZE("cfi") static int32_t AuthGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
+static int32_t AuthGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     return g_cb->GetUidAndPidBySessionName(sessionName, uid, pid);
 }
 
-NO_SANITIZE("cfi") static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t len)
+static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t len)
 {
     AuthChannelInfo channel;
     if (GetChannelInfoByAuthId(authId, &channel) != SOFTBUS_OK) {
@@ -561,7 +561,7 @@ static void DelAuthChannelInfoByAuthId(int32_t authId)
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
 }
 
-NO_SANITIZE("cfi") int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
+int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen)
 {
     if (pkgName == NULL || sessionName == NULL) {
@@ -580,7 +580,7 @@ NO_SANITIZE("cfi") int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgNam
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransAuthInit(IServerChannelCallBack *cb)
+int32_t TransAuthInit(IServerChannelCallBack *cb)
 {
     if (cb == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -611,7 +611,7 @@ NO_SANITIZE("cfi") int32_t TransAuthInit(IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransAuthDeinit(void)
+void TransAuthDeinit(void)
 {
     UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
     UnregAuthChannelListener(MODULE_AUTH_MSG);
@@ -701,7 +701,7 @@ EXIT_ERR:
     return NULL;
 }
 
-NO_SANITIZE("cfi") int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt,
+int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt,
     int32_t *channelId, const char *reqId)
 {
     if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP) {
@@ -742,7 +742,7 @@ NO_SANITIZE("cfi") int32_t TransOpenAuthMsgChannel(const char *sessionName, cons
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransCloseAuthChannel(int32_t channelId)
+int32_t TransCloseAuthChannel(int32_t channelId)
 {
     AuthChannelInfo *channel = NULL;
     AuthChannelInfo *tmp = NULL;
@@ -765,7 +765,7 @@ NO_SANITIZE("cfi") int32_t TransCloseAuthChannel(int32_t channelId)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len)
+int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len)
 {
     if (msg == NULL || len <= 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -791,7 +791,7 @@ NO_SANITIZE("cfi") int32_t TransSendAuthMsg(int32_t channelId, const char *msg, 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
+int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
 {
     AuthChannelInfo chanInfo;
     if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {
@@ -811,7 +811,7 @@ NO_SANITIZE("cfi") int32_t TransAuthGetConnOptionByChanId(int32_t channelId, Con
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connOpt)
+int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connOpt)
 {
     if (connOpt == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s invalid param.", __func__);
@@ -826,7 +826,7 @@ NO_SANITIZE("cfi") int32_t TransNotifyAuthDataSuccess(int32_t channelId, const C
     return LnnNotifyDiscoveryDevice(&addr, true);
 }
 
-NO_SANITIZE("cfi") int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
+int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
 {
     if (appInfo == NULL || g_authChannelList == NULL) {
         return SOFTBUS_INVALID_PARAM;

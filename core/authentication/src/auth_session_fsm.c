@@ -215,7 +215,7 @@ static void DestroyAuthFsm(AuthFsm *authFsm)
     SoftBusFree(authFsm);
 }
 
-NO_SANITIZE("cfi") static void AuthFsmDeinitCallback(FsmStateMachine *fsm)
+static void AuthFsmDeinitCallback(FsmStateMachine *fsm)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth fsm deinit callback enter");
     if (fsm == NULL) {
@@ -887,7 +887,7 @@ static void SetAuthStartTime(AuthFsm *authFsm)
     authFsm->statisticData.startAuthTime = LnnUpTimeMs();
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
+int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
     uint64_t connId, const AuthConnInfo *connInfo, bool isServer, bool isFastAuth)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -912,7 +912,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t reques
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -920,7 +920,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessDevIdData(int64_t authSeq, const ui
     return PostMessageToAuthFsm(FSM_MSG_RECV_DEVICE_ID, authSeq, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     AuthSessionInfo info;
     if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
@@ -932,7 +932,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -940,7 +940,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessAuthData(int64_t authSeq, const uin
     return PostMessageToAuthFsm(FSM_MSG_RECV_AUTH_DATA, authSeq, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
+int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
 {
     if (udid == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -956,7 +956,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint3
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
+int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
 {
     if (key == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -964,17 +964,17 @@ NO_SANITIZE("cfi") int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint
     return PostMessageToAuthFsm(FSM_MSG_SAVE_SESSION_KEY, authSeq, key, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionHandleAuthFinish(int64_t authSeq)
+int32_t AuthSessionHandleAuthFinish(int64_t authSeq)
 {
     return PostMessageToAuthFsm(FSM_MSG_AUTH_FINISH, authSeq, NULL, 0);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason)
+int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason)
 {
     return PostMessageToAuthFsm(FSM_MSG_AUTH_ERROR, authSeq, (uint8_t *)&reason, sizeof(reason));
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -982,7 +982,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const 
     return PostMessageToAuthFsm(FSM_MSG_RECV_DEVICE_INFO, authSeq, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -990,7 +990,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uin
     return PostMessageToAuthFsm(FSM_MSG_RECV_CLOSE_ACK, authSeq, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data,
+int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data,
     uint32_t len)
 {
     if (data == NULL) {
@@ -999,7 +999,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_DEVICE_INFO, connId, isServer, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data,
+int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data,
     uint32_t len)
 {
     if (data == NULL) {
@@ -1008,7 +1008,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, b
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_CLOSE_ACK, connId, isServer, data, len);
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
+int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
 {
     if (udid == NULL || udid[0] == '\0') {
         return SOFTBUS_INVALID_PARAM;
@@ -1032,7 +1032,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
+int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
 {
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
@@ -1052,7 +1052,7 @@ NO_SANITIZE("cfi") int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void AuthSessionFsmExit(void)
+void AuthSessionFsmExit(void)
 {
     HichainDestroy();
     if (!RequireAuthLock()) {

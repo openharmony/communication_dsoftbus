@@ -120,6 +120,11 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 
   ohos_shared_library("nstackx_dfile.open") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     cflags = [
       "-Wall",
       "-DMBEDTLS_INCLUDED",

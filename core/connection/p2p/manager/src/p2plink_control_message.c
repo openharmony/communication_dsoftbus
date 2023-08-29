@@ -28,7 +28,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_log.h"
 
-NO_SANITIZE("cfi") char* P2pLinkPackReuseRequest(const char *mac)
+char* P2pLinkPackReuseRequest(const char *mac)
 {
     char *buf = NULL;
     cJSON *root = cJSON_CreateObject();
@@ -54,7 +54,7 @@ static int32_t P2pLinkUnPackReuseRequest(const cJSON *root, char *mac, uint32_t 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") char* P2pLinkPackReuseResponse(const char *mac, int result)
+char* P2pLinkPackReuseResponse(const char *mac, int result)
 {
     char *buf = NULL;
     cJSON *root = NULL;
@@ -86,7 +86,7 @@ static int32_t P2pLinkUnPackReuseResponse(const cJSON *root, char *mac, uint32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") char* P2pLinkPackDisconnectCmd(const char *mac)
+char* P2pLinkPackDisconnectCmd(const char *mac)
 {
     char *buf = NULL;
     cJSON *root = NULL;
@@ -115,7 +115,7 @@ static int32_t P2pLinkUnPackDisconnectCmd(const cJSON *root, char *mac, uint32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") char* P2pLinkPackHandshake(const char *mac, const char *ip)
+char* P2pLinkPackHandshake(const char *mac, const char *ip)
 {
     char *buf = NULL;
     cJSON *root = NULL;
@@ -167,7 +167,7 @@ static int64_t GetPreferenceAuthId(const P2pLinkAuthId *chan)
     }
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkSendHandshake(const P2pLinkAuthId *chan, const char *myMac, const char *myIp)
+int32_t P2pLinkSendHandshake(const P2pLinkAuthId *chan, const char *myMac, const char *myIp)
 {
     char *buf = NULL;
     int32_t ret;
@@ -189,7 +189,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendHandshake(const P2pLinkAuthId *chan, const
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkSendDisConnect(const P2pLinkAuthId *chan, const char *myMac)
+int32_t P2pLinkSendDisConnect(const P2pLinkAuthId *chan, const char *myMac)
 {
 #define DISCONNECT_DELAY_100MS   100000
     char *buf = NULL;
@@ -213,7 +213,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendDisConnect(const P2pLinkAuthId *chan, cons
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkSendReuse(const P2pLinkAuthId *chan, const char *myMac)
+int32_t P2pLinkSendReuse(const P2pLinkAuthId *chan, const char *myMac)
 {
     char *buf = NULL;
     int32_t ret;
@@ -235,7 +235,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendReuse(const P2pLinkAuthId *chan, const cha
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkSendReuseResponse(const P2pLinkAuthId *chan, const char *myMac, int32_t res)
+int32_t P2pLinkSendReuseResponse(const P2pLinkAuthId *chan, const char *myMac, int32_t res)
 {
     char *buf = NULL;
     int32_t ret;
@@ -257,7 +257,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkSendReuseResponse(const P2pLinkAuthId *chan, c
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void P2pLinkHandleHandshake(int64_t authId, int32_t seq, const cJSON *root)
+void P2pLinkHandleHandshake(int64_t authId, int32_t seq, const cJSON *root)
 {
     char mac[P2P_MAC_LEN] = {0};
     char ip[P2P_IP_LEN] = {0};
@@ -278,7 +278,7 @@ NO_SANITIZE("cfi") void P2pLinkHandleHandshake(int64_t authId, int32_t seq, cons
     connedDev->chanId.p2pAuthIdState = P2PLINK_AUTHCHAN_FINISH;
 }
 
-NO_SANITIZE("cfi") void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
+void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, const cJSON *root)
 {
     char peerMac[P2P_MAC_LEN] = {0};
     int32_t respRet = 0;
@@ -328,7 +328,7 @@ NO_SANITIZE("cfi") void P2pLinkHandleReuseResponse(int64_t authId, int32_t seq, 
     P2pLinkDumpRef();
 }
 
-NO_SANITIZE("cfi") void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, const cJSON *root)
+void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, const cJSON *root)
 {
     char peerMac[P2P_MAC_LEN] = {0};
     int32_t respRet;
@@ -379,7 +379,7 @@ NO_SANITIZE("cfi") void P2pLinkHandleReuseRequest(int64_t authId, int32_t seq, c
         (void)P2pLinkSendReuseResponse(&linkAuthId, P2pLinkGetMyMac(), respRet);
     }
 }
-NO_SANITIZE("cfi") void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, const cJSON *root)
+void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, const cJSON *root)
 {
     P2pLinkRole myRole = P2pLinkGetRole();
     int32_t myRef = P2pLinkGetMyP2pRef();
@@ -416,7 +416,7 @@ NO_SANITIZE("cfi") void P2pLinkHandleDisconnectCmd(int64_t authId, int32_t seq, 
     CLOGI("handle disconnect ok");
 }
 
-NO_SANITIZE("cfi") void P2pLinkHandleWifiCfg(int64_t authId, int32_t seq, const cJSON *root)
+void P2pLinkHandleWifiCfg(int64_t authId, int32_t seq, const cJSON *root)
 {
     char wifiCfg[P2PLINK_WIFICFG_LEN] = {0};
     int32_t ret;
@@ -434,7 +434,7 @@ NO_SANITIZE("cfi") void P2pLinkHandleWifiCfg(int64_t authId, int32_t seq, const 
     }
 }
 
-NO_SANITIZE("cfi") void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLinkCmdType type, const cJSON *root)
+void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLinkCmdType type, const cJSON *root)
 {
     CLOGI("recv control msgtype %d", type);
     if (P2pLinkIsEnable() == false) {
@@ -462,7 +462,7 @@ NO_SANITIZE("cfi") void P2pLinkControlMsgProc(int64_t authId, int64_t seq, P2pLi
     }
 }
 
-NO_SANITIZE("cfi") void P2pLinkonAuthChannelClose(int64_t authId)
+void P2pLinkonAuthChannelClose(int64_t authId)
 {
     CLOGI("recv authid %" PRId64 " close", authId);
     P2pLinkDelConnedByAuthId(authId);

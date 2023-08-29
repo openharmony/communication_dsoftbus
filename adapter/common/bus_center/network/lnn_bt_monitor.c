@@ -117,7 +117,7 @@ int32_t LnnInitBtStateMonitorImpl(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitBtStateMonitorImpl(void)
+void LnnDeinitBtStateMonitorImpl(void)
 {
     (void)SoftBusRemoveBtStateListener(g_btStateListenerId);
 }

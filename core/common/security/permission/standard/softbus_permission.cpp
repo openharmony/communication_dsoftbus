@@ -42,7 +42,7 @@ namespace {
     const std::string SAMGR_PROCESS_NAME = "samgr";
 }
 
-NO_SANITIZE("cfi") int32_t TransPermissionInit(void)
+int32_t TransPermissionInit(void)
 {
     int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
     if (ret != SOFTBUS_OK) {
@@ -51,12 +51,12 @@ NO_SANITIZE("cfi") int32_t TransPermissionInit(void)
     return InitDynamicPermission();
 }
 
-NO_SANITIZE("cfi") void TransPermissionDeinit(void)
+void TransPermissionDeinit(void)
 {
     DeinitPermissionJson();
 }
 
-NO_SANITIZE("cfi") int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
+int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
 {
     using namespace AccessToken;
     if (callingUid == (pid_t)getuid() && callingPid == getpid()) {
@@ -79,7 +79,7 @@ NO_SANITIZE("cfi") int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
     return NORMAL_APP;
 }
 
-NO_SANITIZE("cfi") int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
+int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     const char *pkgName, const char *sessionName, uint32_t actions)
 {
     if (sessionName == nullptr || pkgName == nullptr) {
@@ -98,7 +98,7 @@ NO_SANITIZE("cfi") int32_t CheckTransPermission(pid_t callingUid, pid_t callingP
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-NO_SANITIZE("cfi") int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
+int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
 {
     if (mySessionName == nullptr || peerSessionName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -115,7 +115,7 @@ NO_SANITIZE("cfi") int32_t CheckTransSecLevel(const char *mySessionName, const c
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
+bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
 {
     std::string pkg = "";
     if (pkgName != nullptr) {
@@ -129,7 +129,7 @@ NO_SANITIZE("cfi") bool CheckDiscPermission(pid_t callingUid, const char *pkgNam
     return false;
 }
 
-NO_SANITIZE("cfi") bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
+bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
 {
     std::string pkg = "";
     if (pkgName != nullptr) {
@@ -143,17 +143,17 @@ NO_SANITIZE("cfi") bool CheckBusCenterPermission(pid_t callingUid, const char *p
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
+int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
 {
     return AddDynamicPermission(callingUid, callingPid, sessionName);
 }
 
-NO_SANITIZE("cfi") int32_t RemoveTransPermission(const char *sessionName)
+int32_t RemoveTransPermission(const char *sessionName)
 {
     return DeleteDynamicPermission(sessionName);
 }
 
-NO_SANITIZE("cfi") int32_t CheckDynamicPermission(void)
+int32_t CheckDynamicPermission(void)
 {
     uint32_t callingToken = OHOS::IPCSkeleton::GetCallingTokenID();
 

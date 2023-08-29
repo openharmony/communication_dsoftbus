@@ -25,7 +25,7 @@
 
 static TimerFunc g_timerfunc = NULL;
 
-NO_SANITIZE("cfi") static void HandleTimeoutAdapterFun(void)
+static void HandleTimeoutAdapterFun(void)
 {
     if (g_timerfunc != NULL) {
         g_timerfunc();

@@ -56,7 +56,7 @@ static LnnDiscoveryImplCallback g_discoveryCallback = {
     .OnDeviceFound = DeviceFound,
 };
 
-NO_SANITIZE("cfi") static void ReportDeviceFoundResultEvt(void)
+static void ReportDeviceFoundResultEvt(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report device found result evt enter");
     if (SoftBusRecordDiscoveryResult(DEVICE_FOUND, NULL) != SOFTBUS_OK) {
@@ -64,7 +64,7 @@ NO_SANITIZE("cfi") static void ReportDeviceFoundResultEvt(void)
     }
 }
 
-NO_SANITIZE("cfi") static void DeviceFound(const ConnectionAddr *addr)
+static void DeviceFound(const ConnectionAddr *addr)
 {
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device addr is null\n");
@@ -76,7 +76,7 @@ NO_SANITIZE("cfi") static void DeviceFound(const ConnectionAddr *addr)
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitDiscoveryManager(void)
+int32_t LnnInitDiscoveryManager(void)
 {
     uint32_t i;
 
@@ -92,7 +92,7 @@ NO_SANITIZE("cfi") int32_t LnnInitDiscoveryManager(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartPublish(void)
+int32_t LnnStartPublish(void)
 {
     uint32_t i;
 
@@ -109,7 +109,7 @@ NO_SANITIZE("cfi") int32_t LnnStartPublish(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnStopPublish(void)
+void LnnStopPublish(void)
 {
     uint32_t i;
 
@@ -124,7 +124,7 @@ NO_SANITIZE("cfi") void LnnStopPublish(void)
     }
 }
 
-NO_SANITIZE("cfi") static void ReportStartDiscoveryResultEvt(void)
+static void ReportStartDiscoveryResultEvt(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report start discovery result evt enter");
     if (SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL) != SOFTBUS_OK) {
@@ -132,7 +132,7 @@ NO_SANITIZE("cfi") static void ReportStartDiscoveryResultEvt(void)
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartDiscovery(void)
+int32_t LnnStartDiscovery(void)
 {
     uint32_t i;
 
@@ -150,7 +150,7 @@ NO_SANITIZE("cfi") int32_t LnnStartDiscovery(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnStopDiscovery(void)
+void LnnStopDiscovery(void)
 {
     uint32_t i;
 

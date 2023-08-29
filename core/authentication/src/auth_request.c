@@ -64,7 +64,7 @@ static uint32_t GetAuthRequestWaitNum(AuthRequest *request)
     return num;
 }
 
-NO_SANITIZE("cfi") uint32_t AddAuthRequest(const AuthRequest *request)
+uint32_t AddAuthRequest(const AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(request, 0);
     AuthRequest *newRequest = SoftBusCalloc(sizeof(AuthRequest));
@@ -83,7 +83,7 @@ NO_SANITIZE("cfi") uint32_t AddAuthRequest(const AuthRequest *request)
     return waitNum;
 }
 
-NO_SANITIZE("cfi") int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
+int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
     if (!RequireAuthLock()) {
@@ -99,7 +99,7 @@ NO_SANITIZE("cfi") int32_t GetAuthRequest(uint32_t requestId, AuthRequest *reque
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request)
+int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
     AuthRequest *item = FindAuthRequestByRequestId(requestId);
@@ -110,7 +110,7 @@ NO_SANITIZE("cfi") int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request)
+int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(request, SOFTBUS_INVALID_PARAM);
@@ -131,7 +131,7 @@ NO_SANITIZE("cfi") int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInf
     return SOFTBUS_NOT_FIND;
 }
 
-NO_SANITIZE("cfi") int32_t FindAndDelAuthRequestByConnInfo(uint32_t requestId, const AuthConnInfo *connInfo)
+int32_t FindAndDelAuthRequestByConnInfo(uint32_t requestId, const AuthConnInfo *connInfo)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     if (!RequireAuthLock()) {
@@ -160,7 +160,7 @@ NO_SANITIZE("cfi") int32_t FindAndDelAuthRequestByConnInfo(uint32_t requestId, c
     return SOFTBUS_NOT_FIND;
 }
 
-NO_SANITIZE("cfi") void DelAuthRequest(uint32_t requestId)
+void DelAuthRequest(uint32_t requestId)
 {
     if (!RequireAuthLock()) {
         return;
@@ -176,7 +176,7 @@ NO_SANITIZE("cfi") void DelAuthRequest(uint32_t requestId)
     ReleaseAuthLock();
 }
 
-NO_SANITIZE("cfi") void ClearAuthRequest(void)
+void ClearAuthRequest(void)
 {
     if (!RequireAuthLock()) {
         return;
@@ -191,7 +191,7 @@ NO_SANITIZE("cfi") void ClearAuthRequest(void)
     ReleaseAuthLock();
 }
 
-NO_SANITIZE("cfi") bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
+bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
 {
     if (verifyCb == NULL) {
         return false;
@@ -202,7 +202,7 @@ NO_SANITIZE("cfi") bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb)
     return true;
 }
 
-NO_SANITIZE("cfi") bool CheckAuthConnCallback(const AuthConnCallback *connCb)
+bool CheckAuthConnCallback(const AuthConnCallback *connCb)
 {
     if (connCb == NULL) {
         return false;
@@ -229,7 +229,7 @@ void PerformVerifyCallback(uint32_t requestId, int32_t result, int64_t authId, c
     }
 }
 
-NO_SANITIZE("cfi") void PerformAuthConnCallback(uint32_t requestId, int32_t result, int64_t authId)
+void PerformAuthConnCallback(uint32_t requestId, int32_t result, int64_t authId)
 {
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {

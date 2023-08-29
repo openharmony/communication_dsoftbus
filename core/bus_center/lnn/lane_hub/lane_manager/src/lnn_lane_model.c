@@ -61,7 +61,7 @@ static void ModelUnlock(void)
  * |  LinkType |TxType |  Pri  |              Reserved             |
  * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  */
-NO_SANITIZE("cfi") uint32_t GenerateLaneProfileId(const LaneGenerateParam *param)
+uint32_t GenerateLaneProfileId(const LaneGenerateParam *param)
 {
     uint32_t laneProfileId = 0;
     laneProfileId |= ((param->linkType << LINK_TYPE_SHIFT) |
@@ -136,7 +136,7 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
+int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
 {
     if (profile == NULL) {
         return SOFTBUS_ERR;
@@ -153,7 +153,7 @@ NO_SANITIZE("cfi") int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *pro
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
+void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
 {
     if (ModelLock() != SOFTBUS_OK) {
         return;
@@ -170,7 +170,7 @@ NO_SANITIZE("cfi") void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profil
     ModelUnlock();
 }
 
-NO_SANITIZE("cfi") int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
+int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
 {
     if (profile == NULL) {
         return SOFTBUS_ERR;
@@ -192,7 +192,7 @@ NO_SANITIZE("cfi") int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profi
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listSize)
+int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listSize)
 {
     if (ModelLock() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -225,7 +225,7 @@ NO_SANITIZE("cfi") int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdLi
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") uint32_t GetActiveProfileNum(void)
+uint32_t GetActiveProfileNum(void)
 {
     uint32_t num = 0;
     if (ModelLock() != SOFTBUS_OK) {
@@ -236,7 +236,7 @@ NO_SANITIZE("cfi") uint32_t GetActiveProfileNum(void)
     return num;
 }
 
-NO_SANITIZE("cfi") int32_t InitLaneModel(void)
+int32_t InitLaneModel(void)
 {
     LnnMapInit(&g_profileMap);
     if (SoftBusMutexInit(&g_laneModelMutex, NULL) != SOFTBUS_OK) {
@@ -271,7 +271,7 @@ static void ClearProfileMap(void)
     LnnMapDelete(&g_profileMap);
 }
 
-NO_SANITIZE("cfi") void DeinitLaneModel(void)
+void DeinitLaneModel(void)
 {
     ClearProfileMap();
     (void)SoftBusMutexDestroy(&g_laneModelMutex);

@@ -183,7 +183,7 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t DelPendingPacket(int32_t channelId, int type)
+int32_t DelPendingPacket(int32_t channelId, int type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
         return SOFTBUS_ERR;

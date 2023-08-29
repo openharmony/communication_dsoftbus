@@ -16,7 +16,7 @@
 #include "adapter_bt_utils.h"
 #include "softbus_def.h"
 
-NO_SANITIZE("cfi") int32_t BleOhosStatusToSoftBus(BtStatus btStatus)
+int32_t BleOhosStatusToSoftBus(BtStatus btStatus)
 {
     int32_t status;
     switch (btStatus) {

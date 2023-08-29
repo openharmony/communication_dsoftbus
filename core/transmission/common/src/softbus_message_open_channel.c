@@ -27,7 +27,7 @@
 
 static int32_t g_tdcPktHeadSeq = 1024;
 
-NO_SANITIZE("cfi") char *PackError(int errCode, const char *errDesc)
+char *PackError(int errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);
@@ -264,7 +264,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") char *PackReply(const AppInfo *appInfo)
+char *PackReply(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s]invalid param", __func__);

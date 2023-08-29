@@ -46,7 +46,7 @@ typedef struct {
 
 static SoftBusList *g_reqLanePendingList = NULL;
 
-NO_SANITIZE("cfi") int32_t TransReqLanePendingInit(void)
+int32_t TransReqLanePendingInit(void)
 {
     g_reqLanePendingList = CreateSoftBusList();
     if (g_reqLanePendingList == NULL) {
@@ -56,7 +56,7 @@ NO_SANITIZE("cfi") int32_t TransReqLanePendingInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransReqLanePendingDeinit(void)
+void TransReqLanePendingDeinit(void)
 {
     if (g_reqLanePendingList == NULL) {
         return;
@@ -254,7 +254,7 @@ static LaneTransType GetStreamLaneType(int32_t streamType)
     return LANE_T_BUTT;
 }
 
-NO_SANITIZE("cfi") LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param)
+LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param)
 {
     if (param == NULL) {
         return LANE_T_BUTT;
@@ -449,7 +449,7 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneId, const LaneReq
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
+int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
     uint32_t *laneId)
 {
     if ((requestOption == NULL) || (connInfo == NULL) || (laneId == NULL)) {
@@ -485,7 +485,7 @@ NO_SANITIZE("cfi") int32_t TransGetLaneInfoByOption(const LaneRequestOption *req
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneId)
+int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneId)
 {
     if ((param == NULL) || (connInfo == NULL) || (laneId == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get lane info param error.");
@@ -593,7 +593,7 @@ static int32_t SetBleDirectConnInfo(const BleDirectConnInfo* bleDirect, ConnectO
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
+int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
     if (info == NULL || connOpt == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
@@ -617,7 +617,7 @@ NO_SANITIZE("cfi") int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
+bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
 {
     int32_t value = 0;
     int32_t ret = LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_NODE, &value);

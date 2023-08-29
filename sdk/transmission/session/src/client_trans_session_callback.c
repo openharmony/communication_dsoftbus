@@ -89,7 +89,7 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
     if ((sessionName == NULL) || (channel == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid param");
@@ -129,7 +129,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionOpenFailed: channelId=%d, channelType=%d",
         channelId, channelType);
@@ -146,7 +146,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
+int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnSessionClosed: channelId=%d, channelType=%d",
         channelId, channelType);
@@ -185,7 +185,7 @@ static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, con
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
+int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
     const void *data, uint32_t len, SessionPktType type)
 {
     int32_t sessionId;
@@ -228,7 +228,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
+int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     int32_t sessionId;
@@ -246,7 +246,7 @@ NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t ch
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
+int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
     const QosTv *tvList)
 {
     int32_t sessionId;

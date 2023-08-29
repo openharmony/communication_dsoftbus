@@ -33,7 +33,7 @@ static bool IsExistState(const FsmStateMachine *fsm, const FsmState *state)
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkFsmInit(FsmStateMachine *fsm)
+int32_t P2pLinkFsmInit(FsmStateMachine *fsm)
 {
     if (fsm == NULL) {
         CLOGE("invalid param");
@@ -45,7 +45,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkFsmInit(FsmStateMachine *fsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmDeinit(FsmStateMachine *fsm)
+void P2pLinkFsmDeinit(FsmStateMachine *fsm)
 {
     if (fsm == NULL) {
         CLOGD("fsm already deinit.");
@@ -58,7 +58,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmDeinit(FsmStateMachine *fsm)
     fsm->currentState = NULL;
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmAddState(FsmStateMachine *fsm, FsmState *state)
+void P2pLinkFsmAddState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || state == NULL) {
         CLOGE("invalid param");
@@ -73,7 +73,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmAddState(FsmStateMachine *fsm, FsmState *state
     ListAdd(&fsm->stateList, &state->node);
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmStart(FsmStateMachine *fsm, FsmState *initialState)
+void P2pLinkFsmStart(FsmStateMachine *fsm, FsmState *initialState)
 {
     if (fsm->currentState != NULL) {
         CLOGE("unexpected state in start msg process");
@@ -87,7 +87,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmStart(FsmStateMachine *fsm, FsmState *initialS
     }
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmStop(FsmStateMachine *fsm)
+void P2pLinkFsmStop(FsmStateMachine *fsm)
 {
     if (fsm->currentState == NULL) {
         CLOGE("unexpected state in stop msg process");
@@ -96,7 +96,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmStop(FsmStateMachine *fsm)
     fsm->currentState = NULL;
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *state)
+void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *state)
 {
     if (fsm == NULL || state == NULL) {
         CLOGE("invalid param");
@@ -122,7 +122,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmTransactState(FsmStateMachine *fsm, FsmState *
     }
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t msgType, void *param)
+void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t msgType, void *param)
 {
     if (fsm->currentState == NULL) {
         CLOGE("current state is null");
@@ -133,7 +133,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmMsgProc(const FsmStateMachine *fsm, int32_t ms
     }
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32_t msgType, void *param,
+void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32_t msgType, void *param,
     uint64_t delayMs)
 {
     if (fsm->currentState == NULL) {
@@ -147,7 +147,7 @@ NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelay(const FsmStateMachine *fsm, int32
     (void)P2pLoopProcDelay(fsm->currentState->process, param, delayMs, msgType);
 }
 
-NO_SANITIZE("cfi") void P2pLinkFsmMsgProcDelayDel(int32_t msgType)
+void P2pLinkFsmMsgProcDelayDel(int32_t msgType)
 {
     CLOGI("delete delay msg type %d", msgType);
     (void)P2pLoopProcDelayDel(NULL, msgType);
