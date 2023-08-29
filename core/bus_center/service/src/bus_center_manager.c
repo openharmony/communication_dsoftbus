@@ -19,6 +19,7 @@
 #include <stdlib.h>
 
 #include "bus_center_event.h"
+#include "bus_center_decision_center.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
@@ -206,6 +207,10 @@ NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start delay init fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init bus center decision center fail!");
+        return SOFTBUS_ERR;
+    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
     return SOFTBUS_OK;
 }
@@ -221,6 +226,7 @@ NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
     LnnDeinitBusCenterEvent();
     DeinitNodeAddrAllocator();
     LnnDeinitDecisionCenter();
+    DeinitDecisionCenter();
     LnnDeinitNetLedger();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

@@ -21,7 +21,10 @@ group("unittest") {
     "manager:ConnectionManagerTest",
   ]
   if (support_bluetooth && dsoftbus_feature_conn_br) {
-    deps += [ "br:ConnectionBrTest" ]
+    deps += [
+      "br:BrConnTest",
+      "br:ConnectionBrTest",
+    ]
   }
   if (support_bluetooth && dsoftbus_feature_conn_ble) {
     deps += [

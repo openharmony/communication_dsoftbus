@@ -77,7 +77,7 @@ static JoinLnnRequestInfo *FindJoinLNNRequest(ConnectionAddr *addr)
     SoftBusList *list = g_lnnRequestInfo.joinLNNRequestInfo;
 
     LIST_FOR_EACH_ENTRY(info, &list->list, JoinLnnRequestInfo, node) {
-        if (LnnIsSameConnectionAddr(addr, &info->addr)) {
+        if (LnnIsSameConnectionAddr(addr, &info->addr, false)) {
             return info;
         }
     }
@@ -106,7 +106,7 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, const ConnectionAddr *ad
         if (strncmp(pkgName, info->pkgName, strlen(pkgName)) != 0) {
             continue;
         }
-        if (LnnIsSameConnectionAddr(addr, &info->addr)) {
+        if (LnnIsSameConnectionAddr(addr, &info->addr, false)) {
             return true;
         }
     }

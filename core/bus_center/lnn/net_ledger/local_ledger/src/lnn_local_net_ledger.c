@@ -27,6 +27,7 @@
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
+#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -50,13 +51,15 @@ typedef struct {
 
 static LocalNetLedger g_localNetLedger;
 
-static void UpDateStateVersionAndStore()
+static void UpdateStateVersionAndStore()
 {
     int32_t ret;
     g_localNetLedger.localInfo.stateVersion++;
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
         g_localNetLedger.localInfo.stateVersion = 0;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "local state version changed to:",
+        g_localNetLedger.localInfo.stateVersion);
     if ((ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update local store fail!");
     }
@@ -266,6 +269,46 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
     }
     if (strncpy_s(buf, len, deviceName, strlen(deviceName)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetUnifiedName(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strncpy_s(buf, len, info->deviceInfo.unifiedName, strlen(info->deviceInfo.unifiedName)) != EOK) {
+        LLOGE("strcpy err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetUnifiedDefaultName(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strncpy_s(buf, len, info->deviceInfo.unifiedDefaultName,
+        strlen(info->deviceInfo.unifiedDefaultName)) != EOK) {
+        LLOGE("strcpy err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetNickName(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strncpy_s(buf, len, info->deviceInfo.nickName, strlen(info->deviceInfo.nickName)) != EOK) {
+        LLOGE("strcpy err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -614,6 +657,17 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVNAME failed");
         return SOFTBUS_ERR;
     }
+    if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        LLOGE("get unifiedName fail");
+    }
+    if (LnnGetUnifiedDefaultDeviceName(info->unifiedDefaultName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        LLOGE("get unifiedDefaultName fail");
+    }
+    LLOGD("info->unifiedDefaultName:%s", info->unifiedDefaultName);
+    if (LnnGetSettingNickName(info->unifiedDefaultName, info->unifiedName,
+        info->nickName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        LLOGE("get nick name fail");
+    }
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, devType, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVTYPE failed");
         return SOFTBUS_ERR;
@@ -698,7 +752,54 @@ static int32_t UpdateLocalDeviceName(const void *name)
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set device name fail.");
             return SOFTBUS_ERR;
         }
-        UpDateStateVersionAndStore();
+        UpdateStateVersionAndStore();
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateUnifiedName(const void *name)
+{
+    if (name == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *beforeName = g_localNetLedger.localInfo.deviceInfo.unifiedName;
+    if (strcmp(beforeName, name) != 0) {
+        if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedName,
+            DEVICE_NAME_BUF_LEN, name) != EOK) {
+            return SOFTBUS_ERR;
+        }
+        UpdateStateVersionAndStore();
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateUnifiedDefaultName(const void *name)
+{
+    if (name == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *beforeName = g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName;
+    if (strcmp(beforeName, name) != 0) {
+        if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName,
+            DEVICE_NAME_BUF_LEN, name) != EOK) {
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateNickName(const void *name)
+{
+    if (name == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *beforeName = g_localNetLedger.localInfo.deviceInfo.nickName;
+    if (strcmp(beforeName, name) != 0) {
+        if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.nickName,
+            DEVICE_NAME_BUF_LEN, name) != EOK) {
+            return SOFTBUS_ERR;
+        }
+        UpdateStateVersionAndStore();
     }
     return SOFTBUS_OK;
 }
@@ -708,7 +809,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
     if (ModifyId(g_localNetLedger.localInfo.networkId, NETWORK_ID_BUF_LEN, (char *)id) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    UpDateStateVersionAndStore();
+    UpdateStateVersionAndStore();
     return SOFTBUS_OK;
 }
 
@@ -940,7 +1041,7 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
 
 void LnnUpdateStateVersion()
 {
-    return UpDateStateVersionAndStore();
+    return UpdateStateVersionAndStore();
 }
 
 static LocalLedgerKey g_localKeyTable[] = {
@@ -950,6 +1051,9 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_UUID, UUID_BUF_LEN, LlGetUuid, UpdateLocalUuid},
     {STRING_KEY_DEV_TYPE, DEVICE_TYPE_BUF_LEN, LlGetDeviceType, UpdateLocalDeviceType},
     {STRING_KEY_DEV_NAME, DEVICE_NAME_BUF_LEN, LlGetDeviceName, UpdateLocalDeviceName},
+    {STRING_KEY_DEV_UNIFIED_NAME, DEVICE_NAME_BUF_LEN, LlGetUnifiedName, UpdateUnifiedName},
+    {STRING_KEY_DEV_UNIFIED_DEFAULT_NAME, DEVICE_NAME_BUF_LEN, LlGetUnifiedDefaultName, UpdateUnifiedDefaultName},
+    {STRING_KEY_DEV_NICK_NAME, DEVICE_NAME_BUF_LEN, LlGetNickName, UpdateNickName},
     {STRING_KEY_BT_MAC, MAC_LEN, LlGetBtMac, UpdateLocalBtMac},
     {STRING_KEY_WLAN_IP, IP_LEN, LlGetWlanIp, UpdateLocalDeviceIp},
     {STRING_KEY_NET_IF_NAME, NET_IF_NAME_LEN, LlGetNetIfName, UpdateLocalNetIfName},
@@ -1043,6 +1147,24 @@ NO_SANITIZE("cfi") static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint3
 static bool JudgeString(const char *info, int32_t len)
 {
     return (len <= 0) ? false : IsValidString(info, (uint32_t)len);
+}
+
+int32_t LnnSetLocalUnifiedName(const char *unifiedName)
+{
+    if (unifiedName == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedName,
+        DEVICE_NAME_BUF_LEN, unifiedName) != EOK) {
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)

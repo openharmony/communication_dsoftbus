@@ -44,7 +44,7 @@ static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
 
 static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info);
-static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason);
+static void OnLaneRequestFail(uint32_t laneId, int32_t errCode);
 static void OnLaneStateChange(uint32_t laneId, LaneState state);
 static ILaneListener g_listener = {
     .OnLaneRequestSuccess = OnLaneRequestSuccess,
@@ -71,8 +71,8 @@ void LNNLaneMockTest::SetUpTestCase()
 
 void LNNLaneMockTest::TearDownTestCase()
 {
-    LaneDepsInterfaceMock linkMock;
-    EXPECT_CALL(linkMock, LnnDestoryP2p).WillRepeatedly(Return());
+    LnnWifiAdpterInterfaceMock wifiMock;
+    EXPECT_CALL(wifiMock, LnnDestroyP2p).WillRepeatedly(Return());
     DeinitLane();
     LooperDeinit();
     GTEST_LOG_(INFO) << "LNNLaneMockTest end";
@@ -121,7 +121,7 @@ static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
     CondSignal();
 }
 
-static void OnLaneRequestFail(uint32_t laneId, LaneRequestFailReason reason)
+static void OnLaneRequestFail(uint32_t laneId, int32_t errCode)
 {
     int32_t ret = LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -565,6 +565,17 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
+    LnnWifiAdpterInterfaceMock wifiMock;
+    LaneDepsInterfaceMock mock;
+    EXPECT_CALL(wifiMock, LnnConnectP2p)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
     cb.OnLaneLinkException = nullptr;
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -588,9 +599,99 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     DestroyLink(NODE_NETWORK_ID, 0, LANE_BLE, 0);
-    LaneDepsInterfaceMock linkMock;
-    EXPECT_CALL(linkMock, LnnDestoryP2p).WillRepeatedly(Return());
+    
+    EXPECT_CALL(wifiMock, LnnDestroyP2p).WillRepeatedly(Return());
     DestroyLink(NODE_NETWORK_ID, 0, LANE_P2P, 0);
     DestroyLink(nullptr, 0, LANE_P2P, 0);
+}
+
+/*
+* @tc.name: LNN_BUILD_LINK_002
+* @tc.desc: BUILDLINK
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
+{
+    LinkRequest reqInfo;
+    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    reqInfo.linkType = LANE_P2P;
+    LaneLinkCb cb = {
+        .OnLaneLinkSuccess = OnLaneLinkSuccess,
+        .OnLaneLinkFail = OnLaneLinkFail,
+        .OnLaneLinkException = OnLaneLinkException,
+    };
+    int32_t ret;
+    LnnWifiAdpterInterfaceMock wifiMock;
+    LaneDepsInterfaceMock mock;
+    const char *udid = "testuuid";
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(NULL));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(wifiMock, LnnConnectP2p)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: LNN_BUILD_LINK_003
+* @tc.desc: BUILDLINK
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
+{
+    LinkRequest reqInfo;
+    (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    reqInfo.linkType = LANE_P2P;
+    LaneLinkCb cb = {
+        .OnLaneLinkSuccess = OnLaneLinkSuccess,
+        .OnLaneLinkFail = OnLaneLinkFail,
+        .OnLaneLinkException = OnLaneLinkException,
+    };
+    int32_t ret;
+    LnnWifiAdpterInterfaceMock wifiMock;
+    LaneDepsInterfaceMock mock;
+    
+    ConnBleConnection *connection = (ConnBleConnection*)SoftBusCalloc(sizeof(ConnBleConnection));
+    if (connection == NULL) {
+        return;
+    }
+    const char *udid = "testuuid";
+    NodeInfo *nodeInfo = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
+    if (nodeInfo == NULL) {
+        return;
+    }
+    connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(connection));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(wifiMock, LnnConnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nodeInfo));
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    SoftBusFree(connection);
+    SoftBusFree(nodeInfo);
+}
+
+/*
+* @tc.name: LANE_ADD_P2P_ADDRESS_TEST_001
+* @tc.desc: LANE ADD P2P ADDRESS TEST
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ADD_P2P_ADDRESS_TEST_001, TestSize.Level1)
+{
+    const char *networkId = "testnetworkid123";
+    const char *ipAddr = "127.0.0.1";
+    uint16_t port = 1022;
+    LaneAddP2pAddress(networkId, ipAddr, port);
+    LaneAddP2pAddressByIp(ipAddr, port);
+    LaneUpdateP2pAddressByIp(ipAddr, networkId);
 }
 } // namespace OHOS

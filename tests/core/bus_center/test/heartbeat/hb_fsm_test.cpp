@@ -367,19 +367,20 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
     LnnNetLedgertInterfaceMock lnnNetLedgerMock;
     ON_CALL(heartbeatFsmMock, LnnRequestLeaveSpecific).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(distriLedgerMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(distriLedgerMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, CheckActiveConnection).WillRepeatedly(Return(true));
     EXPECT_CALL(heartbeatFsmMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_ERR));
-    int32_t ret = ProcessLostHeartbeat(nullptr, CONNECTION_ADDR_BLE);
+    int32_t ret = ProcessLostHeartbeat(nullptr, CONNECTION_ADDR_BLE, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(distriLedgerMock, LnnGetOnlineStateById).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnNetLedgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BR);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BR, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_ETH);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_ETH, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusSleepMs(20);
 }
@@ -436,16 +437,17 @@ HWTEST_F(HeartBeatFSMTest, CheckDevStatusByNetworkIdTest_01, TestSize.Level1)
     EXPECT_CALL(heartbeatFsmMock, LnnStopOfflineTimingStrategy)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
+    LnnCheckDevStatusMsgPara msgPara = { .hbType = HEARTBEAT_TYPE_BLE_V0 };
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
     EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<1>(oldTimeStamp), Return(SOFTBUS_OK)));
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME3);
-    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME3);
+    CheckDevStatusByNetworkId(hbFsm, TEST_NETWORK_ID, &msgPara, TEST_TIME1);
     SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
@@ -800,5 +802,87 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_01, TestSize.Level1)
     LnnRemoveScreenOffCheckStatusMsg(&hbFsm, nullptr);
     LnnRemoveScreenOffCheckStatusMsg(&hbFsm, &msgParas);
     ReportSendBroadcastResultEvt();
+}
+
+/*
+ * @tc.name: DeinitHbFsmCallback_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, DeinitHbFsmCallback_01, TestSize.Level1)
+{
+    FsmStateMachine fsm = {};
+    DeinitHbFsmCallback(&fsm);
+}
+
+/*
+ * @tc.name: LnnPostSendBeginMsgToHbFsm_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_01, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = {};
+    LnnProcessSendOnceMsgPara msgParas = {};
+    int32_t ret = LnnPostSendBeginMsgToHbFsm(nullptr, 0, true, &msgParas, 0);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    msgParas.isRelay = true;
+    msgParas.isSyncData = true;
+    ret = LnnPostSendBeginMsgToHbFsm(&hbFsm, 0, true, &msgParas, 0);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: LnnPostTransStateMsgToHbFsm_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostTransStateMsgToHbFsm_01, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = {};
+    int32_t ret = LnnPostTransStateMsgToHbFsm(&hbFsm, EVENT_HB_STOP_SPECIFIC);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnPostTransStateMsgToHbFsm(&hbFsm, EVENT_HB_AS_NORMAL_NODE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnPostTransStateMsgToHbFsm(&hbFsm, EVENT_HB_IN_NONE_STATE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnPostScreenOffCheckDevMsgToHbFsm_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_01, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = {};
+    LnnCheckDevStatusMsgPara para = {};
+    int32_t ret = LnnPostScreenOffCheckDevMsgToHbFsm(nullptr, &para, 0);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnPostScreenOffCheckDevMsgToHbFsm(&hbFsm, nullptr, 0);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnPostUpdateSendInfoMsgToHbFsm_01
+ * @tc.desc: check heartbeat fsm state message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostUpdateSendInfoMsgToHbFsm_01, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = {};
+    int32_t ret = LnnPostUpdateSendInfoMsgToHbFsm(nullptr, UPDATE_HB_INFO_MIN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    LnnPostUpdateSendInfoMsgToHbFsm(&hbFsm, UPDATE_HB_INFO_MIN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    LnnPostUpdateSendInfoMsgToHbFsm(&hbFsm, UPDATE_HB_MAX_INFO);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    LnnPostUpdateSendInfoMsgToHbFsm(&hbFsm, UPDATE_HB_NETWORK_INFO);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

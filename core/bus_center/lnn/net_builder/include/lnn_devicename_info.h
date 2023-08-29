@@ -25,6 +25,7 @@ extern "C" {
 
 void UpdateDeviceName(void *p);
 int32_t LnnInitDevicename(void);
+void LnnDeinitDevicename(void);
 
 #ifdef __cplusplus
 }

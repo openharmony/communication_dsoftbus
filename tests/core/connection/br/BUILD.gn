@@ -31,12 +31,40 @@ config("softbus_connection_br_test_config") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$softbus_adapter_common/net/bluetooth/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/softbus_property",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
+  ]
+}
+
+ohos_unittest("BrConnTest") {
+  module_out_path = module_output_path
+  public_configs = [ ":softbus_connection_br_test_config" ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+  sources = [
+    "connection_br_connection_test.cpp",
+    "connection_br_mock.cpp",
   ]
 }
 

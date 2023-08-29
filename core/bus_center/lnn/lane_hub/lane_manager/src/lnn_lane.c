@@ -285,7 +285,6 @@ NO_SANITIZE("cfi") int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOpti
     result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
     if (result != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "alloc lane fail, result:%d", result);
-        DestroyLaneId(laneId);
         return SOFTBUS_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "request lane success, lane:%u", laneId);

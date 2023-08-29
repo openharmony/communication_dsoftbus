@@ -43,6 +43,7 @@ extern "C" {
 #define HB_OFFLINE_TIME (5 * 60 * HB_TIME_FACTOR + 2 * HB_SEND_ONCE_LEN)
 #define HB_SCREEN_ON_COAP_TIME (3 * HB_TIME_FACTOR)
 #define HB_RESTART_LEN (3 * HB_TIME_FACTOR)
+#define HB_PERIOD_DUMP_LOCAL_INFO_LEN (5 * 60 * HB_TIME_FACTOR)
 #define HB_OFFLINE_PERIOD 2
 
 #define HB_SEND_EACH_SEPARATELY_LEN (2 * HB_TIME_FACTOR) // Split and send a single heartbeat
@@ -115,8 +116,10 @@ ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type);
 int32_t LnnConvertHbTypeToId(LnnHeartbeatType type);
 bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType);
 bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType);
+int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len);
 int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len);
 int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen);
+void LnnDumpLocalBasicInfo(void);
 
 #ifdef __cplusplus
 }

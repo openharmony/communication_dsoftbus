@@ -19,6 +19,7 @@
 #include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "wifi_direct_types.h"
 #include "data/link_manager.h"
 #include "utils/wifi_direct_ipv4_info.h"
@@ -313,6 +314,34 @@ static void DumpLinkId(struct InnerLink *self)
     }
 }
 
+static void SetState(struct InnerLink *self, enum InnerLinkState newState)
+{
+    enum InnerLinkState oldState = self->getInt(self, IL_KEY_STATE, INNER_LINK_STATE_INVALID);
+    if (oldState != newState) {
+        uint64_t changeTime = SoftBusGetSysTimeMs();
+        self->putRawData(self, IL_KEY_STATE_CHANGE_TIME, &changeTime, sizeof(changeTime));
+        self->putInt(self, IL_KEY_STATE, newState);
+    }
+}
+
+#define PROTECT_DURATION_MS 2000
+static bool IsProtected(struct InnerLink *self)
+{
+    enum InnerLinkState state = (enum InnerLinkState)self->getInt(self, IL_KEY_STATE, INNER_LINK_STATE_INVALID);
+    if (state != INNER_LINK_STATE_CONNECTED) {
+        CLOGI(LOG_LABEL "state=%d", state);
+        return false;
+    }
+
+    uint64_t currentTime = SoftBusGetSysTimeMs();
+    uint64_t *changeTime = self->getRawData(self, IL_KEY_STATE_CHANGE_TIME, NULL, NULL);
+    CLOGI(LOG_LABEL "changeTime=%zu curTime=%zu", *changeTime, currentTime);
+    if (currentTime && currentTime - PROTECT_DURATION_MS < *changeTime) {
+        return true;
+    }
+    return false;
+}
+
 /* private method implement */
 static size_t GetKeyFromKeyProperty(struct InfoContainerKeyProperty *keyProperty)
 {
@@ -363,6 +392,8 @@ void InnerLinkConstructor(struct InnerLink *self)
     self->removeId = RemoveId;
     self->containId = ContainId;
     self->dumpLinkId = DumpLinkId;
+    self->setState = SetState;
+    self->isProtected = IsProtected;
 }
 
 void InnerLinkConstructorWithArgs(struct InnerLink *self, enum WifiDirectConnectType type, bool isClient,

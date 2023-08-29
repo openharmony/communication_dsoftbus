@@ -370,6 +370,8 @@ static bool UnmarshallingLinkInfo(struct NegotiateMessage *self, struct WifiDire
 void NegotiateMessageConstructor(struct NegotiateMessage* self)
 {
     InfoContainerConstructor((struct InfoContainer *)self, NegotiateMessageKeyProperties, NM_KEY_MAX);
+    self->dumpFilter = false;
+
     /* virtual method */
     self->getKeySize = GetKeySize;
     self->getContainerName = GetContainerName;

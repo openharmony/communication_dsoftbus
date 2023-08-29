@@ -20,10 +20,12 @@
 
 #include "auth_hichain.h"
 #include "auth_hichain.c"
+#include "auth_hichain_adapter.h"
 #include "softbus_app_info.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 #include "softbus_socket.h"
+#include "auth_common_mock.h"
 
 namespace OHOS {
 using namespace testing;
@@ -119,5 +121,26 @@ HWTEST_F(AuthHichainTest, ON_REQUEST_TEST_001, TestSize.Level1)
 
     char *msgStr = OnRequest(authSeq, operationCode, reqParams);
     EXPECT_TRUE(msgStr == nullptr);
+}
+
+/*
+ * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_001
+ * @tc.desc: is potential trusted device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
+{
+    TrustedRelationIdType idType = ID_TYPE_UID;
+    const char *deviceId = "test123456";
+    bool isPrecise = false;
+    AuthCommonInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetTrustedDevInfoFromDb)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise);
+    EXPECT_TRUE(ret == false);
+    ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise);
+    EXPECT_TRUE(ret == false);
 }
 } // namespace OHOS

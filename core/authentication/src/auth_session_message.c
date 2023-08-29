@@ -21,6 +21,8 @@
 #include "auth_common.h"
 #include "auth_request.h"
 #include "auth_connection.h"
+#include "auth_device_common_key.h"
+#include "auth_hichain_adapter.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
@@ -30,6 +32,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_network_manager.h"
+#include "lnn_settingdata_event_monitor.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -38,8 +41,7 @@
 #include "softbus_json_utils.h"
 #include "lnn_compress.h"
 #include "softbus_adapter_json.h"
-#include "auth_device_common_key.h"
-#include "auth_hichain_adapter.h"
+#include "softbus_socket.h"
 
 /* DeviceId */
 #define CMD_TAG "TECmd"
@@ -51,6 +53,7 @@
 #define SOFTBUS_VERSION_TAG "softbusVersion"
 #define SUPPORT_INFO_COMPRESS "supportInfoCompress"
 #define EXCHANGE_ID_TYPE "exchangeIdType"
+#define DEV_IP_HASH_TAG "DevIpHash"
 #define CMD_TAG_LEN 30
 #define PACKET_SIZE (64 * 1024)
 
@@ -120,6 +123,7 @@
 #define STATE_VERSION "STATE_VERSION"
 #define BD_KEY "BD_KEY"
 #define IV "IV"
+#define SETTINGS_NICK_NAME "SETTINGS_NICK_NAME"
 #define UNIFIED_DISPLAY_DEVICE_NAME "UNIFIED_DISPLAY_DEVICE_NAME"
 #define UNIFIED_DEFAULT_DEVICE_NAME "UNIFIED_DEFAULT_DEVICE_NAME"
 #define UNIFIED_DEVICE_NAME "UNIFIED_DEVICE_NAME"
@@ -258,6 +262,7 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
         return (memcpy_s(udidBuf, bufLen, request.connInfo.info.bleInfo.deviceIdHash,
             UDID_SHORT_HASH_HEX_STR) == EOK);
     }
+    ALOGD("udid len:%d, connInfo type:%d", strlen(info->udid), info->connInfo.type);
     return false;
 }
 
@@ -265,12 +270,14 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
 {
     ALOGD("pack fastAuth, isServer:%d", info->isServer);
     bool isNeedPack;
-    if (!info->isServer) {
-        isNeedPack = true;
-    } else if (info->isSupportFastAuth) {
+    if (!info->isServer || info->isSupportFastAuth) {
         isNeedPack = true;
     } else {
         ALOGI("unsupport fastAuth");
+        isNeedPack = false;
+    }
+    if (isNeedPack && info->isNeedFastAuth == false) {
+        ALOGI("no need fastAuth");
         isNeedPack = false;
     }
     if (!isNeedPack) {
@@ -383,6 +390,29 @@ static void PackCompressInfo(JsonObj *obj, const NodeInfo *info)
     }
 }
 
+static void PackWifiSinglePassInfo(JsonObj *obj, const AuthSessionInfo *info)
+{
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
+        return;
+    }
+    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    char localIp[MAX_ADDR_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
+        ALOGE("get local ip fail");
+        return;
+    }
+    int32_t ret = SoftBusGenerateStrHash((const unsigned char *)localIp, strlen(localIp), hash);
+    if (ret != SOFTBUS_OK) {
+        return;
+    }
+    char devIpHash[SHA_256_HEX_HASH_LEN] = {0};
+    if (ConvertBytesToUpperCaseHexString(devIpHash, SHA_256_HEX_HASH_LEN,
+        hash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        return;
+    }
+    JSON_AddStringToObject(obj, DEV_IP_HASH_TAG, devIpHash);
+}
+
 static char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
     ALOGI("PackDeviceId: connType = %d.", info->connInfo.type);
@@ -400,6 +430,7 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
         JSON_Delete(obj);
         return NULL;
     }
+    PackWifiSinglePassInfo(obj, info);
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && !info->isServer) {
         if (!JSON_AddStringToObject(obj, CMD_TAG, CMD_GET_AUTH_INFO)) {
             ALOGE("add CMD_GET fail.");
@@ -442,6 +473,48 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
     char *msg = JSON_PrintUnformatted(obj);
     JSON_Delete(obj);
     return msg;
+}
+
+static bool UnpackWifiSinglePassInfo(JsonObj *obj, AuthSessionInfo *info)
+{
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
+        ALOGD("isn't wifi link, ignore");
+        return true;
+    }
+    char devIpHash[SHA_256_HEX_HASH_LEN] = {0};
+    if (!JSON_GetStringFromOject(obj, DEV_IP_HASH_TAG, devIpHash, SHA_256_HEX_HASH_LEN)) {
+        ALOGD("devIpHash hash not found, ignore");
+        return true;
+    }
+    // check devIpHash
+    int32_t socketFd = GetFd(info->connId);
+    SoftBusSockAddrIn addr = {0};
+    SocketAddr socketAddr;
+    int32_t rc = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&addr);
+    if (rc != 0) {
+        ALOGE("fd=%d, GetPerrName rc=%d", socketFd, rc);
+        return true;
+    }
+    (void)memset_s(&socketAddr, sizeof(socketAddr), 0, sizeof(socketAddr));
+    if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&addr.sinAddr, socketAddr.addr, sizeof(socketAddr.addr)) == NULL) {
+        ALOGE("fd=%d, GetPerrName rc=%d", socketFd, rc);
+        return true;
+    }
+    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    rc = SoftBusGenerateStrHash((const unsigned char *)socketAddr.addr, strlen(socketAddr.addr), hash);
+    if (rc != SOFTBUS_OK) {
+        return true;
+    }
+    char socketIpHash[SHA_256_HEX_HASH_LEN] = {0};
+    if (ConvertBytesToUpperCaseHexString(socketIpHash, SHA_256_HEX_HASH_LEN,
+        hash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        return true;
+    }
+    if (strcmp(devIpHash, socketIpHash) == 0) {
+        ALOGE("devIpHash is mismatch");
+        return true;
+    }
+    return false;
 }
 
 static int32_t UnPackBtDeviceIdV1(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
@@ -545,6 +618,10 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
         JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
+    if (!UnpackWifiSinglePassInfo(obj, info)) {
+        ALOGE("check ip fail, can't support auth");
+        return SOFTBUS_ERR;
+    }
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
         if (strncmp(cmd, CMD_GET_AUTH_INFO, strlen(CMD_GET_AUTH_INFO)) != 0) {
             ALOGE("CMD_GET not match.");
@@ -576,6 +653,7 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
     }
     if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
         // info->version = SOFTBUS_OLD_V2;
+        ALOGE("softbusVersion is not found");
     }
     if (SetExchangeIdTypeAndValve(obj, info) != SOFTBUS_OK) {
         ALOGE("set exchange id type or valve fail.");
@@ -596,7 +674,8 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
 static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
 {
     (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, info->deviceInfo.unifiedName);
-    (void)JSON_AddStringToObject(json, UNIFIED_DISPLAY_DEVICE_NAME, info->deviceInfo.displayName);
+    (void)JSON_AddStringToObject(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName);
+    (void)JSON_AddStringToObject(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName);
     if (!JSON_AddStringToObject(json, NETWORK_ID, info->networkId) ||
         !JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
@@ -715,7 +794,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptString(json, PKG_VERSION, info->pkgVersion, VERSION_MAX_LEN, "");
     OptString(json, UNIFIED_DEVICE_NAME, info->deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, "");
     OptString(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, "");
-    OptString(json, UNIFIED_DISPLAY_DEVICE_NAME, info->deviceInfo.displayName, DEVICE_NAME_BUF_LEN, "");
+    OptString(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName, DEVICE_NAME_BUF_LEN, "");
     OptInt64(json, WIFI_VERSION, &info->wifiVersion, 0);
     OptInt64(json, BLE_VERSION, &info->bleVersion, 0);
     OptString(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN, "");
@@ -1023,6 +1102,34 @@ char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMet
     return msg;
 }
 
+static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
+{
+    const NodeInfo *localInfo = LnnGetLocalNodeInfo();
+    if (localInfo == NULL) {
+        ALOGE("localInfo is null");
+        return;
+    }
+    int32_t ret = EOK;
+    char deviceName[DEVICE_NAME_BUF_LEN] = {0};
+    if (strlen(peerNodeInfo->deviceInfo.unifiedName) != 0 &&
+        strcmp(peerNodeInfo->deviceInfo.unifiedName, peerNodeInfo->deviceInfo.unifiedDefaultName) != 0) {
+        ret = strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, peerNodeInfo->deviceInfo.unifiedName);
+    } else if (strlen(peerNodeInfo->deviceInfo.nickName) == 0 ||
+        localInfo->accountId == peerNodeInfo->accountId) {
+        ret = strcpy_s(deviceName, DEVICE_NAME_BUF_LEN, peerNodeInfo->deviceInfo.unifiedDefaultName);
+    } else {
+        LnnGetDeviceDisplayName(peerNodeInfo->deviceInfo.nickName,
+            peerNodeInfo->deviceInfo.unifiedDefaultName, deviceName, DEVICE_NAME_BUF_LEN);
+    }
+    if (strlen(deviceName) != 0) {
+        ret = strcpy_s(peerNodeInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, deviceName);
+    }
+    LLOGD("peer deviceName:%s", peerNodeInfo->deviceInfo.deviceName);
+    if (ret != EOK) {
+        ALOGW("strcpy_s fail, use default name");
+    }
+}
+
 int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth)
 {
     CHECK_NULL_PTR_RETURN_VALUE(devInfo, SOFTBUS_INVALID_PARAM);
@@ -1042,6 +1149,13 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
         ret = UnpackBt(json, nodeInfo, devInfo->version, isMetaAuth);
     }
     JSON_Delete(json);
+    int32_t stateVersion;
+    if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK) {
+        nodeInfo->localStateVersion = stateVersion;
+    }
+    if (IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_UNIFORM_NAME_CAPABILITY)) {
+        UpdatePeerDeviceName(nodeInfo);
+    }
     return ret;
 }
 

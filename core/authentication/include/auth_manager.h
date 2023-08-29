@@ -39,6 +39,7 @@ typedef struct {
     AuthConnInfo connInfo;
     uint64_t lastActiveTime;
     /* 密钥信息 */
+    int64_t lastAuthSeq;
     uint64_t lastVerifyTime;
     SessionKeyList sessionKeyList;
     /* 设备信息 */

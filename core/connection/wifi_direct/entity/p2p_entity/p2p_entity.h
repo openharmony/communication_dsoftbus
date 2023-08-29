@@ -31,6 +31,7 @@ extern "C" {
 
 struct P2pEntityConnectingClient {
     ListNode node;
+    int32_t timerId;
     int32_t requestId;
     char remoteMac[MAC_ADDR_STR_LEN];
 };
@@ -48,22 +49,19 @@ struct P2pEntity {
     void (*changeState)(enum P2pEntityStateType state);
     void (*startTimer)(int64_t timeMs, enum P2pEntityTimeoutEvent event);
     void (*stopTimer)(void);
-    void (*startNewClientTimer)(int64_t timeMs, struct P2pEntityConnectingClient *client);
-    void (*stopNewClientTimer)(void);
     void (*notifyOperationComplete)(int32_t result);
     void (*enable)(bool enable, enum EntityState state);
     void (*handleConnectionChange)(struct WifiDirectP2pGroupInfo *groupInfo);
     void (*handleConnectStateChange)(enum WifiDirectP2pConnectState state);
     void (*configIp)(const char *interface);
+    void (*removeJoiningClient)(const char *remoteMac);
     void (*clearJoiningClient)(void);
-    void (*removeJoiningClient)(const char *remotMac);
 
     struct P2pEntityState *states[P2P_ENTITY_STATE_MAX];
     struct P2pEntityState *currentState;
     enum P2pEntityStateType currentStateType;
     int32_t currentRequestId;
     int32_t currentTimerId;
-    int32_t joiningClientTimerId;
     int32_t joiningClientCount;
     ListNode joiningClientList;
     bool isNeedDhcp;

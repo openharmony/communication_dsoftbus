@@ -253,11 +253,11 @@ HWTEST_F(LNNNetBuilderMockTest, NODE_INFO_SYNC_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnInitOffline())
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(NodeInfoSync() == SOFTBUS_ERR);
-    EXPECT_TRUE(NodeInfoSync() == SOFTBUS_ERR);
-    EXPECT_TRUE(NodeInfoSync() == SOFTBUS_ERR);
-    EXPECT_TRUE(NodeInfoSync() == SOFTBUS_ERR);
-    EXPECT_TRUE(NodeInfoSync() == SOFTBUS_OK);
+    EXPECT_TRUE(InitNodeInfoSync() == SOFTBUS_ERR);
+    EXPECT_TRUE(InitNodeInfoSync() == SOFTBUS_ERR);
+    EXPECT_TRUE(InitNodeInfoSync() == SOFTBUS_ERR);
+    EXPECT_TRUE(InitNodeInfoSync() == SOFTBUS_ERR);
+    EXPECT_TRUE(InitNodeInfoSync() == SOFTBUS_OK);
 }
 
 /*
@@ -273,7 +273,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById(_, _))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(NetBuilderMock, LnnGetAllAuthSeq(_, _, _))
+    EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList(_, _, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSendNotTrustedInfo(_, _, _))
@@ -744,14 +744,14 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     (void)strcpy_s(addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
     addr.type = CONNECTION_ADDR_BR;
-    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _)).WillOnce(Return(true));
-    EXPECT_TRUE(FindConnectionFsmByAddr(&addr) != nullptr);
-    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _)).WillOnce(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(true));
+    EXPECT_TRUE(FindConnectionFsmByAddr(&addr, false) != nullptr);
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(true));
     EXPECT_TRUE(FindMetaNodeByAddr(&addr) != nullptr);
     addr.type = CONNECTION_ADDR_BLE;
-    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _)).WillOnce(Return(false));
-    EXPECT_TRUE(FindConnectionFsmByAddr(&addr) == nullptr);
-    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _)).WillOnce(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(false));
+    EXPECT_TRUE(FindConnectionFsmByAddr(&addr, false) == nullptr);
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(false));
     EXPECT_TRUE(FindMetaNodeByAddr(&addr) == nullptr);
 
     EXPECT_TRUE(FindMetaNodeByRequestId(REQUEST_ID) != nullptr);
@@ -1268,12 +1268,12 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001, T
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     OnLnnProcessNotTrustedMsgDelay(nullptr);
     void *para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(NotTrustedDelayInfo)));
-    // EXPECT_CALL(NetBuilderMock, LnnGetAllAuthSeq(_, _, _)).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     OnLnnProcessNotTrustedMsgDelay(para1);
 
     void *para2 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(NotTrustedDelayInfo)));
-    // EXPECT_CALL(NetBuilderMock, LnnGetAllAuthSeq(_, _, _)).WillOnce(Return(SOFTBUS_OK));
-    // EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     OnLnnProcessNotTrustedMsgDelay(para2);
 }
 

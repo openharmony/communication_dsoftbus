@@ -541,6 +541,22 @@ NO_SANITIZE("cfi") int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int 
     return SOFTBUS_OK;
 }
 
+int32_t TransProxyUnPackRestErrMsg(const char *msg, int *errCode, int32_t len)
+{
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    if ((root == NULL) || (errCode == NULL)) {
+        return SOFTBUS_ERR;
+    }
+
+    if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode) && !GetJsonObjectInt32Item(root, "ERR_CODE", errCode)) {
+        cJSON_Delete(root);
+        return SOFTBUS_ERR;
+    }
+
+    cJSON_Delete(root);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi") int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
     int32_t len, uint16_t *fastDataSize)
 {

@@ -20,7 +20,7 @@
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 
-#define JSON_LOGE(fmt, ...) HILOG_ERROR(SOFTBUS_HILOG_ID, "[%{public}s()] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define JSON_LOGE(fmt, ...) HILOG_ERROR(SOFTBUS_HILOG_ID, "[%{public}s] " fmt, __FUNCTION__, ##__VA_ARGS__)
 
 JsonObj *JSON_CreateObject(void)
 {

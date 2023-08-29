@@ -130,8 +130,8 @@ typedef enum {
 } ConnBrConnectUnderlayerStatusType;
 
 int SoftBusRegisterBrCallback(BrUnderlayerCallback *callback);
-SppSocketDriver* InitSppSocketDriver();
-
+SppSocketDriver *InitSppSocketDriver();
+bool IsAclConnected(const BT_ADDR mac);
 #ifdef __cplusplus
 }
 #endif
