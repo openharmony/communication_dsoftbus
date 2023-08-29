@@ -863,7 +863,7 @@ static int32_t TransProxyPackFastDataHead(ProxyDataInfo *dataInfo, const AppInfo
     }
     dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + sizeof(PacketFastHead);
     uint32_t cipherLength = dataInfo->inLen + OVERHEAD_LEN;
-    dataInfo->outData = SoftBusCalloc(dataInfo->outLen);
+    dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
     if (dataInfo->outData == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc error");
         return SOFTBUS_MEM_ERR;
@@ -896,7 +896,7 @@ static void FastDataPackSliceHead(SliceFastHead *data)
 }
 static int32_t TransProxyMessageData(const AppInfo *appInfo, ProxyDataInfo *dataInfo)
 {
-    dataInfo->inData = SoftBusMalloc(appInfo->fastTransDataSize);
+    dataInfo->inData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize);
     if (dataInfo->inData == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc error");
         return SOFTBUS_ERR;
@@ -913,7 +913,7 @@ static int32_t TransProxyMessageData(const AppInfo *appInfo, ProxyDataInfo *data
 
 static int32_t TransProxyByteData(const AppInfo *appInfo, ProxyDataInfo *dataInfo)
 {
-    dataInfo->inData = SoftBusMalloc(appInfo->fastTransDataSize + sizeof(SessionHead));
+    dataInfo->inData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + sizeof(SessionHead));
     if (dataInfo->inData == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc error");
         return SOFTBUS_ERR;
@@ -953,7 +953,7 @@ char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen)
         return NULL;
     }
 
-    char *sliceData = SoftBusMalloc(dataInfo.outLen + sizeof(SliceFastHead));
+    char *sliceData = (char *)SoftBusMalloc(dataInfo.outLen + sizeof(SliceFastHead));
     if (sliceData == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc slice data error");
         SoftBusFree(dataInfo.inData);
