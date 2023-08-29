@@ -57,7 +57,7 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
         CLOGI("recv incomplete packet, conn id=%u", connectionId);
         return NULL;
     }
-    uint8_t *dataCopy = SoftBusCalloc(packLen);
+    uint8_t *dataCopy = (uint8_t *)SoftBusCalloc(packLen);
     if (dataCopy == NULL) {
         CLOGE("connection %u parse data failed: calloc failed, retry next time, packLen=%u", connectionId, packLen);
         return NULL;

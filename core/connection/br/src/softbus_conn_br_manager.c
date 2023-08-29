@@ -139,7 +139,7 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
 
 static int32_t NewDevice(ConnBrDevice **outDevice, const char *addr)
 {
-    ConnBrDevice *device = SoftBusCalloc(sizeof(ConnBrDevice));
+    ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
     if (device == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -169,7 +169,7 @@ static void FreeDevice(ConnBrDevice *device)
 static int32_t NewRequest(ConnBrRequest **outRequest, uint32_t requestId, ConnectStatistics statistics,
     const ConnectResult *result)
 {
-    ConnBrRequest *request = SoftBusCalloc(sizeof(ConnBrRequest));
+    ConnBrRequest *request = (ConnBrRequest *)SoftBusCalloc(sizeof(ConnBrRequest));
     if (request == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -213,12 +213,12 @@ static int32_t ConvertCtxToDevice(ConnBrDevice **outDevice, const ConnBrConnectR
 
 static char *NameAvailableState(void)
 {
-    return "available state";
+    return (char *)("available state");
 }
 
 static char *NameConnectingState(void)
 {
-    return "connecting state";
+    return (char *)("connecting state");
 }
 
 static void EnterAvailableState(void)
@@ -272,7 +272,8 @@ static void NotifyDeviceConnectResult(
         CLOGE("convert br connection info failed, error=%d", status);
     }
 
-    ConnectOption option = { 0 };
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(option), 0, sizeof(option));
     option.type = CONNECT_BR;
     if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, info.brInfo.brMac) == SOFTBUS_OK) {
         LnnDCClearConnectException(&option);
@@ -317,7 +318,7 @@ static void ProcessBleDisconnectedEvent(char *addr)
         SoftBusMutexUnlock(&g_brManager.pendings->lock);
         return;
     }
-    ConnBrPendInfo *info = SoftBusCalloc(sizeof(ConnBrPendInfo));
+    ConnBrPendInfo *info = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
     if (info == NULL || strcpy_s(info->addr, BT_MAC_LEN, addr) != EOK) {
         CLOGE("copy addr failed, address=%s", anomizeAddress);
         SoftBusFree(info);
@@ -367,7 +368,8 @@ static void PendingIfBleSameAddress(const char *addr)
     } while (false);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
-    ConnectOption options = { 0 };
+    ConnectOption options;
+    (void)memset_s(&options, sizeof(options), 0, sizeof(options));
     options.type = CONNECT_BR;
     if (strcpy_s(options.brOption.brMac, BT_MAC_LEN, addr) != EOK) {
         CLOGE("copy br mac fail, address = %s", anomizeAddress);
@@ -598,7 +600,7 @@ static void ServerAccepted(uint32_t connectionId)
         CLOGE("convert connection info failed, error=%d", status);
     }
     g_connectCallback.OnConnected(connectionId, &info);
-    ConnBrPendInfo *pendInfo = SoftBusCalloc(sizeof(ConnBrPendInfo));
+    ConnBrPendInfo *pendInfo = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
     if (pendInfo == NULL || strcpy_s(pendInfo->addr, BT_MAC_LEN, connection->addr) != EOK) {
         CLOGE("copy addr failed, address=%s", anomizeAddress);
         SoftBusFree(pendInfo);
@@ -751,12 +753,12 @@ static void DataReceived(ConnBrDataReceivedContext *ctx)
     ConnPktHead *head = (ConnPktHead *)ctx->data;
     ConnBrConnection *connection = ConnBrGetConnectionById(ctx->connectionId);
     if (connection == NULL) {
-        CLOGE("connection not exist, conn id=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%"PRId64")",
+        CLOGE("connection not exist, conn id=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
             ctx->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
         SoftBusFree(ctx->data);
         return;
     }
-    CLOGD("conn id=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%"PRId64")",
+    CLOGD("conn id=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
         ctx->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
     if (head->module == MODULE_CONNECTION) {
         ReceivedControlData(connection, ctx->data + ConnGetHeadSize(), ctx->dataLen - ConnGetHeadSize());
@@ -1014,7 +1016,7 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_CONNECT_REQUEST: {
-            ConnBrConnectRequestContext *ctx = msg->obj;
+            ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)(msg->obj);
             if (g_brManager.state->connectRequest != NULL) {
                 g_brManager.state->connectRequest(ctx);
                 return;
@@ -1036,7 +1038,7 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_CONNECT_FAIL: {
-            ErrorContext *ctx = msg->obj;
+            ErrorContext *ctx = (ErrorContext *)(msg->obj);
             if (g_brManager.state->clientConnectFailed != NULL) {
                 g_brManager.state->clientConnectFailed(ctx->connectionId, ctx->error);
                 return;
@@ -1051,7 +1053,7 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_DATA_RECEIVED: {
-            ConnBrDataReceivedContext *ctx = msg->obj;
+            ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)(msg->obj);
             if (g_brManager.state->dataReceived != NULL) {
                 g_brManager.state->dataReceived(ctx);
                 return;
@@ -1059,7 +1061,7 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_CONNECTION_EXECEPTION: {
-            ErrorContext *ctx = msg->obj;
+            ErrorContext *ctx = (ErrorContext *)(msg->obj);
             if (g_brManager.state->connectionException != NULL) {
                 g_brManager.state->connectionException(ctx->connectionId, ctx->error);
                 return;
@@ -1081,7 +1083,7 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_UNPEND: {
-            ConnBrPendInfo *info = msg->obj;
+            ConnBrPendInfo *info = (ConnBrPendInfo *)(msg->obj);
             if (g_brManager.state->unpend != NULL) {
                 g_brManager.state->unpend(info);
                 return;
@@ -1089,7 +1091,7 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_RESET: {
-            ErrorContext *ctx = msg->obj;
+            ErrorContext *ctx = (ErrorContext *)(msg->obj);
             if (g_brManager.state->reset != NULL) {
                 g_brManager.state->reset(ctx->error);
                 return;
@@ -1117,8 +1119,8 @@ static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args
             return COMPARE_FAILED;
         }
         case MSG_UNPEND: {
-            ConnBrPendInfo *msgInfo = msg->obj;
-            ConnBrPendInfo *ctxInfo = ctx->obj;
+            ConnBrPendInfo *msgInfo = (ConnBrPendInfo *)(msg->obj);
+            ConnBrPendInfo *ctxInfo = (ConnBrPendInfo *)(ctx->obj);
             if (msgInfo == NULL || ctxInfo == NULL) {
                 return COMPARE_SUCCESS;
             }
@@ -1151,7 +1153,7 @@ static void OnClientConnected(uint32_t connectionId)
 static void OnClientConnectFailed(uint32_t connectionId, int32_t error)
 {
     CLOGW("conn id=%u, error=%d", connectionId, error);
-    ErrorContext *ctx = SoftBusCalloc(sizeof(ErrorContext));
+    ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "OnClientConnectFailed: calloc ctx failed, conn id=%u, error=%d",
         connectionId, error);
     ctx->connectionId = connectionId;
@@ -1163,7 +1165,7 @@ static void OnClientConnectFailed(uint32_t connectionId, int32_t error)
 
 static void OnDataReceived(uint32_t connectionId, uint8_t *data, uint32_t dataLen)
 {
-    ConnBrDataReceivedContext *ctx = SoftBusCalloc(sizeof(ConnBrDataReceivedContext));
+    ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)SoftBusCalloc(sizeof(ConnBrDataReceivedContext));
     if (ctx == NULL) {
         CLOGE("calloc data received context failed, conn id=%u, len=%u", connectionId, dataLen);
         SoftBusFree(data);
@@ -1184,7 +1186,7 @@ static void OnDataReceived(uint32_t connectionId, uint8_t *data, uint32_t dataLe
 
 static void OnConnectionException(uint32_t connectionId, int32_t error)
 {
-    ErrorContext *ctx = SoftBusCalloc(sizeof(ErrorContext));
+    ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "br connection exception: calloc ctx failed, conn id=%u, error=%d",
         connectionId, error);
     ctx->connectionId = connectionId;
@@ -1203,7 +1205,7 @@ static void OnConnectionResume(uint32_t connectionId)
 static void OnPostByteFinshed(
     uint32_t connectionId, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, int32_t error)
 {
-    CLOGI("conn id=%u, pid=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%"PRId64"), error=%d",
+    CLOGI("conn id=%u, pid=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), error=%d",
         connectionId, pid, len, flag, module, seq, error);
     if (error != SOFTBUS_OK) {
         ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
@@ -1378,7 +1380,7 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, option->brOption.brMac, BT_MAC_LEN);
 
-    ConnBrConnectRequestContext *ctx = SoftBusCalloc(sizeof(ConnBrConnectRequestContext));
+    ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)SoftBusCalloc(sizeof(ConnBrConnectRequestContext));
     CONN_CHECK_AND_RETURN_RET_LOG(ctx != NULL, SOFTBUS_MEM_ERR,
         "BrConnectDevice: calloc connect request context failed: request id=%u, addr=%s", requestId, anomizeAddress);
     ctx->statistics.startTime = SoftBusGetSysTimeMs();
@@ -1479,7 +1481,8 @@ static bool BrCheckActiveConnection(const ConnectOption *option)
 static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress)
 {
     CLOGI("addr=%s", anomizeAddress);
-    ConnectOption option = { 0 };
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(option), 0, sizeof(option));
     option.type = CONNECT_BR;
     if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, device->addr) != EOK) {
         CLOGE("copy br mac fail, addr=%s", anomizeAddress);
@@ -1508,7 +1511,7 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
     }
     do {
         BrPending *target = GetBrPending(option->brOption.brMac);
-        ConnBrPendInfo *pendInfo = SoftBusCalloc(sizeof(ConnBrPendInfo));
+        ConnBrPendInfo *pendInfo = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
         if (pendInfo == NULL || strcpy_s(pendInfo->addr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
             CLOGE("copy addr failed, addr=%s", animizeAddress);
             SoftBusFree(pendInfo);
@@ -1533,7 +1536,7 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
             break;
         }
 
-        BrPending *pending = SoftBusCalloc(sizeof(BrPending));
+        BrPending *pending = (BrPending *)SoftBusCalloc(sizeof(BrPending));
         if (pending == NULL) {
             CLOGE("calloc pending object failed");
             status = SOFTBUS_MALLOC_ERR;
@@ -1593,7 +1596,7 @@ static void OnBtStateChanged(int listenerId, int state)
         status = ConnBrStopServer();
         CLOGI("recv bt off, stop server, status=%d", status);
 
-        ErrorContext *ctx = SoftBusCalloc(sizeof(ErrorContext));
+        ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
         if (ctx == NULL) {
             CLOGE("calloc ctx object failed");
             return;

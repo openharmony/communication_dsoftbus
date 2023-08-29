@@ -101,7 +101,7 @@ static void BrConnectStatusCallback(const char *addr, int32_t result, int32_t st
             addr[MAC_FIRST_INDEX], addr[MAC_ONE_INDEX], addr[MAC_FIVE_INDEX], result, status);
         return;
     }
-    BrUnderlayerStatus *callbackStatus = SoftBusCalloc(sizeof(BrUnderlayerStatus));
+    BrUnderlayerStatus *callbackStatus = (BrUnderlayerStatus *)SoftBusCalloc(sizeof(BrUnderlayerStatus));
     if (callbackStatus == NULL) {
         CLOGE("calloc failed, connection id = %u", connection->connectionId);
         ConnBrReturnConnection(&connection);
@@ -194,7 +194,8 @@ static void *StartServerServe(void *serveCtx)
     ServerServeContext *ctx = (ServerServeContext *)serveCtx;
     int32_t socketHandle = ctx->socketHandle;
     SoftBusFree(ctx);
-    BluetoothRemoteDevice remote = { 0 };
+    BluetoothRemoteDevice remote;
+    (void)memset_s(&remote, sizeof(remote), 0, sizeof(remote));
     int32_t status = g_sppDriver->GetRemoteDeviceInfo(socketHandle, &remote);
     if (status != SOFTBUS_OK) {
         CLOGE("GetRemoteDeviceInfo failed, socket=%u, error=%d", socketHandle, status);
@@ -249,7 +250,7 @@ static void *StartServerServe(void *serveCtx)
 ConnBrConnection *ConnBrCreateConnection(const char *addr, ConnSideType side, int32_t socketHandle)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(addr != NULL, NULL, "br creat connection: addr is NULL");
-    ConnBrConnection *connection = SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, NULL, "calloc br conn failed");
     SoftBusList *list = CreateSoftBusList();
     if (list == NULL) {
@@ -307,7 +308,7 @@ void ConnBrFreeConnection(ConnBrConnection *connection)
 // connect peer as client
 int32_t ConnBrConnect(ConnBrConnection *connection)
 {
-    ClientConnectContext *ctx = SoftBusCalloc(sizeof(ClientConnectContext));
+    ClientConnectContext *ctx = (ClientConnectContext *)SoftBusCalloc(sizeof(ClientConnectContext));
     CONN_CHECK_AND_RETURN_RET_LOG(ctx != NULL, SOFTBUS_LOCK_ERR,
         "br client connect: calloc failed, conn id=%u", connection->connectionId);
     ctx->connectionId = connection->connectionId;
@@ -499,7 +500,7 @@ static void *ListenTask(void *arg)
                 CLOGE("accept failed, trace id=%u, server id:%d", serverState->traceId, serverId);
                 break;
             }
-            ServerServeContext *ctx = SoftBusCalloc(sizeof(ServerServeContext));
+            ServerServeContext *ctx = (ServerServeContext *)SoftBusCalloc(sizeof(ServerServeContext));
             if (ctx == NULL) {
                 CLOGE("calloc serve context failed, trace id=%u, server id=%d, socket handle=%d",
                     serverState->traceId, serverId, socketHandle);
@@ -609,7 +610,8 @@ static void RetryNotifyReferenceHandler(uint32_t connectionId)
 
 static void ReportConnectExceptionHandler(uint64_t u64Mac, int32_t errorCode)
 {
-    ConnectOption option = { 0 };
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(option), 0, sizeof(option));
     option.type = CONNECT_BR;
     int32_t ret = ConvertU64MacToStr(u64Mac, option.brOption.brMac, BT_MAC_LEN);
     if (ret != SOFTBUS_OK) {
