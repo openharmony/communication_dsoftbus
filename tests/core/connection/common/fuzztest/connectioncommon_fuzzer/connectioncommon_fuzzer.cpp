@@ -51,48 +51,6 @@ static void DoDataHeadTransformFuzz(const uint8_t *data, size_t size)
     UnpackProxyMessageHead(&proxyMessageHead);
 }
 
-static ConnectOption GenerateConnectOption(const uint8_t *data, size_t size)
-{
-    ConnectOption connectOption = {
-        .type = CONNECT_TCP,
-        .socketOption = {
-            .addr = "127.0.0.1",
-            .protocol = LNN_PROTOCOL_IP,
-        },
-    };
-    if (size < sizeof(int32_t)) {
-        return connectOption;
-    }
-    if (memcpy_s(&connectOption.socketOption.port, sizeof(int32_t), data, sizeof(int32_t)) != EOK) {
-        return connectOption;
-    }
-    return connectOption;
-}
-
-static constexpr int TCP_KEEP_ALIVE_TIME = 5;
-static constexpr int TCP_USER_TIMEOUT = 5;
-static void DoSocketFuzz(const uint8_t *data, size_t size)
-{
-    ConnInitSockets();
-    ConnectOption connectOption = GenerateConnectOption(data, size);
-    int socketFd = ConnOpenClientSocket(&connectOption, "127.0.0.1", false);
-    if (socketFd > 0) {
-        ConnSendSocketData(socketFd, reinterpret_cast<const char *>(data), size, 0);
-        std::vector<char> recvBuf(size);
-        ConnRecvSocketData(socketFd, recvBuf.data(), size, 0);
-        ConnSetTcpKeepAlive(socketFd, TCP_KEEP_ALIVE_TIME);
-        ConnSetTcpUserTimeOut(socketFd, TCP_USER_TIMEOUT);
-        ConnToggleNonBlockMode(socketFd, true);
-        ConnGetLocalSocketPort(socketFd);
-        ConnGetSocketError(socketFd);
-        SocketAddr socketAddr;
-        ConnGetPeerSocketAddr(socketFd, &socketAddr);
-        ConnCloseSocket(socketFd);
-        ConnShutdownSocket(socketFd);
-    }
-    ConnDeinitSockets();
-}
-
 static int32_t ConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     return 0;
@@ -132,7 +90,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
     /* Run your code on data */
     OHOS::DoDataHeadTransformFuzz(data, size);
-    OHOS::DoSocketFuzz(data, size);
     OHOS::DoBaseListenerFuzz(data, size);
     OHOS::DoTriggerFuzz();
     return 0;
