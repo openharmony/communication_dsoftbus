@@ -446,7 +446,6 @@ ohos_unittest("LNNNetBuilderMockTest") {
 ohos_unittest("LNNConnectionFsmTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
@@ -461,6 +460,44 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
     "net_builder/src/lnn_auth_mock.cpp",
     "net_builder/src/lnn_connection_fsm_test.cpp",
+    "net_builder/src/lnn_net_ledger_mock.cpp",
+    "net_builder/src/lnn_service_mock.cpp",
+  ]
+
+  include_dirs = lnn_mock_test_include_dirs
+  deps = lnn_mock_test_deps
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+ohos_unittest("LNNBatteryInfoTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_network_info.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_node_weight.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_p2p_info.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_info_manager.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_trans_mock.cpp",
+    "net_builder/src/lnn_auth_mock.cpp",
+    "net_builder/src/lnn_battery_info_test.cpp",
     "net_builder/src/lnn_net_ledger_mock.cpp",
     "net_builder/src/lnn_service_mock.cpp",
   ]
@@ -1587,6 +1624,7 @@ group("unittest") {
   deps = [
     ":BusCenterClientProxyStandardTest",
     ":BusCenterClientProxyTest",
+    ":LNNBatteryInfoTest",
     ":LNNBtNetworkImplMockTest",
     ":LNNBusCenterIpcTest",
     ":LNNConnectionFsmTest",
