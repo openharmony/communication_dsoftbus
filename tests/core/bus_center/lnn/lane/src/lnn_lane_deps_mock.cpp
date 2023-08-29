@@ -180,22 +180,6 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
     return GetLaneDepsInterface()->AuthGetMetaType(authId, isMetaAuth);
 }
 
-void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId)
-{
-    return GetLaneDepsInterface()->LnnDisconnectP2p(networkId, pid, laneLinkReqId);
-}
-
-void LnnDestroyP2p(void)
-{
-    return GetLaneDepsInterface()->LnnDestroyP2p();
-}
-
-int32_t LnnConnectP2p(const char *networkId, int32_t pid, bool networkDelegate, uint32_t laneLinkReqId,
-                      const LaneLinkCb *callback)
-{
-    return GetLaneDepsInterface()->LnnConnectP2p(networkId, pid, networkDelegate, laneLinkReqId, callback);
-}
-
 ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol)
 {
     return GetLaneDepsInterface()->ConnBleGetClientConnectionByUdid(udid, protocol);
@@ -204,6 +188,16 @@ ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtoco
 void ConnBleReturnConnection(ConnBleConnection **connection)
 {
     return GetLaneDepsInterface()->ConnBleReturnConnection(connection);
+}
+
+bool ConnBleDirectIsEnable(BleProtocolType protocol)
+{
+    return GetLaneDepsInterface()->ConnBleDirectIsEnable(protocol);
+}
+
+int32_t TransProxyCloseProxyChannel(int32_t channelId)
+{
+    return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
 }
 }
 } // namespace OHOS
