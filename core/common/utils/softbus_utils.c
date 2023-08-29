@@ -53,6 +53,8 @@
 #define MAX_IP_LEN 48
 #define MAX_MAC_LEN 46
 
+#define ONE_BYTE_SIZE 8
+
 static void *g_timerId = NULL;
 static TimerFunCallback g_timerFunList[SOFTBUS_MAX_TIMER_FUN_NUM] = {0};
 static bool g_signalingMsgSwitch = false;
@@ -136,6 +138,7 @@ int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param, inlen:%u, outBufLen:%u", inLen, outBufLen);
         return SOFTBUS_ERR;
     }
 
@@ -324,6 +327,36 @@ NO_SANITIZE("cfi") int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, c
     return SOFTBUS_OK;
 }
 
+int32_t ConvertBtMacToU64(const char *strMac, uint32_t strMacLen, uint64_t *u64Mac)
+{
+    if (strMac == NULL || strMacLen < BT_MAC_LEN || u64Mac == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
+    int32_t status = ConvertBtMacToBinary(strMac, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
+    if (status != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    uint64_t u64Value = 0;
+    for (int i = 0; i < BT_ADDR_LEN; i++) {
+        u64Value = (u64Value << ONE_BYTE_SIZE) | binaryAddr[i];
+    }
+    *u64Mac = u64Value;
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertU64MacToStr(uint64_t u64Mac, char *strMac, uint32_t strMacLen)
+{
+    if (strMac == NULL || strMacLen < BT_MAC_LEN || u64Mac == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
+    for (int i = BT_ADDR_LEN - 1; i >= 0; i--) {
+        binaryAddr[i] = u64Mac & 0xFF;
+        u64Mac = u64Mac >> ONE_BYTE_SIZE;
+    }
+    return ConvertBtMacToStr(strMac, strMacLen, binaryAddr, BT_ADDR_LEN);
+}
 static char ToUpperCase(char ch)
 {
     if (ch >= 'a' && ch <= 'z') {
@@ -516,7 +549,7 @@ NO_SANITIZE("cfi") int32_t GenerateStrHashAndConvertToHexString(const unsigned c
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    ret = SoftBusGenerateStrHash(str, strlen((char *)str) + 1, hashResult);
+    ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash fail, ret=%d", ret);
         return ret;

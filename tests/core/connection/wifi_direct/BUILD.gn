@@ -64,6 +64,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":WifiDirectTest",
+    "data:unittest",
     "negotiate_state:unittest",
     "protocol:unittest",
     "utils:unittest",

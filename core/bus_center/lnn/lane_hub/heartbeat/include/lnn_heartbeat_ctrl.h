@@ -32,7 +32,7 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
 int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType);
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
-void LnnRequestBleDiscoveryProcess(int32_t strategy, long timeout);
+void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout);
 
 void LnnHbOnTrustedRelationIncreased(int32_t groupType);
 void LnnHbOnTrustedRelationReduced(void);

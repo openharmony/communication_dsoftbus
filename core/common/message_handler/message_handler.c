@@ -144,7 +144,7 @@ NO_SANITIZE("cfi") static void *LoopTask(void *arg)
             SoftBusFree(itemNode);
             context->msgSize--;
             if (looper->dumpable) {
-                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+                SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
                     "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u,time=%" PRId64,
                     context->name, msg->handler->name, msg->what, msg->arg1, context->msgSize, msg->time);
             }
@@ -162,7 +162,7 @@ NO_SANITIZE("cfi") static void *LoopTask(void *arg)
         context->currentMsg = msg;
         (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
                 "LoopTask[%s], HandleMessage message. handle=%s,what=%" PRId32, context->name, msg->handler->name,
                 msg->what);
         }
@@ -173,7 +173,7 @@ NO_SANITIZE("cfi") static void *LoopTask(void *arg)
         if (looper->dumpable) {
             // Don`t print msg->handler, msg->handler->HandleMessage() may remove handler,
             // so msg->handler maybe invalid pointer
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO,
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG,
                 "LoopTask[%s], after HandleMessage message. what=%" PRId32 ",arg1=%" PRIu64,
                 context->name, msg->what, msg->arg1);
         }
@@ -274,7 +274,7 @@ NO_SANITIZE("cfi") static void PostMessageAtTime(const SoftBusLooper *looper, So
     }
 
     if (looper->dumpable) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]PostMessageAtTime what =%d time=% " PRId64 " us",
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]PostMessageAtTime what =%d time=% " PRId64 " us",
             looper->context->name, msgPost->what, msgPost->time);
     }
     if (msgPost->handler == NULL) {
@@ -385,7 +385,7 @@ NO_SANITIZE("cfi") static void LoopRemoveMessageCustom(const SoftBusLooper *loop
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
         if (msg->handler == handler && customFunc(msg, args) == 0) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[%s]LooperRemoveMessage. handler=%s, what=%d,arg1=%" PRIu64
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "[%s]LooperRemoveMessage. handler=%s, what=%d,arg1=%" PRIu64
                 ",time=%" PRId64, context->name, handler->name, msg->what, msg->arg1, msg->time);
             FreeSoftBusMsg(msg);
             ListDelete(&itemNode->node);

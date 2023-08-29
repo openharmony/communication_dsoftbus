@@ -55,13 +55,16 @@ if (dsoftbus_feature_lnn_net) {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/wifi_direct_p2p_adapter_virtual.c",
   ]
 }
 bus_center_builder_inc = [
+  "$dsoftbus_root_path/core/adapter/common/net/bluetooth/include",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+  "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
 ]
 bus_center_builder_deps = []
 

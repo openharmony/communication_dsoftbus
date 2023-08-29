@@ -22,6 +22,7 @@
 #include "wifi_direct_p2p_adapter.h"
 #include "data/resource_manager.h"
 #include "entity/p2p_entity/p2p_entity.h"
+#include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_network_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 
@@ -113,7 +114,6 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
     struct P2pEntity *entity = GetP2pEntity();
     if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "no groupInfo");
-        entity->stopNewClientTimer();
         entity->clearJoiningClient();
         return;
     }
@@ -124,26 +124,13 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
     CLOGI(LOG_LABEL "remove joining client, clientDeviceSize=%d", groupInfo->clientDeviceSize);
     for (int32_t i = 0; i < groupInfo->clientDeviceSize; i++) {
-        struct P2pEntityConnectingClient *client = NULL;
-        struct P2pEntityConnectingClient *clientNext = NULL;
-        LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &entity->joiningClientList,
-                                 struct P2pEntityConnectingClient, node) {
-            char mac[MAC_ADDR_STR_LEN] = {0};
-            GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->clientDevices[i].address, MAC_ADDR_ARRAY_SIZE,
-                                                          mac, sizeof(mac));
-            if (strcmp(mac, client->remoteMac) == 0) {
-                CLOGI(LOG_LABEL "remove joining client, request=%d remoteMac=%s",
-                      client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
-                entity->stopNewClientTimer();
-                ListDelete(&client->node);
-                SoftBusFree(client);
-                entity->joiningClientCount--;
-            }
-        }
+        char remoteMac[MAC_ADDR_STR_LEN] = {0};
+        GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->clientDevices[i].address, MAC_ADDR_ARRAY_SIZE,
+                                                      remoteMac, sizeof(remoteMac));
+        entity->removeJoiningClient(remoteMac);
     }
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    CONN_CHECK_AND_RETURN_LOG(info, "interface info is null");
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, 0);
     CLOGI(LOG_LABEL "joiningClientCount=%d reuseCount=%d", entity->joiningClientCount, reuseCount);
     if (groupInfo->clientDeviceSize == 0 && entity->joiningClientCount == 0 && reuseCount > 0) {

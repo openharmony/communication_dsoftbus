@@ -45,13 +45,17 @@
 
 #define MIGRATE_ENABLE 2
 #define MIGRATE_SUPPORTED 1
-#define MAX_PROXY_CHANNEL_ID 0x00008000
+#define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
 #define MAX_FD_ID 1025
+#define MAX_PROXY_CHANNEL_ID_COUNT 1024
+#define ID_NOT_USED 0
+#define ID_USED 1
+#define BIT_NUM 8
 
-static int32_t g_allocProxyChannelId = MAX_FD_ID;
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
+static unsigned long g_proxyChanIdBits[MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long)];
 
 typedef struct {
     int32_t channelType;
@@ -76,17 +80,37 @@ static int32_t GenerateTdcChannelId()
 
 static int32_t GenerateProxyChannelId()
 {
-    int32_t channelId;
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
-    channelId = g_allocProxyChannelId++;
-    if (g_allocProxyChannelId >= MAX_PROXY_CHANNEL_ID) {
-        g_allocProxyChannelId = MAX_FD_ID;
+    for (uint32_t id = 0; id < MAX_PROXY_CHANNEL_ID_COUNT; id++) {
+        uint32_t dex = id / (8 * sizeof(long));
+        uint32_t bit = id % (8 * sizeof(long));
+        if (((g_proxyChanIdBits[dex] >> bit) & ID_USED) == ID_NOT_USED) {
+            g_proxyChanIdBits[dex] |= (ID_USED << id);
+            SoftBusMutexUnlock(&g_myIdLock);
+            return (int32_t)id + MAX_FD_ID;
+        }
     }
     SoftBusMutexUnlock(&g_myIdLock);
-    return channelId;
+    return INVALID_CHANNEL_ID;
+}
+
+void ReleaseProxyChannelId(int32_t channelId)
+{
+    if (channelId == INVALID_CHANNEL_ID) {
+        return;
+    }
+    if (SoftBusMutexLock(&g_myIdLock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail");
+        return;
+    }
+    uint32_t id = (uint32_t)channelId - MAX_FD_ID;
+    uint32_t dex = id / (8 * sizeof(long));
+    uint32_t bit = id % (8 * sizeof(long));
+    g_proxyChanIdBits[dex] &= (~(ID_USED << bit));
+    SoftBusMutexUnlock(&g_myIdLock);
 }
 
 int32_t GenerateChannelId(bool isTdcChannel)
@@ -147,44 +171,6 @@ NO_SANITIZE("cfi") void TransChannelDeinit(void)
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
-static int32_t TransGetRemoteInfo(const SessionParam* param, AppInfo* appInfo)
-{
-    if (param == NULL || appInfo == NULL) {
-        return SOFTBUS_ERR;
-    }
-    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "direct get remote node uuid err");
-        char peerNetworkId[NETWORK_ID_BUF_LEN];
-        (void)memset_s(peerNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
-        if (LnnGetNetworkIdByUuid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by uuid");
-        } else {
-            if (strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId),
-                param->peerDeviceId) != SOFTBUS_OK) {
-                return SOFTBUS_ERR;
-            }
-            if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
-                return SOFTBUS_ERR;
-            }
-            return SOFTBUS_OK;
-        }
-        if (LnnGetNetworkIdByUdid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by udid");
-            return SOFTBUS_ERR;
-        }
-        if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
-        }
-        if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-            appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
-            return SOFTBUS_ERR;
-        }
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
 {
     if (param == NULL || param->attr == NULL) {
@@ -226,8 +212,9 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
         return SOFTBUS_ERR;
     }
-    if (TransGetRemoteInfo(param, appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node info err");
+    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
+        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -263,6 +250,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
         goto EXIT_ERR;
     }
 
+    appInfo->fd = -1;
     appInfo->peerData.apiVersion = API_V2;
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
@@ -402,11 +390,15 @@ NO_SANITIZE("cfi") int32_t TransOpenChannel(const SessionParam *param, TransInfo
     uint32_t laneId = 0;
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    int32_t ret = INVALID_CHANNEL_ID;
+    int32_t errCode = INVALID_CHANNEL_ID;
 
     AppInfo *appInfo = GetAppInfo(param);
     TRAN_CHECK_AND_RETURN_RET_LOG(!(appInfo == NULL), INVALID_CHANNEL_ID, "GetAppInfo is null.");
-    if (TransGetLaneInfo(param, &connInfo, &laneId) != SOFTBUS_OK) {
+    errCode = TransGetLaneInfo(param, &connInfo, &laneId);
+    if (errCode != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
+        ret = errCode;
         goto EXIT_ERR;
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
@@ -454,7 +446,7 @@ EXIT_ERR:
         LnnFreeLane(laneId);
     }
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel err");
-    return INVALID_CHANNEL_ID;
+    return ret;
 }
 
 static AppInfo *GetAuthAppInfo(const char *mySessionName)

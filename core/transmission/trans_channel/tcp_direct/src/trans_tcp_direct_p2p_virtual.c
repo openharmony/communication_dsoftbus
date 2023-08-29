@@ -35,3 +35,12 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 void StopP2pSessionListener(void)
 {
 }
+
+void StopHmlListener(ListenerModule module)
+{
+}
+
+ListenerModule GetMoudleByHmlIp(const char *ip)
+{
+    return UNUSE_BUTT;
+}

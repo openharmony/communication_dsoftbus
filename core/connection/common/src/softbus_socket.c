@@ -314,12 +314,11 @@ NO_SANITIZE("cfi") int32_t ConnGetLocalSocketPort(int32_t fd)
 NO_SANITIZE("cfi") int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
 {
     SoftBusSockAddrIn addr;
-    int32_t addrLen = (int32_t)sizeof(addr);
     if (socketAddr == NULL) {
         CLOGE("invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int rc = SoftBusSocketGetPeerName(fd, (SoftBusSockAddr *)&addr, &addrLen);
+    int rc = SoftBusSocketGetPeerName(fd, (SoftBusSockAddr *)&addr);
     if (rc != 0) {
         CLOGE("fd=%d, GetPeerName rc=%d", fd, rc);
         return SOFTBUS_ERR;

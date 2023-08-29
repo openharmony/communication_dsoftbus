@@ -64,5 +64,9 @@ int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *inf
 {
     return GetDistriLedgerInterface()->LnnGetRemoteNumU64Info(networkId, key, info);
 }
+int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac, uint32_t binMacLen)
+{
+    return GetDistriLedgerInterface()->ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+}
 }
 } // namespace OHOS

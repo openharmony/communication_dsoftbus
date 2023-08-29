@@ -57,7 +57,7 @@ typedef enum {
     SOFTBUS_STATISTIC_EVT_APP_DISCOVERY,
 
     SOFTBUS_STATISTIC_EVT_BUTT,
-}StatisticEvtType;
+} StatisticEvtType;
 
 typedef int32_t(*StatisticEvtReportFunc)(void);
 
@@ -68,6 +68,8 @@ void DeinitSoftbusSysEvt(void);
 StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type);
 
 int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc func);
+
+int32_t GetErrorCodeEx(int32_t errorCode, int32_t module);
 
 #ifdef __cplusplus
 #if __cplusplus

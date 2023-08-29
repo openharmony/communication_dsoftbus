@@ -38,7 +38,7 @@ int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connIn
 int32_t TransProxyCloseProxyChannel(int32_t channelId);
 
 void TransProxyDelByConnId(uint32_t connId);
-void TransProxyDelChanByReqId(int32_t reqId);
+void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode);
 void TransProxyDelChanByChanId(int32_t chanlId);
 int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan);
 int32_t TransProxyGetChanByReqId(int32_t reqId, ProxyChannelInfo *chan);

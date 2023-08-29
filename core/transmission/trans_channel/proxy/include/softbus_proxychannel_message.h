@@ -101,6 +101,7 @@ typedef enum {
     PROXY_CHANNEL_STATUS_KEEPLIVEING,
     PROXY_CHANNEL_STATUS_TIMEOUT,
     PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT,
+    PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT,
     PROXY_CHANNEL_STATUS_COMPLETED
 } ProxyChannelStatus;
 
@@ -156,6 +157,7 @@ typedef struct {
 } SessionHead;
 
 int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int* errCode, int32_t len);
+int32_t TransProxyUnPackRestErrMsg(const char *msg, int* errCode, int32_t len);
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
     int32_t len, uint16_t *fastDataSize);
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);

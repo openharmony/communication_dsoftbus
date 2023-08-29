@@ -133,7 +133,7 @@ static void AddUsingInterfaceToList(ListNode *list, const char *interface)
     }
 }
 
-static ListNode* GetUsingInterfaces(void)
+static ListNode* GetUsingInterfaces(bool forShare)
 {
     ListNode *list = SoftBusCalloc(sizeof(*list));
     CONN_CHECK_AND_RETURN_RET_LOG(list, NULL, "malloc list failed");
@@ -142,8 +142,10 @@ static ListNode* GetUsingInterfaces(void)
     if (GetWifiDirectP2pAdapter()->isWifiConnected()) {
         AddUsingInterfaceToList(list, IF_NAME_WLAN);
     }
-    if (GetWifiDirectP2pAdapter()->isWifiApEnabled()) {
-        AddUsingInterfaceToList(list, IF_NAME_WLAN1);
+    if (forShare) {
+        if (GetWifiDirectP2pAdapter()->isWifiApEnabled()) {
+            AddUsingInterfaceToList(list, IF_NAME_WLAN1);
+        }
     }
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
@@ -182,9 +184,13 @@ static bool IsStationAndHmlDBAC(void)
 {
     int32_t staFreq = GetWifiDirectP2pAdapter()->getStationFrequency();
     int32_t hmlFreq = -1;
+    enum WifiDirectApiRole hmlRole = 0;
     struct InterfaceInfo *hmlInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_HML);
     if (hmlInfo) {
-        hmlFreq = hmlInfo->getInt(hmlInfo, II_KEY_CENTER_20M, -1);
+        hmlRole = hmlInfo->getInt(hmlInfo, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE);
+        if (hmlRole == WIFI_DIRECT_API_ROLE_HML) {
+            hmlFreq = hmlInfo->getInt(hmlInfo, II_KEY_CENTER_20M, -1);
+        }
     }
     if (staFreq != -1 && hmlFreq != -1 && staFreq != hmlFreq) {
         CLOGI(LOG_LABEL "staFreq=%d hmlFreq=%d", staFreq, hmlFreq);
@@ -193,7 +199,7 @@ static bool IsStationAndHmlDBAC(void)
     return false;
 }
 
-static bool IsInterfaceAvailable(const char *interface)
+static bool IsInterfaceAvailable(const char *interface, bool forShare)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(interface, false, "name is null");
 
@@ -212,7 +218,7 @@ static bool IsInterfaceAvailable(const char *interface)
         return false;
     }
 
-    ListNode *usingInterfaces = GetUsingInterfaces();
+    ListNode *usingInterfaces = GetUsingInterfaces(forShare);
     if (usingInterfaces) {
         AddUsingInterfaceToList(usingInterfaces, interface);
         bool ret = GetWifiDirectCoexistRule()->isCombinationAvailable(usingInterfaces);
@@ -243,7 +249,7 @@ static int32_t GetAllInterfacesSimpleInfo(struct InterfaceInfo **infoArray, int3
     SoftBusMutexLock(&self->mutex);
     LIST_FOR_EACH_ENTRY(info, &self->interfaces, struct InterfaceInfo, node) {
         char *name = info->getName(info);
-        bool isAvailable = self->isInterfaceAvailable(name);
+        bool isAvailable = self->isInterfaceAvailable(name, false);
         int32_t deviceCount = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
         CLOGI(LOG_LABEL "name=%s available=%d deviceCount=%d", name, isAvailable, deviceCount);
 
@@ -273,7 +279,7 @@ static int32_t GetAllInterfacesInfo(struct InterfaceInfo **infoArray, int32_t *i
     LIST_FOR_EACH_ENTRY(info, &self->interfaces, struct InterfaceInfo, node) {
         array[i].deepCopy(array + i, info);
         const char *name = array[i].getName(array + i);
-        bool isAvailable = self->isInterfaceAvailable(name);
+        bool isAvailable = self->isInterfaceAvailable(name, false);
         array[i].putBoolean(array + i, II_KEY_IS_AVAILABLE, isAvailable);
         int32_t deviceCount = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
 

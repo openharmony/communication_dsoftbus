@@ -15,8 +15,6 @@
 
 #include "entity/p2p_entity/p2p_group_removing_state.h"
 #include "softbus_log.h"
-#include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
 
 #define LOG_LABEL "[WifiDirect] P2pGroupRemovingState: "
 
@@ -50,7 +48,6 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
     if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "remove group complete");
         struct P2pEntity *entity = GetP2pEntity();
-        entity->stopNewClientTimer();
         entity->clearJoiningClient();
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(OK);

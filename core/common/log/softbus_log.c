@@ -25,7 +25,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 
-#define LOG_NAME_MAX_LEN 5
+#define LOG_NAME_MAX_LEN 12
 #ifndef SOFTBUS_DEBUG
 #define LOG_PRINT_MAX_LEN 256
 #else
@@ -65,12 +65,12 @@ typedef enum {
 } AnonymizeMode;
 
 static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
-    {SOFTBUS_LOG_AUTH, "AUTH"},
-    {SOFTBUS_LOG_TRAN, "TRAN"},
-    {SOFTBUS_LOG_CONN, "CONN"},
-    {SOFTBUS_LOG_LNN, "LNN"},
-    {SOFTBUS_LOG_DISC, "DISC"},
-    {SOFTBUS_LOG_COMM, "COMM"},
+    {SOFTBUS_LOG_AUTH, "SoftBusAuth"},
+    {SOFTBUS_LOG_TRAN, "SoftBusTran"},
+    {SOFTBUS_LOG_CONN, "SoftBusConn"},
+    {SOFTBUS_LOG_LNN, "SoftBusLnn"},
+    {SOFTBUS_LOG_DISC, "SoftBusDisc"},
+    {SOFTBUS_LOG_COMM, "SoftBusComm"},
 };
 
 NO_SANITIZE("cfi") void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...)

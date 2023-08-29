@@ -48,6 +48,7 @@ static int64_t g_seq = 0;
 static uint64_t g_channelIdFlagBitsMap = 0;
 static IServerChannelCallBack *g_channelCb = NULL;
 static SoftBusMutex g_udpNegLock;
+static uint32_t g_idMark = 0;
 
 static int32_t GenerateUdpChannelId(void)
 {
@@ -55,10 +56,12 @@ static int32_t GenerateUdpChannelId(void)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate udp channel id lock failed");
         return INVALID_ID;
     }
-    for (uint32_t id = 0; id < MAX_UDP_CHANNEL_ID_COUNT; id++) {
+    for (uint32_t id = g_idMark + 1; id != g_idMark; id++) {
+        id = id % MAX_UDP_CHANNEL_ID_COUNT;
         if (((g_channelIdFlagBitsMap >> id) & ID_USED) == ID_NOT_USED) {
             g_channelIdFlagBitsMap |= (ID_USED << id);
             SoftBusMutexUnlock(&g_udpNegLock);
+            g_idMark = id;
             return (int32_t)id;
         }
     }

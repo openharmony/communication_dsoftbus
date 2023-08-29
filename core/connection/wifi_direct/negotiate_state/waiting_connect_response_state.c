@@ -61,6 +61,7 @@ static int32_t HandleNegotiateMessageFromRemote(struct WifiDirectProcessor *proc
         case CMD_CONN_V2_REQ_2:
         case CMD_CONN_V2_REQ_3:
             return HandleRequest(processor, cmd, msg);
+        case CMD_CLIENT_JOIN_FAIL_NOTIFY:
         case CMD_CTRL_CHL_HANDSHAKE:
         case CMD_PC_GET_INTERFACE_INFO_REQ:
             return processor->processNegotiateMessage(cmd, msg);
@@ -87,12 +88,12 @@ static bool CheckTargetDevice(struct NegotiateMessage *msg)
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
     char remoteDeviceId[UUID_BUF_LEN] = {0};
     int32_t ret = channel->getDeviceId(channel, remoteDeviceId, sizeof(remoteDeviceId));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, "get remote device id failed");
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get remote device id failed");
 
     char *currentDeviceId = GetWifiDirectNegotiator()->context.currentRemoteDeviceId;
     if (GetWifiDirectUtils()->strCompareIgnoreCase(remoteDeviceId, currentDeviceId) != 0) {
         CLOGE(LOG_LABEL "msg from other device, current=%s remote=%s",
-            AnonymizesUUID(currentDeviceId), AnonymizesUUID(remoteDeviceId));
+              AnonymizesUUID(currentDeviceId), AnonymizesUUID(remoteDeviceId));
         return false;
     }
 
@@ -101,9 +102,10 @@ static bool CheckTargetDevice(struct NegotiateMessage *msg)
 }
 
 static int32_t HandleResponse(struct WifiDirectProcessor *processor, enum WifiDirectNegotiateCmdType cmd,
-                             struct NegotiateMessage *msg)
+                              struct NegotiateMessage *msg)
 {
     if (!CheckTargetDevice(msg)) {
+        CLOGE(LOG_LABEL "ignore the response");
         return SOFTBUS_OK;
     }
     GetWifiDirectNegotiator()->context.currentProcessor = processor;
@@ -145,6 +147,7 @@ static int32_t HandleRequest(struct WifiDirectProcessor *processor, enum WifiDir
 
     if (!IsNeedReversal(msg)) {
         CLOGI(LOG_LABEL "no need reversal, ignore remote request");
+        GetWifiDirectNegotiator()->handleUnhandledRequest(msg);
         return SOFTBUS_OK;
     }
 

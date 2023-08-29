@@ -101,8 +101,8 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_CONNECTION_ADDR_Test_001, TestSize.Level0)
 
     EXPECT_TRUE(strncpy_s(bleAddr.info.br.brMac, BT_MAC_LEN, BT_MAC, strlen(BT_MAC)) == EOK);
     EXPECT_TRUE(strncpy_s(bleAddr.info.ip.ip, IP_STR_MAX_LEN, WLAN_IP, strlen(WLAN_IP)) == EOK);
-    EXPECT_TRUE(LnnIsSameConnectionAddr(&bleAddr, &bleAddr));
-    EXPECT_TRUE(LnnIsSameConnectionAddr(&ethAddr, &ethAddr));
-    EXPECT_FALSE(LnnIsSameConnectionAddr(&bleAddr, &ethAddr));
+    EXPECT_TRUE(LnnIsSameConnectionAddr(&bleAddr, &bleAddr, true));
+    EXPECT_TRUE(LnnIsSameConnectionAddr(&ethAddr, &ethAddr, true));
+    EXPECT_FALSE(LnnIsSameConnectionAddr(&bleAddr, &ethAddr, false));
 }
 } // namespace OHOS

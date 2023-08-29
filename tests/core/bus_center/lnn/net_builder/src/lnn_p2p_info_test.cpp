@@ -91,6 +91,7 @@ void LNNP2pInfoTest::SetUpTestCase()
 {
     LooperInit();
     NiceMock<LnnTransInterfaceMock> transMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener).WillRepeatedly(
         DoAll(LnnTransInterfaceMock::ActionOfTransRegister, Return(SOFTBUS_OK)));
     LnnInitSyncInfoManager();
@@ -99,6 +100,7 @@ void LNNP2pInfoTest::SetUpTestCase()
 
 void LNNP2pInfoTest::TearDownTestCase()
 {
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     LooperDeinit();
     LnnDeinitSyncInfoManager();
     LnnDeinitP2p();

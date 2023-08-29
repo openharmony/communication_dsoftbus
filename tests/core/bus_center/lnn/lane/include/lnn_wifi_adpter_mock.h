@@ -20,6 +20,7 @@
 #include <mutex>
 
 #include "softbus_wifi_api_adapter.h"
+#include "lnn_lane_link.h"
 
 namespace OHOS {
 class LnnWifiAdpterInterface {
@@ -28,6 +29,9 @@ public:
     virtual ~LnnWifiAdpterInterface() {};
     virtual int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info) = 0;
     virtual SoftBusBand SoftBusGetLinkBand(void) = 0;
+    virtual void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId) = 0;
+    virtual void LnnDestroyP2p(void) = 0;
+    virtual int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback) = 0;
 };
 
 class LnnWifiAdpterInterfaceMock : public LnnWifiAdpterInterface {
@@ -38,6 +42,9 @@ public:
     MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand ());
 
     void SetDefaultResult(void);
+    MOCK_METHOD3(LnnDisconnectP2p, void (const char *, int32_t, uint32_t));
+    MOCK_METHOD0(LnnDestroyP2p, void ());
+    MOCK_METHOD3(LnnConnectP2p, int32_t (const LinkRequest *, uint32_t, const LaneLinkCb *));
 };
 
 } // namespace OHOS
