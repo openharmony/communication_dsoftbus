@@ -83,7 +83,7 @@ ConnBleConnection *ConnBleCreateConnection(
 {
     CONN_CHECK_AND_RETURN_RET_LOG(addr != NULL, NULL, "invalid parameter: ble addr is NULL");
 
-    ConnBleConnection *connection = SoftBusCalloc(sizeof(ConnBleConnection));
+    ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, NULL, "calloc ble connection failed");
     ListInit(&connection->node);
     // the final connectionId value is allocate on saving global

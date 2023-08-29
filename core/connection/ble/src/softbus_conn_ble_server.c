@@ -107,7 +107,7 @@ static int BleCompareGattServerLooperEventFunc(const SoftBusMessage *msg, void *
 static const int32_t MAX_SERVICE_CHAR_NUM = 8;
 static SoftBusHandlerWrapper g_bleGattServerAsyncHandler = {
     .handler = {
-        .name = "BleGattServerAsyncHandler",
+        .name = (char *)("BleGattServerAsyncHandler"),
         .HandleMessage = BleGattServerMsgHandler,
         // assign when initiation
         .looper = NULL,
@@ -184,7 +184,7 @@ int32_t ConnGattServerStartService(void)
         return status;
     }
     SoftBusBtUuid uuid = {
-        .uuid = SOFTBUS_SERVICE_UUID,
+        .uuid = (char *)(SOFTBUS_SERVICE_UUID),
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     status = SoftBusGattsAddService(uuid, true, MAX_SERVICE_CHAR_NUM);
@@ -201,7 +201,7 @@ int32_t ConnGattServerStartService(void)
 static void BleServiceAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle)
 {
     CLOGI("gatt server callback, server added, srvcHandle=%u, status=%d", srvcHandle, status);
-    ServiceAddMsgContext *ctx = SoftBusCalloc(sizeof(ServiceAddMsgContext) + uuid->uuidLen);
+    ServiceAddMsgContext *ctx = (ServiceAddMsgContext *)SoftBusCalloc(sizeof(ServiceAddMsgContext) + uuid->uuidLen);
     CONN_CHECK_AND_RETURN_LOG(
         ctx != NULL, "receive gatt server callback, server added handle failed: calloc service add msg context failed");
     ctx->status = status;
@@ -250,7 +250,7 @@ static void BleServiceAddMsgHandler(const ServiceAddMsgContext *ctx)
             break;
         }
         SoftBusBtUuid uuid = {
-            .uuid = SOFTBUS_CHARA_BLENET_UUID,
+            .uuid = (char *)(SOFTBUS_CHARA_BLENET_UUID),
             .uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
         };
         rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
@@ -282,7 +282,8 @@ static void BleCharacteristicAddCallback(
 {
     CLOGI("gatt server callback, characteristic added, srvcHandle=%u, characteristicHandle status=%d", srvcHandle,
         characteristicHandle, status);
-    CharacteristicAddMsgContext *ctx = SoftBusCalloc(sizeof(CharacteristicAddMsgContext) + uuid->uuidLen);
+    CharacteristicAddMsgContext *ctx =
+        (CharacteristicAddMsgContext *)SoftBusCalloc(sizeof(CharacteristicAddMsgContext) + uuid->uuidLen);
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "calloc characteristic add msg failed");
     ctx->status = status;
     ctx->srvcHandle = srvcHandle;
@@ -359,7 +360,7 @@ static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ct
         }
 
         SoftBusBtUuid uuid = {
-            .uuid = SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
+            .uuid = (char *)(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
             .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
         };
         rc = SoftBusGattsAddDescriptor(
@@ -386,7 +387,8 @@ static void BleDescriptorAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_
 {
     CLOGI("gatt server callback, descriptor added, srvcHandle=%u, descriptorHandle=%d, status=%d", srvcHandle,
         descriptorHandle, status);
-    DescriptorAddMsgContext *ctx = SoftBusCalloc(sizeof(DescriptorAddMsgContext) + uuid->uuidLen);
+    DescriptorAddMsgContext *ctx =
+        (DescriptorAddMsgContext *)SoftBusCalloc(sizeof(DescriptorAddMsgContext) + uuid->uuidLen);
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "calloc descriptor add msg failed");
     ctx->status = status;
     ctx->srvcHandle = srvcHandle;
@@ -462,7 +464,7 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         return rc;
     }
     SoftBusBtUuid uuid = {
-        .uuid = SOFTBUS_CHARA_BLECONN_UUID,
+        .uuid = (char *)(SOFTBUS_CHARA_BLECONN_UUID),
         .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
     };
     rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
@@ -517,7 +519,7 @@ static int32_t BleConnDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
 static void BleServiceStartCallback(int32_t status, int32_t srvcHandle)
 {
     CLOGI("gatt server callback, service start, srvcHandle=%u, status=%d", srvcHandle, status);
-    CommonStatusMsgContext *ctx = SoftBusCalloc(sizeof(CommonStatusMsgContext));
+    CommonStatusMsgContext *ctx = (CommonStatusMsgContext *)SoftBusCalloc(sizeof(CommonStatusMsgContext));
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "calloc service start status msg failed");
     ctx->srvcHandle = srvcHandle;
     ctx->status = status;
@@ -687,7 +689,7 @@ int32_t ConnGattServerStopService(void)
             status = SoftBusGattsStopService(serviceHandle);
             if (status != SOFTBUS_OK) {
                 CLOGE("underlayer stop service failed, err=%d", status);
-                state = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_ERR;
+                status = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_ERR;
                 break;
             }
             status = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STARTED, BLE_SERVER_STATE_SERVICE_STOPPING);
@@ -716,7 +718,7 @@ int32_t ConnGattServerStopService(void)
 static void BleServiceStopCallback(int32_t status, int32_t srvcHandle)
 {
     CLOGI("gatt server callback, service stop, srvcHandle=%u, status=%d", srvcHandle, status);
-    CommonStatusMsgContext *ctx = SoftBusCalloc(sizeof(CommonStatusMsgContext));
+    CommonStatusMsgContext *ctx = (CommonStatusMsgContext *)SoftBusCalloc(sizeof(CommonStatusMsgContext));
     CONN_CHECK_AND_RETURN_LOG(
         ctx != NULL, "receive gatt server callback, service stop handle failed: calloc service stop status msg failed");
     ctx->srvcHandle = srvcHandle;
@@ -777,7 +779,7 @@ static void BleServiceStopMsgHandler(CommonStatusMsgContext *ctx)
 static void BleServiceDeleteCallback(int32_t status, int32_t srvcHandle)
 {
     CLOGI("gatt server callback, service deleted, srvcHandle=%u, status=%d", srvcHandle, status);
-    CommonStatusMsgContext *ctx = SoftBusCalloc(sizeof(CommonStatusMsgContext));
+    CommonStatusMsgContext *ctx = (CommonStatusMsgContext *)SoftBusCalloc(sizeof(CommonStatusMsgContext));
     CONN_CHECK_AND_RETURN_LOG(
         ctx != NULL, "gatt server callback, service deleted handle failed: calloc service stop status msg failed");
     ctx->srvcHandle = srvcHandle;
@@ -973,7 +975,7 @@ static void BleRequestReadCallback(SoftBusGattReadRequest readCbPara)
         .status = SOFTBUS_BT_STATUS_SUCCESS,
         .attrHandle = readCbPara.transId,
         .valueLen = strlen("not support!") + 1,
-        .value = "not support!",
+        .value = (char *)("not support!"),
     };
     SoftBusGattsSendResponse(&response);
 }
