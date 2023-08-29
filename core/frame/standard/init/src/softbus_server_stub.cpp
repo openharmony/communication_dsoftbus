@@ -94,7 +94,7 @@ static inline int32_t CheckAndRecordAccessToken(const char* permission)
     if (type == TOKEN_HAP) {
         PrivacyKit::AddPermissionUsedRecord(tokenCaller, permission, successCnt, failCnt);
     }
-    
+
     return ret;
 }
 
@@ -215,7 +215,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
             return SOFTBUS_ACCESS_TOKEN_DENIED;
         }
     }
-    
+
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;
@@ -966,17 +966,41 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read clientName failed!");
         return SOFTBUS_IPC_ERR;
     }
-    uint32_t infoTypeLen;
-    if (!data.ReadUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read info type length failed!");
+    PublishInfo info;
+    int32_t mode, medium, freq;
+    (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
+    if (!data.ReadInt32(info.publishId) || !data.ReadInt32(mode) || !data.ReadInt32(medium) ||
+        !data.ReadInt32(freq)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read common publish info failed!");
         return SOFTBUS_IPC_ERR;
     }
-    const void *info = (void *)data.ReadRawData(infoTypeLen);
-    if (info == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read info failed!");
+    info.mode = (DiscoverMode)mode;
+    info.medium = (ExchangeMedium)medium;
+    info.freq = (ExchangeFreq)freq;
+    info.capability = data.ReadCString();
+    if (info.capability == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read capability failed!");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t retReply = PublishLNN(clientName, info, infoTypeLen);
+    if (!data.ReadUint32(info.dataLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read dataLen failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
+        info.capabilityData = (unsigned char *)data.ReadCString();
+        if (info.capabilityData == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read capabilityData failed!");
+            return SOFTBUS_IPC_ERR;
+        }
+    } else {
+        info.capabilityData = nullptr;
+        info.dataLen = 0;
+    }
+    if (!data.ReadBool(info.ranging)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner read ranging failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = PublishLNN(clientName, &info);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusPublishLNNInner write reply failed!");
         return SOFTBUS_IPC_ERR;
@@ -1011,17 +1035,41 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read clientName failed!");
         return SOFTBUS_IPC_ERR;
     }
-    uint32_t infoTypeLen;
-    if (!data.ReadUint32(infoTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read info type length failed!");
+    SubscribeInfo info;
+    int32_t mode, medium, freq;
+    (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
+    if (!data.ReadInt32(info.subscribeId) || !data.ReadInt32(mode) || !data.ReadInt32(medium) ||
+        !data.ReadInt32(freq)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read common subscribe info failed!");
         return SOFTBUS_IPC_ERR;
     }
-    const void *info = (void *)data.ReadRawData(infoTypeLen);
-    if (info == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read info failed!");
+    info.mode = (DiscoverMode)mode;
+    info.medium = (ExchangeMedium)medium;
+    info.freq = (ExchangeFreq)freq;
+    if (!data.ReadBool(info.isSameAccount) || !data.ReadBool(info.isWakeRemote)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read subscribe info flag failed!");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t retReply = RefreshLNN(clientName, info, infoTypeLen);
+    info.capability = data.ReadCString();
+    if (info.capability == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read capability failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.ReadUint32(info.dataLen)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read dataLen failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
+        info.capabilityData = (unsigned char *)data.ReadCString();
+        if (info.capabilityData == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner read capabilityData failed!");
+            return SOFTBUS_IPC_ERR;
+        }
+    } else {
+        info.capabilityData = nullptr;
+        info.dataLen = 0;
+    }
+    int32_t retReply = RefreshLNN(clientName, &info);
     if (!reply.WriteInt32(retReply)) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRefreshLNNInner write reply failed!");
         return SOFTBUS_IPC_ERR;

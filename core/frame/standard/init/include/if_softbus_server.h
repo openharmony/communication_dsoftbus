@@ -60,9 +60,9 @@ public:
     virtual int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data) = 0;
     virtual int32_t GrantPermission(int uid, int pid, const char *sessionName);
     virtual int32_t RemovePermission(const char *sessionName);
-    virtual int32_t PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+    virtual int32_t PublishLNN(const char *pkgName, const PublishInfo *info);
     virtual int32_t StopPublishLNN(const char *pkgName, int32_t publishId);
-    virtual int32_t RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen);
+    virtual int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info);
     virtual int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId);
     virtual int32_t ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId);
     virtual int32_t DeactiveMetaNode(const char *metaNodeId);

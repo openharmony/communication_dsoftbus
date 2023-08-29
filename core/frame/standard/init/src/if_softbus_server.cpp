@@ -35,11 +35,10 @@ int32_t ISoftBusServer::RemovePermission(const char *sessionName)
     return SOFTBUS_ERR;
 }
 
-int32_t ISoftBusServer::PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t ISoftBusServer::PublishLNN(const char *pkgName, const PublishInfo *info)
 {
     (void)pkgName;
     (void)info;
-    (void)infoTypeLen;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "PublishLNN ipc default impl");
     return SOFTBUS_ERR;
 }
@@ -52,11 +51,10 @@ int32_t ISoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
     return SOFTBUS_ERR;
 }
 
-int32_t ISoftBusServer::RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t ISoftBusServer::RefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
     (void)pkgName;
     (void)info;
-    (void)infoTypeLen;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RefreshLNN ipc default impl");
     return SOFTBUS_ERR;
 }
