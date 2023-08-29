@@ -97,6 +97,48 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
     return SOFTBUS_OK;
 }
 
+static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
+{
+    if (getAttr == NULL || req == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadSessionAttrs getAttr is NULL");
+        return;
+    }
+    LinkType *pGetArr = NULL;
+
+    if (!ReadInt32(req, &getAttr->dataType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read dataType failed");
+        return;
+    }
+
+    if (!ReadInt32(req, &getAttr->linkTypeNum)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read linkTypeNum failed");
+        return;
+    }
+
+    if (getAttr->linkTypeNum > 0) {
+        pGetArr = (LinkType *)ReadBuffer(req, sizeof(LinkType) * getAttr->linkTypeNum);
+    }
+
+    if (pGetArr != NULL && getAttr->linkTypeNum <= LINK_TYPE_MAX) {
+        (void)memcpy_s(getAttr->linkType, sizeof(LinkType) * LINK_TYPE_MAX,
+                       pGetArr, sizeof(LinkType) * getAttr->linkTypeNum);
+    }
+
+    if (!ReadInt32(req, &getAttr->attr.streamAttr.streamType)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read streamType failed");
+        return;
+    }
+
+    if (!ReadUint16(req, &getAttr->fastTransDataSize)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read fastTransDataSize failed");
+        return;
+    }
+
+    if (getAttr->fastTransDataSize != 0) {
+        getAttr->fastTransData = (uint8_t *)ReadRawData(req, getAttr->fastTransDataSize);
+    }
+}
+
 int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
 {
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "open session ipc server pop");
@@ -108,6 +150,9 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     int32_t ret;
     uint32_t size;
     SessionParam param;
+    SessionAttribute getAttr;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    (void)memset_s(&getAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
     TransSerializer transSerializer;
     transSerializer.transInfo.channelId = INVALID_CHANNEL_ID;
     transSerializer.transInfo.channelType = CHANNEL_TYPE_BUTT;
@@ -115,7 +160,8 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     param.peerSessionName = (const char *)ReadString(req, &size);
     param.peerDeviceId = (const char *)ReadString(req, &size);
     param.groupId = (const char *)ReadString(req, &size);
-    param.attr = (SessionAttribute *)ReadRawData(req, sizeof(SessionAttribute));
+    ServerReadSessionAttrs(req, &getAttr);
+    param.attr = &getAttr;
 
     ret = CheckOpenSessionPremission(param.sessionName, param.peerSessionName);
     if (ret != SOFTBUS_OK) {

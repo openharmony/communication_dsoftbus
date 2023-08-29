@@ -154,6 +154,54 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     return ret;
 }
 
+static bool TransWriteIpcSessionAttrs(IpcIo *request, const SessionAttribute *attrs)
+{
+    if (attrs == NULL || request == NULL) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "attrs is nullptr!");
+        return false;
+    }
+
+    if (!WriteInt32(request, attrs->dataType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs dataType failed!");
+        return false;
+    }
+
+    if (!WriteInt32(request, attrs->linkTypeNum)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs linkTypeNum failed!");
+        return false;
+    }
+
+    if (attrs->linkTypeNum > 0) {
+        if (!WriteBuffer(request, attrs->linkType, sizeof(LinkType) * attrs->linkTypeNum)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs linkType failed!");
+            return false;
+        }
+    }
+
+    if (!WriteInt32(request, attrs->attr.streamAttr.streamType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs streamAttr failed!");
+        return false;
+    }
+
+    if (attrs->fastTransData != NULL) {
+        if (!WriteUint16(request, attrs->fastTransDataSize)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransDataSize failed!");
+            return false;
+        }
+        if (!WriteRawData(request, attrs->fastTransData, attrs->fastTransDataSize)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransData failed!");
+            return false;
+        }
+    } else {
+        if (!WriteUint16(request, 0)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransDataSize failed!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "ServerIpcOpenSession");
@@ -165,8 +213,8 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     WriteString(&request, param->peerSessionName);
     WriteString(&request, param->peerDeviceId);
     WriteString(&request, param->groupId);
-    bool value = WriteRawData(&request, (void*)param->attr, sizeof(SessionAttribute));
-    if (!value) {
+    if (!TransWriteIpcSessionAttrs(&request, param->attr)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
 
