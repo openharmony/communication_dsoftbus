@@ -43,7 +43,7 @@ static INetworkingListenerEntry *FindListenerEntry(const char *sessionName)
     return NULL;
 }
 
-NO_SANITIZE("cfi")
+
 int32_t NotifyNetworkingChannelOpened(
     const char *sessionName, int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
 {
@@ -61,7 +61,7 @@ int32_t NotifyNetworkingChannelOpened(
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi")
+
 void NotifyNetworkingChannelOpenFailed(const char *sessionName, int32_t channelId, const char *networkId)
 {
     INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
@@ -72,7 +72,7 @@ void NotifyNetworkingChannelOpenFailed(const char *sessionName, int32_t channelI
     entry->listener.onChannelOpenFailed(channelId, networkId);
 }
 
-NO_SANITIZE("cfi") void NotifyNetworkingChannelClosed(const char *sessionName, int32_t channelId)
+void NotifyNetworkingChannelClosed(const char *sessionName, int32_t channelId)
 {
     INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
     if (entry == NULL || entry->listener.onChannelClosed == NULL) {
@@ -100,7 +100,7 @@ static int32_t TransNotifyDecryptNetworkingMsg(const char *sessionKey,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi")
+
 void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, const char *data, uint32_t len)
 {
     if (sessionName == NULL || data == NULL || len <= OVERHEAD_LEN)  {
@@ -136,7 +136,7 @@ void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, con
     SoftBusFree(outData);
 }
 
-NO_SANITIZE("cfi")
+
 int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
 {
     int32_t unuse = -1;

@@ -38,7 +38,7 @@ static char g_noPkgNameSessionWhiteList[NO_PKG_NAME_SESSION_WHITE_LIST_NUM][SESS
     "com.huawei.devicemanager.resident",
 };
 
-NO_SANITIZE("cfi") bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
+bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
 {
     if (sessionName == NULL) {
         return false;

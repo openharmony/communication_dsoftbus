@@ -87,7 +87,7 @@ static void Unlock(void)
     (void)SoftBusMutexUnlock(&g_transLaneMutex);
 }
 
-NO_SANITIZE("cfi") static int32_t PostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2, void *obj)
+static int32_t PostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2, void *obj)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
@@ -283,7 +283,7 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
+static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
 {
     LaneGenerateParam param;
     param.linkType = infoNode->type;
@@ -370,7 +370,7 @@ static void UpdateLinkType(uint32_t laneId, LaneLinkType linkType)
     Unlock();
 }
 
-NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const LaneLinkInfo *info)
+static void NotifyLaneAllocSuccess(uint32_t laneId, const LaneLinkInfo *info)
 {
     TransReqInfo reqInfo;
     if (GetLaneReqInfo(laneId, &reqInfo) != SOFTBUS_OK) {
@@ -398,7 +398,7 @@ NO_SANITIZE("cfi") static void NotifyLaneAllocSuccess(uint32_t laneId, const Lan
     g_laneIdCallback->OnLaneIdEnabled(laneId, profileId);
 }
 
-NO_SANITIZE("cfi") static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
+static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
 {
     TransReqInfo reqInfo;
     if (GetLaneReqInfo(laneId, &reqInfo) != SOFTBUS_OK) {
@@ -550,7 +550,7 @@ static void LaneLinkException(SoftBusMessage *msg)
     NotifyLaneStateChange(laneId, state);
 }
 
-NO_SANITIZE("cfi") static void MsgHandler(SoftBusMessage *msg)
+static void MsgHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;
@@ -640,7 +640,7 @@ static LaneInterface g_transLaneObject = {
     .FreeLane = Free,
 };
 
-NO_SANITIZE("cfi") LaneInterface *TransLaneGetInstance(void)
+LaneInterface *TransLaneGetInstance(void)
 {
     return &g_transLaneObject;
 }

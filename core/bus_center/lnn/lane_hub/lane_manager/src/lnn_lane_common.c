@@ -154,7 +154,7 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC_DIRECT] = BleDirectInfoProc,
 };
 
-NO_SANITIZE("cfi") int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     if ((linkInfo == NULL) || (connInfo == NULL) || (profile == NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneInfoProcess param invalid");
@@ -167,7 +167,7 @@ NO_SANITIZE("cfi") int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneCon
     return g_funcList[linkInfo->type](linkInfo, connInfo, profile);
 }
 
-NO_SANITIZE("cfi") int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueSize)
+int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueSize)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
@@ -181,7 +181,7 @@ NO_SANITIZE("cfi") int32_t LnnCreateData(Map *map, uint32_t key, const void *val
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void *LnnReadData(const Map *map, uint32_t key)
+void *LnnReadData(const Map *map, uint32_t key)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
@@ -192,7 +192,7 @@ NO_SANITIZE("cfi") void *LnnReadData(const Map *map, uint32_t key)
     return data;
 }
 
-NO_SANITIZE("cfi") void LnnDeleteData(Map *map, uint32_t key)
+void LnnDeleteData(Map *map, uint32_t key)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
@@ -205,12 +205,12 @@ NO_SANITIZE("cfi") void LnnDeleteData(Map *map, uint32_t key)
     }
 }
 
-NO_SANITIZE("cfi") uint64_t LnnGetSysTimeMs(void)
+uint64_t LnnGetSysTimeMs(void)
 {
     return SoftBusGetSysTimeMs();
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitLaneLooper(void)
+int32_t LnnInitLaneLooper(void)
 {
     SoftBusLooper *looper = CreateNewLooper("Lane-looper");
     if (!looper) {
@@ -222,7 +222,7 @@ NO_SANITIZE("cfi") int32_t LnnInitLaneLooper(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitLaneLooper(void)
+void LnnDeinitLaneLooper(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_LANE);
     if (looper != NULL) {

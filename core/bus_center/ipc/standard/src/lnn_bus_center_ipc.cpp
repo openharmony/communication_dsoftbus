@@ -218,7 +218,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
 
@@ -242,7 +242,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerJoin(const char *pkgName, int32_t calling
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t MetaNodeIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr,
+int32_t MetaNodeIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr,
     CustomData *customData, uint32_t addrTypeLen)
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
@@ -264,7 +264,7 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcServerJoin(const char *pkgName, int32_t ca
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
+int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
 {
     if (pkgName == nullptr || networkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
@@ -282,7 +282,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcServerLeave(const char *pkgName, int32_t callin
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t MetaNodeIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
+int32_t MetaNodeIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
 {
     if (pkgName == nullptr || networkId == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
@@ -300,7 +300,7 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcServerLeave(const char *pkgName, int32_t c
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen,
+int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen,
     int *infoNum)
 {
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
@@ -310,42 +310,42 @@ NO_SANITIZE("cfi") int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void 
     return LnnGetAllOnlineNodeInfo(reinterpret_cast<NodeBasicInfo **>(info), infoNum);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
+int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
     (void)infoTypeLen;
     return LnnGetLocalDeviceInfo(reinterpret_cast<NodeBasicInfo *>(info));
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
+int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
     uint32_t len)
 {
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId,
+int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId,
     uint16_t dataChangeFlag)
 {
     (void)pkgName;
     return LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char *targetNetworkId,
+int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char *targetNetworkId,
     int32_t accuracy, int32_t period)
 {
     return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
+int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
     return LnnPublishService(pkgName, info, false);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
     return LnnUnPublishService(pkgName, publishId, false);
 }
@@ -395,7 +395,7 @@ static int32_t DeleteRefreshLnnInfo(const char *pkgName, int32_t callingPid)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
+int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
 {
     if (pkgName == nullptr || info == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
@@ -413,7 +413,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t calling
     return LnnStartDiscDevice(pkgName, info, &callback, false);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId)
+int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId)
 {
     if (IsRepeatRfreshLnnRequest(pkgName, callingPid) && (DeleteRefreshLnnInfo(pkgName, callingPid) != SOFTBUS_OK)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop refresh lnn, clean info fail");
@@ -427,23 +427,23 @@ int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
     return LnnActiveMetaNode(info, metaNodeId);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
+int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId)
 {
     return LnnDeactiveMetaNode(metaNodeId);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
+int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 {
     return LnnGetAllMetaNodeInfo(infos, infoNum);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode)
 {
     return LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
+int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
     int32_t retCode)
 {
     if (addr == nullptr) {
@@ -470,7 +470,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeL
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
+int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
     int32_t retCode)
 {
     if (addr == nullptr) {
@@ -497,7 +497,7 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addr
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
+int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -516,7 +516,7 @@ NO_SANITIZE("cfi") int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
+int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -535,17 +535,17 @@ NO_SANITIZE("cfi") int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, i
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
+int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)
 {
     return ClinetOnNodeOnlineStateChanged(isOnline, info, infoTypeLen);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     return ClinetOnNodeBasicInfoChanged(info, infoTypeLen, type);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
+int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {
     return ClientOnTimeSyncResult(pkgName, pid, info, infoTypeLen, retCode);
@@ -593,7 +593,7 @@ static void RemoveRefreshRequestInfoByPkgName(const char *pkgName)
     }
 }
 
-NO_SANITIZE("cfi") void BusCenterServerDeathCallback(const char *pkgName)
+void BusCenterServerDeathCallback(const char *pkgName)
 {
     if (pkgName == nullptr) {
         return;

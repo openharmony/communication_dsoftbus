@@ -377,7 +377,7 @@ static void ProcessRemoveAll(void)
     }
 }
 
-NO_SANITIZE("cfi") static void TimeSyncMessageHandler(SoftBusMessage *msg)
+static void TimeSyncMessageHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync msg is null");
@@ -415,7 +415,7 @@ static SoftBusMessage *CreateTimeSyncMessage(int32_t msgType, void *para)
     return msg;
 }
 
-NO_SANITIZE("cfi") static int32_t PostMessageToHandler(int32_t msgType, void *para)
+static int32_t PostMessageToHandler(int32_t msgType, void *para)
 {
     SoftBusMessage *msg = CreateTimeSyncMessage(msgType, para);
     if (msg == NULL) {
@@ -426,7 +426,7 @@ NO_SANITIZE("cfi") static int32_t PostMessageToHandler(int32_t msgType, void *pa
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t retCode)
+static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t retCode)
 {
     TimeSyncCompleteMsgPara *para = NULL;
 
@@ -463,7 +463,7 @@ static bool CheckTimeSyncReqInfo(const StartTimeSyncReqMsgPara *info)
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitTimeSync(void)
+int32_t LnnInitTimeSync(void)
 {
     ListInit(&g_timeSyncCtrl.reqList);
     g_timeSyncCtrl.looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -478,7 +478,7 @@ NO_SANITIZE("cfi") int32_t LnnInitTimeSync(void)
     return LnnTimeSyncImplInit();
 }
 
-NO_SANITIZE("cfi") void LnnDeinitTimeSync(void)
+void LnnDeinitTimeSync(void)
 {
     if (g_timeSyncCtrl.looper == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "time sync not init");
@@ -490,7 +490,7 @@ NO_SANITIZE("cfi") void LnnDeinitTimeSync(void)
     LnnTimeSyncImplDeinit();
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
+int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
     TimeSyncAccuracy accuracy, TimeSyncPeriod period)
 {
     StartTimeSyncReqMsgPara *para = NULL;
@@ -530,7 +530,7 @@ NO_SANITIZE("cfi") int32_t LnnStartTimeSync(const char *pkgName, int32_t calling
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     StopTimeSyncReqMsgPara *para = NULL;
 

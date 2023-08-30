@@ -49,7 +49,7 @@ static LnnPhysicalSubnet *g_physicalSubnets[MAX_SUPPORTED_PHYSICAL_SUBNET];
         SoftBusMutexUnlock(LOCK);                                            \
     } while (false)
 
-NO_SANITIZE("cfi") int32_t LnnInitPhysicalSubnetManager(void)
+int32_t LnnInitPhysicalSubnetManager(void)
 {
     return SoftBusMutexInit(&g_physicalSubnetsLock, NULL);
 }
@@ -66,7 +66,7 @@ static void ClearSubnetManager(void)
     }
 }
 
-NO_SANITIZE("cfi") void LnnDeinitPhysicalSubnetManager(void)
+void LnnDeinitPhysicalSubnetManager(void)
 {
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, ClearSubnetManager());
     if (SoftBusMutexDestroy(&g_physicalSubnetsLock) != SOFTBUS_OK) {
@@ -90,7 +90,7 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
+int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
 {
     if (subnet == NULL || subnet->protocol == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol of subnet is required!", __func__);
@@ -114,7 +114,7 @@ static int32_t DoUnregistSubnetByType(ProtocolType type)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
+int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 {
     int32_t ret = SOFTBUS_OK;
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoUnregistSubnetByType(type));
@@ -144,7 +144,7 @@ void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType proto
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyStatusChange(ifName, protocolType, status));
 }
 
-NO_SANITIZE("cfi") static void EnableResetingSubnetByType(ProtocolType protocolType)
+static void EnableResetingSubnetByType(ProtocolType protocolType)
 {
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
@@ -156,7 +156,7 @@ NO_SANITIZE("cfi") static void EnableResetingSubnetByType(ProtocolType protocolT
     }
 }
 
-NO_SANITIZE("cfi") void LnnNotifyAllTypeOffline(ConnectionAddrType type)
+void LnnNotifyAllTypeOffline(ConnectionAddrType type)
 {
     if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_MAX) {
         CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_IP));
@@ -178,7 +178,7 @@ static bool DoVisitSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
     return true;
 }
 
-NO_SANITIZE("cfi") bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
+bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
 {
     bool ret = false;
     CALL_WITH_LOCK(ret, &g_physicalSubnetsLock, DoVisitSubnet(callback, data));

@@ -432,7 +432,7 @@ static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void ProcessDisNonPacket(const uint8_t *advData, uint32_t advLen, char rssi,
+static void ProcessDisNonPacket(const uint8_t *advData, uint32_t advLen, char rssi,
     DeviceInfo *foundInfo)
 {
     DeviceWrapper device = {
@@ -548,7 +548,7 @@ static void BleOnScanStop(int listenerId, int status)
     g_isScanning = false;
 }
 
-NO_SANITIZE("cfi") static void BleOnStateChanged(int32_t listenerId, int32_t state)
+static void BleOnStateChanged(int32_t listenerId, int32_t state)
 {
     (void)listenerId;
     SoftBusMessage *msg = NULL;
@@ -805,7 +805,7 @@ static void BuildAdvParam(SoftBusBleAdvParams *advParam)
     advParam->txPower = BLE_ADV_TX_POWER_DEFAULT;
 }
 
-NO_SANITIZE("cfi") static int32_t StartAdvertiser(int32_t adv)
+static int32_t StartAdvertiser(int32_t adv)
 {
     DLOGI("enter");
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
@@ -872,7 +872,7 @@ static int32_t StopAdvertiser(int32_t adv)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t UpdateAdvertiser(int32_t adv)
+static int32_t UpdateAdvertiser(int32_t adv)
 {
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
@@ -1118,7 +1118,7 @@ static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t
     return msg;
 }
 
-NO_SANITIZE("cfi") static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t activeFlags,
+static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t activeFlags,
     int32_t funcCode, const void *option)
 {
     if (SoftBusGetBtState() != BLE_ENABLE) {
@@ -1198,7 +1198,7 @@ static int32_t UpdateAdvertiserDeviceInfo(int32_t adv)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
+static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     (void)type;
     if (UpdateAdvertiserDeviceInfo(NON_ADV_ID) != SOFTBUS_OK || UpdateAdvertiserDeviceInfo(CON_ADV_ID) != SOFTBUS_OK) {
@@ -1257,7 +1257,7 @@ static void InitDiscBleInfo(DiscBleInfo *info)
     }
 }
 
-NO_SANITIZE("cfi") static void DiscBleInitPublish(void)
+static void DiscBleInitPublish(void)
 {
     InitDiscBleInfo(&g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE]);
     InitDiscBleInfo(&g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE]);
@@ -1321,7 +1321,7 @@ static void BleDiscTurnOff(SoftBusMessage *msg)
     DLOGI("end");
 }
 
-NO_SANITIZE("cfi") static int32_t ReplyPassiveNonBroadcast(void)
+static int32_t ReplyPassiveNonBroadcast(void)
 {
     DLOGI("enter");
     SoftBusMessage *msg = CreateBleHandlerMsg(REPLY_PASSIVE_NON_BROADCAST, 0, 0, NULL);
@@ -1332,7 +1332,7 @@ NO_SANITIZE("cfi") static int32_t ReplyPassiveNonBroadcast(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
+static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
 {
     DLOGI("enter");
     uintptr_t key = (uintptr_t)args;
@@ -1369,7 +1369,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void StartTimeout(const char *key)
+static void StartTimeout(const char *key)
 {
     DLOGI("enter");
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
@@ -1505,7 +1505,7 @@ static void ProcessTimeout(SoftBusMessage *msg)
     UpdateAdvertiser(NON_ADV_ID);
 }
 
-NO_SANITIZE("cfi") static void DiscBleMsgHandler(SoftBusMessage *msg)
+static void DiscBleMsgHandler(SoftBusMessage *msg)
 {
     switch (msg->what) {
         case PUBLISH_ACTIVE_SERVICE:
@@ -1614,7 +1614,7 @@ static int32_t InitBleListener(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
+DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 {
     DLOGI("enter");
     if (callback == NULL || callback->OnDeviceFound == NULL) {
@@ -1690,7 +1690,7 @@ static void DiscBleInfoDeinit(void)
     }
 }
 
-NO_SANITIZE("cfi") void DiscSoftBusBleDeinit(void)
+void DiscSoftBusBleDeinit(void)
 {
     if (g_isScanning) {
         (void)StopScaner();
@@ -1702,7 +1702,7 @@ NO_SANITIZE("cfi") void DiscSoftBusBleDeinit(void)
     AdvertiserDeinit();
 }
 
-NO_SANITIZE("cfi") static int32_t BleInfoDump(int fd)
+static int32_t BleInfoDump(int fd)
 {
     if (SoftBusMutexLock(&g_bleInfoLock) != SOFTBUS_OK) {
         DLOGE("lock failed.");

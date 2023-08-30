@@ -47,7 +47,7 @@ typedef struct {
     sem_t wait;
 } QueryP2pDevIsOnline;
 
-NO_SANITIZE("cfi") int32_t P2pLinkGetRequestId(void)
+int32_t P2pLinkGetRequestId(void)
 {
     static int32_t requestId = 0;
     requestId++;
@@ -57,12 +57,12 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetRequestId(void)
     return requestId;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkInit(void)
+int32_t P2pLinkInit(void)
 {
     return P2pLinkManagerInit();
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
+int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
 {
     int32_t ret;
 
@@ -89,7 +89,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
+int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
 {
     int32_t ret;
 
@@ -163,7 +163,7 @@ static void LoopP2pLinkIsRoleConfict(P2pLoopMsg msgType, void *arg)
     return;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info)
+int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info)
 {
     RoleIsConfictLoopInfo loopInfo;
     (void)memset_s(&loopInfo, sizeof(loopInfo), 0, sizeof(loopInfo));
@@ -220,7 +220,7 @@ static void LoopP2pLinkQueryIpByMac(P2pLoopMsg msgType, void *arg)
     return;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char* peerMac, int32_t macLen)
+int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char* peerMac, int32_t macLen)
 {
     QueryP2pMacLoopInfo queryInfo;
     int32_t ret;
@@ -266,7 +266,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char* p
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void P2pLinkRegPeerDevStateChange(const P2pLinkPeerDevStateCb *cb)
+void P2pLinkRegPeerDevStateChange(const P2pLinkPeerDevStateCb *cb)
 {
     if (cb == NULL) {
         return;
@@ -274,7 +274,7 @@ NO_SANITIZE("cfi") void P2pLinkRegPeerDevStateChange(const P2pLinkPeerDevStateCb
     P2pLinkSetDevStateCallback(cb);
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen)
+int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen)
 {
     char tmpIp[P2P_IP_LEN] = {0};
     int32_t ret;
@@ -319,7 +319,7 @@ static void LoopP2pLinkQueryDevOnline(P2pLoopMsg msgType, void *arg)
     return;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
+int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
 {
     QueryP2pDevIsOnline queryInfo;
     int32_t ret;

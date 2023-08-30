@@ -38,7 +38,7 @@ static unsigned int g_timerType;
 
 static TimerFunc g_timerfunc = NULL;
 
-NO_SANITIZE("cfi") static void HandleTimeoutAdapterFun(union sigval para)
+static void HandleTimeoutAdapterFun(union sigval para)
 {
     (void)para;
     if (g_timerfunc != NULL) {

@@ -53,7 +53,7 @@ static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {
     LnnDeinitDriverMonitorImpl,
 };
 
-NO_SANITIZE("cfi") int32_t LnnInitEventMonitor(void)
+int32_t LnnInitEventMonitor(void)
 {
     for (uint32_t i = 0; i < MONITOR_IMPL_MAX_TYPE; ++i) {
         if (g_monitorImplInit[i] == NULL) {
@@ -67,7 +67,7 @@ NO_SANITIZE("cfi") int32_t LnnInitEventMonitor(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitEventMonitor(void)
+void LnnDeinitEventMonitor(void)
 {
     uint32_t i;
 

@@ -141,7 +141,7 @@ static bool CheckListener(const ILaneIdStateListener *listener)
     return true;
 }
 
-NO_SANITIZE("cfi") void RegisterLaneIdListener(const ILaneIdStateListener *listener)
+void RegisterLaneIdListener(const ILaneIdStateListener *listener)
 {
     if (CheckListener(listener) == false) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register fail");
@@ -166,7 +166,7 @@ NO_SANITIZE("cfi") void RegisterLaneIdListener(const ILaneIdStateListener *liste
     Unlock();
 }
 
-NO_SANITIZE("cfi") void UnregisterLaneIdListener(const ILaneIdStateListener *listener)
+void UnregisterLaneIdListener(const ILaneIdStateListener *listener)
 {
     if (listener == NULL) {
         return;
@@ -218,7 +218,7 @@ static int32_t GetAllLaneIdListener(ILaneIdStateListener **listener, uint32_t *l
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
+static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
 {
     ILaneIdStateListener *listener = NULL;
     uint32_t listenerNum = 0;
@@ -234,7 +234,7 @@ NO_SANITIZE("cfi") static void LaneIdEnabled(uint32_t laneId, uint32_t profileId
     SoftBusFree(listener);
 }
 
-NO_SANITIZE("cfi") static void LaneIdDisabled(uint32_t laneId, uint32_t laneProfileId)
+static void LaneIdDisabled(uint32_t laneId, uint32_t laneProfileId)
 {
     ILaneIdStateListener *listener = NULL;
     uint32_t listenerNum = 0;
@@ -263,12 +263,12 @@ static bool RequestInfoCheck(const LaneRequestOption *request, const ILaneListen
 }
 
 /* return laneId if the operation is successful, return 0 otherwise. */
-NO_SANITIZE("cfi") uint32_t ApplyLaneId(LaneType type)
+uint32_t ApplyLaneId(LaneType type)
 {
     return AllocLaneId(type);
 }
 
-NO_SANITIZE("cfi") int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
+int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
     const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
@@ -291,7 +291,7 @@ NO_SANITIZE("cfi") int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOpti
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnFreeLane(uint32_t laneId)
+int32_t LnnFreeLane(uint32_t laneId)
 {
     uint32_t laneType = laneId >> LANE_ID_TYPE_SHIFT;
     if (laneType >= LANE_TYPE_BUTT) {
@@ -310,7 +310,7 @@ NO_SANITIZE("cfi") int32_t LnnFreeLane(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo)
+QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo)
 {
     if (queryInfo == NULL) {
         return QUERY_RESULT_REQUEST_ILLEGAL;
@@ -340,7 +340,7 @@ static int32_t LaneDelayInit(void)
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t InitLane(void)
+int32_t InitLane(void)
 {
     if (LnnInitLaneLooper() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[InitLane]init laneLooper fail");
@@ -373,7 +373,7 @@ NO_SANITIZE("cfi") int32_t InitLane(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DeinitLane(void)
+void DeinitLane(void)
 {
     DeinitLaneModel();
     DeinitLaneLink();

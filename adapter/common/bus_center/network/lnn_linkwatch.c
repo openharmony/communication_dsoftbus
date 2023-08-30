@@ -140,7 +140,7 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") bool LnnIsLinkReady(const char *iface)
+bool LnnIsLinkReady(const char *iface)
 {
     if (iface == NULL) {
         return false;

@@ -90,7 +90,7 @@ static int32_t ResetChanIsEqual(int status, ProxyChannelInfo *a, ProxyChannelInf
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity)
+int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity)
 {
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
@@ -186,7 +186,7 @@ static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
+int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
 {
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -234,7 +234,7 @@ int32_t TransProxyGetChanByReqId(int32_t reqId, ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
+void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
 {
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -262,7 +262,7 @@ NO_SANITIZE("cfi") void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
     return;
 }
 
-NO_SANITIZE("cfi") void TransProxyDelChanByChanId(int32_t chanlId)
+void TransProxyDelChanByChanId(int32_t chanlId)
 {
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -290,7 +290,7 @@ NO_SANITIZE("cfi") void TransProxyDelChanByChanId(int32_t chanlId)
     return;
 }
 
-NO_SANITIZE("cfi") void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
+void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
 {
     ProxyChannelInfo *item = NULL;
     if (g_proxyChannelList == NULL) {
@@ -343,7 +343,7 @@ static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t err
     }
 }
 
-NO_SANITIZE("cfi") void TransProxyDelByConnId(uint32_t connId)
+void TransProxyDelByConnId(uint32_t connId)
 {
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -490,7 +490,7 @@ static int32_t TransProxyKeepAlvieChan(ProxyChannelInfo *chanInfo)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo)
+int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -517,7 +517,7 @@ NO_SANITIZE("cfi") int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, Proxy
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetNewChanSeq(int32_t channelId)
+int32_t TransProxyGetNewChanSeq(int32_t channelId)
 {
     ProxyChannelInfo *item = NULL;
     int32_t seq = 0;
@@ -543,7 +543,7 @@ NO_SANITIZE("cfi") int32_t TransProxyGetNewChanSeq(int32_t channelId)
     return seq;
 }
 
-NO_SANITIZE("cfi") int64_t TransProxyGetAuthId(int32_t channelId)
+int64_t TransProxyGetAuthId(int32_t channelId)
 {
     int64_t authId;
     ProxyChannelInfo *item = NULL;
@@ -568,7 +568,7 @@ NO_SANITIZE("cfi") int64_t TransProxyGetAuthId(int32_t channelId)
     return AUTH_INVALID_ID;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
+int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
 {
     ProxyChannelInfo *item = NULL;
 
@@ -699,7 +699,7 @@ static int32_t TransProxyProcessDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
+void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
@@ -929,7 +929,7 @@ void TransProxyProcessHandshakeAuthMsg(const ProxyMessage *msg)
     AuthSessionProcessAuthData(authSeq, (uint8_t*)msg->data, msg->dateLen);
 }
 
-NO_SANITIZE("cfi") static void ProcessHandshakeMsgNotifyNearBy(ProxyChannelInfo *chan)
+static void ProcessHandshakeMsgNotifyNearBy(ProxyChannelInfo *chan)
 {
     if (chan->appInfo.appType == APP_TYPE_NORMAL) {
         int myHandleId = NotifyNearByUpdateHandleId(chan->channelId);
@@ -964,7 +964,7 @@ static void TransProxyFastDataRecv(ProxyChannelInfo *chan)
     return;
 }
 
-NO_SANITIZE("cfi") void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
+void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
         "recv Handshake myid %d peerid %d", msg->msgHead.myId, msg->msgHead.peerId);
@@ -1006,7 +1006,7 @@ NO_SANITIZE("cfi") void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
 }
 
-NO_SANITIZE("cfi") void TransProxyProcessResetMsg(const ProxyMessage *msg)
+void TransProxyProcessResetMsg(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
@@ -1060,7 +1060,7 @@ NO_SANITIZE("cfi") void TransProxyProcessResetMsg(const ProxyMessage *msg)
     SoftBusFree(info);
 }
 
-NO_SANITIZE("cfi") void TransProxyProcessKeepAlive(const ProxyMessage *msg)
+void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
@@ -1089,7 +1089,7 @@ NO_SANITIZE("cfi") void TransProxyProcessKeepAlive(const ProxyMessage *msg)
     SoftBusFree(info);
 }
 
-NO_SANITIZE("cfi") void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
+void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
@@ -1115,7 +1115,7 @@ NO_SANITIZE("cfi") void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
     SoftBusFree(info);
 }
 
-NO_SANITIZE("cfi") void TransProxyProcessDataRecv(const ProxyMessage *msg)
+void TransProxyProcessDataRecv(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
@@ -1134,7 +1134,7 @@ NO_SANITIZE("cfi") void TransProxyProcessDataRecv(const ProxyMessage *msg)
     SoftBusFree(info);
 }
 
-NO_SANITIZE("cfi") void TransProxyonMessageReceived(const ProxyMessage *msg)
+void TransProxyonMessageReceived(const ProxyMessage *msg)
 {
     if (msg == NULL) {
         return;
@@ -1187,7 +1187,7 @@ static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
     }
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
+int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
 {
     chan->myId = channelId;
     chan->channelId = channelId;
@@ -1244,12 +1244,12 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
     return;
 }
 
-NO_SANITIZE("cfi") void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
+void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     (void)OnProxyChannelOpenFailed(channelId, appInfo, errCode);
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connInfo,
+int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
 {
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
@@ -1465,7 +1465,7 @@ static void TransNotifyOffLine(const LnnEventBasicInfo *info)
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_BLE);
 }
 
-NO_SANITIZE("cfi") static int32_t TransProxyManagerInitInner(const IServerChannelCallBack *cb)
+static int32_t TransProxyManagerInitInner(const IServerChannelCallBack *cb)
 {
     if (TransProxySetCallBack(cb) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -1478,7 +1478,7 @@ NO_SANITIZE("cfi") static int32_t TransProxyManagerInitInner(const IServerChanne
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
+int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 {
     if (TransProxyManagerInitInner(cb) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init proxy manager failed");
@@ -1515,7 +1515,7 @@ NO_SANITIZE("cfi") int32_t TransProxyManagerInit(const IServerChannelCallBack *c
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
+int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionLen)
 {
     if (pkgName == NULL || sessionName == NULL) {
@@ -1560,7 +1560,7 @@ static void TransProxyManagerDeinitInner(void)
     DestroySoftBusList(g_proxyChannelList);
 }
 
-NO_SANITIZE("cfi") void TransProxyManagerDeinit(void)
+void TransProxyManagerDeinit(void)
 {
     TransProxyManagerDeinitInner();
 
@@ -1584,7 +1584,7 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
     return;
 }
 
-NO_SANITIZE("cfi") void TransProxyDeathCallback(const char *pkgName, int32_t pid)
+void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 {
     if ((pkgName == NULL) || (g_proxyChannelList == NULL)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pkgName or proxy channel list is null.");
@@ -1612,7 +1612,7 @@ NO_SANITIZE("cfi") void TransProxyDeathCallback(const char *pkgName, int32_t pid
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransProxyDeathCallback end.");
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo)
+int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo* appInfo)
 {
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -1637,7 +1637,7 @@ NO_SANITIZE("cfi") int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo*
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
+int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
 {
     if (g_proxyChannelList == NULL) {
         return SOFTBUS_ERR;
@@ -1665,7 +1665,7 @@ NO_SANITIZE("cfi") int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
+int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt)
 {
     if (connOpt == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);

@@ -21,7 +21,7 @@
 
 static IServerChannelCallBack g_channelCb;
 
-NO_SANITIZE("cfi") int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb)
+int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb)
 {
     if (cb == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -29,29 +29,29 @@ NO_SANITIZE("cfi") int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb)
     g_channelCb = *cb;
     return SOFTBUS_OK;
 }
-NO_SANITIZE("cfi") int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
+int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
 {
     return g_channelCb.OnChannelOpened(pkgName, pid, sessionName, channel);
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
+int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
     return g_channelCb.OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_TCP_DIRECT);
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
+int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
     int32_t errCode)
 {
     return g_channelCb.OnChannelOpenFailed(pkgName, pid, channelId, CHANNEL_TYPE_TCP_DIRECT, errCode);
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcGetPkgName(const char *sessionName, char *pkgName, uint16_t len)
+int32_t TransTdcGetPkgName(const char *sessionName, char *pkgName, uint16_t len)
 {
     return g_channelCb.GetPkgNameBySessionName(sessionName, pkgName, len);
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
+int32_t TransTdcGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     return g_channelCb.GetUidAndPidBySessionName(sessionName, uid, pid);
 }

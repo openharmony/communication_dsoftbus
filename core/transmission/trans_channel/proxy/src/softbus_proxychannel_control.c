@@ -48,7 +48,7 @@ static int32_t TransProxyEncryptInnerMessage(const char *sessionKey,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
+int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
     uint32_t payLoadLen, int32_t priority)
 {
     if (info == NULL) {
@@ -117,7 +117,7 @@ static int32_t SetCipherOfHandshakeMsg(uint32_t channelId, uint8_t *cipher)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyHandshake(ProxyChannelInfo *info)
+int32_t TransProxyHandshake(ProxyChannelInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
@@ -161,7 +161,7 @@ NO_SANITIZE("cfi") int32_t TransProxyHandshake(ProxyChannelInfo *info)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
+int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
 {
     if (chan == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
@@ -204,7 +204,7 @@ NO_SANITIZE("cfi") int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelI
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
+void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
@@ -241,7 +241,7 @@ NO_SANITIZE("cfi") void TransProxyKeepalive(uint32_t connId, const ProxyChannelI
     }
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
+int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);
@@ -278,7 +278,7 @@ NO_SANITIZE("cfi") int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyResetPeer(ProxyChannelInfo *info)
+int32_t TransProxyResetPeer(ProxyChannelInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[%s] invalid param.", __func__);

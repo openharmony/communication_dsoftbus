@@ -180,7 +180,7 @@ static void OnReceiveP2pSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnSyncP2pInfo(void)
+int32_t LnnSyncP2pInfo(void)
 {
     int32_t rc = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo, NULL);
     if (rc != SOFTBUS_OK) {
@@ -190,7 +190,7 @@ NO_SANITIZE("cfi") int32_t LnnSyncP2pInfo(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitLocalP2pInfo(NodeInfo *info)
+int32_t LnnInitLocalP2pInfo(NodeInfo *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -207,12 +207,12 @@ NO_SANITIZE("cfi") int32_t LnnInitLocalP2pInfo(NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitP2p(void)
+int32_t LnnInitP2p(void)
 {
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }
 
-NO_SANITIZE("cfi") void LnnDeinitP2p(void)
+void LnnDeinitP2p(void)
 {
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }

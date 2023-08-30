@@ -281,7 +281,7 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr,
+int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr,
     void *(*threadEntry) (void *), void *arg)
 {
     if (thread == NULL) {

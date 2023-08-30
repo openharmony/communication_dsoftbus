@@ -403,7 +403,7 @@ static void InitWifiDirectCapability(void)
     LLOGI("g_isWifiDirectSupported=%d g_isApCoexistSupported=%d", g_isWifiDirectSupported, g_isApCoexistSupported);
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitNetworkInfo(void)
+int32_t LnnInitNetworkInfo(void)
 {
     InitWifiDirectCapability();
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler) != SOFTBUS_OK) {
@@ -421,7 +421,7 @@ NO_SANITIZE("cfi") int32_t LnnInitNetworkInfo(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitNetworkInfo(void)
+void LnnDeinitNetworkInfo(void)
 {
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
 }

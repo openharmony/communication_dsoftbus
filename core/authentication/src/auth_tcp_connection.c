@@ -115,14 +115,14 @@ static int32_t UnpackSocketPkt(const uint8_t *data, uint32_t len, SocketPktHead 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void NotifyConnected(ListenerModule module, int32_t fd, bool isClient)
+static void NotifyConnected(ListenerModule module, int32_t fd, bool isClient)
 {
     if (g_callback.onConnected != NULL) {
         g_callback.onConnected(module, fd, isClient);
     }
 }
 
-NO_SANITIZE("cfi") static void NotifyDisconnected(int32_t fd)
+static void NotifyDisconnected(int32_t fd)
 {
     if (g_callback.onDisconnected != NULL) {
         g_callback.onDisconnected(fd);
@@ -145,7 +145,7 @@ static uint32_t ModuleToDataType(int32_t module)
     return DATA_TYPE_CONNECTION;
 }
 
-NO_SANITIZE("cfi") static void NotifyDataReceived(ListenerModule module, int32_t fd,
+static void NotifyDataReceived(ListenerModule module, int32_t fd,
     const SocketPktHead *pktHead, const uint8_t *data)
 {
     if (pktHead->module == MODULE_AUTH_CHANNEL || pktHead->module == MODULE_AUTH_MSG) {
@@ -248,7 +248,7 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module,
+static int32_t OnConnectEvent(ListenerModule module,
     int32_t cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0) {
@@ -279,7 +279,7 @@ NO_SANITIZE("cfi") static int32_t OnConnectEvent(ListenerModule module,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t OnDataEvent(ListenerModule module, int32_t events, int32_t fd)
+static int32_t OnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     (void)module;
     if (events == SOFTBUS_SOCKET_OUT) {
@@ -290,7 +290,7 @@ NO_SANITIZE("cfi") static int32_t OnDataEvent(ListenerModule module, int32_t eve
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t SetSocketCallback(const SocketCallback *cb)
+int32_t SetSocketCallback(const SocketCallback *cb)
 {
     CHECK_NULL_PTR_RETURN_VALUE(cb, SOFTBUS_INVALID_PARAM);
     if (memcpy_s(&g_callback, sizeof(SocketCallback), cb, sizeof(SocketCallback)) != EOK) {
@@ -300,12 +300,12 @@ NO_SANITIZE("cfi") int32_t SetSocketCallback(const SocketCallback *cb)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void UnsetSocketCallback(void)
+void UnsetSocketCallback(void)
 {
     (void)memset_s(&g_callback, sizeof(SocketCallback), 0, sizeof(SocketCallback));
 }
 
-NO_SANITIZE("cfi") int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info)
+int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info)
 {
     SoftbusBaseListener listener = {
         .onConnectEvent = OnConnectEvent,
@@ -319,7 +319,7 @@ NO_SANITIZE("cfi") int32_t StartSocketListening(ListenerModule module, const Loc
     return port;
 }
 
-NO_SANITIZE("cfi") void StopSocketListening(void)
+void StopSocketListening(void)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "stop socket listening.");
     if (StopBaseListener(AUTH) != SOFTBUS_OK) {
@@ -327,7 +327,7 @@ NO_SANITIZE("cfi") void StopSocketListening(void)
     }
 }
 
-NO_SANITIZE("cfi") int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
+int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 {
     char localIp[MAX_ADDR_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
@@ -368,7 +368,7 @@ NO_SANITIZE("cfi") int32_t SocketConnectDevice(const char *ip, int32_t port, boo
     return fd;
 }
 
-NO_SANITIZE("cfi") int32_t NipSocketConnectDevice(ListenerModule module,
+int32_t NipSocketConnectDevice(ListenerModule module,
     const char *addr, int32_t port, bool isBlockMode)
 {
     ConnectOption option = {
@@ -404,7 +404,7 @@ NO_SANITIZE("cfi") int32_t NipSocketConnectDevice(ListenerModule module,
     return fd;
 }
 
-NO_SANITIZE("cfi") void SocketDisconnectDevice(ListenerModule module, int32_t fd)
+void SocketDisconnectDevice(ListenerModule module, int32_t fd)
 {
     if (fd < 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "invalid fd:%d, maybe has shutdown", fd);
@@ -414,7 +414,7 @@ NO_SANITIZE("cfi") void SocketDisconnectDevice(ListenerModule module, int32_t fd
     ConnShutdownSocket(fd);
 }
 
-NO_SANITIZE("cfi") int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *data)
+int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
@@ -449,7 +449,7 @@ NO_SANITIZE("cfi") int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
+int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(isServer, SOFTBUS_INVALID_PARAM);
@@ -479,7 +479,7 @@ NO_SANITIZE("cfi") int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo,
 }
 
 /* Auth Channel */
-NO_SANITIZE("cfi") static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head,
+static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head,
     const uint8_t *data)
 {
     uint32_t i;
@@ -504,7 +504,7 @@ NO_SANITIZE("cfi") static void NotifyChannelDataReceived(int32_t channelId, cons
     listener->onDataReceived(channelId, &channelData);
 }
 
-NO_SANITIZE("cfi") static void NotifyChannelDisconnected(int32_t channelId)
+static void NotifyChannelDisconnected(int32_t channelId)
 {
     uint32_t i;
     for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {
@@ -514,7 +514,7 @@ NO_SANITIZE("cfi") static void NotifyChannelDisconnected(int32_t channelId)
     }
 }
 
-NO_SANITIZE("cfi") int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listener)
+int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listener)
 {
     if (listener == NULL || listener->onDataReceived == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthChannel: invalid listener.");
@@ -532,7 +532,7 @@ NO_SANITIZE("cfi") int32_t RegAuthChannelListener(int32_t module, const AuthChan
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") void UnregAuthChannelListener(int32_t module)
+void UnregAuthChannelListener(int32_t module)
 {
     uint32_t i;
     for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {
@@ -544,7 +544,7 @@ NO_SANITIZE("cfi") void UnregAuthChannelListener(int32_t module)
     }
 }
 
-NO_SANITIZE("cfi") int32_t AuthOpenChannel(const char *ip, int32_t port)
+int32_t AuthOpenChannel(const char *ip, int32_t port)
 {
     if (ip == NULL || port <= 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthChannel: invalid param.");
@@ -559,13 +559,13 @@ NO_SANITIZE("cfi") int32_t AuthOpenChannel(const char *ip, int32_t port)
     return fd;
 }
 
-NO_SANITIZE("cfi") void AuthCloseChannel(int32_t channelId)
+void AuthCloseChannel(int32_t channelId)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthChannel: close auth channel, id=%d.", channelId);
     SocketDisconnectDevice(AUTH, channelId);
 }
 
-NO_SANITIZE("cfi") int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
+int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
 {
     if (channelId < 0 || data == NULL || data->data == NULL || data->len == 0) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthChannel: invalid param, channelId=%d.", channelId);

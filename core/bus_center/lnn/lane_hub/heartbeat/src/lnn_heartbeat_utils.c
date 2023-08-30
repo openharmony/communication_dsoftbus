@@ -31,7 +31,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-NO_SANITIZE("cfi") LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
+LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
 {
     switch (addrType) {
         case CONNECTION_ADDR_WLAN:
@@ -46,7 +46,7 @@ NO_SANITIZE("cfi") LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAdd
     return HEARTBEAT_TYPE_MAX;
 }
 
-NO_SANITIZE("cfi") ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
+ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
 {
     switch (type) {
         case HEARTBEAT_TYPE_UDP:
@@ -61,7 +61,7 @@ NO_SANITIZE("cfi") ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbea
     return CONNECTION_ADDR_MAX;
 }
 
-NO_SANITIZE("cfi") int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
+int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
 {
     int32_t cnt = -1;
 
@@ -142,7 +142,7 @@ static bool HbHasActiveP2pConnection(const char *networkId)
     return isOnline;
 }
 
-NO_SANITIZE("cfi") bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
+bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
 {
     bool ret = false;
 
@@ -168,7 +168,7 @@ NO_SANITIZE("cfi") bool LnnHasActiveConnection(const char *networkId, Connection
     return false;
 }
 
-NO_SANITIZE("cfi") bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)
+bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)
 {
     bool isFinish = false;
     LnnHeartbeatType i;
@@ -201,7 +201,7 @@ static bool VisitCheckSupportedHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
     return true;
 }
 
-NO_SANITIZE("cfi") bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType)
+bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType)
 {
     if (srcType == NULL || dstType == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB check supported hbType get invalid param");
@@ -210,7 +210,7 @@ NO_SANITIZE("cfi") bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHe
     return LnnVisitHbTypeSet(VisitCheckSupportedHbType, srcType, dstType);
 }
 
-NO_SANITIZE("cfi") int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len)
+int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len)
 {
     int32_t ret;
     uint8_t hashResult[SHA_256_HASH_LEN] = {0};
@@ -232,7 +232,7 @@ NO_SANITIZE("cfi") int32_t LnnGenerateHexStringHash(const unsigned char *str, ch
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
+int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
 
@@ -252,7 +252,7 @@ NO_SANITIZE("cfi") int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen)
+int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen)
 {
     if (btMac == NULL || brMacHash == NULL) {
         LLOGE("null point");
@@ -297,7 +297,7 @@ NO_SANITIZE("cfi") int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMac
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDumpLocalBasicInfo(void)
+void LnnDumpLocalBasicInfo(void)
 {
     char *anoyUdid = NULL;
     char *anoyUuid = NULL;
