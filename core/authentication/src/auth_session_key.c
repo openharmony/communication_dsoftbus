@@ -54,13 +54,13 @@ static void RemoveOldKey(SessionKeyList *list)
     SoftBusFree(item);
 }
 
-NO_SANITIZE("cfi") void InitSessionKeyList(SessionKeyList *list)
+void InitSessionKeyList(SessionKeyList *list)
 {
     CHECK_NULL_PTR_RETURN_VOID(list);
     ListInit(list);
 }
 
-NO_SANITIZE("cfi") int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList)
+int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList)
 {
     CHECK_NULL_PTR_RETURN_VALUE(srcList, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(dstList, SOFTBUS_INVALID_PARAM);
@@ -77,7 +77,7 @@ NO_SANITIZE("cfi") int32_t DupSessionKeyList(const SessionKeyList *srcList, Sess
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DestroySessionKeyList(SessionKeyList *list)
+void DestroySessionKeyList(SessionKeyList *list)
 {
     CHECK_NULL_PTR_RETURN_VOID(list);
     SessionKeyItem *item = NULL;
@@ -89,13 +89,13 @@ NO_SANITIZE("cfi") void DestroySessionKeyList(SessionKeyList *list)
     }
 }
 
-NO_SANITIZE("cfi") bool HasSessionKey(const SessionKeyList *list)
+bool HasSessionKey(const SessionKeyList *list)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, false);
     return !IsListEmpty(list);
 }
 
-NO_SANITIZE("cfi") int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key)
+int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key)
 {
     CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
@@ -117,7 +117,7 @@ NO_SANITIZE("cfi") int32_t AddSessionKey(SessionKeyList *list, int32_t index, co
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionKey *key)
+int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionKey *key)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(index, SOFTBUS_INVALID_PARAM);
@@ -141,7 +141,7 @@ NO_SANITIZE("cfi") int32_t GetLatestSessionKey(const SessionKeyList *list, int32
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionKey *key)
+int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionKey *key)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
@@ -162,7 +162,7 @@ NO_SANITIZE("cfi") int32_t GetSessionKeyByIndex(const SessionKeyList *list, int3
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index)
+void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index)
 {
     CHECK_NULL_PTR_RETURN_VOID(list);
     bool isFind = false;
@@ -181,7 +181,7 @@ NO_SANITIZE("cfi") void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t in
     }
 }
 
-NO_SANITIZE("cfi") int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || inLen == 0 || outData == NULL ||
@@ -215,7 +215,7 @@ NO_SANITIZE("cfi") int32_t EncryptData(const SessionKeyList *list, const uint8_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || outData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN ||
@@ -247,7 +247,7 @@ NO_SANITIZE("cfi") int32_t DecryptData(const SessionKeyList *list, const uint8_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t EncryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t EncryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
     uint8_t **outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || inLen == 0 || outData == NULL || outLen == NULL) {
@@ -270,7 +270,7 @@ NO_SANITIZE("cfi") int32_t EncryptInner(const SessionKeyList *list, const uint8_
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DecryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t DecryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
     uint8_t **outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN || outData == NULL || outLen == NULL) {
@@ -294,7 +294,7 @@ NO_SANITIZE("cfi") int32_t DecryptInner(const SessionKeyList *list, const uint8_
 }
 
 /* For Debug */
-NO_SANITIZE("cfi") void DumpSessionkeyList(const SessionKeyList *list)
+void DumpSessionkeyList(const SessionKeyList *list)
 {
     CHECK_NULL_PTR_RETURN_VOID(list);
     uint32_t keyNum = 0;
@@ -339,13 +339,13 @@ static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") void ScheduleUpdateSessionKey(int64_t authId, uint64_t delayMs)
+void ScheduleUpdateSessionKey(int64_t authId, uint64_t delayMs)
 {
     RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RemoveUpdateSessionKeyFunc, (void *)(&authId));
     PostAuthEvent(EVENT_UPDATE_SESSION_KEY, HandleUpdateSessionKeyEvent, &authId, sizeof(authId), delayMs);
 }
 
-NO_SANITIZE("cfi") void CancelUpdateSessionKey(int64_t authId)
+void CancelUpdateSessionKey(int64_t authId)
 {
     RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RemoveUpdateSessionKeyFunc, (void *)(&authId));
 }

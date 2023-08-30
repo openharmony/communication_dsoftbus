@@ -87,7 +87,7 @@ static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, co
     TLOGI("Notify Upgrade MigrateEvents success");
 }
 
-NO_SANITIZE("cfi") void ReqLinkListener(void)
+void ReqLinkListener(void)
 {
     struct WifiDirectStatusListener listener = {
         .onDeviceOffLine = OnWifiDirectDeviceOffLine,

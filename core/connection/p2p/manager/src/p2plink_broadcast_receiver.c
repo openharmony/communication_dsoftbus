@@ -63,7 +63,7 @@ static void UpdateP2pGcGroup(void)
     }
 }
 
-NO_SANITIZE("cfi") void UpdateP2pGroup(const P2pLinkGroup *group)
+void UpdateP2pGroup(const P2pLinkGroup *group)
 {
     if (group == NULL) {
         if (P2pLinkGetRole() != ROLE_NONE) {
@@ -224,7 +224,7 @@ static void WifiCfgChanged(const char *wificfg)
     CLOGI("wificfg = %s", wificfg);
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkBroadCastInit(void)
+int32_t P2pLinkBroadCastInit(void)
 {
     BroadcastRecvCb cb;
 

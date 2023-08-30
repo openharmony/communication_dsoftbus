@@ -41,7 +41,7 @@
 #define MAC_BIT_FOUR 4
 #define MAC_BIT_FIVE 5
 
-NO_SANITIZE("cfi") bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
+bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
     for (uint32_t i = 0; i < capBitMapNum; i++) {
         if (capBitMap[i] != 0x0) {
@@ -51,7 +51,7 @@ NO_SANITIZE("cfi") bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *
     return true;
 }
 
-NO_SANITIZE("cfi") bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos)
+bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos)
 {
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {
@@ -60,7 +60,7 @@ NO_SANITIZE("cfi") bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_
     return (capBitMap[index] >> (pos % INT32_MAX_BIT_NUM)) & 0x1 ? true : false;
 }
 
-NO_SANITIZE("cfi") void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
+void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {
@@ -69,7 +69,7 @@ NO_SANITIZE("cfi") void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitM
     capBitMap[index] = capBitMap[index] | (0x1 << (pos % INT32_MAX_BIT_NUM));
 }
 
-NO_SANITIZE("cfi") void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
+void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {
@@ -88,7 +88,7 @@ static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscBleGetDeviceName(char *deviceName)
+int32_t DiscBleGetDeviceName(char *deviceName)
 {
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         DLOGE("Get local device name failed.");
@@ -97,7 +97,7 @@ NO_SANITIZE("cfi") int32_t DiscBleGetDeviceName(char *deviceName)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") uint16_t DiscBleGetDeviceType(void)
+uint16_t DiscBleGetDeviceType(void)
 {
     char type[DEVICE_TYPE_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
@@ -111,7 +111,7 @@ NO_SANITIZE("cfi") uint16_t DiscBleGetDeviceType(void)
     return typeId;
 }
 
-NO_SANITIZE("cfi") int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
+int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
 {
     char udid[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
@@ -134,7 +134,7 @@ NO_SANITIZE("cfi") int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
+int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
 {
     uint8_t account[SHA_256_HASH_LEN] = {0};
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, account, SHA_256_HASH_LEN) != SOFTBUS_OK) {
@@ -148,7 +148,7 @@ NO_SANITIZE("cfi") int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
+int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
     uint32_t dataLen)
 {
     uint32_t len = dataLen & DATA_LENGTH_MASK;
@@ -254,7 +254,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
+int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, "device is invalid");
     DISC_CHECK_AND_RETURN_RET_LOG(data != NULL, SOFTBUS_INVALID_PARAM, "data=NULL is invalid");

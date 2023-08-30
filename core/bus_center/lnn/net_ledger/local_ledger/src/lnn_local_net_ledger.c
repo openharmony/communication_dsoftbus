@@ -736,7 +736,7 @@ static int32_t ModifyId(char *dstId, uint32_t dstLen, const char *sourceId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") const NodeInfo *LnnGetLocalNodeInfo(void)
+const NodeInfo *LnnGetLocalNodeInfo(void)
 {
     return &g_localNetLedger.localInfo;
 }
@@ -828,17 +828,17 @@ static int32_t UpdateLocalUuid(const void *id)
     return ModifyId(g_localNetLedger.localInfo.uuid, UUID_BUF_LEN, (char *)id);
 }
 
-NO_SANITIZE("cfi") int32_t UpdateLocalParentId(const char *id)
+int32_t UpdateLocalParentId(const char *id)
 {
     return ModifyId(g_localNetLedger.localInfo.parentId, ID_MAX_LEN, id);
 }
 
-NO_SANITIZE("cfi") int32_t UpdateLocalPublicId(const char *id)
+int32_t UpdateLocalPublicId(const char *id)
 {
     return ModifyId(g_localNetLedger.localInfo.publicId, ID_MAX_LEN, id);
 }
 
-NO_SANITIZE("cfi") int32_t UpdateLocalRole(ConnectRole role)
+int32_t UpdateLocalRole(ConnectRole role)
 {
     g_localNetLedger.localInfo.role = role;
     return SOFTBUS_OK;
@@ -871,13 +871,13 @@ static int32_t UpdateMasgerNodeWeight(const void *weight)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t UpdateLocalStatus(ConnectStatus status)
+int32_t UpdateLocalStatus(ConnectStatus status)
 {
     g_localNetLedger.localInfo.status = status;
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t UpdateLocalWeight(int32_t weight)
+int32_t UpdateLocalWeight(int32_t weight)
 {
     g_localNetLedger.localInfo.masterWeight = weight;
     return SOFTBUS_OK;
@@ -1083,7 +1083,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
 };
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     uint32_t i;
     int32_t ret;
@@ -1113,7 +1113,7 @@ NO_SANITIZE("cfi") int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t 
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
+static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
 {
     uint32_t i;
     int32_t ret;
@@ -1167,7 +1167,7 @@ int32_t LnnSetLocalUnifiedName(const char *unifiedName)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
+int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 {
     uint32_t i;
     int32_t ret;
@@ -1200,7 +1200,7 @@ NO_SANITIZE("cfi") int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static int32_t LnnSetLocalInfo(InfoKey key, void* info)
+static int32_t LnnSetLocalInfo(InfoKey key, void* info)
 {
     uint32_t i;
     int32_t ret;
@@ -1230,7 +1230,7 @@ NO_SANITIZE("cfi") static int32_t LnnSetLocalInfo(InfoKey key, void* info)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static int32_t LnnFirstGetUdid(void)
+static int32_t LnnFirstGetUdid(void)
 {
     NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
@@ -1241,37 +1241,37 @@ NO_SANITIZE("cfi") static int32_t LnnFirstGetUdid(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
+int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(uint64_t));
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
+int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
+int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int16_t));
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
+int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
@@ -1282,12 +1282,12 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
     return LnnSetLocalInfo(key, (void *)info);
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
 {
     return LnnGetLocalInfo(key, (void *)info, len);
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
+int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     int32_t rc;
     char type[DEVICE_TYPE_BUF_LEN] = {0};
@@ -1326,7 +1326,7 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitLocalLedger(void)
+int32_t LnnInitLocalLedger(void)
 {
     NodeInfo *nodeInfo = NULL;
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
@@ -1389,7 +1389,7 @@ EXIT:
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitLocalLedgerDelay(void)
+int32_t LnnInitLocalLedgerDelay(void)
 {
     NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
@@ -1404,7 +1404,7 @@ NO_SANITIZE("cfi") int32_t LnnInitLocalLedgerDelay(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitLocalLedger(void)
+void LnnDeinitLocalLedger(void)
 {
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
         SoftBusMutexDestroy(&g_localNetLedger.lock);
@@ -1412,7 +1412,7 @@ NO_SANITIZE("cfi") void LnnDeinitLocalLedger(void)
     g_localNetLedger.status = LL_INIT_UNKNOWN;
 }
 
-NO_SANITIZE("cfi") bool LnnIsMasterNode(void)
+bool LnnIsMasterNode(void)
 {
     bool ret = false;
     if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {

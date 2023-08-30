@@ -60,7 +60,7 @@ static void InitStatisticEvtReportFunc(void)
     }
 }
 
-NO_SANITIZE("cfi") static void ReportStatisticEvent(SoftBusMessage* param)
+static void ReportStatisticEvent(SoftBusMessage* param)
 {
     (void)param;
 
@@ -116,7 +116,7 @@ static SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc ca
     return msg;
 }
 
-NO_SANITIZE("cfi") static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc callback,
+static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc callback,
     uint64_t delayMillis)
 {
     if ((looper == NULL) || (callback == NULL)) {

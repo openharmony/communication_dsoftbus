@@ -51,7 +51,7 @@ static int32_t TransSessionForEachShowInfo(int fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransSessionMgrInit(void)
+int32_t TransSessionMgrInit(void)
 {
     if (g_sessionServerList != NULL) {
         return SOFTBUS_OK;
@@ -64,7 +64,7 @@ NO_SANITIZE("cfi") int32_t TransSessionMgrInit(void)
     return SoftBusRegTransVarDump(CMD_REGISTED_SESSION_LIST, TransSessionForEachShowInfo);
 }
 
-NO_SANITIZE("cfi") void TransSessionMgrDeinit(void)
+void TransSessionMgrDeinit(void)
 {
     if (g_sessionServerList != NULL) {
         DestroySoftBusList(g_sessionServerList);
@@ -72,7 +72,7 @@ NO_SANITIZE("cfi") void TransSessionMgrDeinit(void)
     }
 }
 
-NO_SANITIZE("cfi") bool TransSessionServerIsExist(const char *sessionName)
+bool TransSessionServerIsExist(const char *sessionName)
 {
     if (sessionName == NULL) {
         return false;
@@ -100,7 +100,7 @@ NO_SANITIZE("cfi") bool TransSessionServerIsExist(const char *sessionName)
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t TransSessionServerAddItem(SessionServer *newNode)
+int32_t TransSessionServerAddItem(SessionServer *newNode)
 {
     if (newNode == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -142,7 +142,7 @@ NO_SANITIZE("cfi") int32_t TransSessionServerAddItem(SessionServer *newNode)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransSessionServerDelItem(const char *sessionName)
+int32_t TransSessionServerDelItem(const char *sessionName)
 {
     if (sessionName == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -173,7 +173,7 @@ NO_SANITIZE("cfi") int32_t TransSessionServerDelItem(const char *sessionName)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransDelItemByPackageName(const char *pkgName, int32_t pid)
+void TransDelItemByPackageName(const char *pkgName, int32_t pid)
 {
     if (pkgName == NULL || g_sessionServerList == NULL) {
         return;
@@ -307,7 +307,7 @@ static int32_t TransListCopy(ListNode *sessionServerList)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
+void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
     const char *peerIp, int32_t routeType)
 {
     if (networkId == NULL || g_sessionServerList == NULL) {

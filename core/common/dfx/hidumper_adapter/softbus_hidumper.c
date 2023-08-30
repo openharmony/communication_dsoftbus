@@ -185,7 +185,7 @@ int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerF
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
+int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");

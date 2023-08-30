@@ -52,7 +52,7 @@ typedef enum {
 static BusCenterEventCtrl g_eventCtrl;
 static SoftBusHandler g_notifyHandler = {"NotifyHandler", NULL, NULL};
 
-NO_SANITIZE("cfi") static int32_t PostMessageToHandlerDelay(SoftBusMessage *msg, uint64_t delayMillis)
+static int32_t PostMessageToHandlerDelay(SoftBusMessage *msg, uint64_t delayMillis)
 {
     if (g_notifyHandler.looper == NULL) {
         LLOGE("NotifyHandler not initialized.");
@@ -118,7 +118,7 @@ static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
     LLOGD("offline exceted 5min, process networkId update event");
 }
 
-NO_SANITIZE("cfi") static void HandleNotifyMessage(SoftBusMessage *msg)
+static void HandleNotifyMessage(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid notify message.");
@@ -142,7 +142,7 @@ NO_SANITIZE("cfi") static void HandleNotifyMessage(SoftBusMessage *msg)
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "handle notify message done, type = %d.", msg->what);
 }
 
-NO_SANITIZE("cfi") static void FreeNotifyMessage(SoftBusMessage *msg)
+static void FreeNotifyMessage(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         return;
@@ -229,7 +229,7 @@ static LnnEventHandlerItem *CreateEventHandlerItem(LnnEventHandler handler)
     return item;
 }
 
-NO_SANITIZE("cfi") static void NotifyEvent(const LnnEventBasicInfo *info)
+static void NotifyEvent(const LnnEventBasicInfo *info)
 {
     LnnEventHandlerItem *item = NULL;
 
@@ -250,7 +250,7 @@ void LnnNotifyDeviceVerified(const char *udid)
     RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
+void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
 {
     LnnOnlineStateEventInfo eventInfo;
 
@@ -298,7 +298,7 @@ void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info)
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
+void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : info = null!");
@@ -310,7 +310,7 @@ NO_SANITIZE("cfi") void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasic
     (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
+void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : addr or networkId = null!");
@@ -320,7 +320,7 @@ NO_SANITIZE("cfi") void LnnNotifyJoinResult(ConnectionAddr *addr, const char *ne
     LnnIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
 }
 
-NO_SANITIZE("cfi") void MetaNodeNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
+void MetaNodeNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
 {
     if (addr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : addr or networkId = null!");
@@ -330,7 +330,7 @@ NO_SANITIZE("cfi") void MetaNodeNotifyJoinResult(ConnectionAddr *addr, const cha
     MetaNodeIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
+void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : networkId = null!");
@@ -340,7 +340,7 @@ NO_SANITIZE("cfi") void LnnNotifyLeaveResult(const char *networkId, int32_t retC
     LnnIpcNotifyLeaveResult(networkId, retCode);
 }
 
-NO_SANITIZE("cfi") void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode)
+void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : networkId = null!");
@@ -350,7 +350,7 @@ NO_SANITIZE("cfi") void MetaNodeNotifyLeaveResult(const char *networkId, int32_t
     MetaNodeIpcNotifyLeaveResult(networkId, retCode);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation,
+void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation,
     bool isJoin)
 {
     LnnRelationChanedEventInfo info;
@@ -363,7 +363,7 @@ NO_SANITIZE("cfi") void LnnNotifyLnnRelationChanged(const char *udid, Connection
     NotifyEvent((LnnEventBasicInfo *)&info);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncResultInfo *info,
+void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncResultInfo *info,
     int32_t retCode)
 {
     if (pkgName == NULL || info == NULL) {
@@ -374,7 +374,7 @@ NO_SANITIZE("cfi") void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid
     LnnIpcNotifyTimeSyncResult(pkgName, pid, info, sizeof(TimeSyncResultInfo), retCode);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
+void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
 {
     if (state < SOFTBUS_WIFI_CONNECTED || state > SOFTBUS_WIFI_UNKNOWN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad state %d", state);
@@ -384,7 +384,7 @@ NO_SANITIZE("cfi") void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)
+void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)
 {
     if (state < SOFTBUS_SCREEN_ON || state >= SOFTBUS_SCREEN_UNKNOWN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bad state %d", state);
@@ -394,7 +394,7 @@ NO_SANITIZE("cfi") void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyBtStateChangeEvent(void *state)
+void LnnNotifyBtStateChangeEvent(void *state)
 {
     SoftBusBtState *btState = (SoftBusBtState *)state;
     if (*btState < SOFTBUS_BLE_TURN_ON || *btState >= SOFTBUS_BT_UNKNOWN) {
@@ -486,7 +486,7 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
+void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
 {
     if (btMac == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid btMac, state = %d", state);
@@ -502,7 +502,7 @@ NO_SANITIZE("cfi") void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBu
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyAddressChangedEvent(const char *ifName)
+void LnnNotifyAddressChangedEvent(const char *ifName)
 {
     LnnMonitorAddressChangedEvent event = {.basic.event = LNN_EVENT_IP_ADDR_CHANGED, .ifName = {0}};
     if (ifName != NULL) {
@@ -515,7 +515,7 @@ NO_SANITIZE("cfi") void LnnNotifyAddressChangedEvent(const char *ifName)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight)
+void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight)
 {
     LnnMasterNodeChangedEvent event = {.basic.event = LNN_EVENT_NODE_MASTER_STATE_CHANGED,
         .isMasterNode = isMaster,
@@ -525,7 +525,7 @@ NO_SANITIZE("cfi") void LnnNotifyMasterNodeChanged(bool isMaster, const char *ma
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal)
+void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal)
 {
     if (addr == NULL) {
         return;
@@ -547,7 +547,7 @@ NO_SANITIZE("cfi") void LnnNotifyNodeAddressChanged(const char *addr, const char
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyHBRepeat(void)
+void LnnNotifyHBRepeat(void)
 {
     LnnEventBasicInfo event;
     event.event = LNN_EVENT_NODE_HB_REPEAT_CYCLE;
@@ -555,7 +555,7 @@ NO_SANITIZE("cfi") void LnnNotifyHBRepeat(void)
     NotifyEvent(&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
+void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
 {
     if (state < SOFTBUS_WIFI_NETWORKD_ENABLE || state >= SOFTBUS_NETWORKD_UNKNOWN) {
         LLOGE("bad network state %d", state);
@@ -565,7 +565,7 @@ NO_SANITIZE("cfi") void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo)
+void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo)
 {
     if (addr == NULL || basicInfo == NULL) {
         LLOGE("addr or basicInfo is null");
@@ -580,7 +580,7 @@ NO_SANITIZE("cfi") void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, 
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitBusCenterEvent(void)
+int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;
     SoftBusLooper *looper = CreateNewLooper("NotifyLooper");
@@ -600,7 +600,7 @@ NO_SANITIZE("cfi") int32_t LnnInitBusCenterEvent(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitBusCenterEvent(void)
+void LnnDeinitBusCenterEvent(void)
 {
     if (g_notifyHandler.looper != NULL) {
         DestroyLooper(g_notifyHandler.looper);
@@ -610,7 +610,7 @@ NO_SANITIZE("cfi") void LnnDeinitBusCenterEvent(void)
     SoftBusMutexDestroy(&g_eventCtrl.lock);
 }
 
-NO_SANITIZE("cfi") int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     LnnEventHandlerItem *item = NULL;
 
@@ -638,7 +638,7 @@ NO_SANITIZE("cfi") int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventH
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
+void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     LnnEventHandlerItem *item = NULL;
     LnnEventHandlerItem *next = NULL;

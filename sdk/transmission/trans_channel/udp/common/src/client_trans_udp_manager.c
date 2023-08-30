@@ -145,7 +145,7 @@ static int32_t TransSetUdpChannelEnable(int32_t channelId, bool isEnable)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static void OnUdpChannelOpened(int32_t channelId)
+static void OnUdpChannelOpened(int32_t channelId)
 {
     UdpChannel channel;
     if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
@@ -282,7 +282,7 @@ static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
+int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     UdpChannel channel;
     bool isFind = true;
@@ -313,7 +313,7 @@ static int32_t ClosePeerUdpChannel(int32_t channelId)
     return ServerIpcCloseChannel(channelId, CHANNEL_TYPE_UDP);
 }
 
-NO_SANITIZE("cfi") static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
+static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
 {
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -347,7 +347,7 @@ int32_t TransOnUdpChannelClosed(int32_t channelId)
     return CloseUdpChannel(channelId, false);
 }
 
-NO_SANITIZE("cfi") int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount,
+int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount,
     const QosTv *tvList)
 {
     UdpChannel channel;
@@ -383,7 +383,7 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     return TransSendStream(channelId, data, ext, param);
 }
 
-NO_SANITIZE("cfi") static void OnUdpChannelClosed(int32_t channelId)
+static void OnUdpChannelClosed(int32_t channelId)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnSessionClosed == NULL)) {
         return;
@@ -411,7 +411,7 @@ static int32_t OnFileGetSessionId(int32_t channelId, int32_t *sessionId)
     return g_sessionCb->OnGetSessionId(channelId, CHANNEL_TYPE_UDP, sessionId);
 }
 
-NO_SANITIZE("cfi") static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
+static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnQosEvent == NULL)) {
         return;

@@ -61,12 +61,12 @@ static int32_t GetPermType(pid_t callingUid, pid_t callingPid, const char *pkgNa
     return NORMAL_APP;
 }
 
-NO_SANITIZE("cfi") int32_t TransPermissionInit(void)
+int32_t TransPermissionInit(void)
 {
     return LoadPermissionJson(PERMISSION_JSON_FILE);
 }
 
-NO_SANITIZE("cfi") void TransPermissionDeinit(void)
+void TransPermissionDeinit(void)
 {
     DeinitPermissionJson();
 }
@@ -116,7 +116,7 @@ bool CheckDiscPermission(pid_t callingUid, const char *pkgName)
     return false;
 }
 
-NO_SANITIZE("cfi") bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
+bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
 {
     (void)pkgName;
     if (CheckSoftBusSysPermission(callingUid) == SOFTBUS_OK) {

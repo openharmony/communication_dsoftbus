@@ -182,7 +182,7 @@ static void NstackHiEventCb(void *softObj, const NstackDfxEvent *info)
     }
 }
 
-NO_SANITIZE("cfi") void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
+void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
 {
     if (softObj == NULL || info == NULL) {
         LOG_ERR("param is NULL");
@@ -196,7 +196,7 @@ NO_SANITIZE("cfi") void DstreamHiEventCb(void *softObj, const FillpDfxEvent *inf
     NstackHiEventCb(softObj, &nstackInfo);
 }
 
-NO_SANITIZE("cfi") static void DFileHiEventCb(void *softObj, const DFileEvent *info)
+static void DFileHiEventCb(void *softObj, const DFileEvent *info)
 {
     NstackDfxEvent nstackInfo;
     if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(DFileEvent)) != EOK) {
@@ -206,7 +206,7 @@ NO_SANITIZE("cfi") static void DFileHiEventCb(void *softObj, const DFileEvent *i
     NstackHiEventCb(softObj, &nstackInfo);
 }
 
-NO_SANITIZE("cfi") static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
+static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
 {
     NstackDfxEvent nstackInfo;
     if (memcpy_s(nstackInfo.eventName, sizeof(nstackInfo.eventName),

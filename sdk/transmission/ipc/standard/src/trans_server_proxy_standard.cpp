@@ -157,6 +157,54 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     return serverRet;
 }
 
+static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel &data)
+{
+    if (attrs == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "attrs is nullptr!");
+        return false;
+    }
+
+    if (!data.WriteInt32(attrs->dataType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs dataType failed!");
+        return false;
+    }
+
+    if (!data.WriteInt32(attrs->linkTypeNum)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs linkTypeNum failed!");
+        return false;
+    }
+
+    if (attrs->linkTypeNum > 0) {
+        if (!data.WriteBuffer(attrs->linkType, sizeof(LinkType) * attrs->linkTypeNum)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs linkType failed!");
+            return false;
+        }
+    }
+
+    if (!data.WriteInt32(attrs->attr.streamAttr.streamType)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs streamAttr failed!");
+        return false;
+    }
+
+    if (attrs->fastTransData != nullptr) {
+        if (!data.WriteUint16(attrs->fastTransDataSize)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransDataSize failed!");
+            return false;
+        }
+        if (!data.WriteRawData(attrs->fastTransData, attrs->fastTransDataSize)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransData failed!");
+            return false;
+        }
+    } else {
+        if (!data.WriteUint16(0)) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransDataSize failed!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
     if (param->sessionName == nullptr || param->peerSessionName == nullptr ||
@@ -191,10 +239,11 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
 
-    if (!data.WriteRawData(param->attr, sizeof(SessionAttribute))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
+    if (!TransWriteSessionAttrs(param->attr, data)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
+
     MessageParcel reply;
     MessageOption option;
     if (remote->SendRequest(SERVER_OPEN_SESSION, data, reply, option) != 0) {

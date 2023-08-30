@@ -104,7 +104,7 @@ void DiscClientDeinit(void)
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DeInit success");
 }
 
-NO_SANITIZE("cfi") void DiscClientOnDeviceFound(const DeviceInfo *device)
+void DiscClientOnDeviceFound(const DeviceInfo *device)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDeviceFound, capabilityBitmap = %d",
         device->capabilityBitmap[0]);
@@ -115,7 +115,7 @@ NO_SANITIZE("cfi") void DiscClientOnDeviceFound(const DeviceInfo *device)
     g_discInfo->subscribeCb.OnDeviceFound(device);
 }
 
-NO_SANITIZE("cfi") void DiscClientOnDiscoverySuccess(int32_t subscribeId)
+void DiscClientOnDiscoverySuccess(int32_t subscribeId)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverySuccess, subscribeId = %d", subscribeId);
     if (g_discInfo == NULL) {
@@ -125,7 +125,7 @@ NO_SANITIZE("cfi") void DiscClientOnDiscoverySuccess(int32_t subscribeId)
     g_discInfo->subscribeCb.OnDiscoverySuccess(subscribeId);
 }
 
-NO_SANITIZE("cfi") void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
+void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverFailed, subscribeId = %d", subscribeId);
     if (g_discInfo == NULL) {
@@ -135,7 +135,7 @@ NO_SANITIZE("cfi") void DiscClientOnDiscoverFailed(int32_t subscribeId, Discover
     g_discInfo->subscribeCb.OnDiscoverFailed(subscribeId, failReason);
 }
 
-NO_SANITIZE("cfi") void DiscClientOnPublishSuccess(int32_t publishId)
+void DiscClientOnPublishSuccess(int32_t publishId)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishSuccess, publishId = %d", publishId);
     if (g_discInfo == NULL) {
@@ -145,7 +145,7 @@ NO_SANITIZE("cfi") void DiscClientOnPublishSuccess(int32_t publishId)
     g_discInfo->publishCb.OnPublishSuccess(publishId);
 }
 
-NO_SANITIZE("cfi") void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
+void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishFail, publishId = %d", publishId);
     if (g_discInfo == NULL) {

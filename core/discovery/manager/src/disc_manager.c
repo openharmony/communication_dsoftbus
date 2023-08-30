@@ -123,7 +123,7 @@ static bool IsBitmapSet(const uint32_t *bitMap, uint32_t pos)
     return ((1U << pos) & (*bitMap)) ? true : false;
 }
 
-NO_SANITIZE("cfi") static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
+static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
     const DiscoveryFuncInterface *interface, const DiscoverMode mode, InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL,
@@ -227,7 +227,7 @@ static bool IsInnerModule(const DiscInfo *infoNode)
     return false;
 }
 
-NO_SANITIZE("cfi") static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
+static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
     if (IsInnerModule(infoNode) == false) {
@@ -687,7 +687,7 @@ static int32_t InnerSetDiscoveryCallback(const char *packageName, const DiscInne
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *callback)
+int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *callback)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && callback != NULL,
                                   SOFTBUS_INVALID_PARAM, "invalid parameters");
@@ -695,7 +695,7 @@ NO_SANITIZE("cfi") int32_t DiscSetDiscoverCallback(DiscModule moduleId, const Di
     return InnerSetDiscoveryCallback(TransferModuleIdToPackageName(moduleId), callback);
 }
 
-NO_SANITIZE("cfi") int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info)
+int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
                                   SOFTBUS_INVALID_PARAM, "invalid parameters");
@@ -713,7 +713,7 @@ NO_SANITIZE("cfi") int32_t DiscPublish(DiscModule moduleId, const PublishInfo *i
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info)
+int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
                                   SOFTBUS_INVALID_PARAM, "invalid parameters");
@@ -731,7 +731,7 @@ NO_SANITIZE("cfi") int32_t DiscStartScan(DiscModule moduleId, const PublishInfo 
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId)
+int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX,
                                   SOFTBUS_INVALID_PARAM, "invalid moduleId");
@@ -740,7 +740,7 @@ NO_SANITIZE("cfi") int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId)
     return InnerUnPublishService(TransferModuleIdToPackageName(moduleId), publishId, PUBLISH_INNER_SERVICE);
 }
 
-NO_SANITIZE("cfi") int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info)
+int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
                                   SOFTBUS_INVALID_PARAM, "invalid parameters");
@@ -758,7 +758,7 @@ NO_SANITIZE("cfi") int32_t DiscStartAdvertise(DiscModule moduleId, const Subscri
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info)
+int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
                                   SOFTBUS_INVALID_PARAM, "invalid parameters");
@@ -776,7 +776,7 @@ NO_SANITIZE("cfi") int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInf
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
+int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX,
                                   SOFTBUS_INVALID_PARAM, "invalid moduleId");
@@ -785,7 +785,7 @@ NO_SANITIZE("cfi") int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscr
     return InnerStopDiscovery(TransferModuleIdToPackageName(moduleId), subscribeId, SUBSCRIBE_INNER_SERVICE);
 }
 
-NO_SANITIZE("cfi") int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
+int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(packageName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOG(strlen(packageName) < PKG_NAME_SIZE_MAX,
@@ -803,7 +803,7 @@ NO_SANITIZE("cfi") int32_t DiscPublishService(const char *packageName, const Pub
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
+int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, "invalid parameters");
@@ -812,7 +812,7 @@ NO_SANITIZE("cfi") int32_t DiscUnPublishService(const char *packageName, int32_t
     return InnerUnPublishService(packageName, publishId, PUBLISH_SERVICE);
 }
 
-NO_SANITIZE("cfi") int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
+int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
     const IServerDiscInnerCallback *cb)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
@@ -831,7 +831,7 @@ NO_SANITIZE("cfi") int32_t DiscStartDiscovery(const char *packageName, const Sub
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
+int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, "invalid parameters");
@@ -840,7 +840,7 @@ NO_SANITIZE("cfi") int32_t DiscStopDiscovery(const char *packageName, int32_t su
     return InnerStopDiscovery(packageName, subscribeId, SUBSCRIBE_SERVICE);
 }
 
-NO_SANITIZE("cfi") void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
 {
     if (medium == COAP) {
         if (g_discCoapInterface != NULL) {
@@ -851,7 +851,7 @@ NO_SANITIZE("cfi") void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium 
     }
 }
 
-NO_SANITIZE("cfi") void DiscDeviceInfoChanged(InfoTypeChanged type)
+void DiscDeviceInfoChanged(InfoTypeChanged type)
 {
     DLOGI("type=%d", type);
     if (g_discBleInterface != NULL && g_discBleInterface->UpdateLocalDeviceInfo != NULL) {
@@ -976,7 +976,7 @@ static void RemoveDiscInfoForDiscovery(const char *pkgName)
     RemoveDiscInfoByPackageName(g_discoveryInfoList, SUBSCRIBE_SERVICE, pkgName);
 }
 
-NO_SANITIZE("cfi") void DiscMgrDeathCallback(const char *pkgName)
+void DiscMgrDeathCallback(const char *pkgName)
 {
     DISC_CHECK_AND_RETURN_LOG(pkgName != NULL, "pkgName is null");
     DISC_CHECK_AND_RETURN_LOG(g_isInited == true, "disc manager is not inited");
@@ -986,7 +986,7 @@ NO_SANITIZE("cfi") void DiscMgrDeathCallback(const char *pkgName)
     RemoveDiscInfoForDiscovery(pkgName);
 }
 
-NO_SANITIZE("cfi") int32_t DiscMgrInit(void)
+int32_t DiscMgrInit(void)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(g_isInited == false, SOFTBUS_OK, "already inited");
 
@@ -1010,7 +1010,7 @@ NO_SANITIZE("cfi") int32_t DiscMgrInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DiscMgrDeinit(void)
+void DiscMgrDeinit(void)
 {
     DISC_CHECK_AND_RETURN_LOG(g_isInited == true, "disc manager is not inited");
 

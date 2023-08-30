@@ -94,7 +94,7 @@ static DiscoveryBleDispatcherInterface g_sharebleInterface = {
     .mediumInterface = &g_fun,
 };
 
-NO_SANITIZE("cfi") DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
+DiscoveryBleDispatcherInterface *DiscShareBleInit(DiscInnerCallback *discInnerCb)
 {
     (void)discInnerCb;
     return &g_sharebleInterface;

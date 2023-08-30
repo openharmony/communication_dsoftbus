@@ -32,7 +32,7 @@
 static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
 static SoftBusGattcCallback *g_softBusGattcCallback = NULL;
 
-NO_SANITIZE("cfi") static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
+static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
 {
     CLOGI("StateChangedCallback id=%d, state=%d, status=%d", clientId, connectionState, status);
     if (connectionState != OHOS_STATE_CONNECTED && connectionState != OHOS_STATE_DISCONNECTED) {
@@ -43,46 +43,46 @@ NO_SANITIZE("cfi") static void GattcConnectionStateChangedCallback(int clientId,
     g_softBusGattcCallback->ConnectionStateCallback(clientId, connectionState, status);
 }
 
-NO_SANITIZE("cfi")
+
 static void GattcConnectParaUpdateCallback(int clientId, int interval, int latency, int timeout, int status)
 {
     CLOGI("ParaUpdateCallback");
 }
 
-NO_SANITIZE("cfi") static void GattcSearchServiceCompleteCallback(int clientId, int status)
+static void GattcSearchServiceCompleteCallback(int clientId, int status)
 {
     CLOGI("SearchServiceCompleteCallback, id=%d, status=%d", clientId, status);
     g_softBusGattcCallback->ServiceCompleteCallback(clientId, status);
 }
 
-NO_SANITIZE("cfi") static void GattcReadCharacteristicCallback(int clientId, BtGattReadData *readData, int status)
+static void GattcReadCharacteristicCallback(int clientId, BtGattReadData *readData, int status)
 {
     CLOGI("ReadCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
-NO_SANITIZE("cfi")
+
 static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic, int status)
 {
     CLOGI("WriteCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
-NO_SANITIZE("cfi") static void GattcReadDescriptorCallback(int clientId, BtGattReadData *readData, int status)
+static void GattcReadDescriptorCallback(int clientId, BtGattReadData *readData, int status)
 {
     CLOGI("ReadDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
-NO_SANITIZE("cfi") static void GattcWriteDescriptorCallback(int clientId, BtGattDescriptor *descriptor, int status)
+static void GattcWriteDescriptorCallback(int clientId, BtGattDescriptor *descriptor, int status)
 {
     CLOGI("WriteDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
-NO_SANITIZE("cfi") static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
+static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
 {
     CLOGI("ConfigureMtuSizeCallback, id=%d, mtusize=%d, status=%d", clientId, mtuSize, status);
     g_softBusGattcCallback->ConfigureMtuSizeCallback(clientId, mtuSize, status);
 }
 
-NO_SANITIZE("cfi") static void GattcRegisterNotificationCallback(int clientId, int status)
+static void GattcRegisterNotificationCallback(int clientId, int status)
 {
     CLOGI("RegisterNotificationCallback, id=%d, status=%d", clientId, status);
     g_softBusGattcCallback->RegistNotificationCallback(clientId, status);
@@ -104,7 +104,7 @@ static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, 
     g_softBusGattcCallback->NotificationReceiveCallback(clientId, &notify, status);
 }
 
-NO_SANITIZE("cfi") void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb)
+void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb)
 {
     g_btGattClientCallbacks.ConnectionStateCb = GattcConnectionStateChangedCallback;
     g_btGattClientCallbacks.connectParaUpdateCb = GattcConnectParaUpdateCallback;
@@ -118,7 +118,7 @@ NO_SANITIZE("cfi") void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb)
     g_btGattClientCallbacks.notificationCb = GattcNotificationCallback;
     g_softBusGattcCallback = cb;
 }
-NO_SANITIZE("cfi") int32_t SoftbusGattcRegister(void)
+int32_t SoftbusGattcRegister(void)
 {
     BtUuid appId;
     char uuid[APP_UUID_LEN] = { 0xEE, 0xFD };
@@ -133,7 +133,7 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcRegister(void)
     return clientId;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcUnRegister(int32_t clientId)
+int32_t SoftbusGattcUnRegister(int32_t clientId)
 {
     if (BleGattcUnRegister(clientId) != SOFTBUS_OK) {
         CLOGE("BleGattcUnRegister error");
@@ -142,7 +142,7 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcUnRegister(int32_t clientId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
+int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
     BdAddr bdAddr;
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
@@ -159,7 +159,7 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
+int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
 {
     (void)refreshGatt;
     if (BleGattcDisconnect(clientId) != SOFTBUS_OK) {
@@ -169,7 +169,7 @@ NO_SANITIZE("cfi") int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refr
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcSearchServices(int32_t clientId)
+int32_t SoftbusGattcSearchServices(int32_t clientId)
 {
     CLOGI("SoftbusGattcSearchServices %d", clientId);
     int32_t status = BleOhosStatusToSoftBus(BleGattcSearchServices(clientId));
@@ -180,13 +180,13 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcSearchServices(int32_t clientId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcRefreshServices(int32_t clientId)
+int32_t SoftbusGattcRefreshServices(int32_t clientId)
 {
     CLOGI("SoftbusGattcRefreshServices %d", clientId);
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
+int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
 {
     if (clientId <= 0) {
         CLOGE("SoftbusGattcGetService invalid param");
@@ -202,7 +202,7 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUui
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi")
+
 int32_t SoftbusGattcRegisterNotification(
     int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid, SoftBusBtUuid *descriptorUuid)
 {
@@ -220,7 +220,7 @@ int32_t SoftbusGattcRegisterNotification(
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
+int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
 {
     if (BleGattcConfigureMtuSize(clientId, mtuSize) != SOFTBUS_OK) {
         CLOGE("BleGattcConfigureMtuSize error");
@@ -229,7 +229,7 @@ NO_SANITIZE("cfi") int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mt
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData)
+int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData)
 {
     if (clientId <= 0 || clientData == NULL) {
         CLOGE("SoftbusGattcWriteCharacteristic invalid param");

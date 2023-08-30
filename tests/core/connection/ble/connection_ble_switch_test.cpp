@@ -712,4 +712,133 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0012, TestSize.Level1)
     bool isActive = CheckActiveConnection(&optionInfo);
     EXPECT_TRUE(isActive == false);
 };
+
+/*
+* @tc.name: ManagerTest001
+* @tc.desc: test ConnTypeIsSupport
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0013, TestSize.Level1)
+{
+    int ret;
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0013");
+    ret = ConnTypeIsSupport(CONNECT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: ManagerTest002
+* @tc.desc: test invalid param
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0014, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0014");
+    int ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnConnectDevice(nullptr, 0, nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnDisconnectDevice(0);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnPostBytes(0, nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnStartLocalListening(nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnStopLocalListening(nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+}
+
+/*
+* @tc.name: ManagerTest003
+* @tc.desc: test set unset callback and post disconnect without connect
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0015, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0015");
+    ConnectCallback connCb;
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    g_connId = 0;
+}
+
+/*
+* @tc.name: ManagerTest004
+* @tc.desc: Test start stop listening.
+* @tc.in: Test module, Test number,Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnStartLocalListening and ConnStopLocalListening operates normally.
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0016, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0016");
+    ConnectCallback connCb;
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    LocalListenerInfo info;
+    info.type = CONNECT_BLE;
+    ret = ConnStartLocalListening(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ConnStopLocalListening(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    g_connId = 0;
+}
+
+/*
+* @tc.name: ManagerTest005
+* @tc.desc: Test ConnTypeIsSupport.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The ConnTypeIsSupport operates normally.
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0017, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0017");
+    int ret = ConnTypeIsSupport(CONNECT_P2P);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+}
+
+/*
+* @tc.name: ManagerTest006
+* @tc.desc: Test ConnTypeIsSupport.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnTypeIsSupport operates normally.
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0018, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0018");
+    int ret = ConnTypeIsSupport(CONNECT_BR);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+* @tc.name: ManagerTest007
+* @tc.desc: Test ConnTypeIsSupport.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The ConnTypeIsSupport operates normally.
+*/
+HWTEST_F(ConnectionBleSwitchTest, testConnmanger0019, TestSize.Level1)
+{
+    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0019");
+    int ret = ConnTypeIsSupport(CONNECT_TCP);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 }

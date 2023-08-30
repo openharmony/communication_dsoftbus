@@ -73,7 +73,7 @@ static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
     {SOFTBUS_LOG_COMM, "SoftBusComm"},
 };
 
-NO_SANITIZE("cfi") void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...)
+void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...)
 {
     uint32_t ulPos;
     uint32_t level = CUST_NSTACKX_DFINDER_LOG - nstackLevel;
@@ -110,7 +110,7 @@ NO_SANITIZE("cfi") void NstackxLog(const char *moduleName, uint32_t nstackLevel,
     return;
 }
 
-NO_SANITIZE("cfi") void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
+void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
     int lineNo, const char *fmt, ...)
 {
     uint32_t ulPos;
@@ -147,7 +147,7 @@ NO_SANITIZE("cfi") void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel 
     return;
 }
 
-NO_SANITIZE("cfi") const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength)
+const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength)
 {
     if (target == NULL) {
         return "NULL";
@@ -252,7 +252,7 @@ static int32_t AnonymizeString(char **output, const char *in, size_t inLen, cons
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *packet,
+void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *packet,
     size_t packetLen)
 {
     if (!GetSignalingMsgSwitch()) {
@@ -289,7 +289,7 @@ NO_SANITIZE("cfi") void AnonyPacketPrintout(SoftBusLogModule module, const char 
 #endif
 }
 
-NO_SANITIZE("cfi") const char *AnonyDevId(char **outName, const char *inName)
+const char *AnonyDevId(char **outName, const char *inName)
 {
     if (inName == NULL) {
         return "null";
@@ -316,7 +316,7 @@ static inline void StringAppend(char *dst, uint32_t size, const char *src, uint3
     }
 }
 
-NO_SANITIZE("cfi") const char *ToSecureStrDeviceID(const char *deviceId, char **outputStr)
+const char *ToSecureStrDeviceID(const char *deviceId, char **outputStr)
 {
 #define SECURE_PRINT_PREFIX_LEN 4
 #define SECURE_PRINT_SUFFIX_LEN 4

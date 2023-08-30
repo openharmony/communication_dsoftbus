@@ -58,7 +58,7 @@ static int32_t OnUdpChannelOpenedAsServer(const SvcIdentity *svc, IpcIo *io)
     return udpPort;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
+int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel, int32_t pid)
 {
     (void)pid;
@@ -111,7 +111,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpened(const char *pkgName, const c
     return ans;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
+int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
     int32_t errCode, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel open failed ipc server push");
@@ -137,7 +137,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int
     return ans;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId,
+int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId,
     const char *uuid, const char *udid, const char *peerIp, int32_t routeType, int32_t pid)
 {
     if (pkgName == NULL || networkId == NULL) {
@@ -170,7 +170,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
+int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
     int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
@@ -195,7 +195,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t
     return ans;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
+int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
                                       TransReceiveData *receiveData, int32_t pid)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "on channel closed ipc server push");
@@ -229,7 +229,7 @@ NO_SANITIZE("cfi") int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, in
     return ans;
 }
 
-NO_SANITIZE("cfi") int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
+int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
 {
     (void)pkgName;
     (void)param;

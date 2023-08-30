@@ -593,7 +593,7 @@ static VisitNextChoice NotifyIpAddressChanged(const LnnPhysicalSubnet *subnet, v
     return CHOICE_VISIT_NEXT;
 }
 
-NO_SANITIZE("cfi") static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
+static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_IP_ADDR_CHANGED) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event");
@@ -746,7 +746,7 @@ static LnnProtocolManager g_ipProtocol = {
     .pri = 10,
 };
 
-NO_SANITIZE("cfi") int32_t RegistIPProtocolManager(void)
+int32_t RegistIPProtocolManager(void)
 {
     return LnnRegistProtocol(&g_ipProtocol);
 }

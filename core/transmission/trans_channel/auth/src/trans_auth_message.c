@@ -24,7 +24,7 @@
 
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 
-NO_SANITIZE("cfi") int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
+int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
 {
     if (appInfo == NULL || msg == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -47,7 +47,7 @@ NO_SANITIZE("cfi") int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *ap
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len)
+int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len)
 {
     if (msg == NULL || appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -78,7 +78,7 @@ NO_SANITIZE("cfi") int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *a
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr,
+int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr,
     int32_t maxLen)
 {
     (void)maxLen;

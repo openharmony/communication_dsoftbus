@@ -33,7 +33,7 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-NO_SANITIZE("cfi") int32_t LnnInitNetLedger(void)
+int32_t LnnInitNetLedger(void)
 {
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local net ledger fail!");
@@ -112,7 +112,7 @@ int32_t LnnInitNetLedgerDelay(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitNetLedger(void)
+void LnnDeinitNetLedger(void)
 {
     LnnDeinitMetaNodeLedger();
     LnnDeinitDistributedLedger();
@@ -210,7 +210,7 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
+int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
 {
     bool isLocalNetworkId = false;
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
@@ -232,7 +232,7 @@ NO_SANITIZE("cfi") int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint1
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetNodeKeyInfoLen(int32_t key)
+int32_t LnnGetNodeKeyInfoLen(int32_t key)
 {
     switch (key) {
         case NODE_KEY_UDID:
@@ -261,7 +261,7 @@ NO_SANITIZE("cfi") int32_t LnnGetNodeKeyInfoLen(int32_t key)
     }
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_UDID;
@@ -277,7 +277,7 @@ NO_SANITIZE("cfi") int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_UUID;
@@ -293,7 +293,7 @@ NO_SANITIZE("cfi") int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_BR_MAC;
@@ -309,7 +309,7 @@ NO_SANITIZE("cfi") int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_IP_ADDRESS;
@@ -325,7 +325,7 @@ NO_SANITIZE("cfi") int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_CAPABILITY;
@@ -338,7 +338,7 @@ NO_SANITIZE("cfi") int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *no
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
+int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
 {
     NodeDeviceInfoKey key;
     key = NODE_KEY_NETWORK_TYPE;
@@ -351,7 +351,7 @@ NO_SANITIZE("cfi") int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeIn
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
+void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
 {
     if (fd <= 0 || nodeInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param is null");

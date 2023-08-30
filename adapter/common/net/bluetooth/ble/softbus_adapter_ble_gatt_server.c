@@ -38,7 +38,7 @@ static BtGattServerCallbacks g_bleGattsHalCallback = {0};
 static volatile int g_halServerId = -1;
 static volatile int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 
-NO_SANITIZE("cfi") int CheckGattsStatus(void)
+int CheckGattsStatus(void)
 {
     if (g_gattsCallback == NULL) {
         return SOFTBUS_ERR;
@@ -60,7 +60,7 @@ NO_SANITIZE("cfi") int CheckGattsStatus(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number)
+int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number)
 {
     if ((srvcUuid.uuidLen == 0) || (srvcUuid.uuid == NULL) || (number <= 0)) {
         return SOFTBUS_ERR;
@@ -78,7 +78,7 @@ NO_SANITIZE("cfi") int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPri
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int properties,
+int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int properties,
     int permissions)
 {
     if ((characUuid.uuidLen == 0) || (characUuid.uuid == NULL)) {
@@ -97,7 +97,7 @@ NO_SANITIZE("cfi") int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUu
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permissions)
+int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permissions)
 {
     if ((descUuid.uuidLen == 0) || (descUuid.uuid == NULL)) {
         return SOFTBUS_ERR;
@@ -115,7 +115,7 @@ NO_SANITIZE("cfi") int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid d
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsStartService(int srvcHandle)
+int SoftBusGattsStartService(int srvcHandle)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -127,7 +127,7 @@ NO_SANITIZE("cfi") int SoftBusGattsStartService(int srvcHandle)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsStopService(int srvcHandle)
+int SoftBusGattsStopService(int srvcHandle)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -139,7 +139,7 @@ NO_SANITIZE("cfi") int SoftBusGattsStopService(int srvcHandle)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsDeleteService(int srvcHandle)
+int SoftBusGattsDeleteService(int srvcHandle)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -156,7 +156,7 @@ int SoftBusGattsConnect(int connId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
+int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -172,7 +172,7 @@ NO_SANITIZE("cfi") int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
+int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
 {
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -190,7 +190,7 @@ NO_SANITIZE("cfi") int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
+int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
 {
     CLOGI("SoftBusGattsSendNotify enter");
     if (CheckGattsStatus() != SOFTBUS_OK) {
@@ -212,7 +212,7 @@ NO_SANITIZE("cfi") int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
+static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
 {
     CLOGI("BleRegisterServerCallback status=%d severId=%d", status, serverId);
     if ((appUuid == NULL) || (appUuid->uuid == NULL)) {
@@ -235,7 +235,7 @@ NO_SANITIZE("cfi") static void BleRegisterServerCallback(int status, int serverI
     }
 }
 
-NO_SANITIZE("cfi") static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdAddr)
+static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdAddr)
 {
     CLOGI("ConnectServerCallback is coming, connId=%d serverId=%d\n", connId, serverId);
     if (serverId != g_halServerId) {
@@ -244,7 +244,7 @@ NO_SANITIZE("cfi") static void BleConnectServerCallback(int connId, int serverId
     g_gattsCallback->ConnectServerCallback(connId, (const SoftBusBtAddr*)bdAddr);
 }
 
-NO_SANITIZE("cfi") static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *bdAddr)
+static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *bdAddr)
 {
     CLOGI("DisconnectServerCallback is coming, connId=%d severId=%d", connId, serverId);
     if (serverId != g_halServerId) {
@@ -253,7 +253,7 @@ NO_SANITIZE("cfi") static void BleDisconnectServerCallback(int connId, int serve
     g_gattsCallback->DisconnectServerCallback(connId, (const SoftBusBtAddr*)bdAddr);
 }
 
-NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle)
+static void BleServiceAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle)
 {
     (void)serverId;
     CLOGI("ServiceAddCallback srvcHandle=%d\n", srvcHandle);
@@ -264,7 +264,7 @@ NO_SANITIZE("cfi") static void BleServiceAddCallback(int status, int serverId, B
     g_gattsCallback->ServiceAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle);
 }
 
-NO_SANITIZE("cfi") static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandle,
+static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandle,
     int includeSrvcHandle)
 {
     (void)serverId;
@@ -272,7 +272,7 @@ NO_SANITIZE("cfi") static void BleIncludeServiceAddCallback(int status, int serv
     CLOGI("IncludeServiceAddCallback srvcHandle=%d,includeSrvcHandle=%d\n", srvcHandle, includeSrvcHandle);
 }
 
-NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle,
+static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle,
     int characteristicHandle)
 {
     CLOGI("CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle, characteristicHandle);
@@ -284,7 +284,7 @@ NO_SANITIZE("cfi") static void BleCharacteristicAddCallback(int status, int serv
     g_gattsCallback->CharacteristicAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle, characteristicHandle);
 }
 
-NO_SANITIZE("cfi") static void BleDescriptorAddCallback(int status, int serverId, BtUuid *uuid,
+static void BleDescriptorAddCallback(int status, int serverId, BtUuid *uuid,
     int srvcHandle, int descriptorHandle)
 {
     CLOGI("DescriptorAddCallback srvcHandle=%d,descriptorHandle=%d", srvcHandle, descriptorHandle);
@@ -295,7 +295,7 @@ NO_SANITIZE("cfi") static void BleDescriptorAddCallback(int status, int serverId
     g_gattsCallback->DescriptorAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle, descriptorHandle);
 }
 
-NO_SANITIZE("cfi") static void BleServiceStartCallback(int status, int serverId, int srvcHandle)
+static void BleServiceStartCallback(int status, int serverId, int srvcHandle)
 {
     CLOGI("ServiceStartCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
@@ -305,7 +305,7 @@ NO_SANITIZE("cfi") static void BleServiceStartCallback(int status, int serverId,
     g_gattsCallback->ServiceStartCallback(status, srvcHandle);
 }
 
-NO_SANITIZE("cfi") static void BleServiceStopCallback(int status, int serverId, int srvcHandle)
+static void BleServiceStopCallback(int status, int serverId, int srvcHandle)
 {
     CLOGI("ServiceStopCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
@@ -314,7 +314,7 @@ NO_SANITIZE("cfi") static void BleServiceStopCallback(int status, int serverId, 
     g_gattsCallback->ServiceStopCallback(status, srvcHandle);
 }
 
-NO_SANITIZE("cfi") static void BleServiceDeleteCallback(int status, int serverId, int srvcHandle)
+static void BleServiceDeleteCallback(int status, int serverId, int srvcHandle)
 {
     CLOGI("ServiceDeleteCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
@@ -323,7 +323,7 @@ NO_SANITIZE("cfi") static void BleServiceDeleteCallback(int status, int serverId
     g_gattsCallback->ServiceDeleteCallback(status, srvcHandle);
 }
 
-NO_SANITIZE("cfi") static void BleRequestReadCallback(BtReqReadCbPara readCbPara)
+static void BleRequestReadCallback(BtReqReadCbPara readCbPara)
 {
     CLOGI("RequestReadCallback transId=%d, attrHandle=%d\n", readCbPara.transId, readCbPara.attrHandle);
     SoftBusGattReadRequest req = {
@@ -337,7 +337,7 @@ NO_SANITIZE("cfi") static void BleRequestReadCallback(BtReqReadCbPara readCbPara
     g_gattsCallback->RequestReadCallback(req);
 }
 
-NO_SANITIZE("cfi") static void BleRequestWriteCallback(BtReqWriteCbPara writeCbPara)
+static void BleRequestWriteCallback(BtReqWriteCbPara writeCbPara)
 {
     CLOGI("RequestWriteCallback transId=%d, attrHandle=%d\n", writeCbPara.transId, writeCbPara.attrHandle);
     SoftBusGattWriteRequest req = {
@@ -354,19 +354,19 @@ NO_SANITIZE("cfi") static void BleRequestWriteCallback(BtReqWriteCbPara writeCbP
     g_gattsCallback->RequestWriteCallback(req);
 }
 
-NO_SANITIZE("cfi") static void BleResponseConfirmationCallback(int status, int handle)
+static void BleResponseConfirmationCallback(int status, int handle)
 {
     CLOGI("ResponseConfirmationCallback status=%d, handle=%d\n", status, handle);
     g_gattsCallback->ResponseConfirmationCallback(status, handle);
 }
 
-NO_SANITIZE("cfi") static void BleIndicationSentCallback(int connId, int status)
+static void BleIndicationSentCallback(int connId, int status)
 {
     CLOGI("IndicationSentCallback status=%d, connId=%d\n", status, connId);
     g_gattsCallback->NotifySentCallback(connId, status);
 }
 
-NO_SANITIZE("cfi") static void BleMtuChangeCallback(int connId, int mtu)
+static void BleMtuChangeCallback(int connId, int mtu)
 {
     CLOGI("MtuChangeCallback connId=%d, mtu=%d\n", connId, mtu);
     g_gattsCallback->MtuChangeCallback(connId, mtu);
@@ -392,7 +392,7 @@ static int GattsRegisterHalCallback(void)
     return BleGattsRegisterCallbacks(&g_bleGattsHalCallback);
 }
 
-NO_SANITIZE("cfi") int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
+int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
 {
     if (callback == NULL) {
         CLOGE("SoftBusRegisterGattsCallbacks fail:nullptr");
@@ -423,7 +423,7 @@ NO_SANITIZE("cfi") int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callb
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void SoftBusUnRegisterGattsCallbacks(void)
+void SoftBusUnRegisterGattsCallbacks(void)
 {
     if (g_gattsCallback == NULL) {
         CLOGI("no need to unregist gatts callback.");

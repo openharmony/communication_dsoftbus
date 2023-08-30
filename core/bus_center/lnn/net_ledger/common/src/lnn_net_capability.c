@@ -24,7 +24,7 @@
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
 #define DEFAUTL_LNN_CAPBILITY 0x16
 
-NO_SANITIZE("cfi") bool LnnHasCapability(uint32_t capability, NetCapability type)
+bool LnnHasCapability(uint32_t capability, NetCapability type)
 {
     if (type >= BIT_COUNT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
@@ -38,7 +38,7 @@ NO_SANITIZE("cfi") bool LnnHasCapability(uint32_t capability, NetCapability type
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 {
     if (capability == NULL || type >= BIT_COUNT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
@@ -48,7 +48,7 @@ NO_SANITIZE("cfi") int32_t LnnSetNetCapability(uint32_t *capability, NetCapabili
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
+int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
 {
     if (capability == NULL || type >= BIT_COUNT) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
@@ -58,7 +58,7 @@ NO_SANITIZE("cfi") int32_t LnnClearNetCapability(uint32_t *capability, NetCapabi
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") uint32_t LnnGetNetCapabilty(void)
+uint32_t LnnGetNetCapabilty(void)
 {
     uint32_t capability = 0;
     uint32_t configValue;

@@ -55,7 +55,7 @@ public:
             return 0;
         }
 
-        NO_SANITIZE("cfi") void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) const override
+        void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) const override
         {
             listener_->OnQosEvent(eventId, tvCount, tvList);
         }

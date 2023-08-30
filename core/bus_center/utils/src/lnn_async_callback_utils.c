@@ -34,7 +34,7 @@ typedef struct {
 
 #define TO_ASYNC_CALLBACK_INFO(cb) CONTAINER_OF(cb, AsyncCallbackInfo, callback)
 
-NO_SANITIZE("cfi") static void AsyncCallbackHandler(SoftBusMessage *msg)
+static void AsyncCallbackHandler(SoftBusMessage *msg)
 {
     AsyncCallbackInfo *info = NULL;
 
@@ -54,7 +54,7 @@ NO_SANITIZE("cfi") static void AsyncCallbackHandler(SoftBusMessage *msg)
     info->callback(info->cbPara);
 }
 
-NO_SANITIZE("cfi") static void FreeAsyncCallbackMessage(SoftBusMessage *msg)
+static void FreeAsyncCallbackMessage(SoftBusMessage *msg)
 {
     AsyncCallbackInfo *info = NULL;
 
@@ -98,7 +98,7 @@ static AsyncCallbackInfo *CreateAsyncCallbackInfo(SoftBusLooper *looper,
     return info;
 }
 
-NO_SANITIZE("cfi") int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
+int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
 {
     AsyncCallbackInfo *info = NULL;
 
@@ -115,7 +115,7 @@ NO_SANITIZE("cfi") int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyn
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
     void *para, uint64_t delayMillis)
 {
     AsyncCallbackInfo *info = NULL;

@@ -38,7 +38,6 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
-#include "wifi_direct_command_manager.h"
 #include "wifi_direct_fast_connect.h"
 #include "wifi_direct_initiator.h"
 #include "wifi_direct_work_queue.h"
@@ -59,7 +58,6 @@
 #include "wifi_direct_ip_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_types.h"
-#include "wifi_direct_negotiator.h"
 #include "negotiate_state.h"
 #include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
@@ -294,25 +292,11 @@ HWTEST_F(WifiDirectTest, WifiDirectNegotiator001, TestSize.Level1)
 
 /*
 * @tc.name: testWifiDirectNegotiator
-* @tc.desc: test changeState
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectTest, WifiDirectNegotiator002, TestSize.Level1)
-{
-    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-
-    NegotiateStateType newState = NEGO_STATE_AVAILABLE;
-    self->changeState(newState);
-};
-
-/*
-* @tc.name: testWifiDirectNegotiator
 * @tc.desc: test processNewCommand
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(WifiDirectTest, WifiDirectNegotiator003, TestSize.Level1)
+HWTEST_F(WifiDirectTest, WifiDirectNegotiator002, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
 
@@ -326,7 +310,7 @@ HWTEST_F(WifiDirectTest, WifiDirectNegotiator003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(WifiDirectTest, WifiDirectNegotiator004, TestSize.Level1)
+HWTEST_F(WifiDirectTest, WifiDirectNegotiator003, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
 
@@ -340,7 +324,7 @@ HWTEST_F(WifiDirectTest, WifiDirectNegotiator004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(WifiDirectTest, WifiDirectNegotiator005, TestSize.Level1)
+HWTEST_F(WifiDirectTest, WifiDirectNegotiator004, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
 
@@ -358,7 +342,7 @@ HWTEST_F(WifiDirectTest, WifiDirectNegotiator005, TestSize.Level1)
 
 /*
 * @tc.name: testWifiDirectRoleNegotiator
-* @tc.desc: test wifi_direct_work_queue
+* @tc.desc: test WifiDirectRoleNegotiator
 * @tc.type: FUNC
 * @tc.require:
 */

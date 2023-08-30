@@ -74,7 +74,7 @@ static bool IsValidListener(const ISessionListener *listener)
     return false;
 }
 
-NO_SANITIZE("cfi") static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
+static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
 {
     if (!isEnabled) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "the channel is opening");

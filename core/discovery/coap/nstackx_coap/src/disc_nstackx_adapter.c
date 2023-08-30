@@ -107,7 +107,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
+static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
     DISC_CHECK_AND_RETURN_LOG(deviceList != NULL && deviceCount != 0, "invalid param.");
     DLOGI("Disc device found, count=%u", deviceCount);
@@ -148,7 +148,7 @@ static NSTACKX_Parameter g_nstackxCallBack = {
     .onDFinderMsgReceived = NULL,
 };
 
-NO_SANITIZE("cfi") int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
+int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(discCoapCb != NULL && g_discCoapInnerCb != NULL, SOFTBUS_INVALID_PARAM,
         "invalid param");
@@ -159,7 +159,7 @@ NO_SANITIZE("cfi") int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapC
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
+int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
     DISC_CHECK_AND_RETURN_RET_LOG(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM, "capabilityBitmapNum=0");
 
@@ -169,7 +169,7 @@ NO_SANITIZE("cfi") int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapN
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
+int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
     DISC_CHECK_AND_RETURN_RET_LOG(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM, "capabilityBitmapNum=0");
 
@@ -180,7 +180,7 @@ NO_SANITIZE("cfi") int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmap
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t dataLen)
+int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t dataLen)
 {
     (void)serviceData;
     (void)dataLen;
@@ -231,7 +231,7 @@ static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, cons
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
+int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_INVALID_PARAM, "option=NULL");
     DISC_CHECK_AND_RETURN_RET_LOG(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
@@ -257,7 +257,7 @@ NO_SANITIZE("cfi") int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscCoapStopDiscovery(void)
+int32_t DiscCoapStopDiscovery(void)
 {
     if (NSTACKX_StopDeviceFind() != SOFTBUS_OK) {
         DLOGE("stop device discovery failed");
@@ -329,7 +329,7 @@ static int32_t SetLocalDeviceInfo(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DiscCoapUpdateLocalIp(LinkStatus status)
+void DiscCoapUpdateLocalIp(LinkStatus status)
 {
     DISC_CHECK_AND_RETURN_LOG(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN,
         "invlaid link status, status=%d.", status);
@@ -350,7 +350,7 @@ NO_SANITIZE("cfi") void DiscCoapUpdateLocalIp(LinkStatus status)
     }
 }
 
-NO_SANITIZE("cfi") void DiscCoapUpdateDevName(void)
+void DiscCoapUpdateDevName(void)
 {
     char localDevName[NSTACKX_MAX_DEVICE_NAME_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
@@ -404,7 +404,7 @@ static int32_t InitLocalInfo(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t DiscNstackxInit(void)
+int32_t DiscNstackxInit(void)
 {
     if (InitLocalInfo() != SOFTBUS_OK) {
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
@@ -419,7 +419,7 @@ NO_SANITIZE("cfi") int32_t DiscNstackxInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DiscNstackxDeinit(void)
+void DiscNstackxDeinit(void)
 {
     NSTACKX_Deinit();
     DeinitLocalInfo();

@@ -70,7 +70,7 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
     return data;
 }
 
-NO_SANITIZE("cfi") static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
+static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     ALOGI("hichain OnTransmit: authSeq=%" PRId64 ", len=%u.", authSeq, len);
     if (AuthSessionPostAuthData(authSeq, data, len) != SOFTBUS_OK) {
@@ -80,7 +80,7 @@ NO_SANITIZE("cfi") static bool OnTransmit(int64_t authSeq, const uint8_t *data, 
     return true;
 }
 
-NO_SANITIZE("cfi") static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
     ALOGI("hichain OnSessionKeyReturned: authSeq=%" PRId64 ", len=%u.", authSeq, sessionKeyLen);
     if (sessionKey == NULL || sessionKeyLen > SESSION_KEY_LENGTH) {
@@ -90,7 +90,7 @@ NO_SANITIZE("cfi") static void OnSessionKeyReturned(int64_t authSeq, const uint8
     (void)AuthSessionSaveSessionKey(authSeq, sessionKey, sessionKeyLen);
 }
 
-NO_SANITIZE("cfi") static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
+static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 {
     (void)operationCode;
     (void)returnData;
@@ -98,7 +98,7 @@ NO_SANITIZE("cfi") static void OnFinish(int64_t authSeq, int operationCode, cons
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
 
-NO_SANITIZE("cfi") static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
+static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
     (void)errorReturn;
@@ -106,7 +106,7 @@ NO_SANITIZE("cfi") static void OnError(int64_t authSeq, int operationCode, int e
     (void)AuthSessionHandleAuthError(authSeq, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
 
-NO_SANITIZE("cfi") static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
+static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
 {
     (void)reqParams;
     ALOGI("hichain OnRequest: authSeq=%" PRId64 ", operationCode=%d.", authSeq, operationCode);
@@ -171,7 +171,7 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupInfo)
+static void OnGroupCreated(const char *groupInfo)
 {
     if (groupInfo == NULL) {
         ALOGE("invalid group info.");
@@ -187,7 +187,7 @@ NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupInfo)
     }
 }
 
-NO_SANITIZE("cfi") static void OnDeviceBound(const char *udid, const char *groupInfo)
+static void OnDeviceBound(const char *udid, const char *groupInfo)
 {
     if (udid == NULL || groupInfo == NULL) {
         ALOGE("invalid udid");
@@ -199,7 +199,7 @@ NO_SANITIZE("cfi") static void OnDeviceBound(const char *udid, const char *group
     }
 }
 
-NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupInfo)
+static void OnGroupDeleted(const char *groupInfo)
 {
     if (groupInfo == NULL) {
         ALOGE("invalid group info.");
@@ -215,7 +215,7 @@ NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupInfo)
     }
 }
 
-NO_SANITIZE("cfi") static void OnDeviceNotTrusted(const char *udid)
+static void OnDeviceNotTrusted(const char *udid)
 {
     if (udid == NULL) {
         ALOGE("hichain OnDeviceNotTrusted get invalid udid.");
@@ -229,7 +229,7 @@ NO_SANITIZE("cfi") static void OnDeviceNotTrusted(const char *udid)
     }
 }
 
-NO_SANITIZE("cfi") int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
+int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -249,7 +249,7 @@ NO_SANITIZE("cfi") int32_t RegTrustDataChangeListener(const TrustDataChangeListe
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void UnregTrustDataChangeListener(void)
+void UnregTrustDataChangeListener(void)
 {
     int32_t ret = UnregChangeListener(AUTH_APPID);
     if (ret != 0) {
@@ -258,7 +258,7 @@ NO_SANITIZE("cfi") void UnregTrustDataChangeListener(void)
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
 
-NO_SANITIZE("cfi") int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
+int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
 {
     if (udid == NULL || uid == NULL) {
         ALOGE("udid/uid is invalid.");
@@ -279,7 +279,7 @@ NO_SANITIZE("cfi") int32_t HichainStartAuth(int64_t authSeq, const char *udid, c
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -292,14 +292,14 @@ NO_SANITIZE("cfi") int32_t HichainProcessData(int64_t authSeq, const uint8_t *da
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void HichainDestroy(void)
+void HichainDestroy(void)
 {
     UnregTrustDataChangeListener();
     DestroyDeviceAuth();
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain destroy succ.");
 }
 
-NO_SANITIZE("cfi") void HichainCancelRequest(int64_t authReqId)
+void HichainCancelRequest(int64_t authReqId)
 {
     CancelRequest(authReqId, AUTH_APPID);
 }

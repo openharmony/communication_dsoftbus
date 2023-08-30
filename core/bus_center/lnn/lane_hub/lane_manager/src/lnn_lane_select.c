@@ -230,7 +230,7 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
+int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList, uint32_t *listNum)
 {
     if (PreProcLaneSelect(networkId, request, recommendList, listNum) != SOFTBUS_OK) {

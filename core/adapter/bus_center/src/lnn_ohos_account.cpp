@@ -29,7 +29,7 @@
 
 static const std::string DEFAULT_USER_ID = "0";
 
-NO_SANITIZE("cfi") int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
+int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {
     if (accountHash == nullptr || len != SHA_256_HASH_LEN) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetOhosAccount get invalid param");
@@ -64,7 +64,7 @@ NO_SANITIZE("cfi") int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitOhosAccount(void)
+int32_t LnnInitOhosAccount(void)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
 
@@ -81,7 +81,7 @@ NO_SANITIZE("cfi") int32_t LnnInitOhosAccount(void)
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
-NO_SANITIZE("cfi") void LnnUpdateOhosAccount(void)
+void LnnUpdateOhosAccount(void)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
@@ -111,7 +111,7 @@ NO_SANITIZE("cfi") void LnnUpdateOhosAccount(void)
     LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
 }
 
-NO_SANITIZE("cfi") void LnnOnOhosAccountLogout(void)
+void LnnOnOhosAccountLogout(void)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
 
@@ -127,7 +127,7 @@ NO_SANITIZE("cfi") void LnnOnOhosAccountLogout(void)
     LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
 }
 
-NO_SANITIZE("cfi") bool LnnIsDefaultOhosAccount(void)
+bool LnnIsDefaultOhosAccount(void)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
     uint8_t defaultAccountHash[SHA_256_HASH_LEN] = {0};

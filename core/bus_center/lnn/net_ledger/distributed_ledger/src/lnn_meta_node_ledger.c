@@ -77,7 +77,7 @@ static MetaNodeStorageInfo *CreateMetaNodeStorageInfo(const MetaNodeConfigInfo *
     return storageInfo;
 }
 
-NO_SANITIZE("cfi") int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
+int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
 {
     MetaNodeStorageInfo *storageInfo = NULL;
     int32_t rc = SOFTBUS_ERR;
@@ -127,7 +127,7 @@ NO_SANITIZE("cfi") int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, cha
     return rc;
 }
 
-NO_SANITIZE("cfi") int32_t LnnDeactiveMetaNode(const char *metaNodeId)
+int32_t LnnDeactiveMetaNode(const char *metaNodeId)
 {
     MetaNodeStorageInfo *storageInfo = NULL;
     int32_t rc = SOFTBUS_OK;
@@ -157,7 +157,7 @@ NO_SANITIZE("cfi") int32_t LnnDeactiveMetaNode(const char *metaNodeId)
     return rc;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
+int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
 {
     MetaNodeStorageInfo *item = NULL;
     int32_t i = 0;
@@ -247,7 +247,7 @@ int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeI
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitMetaNodeLedger(void)
+int32_t LnnInitMetaNodeLedger(void)
 {
     if (g_metaNodeList == NULL) {
         g_metaNodeList = CreateSoftBusList();
@@ -260,7 +260,7 @@ NO_SANITIZE("cfi") int32_t LnnInitMetaNodeLedger(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitMetaNodeLedger(void)
+void LnnDeinitMetaNodeLedger(void)
 {
     if (g_metaNodeList == NULL) {
         return;

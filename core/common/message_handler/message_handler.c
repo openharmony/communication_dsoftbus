@@ -63,7 +63,7 @@ static int64_t UptimeMicros(void)
     return when;
 }
 
-NO_SANITIZE("cfi") static void FreeSoftBusMsg(SoftBusMessage *msg)
+static void FreeSoftBusMsg(SoftBusMessage *msg)
 {
     if (msg->FreeMessage == NULL) {
         SoftBusFree(msg);
@@ -90,7 +90,7 @@ void FreeMessage(SoftBusMessage *msg)
     }
 }
 
-NO_SANITIZE("cfi") static void *LoopTask(void *arg)
+static void *LoopTask(void *arg)
 {
     SoftBusLooper *looper = arg;
     SoftBusLooperContext *context = looper->context;
@@ -245,7 +245,7 @@ static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusH
     }
 }
 
-NO_SANITIZE("cfi") void DumpLooper(const SoftBusLooper *looper)
+void DumpLooper(const SoftBusLooper *looper)
 {
     if (looper == NULL) {
         return;
@@ -261,7 +261,7 @@ NO_SANITIZE("cfi") void DumpLooper(const SoftBusLooper *looper)
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-NO_SANITIZE("cfi") static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
+static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
     if (msgPost == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "PostMessageAtTime with nullmsg");
@@ -330,7 +330,7 @@ NO_SANITIZE("cfi") static void PostMessageAtTime(const SoftBusLooper *looper, So
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-NO_SANITIZE("cfi") static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)
+static void LooperPostMessage(const SoftBusLooper *looper, SoftBusMessage *msg)
 {
     if (msg == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LooperPostMessage with nullmsg");
@@ -367,7 +367,7 @@ static int WhatRemoveFunc(const SoftBusMessage *msg, void *args)
     return 1;
 }
 
-NO_SANITIZE("cfi") static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
+static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
     int (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
     SoftBusLooperContext *context = looper->context;
@@ -396,7 +396,7 @@ NO_SANITIZE("cfi") static void LoopRemoveMessageCustom(const SoftBusLooper *loop
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-NO_SANITIZE("cfi") static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandler *handler,
+static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandler *handler,
     int what)
 {
     LoopRemoveMessageCustom(looper, handler, WhatRemoveFunc, (void*)(intptr_t)what);
@@ -410,7 +410,7 @@ void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
     loop->dumpable = dumpable;
 }
 
-NO_SANITIZE("cfi") SoftBusLooper *CreateNewLooper(const char *name)
+SoftBusLooper *CreateNewLooper(const char *name)
 {
     if (g_looperCnt >= MAX_LOOPER_CNT) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Looper count:%u, exceeds the maximum", g_looperCnt);
@@ -468,7 +468,7 @@ static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_LANE, NULL}
 };
 
-NO_SANITIZE("cfi") SoftBusLooper *GetLooper(int type)
+SoftBusLooper *GetLooper(int type)
 {
     uint32_t len = sizeof(g_loopConfig) / sizeof(struct LoopConfigItem);
     for (uint32_t i = 0; i < len; i++) {
@@ -500,7 +500,7 @@ static void ReleaseLooper(const SoftBusLooper *looper)
     }
 }
 
-NO_SANITIZE("cfi") void DestroyLooper(SoftBusLooper *looper)
+void DestroyLooper(SoftBusLooper *looper)
 {
     if (looper == NULL) {
         return;

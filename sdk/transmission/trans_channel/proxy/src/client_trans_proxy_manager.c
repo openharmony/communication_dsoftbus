@@ -268,7 +268,7 @@ static ClientProxyChannelInfo* ClientTransProxyCreasteChannelInfo(const ChannelI
     return info;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransProxyOnChannelOpened invalid param.");
@@ -291,7 +291,7 @@ NO_SANITIZE("cfi") int32_t ClientTransProxyOnChannelOpened(const char *sessionNa
 
 int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId);
 
-NO_SANITIZE("cfi") int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
+int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
 {
     (void)ClientTransProxyDelChannelInfo(channelId);
     (void)TransProxyDelSliceProcessorByChannelId(channelId);
@@ -304,7 +304,7 @@ NO_SANITIZE("cfi") int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId, int32_t errCode)
+int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_PROXY, errCode);
     if (ret != SOFTBUS_OK) {
@@ -769,7 +769,7 @@ static void ClientTransProxySliceTimerProc(void)
     return;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransProxyOnDataReceived(int32_t channelId,
+int32_t ClientTransProxyOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type)
 {
     (void)type;

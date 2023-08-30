@@ -299,7 +299,7 @@ static int32_t GetTcpSockPort(int32_t fd)
     return SoftBusNtoHs(addr.sinPort);
 }
 
-NO_SANITIZE("cfi") int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
+int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 {
 #define KEEP_ALIVE_COUNT 5
     if (fd < 0) {
@@ -344,7 +344,7 @@ NO_SANITIZE("cfi") int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 }
 
 #ifdef TCP_USER_TIMEOUT
-NO_SANITIZE("cfi") int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
+int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     if (fd < 0) {
         CLOGE("ConnSetTcpUserTimeOut invalid param");
@@ -390,7 +390,7 @@ static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") const SocketInterface *GetTcpProtocol(void)
+const SocketInterface *GetTcpProtocol(void)
 {
     static SocketInterface tcpSocketIntf = {
         .name = "TCP",

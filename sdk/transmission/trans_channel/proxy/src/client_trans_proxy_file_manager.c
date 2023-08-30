@@ -1023,7 +1023,7 @@ static int32_t UnpackFileCrcCheckSum(const FileRecipientInfo *info, FileFrame *f
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
+static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
     const char *destFile, uint64_t fileSize)
 {
     FileFrame fileFrame = {0};
@@ -1194,7 +1194,7 @@ static bool IsValidFileString(const char *str[], uint32_t fileNum, uint32_t maxL
     return true;
 }
 
-NO_SANITIZE("cfi") static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *sFileList[],
+static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
     int32_t ret;
@@ -1289,7 +1289,7 @@ static void ReleaseSendListenerInfo(SendListenerInfo *sendInfo)
     SoftBusFree(sendInfo);
 }
 
-NO_SANITIZE("cfi") int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[],
+int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy send file trans start");
@@ -1594,7 +1594,7 @@ static FileRecipientInfo *GetRecipientInfo(int32_t sessionId)
     return recipient;
 }
 
-NO_SANITIZE("cfi") static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const FileFrame *fileFrame)
+static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const FileFrame *fileFrame)
 {
     FileRecipientInfo *recipient = GetRecipientInCreateFileRef(sessionId, channelId);
     if (recipient == NULL) {
@@ -1781,7 +1781,7 @@ static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
+static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
 {
     FileRecipientInfo *recipient = GetRecipientInProcessRef(sessionId);
     if (recipient == NULL) {
@@ -1830,7 +1830,7 @@ EXIT_ERR:
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
+static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
 {
     FileRecipientInfo *recipient = GetRecipientInfo(sessionId);
     if (recipient == NULL) {

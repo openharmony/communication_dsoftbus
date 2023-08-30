@@ -94,7 +94,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
+int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
 {
     int32_t ret = SOFTBUS_ERR;
     if (appInfo == NULL) {
@@ -120,7 +120,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
+int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -146,7 +146,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelOpenFailed(int32_t channelId, const App
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
+int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -170,7 +170,7 @@ NO_SANITIZE("cfi") int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, const char *data,
+int32_t OnProxyChannelMsgReceived(int32_t channelId, const AppInfo *appInfo, const char *data,
     uint32_t len)
 {
     int32_t ret = SOFTBUS_OK;
@@ -263,7 +263,7 @@ EXIT_ERR:
     return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
 }
 
-NO_SANITIZE("cfi")
+
 int32_t TransOpenNetWorkingChannel(
     const char *sessionName, const char *peerNetworkId, const LanePreferredLinkList *preferred)
 {
@@ -292,7 +292,7 @@ int32_t TransOpenNetWorkingChannel(
     return channelId;
 }
 
-NO_SANITIZE("cfi") int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen,
+int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen,
     int32_t priority)
 {
     int32_t ret = SOFTBUS_ERR;
@@ -325,7 +325,7 @@ NO_SANITIZE("cfi") int32_t TransSendNetworkingMessage(int32_t channelId, const c
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t TransCloseNetWorkingChannel(int32_t channelId)
+int32_t TransCloseNetWorkingChannel(int32_t channelId)
 {
     return TransProxyCloseProxyChannel(channelId);
 }

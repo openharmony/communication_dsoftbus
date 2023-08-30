@@ -26,7 +26,7 @@
 #define ERR_CODE "ERR_CODE"
 #define ERR_DESC "ERR_DESC"
 
-NO_SANITIZE("cfi") char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
+char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
 {
     if (errDesc == NULL) {
         return NULL;
@@ -46,7 +46,7 @@ NO_SANITIZE("cfi") char *VerifyP2pPackError(int32_t code, int32_t errCode, const
     return data;
 }
 
-NO_SANITIZE("cfi") char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp)
+char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp)
 {
     if (myIp == NULL || myPort <= 0) {
         return NULL;
@@ -69,7 +69,7 @@ NO_SANITIZE("cfi") char *VerifyP2pPack(const char *myIp, int32_t myPort, const c
     return data;
 }
 
-NO_SANITIZE("cfi") int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port)
+int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port)
 {
     if (json == NULL || ip == NULL || port == NULL) {
         return SOFTBUS_INVALID_PARAM;
