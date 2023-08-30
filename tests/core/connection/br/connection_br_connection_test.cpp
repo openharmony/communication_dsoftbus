@@ -78,6 +78,104 @@ void OnConnected(uint32_t connectionId, const ConnectionInfo *info)
     return;
 }
 
+void OnDisconnected(uint32_t connectionId, const ConnectionInfo *info)
+{
+    (void)connectionId;
+    (void)info;
+    return;
+}
+
+void MessageDelay(const SoftBusLooper *looper, SoftBusMessage *msg, uint64_t delayMillis)
+{
+    (void)looper;
+    (void)msg;
+    (void)delayMillis;
+    return;
+}
+
+void RvMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
+    int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
+{
+    (void)looper;
+    (void)handler;
+    (void)customFunc;
+    (void)args;
+    return;
+}
+
+void handlePendingRequest(void)
+{
+    return;
+}
+
+void connectRequest(const ConnBrConnectRequestContext *ctx)
+{
+    (void)ctx;
+    return;
+}
+
+void clientConnected(uint32_t connectionId)
+{
+    (void)connectionId;
+    return;
+}
+
+void clientConnectTimeout(uint32_t connectionId, const char *address)
+{
+    (void)connectionId;
+    (void)address;
+    return;
+}
+
+void clientConnectFailed(uint32_t connectionId, int32_t error)
+{
+    (void)connectionId;
+    (void)error;
+    return;
+}
+
+void serverAccepted(uint32_t connectionId)
+{
+    (void)connectionId;
+    return;
+}
+
+void dataReceived(ConnBrDataReceivedContext *ctx)
+{
+    (void)ctx;
+    return;
+}
+
+void connectionException(uint32_t connectionId, int32_t error)
+{
+    (void)connectionId;
+    (void)error;
+    return;
+}
+
+void connectionResume(uint32_t connectionId)
+{
+    (void)connectionId;
+    return;
+}
+
+void disconnectRequest(uint32_t connectionId)
+{
+    (void)connectionId;
+    return;
+}
+void unpend(const ConnBrPendInfo *info)
+{
+    (void)info;
+    return;
+}
+
+void reset(int32_t reason)
+{
+    (void)reason;
+    return;
+}
+
 class ConnectionBrConnectionTest : public testing::Test {
 public:
     ConnectionBrConnectionTest()
@@ -665,5 +763,560 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager014, TestSize.Level1)
     ListTailInsert(&g_brManager.connections->list, &target->node);
     g_brManager.connecting = nullptr;
     ClientConnected(connectionId);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager015, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    int32_t error = 0;
+    ConnBrConnection *target;
+
+    SoftBusMutexDestroy(&g_brManager.connections->lock);
+    ClientConnectFailed(connectionId, error);
+
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abcde");
+    target->connectionId = 1;
+    target->connectionRc = 10;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+    g_brManager.connecting = nullptr;
+    ClientConnectFailed(connectionId, error);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager016, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    int32_t error = 0;
+    ConnBrConnection *target;
+    ConnBrDevice *connectingDevice;
+
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abcde");
+    target->connectionId = 0;
+    target->connectionRc = 10;
+    target->side = CONN_SIDE_SERVER;
+    target->state = BR_CONNECTION_STATE_EXCEPTION;
+    target->objectRc = 1;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+    connectingDevice = reinterpret_cast<ConnBrDevice *>(SoftBusCalloc(sizeof(*connectingDevice)));
+    (void)strcpy_s(connectingDevice->addr, BT_MAC_LEN, "abcde");
+    ListInit(&connectingDevice->requests);
+    g_brManager.connecting = connectingDevice;
+    ClientConnectFailed(connectionId, error);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager017, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    const char *address = "abc";
+    ConnBrConnection *target;
+
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
+    target->connectionId = 0;
+    target->objectRc = 1;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+    g_brManager.connecting = nullptr;
+    ClientConnectTimeoutOnConnectingState(connectionId, address);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager018, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    const char *address = "abc";
+    ConnBrDevice *connectingDevice;
+
+    SoftBusMutexDestroy(&g_brManager.connections->lock);
+    connectingDevice = reinterpret_cast<ConnBrDevice *>(SoftBusCalloc(sizeof(*connectingDevice)));
+    (void)strcpy_s(connectingDevice->addr, BT_MAC_LEN, "abc");
+    ListInit(&connectingDevice->requests);
+    g_brManager.connecting = connectingDevice;
+    ClientConnectTimeoutOnConnectingState(connectionId, address);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager019, TestSize.Level1)
+{
+    ConnBrDataReceivedContext ctx;
+    ConnPktHead *head;
+
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = 0;
+    head->seq = 0;
+    ctx.data = (uint8_t *)head;
+    ctx.connectionId = 0;
+    DataReceived(&ctx);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager020, TestSize.Level1)
+{
+    ConnBrDataReceivedContext ctx;
+    ConnPktHead *head;
+    ConnBrConnection *target;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+
+    EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(nullptr));
+    SoftBusMutexDestroy(&g_brManager.connections->lock);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
+    target->connectionId = 0;
+    target->objectRc = 1;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+
+    head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = MODULE_CONNECTION;
+    head->seq = 0;
+    ctx.data = (uint8_t *)head;
+    ctx.connectionId = 0;
+    DataReceived(&ctx);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager021, TestSize.Level1)
+{
+    ConnBrDataReceivedContext ctx;
+    ConnPktHead *head;
+    ConnBrConnection *target;
+
+    SoftBusMutexDestroy(&g_brManager.connections->lock);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
+    target->connectionId = 0;
+    target->objectRc = 1;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+
+    head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = MODULE_NIP_BR_CHANNEL;
+    head->seq = (int64_t)BR_NIP_SEQ;
+    ctx.data = (uint8_t *)head;
+    ctx.connectionId = 0;
+    DataReceived(&ctx);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
+{
+    ConnBrDataReceivedContext ctx;
+    ConnPktHead *head;
+    ConnBrConnection *target;
+
+    SoftBusMutexDestroy(&g_brManager.connections->lock);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
+    target->connectionId = 0;
+    target->objectRc = 1;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+
+    head = reinterpret_cast<ConnPktHead *>(SoftBusCalloc(sizeof(*head)));
+    head->flag = 0;
+    head->module = MODULE_OLD_NEARBY;
+    head->seq = (int64_t)BR_NIP_SEQ;
+    ctx.data = (uint8_t *)head;
+    ctx.connectionId = 0;
+    DataReceived(&ctx);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
+{
+    ConnBrConnection connection;
+    uint8_t data[] = {1, 2, 3};
+    uint32_t dataLen = 3;
+    cJSON *json = cJSON_CreateObject();
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+
+    EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(nullptr));
+    connection.connectionId = 0;
+    ReceivedControlData(&connection, data, dataLen);
+
+    EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(json));
+    EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(false));
+    connection.connectionId = 0;
+    ReceivedControlData(&connection, data, dataLen);
+
+    EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(json));
+    EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    connection.connectionId = 0;
+    ReceivedControlData(&connection, data, dataLen);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager024, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    int32_t error = 0;
+    ConnBrConnection *target;
+    ConnBrDevice it;
+
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
+    target->connectionId = 0;
+    target->objectRc = 10;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+
+    ListInit(&g_brManager.waitings);
+    (void)strcpy_s(it.addr, BT_MAC_LEN, "abc");
+    ListTailInsert(&g_brManager.waitings, &it.node);
+    g_connectCallback.OnDisconnected = OnDisconnected;
+    g_brManagerAsyncHandler.handler.looper->PostMessageDelay = MessageDelay;
+    ConnectionException(connectionId, error);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager025, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    ConnBrConnection *target;
+    ConnBrDevice *it;
+
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    target = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*target)));
+    (void)strcpy_s(target->addr, BT_MAC_LEN, "abc");
+    target->connectionId = 0;
+    target->objectRc = 10;
+    target->state = BR_CONNECTION_STATE_CONNECTED;
+    SoftBusMutexInit(&target->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    ListTailInsert(&g_brManager.connections->list, &target->node);
+
+    it = reinterpret_cast<ConnBrDevice *>(SoftBusCalloc(sizeof(*it)));
+    (void)strcpy_s(it->addr, BT_MAC_LEN, "abc");
+    ListInit(&g_brManager.waitings);
+    ListTailInsert(&g_brManager.waitings, &it->node);
+    ListInit(&it->requests);
+    ConnectionResume(connectionId);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager026, TestSize.Level1)
+{
+    ConnBrPendInfo unpendInfo;
+
+    SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
+    (void)strcpy_s(unpendInfo.addr, BT_MAC_LEN, "abc");
+    ListInit(&g_brManager.pendings->list);
+    g_brManagerAsyncHandler.handler.looper->RemoveMessageCustom = RvMessageCustom;
+    UnpendConnection(&unpendInfo);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager027, TestSize.Level1)
+{
+    enum BrServerState target = BR_STATE_AVAILABLE;
+
+    TransitionToState(target);
+    TransitionToState(target);
+    target = BR_STATE_CONNECTING;
+    TransitionToState(target);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
+{
+    SoftBusMessage msg;
+    ErrorContext obj;
+
+    g_brManager.state->handlePendingRequest = handlePendingRequest;
+    g_brManager.state->connectRequest = connectRequest;
+    g_brManager.state->clientConnected = clientConnected;
+    g_brManager.state->clientConnectTimeout = clientConnectTimeout;
+    g_brManager.state->clientConnectFailed = clientConnectFailed;
+    g_brManager.state->serverAccepted = serverAccepted;
+    g_brManager.state->dataReceived = dataReceived;
+    g_brManager.state->connectionException = connectionException;
+    g_brManager.state->connectionResume = connectionResume;
+    g_brManager.state->disconnectRequest = disconnectRequest;
+    g_brManager.state->unpend = unpend;
+    g_brManager.state->reset = reset;
+
+    obj.connectionId = 0;
+    obj.error = 0;
+    msg.obj = &obj;
+
+    msg.what = MSG_NEXT_CMD;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_CONNECT_REQUEST;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_CONNECT_SUCCESS;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_CONNECT_TIMEOUT;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_CONNECT_FAIL;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_SERVER_ACCEPTED;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_DATA_RECEIVED;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_CONNECTION_EXECEPTION;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_CONNECTION_RESUME;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MGR_DISCONNECT_REQUEST;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_UNPEND;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_RESET;
+    BrManagerMsgHandler(&msg);
+
+    msg.what = MSG_RESET + 1;
+    BrManagerMsgHandler(&msg);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
+{
+    int ret;
+    SoftBusMessage msg;
+    SoftBusMessage args;
+    ConnBrPendInfo msgInfo;
+    ConnBrPendInfo ctxInfo;
+
+    msg.what = MSG_CONNECT_TIMEOUT;
+    args.what = MSG_UNPEND;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_FAILED, ret);
+
+    msg.what = MSG_CONNECT_TIMEOUT;
+    args.what = MSG_CONNECT_TIMEOUT;
+    msg.arg1 = 1;
+    args.arg1 = 1;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_SUCCESS, ret);
+
+    msg.what = MSG_CONNECT_TIMEOUT;
+    args.what = MSG_CONNECT_TIMEOUT;
+    msg.arg1 = 0;
+    args.arg1 = 1;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_FAILED, ret);
+
+    msg.what = MSG_UNPEND;
+    args.what = MSG_UNPEND;
+    msg.obj = nullptr;
+    args.obj = nullptr;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_SUCCESS, ret);
+
+    msg.what = MSG_UNPEND;
+    args.what = MSG_UNPEND;
+    (void)strcpy_s(msgInfo.addr, BT_MAC_LEN, "abc");
+    (void)strcpy_s(ctxInfo.addr, BT_MAC_LEN, "abc");
+    msg.obj = &msgInfo;
+    args.obj = &ctxInfo;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_SUCCESS, ret);
+
+    msg.what = MSG_UNPEND;
+    args.what = MSG_UNPEND;
+    (void)strcpy_s(msgInfo.addr, BT_MAC_LEN, "abcd");
+    (void)strcpy_s(ctxInfo.addr, BT_MAC_LEN, "abc");
+    msg.obj = &msgInfo;
+    args.obj = &ctxInfo;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_FAILED, ret);
+
+    msg.what = MSG_CONNECT_REQUEST;
+    args.what = MSG_CONNECT_REQUEST;
+    args.arg1 = 1;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_FAILED, ret);
+
+    msg.what = MSG_CONNECT_REQUEST;
+    args.what = MSG_CONNECT_REQUEST;
+    args.arg1 = 0;
+    args.arg2 = 0;
+    args.obj = nullptr;
+    ret = BrCompareManagerLooperEventFunc(&msg, &args);
+    EXPECT_EQ(COMPARE_SUCCESS, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager030, TestSize.Level1)
+{
+    uint32_t connectionId = 0;
+    uint32_t len = 0;
+    int32_t pid = 0;
+    int32_t flag = 0;
+    int32_t module = 0;
+    int64_t seq = 0;
+    int32_t error = 1;
+
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    OnPostByteFinshed(connectionId, len, pid, flag, module, seq, error);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager031, TestSize.Level1)
+{
+    int ret;
+    ConnBrConnection it;
+
+    ListInit(&g_brManager.connections->list);
+    it.connectionId = (CONNECT_BR << CONNECT_TYPE_SHIFT) + 3;
+    ListTailInsert(&g_brManager.connections->list, &it.node);
+    ret = AllocateConnectionIdUnsafe();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager032, TestSize.Level1)
+{
+    int ret;
+    ConnBrConnection it;
+
+    ListInit(&g_brManager.connections->list);
+    it.connectionId = 0;
+    ListTailInsert(&g_brManager.connections->list, &it.node);
+    ret = AllocateConnectionIdUnsafe();
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager033, TestSize.Level1)
+{
+    ConnBrConnection *connection;
+    ConnBrConnection target;
+
+    connection = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*connection)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    connection->connectionId = 0;
+    target.connectionId = 0;
+    ListTailInsert(&g_brManager.connections->list, &target.node);
+    ConnBrRemoveConnection(connection);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager034, TestSize.Level1)
+{
+    ConnBrConnection *connection;
+    ConnBrConnection target;
+
+    connection = reinterpret_cast<ConnBrConnection *>(SoftBusCalloc(sizeof(*connection)));
+    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
+    ListInit(&g_brManager.connections->list);
+    connection->connectionId = 0;
+    target.connectionId = 1;
+    ListTailInsert(&g_brManager.connections->list, &target.node);
+    ConnBrRemoveConnection(connection);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager035, TestSize.Level1)
+{
+    int ret;
+    ConnectOption option;
+    uint32_t time = 10;
+    BrPending it;
+    ConnBrPendInfo pendInfo;
+
+    SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
+    option.type = CONNECT_BR;
+    (void)strcpy_s(option.brOption.brMac, BT_MAC_LEN, "abc");
+    ListInit(&g_brManager.pendings->list);
+    (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "abc");
+    pendInfo.startTimestamp = 1;
+    pendInfo.duration = 1;
+    pendInfo.firstDuration = 1;
+    pendInfo.firstStartTimestamp = 1;
+    it.pendInfo = &pendInfo;
+    ListTailInsert(&g_brManager.pendings->list, &it.node);
+    g_brManagerAsyncHandler.handler.looper->RemoveMessageCustom = RvMessageCustom;
+    g_brManagerAsyncHandler.handler.looper->PostMessageDelay = PostMessageDelay;
+    ret = BrPendConnection(&option, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager036, TestSize.Level1)
+{
+    int ret;
+    ConnectOption option;
+    uint32_t time = 10;
+    BrPending it;
+    ConnBrPendInfo pendInfo;
+
+    SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
+    option.type = CONNECT_BR;
+    (void)strcpy_s(option.brOption.brMac, BT_MAC_LEN, "abc");
+    ListInit(&g_brManager.pendings->list);
+    (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "abc");
+    pendInfo.startTimestamp = 0xffffffff;
+    pendInfo.duration = 0xffffffff;
+    pendInfo.firstDuration = 1;
+    pendInfo.firstStartTimestamp = 1;
+    it.pendInfo = &pendInfo;
+    ListTailInsert(&g_brManager.pendings->list, &it.node);
+    g_brManagerAsyncHandler.handler.looper->RemoveMessageCustom = RvMessageCustom;
+    g_brManagerAsyncHandler.handler.looper->PostMessageDelay = PostMessageDelay;
+    ret = BrPendConnection(&option, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager037, TestSize.Level1)
+{
+    int ret;
+    ConnectOption option;
+    uint32_t time = 10;
+    BrPending it;
+    ConnBrPendInfo pendInfo;
+
+    SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
+    option.type = CONNECT_BR;
+    (void)strcpy_s(option.brOption.brMac, BT_MAC_LEN, "abc");
+    ListInit(&g_brManager.pendings->list);
+    (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "abce");
+    it.pendInfo = &pendInfo;
+    ListTailInsert(&g_brManager.pendings->list, &it.node);
+    g_brManagerAsyncHandler.handler.looper->PostMessageDelay = PostMessageDelay;
+    ret = BrPendConnection(&option, time);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager038, TestSize.Level1)
+{
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+
+    EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_ERR));
+    DumpLocalBtMac();
+
+    EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_OK));
+    DumpLocalBtMac();
+}
+
+HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
+{
+    int listenerId = 0;
+    int state = SOFTBUS_BR_STATE_TURN_ON;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+
+    EXPECT_CALL(brMock, SoftBusGetBtMacAddr).WillRepeatedly(Return(SOFTBUS_ERR));
+    OnBtStateChanged(listenerId, state);
+
+    state = SOFTBUS_BR_STATE_TURN_OFF;
+    OnBtStateChanged(listenerId, state);
 }
 }
