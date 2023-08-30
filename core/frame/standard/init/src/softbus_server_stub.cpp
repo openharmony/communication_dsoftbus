@@ -508,11 +508,41 @@ EXIT:
     return SOFTBUS_OK;
 }
 
+static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
+{
+    if (getAttr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadSessionAttrs getAttr is nullptr");
+        return;
+    }
+    LinkType *pGetArr = nullptr;
+
+    getAttr->dataType = data.ReadInt32();
+    getAttr->linkTypeNum = data.ReadInt32();
+
+    if (getAttr->linkTypeNum > 0) {
+        pGetArr = (LinkType *)data.ReadBuffer(sizeof(LinkType) * getAttr->linkTypeNum);
+    }
+
+    if (pGetArr != nullptr && getAttr->linkTypeNum <= LINK_TYPE_MAX) {
+        (void)memcpy_s(getAttr->linkType, sizeof(LinkType) * LINK_TYPE_MAX,
+                       pGetArr, sizeof(LinkType) * getAttr->linkTypeNum);
+    }
+
+    getAttr->attr.streamAttr.streamType = data.ReadInt32();
+    getAttr->fastTransDataSize = data.ReadUint16();
+    if (getAttr->fastTransDataSize != 0) {
+        getAttr->fastTransData = (uint8_t *)data.ReadRawData(getAttr->fastTransDataSize);
+    }
+}
+
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t retReply;
     SessionParam param;
+    SessionAttribute getAttr;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    (void)memset_s(&getAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+
     TransSerializer transSerializer;
     int64_t timeStart = 0;
     int64_t timediff = 0;
@@ -521,9 +551,11 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     param.peerSessionName = data.ReadCString();
     param.peerDeviceId = data.ReadCString();
     param.groupId = data.ReadCString();
-    param.attr = (SessionAttribute *)data.ReadRawData(sizeof(SessionAttribute));
+    ReadSessionAttrs(data, &getAttr);
+    param.attr = &getAttr;
+
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
-        param.groupId == nullptr || param.attr == nullptr) {
+        param.groupId == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
         goto EXIT;
     }
