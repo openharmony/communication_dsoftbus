@@ -72,7 +72,7 @@ int32_t GetConnType(uint64_t connId)
     return (int32_t)((connId >> INT32_BIT_NUM) & MASK_UINT64_L32);
 }
 
-NO_SANITIZE("cfi") const char *GetConnTypeStr(uint64_t connId)
+const char *GetConnTypeStr(uint64_t connId)
 {
     int32_t type = GetConnType(connId);
     switch (type) {
@@ -164,7 +164,7 @@ static void ClearConnRequest(void)
 }
 
 /* Notify Conn Listener */
-NO_SANITIZE("cfi")
+
 static void NotifyClientConnected(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
     if (g_listener.onConnectResult != NULL) {
@@ -172,14 +172,14 @@ static void NotifyClientConnected(uint32_t requestId, uint64_t connId, int32_t r
     }
 }
 
-NO_SANITIZE("cfi") static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
+static void NotifyDisconnected(uint64_t connId, const AuthConnInfo *connInfo)
 {
     if (g_listener.onDisconnected != NULL) {
         g_listener.onDisconnected(connId, connInfo);
     }
 }
 
-NO_SANITIZE("cfi")
+
 static void NotifyDataReceived(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -189,12 +189,12 @@ static void NotifyDataReceived(
 }
 
 /* AuthData */
-NO_SANITIZE("cfi") uint32_t GetAuthDataSize(uint32_t len)
+uint32_t GetAuthDataSize(uint32_t len)
 {
     return AUTH_CONN_DATA_HEAD_SIZE + len;
 }
 
-NO_SANITIZE("cfi") int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
+int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
     uint8_t *buf, uint32_t size)
 {
     if (size < GetAuthDataSize(head->len)) {
@@ -219,7 +219,7 @@ NO_SANITIZE("cfi") int32_t PackAuthData(const AuthDataHead *head, const uint8_t 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head)
+const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head)
 {
     if (len < GetAuthDataSize(0)) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthData: head not enough.");
@@ -394,7 +394,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
     NotifyDisconnected(GenConnId(connInfo.type, connectionId), &connInfo);
 }
 
-NO_SANITIZE("cfi") int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
+int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
 {
     ConnectionInfo info = { 0 };
     int32_t ret = ConnGetConnectionInfo(connectionId, &info);
@@ -548,7 +548,7 @@ static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthData
     return ConnPostBytes(connectionId, &connData);
 }
 
-NO_SANITIZE("cfi") int32_t AuthConnInit(const AuthConnListener *listener)
+int32_t AuthConnInit(const AuthConnListener *listener)
 {
     CHECK_NULL_PTR_RETURN_VALUE(listener, SOFTBUS_INVALID_PARAM);
     g_listener = *listener;
@@ -566,7 +566,7 @@ NO_SANITIZE("cfi") int32_t AuthConnInit(const AuthConnListener *listener)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void AuthConnDeinit(void)
+void AuthConnDeinit(void)
 {
     UnsetSocketCallback();
     ConnUnSetConnectCallback(MODULE_DEVICE_AUTH);
@@ -574,7 +574,7 @@ NO_SANITIZE("cfi") void AuthConnDeinit(void)
     (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
 }
 
-NO_SANITIZE("cfi") int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
+int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "ConnectDevice: requestId=%u, connType=%d, sideType=%d.", requestId,
@@ -629,7 +629,7 @@ void UpdateAuthDevicePriority(uint64_t connId)
         GetConnType(connId), GetConnId(connId), ret);
 }
 
-NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t *connId)
+void DisconnectAuthDevice(uint64_t *connId)
 {
     if (connId == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "connId nulptr");
@@ -655,7 +655,7 @@ NO_SANITIZE("cfi") void DisconnectAuthDevice(uint64_t *connId)
     }
 }
 
-NO_SANITIZE("cfi") int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
+int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
@@ -676,7 +676,7 @@ NO_SANITIZE("cfi") int32_t PostAuthData(uint64_t connId, bool toServer, const Au
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") ConnSideType GetConnSideType(uint64_t connId)
+ConnSideType GetConnSideType(uint64_t connId)
 {
     if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "WiFi not supported, " CONN_INFO, CONN_DATA(connId));
@@ -694,7 +694,7 @@ NO_SANITIZE("cfi") ConnSideType GetConnSideType(uint64_t connId)
     return info.isServer ? CONN_SIDE_SERVER : CONN_SIDE_CLIENT;
 }
 
-NO_SANITIZE("cfi") bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
+bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
 {
     ConnectOption connOpt;
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, false);
@@ -706,7 +706,7 @@ NO_SANITIZE("cfi") bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
     return CheckActiveConnection(&connOpt);
 }
 
-NO_SANITIZE("cfi") int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
+int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
 {
     if (ip == NULL) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
@@ -754,7 +754,7 @@ NO_SANITIZE("cfi") int32_t AuthStartListening(AuthLinkType type, const char *ip,
     return SOFTBUS_INVALID_PARAM;
 }
 
-NO_SANITIZE("cfi") void AuthStopListening(AuthLinkType type)
+void AuthStopListening(AuthLinkType type)
 {
     SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "stop auth listening, type=%d.", type);
     switch (type) {

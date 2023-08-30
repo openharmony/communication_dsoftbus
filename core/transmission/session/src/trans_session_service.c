@@ -28,7 +28,7 @@
 
 static bool g_transSessionInitFlag = false;
 
-NO_SANITIZE("cfi") int TransServerInit(void)
+int TransServerInit(void)
 {
     if (g_transSessionInitFlag) {
         return SOFTBUS_OK;
@@ -54,7 +54,7 @@ NO_SANITIZE("cfi") int TransServerInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransServerDeinit(void)
+void TransServerDeinit(void)
 {
     if (g_transSessionInitFlag == false) {
         return;
@@ -66,13 +66,13 @@ NO_SANITIZE("cfi") void TransServerDeinit(void)
     g_transSessionInitFlag = false;
 }
 
-NO_SANITIZE("cfi") void TransServerDeathCallback(const char *pkgName, int32_t pid)
+void TransServerDeathCallback(const char *pkgName, int32_t pid)
 {
     TransChannelDeathCallback(pkgName, pid);
     TransDelItemByPackageName(pkgName, pid);
 }
 
-NO_SANITIZE("cfi") int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid,
+int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid,
     int32_t pid)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) ||
@@ -113,7 +113,7 @@ NO_SANITIZE("cfi") int32_t TransCreateSessionServer(const char *pkgName, const c
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) ||
         !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
@@ -122,7 +122,7 @@ NO_SANITIZE("cfi") int32_t TransRemoveSessionServer(const char *pkgName, const c
     return TransSessionServerDelItem(sessionName);
 }
 
-NO_SANITIZE("cfi") int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
+int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans server opensession.");
     if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||

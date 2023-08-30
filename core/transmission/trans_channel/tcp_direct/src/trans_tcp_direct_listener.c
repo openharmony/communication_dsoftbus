@@ -34,7 +34,7 @@
 
 #define ID_OFFSET (1)
 
-NO_SANITIZE("cfi") uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
+uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 {
     switch (type) {
         case AUTH_LINK_TYPE_BR:
@@ -48,7 +48,7 @@ NO_SANITIZE("cfi") uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
     }
 }
 
-NO_SANITIZE("cfi") int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer)
+int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer)
 {
     AuthConnInfo info;
     if (AuthGetServerSide(authId, isAuthServer) != SOFTBUS_OK) {
@@ -167,7 +167,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOption *clientAddr)
+static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0 || clientAddr == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param, cfd = %d", cfd);
@@ -215,7 +215,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
     TransSrvDelDataBufNode(channelId);
 }
 
-NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
+static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 {
     (void)module;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
@@ -271,7 +271,7 @@ NO_SANITIZE("cfi") static int32_t TdcOnDataEvent(ListenerModule module, int even
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
+int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info)
 {
     if (info == NULL || (info->type != CONNECT_TCP && info->type != CONNECT_P2P) || info->socketOption.port < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:Invalid para.", __func__);
@@ -288,7 +288,7 @@ NO_SANITIZE("cfi") int32_t TransTdcStartSessionListener(ListenerModule module, c
     return serverPort;
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcStopSessionListener(ListenerModule module)
+int32_t TransTdcStopSessionListener(ListenerModule module)
 {
     TransTdcStopSessionProc(module);
     return StopBaseListener(module);

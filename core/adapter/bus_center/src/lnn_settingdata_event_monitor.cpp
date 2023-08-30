@@ -138,7 +138,7 @@ static void RegisterNameMonitorHelper(void)
 }
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
+int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
 {
     if (deviceName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
@@ -151,7 +151,7 @@ NO_SANITIZE("cfi") int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t le
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
+int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
 {
     if (handler == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "handler is null");
@@ -176,7 +176,7 @@ int32_t LnnInitDeviceNameMonitorImpl(void)
     return ret;
 }
 
-NO_SANITIZE("cfi") void RegisterNameMonitor(void)
+void RegisterNameMonitor(void)
 {
     OHOS::BusCenter::RegisterNameMonitorHelper();
 }

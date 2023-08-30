@@ -96,7 +96,7 @@ static int32_t TransLaneChannelForEachShowInfo(int fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransLaneMgrInit(void)
+int32_t TransLaneMgrInit(void)
 {
     if (g_channelLaneList != NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans lane info manager hasn't initialized.");
@@ -111,7 +111,7 @@ NO_SANITIZE("cfi") int32_t TransLaneMgrInit(void)
     return SoftBusRegTransVarDump(CMD_CONCURRENT_SESSION_LIST, TransLaneChannelForEachShowInfo);
 }
 
-NO_SANITIZE("cfi") void TransLaneMgrDeinit(void)
+void TransLaneMgrDeinit(void)
 {
     if (g_channelLaneList == NULL) {
         return;
@@ -134,7 +134,7 @@ NO_SANITIZE("cfi") void TransLaneMgrDeinit(void)
     g_channelLaneList = NULL;
 }
 
-NO_SANITIZE("cfi") int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo,
+int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo,
     uint32_t laneId, AppInfoData *myData)
 {
     if (g_channelLaneList == NULL) {
@@ -182,7 +182,7 @@ NO_SANITIZE("cfi") int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channe
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
+int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del trans land mgr.[chanid=%d][type=%d]", channelId, channelType);
     if (g_channelLaneList == NULL) {
@@ -211,7 +211,7 @@ NO_SANITIZE("cfi") int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channe
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
+void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
 {
     if (g_channelLaneList == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
@@ -239,7 +239,7 @@ NO_SANITIZE("cfi") void TransLaneMgrDeathCallback(const char *pkgName, int32_t p
     return;
 }
 
-NO_SANITIZE("cfi") int32_t TransGetLaneIdByChannelId(int32_t channelId, uint32_t *laneId)
+int32_t TransGetLaneIdByChannelId(int32_t channelId, uint32_t *laneId)
 {
     if ((laneId == NULL) || (g_channelLaneList == NULL)) {
         return SOFTBUS_INVALID_PARAM;
@@ -259,7 +259,7 @@ NO_SANITIZE("cfi") int32_t TransGetLaneIdByChannelId(int32_t channelId, uint32_t
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransGetChannelInfoByLaneId(uint32_t laneId, int32_t *channelId, int32_t *channelType)
+int32_t TransGetChannelInfoByLaneId(uint32_t laneId, int32_t *channelId, int32_t *channelType)
 {
     if ((channelId == NULL) || (channelType == NULL) || (g_channelLaneList == NULL)) {
         return SOFTBUS_INVALID_PARAM;

@@ -299,7 +299,7 @@ static void NetOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnClearNetConfigList(void)
+int32_t LnnClearNetConfigList(void)
 {
     LnnNetIfMgr *item = NULL;
     LnnNetIfMgr *next = NULL;
@@ -341,7 +341,7 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
+int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
 {
     uint8_t i;
     if (protocolMgr == NULL) {
@@ -361,7 +361,7 @@ NO_SANITIZE("cfi") int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") bool LnnVisitNetif(VisitNetifCallback callback, void *data)
+bool LnnVisitNetif(VisitNetifCallback callback, void *data)
 {
     LnnNetIfMgr *item = NULL;
     VisitNextChoice result = CHOICE_VISIT_NEXT;
@@ -375,7 +375,7 @@ NO_SANITIZE("cfi") bool LnnVisitNetif(VisitNetifCallback callback, void *data)
     return true;
 }
 
-NO_SANITIZE("cfi") bool LnnVisitProtocol(VisitProtocolCallback callback, void *data)
+bool LnnVisitProtocol(VisitProtocolCallback callback, void *data)
 {
     VisitNextChoice result = CHOICE_VISIT_NEXT;
     for (uint8_t i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
@@ -423,7 +423,7 @@ void RestartCoapDiscovery(void)
     SetCallLnnStatus(true);
 }
 
-NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupId, int32_t groupType)
+static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
     LLOGD("wifi handle OnGroupCreated");
@@ -432,7 +432,7 @@ NO_SANITIZE("cfi") static void OnGroupCreated(const char *groupId, int32_t group
     RestartCoapDiscovery();
 }
 
-NO_SANITIZE("cfi") static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId)
 {
     (void)groupId;
     LLOGD("wifi handle OnGroupDeleted");
@@ -573,7 +573,7 @@ static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitNetworkManager(void)
+int32_t LnnInitNetworkManager(void)
 {
     RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
     RegistNetIfMgr(LNN_WLAN_TYPE, CreateNetifMgr);
@@ -693,7 +693,7 @@ int32_t LnnInitNetworkManagerDelay(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") bool LnnIsAutoNetWorkingEnabled(void)
+bool LnnIsAutoNetWorkingEnabled(void)
 {
     bool isConfigEnabled = false;
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char *)&isConfigEnabled,
@@ -707,7 +707,7 @@ NO_SANITIZE("cfi") bool LnnIsAutoNetWorkingEnabled(void)
         g_isOOBEEnd && g_isUnLock;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitNetworkManager(void)
+void LnnDeinitNetworkManager(void)
 {
     if (g_nightOnCache != NULL) {
         DeviceNightMode *item = NULL;
@@ -738,7 +738,7 @@ NO_SANITIZE("cfi") void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler);
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
+int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
 {
     if (ifName == NULL || type == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
@@ -754,7 +754,7 @@ NO_SANITIZE("cfi") int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfTyp
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
+int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 {
     if (type == NULL || ifName == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
@@ -800,7 +800,7 @@ static VisitNextChoice FindProtocolByType(const LnnProtocolManager *manager, voi
     }
 }
 
-NO_SANITIZE("cfi") ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
+ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
 {
     struct FindProtocolByTypeRequest request = {.protocol = protocol, .manager = NULL};
     if (LnnVisitProtocol(FindProtocolByType, &request)) {

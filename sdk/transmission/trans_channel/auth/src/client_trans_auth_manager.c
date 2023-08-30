@@ -31,7 +31,7 @@ int32_t ClientTransAuthInit(const IClientSessionCallBack *cb)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransAuthOnChannelOpened param invalid.");
@@ -47,7 +47,7 @@ NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelOpened(const char *sessionNam
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
+int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_AUTH);
     if (ret != SOFTBUS_OK) {
@@ -57,7 +57,7 @@ NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId, int32_t errCode)
+int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_AUTH, errCode);
     if (ret != SOFTBUS_OK) {
@@ -69,7 +69,7 @@ NO_SANITIZE("cfi") int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientTransAuthOnDataReceived(int32_t channelId,
+int32_t ClientTransAuthOnDataReceived(int32_t channelId,
     const void *data, uint32_t len, SessionPktType type)
 {
     if (data == NULL) {

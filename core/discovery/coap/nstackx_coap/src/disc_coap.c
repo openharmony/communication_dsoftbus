@@ -405,7 +405,7 @@ static void CoapUpdateLocalIp(LinkStatus status)
     DiscCoapUpdateLocalIp(status);
 }
 
-NO_SANITIZE("cfi") static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
+static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     if (type == TYPE_LOCAL_DEVICE_NAME) {
         DiscCoapUpdateDevName();
@@ -469,7 +469,7 @@ static int32_t InitCoapManager(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
+DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
 {
     if (InitCoapManager() != SOFTBUS_OK) {
         DLOGE("coap manager init failed.");
@@ -491,7 +491,7 @@ NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discI
     return &g_discCoapFuncInterface;
 }
 
-NO_SANITIZE("cfi") void DiscCoapDeinit(void)
+void DiscCoapDeinit(void)
 {
     DeinitCoapManager();
     DiscNstackxDeinit();

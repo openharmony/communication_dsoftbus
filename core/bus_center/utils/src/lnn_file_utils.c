@@ -56,7 +56,7 @@ static int32_t InitStorageConfigPath(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
+int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
 {
     if (path == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: path is null", __func__);

@@ -40,7 +40,7 @@
 #define CHANNEL_INVALID (-1)
 #define FREQUENCY_INVALID (-1)
 
-NO_SANITIZE("cfi") int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
+int32_t P2plinkChannelListToString(const P2pLink5GList *channelList, char *channelString,
     int32_t len)
 {
     if ((channelList == NULL) || (channelList->num == 0)) {
@@ -71,7 +71,7 @@ NO_SANITIZE("cfi") int32_t P2plinkChannelListToString(const P2pLink5GList *chann
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void P2pLinkParseItemDataByDelimit(char *srcStr, const char *delimit, char *list[], int32_t num,
+void P2pLinkParseItemDataByDelimit(char *srcStr, const char *delimit, char *list[], int32_t num,
     int32_t *outNum)
 {
     // srcStr will be cut.
@@ -165,7 +165,7 @@ static bool IsInChannelList(int32_t channelItem, const P2pLink5GList *channelLis
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkUpateAndGetStationFreq(const P2pLink5GList *channelList)
+int32_t P2pLinkUpateAndGetStationFreq(const P2pLink5GList *channelList)
 {
     int32_t freq = P2pLinkGetFrequency();
     if (freq < FREQUENCY_2G_FIRST) {
@@ -249,7 +249,7 @@ static int32_t ChoseChannel5gFreq(const GcInfo *gc, const P2pLink5GList *channel
     return FREQUENCY_INVALID;
 }
 
-NO_SANITIZE("cfi") int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList)
+int32_t P2plinkGetGroupGrequency(const GcInfo *gc, const P2pLink5GList *channelList)
 {
     if (gc == NULL) {
         CLOGE("invalid param.");

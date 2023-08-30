@@ -26,7 +26,7 @@
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
 
-NO_SANITIZE("cfi") static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
+static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_dispatchers[i] == NULL) {
@@ -39,7 +39,7 @@ NO_SANITIZE("cfi") static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uin
     return NULL;
 }
 
-NO_SANITIZE("cfi") static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
+static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "option is null");
@@ -60,7 +60,7 @@ NO_SANITIZE("cfi") static int32_t BleDispatchPublishOption(const PublishOption *
     }
 }
 
-NO_SANITIZE("cfi") static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
+static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "option is null");
@@ -121,7 +121,7 @@ static int32_t BleDispatchStopPassiveDiscovery(const SubscribeOption *option)
     return BleDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 
-NO_SANITIZE("cfi") static void BleDispatchLinkStatusChanged(LinkStatus status)
+static void BleDispatchLinkStatusChanged(LinkStatus status)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_dispatchers[i] != NULL && g_dispatchers[i]->mediumInterface != NULL &&
@@ -131,7 +131,7 @@ NO_SANITIZE("cfi") static void BleDispatchLinkStatusChanged(LinkStatus status)
     }
 }
 
-NO_SANITIZE("cfi") static void BleDispatchUpdateLocalDeviceInfo(InfoTypeChanged type)
+static void BleDispatchUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_dispatchers[i] != NULL && g_dispatchers[i]->mediumInterface != NULL &&
@@ -154,7 +154,7 @@ static DiscoveryFuncInterface g_discBleFrameFuncInterface = {
     .UpdateLocalDeviceInfo = BleDispatchUpdateLocalDeviceInfo,
 };
 
-NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
+DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
         DLOGE("discInnerCb err");
@@ -179,7 +179,7 @@ NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discIn
     return &g_discBleFrameFuncInterface;
 }
 
-NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
+DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *interfaceA,
     DiscoveryBleDispatcherInterface *interfaceB)
 {
     g_dispatcherSize = 0;
@@ -188,7 +188,7 @@ NO_SANITIZE("cfi") DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispat
     return &g_discBleFrameFuncInterface;
 }
 
-NO_SANITIZE("cfi") void DiscBleDeinit(void)
+void DiscBleDeinit(void)
 {
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "deinit DiscBleFrameDeinit");
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {

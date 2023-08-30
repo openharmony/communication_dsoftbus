@@ -86,7 +86,7 @@ int32_t QueueCountGet(const LockFreeQueue* queue, uint32_t* count)
     return 0;
 }
 
-NO_SANITIZE("cfi") LockFreeQueue* CreateQueue(uint32_t unitNum)
+LockFreeQueue* CreateQueue(uint32_t unitNum)
 {
     if (!IS_POWER_OF_2(unitNum)) {
         return NULL;

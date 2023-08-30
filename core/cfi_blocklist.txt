@@ -1,0 +1,2 @@
+src:*/connection/ble/src/*
+src:*/connection/wifi_direct/*

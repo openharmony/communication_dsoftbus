@@ -51,7 +51,7 @@ static int32_t P2pLinkLnnSyncSetGoMac()
     }
 }
 
-NO_SANITIZE("cfi") void P2pLinkLnnSync(void)
+void P2pLinkLnnSync(void)
 {
     int32_t change = 0;
 

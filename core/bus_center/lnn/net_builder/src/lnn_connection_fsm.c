@@ -597,7 +597,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     return rc;
 }
 
-NO_SANITIZE("cfi") int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData)
+int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData)
 {
     if (metaJoinNode == NULL || customData == NULL) {
         return SOFTBUS_ERR;
@@ -1024,7 +1024,7 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName,
+LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName,
     bool isNeedConnect)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -1059,7 +1059,7 @@ NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr
     return connFsm;
 }
 
-NO_SANITIZE("cfi") void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
+void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
 {
     if (connFsm == NULL) {
         return;
@@ -1074,7 +1074,7 @@ NO_SANITIZE("cfi") void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
     SoftBusFree(connFsm);
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
+int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
 {
     if (connFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connection fsm is null");
@@ -1088,7 +1088,7 @@ NO_SANITIZE("cfi") int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCallback callback)
+int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCallback callback)
 {
     if (connFsm == NULL || callback == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connection fsm or stop callback is null");
@@ -1102,7 +1102,7 @@ NO_SANITIZE("cfi") int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnCo
     return LnnFsmDeinit(&connFsm->fsm);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_INVALID_PARAM;
@@ -1116,7 +1116,7 @@ NO_SANITIZE("cfi") int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode)
+int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode)
 {
     int32_t *para = NULL;
 
@@ -1137,7 +1137,7 @@ NO_SANITIZE("cfi") int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connF
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_INVALID_PARAM;
@@ -1145,7 +1145,7 @@ NO_SANITIZE("cfi") int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_NOT_TRUSTED, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_INVALID_PARAM;
@@ -1153,7 +1153,7 @@ NO_SANITIZE("cfi") int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connF
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_DISCONNECT, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_ERR;
@@ -1161,7 +1161,7 @@ NO_SANITIZE("cfi") int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFs
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_ERR;
@@ -1169,7 +1169,7 @@ NO_SANITIZE("cfi") int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *c
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_OFFLINE_DONE, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_ERR;

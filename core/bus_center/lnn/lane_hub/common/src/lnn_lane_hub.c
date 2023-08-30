@@ -24,7 +24,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-NO_SANITIZE("cfi") int32_t LnnInitLaneHub(void)
+int32_t LnnInitLaneHub(void)
 {
     if (InitLane() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane fail");
@@ -54,7 +54,7 @@ int32_t LnnInitLaneHubDelay(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitLaneHub(void)
+void LnnDeinitLaneHub(void)
 {
     LnnDeinitQos();
     DeinitLane();

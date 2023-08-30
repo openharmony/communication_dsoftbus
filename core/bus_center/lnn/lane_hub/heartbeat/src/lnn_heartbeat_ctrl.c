@@ -610,7 +610,7 @@ static void PeriodDumpLocalInfo(void *para)
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), PeriodDumpLocalInfo, NULL, HB_PERIOD_DUMP_LOCAL_INFO_LEN);
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartHeartbeatFrameDelay(void)
+int32_t LnnStartHeartbeatFrameDelay(void)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) FSM start.");
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), PeriodDumpLocalInfo, NULL, HB_PERIOD_DUMP_LOCAL_INFO_LEN);
@@ -631,12 +631,12 @@ NO_SANITIZE("cfi") int32_t LnnStartHeartbeatFrameDelay(void)
     return LnnStartHeartbeat(0);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
+int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
 {
     return LnnSetMediumParamBySpecificType(param);
 }
 
-NO_SANITIZE("cfi") int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
 {
     if (networkId == NULL) {
         LLOGE("HB offline timing get invalid param");
@@ -676,7 +676,7 @@ static void ReportBusinessDiscoveryResultEvt(const char *pkgName, int32_t discCn
     }
 }
 
-NO_SANITIZE("cfi") int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode)
 {
     if (pkgName == NULL || mode == NULL || callerId == NULL) {
@@ -753,7 +753,7 @@ int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbea
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
+void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     LLOGI("HB update heartbeat info, type:%d", type);
     LnnUpdateSendInfoStrategy(type);
@@ -778,7 +778,7 @@ static void HbDelayCheckTrustedRelation(void *para)
     }
 }
 
-NO_SANITIZE("cfi") void LnnHbOnTrustedRelationIncreased(int32_t groupType)
+void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     /* If it is a peer-to-peer group, delay initialization to give BR networking priority. */
     int32_t ret = LnnStartHeartbeat(0);
@@ -792,7 +792,7 @@ NO_SANITIZE("cfi") void LnnHbOnTrustedRelationIncreased(int32_t groupType)
     }
 }
 
-NO_SANITIZE("cfi") void LnnHbOnTrustedRelationReduced(void)
+void LnnHbOnTrustedRelationReduced(void)
 {
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayCheckTrustedRelation, NULL,
         CHECK_TRUSTED_RELATION_TIME) != SOFTBUS_OK) {
@@ -813,7 +813,7 @@ static void LnnHbUnsubscribeTask(void)
     LnnDcUnsubscribe(&g_dcTask);
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitHeartbeat(void)
+int32_t LnnInitHeartbeat(void)
 {
     if (LnnHbStrategyInit() != SOFTBUS_OK) {
         LLOGE("HB strategy module init fail!");
@@ -873,7 +873,7 @@ NO_SANITIZE("cfi") int32_t LnnInitHeartbeat(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitHeartbeat(void)
+void LnnDeinitHeartbeat(void)
 {
     LnnHbUnsubscribeTask();
     LnnHbStrategyDeinit();

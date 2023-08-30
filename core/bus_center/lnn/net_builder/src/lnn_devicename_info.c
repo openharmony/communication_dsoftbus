@@ -368,7 +368,7 @@ static void UpdataLocalFromSetting(void *p)
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
 }
 
-NO_SANITIZE("cfi") static void UpdateDeviceNameFromSetting(void)
+static void UpdateDeviceNameFromSetting(void)
 {
     LnnInitGetDeviceName(LnnHandlerGetDeviceName);
 }
@@ -392,7 +392,7 @@ static void LnnAccountStateChangeHandler(const LnnEventBasicInfo *info)
     return;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitDevicename(void)
+int32_t LnnInitDevicename(void)
 {
     int32_t ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_DEVICE_NAME, OnReceiveDeviceName);
     if (ret != SOFTBUS_OK) {
@@ -405,7 +405,7 @@ NO_SANITIZE("cfi") int32_t LnnInitDevicename(void)
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_NICK_NAME, OnReceiveDeviceNickName);
 }
 
-NO_SANITIZE("cfi") void LnnDeinitDevicename(void)
+void LnnDeinitDevicename(void)
 {
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_DEVICE_NAME, OnReceiveDeviceName);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, LnnAccountStateChangeHandler);

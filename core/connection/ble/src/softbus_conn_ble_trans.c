@@ -239,7 +239,7 @@ static void FreeSendNode(SendQueueNode *node)
     SoftBusFree(node);
 }
 
-NO_SANITIZE("cfi")
+
 static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
 #define BLE_SEND_PACKET_DELAY_MILLIS 10
@@ -489,7 +489,7 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     return dataCopy;
 }
 
-NO_SANITIZE("cfi")
+
 static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
 {
     int32_t status = ConnBleSend(connection, data, dataLen, module);

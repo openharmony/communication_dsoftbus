@@ -33,7 +33,7 @@ typedef struct {
     int32_t msgType;
 } P2pCallbackInfo;
 
-NO_SANITIZE("cfi") static void P2pLoopMsgHandler(SoftBusMessage *msg)
+static void P2pLoopMsgHandler(SoftBusMessage *msg)
 {
     if (msg == 0) {
         return;
@@ -52,7 +52,7 @@ NO_SANITIZE("cfi") static void P2pLoopMsgHandler(SoftBusMessage *msg)
 }
 
 
-NO_SANITIZE("cfi") int32_t P2pLoopInit()
+int32_t P2pLoopInit()
 {
     g_p2pcHandler.looper = CreateNewLooper(P2P_LOOP_NAME);
     if (g_p2pcHandler.looper == 0) {
@@ -62,7 +62,7 @@ NO_SANITIZE("cfi") int32_t P2pLoopInit()
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void P2pFreeLoopMsg(SoftBusMessage *msg)
+static void P2pFreeLoopMsg(SoftBusMessage *msg)
 {
     if (msg != NULL) {
         if (msg->obj != NULL) {
@@ -86,7 +86,7 @@ static SoftBusMessage *P2pCreateLoopMsg(int32_t what, char *data)
     return msg;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, P2pLoopMsg msgType)
+int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, P2pLoopMsg msgType)
 {
     P2pCallbackInfo *cbinfo = SoftBusCalloc(sizeof(P2pCallbackInfo));
     if (cbinfo == NULL) {
@@ -103,7 +103,7 @@ NO_SANITIZE("cfi") int32_t P2pLoopProc(P2pLoopProcessFunc callback, void *para, 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *para, uint64_t delayMillis,
+int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *para, uint64_t delayMillis,
     P2pLoopMsg msgType)
 {
     P2pCallbackInfo *cbinfo = SoftBusCalloc(sizeof(P2pCallbackInfo));
@@ -121,7 +121,7 @@ NO_SANITIZE("cfi") int32_t P2pLoopProcDelay(P2pLoopProcessFunc callback, void *p
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t P2pRemoveMessageFunc(const SoftBusMessage *msg, void *para)
+static int32_t P2pRemoveMessageFunc(const SoftBusMessage *msg, void *para)
 {
     if (para == NULL) {
         return SOFTBUS_ERR;
@@ -144,7 +144,7 @@ NO_SANITIZE("cfi") static int32_t P2pRemoveMessageFunc(const SoftBusMessage *msg
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLoopProcDelayDel(P2pLoopProcessFunc callback, P2pLoopMsg msgType)
+int32_t P2pLoopProcDelayDel(P2pLoopProcessFunc callback, P2pLoopMsg msgType)
 {
     P2pCallbackInfo cbinfo = {0};
 

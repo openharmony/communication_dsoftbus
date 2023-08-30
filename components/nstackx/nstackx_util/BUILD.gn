@@ -175,6 +175,11 @@ if (defined(ohos_lite)) {
   }
 
   ohos_shared_library("nstackx_util.open") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     cflags += [
       "-DMBEDTLS_INCLUDED",
       "-DNSTACKX_WITH_HMOS_LINUX",

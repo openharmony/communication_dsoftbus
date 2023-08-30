@@ -53,12 +53,12 @@ static void ServerModuleDeinit(void)
     DeinitSoftbusSysEvt();
 }
 
-NO_SANITIZE("cfi") bool GetServerIsInit(void)
+bool GetServerIsInit(void)
 {
     return g_isInit;
 }
 
-NO_SANITIZE("cfi") void InitSoftBusServer(void)
+void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
 
@@ -121,7 +121,7 @@ ERR_EXIT:
     return;
 }
 
-NO_SANITIZE("cfi") void ClientDeathCallback(const char *pkgName, int32_t pid)
+void ClientDeathCallback(const char *pkgName, int32_t pid)
 {
     DiscServerDeathCallback(pkgName);
     TransServerDeathCallback(pkgName, pid);

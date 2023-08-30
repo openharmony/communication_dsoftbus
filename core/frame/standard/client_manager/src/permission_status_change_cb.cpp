@@ -30,7 +30,7 @@ void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& resu
     }
 }
 
-NO_SANITIZE("cfi") void RegisterDataSyncPermission(const uint32_t& callingTokenId,
+void RegisterDataSyncPermission(const uint32_t& callingTokenId,
                                 const std::string& permissionName, const std::string& pkgName, int32_t pid)
 {
     PermStateChangeScope scopeInfo;

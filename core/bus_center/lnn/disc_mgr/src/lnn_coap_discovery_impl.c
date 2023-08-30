@@ -67,7 +67,7 @@ static void ConvertDeviceInfo(const DeviceInfo *fromDevice, DeviceInfo *toDevice
     }
 }
 
-NO_SANITIZE("cfi") static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
+static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     ConnectionAddr addr;
     DeviceInfo tmpInfo;

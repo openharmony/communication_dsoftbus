@@ -155,6 +155,11 @@ if (defined(ohos_lite)) {
     include_dirs = [ "interface" ]
   }
   ohos_shared_library("nstackx_ctrl") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
     cflags += [ "-DDFINDER_MGT_MSG_LOG" ]
     cflags_cc = cflags
     sources = [

@@ -128,7 +128,7 @@ void StopHmlListener(ListenerModule module)
     DelHmlListenerByMoudle(module);
 }
 
-NO_SANITIZE("cfi") void StopP2pSessionListener(void)
+void StopP2pSessionListener(void)
 {
     if (g_p2pSessionPort > 0) {
         if (StopBaseListener(DIRECT_CHANNEL_SERVER_P2P) != SOFTBUS_OK) {
@@ -693,7 +693,7 @@ static void OnAuthChannelClose(int64_t authId)
     return;
 }
 
-NO_SANITIZE("cfi") static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,
+static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,
     int32_t newChannelId, uint32_t requestId)
 {
     int32_t ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, conn->isMeta);
@@ -769,7 +769,7 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
+int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenP2pDirectChannel");
@@ -819,7 +819,7 @@ NO_SANITIZE("cfi") int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const Co
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t P2pDirectChannelInit(void)
+int32_t P2pDirectChannelInit(void)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "P2pDirectChannelInit");
     if (SoftBusMutexInit(&g_p2pLock, NULL) != SOFTBUS_OK) {

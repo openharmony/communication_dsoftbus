@@ -55,7 +55,7 @@ static int32_t GetUuidFromFile(char *id, uint32_t len)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
+int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
 {
     if (networkId == NULL || len < NETWORK_ID_BUF_LEN) {
         return SOFTBUS_INVALID_PARAM;
@@ -69,7 +69,7 @@ NO_SANITIZE("cfi") int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
 {
     static bool isGenerated = false;
     static char localUuid[UUID_BUF_LEN] = {0};
