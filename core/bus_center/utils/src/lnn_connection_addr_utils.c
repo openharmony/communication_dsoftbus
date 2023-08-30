@@ -24,7 +24,7 @@
 #define LNN_MAX_PRINT_ADDR_LEN 100
 #define SHORT_UDID_HASH_LEN 8
 
-NO_SANITIZE("cfi") bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
+bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
 {
     if (addr1 == NULL || addr2 == NULL) {
         return false;
@@ -56,7 +56,7 @@ NO_SANITIZE("cfi") bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, con
     return false;
 }
 
-NO_SANITIZE("cfi") bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
+bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
 {
     if (addr == NULL || option == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or option is null");
@@ -95,7 +95,7 @@ NO_SANITIZE("cfi") bool LnnConvertAddrToOption(const ConnectionAddr *addr, Conne
     return false;
 }
 
-NO_SANITIZE("cfi") bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option,
+bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option,
     ConnectionAddrType hintType)
 {
     if (addr == NULL || option == NULL) {
@@ -138,7 +138,7 @@ NO_SANITIZE("cfi") bool LnnConvertOptionToAddr(ConnectionAddr *addr, const Conne
     return false;
 }
 
-NO_SANITIZE("cfi") DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
+DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type)
 {
     if (type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_ETH) {
         return DISCOVERY_TYPE_WIFI;
@@ -153,7 +153,7 @@ NO_SANITIZE("cfi") DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType ty
     }
 }
 
-NO_SANITIZE("cfi") ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
+ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
 {
     switch (type) {
         case DISCOVERY_TYPE_WIFI:
@@ -168,7 +168,7 @@ NO_SANITIZE("cfi") ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType ty
     return CONNECTION_ADDR_MAX;
 }
 
-NO_SANITIZE("cfi") bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
+bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
 {
     if (addr == NULL || connInfo == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or connInfo is null");
@@ -206,7 +206,7 @@ NO_SANITIZE("cfi") bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr,
     return false;
 }
 
-NO_SANITIZE("cfi") bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo,
+bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo,
     ConnectionAddrType hintType)
 {
     if (addr == NULL || connInfo == NULL) {

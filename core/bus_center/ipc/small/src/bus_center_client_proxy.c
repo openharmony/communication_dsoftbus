@@ -65,7 +65,7 @@ static int32_t GetAllClientIdentity(SvcIdentity *svc, int num)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnJoinLNNResult ipc server push.");
@@ -98,7 +98,7 @@ NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
+int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     (void)pkgName;
@@ -109,7 +109,7 @@ NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int retCode)
+int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int retCode)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLeaveLNNResult callback ipc server push.");
     if (networkId == NULL) {
@@ -137,7 +137,7 @@ NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(const char *pkgName, const cha
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int retCode)
+int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int retCode)
 {
     (void)pkgName;
     (void)networkId;
@@ -145,7 +145,7 @@ NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, cons
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
+int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnNodeOnlineStateChanged callback ipc server push.");
     if (info == NULL) {
@@ -193,7 +193,7 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *i
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClinetOnNodeBasicInfoChanged callback ipc server push.");
     if (info == NULL) {
@@ -241,7 +241,7 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t inf
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
+int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {
     (void)pid;
@@ -272,7 +272,7 @@ NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t p
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId,
+int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId,
     int32_t reason)
 {
     (void) pid;
@@ -302,7 +302,7 @@ NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId,
+int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId,
     int32_t reason)
 {
     (void)pid;
@@ -332,7 +332,7 @@ NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device,
+int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void *device,
     uint32_t deviceLen)
 {
     (void)pid;

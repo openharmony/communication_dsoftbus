@@ -276,7 +276,7 @@ int32_t InitBaseListener(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void DeinitBaseListener(void)
+void DeinitBaseListener(void)
 {
     for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
         SoftbusListenerNode *node = GetListenerNode(module);
@@ -288,7 +288,7 @@ NO_SANITIZE("cfi") void DeinitBaseListener(void)
     }
 }
 
-NO_SANITIZE("cfi") uint32_t CreateListenerModule(void)
+uint32_t CreateListenerModule(void)
 {
     int32_t status = SoftBusMutexLock(&g_listenerListLock);
     CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, UNUSE_BUTT,
@@ -316,7 +316,7 @@ NO_SANITIZE("cfi") uint32_t CreateListenerModule(void)
     return module;
 }
 
-NO_SANITIZE("cfi") void DestroyBaseListener(ListenerModule module)
+void DestroyBaseListener(ListenerModule module)
 {
     CONN_CHECK_AND_RETURN_LOG(module >= LISTENER_MODULE_DYNAMIC_START && module <= LISTENER_MODULE_DYNAMIC_END,
         LISTENER_TAG "destroy base listener failed: only dynamic module support destroy, module=%d", module);
@@ -601,7 +601,7 @@ static bool IsValidTriggerType(TriggerType trigger)
     }
 }
 
-NO_SANITIZE("cfi") int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(module >= 0 && module < UNUSE_BUTT, SOFTBUS_INVALID_PARAM,
         LISTENER_TAG "add trigger failed: invalid module, module=%d", module);
@@ -691,7 +691,7 @@ NO_SANITIZE("cfi") int32_t AddTrigger(ListenerModule module, int32_t fd, Trigger
     return status;
 }
 
-NO_SANITIZE("cfi") int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(module >= 0 && module < UNUSE_BUTT, SOFTBUS_INVALID_PARAM,
         LISTENER_TAG "delete trigger failed: invalid module, module=%d", module);

@@ -774,7 +774,7 @@ static int32_t FillAllRelation(LnnRelation *relation, uint32_t relationNum)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnInitTopoManager(void)
+int32_t LnnInitTopoManager(void)
 {
     int32_t i;
 
@@ -803,7 +803,7 @@ NO_SANITIZE("cfi") int32_t LnnInitTopoManager(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnDeinitTopoManager(void)
+void LnnDeinitTopoManager(void)
 {
     if (!g_topoTable.isSupportTopo) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not Support Topo");
@@ -821,7 +821,7 @@ NO_SANITIZE("cfi") void LnnDeinitTopoManager(void)
     SoftBusMutexDestroy(&g_topoTable.lock);
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum)
+int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum)
 {
     int32_t rc;
     if (relation == NULL || relationNum == NULL) {
@@ -852,7 +852,7 @@ NO_SANITIZE("cfi") int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *r
     return rc;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetRelation(const char *udid, const char *peerUdid, uint8_t *relation, uint32_t len)
+int32_t LnnGetRelation(const char *udid, const char *peerUdid, uint8_t *relation, uint32_t len)
 {
     TopoTableItem *topoItem = NULL;
     TopoInfo *topoInfo = NULL;

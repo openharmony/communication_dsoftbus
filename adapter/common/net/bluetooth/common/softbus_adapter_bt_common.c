@@ -118,7 +118,7 @@ static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState sta
     }
 }
 
-NO_SANITIZE("cfi") static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
+static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
 {
     if (bdAddr == NULL) {
         CLOGE("WrapperPairRequestedCallback addr is null");
@@ -132,7 +132,7 @@ NO_SANITIZE("cfi") static void WrapperPairRequestedCallback(const BdAddr *bdAddr
     }
 }
 
-NO_SANITIZE("cfi") static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, int reqType,
+static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, int reqType,
     int number)
 {
     if (bdAddr == NULL) {
@@ -167,7 +167,7 @@ static int RegisterListenerCallback(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     if (listener == NULL) {
         return SOFTBUS_ERR;
@@ -185,7 +185,7 @@ NO_SANITIZE("cfi") int SoftBusAddBtStateListener(const SoftBusBtStateListener *l
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int SoftBusRemoveBtStateListener(int listenerId)
+int SoftBusRemoveBtStateListener(int listenerId)
 {
     if (listenerId < 0 || listenerId >= STATE_LISTENER_MAX_NUM) {
         return SOFTBUS_INVALID_PARAM;
@@ -195,7 +195,7 @@ NO_SANITIZE("cfi") int SoftBusRemoveBtStateListener(int listenerId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusEnableBt(void)
+int SoftBusEnableBt(void)
 {
     if (EnableBle()) {
         return SOFTBUS_OK;
@@ -203,7 +203,7 @@ NO_SANITIZE("cfi") int SoftBusEnableBt(void)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int SoftBusDisableBt(void)
+int SoftBusDisableBt(void)
 {
     if (DisableBle()) {
         return SOFTBUS_OK;
@@ -211,7 +211,7 @@ NO_SANITIZE("cfi") int SoftBusDisableBt(void)
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int SoftBusGetBtState(void)
+int SoftBusGetBtState(void)
 {
     if (IsBleEnabled()) {
         return BLE_ENABLE;
@@ -219,7 +219,7 @@ NO_SANITIZE("cfi") int SoftBusGetBtState(void)
     return BLE_DISABLE;
 }
 
-NO_SANITIZE("cfi") int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     if (mac == NULL) {
         return SOFTBUS_ERR;
@@ -238,7 +238,7 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int SoftBusSetBtName(const char *name)
+int SoftBusSetBtName(const char *name)
 {
     if (SetLocalName((unsigned char *)name, strlen(name))) {
         return SOFTBUS_OK;

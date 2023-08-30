@@ -96,7 +96,7 @@ static void DfxRecordTcpConnectSuccess(uint32_t pId, TcpConnInfoNode *tcpInfo, C
                             SOFTBUS_HISYSEVT_CONN_OK);
 }
 
-NO_SANITIZE("cfi") uint32_t TcpGetConnNum(void)
+uint32_t TcpGetConnNum(void)
 {
     if (g_tcpConnInfoList == NULL) {
         return 0;
@@ -133,7 +133,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t fd)
+static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t fd)
 {
     CONN_CHECK_AND_RETURN_LOG(g_tcpConnInfoList, "global connection list is null");
     int32_t status = SoftBusMutexLock(&g_tcpConnInfoList->lock);
@@ -199,7 +199,7 @@ static void DelTcpConnNode(uint32_t connectionId)
     return;
 }
 
-NO_SANITIZE("cfi") static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
+static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0 || clientAddr == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -364,7 +364,7 @@ static int32_t TcpOnDataEventIn(ListenerModule module, int32_t fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
+int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     (void)module;
     if (events == SOFTBUS_SOCKET_IN) {
@@ -380,7 +380,7 @@ NO_SANITIZE("cfi") int32_t TcpOnDataEvent(ListenerModule module, int32_t events,
     DelTcpConnInfo(connectionId, module, fd);
     return SOFTBUS_ERR;
 }
-NO_SANITIZE("cfi") static void DelAllConnInfo(ListenerModule moduleId)
+static void DelAllConnInfo(ListenerModule moduleId)
 {
     if (g_tcpConnInfoList == NULL) {
         return;
@@ -408,14 +408,14 @@ NO_SANITIZE("cfi") static void DelAllConnInfo(ListenerModule moduleId)
     SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
 }
 
-NO_SANITIZE("cfi") uint32_t CalTcpConnectionId(int32_t fd)
+uint32_t CalTcpConnectionId(int32_t fd)
 {
     uint32_t connectType = (uint32_t)CONNECT_TCP;
     uint32_t connectionId = ((uint32_t)fd & 0xffff) | (connectType << CONNECT_TYPE_SHIFT);
     return connectionId;
 }
 
-NO_SANITIZE("cfi") int32_t TcpConnectDeviceCheckArg(const ConnectOption *option, uint32_t requestId,
+int32_t TcpConnectDeviceCheckArg(const ConnectOption *option, uint32_t requestId,
     const ConnectResult *result)
 {
     if ((result == NULL) ||
@@ -465,7 +465,7 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requestId,
+static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requestId,
     ConnectStatistics *statistics, const ConnectResult *result)
 {
     SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "OpenTcpClient failed.");
@@ -477,7 +477,7 @@ NO_SANITIZE("cfi") static int32_t TcpOpenClientSocketErr(const ConnectOption *op
     return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
+int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
     const ConnectResult *result)
 {
     if (TcpConnectDeviceCheckArg(option, requestId, result) == SOFTBUS_ERR) {
@@ -537,7 +537,7 @@ int32_t TcpDisconnectDevice(uint32_t connectionId)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
+int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
 {
     if (g_tcpConnInfoList == NULL || option == NULL) {
         return SOFTBUS_ERR;
@@ -711,7 +711,7 @@ static void InitTcpInterface(void)
     g_tcpInterface.PreventConnection = NULL;
 }
 
-NO_SANITIZE("cfi") ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
+ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     if (callback == NULL) {
         CLOGE("ConnectCallback is NULL.");

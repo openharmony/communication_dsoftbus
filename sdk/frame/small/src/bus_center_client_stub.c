@@ -23,7 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
+int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -60,14 +60,14 @@ NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(IpcIo *data, IpcIo *reply)
+int32_t ClientOnJoinMetaNodeResult(IpcIo *data, IpcIo *reply)
 {
     (void)data;
     (void)reply;
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
+int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -89,7 +89,7 @@ NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(IpcIo *data, IpcIo *reply)
+int32_t ClientOnLeaveMetaNodeResult(IpcIo *data, IpcIo *reply)
 {
     (void)data;
     (void)reply;
@@ -155,7 +155,7 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
+int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -184,7 +184,7 @@ NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply)
+void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (reply == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -197,7 +197,7 @@ NO_SANITIZE("cfi") void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply)
     LnnOnPublishLNNResult(publishId, reason);
 }
 
-NO_SANITIZE("cfi") void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply)
+void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
@@ -210,7 +210,7 @@ NO_SANITIZE("cfi") void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply)
     LnnOnRefreshLNNResult(refreshId, reason);
 }
 
-NO_SANITIZE("cfi") void ClientOnRefreshDeviceFound(IpcIo *data, IpcIo *reply)
+void ClientOnRefreshDeviceFound(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);

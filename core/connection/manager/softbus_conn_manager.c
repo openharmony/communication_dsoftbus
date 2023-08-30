@@ -299,7 +299,7 @@ static void DelListener(ConnModule moduleId)
     return;
 }
 
-NO_SANITIZE("cfi") uint32_t ConnGetHeadSize(void)
+uint32_t ConnGetHeadSize(void)
 {
     return sizeof(ConnPktHead);
 }
@@ -307,7 +307,7 @@ NO_SANITIZE("cfi") uint32_t ConnGetHeadSize(void)
 SoftBusMutex g_ReqLock;
 static uint32_t g_ReqId = 1;
 
-NO_SANITIZE("cfi") uint32_t ConnGetNewRequestId(ConnModule moduleId)
+uint32_t ConnGetNewRequestId(ConnModule moduleId)
 {
 #define REQID_MAX 1000000
     (void)moduleId;
@@ -320,7 +320,7 @@ NO_SANITIZE("cfi") uint32_t ConnGetNewRequestId(ConnModule moduleId)
     return reqId;
 }
 
-NO_SANITIZE("cfi")
+
 void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     CONN_CHECK_AND_RETURN_LOG(
@@ -407,7 +407,7 @@ static int32_t InitTimeNodeList()
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
+void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
@@ -427,7 +427,7 @@ NO_SANITIZE("cfi") void ConnManagerConnected(uint32_t connectionId, const Connec
     return;
 }
 
-NO_SANITIZE("cfi") void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
+void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     ConnListenerNode *node = NULL;
     ConnListenerNode *listener = NULL;
@@ -444,7 +444,7 @@ NO_SANITIZE("cfi") void ConnManagerDisconnected(uint32_t connectionId, const Con
     return;
 }
 
-NO_SANITIZE("cfi") int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
+int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
         return SOFTBUS_INVALID_PARAM;
@@ -460,18 +460,18 @@ NO_SANITIZE("cfi") int32_t ConnSetConnectCallback(ConnModule moduleId, const Con
     return AddListener(moduleId, callback);
 }
 
-NO_SANITIZE("cfi") void ConnUnSetConnectCallback(ConnModule moduleId)
+void ConnUnSetConnectCallback(ConnModule moduleId)
 {
     DelListener(moduleId);
     return;
 }
 
-NO_SANITIZE("cfi") int32_t ConnTypeIsSupport(ConnectType type)
+int32_t ConnTypeIsSupport(ConnectType type)
 {
     return ConnTypeCheck(type);
 }
 
-NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const ConnectResult *result)
+int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const ConnectResult *result)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -489,7 +489,7 @@ NO_SANITIZE("cfi") int32_t ConnConnectDevice(const ConnectOption *info, uint32_t
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
 
-NO_SANITIZE("cfi") int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type)
+int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(type != NULL, SOFTBUS_INVALID_PARAM, "param error");
 
@@ -503,7 +503,7 @@ NO_SANITIZE("cfi") int32_t ConnGetTypeByConnectionId(uint32_t connectionId, Conn
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
+int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data)
 {
     ConnectType type;
     ConnPktHead *head = NULL;
@@ -538,7 +538,7 @@ NO_SANITIZE("cfi") int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *da
         connectionId, (uint8_t *)data->buf, data->len, data->pid, data->flag, data->module, data->seq);
 }
 
-NO_SANITIZE("cfi") int32_t ConnDisconnectDevice(uint32_t connectionId)
+int32_t ConnDisconnectDevice(uint32_t connectionId)
 {
     ConnectType type;
     if (ConnGetTypeByConnectionId(connectionId, &type) != SOFTBUS_OK) {
@@ -551,7 +551,7 @@ NO_SANITIZE("cfi") int32_t ConnDisconnectDevice(uint32_t connectionId)
     return g_connManager[type]->DisconnectDevice(connectionId);
 }
 
-NO_SANITIZE("cfi") int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
+int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
 {
     if (option == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -567,7 +567,7 @@ NO_SANITIZE("cfi") int32_t ConnDisconnectDeviceAllConn(const ConnectOption *opti
     return g_connManager[option->type]->DisconnectDeviceNow(option);
 }
 
-NO_SANITIZE("cfi") int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
+int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
     ConnectType type;
     if (ConnGetTypeByConnectionId(connectionId, &type) != SOFTBUS_OK) {
@@ -581,7 +581,7 @@ NO_SANITIZE("cfi") int32_t ConnGetConnectionInfo(uint32_t connectionId, Connecti
     return g_connManager[type]->GetConnectionInfo(connectionId, info);
 }
 
-NO_SANITIZE("cfi") int32_t ConnStartLocalListening(const LocalListenerInfo *info)
+int32_t ConnStartLocalListening(const LocalListenerInfo *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -598,7 +598,7 @@ NO_SANITIZE("cfi") int32_t ConnStartLocalListening(const LocalListenerInfo *info
     return g_connManager[info->type]->StartLocalListening(info);
 }
 
-NO_SANITIZE("cfi") int32_t ConnStopLocalListening(const LocalListenerInfo *info)
+int32_t ConnStopLocalListening(const LocalListenerInfo *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -617,7 +617,7 @@ NO_SANITIZE("cfi") int32_t ConnStopLocalListening(const LocalListenerInfo *info)
 
 ConnectCallback g_connManagerCb = { 0 };
 
-NO_SANITIZE("cfi") int32_t ConnServerInit(void)
+int32_t ConnServerInit(void)
 {
     ConnectFuncInterface *connectObj = NULL;
 
@@ -679,7 +679,7 @@ NO_SANITIZE("cfi") int32_t ConnServerInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void ConnServerDeinit(void)
+void ConnServerDeinit(void)
 {
     if (!g_isInited) {
         return;
@@ -702,7 +702,7 @@ NO_SANITIZE("cfi") void ConnServerDeinit(void)
     g_isInited = false;
 }
 
-NO_SANITIZE("cfi") bool CheckActiveConnection(const ConnectOption *info)
+bool CheckActiveConnection(const ConnectOption *info)
 {
     if (info == NULL) {
         return false;

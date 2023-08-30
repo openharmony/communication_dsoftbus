@@ -44,7 +44,7 @@ int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *chanInfo, const unsigned ch
     int payLoadLen, ProxyPacketType flag);
 
 
-NO_SANITIZE("cfi") int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
+int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
     TransReceiveData *receiveData)
 {
     int32_t ret = TransProxyOnMsgReceived(pkgName, pid, channelId, receiveData);
@@ -54,7 +54,7 @@ NO_SANITIZE("cfi") int32_t NotifyClientMsgReceived(const char *pkgName, int32_t 
     return ret;
 }
 
-NO_SANITIZE("cfi") ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
+ProxyPacketType SessionTypeToPacketType(SessionPktType sessionType)
 {
     switch (sessionType) {
         case TRANS_SESSION_BYTES:
@@ -84,7 +84,7 @@ NO_SANITIZE("cfi") ProxyPacketType SessionTypeToPacketType(SessionPktType sessio
     }
 }
 
-NO_SANITIZE("cfi") SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
+SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
 {
     switch (proxyType) {
         case PROXY_FLAG_BYTES:
@@ -98,7 +98,7 @@ NO_SANITIZE("cfi") SendPriority ProxyTypeToConnPri(ProxyPacketType proxyType)
     }
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
+int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
     uint32_t len, ProxyPacketType flags)
 {
     int32_t seq = 0;
@@ -132,7 +132,7 @@ NO_SANITIZE("cfi") int32_t TransProxyPostPacketData(int32_t channelId, const uns
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len,
+int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, uint32_t len,
     SessionPktType flags)
 {
     ProxyPacketType type = SessionTypeToPacketType(flags);
@@ -197,7 +197,7 @@ static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *payLoad,
+int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *payLoad,
     int payLoadLen, ProxyPacketType flag)
 {
     if ((info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING)) {
@@ -212,7 +212,7 @@ NO_SANITIZE("cfi") int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, co
     return TransProxyTransNormalMsg(info, (const char*)payLoad, payLoadLen, flag);
 }
 
-NO_SANITIZE("cfi") int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
+int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
     const char *data, uint32_t len)
 {
     if (data == NULL) {

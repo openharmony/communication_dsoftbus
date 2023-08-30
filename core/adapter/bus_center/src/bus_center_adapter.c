@@ -62,7 +62,7 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
+int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "fail: para error!");

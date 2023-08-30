@@ -57,7 +57,14 @@ ohos_unittest("WifiDirectTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  sources = [ "wifi_direct_test.cpp" ]
+  sources = [
+    "wifi_direct_coexist_rule_test.cpp",
+    "wifi_direct_command_manage_test.cpp",
+    "wifi_direct_initiator_test.cpp",
+    "wifi_direct_ip_manager_test.cpp",
+    "wifi_direct_negotiator_test.cpp",
+    "wifi_direct_test.cpp",
+  ]
 }
 
 group("unittest") {
@@ -66,6 +73,7 @@ group("unittest") {
     ":WifiDirectTest",
     "data:unittest",
     "negotiate_state:unittest",
+    "processor:unittest",
     "protocol:unittest",
     "utils:unittest",
   ]

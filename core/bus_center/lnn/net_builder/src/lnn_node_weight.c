@@ -32,7 +32,7 @@
 #define BASE_WEIGHT_CAR_VALUE   5000
 #define BASE_WEIGHT_PC_VALUE    4000
 
-NO_SANITIZE("cfi") int32_t LnnGetLocalWeight(void)
+int32_t LnnGetLocalWeight(void)
 {
     static int32_t weight;
     static bool isGenWeight = false;
@@ -77,7 +77,7 @@ NO_SANITIZE("cfi") int32_t LnnGetLocalWeight(void)
     return weight;
 }
 
-NO_SANITIZE("cfi") int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1, int32_t weight2,
+int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1, int32_t weight2,
     const char *masterUdid2)
 {
     if (weight1 != weight2) {

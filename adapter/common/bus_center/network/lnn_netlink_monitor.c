@@ -142,7 +142,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     }
 }
 
-NO_SANITIZE("cfi") static void *NetlinkMonitorThread(void *para)
+static void *NetlinkMonitorThread(void *para)
 {
     struct nlmsghdr *nlh = NULL;
     (void)para;

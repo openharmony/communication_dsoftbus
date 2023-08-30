@@ -118,7 +118,7 @@ static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
 }
 
 
-NO_SANITIZE("cfi") void TransTdcStopSessionProc(ListenerModule listenMod)
+void TransTdcStopSessionProc(ListenerModule listenMod)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcStopSessionProc");
     SessionConn *item = NULL;
@@ -150,7 +150,7 @@ NO_SANITIZE("cfi") void TransTdcStopSessionProc(ListenerModule listenMod)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcStopSessionProc end");
 }
 
-NO_SANITIZE("cfi") int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
+int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 {
     int32_t ret = P2pDirectChannelInit();
     if (ret != SOFTBUS_OK) {
@@ -179,13 +179,13 @@ NO_SANITIZE("cfi") int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransTcpDirectDeinit(void)
+void TransTcpDirectDeinit(void)
 {
     TransSrvDataListDeinit();
     (void)RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, NULL);
 }
 
-NO_SANITIZE("cfi") void TransTdcDeathCallback(const char *pkgName, int32_t pid)
+void TransTdcDeathCallback(const char *pkgName, int32_t pid)
 {
     if (pkgName == NULL) {
         return;
@@ -248,7 +248,7 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
+int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenDirectChannel");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {

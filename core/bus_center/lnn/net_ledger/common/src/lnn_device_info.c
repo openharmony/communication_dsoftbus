@@ -49,7 +49,7 @@ static TypeToId g_typeToIdMap[] = {
 
 static char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};
 
-NO_SANITIZE("cfi") const char *LnnGetDeviceName(const DeviceBasicInfo *info)
+const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 {
     if (info == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceName para error.");
@@ -58,7 +58,7 @@ NO_SANITIZE("cfi") const char *LnnGetDeviceName(const DeviceBasicInfo *info)
     return info->deviceName;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
+int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
 {
     if (info == NULL || name == NULL || strlen(name) > DEVICE_NAME_BUF_LEN - 1) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnSetDeviceName para error.");
@@ -71,7 +71,7 @@ NO_SANITIZE("cfi") int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *n
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
+int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
 {
     if (info == NULL || typeId == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceTypeId para error.");
@@ -132,7 +132,7 @@ static char *ConvertIntToHexString(uint16_t typeId)
     return g_stringTypeId;
 }
 
-NO_SANITIZE("cfi") int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
+int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
 {
     int mstRet;
     if (deviceType == NULL || typeId == NULL) {
@@ -163,7 +163,7 @@ NO_SANITIZE("cfi") int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") char *LnnConvertIdToDeviceType(uint16_t typeId)
+char *LnnConvertIdToDeviceType(uint16_t typeId)
 {
     uint32_t count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
     for (uint32_t i = 0; i < count; i++) {

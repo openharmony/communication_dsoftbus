@@ -106,7 +106,7 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
     }
 }
 
-NO_SANITIZE("cfi") int32_t BrTransSend(
+int32_t BrTransSend(
     uint32_t connectionId, int32_t socketHandle, uint32_t mtu, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t waitWriteLen = dataLen;

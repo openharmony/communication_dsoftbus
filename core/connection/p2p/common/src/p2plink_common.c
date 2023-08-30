@@ -35,18 +35,18 @@ static char g_interface[P2PLINK_INTERFACE_LEN] = {0};
 static bool g_p2plinkState = false;
 static bool g_p2plinkDhcp = false;
 
-NO_SANITIZE("cfi") P2pLinkRole P2pLinkGetRole(void)
+P2pLinkRole P2pLinkGetRole(void)
 {
     return g_role;
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetRole(P2pLinkRole role)
+void P2pLinkSetRole(P2pLinkRole role)
 {
     CLOGI("set my role %d", role);
     g_role = role;
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetMyIp(const char *ip)
+void P2pLinkSetMyIp(const char *ip)
 {
     int32_t ret = strcpy_s(g_myIp, sizeof(g_myIp), ip);
     if (ret != EOK) {
@@ -55,12 +55,12 @@ NO_SANITIZE("cfi") void P2pLinkSetMyIp(const char *ip)
     CLOGI("set my ip.");
 }
 
-NO_SANITIZE("cfi") char* P2pLinkGetMyIp(void)
+char* P2pLinkGetMyIp(void)
 {
     return g_myIp;
 }
 
-NO_SANITIZE("cfi") char* P2pLinkGetMyMac(void)
+char* P2pLinkGetMyMac(void)
 {
     char myMac[P2P_MAC_LEN] = {0};
 
@@ -77,7 +77,7 @@ NO_SANITIZE("cfi") char* P2pLinkGetMyMac(void)
     return g_myMac;
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetGoIp(const char *ip)
+void P2pLinkSetGoIp(const char *ip)
 {
     int32_t ret = strcpy_s(g_goIp, sizeof(g_goIp), ip);
     if (ret != EOK) {
@@ -86,7 +86,7 @@ NO_SANITIZE("cfi") void P2pLinkSetGoIp(const char *ip)
     CLOGI("set go ip");
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetGoMac(const char *mac)
+void P2pLinkSetGoMac(const char *mac)
 {
     if (strcpy_s(g_goMac, sizeof(g_goMac), mac) != EOK) {
         CLOGE("strcpy error");
@@ -94,24 +94,24 @@ NO_SANITIZE("cfi") void P2pLinkSetGoMac(const char *mac)
     CLOGI("set go mac");
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetGoPort(int32_t port)
+void P2pLinkSetGoPort(int32_t port)
 {
     g_goPort = port;
     CLOGI("set go port %d", g_goPort);
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetGcPort(int32_t port)
+void P2pLinkSetGcPort(int32_t port)
 {
     g_gcPort = port;
     CLOGI("set gc port %d", g_goPort);
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkGetGcPort(void)
+int32_t P2pLinkGetGcPort(void)
 {
     return g_gcPort;
 }
 
-NO_SANITIZE("cfi") char* P2pLinkGetGoIp(void)
+char* P2pLinkGetGoIp(void)
 {
     if (g_role == ROLE_GO) {
         return P2pLinkGetMyIp();
@@ -119,7 +119,7 @@ NO_SANITIZE("cfi") char* P2pLinkGetGoIp(void)
     return g_goIp;
 }
 
-NO_SANITIZE("cfi") char* P2pLinkGetGoMac(void)
+char* P2pLinkGetGoMac(void)
 {
     if (g_role == ROLE_GO) {
         return P2pLinkGetMyMac();
@@ -127,54 +127,54 @@ NO_SANITIZE("cfi") char* P2pLinkGetGoMac(void)
     return g_goMac;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkGetGoPort(void)
+int32_t P2pLinkGetGoPort(void)
 {
     return g_goPort;
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetMyMacExpired(bool isExpired)
+void P2pLinkSetMyMacExpired(bool isExpired)
 {
     g_macExpired = isExpired;
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetState(bool state)
+void P2pLinkSetState(bool state)
 {
     g_p2plinkState = state;
 }
 
-NO_SANITIZE("cfi") bool P2pLinkIsEnable(void)
+bool P2pLinkIsEnable(void)
 {
     return g_p2plinkState;
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetDhcpState(bool isNeedDhcp)
+void P2pLinkSetDhcpState(bool isNeedDhcp)
 {
     g_p2plinkDhcp = isNeedDhcp;
 }
 
-NO_SANITIZE("cfi") bool P2pLinkGetDhcpState(void)
+bool P2pLinkGetDhcpState(void)
 {
     return g_p2plinkDhcp;
 }
 
-NO_SANITIZE("cfi") bool P2pLinkIsDisconnectState(void)
+bool P2pLinkIsDisconnectState(void)
 {
     return g_isDisconnect;
 }
 
-NO_SANITIZE("cfi") void P2pLinkSetDisconnectState(bool state)
+void P2pLinkSetDisconnectState(bool state)
 {
     g_isDisconnect = state;
 }
 
-NO_SANITIZE("cfi") void P2pLinkCommonInit(void)
+void P2pLinkCommonInit(void)
 {
     g_macExpired = true;
     g_role = ROLE_NONE;
     return;
 }
 
-NO_SANITIZE("cfi") void P2pLinkCommonClean(void)
+void P2pLinkCommonClean(void)
 {
     CLOGI("P2pLinkCommonClean");
     g_role = ROLE_NONE;

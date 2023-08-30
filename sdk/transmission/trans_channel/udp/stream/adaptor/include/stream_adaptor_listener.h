@@ -92,7 +92,7 @@ public:
             &retStreamData, &extStreamData, &tmpf);
     }
 
-    NO_SANITIZE("cfi") void OnStreamStatus(int status) override
+    void OnStreamStatus(int status) override
     {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnStreamStatus(%d) in.", status);
 
@@ -102,7 +102,7 @@ public:
         }
     }
 
-    NO_SANITIZE("cfi") void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
+    void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnQosEvent for channelId = %" PRId64,

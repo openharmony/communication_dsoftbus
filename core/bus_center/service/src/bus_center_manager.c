@@ -161,7 +161,7 @@ static int32_t StartDelayInit(void)
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
+int32_t BusCenterServerInit(void)
 {
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -215,7 +215,7 @@ NO_SANITIZE("cfi") int32_t BusCenterServerInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void BusCenterServerDeinit(void)
+void BusCenterServerDeinit(void)
 {
     RouteLSDeinit();
     DeinitNodeAddrAllocator();

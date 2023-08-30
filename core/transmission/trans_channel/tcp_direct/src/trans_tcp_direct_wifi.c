@@ -33,7 +33,7 @@
 #define HML_IP_PREFIX "172.30."
 #define NETWORK_ID_LEN 7
 
-NO_SANITIZE("cfi") static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, SessionConn *newConn,
+static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, SessionConn *newConn,
     ListenerModule module)
 {
     if (TransSrvAddDataBufNode(newchannelId, fd) != SOFTBUS_OK) {
@@ -76,7 +76,7 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
     return module;
 }
 
-NO_SANITIZE("cfi") int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
+int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel");

@@ -27,7 +27,7 @@ int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
     return SoftBusDumpDispatch(fd, argc, argv);
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusHiDumperInit(void)
+int32_t SoftBusHiDumperInit(void)
 {
     return SoftBusHiDumperModuleInit();
 }

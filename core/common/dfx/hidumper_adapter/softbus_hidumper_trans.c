@@ -102,7 +102,7 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     SOFTBUS_DPRINTF(fd, "DataType              : %s\n", g_dataTypeList[appInfo->businessType]);
 }
 
-NO_SANITIZE("cfi") static int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
+static int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argv == NULL || argc < 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid ");

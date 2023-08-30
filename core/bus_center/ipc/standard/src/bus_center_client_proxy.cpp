@@ -31,7 +31,7 @@ static sptr<BusCenterClientProxy> GetClientProxy(const char *pkgName, int32_t pi
     return clientProxy;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
+int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     if (info == nullptr) {
@@ -46,7 +46,7 @@ NO_SANITIZE("cfi") int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *
     return clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
+int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
     if (info == nullptr) {
@@ -61,7 +61,7 @@ NO_SANITIZE("cfi") int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, v
     return clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(
+int32_t ClientOnLeaveLNNResult(
     const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
@@ -76,7 +76,7 @@ NO_SANITIZE("cfi") int32_t ClientOnLeaveLNNResult(
     return clientProxy->OnLeaveLNNResult(networkId, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(
+int32_t ClientOnLeaveMetaNodeResult(
     const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
@@ -91,7 +91,7 @@ NO_SANITIZE("cfi") int32_t ClientOnLeaveMetaNodeResult(
     return clientProxy->OnLeaveMetaNodeResult(networkId, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
+int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
@@ -102,7 +102,7 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *i
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
+int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
     std::multimap<std::string, sptr<IRemoteObject>> proxyMap;
     SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxyMap(proxyMap);
@@ -113,7 +113,7 @@ NO_SANITIZE("cfi") int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t inf
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
+int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *info,
     uint32_t infoTypeLen, int32_t retCode)
 {
     if (pkgName == nullptr) {
@@ -128,7 +128,7 @@ NO_SANITIZE("cfi") int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t p
     return clientProxy->OnTimeSyncResult(info, infoTypeLen, retCode);
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId,
+int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId,
     int32_t reason)
 {
     if (pkgName == nullptr) {
@@ -144,7 +144,7 @@ NO_SANITIZE("cfi") int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId,
+int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId,
     int32_t reason)
 {
     if (pkgName == nullptr) {
@@ -160,7 +160,7 @@ NO_SANITIZE("cfi") int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ClientOnRefreshDeviceFound(
+int32_t ClientOnRefreshDeviceFound(
     const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen)
 {
     if (pkgName == nullptr) {

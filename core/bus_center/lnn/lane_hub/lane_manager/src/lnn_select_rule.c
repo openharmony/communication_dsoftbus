@@ -230,21 +230,21 @@ static bool IsEnableCocDirect(const char *networkId)
     return true;
 }
 
-NO_SANITIZE("cfi") static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
+static int32_t GetBrScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-NO_SANITIZE("cfi") static int32_t GetBleScore(const char *networkId, uint32_t expectedBw)
+static int32_t GetBleScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
     return LNN_LINK_DEFAULT_SCORE;
 }
 
-NO_SANITIZE("cfi") static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
+static int32_t GetP2pScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
@@ -270,7 +270,7 @@ static int32_t GetLinkedChannelScore(void)
     return score;
 }
 
-NO_SANITIZE("cfi") static int32_t GetWlan2P4GScore(const char *networkId, uint32_t expectedBw)
+static int32_t GetWlan2P4GScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
@@ -284,7 +284,7 @@ static int32_t GetWlan5GScore(const char *networkId, uint32_t expectedBw)
     return GetLinkedChannelScore();
 }
 
-NO_SANITIZE("cfi") static int32_t GetCocScore(const char *networkId, uint32_t expectedBw)
+static int32_t GetCocScore(const char *networkId, uint32_t expectedBw)
 {
     (void)networkId;
     (void)expectedBw;
@@ -305,7 +305,7 @@ static LinkAttribute g_linkAttr[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC_DIRECT] = { true,  IsEnableCocDirect, GetCocScore     },
 };
 
-NO_SANITIZE("cfi") LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
+LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
 {
     if ((linkType < 0) || (linkType >= LANE_LINK_TYPE_BUTT)) {
         return NULL;

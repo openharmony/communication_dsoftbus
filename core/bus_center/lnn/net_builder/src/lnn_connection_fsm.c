@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,7 +169,8 @@ static void ReportDeviceOnlineEvt(const char *udid, NodeBasicInfo *peerDevInfo)
     LLOGI("report device online evt enter");
     int32_t infoNum = 0;
     NodeBasicInfo *basic = NULL;
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     OnlineDeviceInfo info;
     (void)memset_s(&info, sizeof(OnlineDeviceInfo), 0, sizeof(OnlineDeviceInfo));
     if (LnnGetAllOnlineNodeInfo(&basic, &infoNum) != SOFTBUS_OK) {
@@ -210,7 +211,8 @@ static void ReportDeviceOnlineEvt(const char *udid, NodeBasicInfo *peerDevInfo)
 
 static void OnlineTrustGroupProc(const char *udid)
 {
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo) != SOFTBUS_OK) {
         LLOGE("get remote info fail");
         return;
@@ -427,7 +429,8 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
 static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *networkId, NodeBasicInfo *basic)
 {
     const LnnConntionInfo *connInfo = &connFsm->connInfo;
-    NodeInfo info = {0};
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     const char *udid = NULL;
     bool needReportOffline = false;
     bool isMetaAuth = false;
@@ -494,7 +497,8 @@ static void ReportLeaveLNNResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
 static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
-    NodeBasicInfo basic = {0};
+    NodeBasicInfo basic;
+    (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     bool needReportOffline = false;
     ReportLeaveLNNResultEvt(connFsm, retCode);
     if (CheckDeadFlag(connFsm, true)) {
@@ -513,7 +517,8 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     } else if (retCode == SOFTBUS_OK) {
         LnnNotifySingleOffLineEvent(&connInfo->addr, &basic);
     }
-    NodeInfo info = {0};
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
         DeviceStateChangeProcess(info.deviceInfo.deviceUdid, connInfo->addr.type, false);
     }
@@ -564,7 +569,8 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         // go to online
         LLOGI("begin to start ble direct online");
         int32_t ret;
-        NodeInfo deviceInfo = {0};
+        NodeInfo deviceInfo;
+        (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         int64_t authId = 0;
         char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
         ret = memcpy_s(udidHash, HB_SHORT_UDID_HASH_HEX_LEN, connInfo->addr.info.ble.udidHash,
@@ -591,7 +597,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     return rc;
 }
 
-NO_SANITIZE("cfi") int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData)
+int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData)
 {
     if (metaJoinNode == NULL || customData == NULL) {
         return SOFTBUS_ERR;
@@ -759,7 +765,8 @@ static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
     if (connInfo->nodeInfo == NULL) {
         return;
     }
-    NodeInfo oldNodeInfo = {0};
+    NodeInfo oldNodeInfo;
+    (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo *newNodeInfo = connInfo->nodeInfo;
     ConnectionAddrType addrType;
     int32_t ret = LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo);
@@ -1017,7 +1024,7 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName,
+LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName,
     bool isNeedConnect)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -1026,7 +1033,7 @@ NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connection target is null");
         return NULL;
     }
-    connFsm = SoftBusCalloc(sizeof(LnnConnectionFsm));
+    connFsm = (LnnConnectionFsm *)SoftBusCalloc(sizeof(LnnConnectionFsm));
     if (connFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc for connection fsm failed");
         return NULL;
@@ -1052,7 +1059,7 @@ NO_SANITIZE("cfi") LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr
     return connFsm;
 }
 
-NO_SANITIZE("cfi") void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
+void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
 {
     if (connFsm == NULL) {
         return;
@@ -1067,7 +1074,7 @@ NO_SANITIZE("cfi") void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
     SoftBusFree(connFsm);
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
+int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
 {
     if (connFsm == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connection fsm is null");
@@ -1081,7 +1088,7 @@ NO_SANITIZE("cfi") int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCallback callback)
+int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCallback callback)
 {
     if (connFsm == NULL || callback == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connection fsm or stop callback is null");
@@ -1095,7 +1102,7 @@ NO_SANITIZE("cfi") int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnCo
     return LnnFsmDeinit(&connFsm->fsm);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_INVALID_PARAM;
@@ -1109,7 +1116,7 @@ NO_SANITIZE("cfi") int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode)
+int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode)
 {
     int32_t *para = NULL;
 
@@ -1130,7 +1137,7 @@ NO_SANITIZE("cfi") int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connF
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_INVALID_PARAM;
@@ -1138,7 +1145,7 @@ NO_SANITIZE("cfi") int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_NOT_TRUSTED, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_INVALID_PARAM;
@@ -1146,7 +1153,7 @@ NO_SANITIZE("cfi") int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connF
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_DISCONNECT, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_ERR;
@@ -1154,7 +1161,7 @@ NO_SANITIZE("cfi") int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFs
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_ERR;
@@ -1162,7 +1169,7 @@ NO_SANITIZE("cfi") int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *c
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_OFFLINE_DONE, NULL);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
         return SOFTBUS_ERR;

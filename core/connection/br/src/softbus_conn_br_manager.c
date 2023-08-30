@@ -549,7 +549,11 @@ static void ConnectRequestOnAvailableState(const ConnBrConnectRequestContext *ct
         ctx->result.OnConnectFailed(ctx->requestId, status);
         return;
     }
-    AttempReuseConnect(device, ConnectDeviceDirectly);
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
+    device->state = BR_DEVICE_STATE_WAIT_SCHEDULE;
+    PendingDevice(device, anomizeAddress);
+    ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_NEXT_CMD, 0, 0, NULL, 0);
 }
 
 static void ConnectRequestOnConnectingState(const ConnBrConnectRequestContext *ctx)

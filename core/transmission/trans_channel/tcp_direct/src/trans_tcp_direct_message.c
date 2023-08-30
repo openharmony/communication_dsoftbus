@@ -78,7 +78,7 @@ static void UnpackTdcPacketHead(TdcPacketHead *data)
     data->dataLen = SoftBusLtoHl(data->dataLen);
 }
 
-NO_SANITIZE("cfi") int32_t TransSrvDataListInit(void)
+int32_t TransSrvDataListInit(void)
 {
     if (g_tcpSrvDataList != NULL) {
         return SOFTBUS_OK;
@@ -112,7 +112,7 @@ static void TransSrvDestroyDataBuf(void)
     return;
 }
 
-NO_SANITIZE("cfi") void TransSrvDataListDeinit(void)
+void TransSrvDataListDeinit(void)
 {
     if (g_tcpSrvDataList == NULL) {
         return;
@@ -122,7 +122,7 @@ NO_SANITIZE("cfi") void TransSrvDataListDeinit(void)
     g_tcpSrvDataList = NULL;
 }
 
-NO_SANITIZE("cfi") int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
+int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
 {
 #define MAX_DATA_BUF 4096
     ServerDataBuf *node = (ServerDataBuf *)SoftBusCalloc(sizeof(ServerDataBuf));
@@ -154,7 +154,7 @@ NO_SANITIZE("cfi") int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void TransSrvDelDataBufNode(int channelId)
+void TransSrvDelDataBufNode(int channelId)
 {
     if (g_tcpSrvDataList ==  NULL) {
         return;
@@ -220,7 +220,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void SendFailToFlushDevice(SessionConn *conn)
+static void SendFailToFlushDevice(SessionConn *conn)
 {
     if (conn->appInfo.routeType == WIFI_STA) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data fail, do Authflushdevice uuid:%s",
@@ -232,7 +232,7 @@ NO_SANITIZE("cfi") static void SendFailToFlushDevice(SessionConn *conn)
     }
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data)
+int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data)
 {
     if (data == NULL || packetHead == NULL || packetHead->dataLen == 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid para.");
@@ -359,7 +359,7 @@ static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channelId = %d, ret = %d", channelId, ret);
     return ret;
 }
-NO_SANITIZE("cfi") int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
+int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     SessionConn conn;
     if (GetSessionConnById(channelId, &conn) == NULL) {
@@ -1002,7 +1002,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     return SOFTBUS_ERR;
 }
 
-NO_SANITIZE("cfi") int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
 {
     int32_t fd = -1;
     size_t len = 0;

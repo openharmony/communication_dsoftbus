@@ -500,7 +500,7 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type,
+static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type,
     LnnHeartbeatType hbType)
 {
     (void)type;
@@ -572,7 +572,7 @@ void LnnHbClearRecvList(void)
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
 }
 
-NO_SANITIZE("cfi")  void LnnDumpHbMgrRecvList(void)
+void LnnDumpHbMgrRecvList(void)
 {
 #define HB_DUMP_UPDATE_INFO_MAX_NUM 10
     int32_t dumpCount = 0;
@@ -607,7 +607,7 @@ NO_SANITIZE("cfi")  void LnnDumpHbMgrRecvList(void)
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
 }
 
-NO_SANITIZE("cfi") void LnnDumpHbOnlineNodeList(void)
+void LnnDumpHbOnlineNodeList(void)
 {
 #define HB_DUMP_ONLINE_NODE_MAX_NUM 5
     int32_t i, infoNum;
@@ -644,7 +644,7 @@ NO_SANITIZE("cfi") void LnnDumpHbOnlineNodeList(void)
     SoftBusFree(info);
 }
 
-NO_SANITIZE("cfi") int32_t LnnHbMediumMgrInit(void)
+int32_t LnnHbMediumMgrInit(void)
 {
     if (LnnRegistBleHeartbeatMediumMgr() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist ble heartbeat manager fail");
@@ -657,7 +657,7 @@ NO_SANITIZE("cfi") int32_t LnnHbMediumMgrInit(void)
     return HbInitRecvList();
 }
 
-NO_SANITIZE("cfi") static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType,
+static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType,
     void *data)
 {
     (void)typeSet;
@@ -691,7 +691,7 @@ NO_SANITIZE("cfi") static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeS
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData)
+int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData)
 {
     if (custData == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -703,7 +703,7 @@ NO_SANITIZE("cfi") int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *cu
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType,
+static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType,
     void *data)
 {
     (void)typeSet;
@@ -742,7 +742,7 @@ NO_SANITIZE("cfi") static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custData)
+int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custData)
 {
     if (!LnnVisitHbTypeSet(VisitHbMediumMgrSendEnd, &custData->hbType, custData)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send end hbType(%d) fail", custData->hbType);
@@ -751,7 +751,7 @@ NO_SANITIZE("cfi") int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custDa
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
+static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
 {
     (void)typeSet;
     (void)data;
@@ -778,7 +778,7 @@ NO_SANITIZE("cfi") static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, L
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type)
+int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type)
 {
     if (!LnnVisitHbTypeSet(VisitHbMediumMgrStop, type, NULL)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager stop hbType(%d) fail", *type);
@@ -787,7 +787,7 @@ NO_SANITIZE("cfi") int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnHbMediumMgrDeinit(void)
+void LnnHbMediumMgrDeinit(void)
 {
     int32_t i;
 
@@ -805,7 +805,7 @@ NO_SANITIZE("cfi") void LnnHbMediumMgrDeinit(void)
     HbDeinitRecvList();
 }
 
-NO_SANITIZE("cfi") int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
+int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
 {
     int32_t id, ret;
 
@@ -830,7 +830,7 @@ NO_SANITIZE("cfi") int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type)
+int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type)
 {
     int32_t i;
 
@@ -866,7 +866,7 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
+int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
     // TODO: One-to-one correspondence between LnnHeartbeatMediumMgr and implementation.
     if (mgr == NULL) {
@@ -898,7 +898,7 @@ static bool VisitUnRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartb
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnUnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
+int32_t LnnUnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
     if (mgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unregist manager get invalid param");

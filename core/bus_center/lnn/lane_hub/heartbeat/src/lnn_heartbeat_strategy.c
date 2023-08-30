@@ -159,7 +159,7 @@ static LnnHeartbeatParamManager *GetParamMgrByTypeLocked(LnnHeartbeatType type)
     return g_hbParamMgr[id];
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
+int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
 {
     LnnHeartbeatParamManager *paramMgr = NULL;
 
@@ -230,7 +230,7 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
+int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
     LnnHeartbeatType type)
 {
     int64_t nowTime;
@@ -312,8 +312,12 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
     uint32_t sendCnt = isRelayV0 ? 1 : HB_SEND_SEPARATELY_CNT;
     LnnHeartbeatType splitHbType = registedHbType;
     (void)LnnVisitHbTypeSet(VisitClearNoneSplitHbType, &splitHbType, NULL);
-    LnnHeartbeatSendEndData endData = {.hbType = splitHbType, .wakeupFlag = wakeupFlag,
-        .isRelay = msgPara->isRelay, .isLastEnd = false};
+    LnnHeartbeatSendEndData endData = {
+        .hbType = splitHbType,
+        .wakeupFlag = wakeupFlag,
+        .isRelay = msgPara->isRelay,
+        .isLastEnd = false,
+    };
     for (i = 1; i < sendCnt; ++i) {
         if (splitHbType < HEARTBEAT_TYPE_MIN) {
             break;
@@ -510,7 +514,7 @@ static bool VisitRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType each
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnRegistParamMgrByType(LnnHeartbeatType type)
+int32_t LnnRegistParamMgrByType(LnnHeartbeatType type)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist paramMgr lock mutex fail");
@@ -556,7 +560,7 @@ static bool VisitUnRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType ea
     return true;
 }
 
-NO_SANITIZE("cfi") void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
+void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unRegist paramMgr lock mutex fail");
@@ -566,7 +570,7 @@ NO_SANITIZE("cfi") void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
     (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
+int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
 {
     LnnHeartbeatParamManager *paramMgr = NULL;
 
@@ -609,7 +613,7 @@ NO_SANITIZE("cfi") int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMed
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type)
+int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type)
 {
     const LnnHeartbeatParamManager *paramMgr = NULL;
 
@@ -640,7 +644,7 @@ NO_SANITIZE("cfi") int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumPar
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
+int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
     LnnHeartbeatStrategyType strategyType)
 {
     if (mgr == NULL) {
@@ -657,7 +661,7 @@ NO_SANITIZE("cfi") int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartNewHbStrategyFsm(void)
+int32_t LnnStartNewHbStrategyFsm(void)
 {
     LnnHeartbeatFsm *hbFsm = NULL;
 
@@ -694,7 +698,7 @@ static bool IsSupportBurstFeature(const char *networkId)
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
     GearMode mode = {0};
     LnnCheckDevStatusMsgPara msgPara = {0};
@@ -720,7 +724,7 @@ NO_SANITIZE("cfi") int32_t LnnStartOfflineTimingStrategy(const char *networkId, 
     return LnnPostCheckDevStatusMsgToHbFsm(g_hbFsm, &msgPara, delayMillis);
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -738,7 +742,7 @@ NO_SANITIZE("cfi") int32_t LnnStopOfflineTimingStrategy(const char *networkId, C
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
 {
     LLOGI("start screen changed offline timing");
     if (networkId == NULL || addrType >= CONNECTION_ADDR_MAX) {
@@ -760,7 +764,7 @@ NO_SANITIZE("cfi") int32_t LnnStartScreenChangeOfflineTiming(const char *network
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
 {
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -778,7 +782,7 @@ NO_SANITIZE("cfi") int32_t LnnStopScreenChangeOfflineTiming(const char *networkI
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
+int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
     bool isRelay)
 {
     LnnProcessSendOnceMsgPara msgPara = {
@@ -809,7 +813,7 @@ int32_t LnnStopV0HeartbeatAndNotTransState()
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
+int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
 {
     if (LnnPostStopMsgToHbFsm(g_hbFsm, type) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat by type post msg fail");
@@ -823,14 +827,18 @@ NO_SANITIZE("cfi") int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType type)
+int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType type)
 {
     if (type <= HEARTBEAT_TYPE_MIN || type >= HEARTBEAT_TYPE_MAX) {
         LLOGE("HB send once get hbType(%d) is not available", type);
         return SOFTBUS_ERR;
     }
-    LnnHeartbeatSendEndData endData =
-        {.hbType = type, .wakeupFlag = false, .isRelay = false, .isLastEnd = true};
+    LnnHeartbeatSendEndData endData = {
+        .hbType = type,
+        .wakeupFlag = false,
+        .isRelay = false,
+        .isLastEnd = true,
+    };
     if (LnnPostSendEndMsgToHbFsm(g_hbFsm, &endData, 0) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", type);
         return SOFTBUS_ERR;
@@ -852,7 +860,7 @@ static bool VisitEnableHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachTy
     return true;
 }
 
-NO_SANITIZE("cfi") int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
+int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB enable hbType lock mutex fail");
@@ -863,7 +871,7 @@ NO_SANITIZE("cfi") int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
+bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
 {
     bool ret = false;
     LnnHeartbeatParamManager *paramMgr = NULL;
@@ -878,17 +886,17 @@ NO_SANITIZE("cfi") bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
+int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
 {
     return LnnPostTransStateMsgToHbFsm(g_hbFsm, isMasterNode ? EVENT_HB_AS_MASTER_NODE : EVENT_HB_AS_NORMAL_NODE);
 }
 
-NO_SANITIZE("cfi") int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
+int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
 {
     return LnnPostUpdateSendInfoMsgToHbFsm(g_hbFsm, type);
 }
 
-NO_SANITIZE("cfi") int32_t LnnHbStrategyInit(void)
+int32_t LnnHbStrategyInit(void)
 {
     if (SoftBusMutexInit(&g_hbStrategyMutex, NULL) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strategy module init mutex fail!");
@@ -905,7 +913,7 @@ NO_SANITIZE("cfi") int32_t LnnHbStrategyInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnHbStrategyDeinit(void)
+void LnnHbStrategyDeinit(void)
 {
     if (g_hbFsm != NULL) {
         (void)LnnStopHeartbeatFsm(g_hbFsm);

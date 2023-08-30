@@ -36,7 +36,7 @@ static ChannelInfoList g_channelInfoList;
 static ChannelList g_channelList;
 static void GetOneChannelMeasResult(void *para);
 
-NO_SANITIZE("cfi") int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
+int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
 {
     if (cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameter.");
@@ -72,7 +72,7 @@ static void ReleaseMeasResources(void)
     g_channelInfoList.buff = NULL;
 }
 
-NO_SANITIZE("cfi") static void ExcuteChannelMeas(void)
+static void ExcuteChannelMeas(void)
 {
     if (g_channelList.measNum >= g_channelList.num) {
         WlanChannelInfo *info = g_channelInfoList.buff;
@@ -104,7 +104,7 @@ NO_SANITIZE("cfi") static void ExcuteChannelMeas(void)
     }
 }
 
-NO_SANITIZE("cfi") int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
+int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
 {
     if (channelId == NULL || num == 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameter.");
@@ -152,7 +152,7 @@ NO_SANITIZE("cfi") int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uin
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static void GetOneChannelMeasResult(void *para)
+static void GetOneChannelMeasResult(void *para)
 {
     (void)para;
     struct MeasChannelResult measChannelResult = {0};

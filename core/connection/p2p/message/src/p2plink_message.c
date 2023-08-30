@@ -125,7 +125,7 @@ static void P2pLinkNegoDataRecv(int64_t authId, const AuthTransData *data)
     }
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
+int32_t P2pLinkSendMessage(int64_t authId, char *data, uint32_t len)
 {
     AuthTransData dataInfo = {
         .module = MODULE_P2P_LINK,
@@ -174,7 +174,7 @@ static AuthTransListener g_p2pLinkTransCb = {
     .onDisconnected = P2pLinkAuthChannelClose,
 };
 
-NO_SANITIZE("cfi") int32_t P2pLinkMessageInit(void)
+int32_t P2pLinkMessageInit(void)
 {
     if (RegAuthTransListener(MODULE_P2P_LINK, &g_p2pLinkTransCb) != SOFTBUS_OK) {
         CLOGE("auth register p2plink callback failed.");

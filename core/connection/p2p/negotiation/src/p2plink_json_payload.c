@@ -89,7 +89,7 @@ static int32_t UnpackGcInfo(GcInfo *gc, const cJSON *data)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data)
+int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P2pContentType type, cJSON *data)
 {
     CLOGD("pack request info.");
     if (request == NULL || data == NULL) {
@@ -126,7 +126,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkPackRequestMsg(const P2pRequestMsg *request, P
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data)
+int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2pContentType type, cJSON *data)
 {
     CLOGD("pack response info.");
     if (response == NULL || data == NULL) {
@@ -166,7 +166,7 @@ NO_SANITIZE("cfi") int32_t P2plinkPackRepsonseMsg(const P2pRespMsg *response, P2
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContentType type, P2pRequestMsg *request)
+int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContentType type, P2pRequestMsg *request)
 {
     CLOGD("unpack request info.");
     if (request == NULL || data == NULL) {
@@ -206,7 +206,7 @@ NO_SANITIZE("cfi") int32_t P2pLinkUnpackRequestMsg(const cJSON *data, P2pContent
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t P2plinkUnpackRepsonseMsg(const cJSON *data, P2pContentType type, P2pRespMsg *response)
+int32_t P2plinkUnpackRepsonseMsg(const cJSON *data, P2pContentType type, P2pRespMsg *response)
 {
     CLOGD("unpack response info.");
     if (response == NULL || data == NULL) {

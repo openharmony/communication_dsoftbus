@@ -86,7 +86,7 @@ int32_t __attribute__((weak)) RegistNewIpSocket(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ConnInitSockets(void)
+int32_t ConnInitSockets(void)
 {
     int32_t ret = SoftBusMutexInit(&g_socketsMutex, NULL);
     if (ret != SOFTBUS_OK) {
@@ -114,13 +114,13 @@ NO_SANITIZE("cfi") int32_t ConnInitSockets(void)
     return ret;
 }
 
-NO_SANITIZE("cfi") void ConnDeinitSockets(void)
+void ConnDeinitSockets(void)
 {
     (void)memset_s(g_socketInterfaces, sizeof(g_socketInterfaces), 0, sizeof(g_socketInterfaces));
     (void)SoftBusMutexDestroy(&g_socketsMutex);
 }
 
-NO_SANITIZE("cfi") int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
+int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
 {
     if (option == NULL || bindAddr == NULL) {
         return SOFTBUS_ERR;
@@ -175,7 +175,7 @@ static int WaitEvent(int fd, short events, int timeout)
     }
     return rc;
 }
-NO_SANITIZE("cfi") int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
+int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
 {
     if (fd < 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -198,7 +198,7 @@ NO_SANITIZE("cfi") int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     return fcntl(fd, F_SETFL, flags);
 }
 
-NO_SANITIZE("cfi") ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
+ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     if (fd < 0 || buf == NULL || len == 0) {
         CLOGE("fd=%d invalid params", fd);
@@ -274,12 +274,12 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
     return rc;
 }
 
-NO_SANITIZE("cfi") ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
+ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
 {
     return OnRecvData(fd, buf, len, timeout, 0);
 }
 
-NO_SANITIZE("cfi") void ConnCloseSocket(int32_t fd)
+void ConnCloseSocket(int32_t fd)
 {
     if (fd >= 0) {
         CLOGI("close fd=%d", fd);
@@ -287,7 +287,7 @@ NO_SANITIZE("cfi") void ConnCloseSocket(int32_t fd)
     }
 }
 
-NO_SANITIZE("cfi") void ConnShutdownSocket(int32_t fd)
+void ConnShutdownSocket(int32_t fd)
 {
     if (fd >= 0) {
         CLOGI("shutdown fd=%d", fd);
@@ -296,12 +296,12 @@ NO_SANITIZE("cfi") void ConnShutdownSocket(int32_t fd)
     }
 }
 
-NO_SANITIZE("cfi") int32_t ConnGetSocketError(int32_t fd)
+int32_t ConnGetSocketError(int32_t fd)
 {
     return SoftBusSocketGetError(fd);
 }
 
-NO_SANITIZE("cfi") int32_t ConnGetLocalSocketPort(int32_t fd)
+int32_t ConnGetLocalSocketPort(int32_t fd)
 {
     const SocketInterface *socketInterface = GetSocketInterface(LNN_PROTOCOL_IP);
     if (socketInterface == NULL) {
@@ -311,7 +311,7 @@ NO_SANITIZE("cfi") int32_t ConnGetLocalSocketPort(int32_t fd)
     return socketInterface->GetSockPort(fd);
 }
 
-NO_SANITIZE("cfi") int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
+int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
 {
     SoftBusSockAddrIn addr;
     if (socketAddr == NULL) {

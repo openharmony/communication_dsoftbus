@@ -277,7 +277,7 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
 #endif
 
 /* This function is used to prompt the metrics returned by FtApiRegEventCallbackFunc() function */
-NO_SANITIZE("cfi") int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
+int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 {
     if (info == nullptr) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "stats info is nullptr");
@@ -325,7 +325,7 @@ NO_SANITIZE("cfi") int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbk
     return 0;
 }
 
-NO_SANITIZE("cfi") void VtpStreamSocket::FillpAppStatistics()
+void VtpStreamSocket::FillpAppStatistics()
 {
     int32_t eventId = TRANS_STREAM_QUALITY_EVENT;
     int16_t tvCount = 1;

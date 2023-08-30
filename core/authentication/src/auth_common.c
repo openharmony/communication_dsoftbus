@@ -51,7 +51,7 @@ static SoftBusMutex g_authLock;
 static SoftBusHandler g_authHandler = { NULL, NULL, NULL };
 
 /* auth handler */
-NO_SANITIZE("cfi") static bool IsAuthHandlerInit(void)
+static bool IsAuthHandlerInit(void)
 {
     if (g_authHandler.looper == NULL || g_authHandler.looper->PostMessage == NULL ||
         g_authHandler.looper->PostMessageDelay == NULL || g_authHandler.looper->RemoveMessageCustom == NULL) {
@@ -61,7 +61,7 @@ NO_SANITIZE("cfi") static bool IsAuthHandlerInit(void)
     return true;
 }
 
-NO_SANITIZE("cfi") static void DelAuthMessage(SoftBusMessage *msg)
+static void DelAuthMessage(SoftBusMessage *msg)
 {
     CHECK_NULL_PTR_RETURN_VOID(msg);
     if (msg->obj != NULL) {
@@ -92,7 +92,7 @@ static SoftBusMessage *NewAuthMessage(const uint8_t *obj, uint32_t size)
     return msg;
 }
 
-NO_SANITIZE("cfi") static void HandleAuthMessage(SoftBusMessage *msg)
+static void HandleAuthMessage(SoftBusMessage *msg)
 {
     CHECK_NULL_PTR_RETURN_VOID(msg);
     EventHandler handler = (EventHandler)(uintptr_t)msg->arg1;
@@ -103,7 +103,7 @@ NO_SANITIZE("cfi") static void HandleAuthMessage(SoftBusMessage *msg)
     handler(msg->obj);
 }
 
-NO_SANITIZE("cfi")
+
 int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, uint32_t size, uint64_t delayMs)
 {
     if (!IsAuthHandlerInit()) {
@@ -124,7 +124,7 @@ int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, ui
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
+static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
 {
     CHECK_NULL_PTR_RETURN_VALUE(msg, SOFTBUS_ERR);
     CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_ERR);
@@ -138,7 +138,7 @@ NO_SANITIZE("cfi") static int32_t CustomFunc(const SoftBusMessage *msg, void *pa
     return info->cmpFunc(msg->obj, info->param);
 }
 
-NO_SANITIZE("cfi") int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param)
+int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param)
 {
     if (!IsAuthHandlerInit()) {
         return SOFTBUS_NO_INIT;
@@ -153,7 +153,7 @@ NO_SANITIZE("cfi") int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc fu
 }
 
 /* auth lock */
-NO_SANITIZE("cfi") bool RequireAuthLock(void)
+bool RequireAuthLock(void)
 {
     if (SoftBusMutexLock(&g_authLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth lock fail.");
@@ -162,7 +162,7 @@ NO_SANITIZE("cfi") bool RequireAuthLock(void)
     return true;
 }
 
-NO_SANITIZE("cfi") void ReleaseAuthLock(void)
+void ReleaseAuthLock(void)
 {
     if (SoftBusMutexUnlock(&g_authLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth unlock fail.");
@@ -170,7 +170,7 @@ NO_SANITIZE("cfi") void ReleaseAuthLock(void)
 }
 
 /* auth config */
-NO_SANITIZE("cfi") bool GetConfigSupportAsServer(void)
+bool GetConfigSupportAsServer(void)
 {
     uint32_t ability = 0;
     if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, (uint8_t *)(&ability), sizeof(ability)) != SOFTBUS_OK) {
@@ -181,7 +181,7 @@ NO_SANITIZE("cfi") bool GetConfigSupportAsServer(void)
 }
 
 /* auth common function */
-NO_SANITIZE("cfi") uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
+uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
 {
     if (buf == NULL || size == 0) {
         return NULL;
@@ -216,7 +216,7 @@ static void UpdateUniqueId(void)
     g_uniqueId = (g_uniqueId << SEQ_TIME_STAMP_BITS) | (SEQ_TIME_STAMP_MASK & timeStamp);
 }
 
-NO_SANITIZE("cfi") int64_t GenSeq(bool isServer)
+int64_t GenSeq(bool isServer)
 {
     static uint32_t integer = 0;
     if (integer >= SEQ_INTEGER_MAX) {
@@ -232,7 +232,7 @@ NO_SANITIZE("cfi") int64_t GenSeq(bool isServer)
     return (int64_t)seq;
 }
 
-NO_SANITIZE("cfi") uint64_t GetCurrentTimeMs(void)
+uint64_t GetCurrentTimeMs(void)
 {
     SoftBusSysTime now = { 0 };
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
@@ -242,12 +242,12 @@ NO_SANITIZE("cfi") uint64_t GetCurrentTimeMs(void)
     return (uint64_t)now.sec * TIME_SEC_TO_MSEC + (uint64_t)now.usec / TIME_MSEC_TO_USEC;
 }
 
-NO_SANITIZE("cfi") const char *GetAuthSideStr(bool isServer)
+const char *GetAuthSideStr(bool isServer)
 {
     return isServer ? "server" : "client";
 }
 
-NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info1, false);
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
@@ -284,7 +284,7 @@ NO_SANITIZE("cfi") bool CompareConnInfo(const AuthConnInfo *info1, const AuthCon
     return false;
 }
 
-NO_SANITIZE("cfi") int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option)
+int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *option)
 {
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(option, SOFTBUS_INVALID_PARAM);
@@ -327,7 +327,7 @@ NO_SANITIZE("cfi") int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, 
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
+int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
@@ -369,7 +369,7 @@ NO_SANITIZE("cfi") int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, Aut
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t AuthCommonInit(void)
+int32_t AuthCommonInit(void)
 {
     g_authHandler.name = "AuthHandler";
     g_authHandler.HandleMessage = HandleAuthMessage;
@@ -382,7 +382,7 @@ NO_SANITIZE("cfi") int32_t AuthCommonInit(void)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void AuthCommonDeinit(void)
+void AuthCommonDeinit(void)
 {
     g_authHandler.looper = NULL;
     g_authHandler.HandleMessage = NULL;

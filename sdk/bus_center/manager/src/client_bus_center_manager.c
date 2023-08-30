@@ -799,7 +799,7 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
     return ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
+int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
@@ -867,7 +867,7 @@ int32_t MetaNodeOnJoinResult(void *addr, const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
+int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
 {
     LeaveLNNCbListItem *item = NULL;
 
@@ -937,7 +937,7 @@ int32_t MetaNodeOnLeaveResult(const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info)
+int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info)
 {
     NodeStateCallbackItem *item = NULL;
     NodeBasicInfo *basicInfo = (NodeBasicInfo *)info;
@@ -975,7 +975,7 @@ NO_SANITIZE("cfi") int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
+int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
 {
     NodeStateCallbackItem *item = NULL;
     NodeBasicInfo *basicInfo = (NodeBasicInfo *)info;
@@ -1012,7 +1012,7 @@ NO_SANITIZE("cfi") int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t LnnOnTimeSyncResult(const void *info, int retCode)
+int32_t LnnOnTimeSyncResult(const void *info, int retCode)
 {
     TimeSyncCallbackItem *item = NULL;
     TimeSyncResultInfo *basicInfo = (TimeSyncResultInfo *)info;
@@ -1044,21 +1044,21 @@ NO_SANITIZE("cfi") int32_t LnnOnTimeSyncResult(const void *info, int retCode)
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") void LnnOnPublishLNNResult(int32_t publishId, int32_t reason)
+void LnnOnPublishLNNResult(int32_t publishId, int32_t reason)
 {
     if (g_busCenterClient.publishCb.OnPublishResult != NULL) {
         g_busCenterClient.publishCb.OnPublishResult(publishId, (PublishResult)reason);
     }
 }
 
-NO_SANITIZE("cfi") void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
+void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
 {
     if (g_busCenterClient.refreshCb.OnDiscoverResult != NULL) {
         g_busCenterClient.refreshCb.OnDiscoverResult(refreshId, (RefreshResult)reason);
     }
 }
 
-NO_SANITIZE("cfi") void LnnOnRefreshDeviceFound(const void *device)
+void LnnOnRefreshDeviceFound(const void *device)
 {
     if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
         g_busCenterClient.refreshCb.OnDeviceFound((const DeviceInfo *)device);
