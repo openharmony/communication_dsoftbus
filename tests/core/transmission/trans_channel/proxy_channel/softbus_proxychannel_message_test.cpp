@@ -34,6 +34,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 #define FAST_TRANS_DATASIZE 256
+#define FAST_ARRAY_SIZE 1024
 #define TEST_AUTH_DECRYPT_SIZE 35
 #define TEST_CHANNEL_IDENTITY_LEN 33
 #define TEST_BASE_ENCODE_LEN 32
@@ -967,5 +968,82 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Le
     msg.msgHead.cipher = 1;
     int32_t ret = GetAuthIdByHandshakeMsg(msg.connId, msg.msgHead.cipher);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: TransProxyUnpackInnerHandshakeMsgTest001
+  * @tc.desc: test trans proxy unpack inner handshakemsg.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest001, TestSize.Level1)
+{
+    char msg[FAST_TRANS_DATASIZE] = {
+        "{\
+            \"ESSION_KEY\": \"sdadad\",\
+            \"ENCRYPT\": 30,\
+            \"MY_HANDLE_ID\": 22,\
+            \"PEER_HANDLE_ID\": 25,\
+        }"
+    };
+    cJSON *root = cJSON_ParseWithLength(msg, FAST_TRANS_DATASIZE);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    int32_t ret = TransProxyUnpackInnerHandshakeMsg(root, appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: TransProxyUnpackNormalHandshakeMsgTest001
+  * @tc.desc: test trans proxy unpack inner handshakemsg.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest001, TestSize.Level1)
+{
+    char msg[FAST_ARRAY_SIZE] = {
+        "{\
+            \"SESSION_KEY\": \"sdadad\",\
+            \"PKG_NAME\": \"fdfdf\",\
+            \"ENCRYPT\": 30,\
+            \"MY_HANDLE_ID\": 55,\
+            \"PEER_HANDLE_ID\": 69,\
+            \"UID\": 111,\
+            \"PID\": 5331,\
+            \"ALGORITHM\": 66,\
+            \"CRC\": 58,\
+            \"BUSINESS_TYPE\": 4,\
+            \"GROUP_ID\": \"10.11.11.11\",\
+        }"
+    };
+    cJSON *root = cJSON_ParseWithLength(msg, FAST_TRANS_DATASIZE);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(root, appInfo, sessionKey, BASE64KEY);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: UnpackPackHandshakeMsgForFastDataTest001
+  * @tc.desc: test unpack pack handshakemsg for fastdata.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest001, TestSize.Level1)
+{
+    char msg[FAST_TRANS_DATASIZE] = {
+        "{\
+            \"ROUTE_TYPE\": 2,\
+            \"FIRST_DATA\": \"10.11.11.11\",\
+            \"FIRST_DATA_SIZE\": 256,\
+        }"
+    };
+    cJSON *root = cJSON_ParseWithLength(msg, FAST_TRANS_DATASIZE);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
+    appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
+    appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+    int32_t ret = UnpackPackHandshakeMsgForFastData(appInfo, root);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
