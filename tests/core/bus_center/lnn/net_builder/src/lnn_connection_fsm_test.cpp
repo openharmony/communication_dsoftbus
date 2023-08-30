@@ -300,8 +300,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_POST_PC_ONLINE_UNIQUELY_TEST_001, TestSize.Le
     info = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(info != nullptr);
     info->deviceInfo.deviceTypeId = TYPE_PC_ID;
-    (void)memcpy_s(info->networkId, NETWORK_ID_BUF_LEN, PEERUID, SHA_256_HEX_HASH_LEN);
-    (void)memcpy_s(info->deviceInfo.deviceUdid, NETWORK_ID_BUF_LEN, PEERUID1, SHA_256_HEX_HASH_LEN);
+    (void)memcpy_s(info->networkId, NETWORK_ID_BUF_LEN, NETWORKID1, NETWORK_ID_BUF_LEN);
+    (void)memcpy_s(info->deviceInfo.deviceUdid, NETWORK_ID_BUF_LEN, NETWORKID1, NETWORK_ID_BUF_LEN);
     PostPcOnlineUniquely(info);
     info->deviceInfo.deviceTypeId = TYPE_IPCAMERA_ID;
     PostPcOnlineUniquely(info);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "lnn_net_capability.h"
 #include "lnn_node_info.h"
 #include "lnn_net_builder.h"
+#include <securec.h>
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
@@ -69,7 +70,8 @@ static void HandlePeerNetCapchanged(const char *networkId, uint32_t capability)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "only support close ble");
         return;
     }
-    NodeInfo info = {0};
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
         LLOGE("get node info fail");
         return;
@@ -86,7 +88,8 @@ static void HandlePeerNetCapchanged(const char *networkId, uint32_t capability)
 
 static void UpdateNetworkInfo(const char *udid)
 {
-    NodeBasicInfo basic = {0};
+    NodeBasicInfo basic;
+    (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetBasicInfoByUdid fail");
         return;
@@ -113,7 +116,8 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "capability:%d", capability);
     // update ledger
-    NodeInfo info = {0};
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
         LLOGE("get node info fail");
         return;
@@ -133,7 +137,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
 static uint8_t *ConvertCapabilityToMsg(uint32_t localCapability)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert capability to msg enter");
-    uint8_t *arr = SoftBusCalloc(MSG_LEN);
+    uint8_t *arr = (uint8_t *)SoftBusCalloc(MSG_LEN);
     if (arr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert capability to msg calloc msg fail");
         return NULL;
@@ -176,8 +180,9 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         SoftBusFree(msg);
         return;
     }
-    NodeInfo nodeInfo = {0};
-    for (int32_t i = 0; i< infoNum; i++) {
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (int32_t i = 0; i < infoNum; i++) {
         if (LnnIsLSANode(&netInfo[i])) {
             continue;
         }
@@ -369,7 +374,7 @@ static bool IsSupportApCoexist(const char *coexistCap)
                 continue;
             }
 
-            enum WifiDirectApiRole mode = 0;
+            enum WifiDirectApiRole mode = WIFI_DIRECT_API_ROLE_NONE;
             if (!GetJsonObjectInt32Item(subItem, "MODE", (int32_t *)&mode)) {
                 LLOGE("%s get mode failed", interface);
                 continue;
