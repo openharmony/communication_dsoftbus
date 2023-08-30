@@ -491,6 +491,14 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     int32_t ret = FindAuthRequestByConnInfo(&connInfo, &request);
     EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    uint32_t requestId = 1;
+    ret = GetAuthRequestNoLock(requestId, &request);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    ret = FindAndDelAuthRequestByConnInfo(requestId, &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    int32_t result = 1;
+    int64_t authId = 10;
+    PerformAuthConnCallback(requestId, result, authId);
 }
 
 /*
@@ -572,7 +580,7 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEIVED_TEST_001, TestSize.Level1)
     uint32_t connectionId = 0;
     ConnModule moduleId = MODULE_DEVICE_AUTH;
     int64_t seq = 0;
-    char *data = (char *)malloc(1024);
+    char *data = reinterpret_cast<char *>(malloc(1024));
     const int SEND_DATA_SIZE_1KB = 1024;
     ASSERT_NE(data, nullptr);
     const char *testData = "{\"data\":\"open session test!!!\"}";
@@ -653,7 +661,7 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
     ConnModule moduleId = MODULE_DEVICE_AUTH;
     int64_t seq = 0;
     int32_t len = 0;
-    char *data = (char *)malloc(1024);
+    char *data = reinterpret_cast<char *>(malloc(1024));
     ASSERT_NE(data, nullptr);
     OnCommDataReceived(connectionId, moduleId, seq, data, len);
 
@@ -781,17 +789,438 @@ HWTEST_F(AuthOtherTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
     if (info == NULL) {
         return;
     }
-
     info->requestId = 1;
     info->connId = 1;
     info->isServer = false;
     info->version = SOFTBUS_NEW_V1;
-
     info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     int32_t ret = PostDeviceIdV1(authSeq, info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     FsmStateMachine *fsm = NULL;
     AuthFsmDeinitCallback(fsm);
     SoftBusFree(info);
+}
+
+/*
+ * @tc.name: FSM_MSG_TYPE_TO_STR_TEST_001
+ * @tc.desc: fsm msg type to str test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, FSM_MSG_TYPE_TO_STR_TEST_001, TestSize.Level1)
+{
+    int32_t type = FSM_MSG_UNKNOWN;
+    const char *str = "UNKNOWN MSG!!";
+    char *ret = FsmMsgTypeToStr(type);
+    EXPECT_EQ(ret, str);
+    type = -1;
+    ret = FsmMsgTypeToStr(type);
+    EXPECT_EQ(ret, str);
+    type = FSM_MSG_RECV_DEVICE_ID;
+    ret = FsmMsgTypeToStr(type);
+    const char *str1= "RECV_DEVICE_ID";
+    EXPECT_EQ(ret, str1);
+}
+
+/*
+ * @tc.name: AUTH_MANAGER_SET_SESSION_KEY_TEST_001
+ * @tc.desc: fsm msg type to str test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    AuthSessionInfo *info = (AuthSessionInfo*)SoftBusCalloc(sizeof(AuthSessionInfo));
+    if (info == NULL) {
+        return;
+    }
+    info->requestId = 1;
+    info->isServer = false;
+    info->connInfo.type = AUTH_LINK_TYPE_WIFI;
+    SessionKey *sessionKey = (SessionKey*)SoftBusCalloc(sizeof(SessionKey));
+    if (info == NULL) {
+        return;
+    }
+    sessionKey->len = 0;
+    int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AuthManagerGetSessionKey(authSeq, info, sessionKey);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    AuthManagerSetAuthPassed(authSeq, info);
+    AuthManagerSetAuthFinished(authSeq, info);
+    info->isServer = true;
+    info->connInfo.type = AUTH_LINK_TYPE_BLE;
+    AuthManagerSetAuthFinished(authSeq, info);
+    SoftBusFree(sessionKey);
+    SoftBusFree(info);
+}
+
+/*
+ * @tc.name: AUTH_DEVICE_CLOSE_CONN_TEST_001
+ * @tc.desc: fsm msg type to str test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
+{
+    int64_t authId = 111;
+    AuthDeviceCloseConn(authId);
+    AuthTransData *dataInfo = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    if (dataInfo == NULL) {
+        return;
+    }
+    int32_t ret = AuthDevicePostTransData(authId, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    dataInfo->module = 1;
+    dataInfo->seq = 2;
+    dataInfo->flag = 0;
+    ret = AuthDevicePostTransData(authId, dataInfo);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+    SoftBusFree(dataInfo);
+}
+
+/*
+ * @tc.name: AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001
+ * @tc.desc: fsm msg type to str test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001, TestSize.Level1)
+{
+    const char *uuid = "";
+    int32_t ret = AuthDeviceGetPreferConnInfo(uuid, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    AuthConnInfo *connInfo =(AuthConnInfo*)SoftBusCalloc(sizeof(AuthConnInfo));
+    if (connInfo == NULL) {
+        return;
+    }
+    ret = AuthDeviceGetPreferConnInfo(NULL, connInfo);
+    connInfo->type = AUTH_LINK_TYPE_BLE;
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    SoftBusFree(connInfo); 
+}
+
+/*
+ * @tc.name: AUTH_DEVICE_CHECK_CONN_INFO_TEST_001
+ * @tc.desc: fsm msg type to str test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_DEVICE_CHECK_CONN_INFO_TEST_001, TestSize.Level1)
+{
+    const char *uuid = "test66";
+    AuthLinkType type = AUTH_LINK_TYPE_WIFI;
+    bool checkConnection = false;
+    bool ret = AuthDeviceCheckConnInfo(uuid, type, checkConnection);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001
+ * @tc.desc: sync deviceInfo state process test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, TestSize.Level1)
+{
+    AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
+    ASSERT_TRUE(authFsm != nullptr);
+    authFsm->info.connInfo.type = (AuthLinkType)(AUTH_LINK_TYPE_WIFI - 1);
+    ReportAuthResultEvt(authFsm, 0);
+
+    authFsm->info.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    SoftBusLinkType ret = ConvertAuthLinkTypeToHisysEvtLinkType(AUTH_LINK_TYPE_WIFI);
+    EXPECT_TRUE(ret == SOFTBUS_HISYSEVT_LINK_TYPE_WLAN);
+
+    authFsm->info.connInfo.type = AUTH_LINK_TYPE_BR;
+    ret = ConvertAuthLinkTypeToHisysEvtLinkType(AUTH_LINK_TYPE_BR);
+    EXPECT_TRUE(ret == SOFTBUS_HISYSEVT_LINK_TYPE_BR);
+
+    authFsm->info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    ret = ConvertAuthLinkTypeToHisysEvtLinkType(AUTH_LINK_TYPE_BLE);
+    EXPECT_TRUE(ret == SOFTBUS_HISYSEVT_LINK_TYPE_BLE);
+
+    authFsm->info.connInfo.type = AUTH_LINK_TYPE_P2P;
+    ret = ConvertAuthLinkTypeToHisysEvtLinkType(AUTH_LINK_TYPE_P2P);
+    EXPECT_TRUE(ret == SOFTBUS_HISYSEVT_LINK_TYPE_P2P);
+
+    ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_SEND_FAIL);
+    ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
+    ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
+    ReportAuthResultEvt(authFsm, 11);
+    int32_t  ret1 = RecoveryDeviceKey(authFsm);
+    EXPECT_TRUE(ret1 == SOFTBUS_ERR);
+    AuthSessionInfo authSessionInfo;
+    authSessionInfo.requestId = 11;
+    authSessionInfo.isServer= false;
+    authSessionInfo.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    const char *udid = "1111";
+    (void)strcpy_s(authSessionInfo.udid, UDID_BUF_LEN, udid);
+    authFsm->info = authSessionInfo;
+    authFsm->authSeq = 512;
+    const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    ASSERT_TRUE(data != nullptr);
+    MessagePara *para = NewMessagePara(data, 1024);
+    HandleMsgRecvDeviceInfo(authFsm, para);
+    authSessionInfo.isServer= true;
+    HandleMsgRecvDeviceInfo(authFsm, para);
+    SoftBusFree(authFsm);
+}
+
+/*
+ * @tc.name: POST_MESSAGE_TO_AUTH_FSM_TEST_001
+ * @tc.desc: post message to auth fsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
+{
+    int32_t msgType = 1;
+    int64_t authSeq = 0;
+    const uint8_t *data = (const uint8_t *)malloc(sizeof(uint8_t));
+    ASSERT_TRUE(data != nullptr);
+    uint32_t len = 0;
+    int32_t ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    len = 1024;
+    ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: AUTH_FSM_TEST_001
+ * @tc.desc: authSession handle device disconnected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
+{
+    uint64_t connId = 111;
+    bool isServer = true;
+    AuthFsm* ret = GetAuthFsmByConnId(connId, isServer);
+    EXPECT_TRUE(ret == NULL);
+    int32_t ret1 = AuthSessionHandleDeviceDisconnected(connId);
+    EXPECT_TRUE(ret1 == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: AUTH_RESTORE_MANAGER_TEST_001
+ * @tc.desc: authRestore authManager test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
+{
+    AuthConnInfo *connInfo =(AuthConnInfo*)SoftBusCalloc(sizeof(AuthConnInfo));
+    if (connInfo == NULL) {
+        return;
+    }
+    connInfo->type = AUTH_LINK_TYPE_BLE;
+    int32_t requestId = 1;
+    NodeInfo *nodeInfo = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
+    ASSERT_TRUE(nodeInfo != nullptr);
+    int64_t *authId = (int64_t *)malloc(sizeof(int64_t));
+    int32_t ret = AuthRestoreAuthManager(NULL, connInfo, requestId, nodeInfo, authId);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    const char *udidHash = "1234uuid";
+    ret = AuthRestoreAuthManager(udidHash, NULL, requestId, nodeInfo, authId);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, NULL, authId);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    const char *udidHash1 = "testudidhashpass";
+    ret = AuthRestoreAuthManager(udidHash1, connInfo, requestId, nodeInfo, authId);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    SoftBusFree(connInfo);
+    SoftBusFree(nodeInfo);
+}
+
+/*
+ * @tc.name: COMPLEMENT_CONNECTION_INFO_TEST_001
+ * @tc.desc: complement connectionInfo ifNeed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, COMPLEMENT_CONNECTION_INFO_TEST_001, TestSize.Level1)
+{
+    AuthManager *auth = (AuthManager*)SoftBusCalloc(sizeof(AuthManager));
+    ASSERT_TRUE(auth != nullptr);
+    auth->connInfo.type = AUTH_LINK_TYPE_P2P;
+
+    int32_t ret = ComplementConnectionInfoIfNeed(auth, "test");
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    auth->connInfo.type = AUTH_LINK_TYPE_BLE;
+    ret = ComplementConnectionInfoIfNeed(auth, "");
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    
+    ret = ComplementConnectionInfoIfNeed(auth, NULL);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: COVERT_AUTH_LINKTYPE_TO_CONNECT_TEST_001
+ * @tc.desc: Convert authLinkType to connect test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, COVERT_AUTH_LINKTYPE_TO_CONNECT_TEST_001, TestSize.Level1)
+{
+    AuthLinkType type = AUTH_LINK_TYPE_WIFI;
+    ConnectionAddrType ret = ConvertAuthLinkTypeToConnect(type);
+    EXPECT_TRUE(ret == CONNECTION_ADDR_WLAN);
+    type = AUTH_LINK_TYPE_BLE;
+    ret = ConvertAuthLinkTypeToConnect(type);
+    EXPECT_TRUE(ret == CONNECTION_ADDR_BLE);
+    type = AUTH_LINK_TYPE_BR;
+    ret = ConvertAuthLinkTypeToConnect(type);
+    EXPECT_TRUE(ret == CONNECTION_ADDR_BR);
+}
+
+/*
+ * @tc.name: GET_PEER_UDID_BY_NETWORK_ID_TEST_001
+ * @tc.desc: get peer udid by networkId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
+{
+    const char *networkId = "testudid";
+    int32_t ret = GetPeerUdidByNetworkId(networkId, NULL);
+    char udid[UDID_BUF_LEN] = {0};
+    ret = GetPeerUdidByNetworkId(NULL, udid);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = GetPeerUdidByNetworkId(networkId, udid);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: GET_LATEST_ID_BY_CONNINFO_TEST_001
+ * @tc.desc: get latest id by connInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, GET_LATEST_ID_BY_CONNINFO_TEST_001, TestSize.Level1)
+{
+    AuthLinkType type = AUTH_LINK_TYPE_WIFI;
+    int64_t ret = GetLatestIdByConnInfo(NULL, type);
+    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
+    ASSERT_TRUE(connInfo != nullptr);
+    connInfo->type = AUTH_LINK_TYPE_WIFI;
+    const char *ip = "192.168.12.1";
+    (void)strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, ip);
+    ret = GetLatestIdByConnInfo(connInfo, type);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    type = AUTH_LINK_TYPE_BLE;
+    ret = GetLatestIdByConnInfo(connInfo, type);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    SoftBusFree(connInfo);
+}
+
+/*
+ * @tc.name: START_RECONNECT_DEVICE_TEST_001
+ * @tc.desc: start reconnection device test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    AuthConnCallback connCb;
+    int32_t ret = StartReconnectDevice(1, &connInfo, 1, &connCb);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+
+    NodeInfo nodeInfo;
+    ReportAuthRequestPassed(11, 1, &nodeInfo);
+    AuthRequest request;
+    uint64_t connId = 10;
+    int32_t result = 1;
+    HandleReconnectResult(&request, connId, result);
+    request.authId = 10;
+    request.requestId = 11;
+    HandleReconnectResult(&request, connId, result);
+}
+
+/*
+ * @tc.name: AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001
+ * @tc.desc: auth get latest authsed list test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001, TestSize.Level1)
+{
+    int64_t seqList = 1024;
+    uint32_t num = 1;
+    int32_t ret = AuthGetLatestAuthSeqList(NULL, &seqList, num);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    const char *udid = "";
+    ret = AuthGetLatestAuthSeqList(udid, &seqList, num);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    const char *udid1 = "11";
+    ret = AuthGetLatestAuthSeqList(udid1, NULL, num);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthGetLatestAuthSeqList(udid1, &seqList, num);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    num = DISCOVERY_TYPE_COUNT;
+    ret = AuthGetLatestAuthSeqList(udid1, &seqList, num);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+    
+    AuthConnInfo connInfo;
+    AuthDataHead head;
+    uint8_t data = 1;
+    head.flag = 0;
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    uint64_t connId = 11;
+    HandleDeviceInfoData(connId, &connInfo, false, &head, &data);
+    head.flag = 1;
+    HandleDeviceInfoData(connId, &connInfo, false, &head, &data);
+}
+
+
+/*
+ * @tc.name: SYNC_DEVINFO_STATE_PROCESS_TEST_001
+ * @tc.desc: sync deviceInfo state process test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
+{
+    FsmStateMachine *fsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
+    ASSERT_TRUE(fsm != nullptr);
+    int32_t msgType = 1;
+    bool ret = SyncDevInfoStateProcess(fsm, msgType, NULL);
+    EXPECT_TRUE(ret == false);
+    SoftBusFree(fsm);
+    FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
+    ASSERT_TRUE(testFsm != nullptr);
+    testFsm->flag = 1;
+
+    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    EXPECT_TRUE(ret == false);
+
+    msgType = FSM_MSG_AUTH_TIMEOUT;
+    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    EXPECT_TRUE(ret == true);
+    msgType = FSM_MSG_RECV_DEVICE_INFO;
+    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    EXPECT_TRUE(ret == false);
+
+    msgType = FSM_MSG_RECV_CLOSE_ACK;
+    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    EXPECT_TRUE(ret == false);
+
+    msgType = FSM_MSG_RECV_AUTH_DATA;
+    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    EXPECT_TRUE(ret == false);
+    
+    msgType = FSM_MSG_AUTH_FINISH;
+    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    EXPECT_TRUE(ret == false);
+    SoftBusFree(testFsm);
 }
 } // namespace OHOS
