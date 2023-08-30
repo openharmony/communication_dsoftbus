@@ -56,5 +56,19 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     return GetConnectionBrInterface()->AddNumber64ToJsonObject(json, string, num);
 }
 
+cJSON *cJSON_ParseWithLength(const char *data, uint32_t dataLen)
+{
+    return GetConnectionBrInterface()->cJSON_ParseWithLength(data, dataLen);
+}
+
+bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target)
+{
+    return GetConnectionBrInterface()->GetJsonObjectNumberItem(json, string, target);
+}
+
+int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
+{
+    return GetConnectionBrInterface()->SoftBusGetBtMacAddr(mac);
+}
 }
 }
