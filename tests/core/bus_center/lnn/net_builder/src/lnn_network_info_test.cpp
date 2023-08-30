@@ -20,6 +20,7 @@
 #include "lnn_devicename_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_builder.h"
+#include "lnn_network_info.c"
 #include "lnn_network_info.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_service_mock.h"
@@ -39,6 +40,11 @@ using namespace testing;
 constexpr int32_t CHANNELID = 2;
 constexpr uint32_t LEN = 10;
 constexpr char UUID[SHA_256_HEX_HASH_LEN] = "abc";
+constexpr uint8_t MSG[] = "123456BNHFCF";
+constexpr char NETWORKID[] = "ABCDEFG";
+constexpr int32_t TEST_LEN_BITS = 6;
+constexpr int32_t ERR_MSG_LEN = 0;
+
 
 class LNNNetworkInfoTest : public testing::Test {
 public:
@@ -184,5 +190,83 @@ HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_001, TestSize.Level1)
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
     handler((LnnEventBasicInfo *)&wifiEvent1);
     SoftBusSleepMs(200);
+}
+
+/*
+* @tc.name: CONVERT_MSG_TO_CAPABILITY_TEST_001
+* @tc.desc: test ConvertMsgToCapability
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_CAPABILITY_TEST_001, TestSize.Level1)
+{
+    uint32_t capabilty;
+    uint32_t ret = ConvertMsgToCapability(&capabilty, MSG, BITS);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: POST_NETCHAANGED_INFO_TEST_001
+* @tc.desc: test PostNetchangedInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetworkInfoTest, POST_NETCHAANGED_INFO_TEST_001, TestSize.Level1)
+{
+    PostNetchangedInfo(nullptr, CONNECTION_ADDR_ETH);
+}
+
+/*
+* @tc.name: ON_RECEIVE_CAPA_SYNC_INFO_MSG_TEST_001
+* @tc.desc: test OnReceiveCapaSyncInfoMsg
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetworkInfoTest, ON_RECEIVE_CAPA_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
+{
+    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CONNECTION_INFO, nullptr, nullptr, TEST_LEN_BITS);
+    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, nullptr, nullptr, TEST_LEN_BITS);
+    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, NETWORKID, nullptr, TEST_LEN_BITS);
+    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, ERR_MSG_LEN);
+}
+
+/*
+* @tc.name: IS_P2P_AVAILABLE_TEST_001
+* @tc.desc: test IsP2pAvailable
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
+{
+    bool ret = IsP2pAvailable(true);
+    EXPECT_TRUE(ret == false);
+}
+
+/*
+* @tc.name: WIFI_STATE_EVENT_HANDLER_TEST_002
+* @tc.desc: test WifiStateEventHandler
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_002, TestSize.Level1)
+{
+    LnnEventBasicInfo info = {};
+    WifiStateEventHandler(nullptr);
+    info.event = LNN_EVENT_BT_STATE_CHANGED;
+    WifiStateEventHandler(&info);
+}
+
+/*
+* @tc.name: BT_STATE_CHANGE_EVENT_HANDLER_TEST_001
+* @tc.desc: test BtStateChangeEventHandler
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Level1)
+{
+    LnnEventBasicInfo info = {};
+    BtStateChangeEventHandler(nullptr);
+    info.event = LNN_EVENT_WIFI_STATE_CHANGED;
+    BtStateChangeEventHandler(&info);
 }
 }
