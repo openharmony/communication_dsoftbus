@@ -414,11 +414,6 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
         }
-        if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
-            LLOGE("reauth request repeated");
-            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-            return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-        }
         AuthConnInfo authConn;
         uint32_t requestId = AuthGenRequestId();
         (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
