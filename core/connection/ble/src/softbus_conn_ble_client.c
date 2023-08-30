@@ -483,10 +483,10 @@ static int32_t NotificatedNetHandler(int32_t underlayerHandle, ConnBleConnection
 
 static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t mtuSize, int32_t status)
 {
-    CLOGI("gatt client callback, MTU configured, handle=%d, mtu =%d, status=%d", underlayerHandle, mtuSize, status);
+    CLOGI("gatt client callback, MTU configured, handle=%d, mtu=%d, status=%d", underlayerHandle, mtuSize, status);
     MtuConfiguredContext *ctx = (MtuConfiguredContext *)SoftBusCalloc(sizeof(MtuConfiguredContext));
     if (ctx == NULL) {
-        CLOGE("calloc mtu failed, handle=%d, mtu =%d, status=%d", underlayerHandle, mtuSize, status);
+        CLOGE("calloc mtu failed, handle=%d, mtu=%d, status=%d", underlayerHandle, mtuSize, status);
         return;
     }
     ctx->common.underlayerHandle = underlayerHandle;
@@ -550,7 +550,7 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
         "ble client connection disconnect failed: invalid param, connection is null");
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("lock failed, err=%d", connection->connectionId, status);
+        CLOGE("lock failed, err=%d", status);
         return SOFTBUS_LOCK_ERR;
     }
     int32_t underlayerHandle = connection->underlayerHandle;
