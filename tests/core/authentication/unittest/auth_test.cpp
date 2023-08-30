@@ -70,6 +70,32 @@ void AuthTest::SetUp()
     LOG_INFO("AuthTest start.");
 }
 
+static void OnGroupCreated(const char *groupId, int32_t groupType)
+{
+    (void)groupId;
+    (void)groupType;
+    return;
+}
+
+static void OnGroupDeleted(const char *groupId)
+{
+    (void)groupId;
+    return;
+}
+
+static void OnDeviceNotTrusted(const char *udid)
+{
+    (void)udid;
+    return;
+}
+
+static void OnDeviceBound(const char *udid, const char *groupInfo)
+{
+    (void)udid;
+    (void)groupInfo;
+    return;
+}
+
 void AuthTest::TearDown() {}
 
 /*
@@ -93,11 +119,17 @@ HWTEST_F(AuthTest, AUTH_COMMON_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
 {
     int32_t ret;
-    const TrustDataChangeListener listener = { 0 };
+    const TrustDataChangeListener listener = {
+        .onGroupCreated = OnGroupCreated,
+        .onGroupDeleted = OnGroupDeleted,
+        .onDeviceNotTrusted = OnDeviceNotTrusted,
+        .onDeviceBound = OnDeviceBound,
+    };
 
     ret = RegTrustDataChangeListener(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)RegTrustDataChangeListener(&listener);
+    ret = RegTrustDataChangeListener(&listener);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -319,6 +351,9 @@ HWTEST_F(AuthTest, AUTH_SESSION_HANDLE_DEVICE_NOT_TRUSTED_Test_001, TestSize.Lev
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthSessionHandleDeviceNotTrusted(udid);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    const char *udid1 = "";
+    ret = AuthSessionHandleDeviceNotTrusted(udid1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -540,7 +575,7 @@ HWTEST_F(AuthTest, START_SOCKET_LISTENING_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, SOCKET_CONNECT_DEVICE_Test_001, TestSize.Level1)
 {
-    const char *ip = "192.168.12.1";
+    const char *ip = "***.***.**.*";
     int32_t port = 22;
     bool isBlockMode = true;
 
@@ -608,7 +643,7 @@ HWTEST_F(AuthTest, REGAUTH_CHANNEL_LISTENER_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, AUTH_OPRN_CHANNEL_Test_001, TestSize.Level1)
 {
-    const char *ip = "192.168.12.1";
+    const char *ip = "***.***.**.*";
     int32_t port = 1;
     int32_t ret;
 
@@ -1407,6 +1442,9 @@ HWTEST_F(AuthTest, CONVERT_TO_AUTH_CONNINFO_Test_001, TestSize.Level1)
     info.socketInfo.protocol = LNN_PROTOCOL_IP;
     ret = ConvertToAuthConnInfo(&info, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    info.socketInfo.protocol = LNN_PROTOCOL_BR;
+    ret = ConvertToAuthConnInfo(&info, &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     info.type = CONNECT_BR;
     ret = ConvertToAuthConnInfo(&info, &connInfo);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -1461,7 +1499,7 @@ HWTEST_F(AuthTest, CONNECT_AUTH_DEVICE_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, AUTH_START_LISTENING_Test_001, TestSize.Level1)
 {
-    const char *ip = "192.168.12.1";
+    const char *ip = "***.***.**.*";
     int32_t port = 22;
     int32_t ret;
 
@@ -1559,6 +1597,16 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     AuthConnInfo *connInfo = nullptr;
     int32_t ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, connInfo, false, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    AuthConnInfo authConnInfo;
+    authConnInfo.type = AUTH_LINK_TYPE_WIFI;
+    constexpr char NODE1_BR_MAC[] = "12345TTU";
+    const char *ip = "***.***.**.*";
+    (void)strcpy_s(authConnInfo.info.brInfo.brMac, BT_MAC_LEN, NODE1_BR_MAC);
+    authConnInfo.info.ipInfo.port = 20;
+    authConnInfo.info.ipInfo.authId = 1024;
+    (void)strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, ip);
+    ret = AuthSessionStartAuth(GenSeq(false), requestId, connId, &authConnInfo, false, true);
+    EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
 }
 
 /*
