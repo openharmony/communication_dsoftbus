@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -499,6 +499,26 @@ int32_t LnnInitOffline(void)
 void LnnDeinitOffline(void)
 {
     return GetNetBuilderDepsInterface()->LnnDeinitOffline();
+}
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
+bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetNetBuilderDepsInterface()->LnnHasDiscoveryType(info, type);
+}
+
+const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+{
+    return GetNetBuilderDepsInterface()->LnnConvertDLidToUdid(id, type);
+}
+
+int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
+{
+    return GetNetBuilderDepsInterface()->GetAuthRequest(requestId, request);
 }
 
 } // extern "C"
