@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,8 @@ constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";
 constexpr uint16_t PORT = 1000;
 constexpr char PEERUID[MAX_ACCOUNT_HASH_LEN] = "021315ASD";
 constexpr uint8_t MSG[] = "123456BNHFCF";
+constexpr int64_t AUTH_ID = 10;
+constexpr uint32_t REQUEST_ID = 10;
 
 namespace OHOS {
 using namespace testing::ext;
@@ -343,7 +345,7 @@ HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
         .info.ip.port = PORT
     };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
-    uint32_t requestId = 0;
+    uint32_t requestId;
     uint32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = FindRequestIdByAddr(nullptr, &requestId);
@@ -363,11 +365,9 @@ HWTEST_F(LNNNetBuilderTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level0
         .info.ip.port = PORT
     };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
-    NodeInfo *info = nullptr;
-    uint32_t requestId = 0;
     int32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    info = FindNodeInfoByRquestId(requestId);
+    NodeInfo *info = FindNodeInfoByRquestId(REQUEST_ID);
     EXPECT_TRUE(info == nullptr);
 }
 
@@ -385,19 +385,36 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
     };
     (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, IP);
     NodeInfo *info = nullptr;
-    NodeInfo info1 = {};
-    uint32_t requestId = 0;
-    int64_t authId = 123456;
+    NodeInfo info1;
     int32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
-    authVerifyCallback->onVerifyPassed(requestId, authId, info);
-    authVerifyCallback->onVerifyPassed(requestId, authId, &info1);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);
     authVerifyCallback = LnnGetMetaVerifyCallback();
-    authVerifyCallback->onVerifyPassed(requestId, authId, info);
-    authVerifyCallback->onVerifyPassed(requestId, authId, &info1);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);
+    authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_OK);
     authVerifyCallback = LnnGetReAuthVerifyCallback();
-    authVerifyCallback->onVerifyPassed(requestId, authId, info);
-    authVerifyCallback->onVerifyPassed(requestId, authId, &info1);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);
+    authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_OK);
+    authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
+}
+
+/*
+* @tc.name: LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001
+* @tc.desc: lnn notify auth handle leave lnn test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001, TestSize.Level0)
+{
+    int32_t ret = LnnNotifyAuthHandleLeaveLNN(AUTH_ID);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnInitNetBuilder();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnNotifyAuthHandleLeaveLNN(AUTH_ID);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
