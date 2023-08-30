@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
+#include "auth_request.h"
 namespace OHOS {
 class NetBuilderDepsInterface {
 public:
@@ -150,6 +151,10 @@ public:
     virtual void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal);
     virtual int32_t LnnInitOffline(void);
     virtual void LnnDeinitOffline(void);
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
+    virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type);
+    virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
+    virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -245,6 +250,10 @@ public:
     MOCK_METHOD3(LnnNotifyNodeAddressChanged, void (const char *, const char *, bool));
     MOCK_METHOD0(LnnInitOffline, int32_t ());
     MOCK_METHOD0(LnnDeinitOffline, void ());
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
+    MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
+    MOCK_METHOD2(GetAuthRequest, int32_t (uint32_t, AuthRequest *));
 
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
