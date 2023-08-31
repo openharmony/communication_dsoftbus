@@ -17,15 +17,12 @@
 #define CONNECTION_BR_MOCK_H
 
 #include <gmock/gmock.h>
-#include <mutex>
 #include "cJSON.h"
 
-#include "disc_interface.h"
-#include "message_handler.h"
-#include "softbus_adapter_bt_common.h"
-#include "softbus_common.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_config_type.h"
-#include "softbus_conn_br_connection.h"
+#include "softbus_def.h"
+#include "softbus_adapter_bt_common.h"
 
 namespace OHOS {
 class ConnectionBrInterface {
@@ -36,6 +33,9 @@ public:
     virtual bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target) = 0;
     virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int num) = 0;
     virtual bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num) = 0;
+    virtual cJSON *cJSON_ParseWithLength(const char *data, uint32_t dataLen) = 0;
+    virtual bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target) = 0;
+    virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
 };
 
 class ConnectionBrInterfaceMock : public ConnectionBrInterface {
@@ -46,6 +46,9 @@ public:
     MOCK_METHOD3(GetJsonObjectNumber64Item, bool (const cJSON *, const char * const, int64_t *));
     MOCK_METHOD3(AddNumberToJsonObject, bool (cJSON *, const char * const, int));
     MOCK_METHOD3(AddNumber64ToJsonObject, bool (cJSON *, const char * const, int64_t));
+    MOCK_METHOD2(cJSON_ParseWithLength, cJSON* (const char *, uint32_t));
+    MOCK_METHOD3(GetJsonObjectNumberItem, bool (const cJSON *, const char * const, int *));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int (SoftBusBtAddr *));
 };
 } // namespace OHOS
 #endif // CONNECTION_BR_MOCK_H
