@@ -37,7 +37,10 @@ group("unittest") {
     deps += [ "tcp:TcpManagerTest" ]
   }
   if (softbus_communication_wifi_feature) {
-    deps += [ "wifi_direct:unittest" ]
+    deps += [
+      "wifi_direct:WifiDirectTest",
+      "wifi_direct/adapter/single:unittest",
+    ]
   }
 }
 
