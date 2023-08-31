@@ -20,6 +20,7 @@
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
 #include "wifi_direct_initiator.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_disc_server.h"
@@ -112,6 +113,7 @@ void InitSoftBusServer(void)
         goto ERR_EXIT;
     }
 
+    SoftBusBtInit();
     g_isInit = true;
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus framework init success.");
     return;
