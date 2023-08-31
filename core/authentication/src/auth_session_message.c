@@ -290,7 +290,7 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
         return;
     }
     ALOGD("udidHashHexStr:%s", udidHashHexStr);
-    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false)) {
+    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, true)) {
         ALOGI("not potential trusted realtion, bypass fastAuthProc");
         info->isSupportFastAuth = false;
         return;
@@ -365,7 +365,7 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
         ALOGE("udid hash bytes to hexString fail");
         return;
     }
-    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidShortHash, false)) {
+    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidShortHash, false, true)) {
         ALOGI("not potential trusted realtion, fastAuth not support");
         return;
     }

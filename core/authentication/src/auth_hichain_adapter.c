@@ -15,7 +15,6 @@
 
 #include "auth_hichain_adapter.h"
 
-#include <regex.h>
 #include <stdlib.h>
 #include <string.h>
 #include <securec.h>
@@ -23,19 +22,24 @@
 #include "auth_common.h"
 #include "auth_hichain.h"
 #include "auth_session_fsm.h"
+#include "bus_center_manager.h"
 #include "device_auth.h"
 #include "device_auth_defines.h"
-#include "lnn_decision_db.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+#include "softbus_json_utils.h"
 #include "softbus_log.h"
 
-#define UDID_REGEX_PATTERN "[0-9A-Fa-f]{16,}"
-#define CUST_UDID_LEN 16
 #define AUTH_APPID "softbus_auth"
+#define GROUP_ID "groupId"
+#define GROUP_TYPE "groupType"
+#define AUTH_ID "authId"
 #define RETRY_TIMES 16
 #define RETRY_MILLSECONDS 500
+#define SAME_ACCOUNT_GROUY_TYPE 1
 static const GroupAuthManager *g_hichain = NULL;
+#define CUST_UDID_LEN 16
 
 static const GroupAuthManager *InitHichain(void)
 {
@@ -135,40 +139,38 @@ void DestroyDeviceAuth(void)
     ALOGI("hichain destroy succ");
 }
 
-bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise)
+static bool IsTrustedDeviceInAGroup(const DeviceGroupManager *gmInstance, int32_t accountId,
+    const char *groupId, const char *deviceId)
 {
-    (void)idType;
-    (void)isPrecise;
-    AUTH_CHECK_AND_RETURN_RET_LOG(deviceId != NULL, false, "invalid param");
-
-    uint32_t num = 0;
-    char *udidArray = NULL;
-    if (LnnGetTrustedDevInfoFromDb(&udidArray, &num) != SOFTBUS_OK) {
-        ALOGE("get trusted dev info fail");
+    uint32_t deviceNum = 0;
+    char *returnDevInfoVec = NULL;
+    if (gmInstance->getTrustedDevices(accountId, AUTH_APPID, groupId, &returnDevInfoVec, &deviceNum) != SOFTBUS_OK) {
+        gmInstance->destroyInfo(&returnDevInfoVec);
+        ALOGE("GetTrustedDevices fail");
         return false;
     }
-    if (udidArray == NULL || num == 0) {
-        ALOGI("get none trusted node");
+    if (deviceNum == 0) {
+        gmInstance->destroyInfo(&returnDevInfoVec);
+        ALOGI("GetTrustedDevices zero");
         return false;
     }
-    regex_t regComp;
-    if (regcomp(&regComp, UDID_REGEX_PATTERN, REG_EXTENDED | REG_NOSUB) != 0) {
-        ALOGE("get trusted dev udid regcomp fail");
-        SoftBusFree(udidArray);
-        return true;
+    cJSON *devJson = cJSON_Parse(returnDevInfoVec);
+    if (devJson == NULL) {
+        gmInstance->destroyInfo(&returnDevInfoVec);
+        ALOGE("parse json fail");
+        return false;
     }
-    for (uint32_t i = 0; i < num; i++) {
-        char udidSubStr[UDID_BUF_LEN] = {0};
-        char hashStr[CUST_UDID_LEN + 1] = {0};
-        uint8_t udidHash[SHA_256_HASH_LEN] = {0};
-        if (regexec(&regComp, udidArray + i * UDID_BUF_LEN, 0, NULL, 0) != 0) {
+    int32_t devArraySize = cJSON_GetArraySize(devJson);
+    for (int32_t j = 0; j < devArraySize; j++) {
+        cJSON *devItem = cJSON_GetArrayItem(devJson, j);
+        char authId[UDID_BUF_LEN] = {0};
+        if (!GetJsonObjectStringItem(devItem, AUTH_ID, authId, UDID_BUF_LEN)) {
+            ALOGE("AUTH_ID not found");
             continue;
         }
-        if (memcpy_s(udidSubStr, UDID_BUF_LEN, udidArray + i * UDID_BUF_LEN, UDID_BUF_LEN) != EOK) {
-            ALOGE("memcpy_s udidSubStr fail");
-            break;
-        }
-        if (SoftBusGenerateStrHash((const unsigned char *)udidSubStr, strlen(udidSubStr), udidHash) != SOFTBUS_OK) {
+        uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+        char hashStr[CUST_UDID_LEN + 1] = {0};
+        if (SoftBusGenerateStrHash((const unsigned char *)authId, strlen(authId), udidHash) != SOFTBUS_OK) {
             continue;
         }
         if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash,
@@ -176,14 +178,85 @@ bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId
             continue;
         }
         if (strncmp(hashStr, deviceId, strlen(deviceId)) == 0) {
-            SoftBusFree(udidArray);
-            regfree(&regComp);
+            cJSON_Delete(devJson);
+            gmInstance->destroyInfo(&returnDevInfoVec);
             return true;
         }
     }
-    SoftBusFree(udidArray);
-    regfree(&regComp);
+    cJSON_Delete(devJson);
+    gmInstance->destroyInfo(&returnDevInfoVec);
     return false;
+}
+
+static bool HasTrustedRelationWithLocalDevice(const DeviceGroupManager *gmInstance, int32_t accountId,
+    char *localUdid, const char *deviceId, bool isPointToPoint)
+{
+    uint32_t groupNum = 0;
+    char *returnGroupVec = NULL;
+    if (gmInstance->getRelatedGroups(accountId, AUTH_APPID, localUdid, &returnGroupVec, &groupNum) != SOFTBUS_OK) {
+        ALOGE("GetRelatedGroups fail");
+        gmInstance->destroyInfo(&returnGroupVec);
+        return false;
+    }
+    if (groupNum == 0) {
+        ALOGI("GetRelatedGroups zero");
+        gmInstance->destroyInfo(&returnGroupVec);
+        return false;
+    }
+    cJSON *groupJson = cJSON_Parse(returnGroupVec);
+    if (groupJson == NULL) {
+        ALOGE("parse json fail");
+        gmInstance->destroyInfo(&returnGroupVec);
+        return false;
+    }
+    int32_t groupArraySize = cJSON_GetArraySize(groupJson);
+    for (int32_t i = 0; i < groupArraySize; i++) {
+        cJSON *groupItem = cJSON_GetArrayItem(groupJson, i);
+        char groupId[UDID_BUF_LEN] = {0};
+        if (isPointToPoint) {
+            int groupType = 0;
+            if ((GetJsonObjectNumberItem(groupItem, GROUP_TYPE, &groupType) && groupType == SAME_ACCOUNT_GROUY_TYPE)) {
+                ALOGI("ignore same account group");
+                continue;
+            }
+        }
+        if (!GetJsonObjectStringItem(groupItem, GROUP_ID, groupId, UDID_BUF_LEN)) {
+            ALOGE("GROUP_ID not found");
+            continue;
+        }
+        if (IsTrustedDeviceInAGroup(gmInstance, accountId, groupId, deviceId)) {
+            cJSON_Delete(groupJson);
+            gmInstance->destroyInfo(&returnGroupVec);
+            return true;
+        }
+    }
+    cJSON_Delete(groupJson);
+    gmInstance->destroyInfo(&returnGroupVec);
+    return false;
+}
+
+bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint)
+{
+    (void)idType;
+    (void)isPrecise;
+    const DeviceGroupManager *gmInstance = GetGmInstance();
+    if (gmInstance == NULL) {
+        ALOGE("hichain GetGmInstance failed");
+        return false;
+    }
+
+    int32_t accountId = GetActiveOsAccountIds();
+    if (accountId <= 0) {
+        ALOGE("accountId is invalid");
+        return false;
+    }
+
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        ALOGE("get udid fail");
+        return false;
+    }
+    return HasTrustedRelationWithLocalDevice(gmInstance, accountId, localUdid, deviceId, isPointToPoint);
 }
 
 uint32_t HichainGetJoinedGroups(int32_t groupType)

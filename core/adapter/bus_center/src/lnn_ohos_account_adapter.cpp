@@ -15,6 +15,7 @@
 
 #include "lnn_ohos_account_adapter.h"
 #include "ohos_account_kits.h"
+#include "os_account_manager.h"
 #include "securec.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
@@ -79,4 +80,16 @@ int64_t GetCurrentAccount(void)
     }
 
     return account;
+}
+
+int32_t GetActiveOsAccountIds(void)
+{
+    std::vector<int32_t> accountId;
+    int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountId);
+    if (ret != SOFTBUS_OK) {
+        LLOGE("QueryActiveOsAccountIds failed");
+        return SOFTBUS_ERR;
+    }
+    LLOGI("GetActiveOsAccountIds is[%d]", accountId[0]);
+    return accountId[0];
 }

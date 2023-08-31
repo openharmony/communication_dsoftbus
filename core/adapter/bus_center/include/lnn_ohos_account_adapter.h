@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len);
 int64_t GetCurrentAccount(void);
+int32_t GetActiveOsAccountIds(void);
 
 #ifdef __cplusplus
 }
