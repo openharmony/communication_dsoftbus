@@ -83,7 +83,8 @@ public:
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual bool LnnIsDefaultOhosAccount(void) = 0;
-    virtual bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise) = 0;
+    virtual bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId,
+        bool isPrecise, bool isPointToPoint) = 0;
     virtual bool LnnIsPotentialHomeGroup(const char *udid) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t LnnRegisterBleLpDeviceMediumMgr(void) = 0;
@@ -143,7 +144,8 @@ public:
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
-    MOCK_METHOD3(IsPotentialTrustedDevice, bool (TrustedRelationIdType idType, const char *deviceId, bool isPrecise));
+    MOCK_METHOD4(IsPotentialTrustedDevice, bool (TrustedRelationIdType idType, const char *deviceId,
+        bool isPrecise, bool isPointToPoint));
     MOCK_METHOD1(LnnIsPotentialHomeGroup, bool (const char *udid));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
     MOCK_METHOD0(LnnRegisterBleLpDeviceMediumMgr, int32_t (void));

@@ -1476,11 +1476,13 @@ ohos_unittest("LNNTransLaneMockTest") {
 ohos_unittest("LNNDiscoveryInterfaceTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_hichain_adapter.c",
     "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_interface.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_file_utils.c",
+    "$dsoftbus_root_path/tests/core/authentication/unittest/auth_common_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/bus_center_mock.cpp",
     "disc_mgr/disc_manager_mock.cpp",
     "disc_mgr/lnn_discovery_interface_test.cpp",
@@ -1512,11 +1514,15 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
     "//base/security/device_auth/interfaces/inner_api",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//third_party/bounds_checking_function/include",
+    "//base/security/device_auth/interfaces/inner_api",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]

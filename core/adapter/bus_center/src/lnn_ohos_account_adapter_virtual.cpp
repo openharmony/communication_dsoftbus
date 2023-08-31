@@ -15,6 +15,7 @@
 
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_error_code.h"
+#define ACCOUNT_ID 1
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 {
@@ -24,4 +25,9 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 int64_t GetCurrentAccount(void)
 {
     return 0;
+}
+
+int32_t GetActiveOsAccountIds(void)
+{
+    return ACCOUNT_ID;
 }

@@ -87,4 +87,10 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     return GetCommonInterface()->LnnGetTrustedDevInfoFromDb(udidArray, num);
 }
 }
+
+int32_t GetActiveOsAccountIds(void)
+{
+    return GetCommonInterface()->GetActiveOsAccountIds();
+}
+
 } // namespace OHOS
