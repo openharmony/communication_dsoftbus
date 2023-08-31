@@ -24,6 +24,7 @@
 #include "lnn_net_ledger_mock.h"
 #include "lnn_node_info.h"
 #include "lnn_p2p_info.h"
+#include "lnn_p2p_info.c"
 #include "lnn_service_mock.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_trans_mock.h"
@@ -48,6 +49,12 @@ constexpr int32_t CHANNELID1 = 1;
 constexpr int32_t CHANNELID2 = 2;
 constexpr uint32_t LEN = 65;
 constexpr char UUID[65] = "abc";
+constexpr char NETWORKID[NETWORK_ID_BUF_LEN] = "345678BNHFCF";
+constexpr int32_t ERR_MSG_LEN = 0;
+constexpr int32_t OK_MSG_LEN = 13;
+constexpr uint8_t MSG[] = "123456BNHFCF";
+constexpr int32_t PARSE_P2P_INFO_MSG_LEN = 256;
+
 
 static char *GetP2pInfoMsgTest(const P2pInfo *info)
 {
@@ -131,6 +138,9 @@ HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
 
     int32_t ret = LnnInitLocalP2pInfo(&info);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = LnnInitLocalP2pInfo(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(netLedgerMock, LnnSetP2pRole(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = LnnInitLocalP2pInfo(&info);
@@ -228,5 +238,65 @@ HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
     ret = LnnSyncP2pInfo();
     SoftBusSleepMs(50);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_PARSE_P2P_INFO_MSG_TEST_001
+ * @tc.desc: test LnnParseP2pInfoMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNP2pInfoTest, LNN_PARSE_P2P_INFO_MSG_TEST_001, TestSize.Level1)
+{
+    char msg[PARSE_P2P_INFO_MSG_LEN] = "{\"P2P_ROLE\":1234}";
+    P2pInfo info = {};
+    int32_t ret = LnnParseP2pInfoMsg(msg, &info, 0);
+    EXPECT_TRUE(ret == SOFTBUS_PARSE_JSON_ERR);
+
+    (void)strcpy_s(msg, sizeof(msg), "{\"WIFI_CFG\":1234}");
+    ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234}");
+    ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\"}");
+    ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
+    "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\"}");
+    ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
+        "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\", \"STA_FREQUENCY\":2008}");
+    ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    (void)strcpy_s(msg, sizeof(msg), "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
+        "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\", \"STA_FREQUENCY\":2008, \"P2P_MAC\":\"P2P_MAC\"}");
+    ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+
+    (void)strcpy_s(msg, sizeof(msg),  "{\"P2P_ROLE\":1234, \"WIFI_CFG\":\"wifi_cgf\", "\
+        "\"CHAN_LIST_5G\":\"CHAN_LIST_5G\",\"STA_FREQUENCY\":2008, \"P2P_MAC\":\"P2P_MAC\", \"GO_MAC\":\"GO_MAC\"}");
+    ret = LnnParseP2pInfoMsg(msg, &info, strlen(msg) + 1);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_RECEIVE_P2P_SYNC_INFO_MSG_TEST_001
+ * @tc.desc: test OnReceiveP2pSyncInfoMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_P2P_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
+{
+    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_OFFLINE, NETWORKID, MSG, ERR_MSG_LEN);
+    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, NETWORKID, nullptr, ERR_MSG_LEN);
+    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, NETWORKID, MSG, ERR_MSG_LEN);
+    OnReceiveP2pSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, nullptr, MSG, OK_MSG_LEN);
 }
 } // namespace OHOS
