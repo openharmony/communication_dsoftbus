@@ -25,7 +25,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <cstring>
 
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
@@ -61,7 +60,6 @@
 #include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
 #include "wifi_direct_role_option.h"
-#include "wifi_direct_defines.h"
 
 using namespace testing::ext;
 
@@ -164,6 +162,24 @@ HWTEST_F(WifiDirectCoexist, WifiDirectCoexistRule005, TestSize.Level1)
 */
 HWTEST_F(WifiDirectCoexist, WifiDirectCoexistRule006, TestSize.Level1)
 {
+    struct WifiDirectCoexistRule *self = GetWifiDirectCoexistRule();
+    self->bypass = true;
+    ListNode sortList;
+    ListInit(&sortList);
+    bool status =  GetWifiDirectCoexistRule()->isCombinationAvailable(&sortList);
+    EXPECT_EQ(status, true);
+};
+
+/*
+* @tc.name: WifiDirectCoexistRule007
+* @tc.desc: test setCoexistRule with different value
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectCoexist, WifiDirectCoexistRule007, TestSize.Level1)
+{
+    struct WifiDirectCoexistRule *self = GetWifiDirectCoexistRule();
+    self->bypass = false;
     ListNode sortList;
     ListInit(&sortList);
     bool status =  GetWifiDirectCoexistRule()->isCombinationAvailable(&sortList);

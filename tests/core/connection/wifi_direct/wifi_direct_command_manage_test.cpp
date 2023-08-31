@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <cstring>
 
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
@@ -41,7 +40,6 @@
 #include "wifi_direct_fast_connect.h"
 #include "wifi_direct_initiator.h"
 #include "wifi_direct_work_queue.h"
-#include "wifi_direct_command_manager.h"
 #include "wifi_direct_timer_list.h"
 #include "default_negotiate_channel.h"
 #include "fast_connect_negotiate_channel.h"
@@ -58,7 +56,6 @@
 #include "wifi_direct_ip_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_types.h"
-#include "wifi_direct_negotiator.h"
 #include "negotiate_state.h"
 #include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
@@ -96,7 +93,7 @@ void WifiDirectCommandManagerTest::TearDown(void)
 * @tc.name: WifiDirectCommandManager
 * @tc.desc: test TcpGetConnNum
 * @tc.type: FUNC
-* @tc.require:wifi_direct\wifi_direct_command_manager.h
+* @tc.require:
 */
 HWTEST_F(WifiDirectCommandManagerTest, WifiDirectCommandManager001, TestSize.Level1)
 {
@@ -113,7 +110,7 @@ HWTEST_F(WifiDirectCommandManagerTest, WifiDirectCommandManager001, TestSize.Lev
 * @tc.name: WifiDirectCommandManager
 * @tc.desc: test GenerateWifiDirectConnectCommand
 * @tc.type: FUNC
-* @tc.require:wifi_direct\wifi_direct_command_manager.h
+* @tc.require:
 */
 HWTEST_F(WifiDirectCommandManagerTest, WifiDirectCommandManager002, TestSize.Level1)
 {
@@ -134,7 +131,7 @@ HWTEST_F(WifiDirectCommandManagerTest, WifiDirectCommandManager002, TestSize.Lev
 * @tc.name: WifiDirectCommandManager
 * @tc.desc: test GenerateWifiDirectDisconnectCommand
 * @tc.type: FUNC
-* @tc.require:wifi_direct\wifi_direct_command_manager.h
+* @tc.require:
 */
 HWTEST_F(WifiDirectCommandManagerTest, WifiDirectCommandManager003, TestSize.Level1)
 {

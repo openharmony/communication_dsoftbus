@@ -33,6 +33,7 @@ ohos_unittest("WifiDirectTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct/negotiate_state",
     "$dsoftbus_root_path/core/common/softbus_property/include",
     "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
@@ -63,6 +64,8 @@ ohos_unittest("WifiDirectTest") {
     "wifi_direct_initiator_test.cpp",
     "wifi_direct_ip_manager_test.cpp",
     "wifi_direct_negotiator_test.cpp",
+    "wifi_direct_role_negotiator_test.cpp",
+    "wifi_direct_role_option_test.cpp",
     "wifi_direct_test.cpp",
   ]
 }
