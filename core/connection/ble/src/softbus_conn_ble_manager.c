@@ -1124,7 +1124,7 @@ static bool ConnectionCompareByAddress(ConnBleConnection *connection, const BleC
     return StrCmpIgnoreCase(connection->addr, option->addressOption.addr) == 0 &&
         (option->addressOption.side == CONN_SIDE_ANY ? true : connection->side == option->addressOption.side) &&
         ((BleProtocolType)option->addressOption.protocol == BLE_PROTOCOL_ANY ? true :
-            connection->protocol == option->addressOption.protocol);
+            connection->protocol == (BleProtocolType)option->addressOption.protocol);
 }
 
 static bool ConnectionCompareByUnderlayHandle(ConnBleConnection *connection, const BleConnectionCompareOption *option)
@@ -1134,7 +1134,7 @@ static bool ConnectionCompareByUnderlayHandle(ConnBleConnection *connection, con
                 true :
                 connection->side == option->underlayerHandleOption.side) &&
         ((BleProtocolType)option->underlayerHandleOption.protocol == BLE_PROTOCOL_ANY ? true :
-        connection->protocol == option->underlayerHandleOption.protocol);
+        connection->protocol == (BleProtocolType)option->underlayerHandleOption.protocol);
 }
 
 static bool ConnectionCompareByUdidDiffAddress(ConnBleConnection *connection, const BleConnectionCompareOption *option)
@@ -1143,7 +1143,7 @@ static bool ConnectionCompareByUdidDiffAddress(ConnBleConnection *connection, co
     return StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0 &&
         IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
         ((BleProtocolType)option->udidAddressOption.protocol == BLE_PROTOCOL_ANY ? true :
-        connection->protocol == option->udidAddressOption.protocol);
+        connection->protocol == (BleProtocolType)option->udidAddressOption.protocol);
 }
 
 static bool ConnectionCompareByUdidClientSide(ConnBleConnection *connection, const BleConnectionCompareOption *option)
