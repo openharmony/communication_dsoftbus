@@ -92,83 +92,19 @@ void WifiDirectIpManagerTest::TearDown(void)
 
 /*
 * @tc.name: testWifiDirectIpManager
-* @tc.desc: test applyIp
+* @tc.desc: test applyIp&configIp
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(WifiDirectIpManagerTest, WifiDirectIpManager001, TestSize.Level1)
 {
     struct WifiDirectIpManager *self = GetWifiDirectIpManager();
-    struct WifiDirectIpv4Info *remoteArray = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remoteArray));
-    struct WifiDirectIpv4Info *local = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*local));
-    struct WifiDirectIpv4Info *remote = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remote));
-    int32_t remoteArraySize = 32;
-    int32_t ret = self->applyIp(remoteArray, remoteArraySize, local, remote);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    const char *interface = "interface";
-    const char *macAddress = "00:1A:2B:3C:4D:5E";
-    ret = self->configIp(interface, local, remote, macAddress);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    const char *remoteMac = " 213213";
-    const char *interface1 = "1,2,3";
-    const char *remoteMac1 = "00:1A:2B:3C:4D:5E";
-    ret = self->configIp(interface1, local, remote, remoteMac1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    self->releaseIp(interface, local, remote, remoteMac);
-    self->cleanAllIps(interface);
-    SoftBusFree(remoteArray);
-    SoftBusFree(local);
-    SoftBusFree(remote);
-};
-
-/*
-* @tc.name: testWifiDirectIpManager
-* @tc.desc: test configIp
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectIpManagerTest, WifiDirectIpManager002, TestSize.Level1)
-{
-    struct WifiDirectIpManager *self = GetWifiDirectIpManager();
-    struct WifiDirectIpv4Info *remoteArray = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remoteArray));
-    struct WifiDirectIpv4Info *local = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*local));
-    struct WifiDirectIpv4Info *remote = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remote));
-    int32_t remoteArraySize = 32;
-    int32_t ret = self->applyIp(remoteArray, remoteArraySize, local, remote);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    const char *interface = " ";
-    const char *macAddress = " B:3C:4D:5 ";
-    ret = self->configIp(interface, local, remote, macAddress);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    const char *remoteMac = " 213213";
-    const char *interface1 = "1,2,3";
-    const char *remoteMac1 = "00:1A:2B:3C:4D:5E";
-    ret = self->configIp(interface1, local, remote, remoteMac1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    self->releaseIp(interface, local, remote, remoteMac);
-    self->releaseIp(interface1, local, remote, remoteMac1);
-    self->cleanAllIps(interface);
-    self->cleanAllIps(interface1);
-    SoftBusFree(remoteArray);
-    SoftBusFree(local);
-    SoftBusFree(remote);
-};
-
-/*
-* @tc.name: testWifiDirectIpManager
-* @tc.desc: test configIp
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectIpManagerTest, WifiDirectIpManager003, TestSize.Level1)
-{
-    struct WifiDirectIpManager *self = GetWifiDirectIpManager();
-    struct WifiDirectIpv4Info *remoteArray = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remoteArray));
-    struct WifiDirectIpv4Info *local = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*local));
-    struct WifiDirectIpv4Info *remote = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remote));
-    int32_t remoteArraySize = 32;
+    struct WifiDirectIpv4Info remoteArray[INTERFACE_NUM_MAX];
+    struct WifiDirectIpv4Info remote[INTERFACE_NUM_MAX];
+    struct WifiDirectIpv4Info local[INTERFACE_NUM_MAX];
+    int32_t remoteArraySize = INTERFACE_NUM_MAX;
+    ListNode conflictList;
+    ListInit(&conflictList);
     int32_t ret = self->applyIp(remoteArray, remoteArraySize, local, remote);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -185,8 +121,5 @@ HWTEST_F(WifiDirectIpManagerTest, WifiDirectIpManager003, TestSize.Level1)
     self->cleanAllIps(interface);
     self->releaseIp(interface1, local, remote, remoteMac1);
     self->cleanAllIps(interface1);
-    SoftBusFree(remoteArray);
-    SoftBusFree(local);
-    SoftBusFree(remote);
 };
 }

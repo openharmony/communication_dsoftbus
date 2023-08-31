@@ -164,10 +164,9 @@ HWTEST_F(WifiDirectCoexist, WifiDirectCoexistRule005, TestSize.Level1)
 */
 HWTEST_F(WifiDirectCoexist, WifiDirectCoexistRule006, TestSize.Level1)
 {
-    struct WifiDirectCoexistRule *self = GetWifiDirectCoexistRule();
-    struct ListNode *comb = nullptr;
-    bool status =  self->isCombinationAvailable(comb);
+    ListNode sortList;
+    ListInit(&sortList);
+    bool status =  GetWifiDirectCoexistRule()->isCombinationAvailable(&sortList);
     EXPECT_EQ(status, true);
-    SoftBusFree(comb);
 };
 }
