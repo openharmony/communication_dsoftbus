@@ -184,7 +184,7 @@ int32_t ConnGattServerStartService(void)
         return status;
     }
     SoftBusBtUuid uuid = {
-        .uuid = (char *)(SOFTBUS_SERVICE_UUID),
+        .uuid = (char *)SOFTBUS_SERVICE_UUID,
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     status = SoftBusGattsAddService(uuid, true, MAX_SERVICE_CHAR_NUM);
@@ -250,7 +250,7 @@ static void BleServiceAddMsgHandler(const ServiceAddMsgContext *ctx)
             break;
         }
         SoftBusBtUuid uuid = {
-            .uuid = (char *)(SOFTBUS_CHARA_BLENET_UUID),
+            .uuid = (char *)SOFTBUS_CHARA_BLENET_UUID,
             .uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
         };
         rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
@@ -360,7 +360,7 @@ static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ct
         }
 
         SoftBusBtUuid uuid = {
-            .uuid = (char *)(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
+            .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
             .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
         };
         rc = SoftBusGattsAddDescriptor(
@@ -464,7 +464,7 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         return rc;
     }
     SoftBusBtUuid uuid = {
-        .uuid = (char *)(SOFTBUS_CHARA_BLECONN_UUID),
+        .uuid = (char *)SOFTBUS_CHARA_BLECONN_UUID,
         .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
     };
     rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,

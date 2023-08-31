@@ -135,12 +135,12 @@ static ConnectCallback g_connectCallback = { 0 };
 
 static char *BleNameAvailableState(void)
 {
-    return "avaible state";
+    return (char *)("avaible state");
 }
 
 static char *BleNameConnectingState(void)
 {
-    return "connectting state";
+    return (char *)("connectting state");
 }
 
 static void BleEnterAvailableState(void)
@@ -197,7 +197,7 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
 
 static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectRequestContext *ctx)
 {
-    ConnBleRequest *request = SoftBusCalloc(sizeof(ConnBleRequest));
+    ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
     if (request == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -212,7 +212,7 @@ static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectReque
 
 static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestContext *ctx)
 {
-    ConnBleDevice *device = SoftBusCalloc(sizeof(ConnBleDevice));
+    ConnBleDevice *device = (ConnBleDevice *)SoftBusCalloc(sizeof(ConnBleDevice));
     if (device == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -885,7 +885,7 @@ static void ReceivedControlData(ConnBleConnection *connection, const uint8_t *da
 
 static int32_t BleReuseConnectionCommon(const char *udid, const char *anomizeAddress, ProtocolType protocol)
 {
-    ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, protocol);
+    ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, (BleProtocolType)protocol);
     if (connection == NULL) {
         return SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR;
     }
@@ -954,7 +954,7 @@ static void BleReuseConnectionRequestOnConnectingState(const ConnBleReuseConnect
     }
 
     // merge connect request
-    ConnBleRequest *request = SoftBusCalloc(sizeof(ConnBleRequest));
+    ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
     if (request == NULL) {
         ctx->waitResult->result = SOFTBUS_MALLOC_ERR;
         sem_post(&ctx->waitResult->wait);
@@ -1327,7 +1327,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_CONNECT_REQUEST: {
-            ConnBleConnectRequestContext *ctx = msg->obj;
+            ConnBleConnectRequestContext *ctx = (ConnBleConnectRequestContext *)msg->obj;
             if (g_bleManager.state->connectRequest != NULL) {
                 g_bleManager.state->connectRequest(ctx);
                 return;
@@ -1349,7 +1349,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_CONNECT_FAIL: {
-            BleStatusContext *ctx = msg->obj;
+            BleStatusContext *ctx = (BleStatusContext *)msg->obj;
             if (g_bleManager.state->clientConnectFailed != NULL) {
                 g_bleManager.state->clientConnectFailed(ctx->connectionId, ctx->status);
                 return;
@@ -1364,7 +1364,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_DATA_RECEIVED: {
-            ConnBleDataReceivedContext *ctx = msg->obj;
+            ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)msg->obj;
             if (g_bleManager.state->dataReceived != NULL) {
                 g_bleManager.state->dataReceived(ctx);
                 return;
@@ -1372,7 +1372,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_CONNECTION_CLOSED: {
-            BleStatusContext *ctx = msg->obj;
+            BleStatusContext *ctx = (BleStatusContext *)msg->obj;
             if (g_bleManager.state->connectionClosed != NULL) {
                 g_bleManager.state->connectionClosed(ctx->connectionId, ctx->status);
                 return;
@@ -1394,7 +1394,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_REUSE_CONNECTION_REQUEST: {
-            ConnBleReuseConnectionContext *ctx = msg->obj;
+            ConnBleReuseConnectionContext *ctx = (ConnBleReuseConnectionContext *)msg->obj;
             if (g_bleManager.state->reuseConnectionRequest != NULL) {
                 g_bleManager.state->reuseConnectionRequest(ctx);
                 return;
@@ -1402,7 +1402,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_PREVENT_TIMEOUT: {
-            char *udid = msg->obj;
+            char *udid = (char *)msg->obj;
             if (g_bleManager.state->preventTimeout != NULL) {
                 g_bleManager.state->preventTimeout(udid);
                 return;
@@ -1410,7 +1410,7 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case BLE_MGR_MSG_RESET: {
-            BleStatusContext *ctx = msg->obj;
+            BleStatusContext *ctx = (BleStatusContext *)msg->obj;
             if (g_bleManager.state->reset != NULL) {
                 g_bleManager.state->reset(ctx->status);
                 return;
@@ -1480,7 +1480,8 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udidHashStr);
 
-    ConnBleConnectRequestContext *ctx = SoftBusCalloc(sizeof(ConnBleConnectRequestContext));
+    ConnBleConnectRequestContext *ctx =
+        (ConnBleConnectRequestContext *)SoftBusCalloc(sizeof(ConnBleConnectRequestContext));
     CONN_CHECK_AND_RETURN_RET_LOG(ctx != NULL, SOFTBUS_MEM_ERR,
         "calloc connect request context object failed: reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress,
         anomizeUdid);
@@ -1634,7 +1635,7 @@ void OnConnected(uint32_t connectionId)
 void OnConnectFailed(uint32_t connectionId, int32_t error)
 {
     CLOGW("receive ble client connect failed notify, connId=%u, err=%d", connectionId, error);
-    BleStatusContext *ctx = SoftBusCalloc(sizeof(BleStatusContext));
+    BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = error;
@@ -1643,7 +1644,7 @@ void OnConnectFailed(uint32_t connectionId, int32_t error)
 
 void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
 {
-    ConnBleDataReceivedContext *ctx = SoftBusCalloc(sizeof(ConnBleDataReceivedContext));
+    ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)SoftBusCalloc(sizeof(ConnBleDataReceivedContext));
     if (ctx == NULL) {
         CLOGE("calloc data received context failed, connId=%u, conn characteristic=%d, data len=%u", connectionId,
             isConnCharacteristic, dataLen);
@@ -1665,7 +1666,7 @@ void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *d
 
 void OnConnectionClosed(uint32_t connectionId, int32_t status)
 {
-    BleStatusContext *ctx = SoftBusCalloc(sizeof(BleStatusContext));
+    BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = status;
@@ -1708,7 +1709,7 @@ static void OnBtStateChanged(int listenerId, int state)
     if (state == SOFTBUS_BT_STATE_TURN_OFF) {
         status = ConnBleStopServer();
         CLOGI("ble manager receive bt off event, stop server, status=%d", status);
-        BleStatusContext *ctx = SoftBusCalloc(sizeof(BleStatusContext));
+        BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
         if (ctx == NULL) {
             CLOGE("ble manager receive bt off event, send reset event failed: calloc ctx "
                   "object failed");
@@ -1739,8 +1740,10 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
     CLOGW("conflict reuse connection, receive reuse request, reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress,
         anomizeUdid);
 
-    ConnBleReuseConnectionContext *ctx = SoftBusCalloc(sizeof(ConnBleReuseConnectionContext));
-    ConnBleReuseConnectionWaitResult *waitResult = SoftBusCalloc(sizeof(ConnBleReuseConnectionWaitResult));
+    ConnBleReuseConnectionContext *ctx =
+        (ConnBleReuseConnectionContext *)SoftBusCalloc(sizeof(ConnBleReuseConnectionContext));
+    ConnBleReuseConnectionWaitResult *waitResult =
+        (ConnBleReuseConnectionWaitResult *)SoftBusCalloc(sizeof(ConnBleReuseConnectionWaitResult));
     if (ctx == NULL || waitResult == NULL) {
         CLOGE(
             "calloc reuse connect objects failed, reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress, anomizeUdid);
@@ -1803,7 +1806,7 @@ static bool ConflictPostBytes(int32_t underlayHandle, uint8_t *data, uint32_t da
     ConnBleReturnConnection(&connection);
 
     uint32_t payloadLen = ConnGetHeadSize() + dataLen;
-    uint8_t *payload = SoftBusCalloc(payloadLen);
+    uint8_t *payload = (uint8_t *)SoftBusCalloc(payloadLen);
     CONN_CHECK_AND_RETURN_RET_LOG(payload != NULL, false,
         "conflict post bytes failed: alloc payload failed, underlayer handle=%d", underlayHandle);
 
@@ -1849,7 +1852,7 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
     CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK,
         "ATTENTION UNEXPECTED ERROR! conflict occupy failed: try to lock failed, udid=%s", anomizeUdid);
     do {
-        char *copyUdid = SoftBusCalloc(UDID_BUF_LEN);
+        char *copyUdid = (char *)SoftBusCalloc(UDID_BUF_LEN);
         if (copyUdid == NULL) {
             CLOGE("calloc udid failed, udid=%s", anomizeUdid);
             break;
@@ -1876,7 +1879,7 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
             ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
             break;
         }
-        BlePrevent *prevent = SoftBusCalloc(sizeof(BlePrevent));
+        BlePrevent *prevent = (BlePrevent *)SoftBusCalloc(sizeof(BlePrevent));
         if (prevent == NULL) {
             SoftBusFree(copyUdid);
             CLOGE("calloc prevent object failed, udid=%s", anomizeUdid);

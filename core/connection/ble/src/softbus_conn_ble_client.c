@@ -66,7 +66,7 @@ static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearc
 static ConnBleClientEventListener g_clientEventListener = { 0 };
 static SoftBusHandlerWrapper g_bleGattClientAsyncHandler = {
     .handler = {
-        .name = (char *)"BleGattClientAsyncHandler",
+        .name = (char *)("BleGattClientAsyncHandler"),
         .HandleMessage = BleGattClientMsgHandler,
         // assign when initiation
         .looper = NULL,
@@ -667,9 +667,9 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
 static char *GetBleAttrUuid(int32_t module)
 {
     if (module == MODULE_BLE_NET) {
-        return (char *)SOFTBUS_CHARA_BLENET_UUID;
+        return (char *)(SOFTBUS_CHARA_BLENET_UUID);
     } else {
-        return (char *)SOFTBUS_CHARA_BLECONN_UUID;
+        return (char *)(SOFTBUS_CHARA_BLECONN_UUID);
     }
 }
 
