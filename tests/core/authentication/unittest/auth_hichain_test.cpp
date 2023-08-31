@@ -138,9 +138,9 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
     EXPECT_CALL(authMock, LnnGetTrustedDevInfoFromDb)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise);
+    bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, true);
     EXPECT_TRUE(ret == false);
-    ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise);
+    ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, true);
     EXPECT_TRUE(ret == false);
 }
 } // namespace OHOS

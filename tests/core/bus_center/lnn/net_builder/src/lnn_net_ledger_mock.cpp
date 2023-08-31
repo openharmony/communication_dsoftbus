@@ -448,9 +448,9 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
 {
     return GetNetLedgerInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
-bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise)
+bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint)
 {
-    return GetNetLedgerInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise);
+    return GetNetLedgerInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise, isPointToPoint);
 }
 int32_t LnnRegisterBleLpDeviceMediumMgr(void)
 {
