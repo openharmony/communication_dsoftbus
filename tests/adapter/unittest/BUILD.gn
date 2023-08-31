@@ -353,6 +353,34 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("AdapterWlanExtendTest") {
+    module_out_path = module_output_path
+    sources = [ "softbus_adapter_wlan_extend_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/core/common/include/",
+      "$dsoftbus_root_path/core/bus_center/utils/include/",
+      "$dsoftbus_root_path/adapter/common/net/hdi/include/",
+    ]
+    deps = [
+      "$dsoftbus_root_path/core/frame:softbus_server",
+      "../../../adapter:softbus_adapter",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
   group("unittest") {
     testonly = true
     deps = [
@@ -360,6 +388,7 @@ if (defined(ohos_lite)) {
       ":AdapterDsoftbusOtherTest",
       ":AdapterDsoftbusRangeTest",
       ":AdapterDsoftbusSocketTest",
+      ":AdapterWlanExtendTest",
       ":AdaptorDsoftbusCryptTest",
       ":AdaptorDsoftbusFileTest",
       ":SoftbusThreadTest",
