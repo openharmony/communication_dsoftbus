@@ -458,7 +458,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight,
         LLOGE("HB mgr recv process get invalid param");
         return SOFTBUS_ERR;
     }
-    if (!AuthIsPotentialTrusted(device, true)) {
+    if (!AuthIsPotentialTrusted(device)) {
         LLOGW(">> heartbeat(HB) OnTock is not potential trusted, udidHash:%s, accountHash:%02X%02X",
             AnonymizesUDID(device->devId), device->accountHash[0], device->accountHash[1]);
         return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;

@@ -24,6 +24,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_common_utils.h"
 #include "lnn_feature_capability.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_node_info.h"
 
 namespace OHOS {
@@ -43,6 +44,7 @@ public:
     virtual int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen) = 0;
     virtual int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen) = 0;
     virtual int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num) = 0;
+    virtual int32_t GetActiveOsAccountIds(void) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -58,6 +60,7 @@ public:
     MOCK_METHOD4(LnnEncryptAesGcm, int32_t (AesGcmInputParam *, int32_t, uint8_t **, uint32_t *));
     MOCK_METHOD3(LnnDecryptAesGcm, int32_t (AesGcmInputParam *, uint8_t **, uint32_t *));
     MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t (char **, uint32_t *));
+    MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

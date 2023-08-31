@@ -22,6 +22,7 @@
 #include "lnn_coap_discovery_impl.c"
 #include "lnn_discovery_manager.h"
 #include "lnn_discovery_manager.c"
+#include "lnn_hichain_mock.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 

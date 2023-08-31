@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include "disc_manager.h"
+#include "lnn_ohos_account_adapter.h"
 
 namespace OHOS {
 class DiscManagerInterface {

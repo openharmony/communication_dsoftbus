@@ -46,7 +46,7 @@ int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, Devi
 bool CheckDeviceInGroupByType(const char *udid, const char *uuid, HichainGroup groupType);
 bool CheckHasRelatedGroupInfo(HichainGroup groupType);
 void DestroyDeviceAuth(void);
-bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise);
+bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint);
 void CancelRequest(int64_t authReqId, const char *appId);
 
 #ifdef __cplusplus

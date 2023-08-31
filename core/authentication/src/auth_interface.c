@@ -319,7 +319,7 @@ int32_t AuthGetGroupType(const char *udid, const char *uuid)
     return type;
 }
 
-bool AuthIsPotentialTrusted(const DeviceInfo *device, bool validAccount)
+bool AuthIsPotentialTrusted(const DeviceInfo *device)
 {
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
     DeviceInfo defaultInfo;
@@ -333,19 +333,18 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device, bool validAccount)
         ALOGI("devId is empty");
         return false;
     }
-    if (!validAccount) {
-        return true;
-    }
-    if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false)) {
-        ALOGI("device is potential trusted, continue verify progress");
-        return true;
-    }
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         ALOGE("get local accountHash fail");
         return false;
     }
     if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
         ALOGD("account:%02X%02X is same, continue verify progress", device->accountHash[0], device->accountHash[1]);
+        return true;
+    }
+    bool isDiffAccount =
+        (memcmp(device->accountHash, defaultInfo.accountHash, SHORT_ACCOUNT_HASH_LEN) == 0) ? false : true;
+    if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, isDiffAccount)) {
+        ALOGI("device is potential trusted, continue verify progress");
         return true;
     }
     return false;
