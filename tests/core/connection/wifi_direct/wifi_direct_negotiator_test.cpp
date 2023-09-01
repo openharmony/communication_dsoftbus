@@ -25,7 +25,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <cstring>
 
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
@@ -37,10 +36,10 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "softbus_utils.h"
+#include "wifi_direct_command_manager.h"
 #include "wifi_direct_fast_connect.h"
 #include "wifi_direct_initiator.h"
 #include "wifi_direct_work_queue.h"
-#include "wifi_direct_command_manager.h"
 #include "wifi_direct_timer_list.h"
 #include "default_negotiate_channel.h"
 #include "fast_connect_negotiate_channel.h"
