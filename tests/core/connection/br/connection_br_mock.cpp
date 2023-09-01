@@ -56,9 +56,9 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     return GetConnectionBrInterface()->AddNumber64ToJsonObject(json, string, num);
 }
 
-cJSON *cJSON_ParseWithLength(const char *data, uint32_t dataLen)
+cJSON *cJSON_ParseWithLength(const char *value, size_t buffer_length)
 {
-    return GetConnectionBrInterface()->cJSON_ParseWithLength(data, dataLen);
+    return GetConnectionBrInterface()->cJSON_ParseWithLength(value, buffer_length);
 }
 
 bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target)
