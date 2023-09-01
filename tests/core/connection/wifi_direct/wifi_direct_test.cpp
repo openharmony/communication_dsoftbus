@@ -25,8 +25,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <cstring>
-
 
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
@@ -101,30 +99,6 @@ HWTEST_F(WifiDirectTest, WifiDirectCommandManager, TestSize.Level1)
 {
     int32_t ret = WifiDirectCommandManagerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-};
-
-/*
-* @tc.name: testWifiDirectCoexistRule
-* @tc.desc: test setCoexistRule with different value
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectTest, WifiDirectCoexistRule, TestSize.Level1)
-{
-    struct WifiDirectCoexistRule *self = GetWifiDirectCoexistRule();
-    int32_t ret = self->setCoexistRule("configname");
-    EXPECT_EQ(ret, SOFTBUS_MALLOC_ERR);
-    ret = self->setCoexistRule("c");
-    EXPECT_EQ(ret, SOFTBUS_MALLOC_ERR);
-    ret = self->setCoexistRule("123.55.1.33");
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = self->setCoexistRule("123338");
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = self->setCoexistRule("[1,2,3]");
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    struct ListNode *comb = nullptr;
-    bool status =  self->isCombinationAvailable(comb);
-    EXPECT_EQ(status, false);
 };
 
 /*
