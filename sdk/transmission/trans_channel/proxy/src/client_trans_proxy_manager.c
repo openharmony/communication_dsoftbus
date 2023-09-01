@@ -40,7 +40,7 @@
 #include "trans_server_proxy.h"
 #include "trans_pending_pkt.h"
 
-#define SLICE_LEN (32 * 1024)
+#define SLICE_LEN (4 * 1024)
 #define PROXY_ACK_SIZE 4
 
 static IClientSessionCallBack g_sessionCb;
