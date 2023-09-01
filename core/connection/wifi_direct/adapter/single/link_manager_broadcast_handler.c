@@ -15,6 +15,7 @@
 
 #include "link_manager_broadcast_handler.h"
 #include <string.h>
+#include <securec.h>
 #include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "broadcast_receiver.h"
@@ -31,7 +32,8 @@
 static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
 {
     struct InterfaceInfo *localInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    struct WifiDirectIpv4Info *localIpv4 = localInfo->getRawData(localInfo, II_KEY_IPV4, NULL, NULL);
+    struct WifiDirectIpv4Info *localIpv4 = (struct WifiDirectIpv4Info *)localInfo->getRawData(localInfo,
+        II_KEY_IPV4, NULL, NULL);
 
     if (!groupInfo->isGroupOwner) {
         CLOGI(LOG_LABEL "not group owner");
@@ -50,7 +52,8 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
         return;
     }
 
-    char clientDevicesBuf[MAX_CONNECTED_DEVICE_COUNT][MAC_ADDR_STR_LEN] = {0};
+    char clientDevicesBuf[MAX_CONNECTED_DEVICE_COUNT][MAC_ADDR_STR_LEN];
+    (void)memset_s(clientDevicesBuf, sizeof(clientDevicesBuf), 0, sizeof(clientDevicesBuf));
     char *clientDevices[MAX_CONNECTED_DEVICE_COUNT] = {NULL};
     int32_t clientDeviceSize = MIN(groupInfo->clientDeviceSize, MAX_CONNECTED_DEVICE_COUNT);
     CLOGI(LOG_LABEL "local is group owner, clientDeviceSize=%d", clientDeviceSize);

@@ -146,7 +146,7 @@ static int32_t SetPeerWifiConfigInfo(const char *config)
     CONN_CHECK_AND_RETURN_RET_LOG(config, SOFTBUS_INVALID_PARAM, LOG_LABEL "cfg is null");
     size_t configSize = strlen(config);
     size_t peerCfgLen = configSize + 1;
-    uint8_t *peerCfg = SoftBusCalloc(peerCfgLen);
+    uint8_t *peerCfg = (uint8_t *)SoftBusCalloc(peerCfgLen);
     size_t decLen;
     CONN_CHECK_AND_RETURN_RET_LOG(peerCfg, SOFTBUS_MALLOC_ERR, LOG_LABEL "malloc failed");
 
@@ -390,7 +390,7 @@ static int32_t P2pConnectGroup(char *groupConfigString)
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
 
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
-    int32_t ret = netWorkUtils->splitString(groupConfigString, "\n", configs, &configsSize);
+    int32_t ret = netWorkUtils->splitString(groupConfigString, (char *)"\n", configs, &configsSize);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "split group config failed");
 
     Hid2dConnectConfig connectConfig;
@@ -444,7 +444,8 @@ static int32_t P2pRemoveGroup(const char *interface)
         return SOFTBUS_ERR;
     }
 
-    enum WifiDirectApiRole role = info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE);
+    enum WifiDirectApiRole role = (enum WifiDirectApiRole)info->getInt(info, II_KEY_WIFI_DIRECT_ROLE,
+        WIFI_DIRECT_API_ROLE_NONE);
 
     WifiErrorCode ret;
     if (role == WIFI_DIRECT_API_ROLE_GO) {
