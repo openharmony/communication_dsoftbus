@@ -375,7 +375,7 @@ int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json
     int32_t peerRc = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_DELTA, &delta) ||
         !GetJsonObjectSignedNumberItem(json, KEY_REFERENCE_NUM, &peerRc)) {
-        CLOGE("connection %u: parse delta or ref failed, delta=%d",
+        CLOGE("connection %u: parse delta or ref failed, delta=%d, peerRc=%d",
             connection->connectionId, delta, peerRc);
         return SOFTBUS_PARSE_JSON_ERR;
     }
