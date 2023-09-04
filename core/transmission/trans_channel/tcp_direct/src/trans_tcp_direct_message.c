@@ -667,6 +667,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
 
     char *errDesc = NULL;
     int32_t errCode;
+    int myHandleId;
     if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
         &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
@@ -708,7 +709,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if (conn->appInfo.fastTransDataSize > 0 && conn->appInfo.fastTransData != NULL) {
         NotifyFastDataRecv(conn, channelId);
     }
-    int myHandleId = NotifyNearByUpdateHandleId(channelId);
+    myHandleId = NotifyNearByUpdateHandleId(channelId);
     if (myHandleId != SOFTBUS_ERR) {
         conn->appInfo.myHandleId = myHandleId;
     }
