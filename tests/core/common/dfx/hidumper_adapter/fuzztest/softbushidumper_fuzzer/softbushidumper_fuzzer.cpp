@@ -151,8 +151,11 @@ void SoftBusHiDumperNstackFuzzTest(const uint8_t* data, size_t size)
 
 void SoftBusHiDumperTransFuzzTest(const uint8_t* data, size_t size)
 {
-    SoftBusRegTransVarDump((const char*)data, TransSessionShowInfoFunc);
-    SoftBusRegTransVarDump((const char*)data, TransSessionShowInfoFunc);
+    char tmpDumpVar[SOFTBUS_DUMP_VAR_NAME_LEN] = {0};
+    if (memcpy_s(tmpDumpVar, sizeof(tmpDumpVar) - 1, data, size) != EOK) {
+        return;
+    }
+    SoftBusRegTransVarDump(tmpDumpVar, TransSessionShowInfoFunc);
     SoftBusTransDumpHandlerInit();
     int32_t tmpValue = *(reinterpret_cast<const int *>(data));
     char tmpPkgName[TEST_PKG_NAME_MAX_LEN] = {0};
