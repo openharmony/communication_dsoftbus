@@ -55,7 +55,6 @@ constexpr int32_t OK_MSG_LEN = 13;
 constexpr uint8_t MSG[] = "123456BNHFCF";
 constexpr int32_t PARSE_P2P_INFO_MSG_LEN = 256;
 
-
 static char *GetP2pInfoMsgTest(const P2pInfo *info)
 {
     cJSON *json = cJSON_CreateObject();
