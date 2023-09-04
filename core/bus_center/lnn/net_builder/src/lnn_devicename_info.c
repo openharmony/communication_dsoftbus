@@ -128,7 +128,8 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
         return;
     }
     LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LLOGE("get node info fail");
         return;
@@ -138,13 +139,15 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
 
 static void NotifyDeviceDisplayNameChange(const char *networkId, const char *udid)
 {
-    NodeBasicInfo basic = {0};
+    NodeBasicInfo basic;
+    (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     if (LnnGetBasicInfoByUdid(udid, &basic) != SOFTBUS_OK) {
         LLOGE("GetBasicInfoByUdid fail");
         return;
     }
     LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LLOGE("get node info fail");
         return;
@@ -160,7 +163,8 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         return;
     }
     char displayName[DEVICE_NAME_BUF_LEN] = {0};
-    NodeInfo peerNodeInfo = {0};
+    NodeInfo peerNodeInfo;
+    (void)memset_s(&peerNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &peerNodeInfo) != SOFTBUS_OK) {
         LLOGE("get remote nodeInfo fail");
         return;
@@ -258,7 +262,8 @@ static void HandlerGetDeviceName(const char *deviceName)
 
 static bool IsDeviceNeedSyncNickName(const char *networkId)
 {
-    NodeInfo nodeInfo = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LLOGE("get node info fail");
         return false;
