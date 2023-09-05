@@ -105,10 +105,6 @@ void LnnOnOhosAccountLogout(void)
 {
     return GetNetworkManagerInterface()->LnnOnOhosAccountLogout();
 }
-int strncmp(const char *strDest, const char *strSrc, size_t len)
-{
-    return GetNetworkManagerInterface()->strncmp(strDest, strSrc, len);
-}
 
 int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
