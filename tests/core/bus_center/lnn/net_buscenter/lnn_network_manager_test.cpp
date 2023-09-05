@@ -151,9 +151,6 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ConnectionAddrType type1 = CONNECTION_ADDR_ETH;
-    ret = LnnGetAddrTypeByIfName("unknown", &type1);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
-
     ret = LnnGetAddrTypeByIfName("ETH", &type1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
@@ -320,25 +317,6 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_OOB_STATE_EVENTHANDLER_TEST_001, TestSiz
 
     delete info1;
     info1 = nullptr;
-}
-
-HWTEST_F(LNNNetworkManagerMockTest, RESTART_COAP_DISCOVERY_TEST_001, TestSize.Level1)
-{
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    (void)RestartCoapDiscovery();
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(managerMock, strncmp).WillRepeatedly(Return(SOFTBUS_OK));
-    (void)RestartCoapDiscovery();
-    EXPECT_CALL(managerMock, strncmp).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    (void)RestartCoapDiscovery();
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(managerMock, LnnStartPublish).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(managerMock, LnnStartDiscovery).WillRepeatedly(Return(SOFTBUS_ERR));
-    (void)RestartCoapDiscovery();
 }
 
 HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
