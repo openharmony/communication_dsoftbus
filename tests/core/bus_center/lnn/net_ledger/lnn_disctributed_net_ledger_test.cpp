@@ -646,7 +646,7 @@ HWTEST_F(LNNDisctributedLedgerTest, NOTIFY_MIGRATE_UPGRADE_Test_001, TestSize.Le
     memset_s(info.deviceInfo.deviceUdid, sizeof(info.deviceInfo.deviceUdid), '\0', sizeof(info.deviceInfo.deviceUdid));
     (void)NotifyMigrateUpgrade(&info);
     int32_t ret = LnnUpdateAccountInfo(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_GROUPTYPE_Test_001, TestSize.Level1)
