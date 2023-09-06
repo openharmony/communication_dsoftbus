@@ -22,6 +22,7 @@
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
+#include "softbus_adapter_mem.h"
 
 static SoftBusMutex g_randomLock;
 
@@ -238,21 +239,46 @@ int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
     if (ctx == NULL) {
         return SOFTBUS_DECRYPT_ERR;
     }
+    unsigned char* dstTmp = SoftBusCalloc(EVP_ENCODE_LENGTH(slen));
+    if (dstTmp == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] %{public}s SoftBusCalloc fail.", __func__);
+        EVP_ENCODE_CTX_free(ctx);
+        return SOFTBUS_MEM_ERR;
+    }
     EVP_EncodeInit(ctx);
-    int32_t ret = EVP_EncodeUpdate(ctx, dst, &outlen, src, slen);
+    int32_t ret = EVP_EncodeUpdate(ctx, dstTmp, &outlen, src, slen);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_EncodeUpdate fail.");
         EVP_ENCODE_CTX_free(ctx);
+        SoftBusFree(dstTmp);
         return SOFTBUS_DECRYPT_ERR;
     }
     *olen += outlen;
-    EVP_EncodeFinal(ctx, dst + outlen, &outlen);
+    EVP_EncodeFinal(ctx, dstTmp + outlen, &outlen);
     *olen += outlen;
+
+    if (*olen > dlen) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] %{public}s  invalid dlen: %{public}zu, olen:%{public}zu.", __func__,
+            dlen, *olen);
+        EVP_ENCODE_CTX_free(ctx);
+        SoftBusFree(dstTmp);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    ret = memcpy_s(dst, dlen, dstTmp, *olen);
+    if (ret != EOK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] %{public}s memcpy_s failed.", __func__);
+        EVP_ENCODE_CTX_free(ctx);
+        SoftBusFree(dstTmp);
+        return SOFTBUS_MEM_ERR;
+    }
     if ((*olen > 0) && (dst[*olen - 1] == '\n')) {
         (*olen)--;
         dst[*olen] = 0;
     }
+
     EVP_ENCODE_CTX_free(ctx);
+    SoftBusFree(dstTmp);
     return SOFTBUS_OK;
 }
 
@@ -268,22 +294,46 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
     if (ctx == NULL) {
         return SOFTBUS_DECRYPT_ERR;
     }
+    unsigned char *dstTmp = SoftBusCalloc(EVP_DECODE_LENGTH(slen));
+    if (dstTmp == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] %{public}s SoftBusCalloc fail.", __func__);
+        EVP_ENCODE_CTX_free(ctx);
+        return SOFTBUS_MEM_ERR;
+    }
     EVP_DecodeInit(ctx);
-    int32_t ret = EVP_DecodeUpdate(ctx, dst, &outlen, src, slen);
+    int32_t ret = EVP_DecodeUpdate(ctx, dstTmp, &outlen, src, slen);
     if (ret == -1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeUpdate fail.");
         EVP_ENCODE_CTX_free(ctx);
+        SoftBusFree(dstTmp);
         return SOFTBUS_DECRYPT_ERR;
     }
     *olen += outlen;
-    ret = EVP_DecodeFinal(ctx, dst + outlen, &outlen);
+    ret = EVP_DecodeFinal(ctx, dstTmp + outlen, &outlen);
     if (ret != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] EVP_DecodeFinal fail.");
         EVP_ENCODE_CTX_free(ctx);
+        SoftBusFree(dstTmp);
         return SOFTBUS_DECRYPT_ERR;
     }
     *olen += outlen;
+    if (*olen > dlen) {
+        HILOG_ERROR(
+            SOFTBUS_HILOG_ID, "[TRANS] %{public}s  invalid dlen: %{public}zu, olen:%{public}zu.", __func__, dlen, *olen);
+        EVP_ENCODE_CTX_free(ctx);
+        SoftBusFree(dstTmp);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    ret = memcpy_s(dst, dlen, dstTmp, *olen);
+    if (ret != EOK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "[TRANS] %{public}s memcpy_s failed.", __func__);
+        EVP_ENCODE_CTX_free(ctx);
+        SoftBusFree(dstTmp);
+        return SOFTBUS_MEM_ERR;
+    }
     EVP_ENCODE_CTX_free(ctx);
+    SoftBusFree(dstTmp);
     return SOFTBUS_OK;
 }
 
