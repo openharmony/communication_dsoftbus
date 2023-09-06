@@ -81,6 +81,7 @@ static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, u
 static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "peerMac is %s", AnonymizesMac(peerMac));
     if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "LnnGetNetworkIdByBtMac fail");
         return SOFTBUS_NOT_FIND;
