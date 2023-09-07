@@ -83,5 +83,9 @@ uint32_t AuthGenRequestId(void)
 {
     return HeartBeatStrategyInterface()->AuthGenRequestId();
 }
+int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type)
+{
+    return HeartBeatStrategyInterface()->LnnSetGearModeBySpecificType(callerId, mode, type);
+}
 }
 } // namespace OHOS
