@@ -68,7 +68,7 @@ static void InitHbConditionState(void)
     g_hbConditionState.screenState = SOFTBUS_SCREEN_UNKNOWN;
     g_hbConditionState.lockState = SOFTBUS_SCREEN_LOCK_UNKNOWN;
     // need suit for same account
-    g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
+    g_hbConditionState.accountState = SOFTBUS_ACCOUNT_UNKNOWN;
     g_hbConditionState.backgroundState = SOFTBUS_USER_FOREGROUND;
     g_hbConditionState.nightModeState = SOFTBUS_NIGHT_MODE_UNKNOWN;
     g_hbConditionState.hasTrustedRelation = false;
