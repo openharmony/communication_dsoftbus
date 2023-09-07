@@ -76,24 +76,20 @@ static int32_t GetAvailableBtMac(char *macStr, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t EnableBrSubnet(LnnPhysicalSubnet *subnet)
+static int32_t EnableBtSubnet(LnnPhysicalSubnet *subnet)
 {
     char macStr[BT_MAC_LEN] = {0};
 
     if (subnet->status == LNN_SUBNET_RUNNING) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bt running return ok");
         return SOFTBUS_OK;
     }
     if (GetAvailableBtMac(macStr, sizeof(macStr)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get available bt mac fail");
         return SOFTBUS_ERR;
     }
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "btmac is %s", AnonymizesMac(macStr));
     return LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr);
-}
-
-static int32_t EnableBleSubnet(LnnPhysicalSubnet *subnet)
-{
-    (void)subnet;
-    return SOFTBUS_OK;
 }
 
 static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
@@ -190,11 +186,8 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
     LnnGetNetIfTypeByName(subnet->ifName, &type);
     switch (event) {
         case BT_SUBNET_MANAGER_EVENT_IF_READY:
-            if (type == LNN_NETIF_TYPE_BR) {
-                ret = EnableBrSubnet(subnet);
-            }
-            if (type == LNN_NETIF_TYPE_BLE) {
-                ret = EnableBleSubnet(subnet);
+            if (type == LNN_NETIF_TYPE_BR || type == LNN_NETIF_TYPE_BLE) {
+                ret = EnableBtSubnet(subnet);
             }
             break;
         case BT_SUBNET_MANAGER_EVENT_IF_DOWN:
