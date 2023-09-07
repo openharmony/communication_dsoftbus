@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -273,6 +273,77 @@ ohos_unittest("HeartBeatUtilsTest") {
   }
 }
 
+ohos_unittest("HeartBeatCtrlTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter/lnn_ip_network_impl_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_ctrl_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/core/connection/p2p/common/include",
+    "$dsoftbus_root_path/core/connection/p2p/interface",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/mock",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "device_auth:deviceauth_sdk",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "hilog:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
+  external_deps += [
+    "c_utils:utils",
+    "ipc:ipc_core",
+  ]
+}
+
 ohos_unittest("ClientProxyTest") {
   module_out_path = "dsoftbus/bus_center"
   sources = [
@@ -378,6 +449,7 @@ group("unittest") {
   deps = [
     ":BusCenterIpcTest",
     ":ClientProxyTest",
+    ":HeartBeatCtrlTest",
     ":HeartBeatFSMTest",
     ":HeartBeatMediumTest",
     ":HeartBeatStrategyTest",
