@@ -182,7 +182,10 @@ static int32_t TransferStringCapToBitmap(const char *capability)
 
 static void AddDiscInfoToCapabilityList(DiscInfo *info, const ServiceType type)
 {
-    DISC_CHECK_AND_RETURN_LOG(type == SUBSCRIBE_SERVICE || type == SUBSCRIBE_INNER_SERVICE, "no need to add");
+    if (type != SUBSCRIBE_SERVICE && type != SUBSCRIBE_INNER_SERVICE) {
+        DLOGI("publish no need to add");
+        return;
+    }
 
     for (uint32_t tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
         if (IsBitmapSet(&(info->option.subscribeOption.capabilityBitmap[0]), tmp) == true) {
@@ -198,7 +201,10 @@ static void AddDiscInfoToCapabilityList(DiscInfo *info, const ServiceType type)
 
 static void RemoveDiscInfoFromCapabilityList(DiscInfo *info, const ServiceType type)
 {
-    DISC_CHECK_AND_RETURN_LOG(type == SUBSCRIBE_SERVICE || type == SUBSCRIBE_INNER_SERVICE, "no need to delete");
+    if (type != SUBSCRIBE_SERVICE && type != SUBSCRIBE_INNER_SERVICE) {
+        DLOGI("publish no need to delete");
+        return;
+    }
     ListDelete(&(info->capNode));
 }
 
