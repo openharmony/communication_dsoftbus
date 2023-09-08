@@ -86,7 +86,7 @@ int32_t GetActiveOsAccountIds(void)
 {
     std::vector<int32_t> accountId;
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountId);
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK || accountId.empty()) {
         LLOGE("QueryActiveOsAccountIds failed");
         return SOFTBUS_ERR;
     }
