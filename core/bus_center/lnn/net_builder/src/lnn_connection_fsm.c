@@ -573,8 +573,8 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         int64_t authId = 0;
         char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-        ret = memcpy_s(udidHash, HB_SHORT_UDID_HASH_HEX_LEN, connInfo->addr.info.ble.udidHash,
-            HB_SHORT_UDID_HASH_HEX_LEN);
+        ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1,
+            (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
         LLOGI("join udidHash = %s", udidHash);
         if (ret == EOK) {
             if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
