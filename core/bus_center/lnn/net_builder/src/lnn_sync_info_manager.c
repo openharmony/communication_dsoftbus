@@ -166,6 +166,19 @@ static SyncInfoMsg *CreateSyncInfoMsg(LnnSyncInfoType type, const uint8_t *msg,
     return syncMsg;
 }
 
+static void SendSyncInfoMsgOnly(const char *networkId, int32_t clientChannelId, SyncInfoMsg *msg)
+{
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "only send sync info");
+    if (TransSendNetworkingMessage(clientChannelId, (char *)msg->data, msg->dataLen, CONN_HIGH) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "trans send data fail");
+    }
+    if (msg->complete != NULL) {
+        msg->complete((LnnSyncInfoType)(*(uint32_t *)msg->data), networkId,
+            &msg->data[MSG_HEAD_LEN], msg->dataLen - MSG_HEAD_LEN);
+    }
+    SoftBusFree(msg);
+}
+
 static void SendSyncInfoMsg(SyncChannelInfo *info, SyncInfoMsg *msg)
 {
     if (TransSendNetworkingMessage(info->clientChannelId, (char *)msg->data, msg->dataLen, CONN_HIGH) != SOFTBUS_OK) {
@@ -555,7 +568,12 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
     }
     ListNodeInsert(&info->syncMsgList, &msg->node);
     if (info->isClientOpened) {
-        SendSyncInfoMsg(info, msg);
+        SoftBusGetTime(&info->accessTime);
+        ListDelete(&msg->node);
+        int32_t id = info->clientChannelId;
+        (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
+        SendSyncInfoMsgOnly(networkId, id, msg);
+        return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     return SOFTBUS_OK;
