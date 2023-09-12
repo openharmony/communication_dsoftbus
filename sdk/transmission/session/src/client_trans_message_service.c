@@ -33,7 +33,7 @@ int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len)
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len:%u", dataConfig);
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channelId[%d]: send dataLen = %u, max dataLen = %u", channelId, len, dataConfig);
     if (len > dataConfig) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send data len[%u] over limit.", len);
         return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
