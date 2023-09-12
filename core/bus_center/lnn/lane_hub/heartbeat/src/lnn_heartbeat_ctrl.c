@@ -756,6 +756,11 @@ int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbea
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     LLOGI("HB update heartbeat info, type:%d", type);
+    if (type == UPDATE_HB_ACCOUNT_INFO && !LnnIsDefaultOhosAccount()) {
+        g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
+        LLOGI("account is login");
+        HbConditionChanged(true);
+    }
     LnnUpdateSendInfoStrategy(type);
 }
 
