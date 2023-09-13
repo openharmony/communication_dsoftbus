@@ -19,7 +19,7 @@ import("../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("JsonUtilsFuzzTest") {
-  module_out_path = "dsoftbus/common"
+  module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/common/json_utils/fuzztest/jsonutils_fuzzer"
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
