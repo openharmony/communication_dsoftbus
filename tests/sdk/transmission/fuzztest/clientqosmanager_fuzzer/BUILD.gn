@@ -16,11 +16,10 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
-module_output_path = "dsoftbus/transmission"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ClientQosManagerFuzzTest") {
-  module_out_path = module_output_path
+  module_out_path = dsoftbus_fuzz_out_path
 
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/clientqosmanager_fuzzer"
 

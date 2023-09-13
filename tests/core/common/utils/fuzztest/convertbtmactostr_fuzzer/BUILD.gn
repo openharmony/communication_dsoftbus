@@ -15,11 +15,10 @@
 import("//build/config/features.gni")
 import("//build/test.gni")
 import("../../../../../../dsoftbus.gni")
-module_output_path = "dsoftbus/common"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ConvertBtMacToStrFuzzTest") {
-  module_out_path = module_output_path
+  module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/common/utils/fuzztest/convertbtmactostr_fuzzer"
   include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
   cflags = [
