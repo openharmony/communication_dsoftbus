@@ -58,9 +58,9 @@ public:
     int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) override;
     int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data) override;
     int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data) override;
-    int32_t PublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen) override;
+    int32_t PublishLNN(const char *pkgName, const PublishInfo *info) override;
     int32_t StopPublishLNN(const char *pkgName, int32_t publishId) override;
-    int32_t RefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen) override;
+    int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info) override;
     int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId) override;
     int32_t ActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId) override;
     int32_t DeactiveMetaNode(const char *metaNodeId) override;
