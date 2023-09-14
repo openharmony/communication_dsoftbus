@@ -296,14 +296,9 @@ int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     return LnnStopTimeSync(pkgName, targetNetworkId);
 }
 
-int32_t LnnIpcPublishLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    (void)infoTypeLen;
-    PublishInfo pubInfo;
-    (void)memset_s(&pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    ConvertVoidToPublishInfo(info, &pubInfo);
-    int32_t ret = LnnPublishService(pkgName, &pubInfo, false);
-    return ret;
+    return LnnPublishService(pkgName, info, false);
 }
 
 int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
@@ -311,18 +306,13 @@ int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-int32_t LnnIpcRefreshLNN(const char *pkgName, const void *info, uint32_t infoTypeLen)
+int32_t LnnIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
-    (void)infoTypeLen;
-    SubscribeInfo subInfo;
-    (void)memset_s(&subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
-    ConvertVoidToSubscribeInfo(info, &subInfo);
     SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    int32_t ret = LnnStartDiscDevice(pkgName, &subInfo, &callback, false);
-    return ret;
+    return LnnStartDiscDevice(pkgName, info, &callback, false);
 }
 
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)

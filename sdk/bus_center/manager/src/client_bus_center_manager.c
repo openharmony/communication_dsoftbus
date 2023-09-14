@@ -343,86 +343,6 @@ static void DuplicateTimeSyncResultCbList(ListNode *list, const char *networkId)
     }
 }
 
-static int32_t ConvertPublishInfoToVoid(const PublishInfo *pubInfo, void **info, int32_t *infoLen)
-{
-    *info = SoftBusMalloc(MAX_IPC_LEN);
-    if (*info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc info fail");
-        return SOFTBUS_ERR;
-    }
-    (void)memset_s(*info, MAX_IPC_LEN, 0, MAX_IPC_LEN);
-    char *buf = (char *)*info;
-    *(int32_t *)buf = pubInfo->publishId;
-    buf += sizeof(int32_t);
-    *(DiscoverMode *)buf = pubInfo->mode;
-    buf += sizeof(DiscoverMode);
-    *(ExchangeMedium *)buf = pubInfo->medium;
-    buf += sizeof(ExchangeMedium);
-    *(ExchangeFreq *)buf = pubInfo->freq;
-    buf += sizeof(ExchangeFreq);
-    if (memcpy_s(buf, strlen(pubInfo->capability), pubInfo->capability, strlen(pubInfo->capability)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s pubInfo->capability fail");
-        SoftBusFree(*info);
-        return SOFTBUS_ERR;
-    }
-    buf += strlen(pubInfo->capability) + 1;
-    *(int32_t *)buf = pubInfo->dataLen;
-    buf += sizeof(int32_t);
-    if (pubInfo->dataLen > 0) {
-        if (memcpy_s(buf, pubInfo->dataLen, (char *)pubInfo->capabilityData, pubInfo->dataLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s pubInfo->capabilityData fail");
-            SoftBusFree(*info);
-            return SOFTBUS_ERR;
-        }
-        buf += pubInfo->dataLen + 1;
-    }
-    *(bool *)buf = pubInfo->ranging;
-    buf += sizeof(bool);
-    *infoLen = buf - (char *)*info;
-    return SOFTBUS_OK;
-}
-
-static int32_t ConvertSubscribeInfoToVoid(const SubscribeInfo *subInfo, void **info, int32_t *infoLen)
-{
-    *info = SoftBusMalloc(MAX_IPC_LEN);
-    if (*info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc info fail");
-        return SOFTBUS_ERR;
-    }
-    (void)memset_s(*info, MAX_IPC_LEN, 0, MAX_IPC_LEN);
-    char *buf = (char *)*info;
-    *(int32_t *)buf = subInfo->subscribeId;
-    buf += sizeof(int32_t);
-    *(DiscoverMode *)buf = subInfo->mode;
-    buf += sizeof(DiscoverMode);
-    *(ExchangeMedium *)buf = subInfo->medium;
-    buf += sizeof(ExchangeMedium);
-    *(ExchangeFreq *)buf = subInfo->freq;
-    buf += sizeof(ExchangeFreq);
-    *(bool *)buf = subInfo->isSameAccount;
-    buf += sizeof(bool);
-    *(bool *)buf = subInfo->isWakeRemote;
-    buf += sizeof(bool);
-    if (memcpy_s(buf, strlen(subInfo->capability), subInfo->capability, strlen(subInfo->capability)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s subInfo->capability fail");
-        SoftBusFree(*info);
-        return SOFTBUS_ERR;
-    }
-    buf += strlen(subInfo->capability) + 1;
-    *(int32_t *)buf = subInfo->dataLen;
-    buf += sizeof(int32_t);
-    *infoLen = buf - (char *)*info;
-    if (subInfo->dataLen > 0) {
-        if (memcpy_s(buf, subInfo->dataLen, (char *)subInfo->capabilityData, subInfo->dataLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s subInfo->capabilityData fail");
-            SoftBusFree(*info);
-            return SOFTBUS_ERR;
-        }
-        *infoLen += subInfo->dataLen + 1;
-    }
-    return SOFTBUS_OK;
-}
-
 void BusCenterClientDeinit(void)
 {
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
@@ -778,17 +698,10 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
 int32_t PublishLNNInner(const char *pkgName, const PublishInfo *info, const IPublishCb *cb)
 {
     g_busCenterClient.publishCb = *cb;
-    int32_t bufLen = 0;
-    void *buf = NULL;
-    if (ConvertPublishInfoToVoid(info, &buf, &bufLen) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConvertPublishInfoToVoid fail");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = ServerIpcPublishLNN(pkgName, buf, bufLen);
+    int32_t ret = ServerIpcPublishLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Server PublishLNNInner failed, ret = %d", ret);
     }
-    SoftBusFree(buf);
     return ret;
 }
 
@@ -805,17 +718,10 @@ int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId)
 int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
 {
     g_busCenterClient.refreshCb = *cb;
-    int32_t bufLen = 0;
-    void *buf = NULL;
-    if (ConvertSubscribeInfoToVoid(info, &buf, &bufLen) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConvertSubscribeInfoToVoid fail");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = ServerIpcRefreshLNN(pkgName, buf, bufLen);
+    int32_t ret = ServerIpcRefreshLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server RefreshLNNInner failed, ret = %d", ret);
     }
-    SoftBusFree(buf);
     return ret;
 }
 
