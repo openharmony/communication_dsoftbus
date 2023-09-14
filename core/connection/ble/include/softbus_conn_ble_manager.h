@@ -121,6 +121,7 @@ ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid
 // get connection with same udid and client side
 ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol);
 void ConnBleReturnConnection(ConnBleConnection **connection);
+void NotifyReusedConnected(uint32_t connectionId);
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback);
 

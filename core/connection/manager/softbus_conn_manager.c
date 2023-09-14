@@ -427,6 +427,28 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
     return;
 }
 
+void ConnManagerReusedConnected(uint32_t connectionId, const ConnectionInfo *info)
+{
+    ConnListenerNode *node = NULL;
+    ConnListenerNode *listener = NULL;
+
+    int32_t num = GetAllListener(&node);
+    if (num == 0 || node == NULL) {
+        CLOGE("get node failed connId %u", connectionId);
+        return;
+    }
+
+    for (int32_t i = 0; i < num; i++) {
+        listener = node + i;
+        if (listener->callback.OnReusedConnected != NULL) {
+            listener->callback.OnReusedConnected(connectionId, info);
+        }
+    }
+    SoftBusFree(node);
+    ReportConnectTime(info);
+    return;
+}
+
 void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     ConnListenerNode *node = NULL;
@@ -638,6 +660,7 @@ int32_t ConnServerInit(void)
     }
 
     g_connManagerCb.OnConnected = ConnManagerConnected;
+    g_connManagerCb.OnReusedConnected = ConnManagerReusedConnected;
     g_connManagerCb.OnDisconnected = ConnManagerDisconnected;
     g_connManagerCb.OnDataReceived = ConnManagerRecvData;
 
