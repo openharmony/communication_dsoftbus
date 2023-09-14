@@ -1264,6 +1264,19 @@ void ConnBleReturnConnection(ConnBleConnection **connection)
     *connection = NULL;
 }
 
+void NotifyReusedConnected(uint32_t connectionId)
+{
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection not exist, connId=%u", connectionId);
+
+    ConnectionInfo info = { 0 };
+    int32_t status = BleConvert2ConnectionInfo(connection, &info);
+    if (status != SOFTBUS_OK) {
+        CLOGE("convert connection info failed, err=%d. It can not backoff now, just ahead.", status);
+    }
+    g_connectCallback.OnReusedConnected(connectionId, &info);
+}
+
 static void TransitionToState(enum BleMgrState target)
 {
     static ConnBleState statesTable[BLE_MGR_STATE_MAX] = {
@@ -1600,9 +1613,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     ConnBleConnection *connection = ConnBleGetConnectionByUdid(NULL, hashStr, option->bleOption.protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, false, "ble check action connection: connection is not exist");
     bool isActive = (connection->state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
-    if (isActive) {
-        ConnBleRefreshIdleTimeout(connection);
-    }
+
     ConnBleReturnConnection(&connection);
     return isActive;
 }
