@@ -128,7 +128,7 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
         listener && listener->onDataReceived && listener->onDisconnected, SOFTBUS_INVALID_PARAM, "listen is invalid");
 
     TRAN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_manager.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, "lock failed");
-    for (int32_t  i = 0; i < MSG_CNT; i++) {
+    for (int32_t i = 0; i < MSG_CNT; i++) {
         if (g_manager.listeners[i].type == type) {
             TLOGW("type: %d repeat register listener, overwrite it", type);
             g_manager.listeners[i].listener = *listener;
