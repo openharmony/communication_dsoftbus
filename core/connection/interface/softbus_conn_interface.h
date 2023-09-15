@@ -114,6 +114,7 @@ typedef struct {
 
 typedef struct {
     void (*OnConnected)(uint32_t connectionId, const ConnectionInfo *info);
+    void (*OnReusedConnected)(uint32_t connectionId, const ConnectionInfo *info);
     void (*OnDisconnected)(uint32_t connectionId, const ConnectionInfo *info);
     void (*OnDataReceived)(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len);
 } ConnectCallback;
