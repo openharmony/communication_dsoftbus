@@ -215,12 +215,15 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest001, Test
     strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
 
     AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    if (appInfo == NULL) {
+        return;
+    }
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
     appInfo->appType = APP_TYPE_NORMAL;
     ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
+    SoftBusFree(appInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -233,10 +236,13 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest001, Test
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenedTest001, TestSize.Level1)
 {
     AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    if (appInfo == NULL) {
+        return;
+    }
     strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelOpened(TEST_NUMBER_25, appInfo, 0);
+    SoftBusFree(appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -249,7 +255,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenedTest001, TestSize.
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenFailedTest001, TestSize.Level1)
 {
     AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    if (appInfo == NULL) {
+        return;
+    }
     strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
     appInfo->myData.pid = TEST_NUMBER_25;
     strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
@@ -257,6 +265,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenFailedTest001, TestS
 
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelOpenFailed(TEST_NUMBER_25, appInfo, 0);
+    SoftBusFree(appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -269,13 +278,16 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenFailedTest001, TestS
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelClosedTest001, TestSize.Level1)
 {
     AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    if (appInfo == NULL) {
+        return;
+    }
     strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
     appInfo->myData.pid = TEST_NUMBER_25;
     strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
 
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelClosed(TEST_NUMBER_25, appInfo);
+    SoftBusFree(appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -288,7 +300,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelClosedTest001, TestSize.
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelMsgReceivedTest001, TestSize.Level1)
 {
     AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    if (appInfo == NULL) {
+        return;
+    }
     strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
     appInfo->myData.pid = TEST_NUMBER_25;
     strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
@@ -297,6 +311,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelMsgReceivedTest001, Test
 
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelMsgReceived(TEST_NUMBER_25, appInfo, data, SESSIONKEYSIZE);
+    SoftBusFree(appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -309,13 +324,16 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelMsgReceivedTest001, Test
 HWTEST_F(SoftbusProxyChannelListenerTest, TransProxyGetAppInfoTest001, TestSize.Level1)
 {
     AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    if (appInfo == NULL) {
+        return;
+    }
     char sessionName[SESSIONKEYSIZE] = {0};
     strcpy_s(sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
     char peerNetworkId[SESSIONKEYSIZE] = {0};
     strcpy_s(peerNetworkId, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
 
     int32_t ret = TransProxyGetAppInfo(sessionName, peerNetworkId, appInfo);
+    SoftBusFree(appInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
