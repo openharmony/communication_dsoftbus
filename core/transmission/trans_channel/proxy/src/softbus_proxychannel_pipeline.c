@@ -477,7 +477,7 @@ static void TransProxyPipelineOnMessageReceived(int32_t channelId, const char *d
 
     uint32_t msgType = *(uint32_t *)data;
     struct ListenerItem *target = NULL;
-    for (int32_t  i = 0; i < MSG_CNT; i++) {
+    for (int32_t i = 0; i < MSG_CNT; i++) {
         if ((uint32_t)(g_manager.listeners[i].type) == msgType) {
             target = g_manager.listeners + i;
             break;
