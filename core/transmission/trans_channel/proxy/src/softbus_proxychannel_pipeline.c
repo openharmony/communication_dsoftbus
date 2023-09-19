@@ -28,6 +28,8 @@
 #include "softbus_utils.h"
 
 #define SESSION_NAME "ohos.dsoftbus.inner.p2pchannel"
+#define PIPELINEHANDLER_NAME "ProxyChannelPipelineHandler"
+#define MSG_CNT 2
 
 enum PipelineLooperMsgType {
     LOOPER_MSG_TYPE_OPEN_CHANNEL,
@@ -68,9 +70,9 @@ struct PipelineManager {
 
 static struct PipelineManager g_manager = {
     .inited = false,
-    .listeners = { 0 },
+    .listeners = {},
     .looper = NULL,
-    .handler = { 0 },
+    .handler = {},
 };
 
 typedef bool (*Comparable)(const struct PipelineChannelItem *item, const void *param);
@@ -126,7 +128,7 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
         listener && listener->onDataReceived && listener->onDisconnected, SOFTBUS_INVALID_PARAM, "listen is invalid");
 
     TRAN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_manager.lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, "lock failed");
-    for (int32_t i = 0; i < MSG_TYPE_CNT; i++) {
+    for (int32_t i = 0; i < MSG_CNT; i++) {
         if (g_manager.listeners[i].type == type) {
             TLOGW("type: %d repeat register listener, overwrite it", type);
             g_manager.listeners[i].listener = *listener;
@@ -159,7 +161,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
             return SOFTBUS_FUNC_NOT_SUPPORT;
         }
     }
-    struct PipelineChannelItem *item = SoftBusCalloc(sizeof(struct PipelineChannelItem));
+    struct PipelineChannelItem *item = (struct PipelineChannelItem *)SoftBusCalloc(sizeof(struct PipelineChannelItem));
     if (item == NULL) {
         TLOGE("malloc item failed, request id: %d", requestId);
         return SOFTBUS_MEM_ERR;
@@ -174,7 +176,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     item->callback = *callback;
     item->channelId = INVALID_CHANNEL_ID;
 
-    struct SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
         TLOGE("malloc msg failed, request id: %d", requestId);
         SoftBusFree(item);
@@ -209,7 +211,7 @@ int32_t TransProxyPipelineSendMessage(
     TRAN_CHECK_AND_RETURN_RET_LOG(type == MSG_TYPE_P2P_NEGO || type == MSG_TYPE_IP_PORT_EXCHANGE, SOFTBUS_INVALID_PARAM,
         "type: %d is invalid", type);
 
-    char *sendData = SoftBusCalloc(dataLen + sizeof(uint32_t));
+    char *sendData = (char *)SoftBusCalloc(dataLen + sizeof(uint32_t));
     TRAN_CHECK_AND_RETURN_RET_LOG(sendData, SOFTBUS_MALLOC_ERR, "malloc send data failed");
     *(uint32_t *)sendData = (uint32_t)type;
     if (memcpy_s(sendData + sizeof(uint32_t), dataLen, data, dataLen) != EOK) {
@@ -291,7 +293,7 @@ int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId)
     TLOGI("enter");
     TRAN_CHECK_AND_RETURN_RET_LOG(
         channelId != INVALID_CHANNEL_ID, SOFTBUS_INVALID_PARAM, "invalid channel id: %d", channelId);
-    struct SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
         TLOGE("malloc msg failed, channel id: %d", channelId);
         return SOFTBUS_MEM_ERR;
@@ -308,7 +310,7 @@ int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
 {
     TRAN_CHECK_AND_RETURN_RET_LOG(
         SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, "lock failed");
-    struct PipelineChannelItem *item = SoftBusCalloc(sizeof(struct PipelineChannelItem));
+    struct PipelineChannelItem *item = (struct PipelineChannelItem *)SoftBusCalloc(sizeof(struct PipelineChannelItem));
     if (item == NULL) {
         SoftBusMutexUnlock(&g_manager.channels->lock);
         return SOFTBUS_LOCK_ERR;
@@ -329,13 +331,13 @@ int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
 static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
 {
     TLOGI("enter");
-    char *clone = SoftBusCalloc(UUID_BUF_LEN);
+    char *clone = (char *)SoftBusCalloc(UUID_BUF_LEN);
     if (clone == NULL || strcpy_s(clone, UUID_BUF_LEN, uuid) != EOK) {
         TLOGE("copy uuid failed, channel id: %d", channelId);
         SoftBusFree(clone);
         return SOFTBUS_MEM_ERR;
     }
-    struct SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
         TLOGE("malloc msg failed, channel id: %d", channelId);
         SoftBusFree(clone);
@@ -350,7 +352,9 @@ static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid
     g_manager.looper->PostMessage(g_manager.looper, msg);
     return SOFTBUS_OK;
 }
-
+#ifdef  __cplusplus
+extern "C" {
+#endif
 static void InnerOnChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
 {
     TLOGI("enter");
@@ -395,12 +399,14 @@ static void InnerOnChannelOpened(int32_t channelId, const char *uuid, unsigned c
         callback.onChannelOpened(requestId, channelId);
     }
 }
-
+#ifdef  __cplusplus
+}
+#endif
 static void TransProxyPipelineOnChannelOpenFailed(int32_t channelId, const char *uuid)
 {
     (void)uuid;
     TLOGI("enter");
-    struct SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
         TLOGE("malloc msg failed, channel id: %d", channelId);
         return;
@@ -442,12 +448,13 @@ static void InnerOnChannelOpenFailed(int32_t channelId)
 static void TransProxyPipelineOnChannelClosed(int32_t channelId)
 {
     TLOGI("enter");
+    struct PipelineChannelItem *target = NULL;
     int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
     if (ret != SOFTBUS_OK) {
         TLOGE("lock channels failed, channel id: %d, error: %d", channelId, ret);
         goto exit;
     }
-    struct PipelineChannelItem *target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
+    target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
     if (target != NULL) {
         ListDelete(&target->node);
         SoftBusFree(target);
@@ -455,7 +462,7 @@ static void TransProxyPipelineOnChannelClosed(int32_t channelId)
     }
     SoftBusMutexUnlock(&g_manager.channels->lock);
 exit:
-    for (int32_t i = 0; i < MSG_TYPE_CNT; i++) {
+    for (int32_t i = 0; i < MSG_CNT; i++) {
         if (g_manager.listeners[i].type != MSG_TYPE_INVALID && g_manager.listeners[i].listener.onDisconnected != NULL) {
             g_manager.listeners[i].listener.onDisconnected(channelId);
         }
@@ -470,7 +477,7 @@ static void TransProxyPipelineOnMessageReceived(int32_t channelId, const char *d
 
     uint32_t msgType = *(uint32_t *)data;
     struct ListenerItem *target = NULL;
-    for (int32_t i = 0; i < MSG_TYPE_CNT; i++) {
+    for (int32_t i = 0; i < MSG_CNT; i++) {
         if ((uint32_t)(g_manager.listeners[i].type) == msgType) {
             target = g_manager.listeners + i;
             break;
@@ -547,7 +554,9 @@ static void InnerOpenProxyChannel(int32_t requestId)
     target->channelId = channelId;
     SoftBusMutexUnlock(&g_manager.channels->lock);
 }
-
+#ifdef  __cplusplus
+extern "C" {
+#endif
 static void TransProxyPipelineHandleMessage(SoftBusMessage *msg)
 {
     TLOGI("enter, what: %d", msg->what);
@@ -562,7 +571,7 @@ static void TransProxyPipelineHandleMessage(SoftBusMessage *msg)
             InnerOnChannelOpenFailed(msg->arg1);
             break;
         case LOOPER_MSG_TYPE_ON_CHANNEL_OPENED:
-            InnerOnChannelOpened(msg->arg1, msg->obj, msg->arg2);
+            InnerOnChannelOpened(msg->arg1, (char *)msg->obj, msg->arg2);
             break;
         default:
             TLOGE("unknown message type: %d", msg->what);
@@ -573,10 +582,18 @@ static void TransProxyPipelineHandleMessage(SoftBusMessage *msg)
 int32_t TransProxyPipelineInit(void)
 {
     TLOGI("enter");
+    SoftBusList *channels = NULL;
+    int32_t ret = 0;
+    INetworkingListener listener = {
+        .onChannelOpened = TransProxyPipelineOnChannelOpened,
+        .onChannelOpenFailed = TransProxyPipelineOnChannelOpenFailed,
+        .onChannelClosed = TransProxyPipelineOnChannelClosed,
+        .onMessageReceived = TransProxyPipelineOnMessageReceived,
+    };
     if (g_manager.inited) {
         return SOFTBUS_OK;
     };
-    SoftBusList *channels = CreateSoftBusList();
+    channels = CreateSoftBusList();
     if (channels == NULL) {
         goto exit;
     }
@@ -585,19 +602,14 @@ int32_t TransProxyPipelineInit(void)
     }
     g_manager.channels = channels;
 
-    INetworkingListener listener = {
-        .onChannelOpened = TransProxyPipelineOnChannelOpened,
-        .onChannelOpenFailed = TransProxyPipelineOnChannelOpenFailed,
-        .onChannelClosed = TransProxyPipelineOnChannelClosed,
-        .onMessageReceived = TransProxyPipelineOnMessageReceived,
-    };
-    int32_t ret = TransRegisterNetworkingChannelListener(SESSION_NAME, &listener);
+
+    ret = TransRegisterNetworkingChannelListener(SESSION_NAME, &listener);
     if (ret != SOFTBUS_OK) {
         goto exit;
     }
     g_manager.looper = CreateNewLooper("proxy_looper");
     g_manager.handler.looper = g_manager.looper;
-    g_manager.handler.name = "ProxyChannelPipelineHandler";
+    strcpy_s(g_manager.handler.name, strlen(PIPELINEHANDLER_NAME) + 1, PIPELINEHANDLER_NAME);
     g_manager.handler.HandleMessage = TransProxyPipelineHandleMessage;
     g_manager.inited = true;
     return SOFTBUS_OK;
@@ -611,3 +623,6 @@ exit:
 
     return SOFTBUS_ERR;
 }
+#ifdef  __cplusplus
+}
+#endif

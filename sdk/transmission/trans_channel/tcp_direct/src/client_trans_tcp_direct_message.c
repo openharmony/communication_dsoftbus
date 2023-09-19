@@ -395,6 +395,8 @@ static int32_t TransTdcProcessData(int32_t channelId)
     int32_t seqNum = pktHead->seq;
     uint32_t flag = pktHead->flags;
     uint32_t dataLen = pktHead->dataLen;
+    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channelId[%d] data has all received, dataLen = %u",
+        channelId, dataLen);
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc fail.");
@@ -467,7 +469,8 @@ static int32_t TransTdcProcAllData(int32_t channelId)
             return SOFTBUS_OK;
         }
         if (bufLen < DC_DATA_HEAD_SIZE) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "head[%d] not enough, recv biz head next time.", bufLen);
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
+                "ChannelId[%d]: head[%d] not enough, recv biz head next time.", channelId, bufLen);
             SoftBusMutexUnlock(&g_tcpDataList->lock);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }

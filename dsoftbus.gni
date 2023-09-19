@@ -16,6 +16,7 @@ dsoftbus_root_path = "//foundation/communication/dsoftbus"
 dsoftbus_sdk_path = "${dsoftbus_root_path}/sdk"
 dsoftbus_core_path = "${dsoftbus_root_path}/core"
 dsoftbus_test_path = "${dsoftbus_root_path}/tests"
+dsoftbus_fuzz_out_path = "dsoftbus/soft_bus"
 
 declare_args() {
   softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"

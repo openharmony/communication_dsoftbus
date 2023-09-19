@@ -19,7 +19,7 @@ import("../../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("SoftBusHiDumperFuzzTest") {
-  module_out_path = "dsoftbus/common"
+  module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/common/dfx/hidumper_adapter/fuzztest/softbushidumper_fuzzer"
 
   include_dirs = [
