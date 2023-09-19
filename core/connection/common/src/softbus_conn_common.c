@@ -206,7 +206,8 @@ int32_t WaitQueueLength(
         if (queueCount < (maxLen - diffLen)) {
             break;
         }
-        if (ConnectSoftBusCondWait(cond, mutex, WAIT_QUEUE_DELAY) != SOFTBUS_OK) {
+        int32_t status = ConnectSoftBusCondWait(cond, mutex, WAIT_QUEUE_DELAY);
+        if (status != SOFTBUS_OK && status != SOFTBUS_TIMOUT) {
             CLOGE("wait queue length cond wait fail");
             return SOFTBUS_ERR;
         }
