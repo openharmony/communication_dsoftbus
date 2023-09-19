@@ -184,4 +184,46 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, T
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     LnnHbStrategyDeinit();
 }
+
+/*
+ * @tc.name: LNN_GET_HB_STRATEGY_MANAGER_TEST_01
+ * @tc.desc: lnn get hb strategy manager test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatStrategyTest, LNN_GET_HB_STRATEGY_MANAGER_TEST_01, TestSize.Level1)
+{
+    LnnHeartbeatStrategyManager mgr;
+    LnnProcessSendOnceMsgPara msgPara;
+    LnnHeartbeatFsm hbFsm;
+    int32_t ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_MAX, STRATEGY_HB_SEND_SINGLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_UDP, STRATEGY_HB_SEND_SINGLE);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    msgPara.strategyType = STRATEGY_HB_SEND_SINGLE;
+    ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    msgPara.strategyType = STRATEGY_HB_SEND_FIXED_PERIOD;
+    ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_UDP, STRATEGY_HB_SEND_FIXED_PERIOD);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    msgPara.strategyType = STRATEGY_HB_SEND_ADJUSTABLE_PERIOD;
+    ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    msgPara.hbType = HEARTBEAT_TYPE_BLE_V0;
+    ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    msgPara.strategyType = STRATEGY_HB_RECV_SINGLE;
+    ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

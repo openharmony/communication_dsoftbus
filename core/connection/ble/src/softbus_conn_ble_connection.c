@@ -348,6 +348,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
             g_connectionListener.onConnectionResume(connection->connectionId);
         }
         (void)SoftBusMutexUnlock(&connection->lock);
+        NotifyReusedConnected(connection->connectionId);
         return SOFTBUS_OK;
     }
     if (localRc <= 0) {

@@ -43,7 +43,7 @@ static void DoDataHeadTransformFuzz(const uint8_t *data, size_t size)
     if (size < sizeof(ProxyMessageHead)) {
         return;
     }
-    ProxyMessageHead  proxyMessageHead;
+    ProxyMessageHead proxyMessageHead;
     if (memcpy_s(&proxyMessageHead, sizeof(proxyMessageHead), data, sizeof(proxyMessageHead)) != EOK) {
         return;
     }

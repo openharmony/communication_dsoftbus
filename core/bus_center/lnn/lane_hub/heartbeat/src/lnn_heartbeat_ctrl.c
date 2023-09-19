@@ -68,7 +68,7 @@ static void InitHbConditionState(void)
     g_hbConditionState.screenState = SOFTBUS_SCREEN_UNKNOWN;
     g_hbConditionState.lockState = SOFTBUS_SCREEN_LOCK_UNKNOWN;
     // need suit for same account
-    g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
+    g_hbConditionState.accountState = SOFTBUS_ACCOUNT_UNKNOWN;
     g_hbConditionState.backgroundState = SOFTBUS_USER_FOREGROUND;
     g_hbConditionState.nightModeState = SOFTBUS_NIGHT_MODE_UNKNOWN;
     g_hbConditionState.hasTrustedRelation = false;
@@ -756,6 +756,11 @@ int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbea
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     LLOGI("HB update heartbeat info, type:%d", type);
+    if (type == UPDATE_HB_ACCOUNT_INFO && !LnnIsDefaultOhosAccount()) {
+        g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
+        LLOGI("account is login");
+        HbConditionChanged(true);
+    }
     LnnUpdateSendInfoStrategy(type);
 }
 

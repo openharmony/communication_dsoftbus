@@ -251,5 +251,6 @@ void SoftBusBtInit(void)
 {
     if (SoftBusGetBtState() == BLE_ENABLE) {
         SoftBusOnBtSateChanged(SOFTBUS_BT_STATE_TURN_ON);
+        SoftBusOnBtSateChanged(SOFTBUS_BR_STATE_TURN_ON);
     }
 }
