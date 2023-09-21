@@ -168,6 +168,12 @@ void RouteClearAuthChannelId(int32_t cfd)
 {
     return GetNetLedgerInterface()->RouteClearAuthChannelId(cfd);
 }
+
+bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
+                             uint32_t targetLen)
+{
+    return GetNetLedgerInterface()->GetJsonObjectStringItem(json, string, target, targetLen);
+}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)

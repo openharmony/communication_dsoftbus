@@ -65,6 +65,15 @@ public:
     static inline DeviceAuthCallback g_devAuthCb;
     static inline SoftBusCond cond;
     static inline SoftBusMutex mutex;
+    static int32_t getRelatedGroups(
+        int32_t accountId, const char *auth_appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum);
+    static int32_t getRelatedGroups1(
+        int32_t accountId, const char *auth_appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum);
+    static int32_t getTrustedDevices(
+        int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum);
+    static int32_t getTrustedDevices1(
+        int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum);
+    static void destroyInfo(char **returnDevInfoVec);
 };
 
 } // namespace OHOS
