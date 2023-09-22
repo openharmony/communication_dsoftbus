@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
+dsoftbus_root_path = "../../../.."
 
 ohos_unittest("TransClientProxyTest") {
   module_out_path = module_output_path
