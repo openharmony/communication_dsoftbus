@@ -280,4 +280,44 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapAdapterFound001, TestSize.Level1)
     OnDeviceFound(&testNstackxInfo, 1);
     ASSERT_TRUE(!isDeviceFound);
 }
+
+/*
+ * @tc.name: testDiscCoapAdapterParseResInfo001
+ * @tc.desc: test ParseReservedInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, testDiscCoapAdapterParseResInfo001, TestSize.Level1)
+{
+    NSTACKX_DeviceInfo testNstackxDevice;
+    DeviceInfo testDevice;
+    EXPECT_EQ(strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo),
+	"{\"version\":\"1.0.0\"}"), EOK);
+    int32_t ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_EQ(strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "test"), EOK);
+    ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/*
+ * @tc.name: testDiscCoapAdapterParseDevInfo001
+ * @tc.desc: test ParseDiscDevInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, testDiscCoapAdapterParseDevInfo001, TestSize.Level1)
+{
+    NSTACKX_DeviceInfo testNstackxDevice;
+    DeviceInfo testDiscDevInfo;
+    testNstackxDevice.mode = PUBLISH_MODE_PROACTIVE;
+    EXPECT_EQ(strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "wlan"), EOK);
+    ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
+    EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_WLAN);
+
+    EXPECT_EQ(strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "eth"), EOK);
+    ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
+    EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_ETH);
+}
 }
