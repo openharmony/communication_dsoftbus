@@ -13,6 +13,9 @@
 
 import("../dsoftbus.gni")
 
+dsoftbus_root_path = ".."
+softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
+
 ohos_executable("SoftBusDumpDeviceInfo") {
   sources = [ "device_info/get_device_info.c" ]
 
