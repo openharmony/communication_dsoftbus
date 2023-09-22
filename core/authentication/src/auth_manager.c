@@ -425,35 +425,27 @@ static int64_t GetAuthIdByConnId(uint64_t connId, bool isServer)
 static int64_t GetLatestIdByConnInfo(const AuthConnInfo *connInfo, AuthLinkType type)
 {
     if (connInfo == NULL) {
-        LLOGE("connInfo is empty");
+        LLOGE("connInfo is empty.");
         return AUTH_INVALID_ID;
     }
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t num = 0;
-    AuthManager *auth[4] = {NULL, NULL, NULL, NULL }; /* 4: max size for (BR + BLE) * (CLENT + SERVER) */
-    if ((type == AUTH_LINK_TYPE_WIFI) || (type == AUTH_LINK_TYPE_BLE)) {
-        auth[num++] = FindAuthManagerByConnInfo(connInfo, false);
-        auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
-    } else {
-        auth[num++] = FindAuthManagerByConnInfo(connInfo, false);
-        auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
-        auth[num++] = FindAuthManagerByConnInfo(connInfo, false);
-        auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
-    }
-    uint64_t latestAuthId = AUTH_INVALID_ID;
+    const AuthManager *auth[2] = { NULL, NULL }; /* 2: client + server */
+    auth[num++] = FindAuthManagerByConnInfo(connInfo, false);
+    auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
+    int64_t latestAuthId = AUTH_INVALID_ID;
     uint64_t latestVerifyTime = 0;
-    for (uint32_t i = 0; i< num; i++) {
+    for (uint32_t i = 0; i < num; i++) {
         if (auth[i] != NULL && auth[i]->lastVerifyTime > latestVerifyTime) {
             latestAuthId = auth[i]->authId;
             latestVerifyTime = auth[i]->lastVerifyTime;
         }
     }
     ReleaseAuthLock();
-    LLOGD("find %d, latest auth manager[%" PRId64 "] found, lastVerfyTime=%" PRIu64 ", udidHash:%02x%02x, type:%d",
-            num, latestAuthId, latestVerifyTime, connInfo->info.bleInfo.deviceIdHash[0],
-            connInfo->info.bleInfo.deviceIdHash[1], type);
+    LLOGD("find %d, latest auth manager[%" PRId64 "] found, lastVerifyTime=%" PRIu64 ", type:%d",
+        num, latestAuthId, latestVerifyTime, type);
     return latestAuthId;
 }
 
@@ -1388,10 +1380,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
     int64_t authId;
     switch (info->type) {
         case AUTH_LINK_TYPE_WIFI:
-            authId = GetAuthIdByConnInfo(info, false);
-            if (authId == AUTH_INVALID_ID) {
-                authId = GetAuthIdByConnInfo(info, true);
-            }
+            authId = GetLatestIdByConnInfo(info, AUTH_LINK_TYPE_WIFI);
             if (authId == AUTH_INVALID_ID) {
                 return SOFTBUS_AUTH_NOT_FOUND;
             }
