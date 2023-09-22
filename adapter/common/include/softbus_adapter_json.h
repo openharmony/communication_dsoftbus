@@ -63,6 +63,7 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
 
 bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const char **value, int32_t len);
 
+/* use input parameter len to limit value's max array num and return as real value's max array num */
 bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, char **value, int32_t *len);
 
 #ifdef __cplusplus
