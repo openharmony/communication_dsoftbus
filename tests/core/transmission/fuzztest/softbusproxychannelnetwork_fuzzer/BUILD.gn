@@ -18,6 +18,10 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
+
+dsoftbus_root_path = "../../../../.."
+softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
+
 ohos_fuzztest("SoftbusProxychannelNetworkFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 

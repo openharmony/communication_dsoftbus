@@ -18,6 +18,8 @@ import("../../../../../dsoftbus.gni")
 import("../../../../utils/utils.gni")
 
 module_output_path = "dsoftbus/connection"
+dsoftbus_root_path = "../../../../.."
+softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 ohos_unittest("P2pCommonTest") {
   module_out_path = module_output_path

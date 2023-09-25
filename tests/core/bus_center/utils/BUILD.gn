@@ -15,6 +15,8 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/LNN"
+dsoftbus_root_path = "../../../.."
+
 ohos_unittest("LNNConnAddrUtilsTest") {
   module_out_path = module_output_path
   sources = [ "lnn_bus_center_utils_test.cpp" ]
