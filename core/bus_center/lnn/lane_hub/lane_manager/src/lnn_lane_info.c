@@ -240,7 +240,7 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
 {
     int32_t ret;
     int32_t port;
-    if (laneId >= LNN_LINK_TYPE_BUTT || laneId < LNN_LINK_TYPE_WLAN_5G) {
+    if (networkId == NULL || laneId >= LNN_LINK_TYPE_BUTT || laneId < LNN_LINK_TYPE_WLAN_5G) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. laneId = %d", laneId);
         return;
     }
@@ -268,7 +268,7 @@ void LnnSetLaneSupportUdp(const char *netWorkId, int32_t laneId, bool isSupport)
 
 void LnnLaneSetNetworkIdAndPid(int32_t laneId, const char *networkId, int32_t pid)
 {
-    if (laneId >= LNN_LINK_TYPE_BUTT || laneId < LNN_LINK_TYPE_WLAN_5G) {
+    if (networkId == NULL || laneId >= LNN_LINK_TYPE_BUTT || laneId < LNN_LINK_TYPE_WLAN_5G) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error, laneId = %d", laneId);
         return;
     }
