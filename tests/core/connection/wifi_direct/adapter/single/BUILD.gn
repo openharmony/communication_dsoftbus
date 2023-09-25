@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection"
+dsoftbus_root_path = "../../../../../.."
 
 ohos_unittest("BroadcastReceiverTest") {
   module_out_path = module_output_path
