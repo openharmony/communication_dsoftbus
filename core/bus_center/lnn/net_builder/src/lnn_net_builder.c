@@ -2014,6 +2014,9 @@ NodeInfo *FindNodeInfoByRquestId(uint32_t requestId)
 
 int32_t FindRequestIdByAddr(ConnectionAddr *connetionAddr, uint32_t *requestId)
 {
+    if (requestId == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "requestId is null");
+    }
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(connetionAddr, false);
     if (connFsm == NULL || connFsm->isDead) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR,
