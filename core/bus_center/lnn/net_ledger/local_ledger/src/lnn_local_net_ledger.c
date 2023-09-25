@@ -51,7 +51,7 @@ typedef struct {
 
 static LocalNetLedger g_localNetLedger;
 
-static void UpdateStateVersionAndStore()
+static void UpdateStateVersionAndStore(void)
 {
     int32_t ret;
     g_localNetLedger.localInfo.stateVersion++;

@@ -366,7 +366,7 @@ TrustedReturnType AuthHasTrustedRelation(void)
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 
-bool IsAuthHasTrustedRelation()
+bool IsAuthHasTrustedRelation(void)
 {
     bool hasTrustedRelation = (AuthHasTrustedRelation() == TRUSTED_RELATION_YES) ? true : false;
     return hasTrustedRelation;

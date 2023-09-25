@@ -24,8 +24,8 @@
 extern "C" {
 #endif
 
-int32_t InitDecisionCenter();
-void DeinitDecisionCenter();
+int32_t InitDecisionCenter(void);
+void DeinitDecisionCenter(void);
 void LnnDCReportConnectException(const ConnectOption *option, int32_t errorCode);
 void LnnDCClearConnectException(const ConnectOption *option);
 void LnnDCProcessOnlineState(bool isOnline, const NodeBasicInfo *info);
