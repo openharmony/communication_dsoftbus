@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/bus_center"
+dsoftbus_root_path = "../../../.."
 
 ohos_benchmarktest("BusCenterTest") {
   module_out_path = module_output_path

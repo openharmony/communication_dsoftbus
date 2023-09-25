@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
+dsoftbus_root_path = "../../../../../../../.."
 
 ## UnitTest VtpStreamSocketTest {{{
 ohos_unittest("VtpStreamSocketTest") {
