@@ -28,6 +28,7 @@ static struct HdfIoService *g_serv = NULL;
 
 static int OnDevEventReceived(void* priv, unsigned int id, struct HdfSBuf* data)
 {
+    (void)data;
     if (id == IP_READY) {
         HILOG_INFO(SOFTBUS_HILOG_ID, "envent %{public}s: dev event received: %{public}u", (char*)priv, id);
         LnnNotifyAddressChangedEvent(NULL);
