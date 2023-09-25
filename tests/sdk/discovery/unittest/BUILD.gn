@@ -12,6 +12,9 @@
 # limitations under the License.
 
 import("../../../../dsoftbus.gni")
+
+dsoftbus_root_path = "../../../.."
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")

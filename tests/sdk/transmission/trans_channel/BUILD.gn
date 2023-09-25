@@ -14,6 +14,8 @@
 import("../../../../dsoftbus.gni")
 import("../../../../sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
 
+dsoftbus_root_path = "../../../.."
+
 trans_sdk_test_common_inc = [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/connection/interface",

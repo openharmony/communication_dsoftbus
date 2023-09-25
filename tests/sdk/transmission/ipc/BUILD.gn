@@ -15,6 +15,9 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
+dsoftbus_root_path = "../../../.."
+softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
+
 ohos_unittest("TransIpcStandardTest") {
   module_out_path = module_output_path
   sources = [ "trans_ipc_test.cpp" ]
