@@ -17,6 +17,8 @@ import("//build/test.gni")
 import("../../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../../dsoftbus.gni")
 
+dsoftbus_root_path = "../../.."
+
 if (!defined(ohos_lite)) {
   module_output_path = "dsoftbus/adapter"
   bt_test_sources = [ "bluetooth_mock.cpp" ]
