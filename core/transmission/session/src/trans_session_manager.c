@@ -26,7 +26,7 @@
 #include "trans_channel_callback.h"
 #include "softbus_hidumper_trans.h"
 
-#define MAX_SESSION_SERVER_NUM 32
+#define MAX_SESSION_SERVER_NUM 100
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
 
 static SoftBusList *g_sessionServerList = NULL;
