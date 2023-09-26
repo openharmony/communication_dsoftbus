@@ -160,7 +160,8 @@ static bool IsEnableP2pReuse(const char *networkId)
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) || ((remote & (1 << BIT_WIFI_P2P_REUSE)) == 0)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p reuse capa disable, local:%d, remote:%d", local, remote);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p reuse capa disable, local:" PRIu64 ", remote:%"  PRIu64,
+            local, remote);
         return false;
     }
     return true;
@@ -193,7 +194,8 @@ static bool IsEnableBleDirect(const char *networkId)
     }
     if (((local & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0) ||
         ((remote & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble direct capa disable, local:%d, remote:%d", local, remote);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble direct capa disable, local:%" PRIu64 ", remote:%" PRIu64,
+            local, remote);
         return false;
     }
     return true;
@@ -211,7 +213,8 @@ static bool IsEnableCoc(const char *networkId)
         return false;
     }
     if (((local & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0) || ((remote & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coc capa disable, local:%d, remote:%d", local, remote);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coc capa disable, local:%" PRIu64 ", remote:%" PRIu64,
+            local, remote);
         return false;
     }
     return true;

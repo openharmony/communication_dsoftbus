@@ -60,6 +60,8 @@ public:
     virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual void RouteBuildClientAuthManager(int32_t cfd) = 0;
     virtual void RouteClearAuthChannelId(int32_t cfd) = 0;
+    virtual bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
+                                         uint32_t targetLen) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -89,6 +91,8 @@ public:
     MOCK_METHOD2(LnnPeerHasExchangeDiscoveryType, bool(const NodeInfo *, DiscoveryType));
     MOCK_METHOD1(RouteBuildClientAuthManager, void (int32_t));
     MOCK_METHOD1(RouteClearAuthChannelId, void (int32_t));
+    MOCK_METHOD(bool, GetJsonObjectStringItem, (const cJSON *json, const char * const string, char *target,
+                uint32_t targetLen), (override));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

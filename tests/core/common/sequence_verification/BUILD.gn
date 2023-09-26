@@ -16,6 +16,8 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/test.gni")
   import("../../../../dsoftbus.gni")
 
+  dsoftbus_root_path = "../../../.."
+
   if (ohos_build_type == "debug") {
     unittest("SequenceVerificationTest") {
       output_extension = "bin"

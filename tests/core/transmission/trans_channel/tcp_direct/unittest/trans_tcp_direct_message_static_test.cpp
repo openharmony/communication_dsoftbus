@@ -97,7 +97,6 @@ SessionConn *TestSetSessionConn()
     if (conn == nullptr) {
         return nullptr;
     }
-    (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
@@ -139,6 +138,10 @@ AppInfo *TestSetAppInfo()
 HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    if(conn == NULL) {
+        return;
+    }
+
     conn->appInfo.routeType = WIFI_STA;
     uint32_t cipherFlagBr = FLAG_BR;
     uint32_t cipherFlagBle = FLAG_BLE;
@@ -187,6 +190,9 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Le
 {
     int32_t ret;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    if(conn == NULL) {
+        return;
+    }
 
     ret = TransTdcPostFisrtData(conn);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -260,11 +266,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessMessage0006, TestSize.Level1)
 
     ret = ProcessMessage(channelId, flagRequst, seq, dataTmp);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-
-    SoftBusFree(data);
-    data = nullptr;
-    SoftBusFree(dataTmp);
-    dataTmp = nullptr;
 }
 
 /**
@@ -321,7 +322,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetUuidByChanId0008, TestSize.Level1)
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfig0009, TestSize.Level1)
 {
     int32_t ret;
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));;
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
 
     appInfo->businessType = BUSINESS_TYPE_FILE;
     ret = TransTdcFillDataConfig(appInfo);
@@ -355,11 +356,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetDataBufNodeById0010, TestSi
     int32_t channelId = 1;
     ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
     EXPECT_TRUE(node == NULL || node->data == NULL);
-
-    SoftBusFree(node);
-    node = nullptr;
 }
-
 
 /**
  * @tc.name: ProcessReceivedData0011
@@ -385,13 +382,9 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
-    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
 
-    ret = TransTdcSrvProcData(conn->listenMod, channelId);
+    ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    SoftBusFree(conn);
-    conn = nullptr;
 }
 
 /**
@@ -408,8 +401,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
     string recvStr = "testrecvBuf";
     int32_t recvLen = 10;
     void *tmp = SoftBusCalloc(recvLen);
-    char *recvBuf = reinterpret_cast<char *>(tmp);
+    if(tmp == NULL) {
+        return;
+    }
 
+    char *recvBuf = reinterpret_cast<char *>(tmp);
     ret = TransTdcUpdateDataBufWInfo(channelId, recvBufNull, recvLen);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
@@ -417,10 +413,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
     ret = TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    SoftBusFree(recvBufNull);
-    recvBufNull = nullptr;
-    SoftBusFree(recvBuf);
-    recvBuf = nullptr;
     SoftBusFree(tmp);
     tmp = nullptr;
 }

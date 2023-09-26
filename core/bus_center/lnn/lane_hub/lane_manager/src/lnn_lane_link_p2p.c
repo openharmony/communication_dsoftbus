@@ -535,9 +535,13 @@ FAIL:
 
 static void OnWifiDirectConnectSuccess(int32_t p2pRequestId, const struct WifiDirectLink *link)
 {
-    LLOGI("requestId=%d p2pGenLinkId=%d", p2pRequestId, link->linkId);
     int errCode = SOFTBUS_OK;
     LaneLinkInfo linkInfo;
+    if (link == NULL) {
+        LLOGE("link is null");
+        return;
+    }
+    LLOGI("requestId=%d p2pGenLinkId=%d", p2pRequestId, link->linkId);
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     linkInfo.type = LANE_P2P;
     linkInfo.linkInfo.p2p.bw = LANE_BW_RANDOM;
@@ -837,19 +841,19 @@ int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId,
     uint64_t local = 0;
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &local);
     if (ret != SOFTBUS_OK) {
-        LLOGE("get local feature capa failed, error=%u, local=%u", ret, local);
+        LLOGE("get local feature capa failed, error=%u, local=%" PRIu64, ret, local);
         return ret;
     }
     uint64_t remote = 0;
     ret = LnnGetRemoteNumU64Info(request->peerNetworkId, NUM_KEY_FEATURE_CAPA, &remote);
     if (ret != SOFTBUS_OK) {
-        LLOGE("get remote feature capa failed, error=%u, remote=%u", ret, remote);
+        LLOGE("get remote feature capa failed, error=%u, remote=%" PRIu64, ret, remote);
         return ret;
     }
 
     if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0) ||
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0)) {
-        LLOGI("open auth to connect p2p, local=%u, remot=%u", local, remote);
+        LLOGI("open auth to connect p2p, local=%" PRIu64 ", remot=%" PRIu64, local, remote);
         return OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
 
