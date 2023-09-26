@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection"
+dsoftbus_root_path = "../../../../.."
 
 ohos_unittest("WifiDirectProcessorTest") {
   module_out_path = module_output_path
@@ -32,6 +33,7 @@ ohos_unittest("WifiDirectProcessorTest") {
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel",
   ]
 
   deps = [
@@ -47,13 +49,84 @@ ohos_unittest("WifiDirectProcessorTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+  sources = [ "wifi_direct_processor_test.cpp" ]
+}
+
+ohos_unittest("WifiDirectProcessorMockTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
+    "$dsoftbus_root_path/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "//third_party/googletest/googletest/include",
+    "//third_party/googletest/googletest/src",
+    "//third_party/bounds_checking_function/include",
+    "//foundation/communication/wifi/wifi/interfaces/kits/c",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
   sources = [
-    "wifi_direct_processor_mock.cpp",
-    "wifi_direct_processor_test.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data/info_container.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data/inner_link.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data/interface_info.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data/link_info.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data/link_manager.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data/negotiate_message.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data/resource_manager.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity/p2p_available_state.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity/p2p_entity.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity/p2p_entity_state.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity/p2p_group_connecting_state.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity/p2p_group_creating_state.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity/p2p_group_removing_state.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/p2p_entity/p2p_unavailable_state.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/entity/wifi_direct_entity_factory.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/processor/p2p_v1_processor.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/processor/p2p_v2_processor.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/protocol/json_protocol.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/protocol/tlv_protocol.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/protocol/wifi_direct_protocol_factory.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_anonymous.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_ipv4_info.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_network_utils.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_perf_recorder.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_timer_list.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_work_queue.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_coexist_rule.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_ip_manager.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_role_negotiator.c",
+    "default_negotiate_channel_mock.cpp",
+    "p2p_v1_processor_mock_test.cpp",
+    "p2p_v2_processor_mock_test.cpp",
+    "wifi_direct_negotiator_mock.cpp",
+    "wifi_direct_p2p_adapter_mock.cpp",
   ]
 }
 
 group("unittest") {
   testonly = true
-  deps = [ ":WifiDirectProcessorTest" ]
+  deps = [
+    ":WifiDirectProcessorMockTest",
+    ":WifiDirectProcessorTest",
+  ]
 }

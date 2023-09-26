@@ -16,6 +16,8 @@ import("../../../../../dsoftbus.gni")
 import("../../common/mock/mock.gni")
 
 module_output_path = "dsoftbus/transmission"
+dsoftbus_root_path = "../../../../.."
+softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 ohos_unittest("TransProxyChannelTest") {
   module_out_path = module_output_path

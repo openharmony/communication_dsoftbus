@@ -13,6 +13,12 @@
 
 import("../dsoftbus.gni")
 
+dsoftbus_root_path = ".."
+softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
+dsoftbus_feature_product_config_path =
+    "${dsoftbus_root_path}/adapter/default_config"
+softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dsoftbus_adapter_common_interface") {

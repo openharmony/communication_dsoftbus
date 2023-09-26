@@ -183,7 +183,7 @@ void LnnDCProcessOnlineState(bool isOnline, const NodeBasicInfo *info)
     }
 }
 
-int32_t InitDecisionCenter()
+int32_t InitDecisionCenter(void)
 {
     g_exceptionConnMgr.connections = CreateSoftBusList();
     if (g_exceptionConnMgr.connections == NULL) {
@@ -196,7 +196,7 @@ int32_t InitDecisionCenter()
     return SOFTBUS_OK;
 }
 
-void DeinitDecisionCenter()
+void DeinitDecisionCenter(void)
 {
     g_exceptionConnMgr.initFlag = false;
     if (g_exceptionConnMgr.connections != NULL) {

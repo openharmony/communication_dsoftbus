@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <securec.h>
+
 #include "common_list.h"
 #include "wifi_direct_processor.h"
 #include "wifi_direct_types.h"
@@ -33,7 +34,6 @@
 #include "softbus_feature_config.h"
 #include "softbus_log.h"
 #include "channel/default_negotiate_channel.h"
-#include "wifi_direct_processor_mock.h"
 #include "resource_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "link_info.h"
@@ -87,43 +87,6 @@ HWTEST_F(WifiProcessorTest, testFactoryCreateProcessor001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testDisconnectLink001
-* @tc.desc: test DisconnectLink
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiProcessorTest, testV1DisconnectLink001, TestSize.Level1)
-{
-    struct WifiDirectConnectInfo connectInfo;
-    WifiProcessorMock wifiProcessorMock;
-    (void)memset_s(&connectInfo, sizeof(connectInfo), 0, sizeof(connectInfo));
-    connectInfo.requestId = 2;
-    connectInfo.pid = 3;
-    connectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
-    connectInfo.expectApiRole = WIFI_DIRECT_ROLE_GO;
-    char myMac[MAC_ADDR_STR_LEN] = "00:11:22:33:44:55";
-    strcpy_s(connectInfo.remoteMac, sizeof(connectInfo.remoteMac), myMac);
-    connectInfo.isNetworkDelegate = true;
-    connectInfo.linkId = 4;
-    struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
-    connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
-    struct InnerLink innerlink;
-    (void)memset_s(&innerlink, sizeof(innerlink), 0, sizeof(innerlink));
-    InnerLinkConstructor(&innerlink);
-    innerlink.putString(&innerlink, IL_KEY_REMOTE_BASE_MAC, "00:1A:2B:3C:4D:56");
-    EXPECT_EQ(GetP2pV1Processor()->disconnectLink(nullptr, &innerlink), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(GetP2pV1Processor()->disconnectLink(&connectInfo, nullptr), SOFTBUS_INVALID_PARAM);
-    const char *interface = "1";
-    struct InterfaceInfo interfaceInfo;
-    InterfaceInfoConstructor(&interfaceInfo);
-    interfaceInfo.putInt(&interfaceInfo, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_GO);
-    EXPECT_CALL(wifiProcessorMock, GetInterfaceInfo(interface)).WillRepeatedly(Return(&interfaceInfo));
-    int32_t ret = GetP2pV1Processor()->disconnectLink(&connectInfo, &innerlink);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-}
-
-/*
 * @tc.name: testProcessNegotiateMessage001
 * @tc.desc: test ProcessNegotiateMessage
 * @tc.type: FUNC
@@ -133,11 +96,12 @@ HWTEST_F(WifiProcessorTest, testV1ProcessNegotiateMessage001, TestSize.Level1)
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111);
-    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)(struct WifiDirectNegotiateChannel *)&channel);
+    
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
 
     int32_t ret = self->processNegotiateMessage(CMD_CONN_V1_REQ, msg);
+    DefaultNegotiateChannelDelete(channel);
     NegotiateMessageDelete(msg);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
@@ -223,6 +187,46 @@ HWTEST_F(WifiProcessorTest, testV1ProcessNegotiateMessage006, TestSize.Level1)
 }
 
 /*
+* @tc.name: testProcessNegotiateMessage007
+* @tc.desc: test ProcessNegotiateMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV1ProcessNegotiateMessage007, TestSize.Level1)
+{
+    ResourceManagerInit();
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+    char myMac[MAC_ADDR_STR_LEN] = "00:11:22:33:44:55";
+    msg->putString(msg, NM_KEY_MAC, myMac);
+
+    int32_t ret = self->processNegotiateMessage(CMD_REUSE_REQ, msg);
+    NegotiateMessageDelete(msg);
+    EXPECT_EQ(ret, ERROR_POST_DATA_FAILED);
+}
+
+/*
+* @tc.name: testProcessNegotiateMessage008
+* @tc.desc: test ProcessNegotiateMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV1ProcessNegotiateMessage008, TestSize.Level1)
+{
+    ResourceManagerInit();
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    char myMac[MAC_ADDR_STR_LEN] = "00:11:22:33:44:55";
+    msg->putString(msg, NM_KEY_MAC, myMac);
+
+    int32_t ret = self->processNegotiateMessage(CMD_DISCONNECT_V1_REQ, msg);
+    NegotiateMessageDelete(msg);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
 * @tc.name: testOnOperationEvent001
 * @tc.desc: test OnOperationEvent
 * @tc.type: FUNC
@@ -231,17 +235,17 @@ HWTEST_F(WifiProcessorTest, testV1ProcessNegotiateMessage006, TestSize.Level1)
 HWTEST_F(WifiProcessorTest, testV1OnOperationEvent001, TestSize.Level1)
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
-    int32_t result = 1;
-    int32_t requestId = 1;
-    struct NegotiateMessage msg;
-    NegotiateMessageConstructor(&msg);
-    struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111);
-    msg.putPointer(&msg, NM_KEY_NEGO_CHANNEL, (void **)(struct WifiDirectNegotiateChannel *)&channel);
+    constexpr int32_t result = 1;
+    constexpr int32_t requestId = 1;
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+    self->currentMsg = msg;
+    self->needReply =  false;
     int32_t ret = self->onOperationEvent(requestId, result);
-    DefaultNegotiateChannelDestructor(&channel);
-    NegotiateMessageDestructor(&msg);
-    EXPECT_TRUE(ret == false);
+    DefaultNegotiateChannelDelete(channel);
+    NegotiateMessageDelete(msg);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /*
@@ -255,8 +259,9 @@ HWTEST_F(WifiProcessorTest, testV1OnOperationEvent002, TestSize.Level1)
     struct P2pV1Processor *self = GetP2pV1Processor();
     constexpr int32_t result = 1;
     constexpr int32_t requestId = 1;
+    self->currentMsg = nullptr;
     int32_t ret = self->onOperationEvent(requestId, result);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -324,6 +329,54 @@ HWTEST_F(WifiProcessorTest, testV1OnOperationEvent006, TestSize.Level1)
 }
 
 /*
+* @tc.name: testOnOperationEvent007
+* @tc.desc: test OnOperationEvent
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV1OnOperationEvent007, TestSize.Level1)
+{
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    constexpr int32_t result = 1;
+    constexpr int32_t requestId = 1;
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+    self->currentMsg = msg;
+    self->needReply =  true;
+    int32_t ret = self->onOperationEvent(requestId, result);
+    DefaultNegotiateChannelDelete(channel);
+    NegotiateMessageDelete(msg);
+    EXPECT_EQ(ret, ERROR_POST_DATA_FAILED);
+}
+
+/*
+* @tc.name: testOnOperationEvent008
+* @tc.desc: test OnOperationEvent
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV1OnOperationEvent008, TestSize.Level1)
+{
+    ResourceManagerInit();
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    constexpr int32_t result = OK;
+    constexpr int32_t requestId = 1;
+    self->currentState = PROCESSOR_STATE_WAITING_CREATE_GROUP;
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+    char myMac[MAC_ADDR_STR_LEN] = "00:11:22:33:44:55";
+    msg->putString(msg, NM_KEY_MAC, myMac);
+    self->currentMsg = msg;
+    self->needReply = true;
+    self->currentRequestId = 233;
+    int32_t ret = self->onOperationEvent(requestId, result);
+    NegotiateMessageDelete(msg);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/*
  * @tc.name: testProcessUnhandledRequest001
  * @tc.desc: test ProcessUnhandledRequest
  * @tc.type: FUNC
@@ -335,13 +388,33 @@ HWTEST_F(WifiProcessorTest, testV1ProcessUnhandledRequest001, TestSize.Level1)
     constexpr int32_t reason = 100;
     struct NegotiateMessage msg;
     NegotiateMessageConstructor(&msg);
-    struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111);
-    msg.putPointer(&msg, NM_KEY_NEGO_CHANNEL, (void **)(struct WifiDirectNegotiateChannel *)&channel);
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    msg.putPointer(&msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg.putInt(&msg, NM_KEY_COMMAND_TYPE, CMD_REUSE_REQ);
 
     self->processUnhandledRequest(&msg, reason);
-    DefaultNegotiateChannelDestructor(&channel);
+    DefaultNegotiateChannelDelete(channel);
+    NegotiateMessageDestructor(&msg);
+}
+
+/*
+ * @tc.name: testProcessUnhandledRequest002
+ * @tc.desc: test ProcessUnhandledRequest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiProcessorTest, testV1ProcessUnhandledRequest002, TestSize.Level1)
+{
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    constexpr int32_t reason = 100;
+    struct NegotiateMessage msg;
+    NegotiateMessageConstructor(&msg);
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    msg.putPointer(&msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+    msg.putInt(&msg, NM_KEY_COMMAND_TYPE, CMD_REUSE_REQ);
+
+    self->processUnhandledRequest(&msg, reason);
+    DefaultNegotiateChannelDelete(channel);
     NegotiateMessageDestructor(&msg);
 }
 
@@ -367,50 +440,14 @@ HWTEST_F(WifiProcessorTest, testV1ReuseLink001, TestSize.Level1)
     InnerLinkConstructor(&link);
     ResourceManagerInit();
     struct InterfaceInfo *info1 = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    struct WifiDirectIpv4Info *localIpv4 = (struct WifiDirectIpv4Info *)info1->get(info1, II_KEY_IPV4, NULL, NULL);
-    link.putRawData(&link, IL_KEY_LOCAL_IPV4, localIpv4, sizeof(struct WifiDirectIpv4Info));
+
+    struct WifiDirectIpv4Info ipv4;
+    WifiDirectIpStringToIpv4("192.168.1.1", &ipv4);
+    info1->putRawData(info1, II_KEY_IPV4, &ipv4, sizeof(ipv4));
+   
     int32_t ret = self->reuseLink(&info, &link);
     InnerLinkDestructor(&link);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-}
-
-/*
-* @tc.name: testV1CreateLink001
-* @tc.desc: test CreateLink
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiProcessorTest, testV1CreateLink001, TestSize.Level1)
-{
-    WifiProcessorMock wifiProcessorMock;
-    struct WifiDirectConnectInfo connectInfo;
-    (void)memset_s(&connectInfo, sizeof(connectInfo), 0, sizeof(connectInfo));
-    EXPECT_EQ(GetP2pV1Processor()->createLink(nullptr), SOFTBUS_INVALID_PARAM);
-
-    connectInfo.requestId = 2;
-    connectInfo.pid = 3;
-    connectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
-    connectInfo.expectApiRole = WIFI_DIRECT_ROLE_GO;
-    const char str[] = "00:1A:2B:3C:4D:56";
-    strcpy_s(connectInfo.remoteMac, sizeof(32), str);
-    connectInfo.isNetworkDelegate = true;
-    connectInfo.linkId = 4;
-    struct WifiProcessorMock::WifiDirectNegoChannelMock channel;
-    wifiProcessorMock.WifiDirectNegoChannelMockConstructor(&channel, 11111111);
-    
-    connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
-
-    wifiProcessorMock.SetupSuccessStub();
-    EXPECT_EQ(GetP2pV1Processor()->createLink(&connectInfo), V1_ERROR_IF_NOT_AVAILABLE);
-
-    struct InterfaceInfo interfaceInfo;
-    InterfaceInfoConstructor(&interfaceInfo);
-    interfaceInfo.putInt(&interfaceInfo, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_GO);
-    EXPECT_EQ(GetP2pV1Processor()->createLink(&connectInfo), V1_ERROR_IF_NOT_AVAILABLE);
-
-    ResourceManagerInit();
-    int32_t ret = GetP2pV1Processor()->createLink(&connectInfo);
-    EXPECT_EQ(ret, V1_ERROR_IF_NOT_AVAILABLE);
 }
 
 /*
@@ -429,7 +466,7 @@ HWTEST_F(WifiProcessorTest, testV2ProcessReuseLink001, TestSize.Level1)
     strcpy_s(info.remoteMac, sizeof(info.remoteMac), myMac);
     struct DefaultNegotiateChannel channel;
     DefaultNegotiateChannelConstructor(&channel, 222);
-    info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel;
+    info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel; 
 
     struct InnerLink link;
     InnerLinkConstructor(&link);
@@ -482,6 +519,39 @@ HWTEST_F(WifiProcessorTest, testV2OnOperationEvent001, TestSize.Level1)
 }
 
 /*
+* @tc.name: testV2DisconnectLink001
+* @tc.desc: test V2DisconnectLink
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV2DisconnectLink001, TestSize.Level1)
+{
+    struct P2pV2Processor *self = GetP2pV2Processor();
+    struct WifiDirectConnectInfo info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    info.requestId = 1111;
+    char myMac[MAC_ADDR_STR_LEN] = "00:11:22:33:44:55";
+    strcpy_s(info.remoteMac, sizeof(info.remoteMac), myMac);
+    DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(1111);
+    
+    info.negoChannel = (struct WifiDirectNegotiateChannel *)channel;
+
+    struct InnerLink *link = InnerLinkNew();
+    ResourceManagerInit();
+    link->putString(link, IL_KEY_LOCAL_INTERFACE, "p2p0");
+    int32_t ret = self->disconnectLink(&info, link);
+
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    link->putBoolean(link, IL_KEY_IS_BEING_USED_BY_REMOTE, true);
+    EXPECT_EQ(self->disconnectLink(&info, link), ERROR_WIFI_DIRECT_PACK_DATA_FAILED);
+
+    link->putBoolean(link, IL_KEY_IS_BEING_USED_BY_REMOTE, false);
+    EXPECT_EQ(self->disconnectLink(&info, link), SOFTBUS_ERR);
+    InnerLinkDestructor(link);
+}
+
+/*
 * @tc.name: testV2ProcessNegotiateMessage001
 * @tc.desc: test ProcessNegotiateMessage
 * @tc.type: FUNC
@@ -501,6 +571,93 @@ HWTEST_F(WifiProcessorTest, testV2ProcessNegotiateMessage001, TestSize.Level1)
     EXPECT_EQ(GetP2pV2Processor()->processNegotiateMessage(CMD_DISCONNECT_V2_REQ, msg), SOFTBUS_ERR);
     EXPECT_EQ(GetP2pV2Processor()->processNegotiateMessage(CMD_DISCONNECT_V2_RESP, msg),
         ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG);
+}
+
+/*
+* @tc.name: testV2ProcessUnhandledRequest001
+* @tc.desc: test ProcessUnhandledRequest
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV2ProcessUnhandledRequest001, TestSize.Level1)
+{
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    channel->tlvFeature = true;
+    msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+    msg->putInt(msg, NM_KEY_SESSION_ID, 111);
+    
+    struct LinkInfo linkInfo;
+    LinkInfoConstructor(&linkInfo);
+    linkInfo.putString(&linkInfo, LI_KEY_LOCAL_INTERFACE, "123");
+    linkInfo.putString(&linkInfo, LI_KEY_REMOTE_INTERFACE, "123");
+    linkInfo.putInt(&linkInfo, LI_KEY_LOCAL_LINK_MODE, 5);
+    linkInfo.putInt(&linkInfo, LI_KEY_REMOTE_LINK_MODE, 5);
+    linkInfo.putBoolean(&linkInfo, LI_KEY_IS_CLIENT, true);
+    linkInfo.putString(&linkInfo, LI_KEY_REMOTE_BASE_MAC, "00:11:22:33:44:55");
+    msg->putContainer(msg, NM_KEY_LINK_INFO, (struct InfoContainer *)&linkInfo, sizeof(linkInfo));
+    WifiDirectNegotiatorInit();
+
+    GetP2pV2Processor()->processUnhandledRequest(msg, 333);
+    DefaultNegotiateChannelDelete(channel);
+    LinkInfoDestructor(&linkInfo);
+    NegotiateMessageDelete(msg);
+}
+
+/*
+* @tc.name: testV2ProcessNegotiateMessage002
+* @tc.desc: test ProcessNegotiateMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV2ProcessNegotiateMessage002, TestSize.Level1)
+{
+    WifiDirectNegotiatorInit();
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    GetP2pV2Processor()->needReply = false;
+    struct LinkInfo linkInfo;
+    LinkInfoConstructor(&linkInfo);
+    linkInfo.putString(&linkInfo, LI_KEY_LOCAL_INTERFACE, "p2p0");
+    linkInfo.putString(&linkInfo, LI_KEY_REMOTE_INTERFACE, "p2p0");
+    linkInfo.putInt(&linkInfo, LI_KEY_LOCAL_LINK_MODE, WIFI_DIRECT_API_ROLE_GO);
+    linkInfo.putInt(&linkInfo, LI_KEY_REMOTE_LINK_MODE, WIFI_DIRECT_API_ROLE_GC);
+    linkInfo.putBoolean(&linkInfo, LI_KEY_IS_CLIENT, true);
+    linkInfo.putString(&linkInfo, LI_KEY_REMOTE_BASE_MAC, "00:11:22:33:44:55");
+    msg->putContainer(msg, NM_KEY_LINK_INFO, (struct InfoContainer *)&linkInfo, sizeof(linkInfo));
+    ResourceManagerInit();
+    EXPECT_EQ(GetP2pV2Processor()->processNegotiateMessage(CMD_CONN_V2_REQ_1, msg), SOFTBUS_ERR);
+
+    linkInfo.putInt(&linkInfo, LI_KEY_LOCAL_LINK_MODE, WIFI_DIRECT_API_ROLE_GC);
+    msg->putContainer(msg, NM_KEY_LINK_INFO, (struct InfoContainer *)&linkInfo, sizeof(linkInfo));
+    EXPECT_EQ(GetP2pV2Processor()->processNegotiateMessage(CMD_CONN_V2_REQ_1, msg), SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: testV2ProcessNegotiateMessage003
+* @tc.desc: test ProcessNegotiateMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiProcessorTest, testV2ProcessNegotiateMessage003, TestSize.Level1)
+{
+    WifiDirectNegotiatorInit();
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    GetP2pV2Processor()->needReply = false;
+    struct LinkInfo linkInfo;
+    LinkInfoConstructor(&linkInfo);
+    linkInfo.putString(&linkInfo, LI_KEY_LOCAL_INTERFACE, "p2p0");
+    linkInfo.putString(&linkInfo, LI_KEY_REMOTE_INTERFACE, "p2p0");
+    linkInfo.putInt(&linkInfo, LI_KEY_LOCAL_LINK_MODE, WIFI_DIRECT_API_ROLE_GO);
+    linkInfo.putInt(&linkInfo, LI_KEY_REMOTE_LINK_MODE, WIFI_DIRECT_API_ROLE_GC);
+    linkInfo.putBoolean(&linkInfo, LI_KEY_IS_CLIENT, true);
+    linkInfo.putString(&linkInfo, LI_KEY_REMOTE_BASE_MAC, "00:11:22:33:44:55");
+    msg->putContainer(msg, NM_KEY_LINK_INFO, (struct InfoContainer *)&linkInfo, sizeof(linkInfo));
+    ResourceManagerInit();
+    EXPECT_EQ(GetP2pV2Processor()->processNegotiateMessage(CMD_CONN_V2_REQ_2, msg), SOFTBUS_ERR);
+
+    linkInfo.putInt(&linkInfo, LI_KEY_LOCAL_LINK_MODE, WIFI_DIRECT_API_ROLE_GC);
+    msg->putContainer(msg, NM_KEY_LINK_INFO, (struct InfoContainer *)&linkInfo, sizeof(linkInfo));
+    EXPECT_EQ(GetP2pV2Processor()->processNegotiateMessage(CMD_CONN_V2_REQ_2, msg), SOFTBUS_ERR);
 }
 
 }

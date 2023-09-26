@@ -445,7 +445,7 @@ static int64_t GetLatestIdByConnInfo(const AuthConnInfo *connInfo, AuthLinkType 
     uint64_t latestAuthId = AUTH_INVALID_ID;
     uint64_t latestVerifyTime = 0;
     for (uint32_t i = 0; i< num; i++) {
-        if (auth[i] == NULL && auth[i]->lastVerifyTime > latestVerifyTime) {
+        if (auth[i] != NULL && auth[i]->lastVerifyTime > latestVerifyTime) {
             latestAuthId = auth[i]->authId;
             latestVerifyTime = auth[i]->lastVerifyTime;
         }

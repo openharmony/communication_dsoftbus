@@ -71,6 +71,7 @@ char *JSON_PrintUnformatted(const JsonObj *obj)
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return nullptr;
     }
     std::string jsonString = json->dump();
@@ -121,6 +122,7 @@ bool JSON_AddBoolToObject(JsonObj *obj, const char *key, bool value)
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     (*json)[key] = value;
@@ -135,6 +137,7 @@ bool JSON_GetBoolFromOject(const JsonObj *obj, const char *key, bool *value)
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     nlohmann::json item = (*json)[key];
@@ -155,6 +158,7 @@ static bool JSON_AddIntegerToObject(JsonObj *obj, const char *key, Integer num)
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     (*json)[key] = num;
@@ -170,6 +174,7 @@ static bool JSON_GetIntegerFromObject(const JsonObj *obj, const char *key, Integ
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     nlohmann::json item = (*json)[key];
@@ -231,6 +236,7 @@ bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value)
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     (*json)[key] = std::string(value);
@@ -245,6 +251,7 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     nlohmann::json item = (*json)[key];
@@ -269,6 +276,7 @@ bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const cha
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     nlohmann::json valueStringArray = nlohmann::json::array();
@@ -281,12 +289,13 @@ bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const cha
 
 bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, char **value, int32_t *len)
 {
-    if (value == NULL && obj == NULL && key == NULL && len == NULL) {
+    if (value == NULL || obj == NULL || key == NULL || len == NULL || *len <= 0) {
         JSON_LOGE("input invalid");
         return false;
     }
     nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
     if (json == nullptr) {
+        JSON_LOGE("invaild json param");
         return false;
     }
     nlohmann::json item = (*json)[key];
@@ -294,7 +303,10 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
         JSON_LOGE("cannot find or invalid [%{public}s]", key);
         return false;
     }
-    *len = item.size();
+    if (*len < item.size()) {
+        JSON_LOGE("item size invalid, size=%lu.", (unsigned long)item.size());
+        return false;
+    }
     int32_t i = 0;
     for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
         std::string str = it.value().get<std::string>();
@@ -310,5 +322,6 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
         }
         i++;
     }
+    *len = item.size();
     return true;
 }

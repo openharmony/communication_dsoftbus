@@ -117,6 +117,7 @@ string TestGetMsgPack()
     cJSON_Delete(msg);
     return data;
 }
+
 /**
  * @tc.name: StartNewP2pListenerTest001
  * @tc.desc: StartNewP2pListener, use the wrong parameter.
@@ -308,5 +309,120 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
     OnAuthDataRecv(authId, data);
 
     SoftBusFree(data);
+}
+
+/**
+ * @tc.name: OpenAuthConntest002
+ * @tc.desc: OpenAuthConntest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    if (appInfo == nullptr) {
+        return ;
+    }
+    int32_t ret;
+    int32_t reason = 1;
+    uint32_t requestId = 1;
+    int64_t authId = 1;
+    bool isMeta = 1;
+
+    (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
+    OnAuthConnOpenFailed(requestId, reason);
+    OnAuthConnOpened(requestId, authId);
+    ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, isMeta);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    SoftBusFree(appInfo);
+    appInfo = nullptr;
+}
+
+/**
+ * @tc.name: SendVerifyP2pRsp003
+ * @tc.desc: SendVerifyP2pRsp.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
+{
+    int64_t authId = 1;
+    int32_t ret;
+    int32_t errCode = SOFTBUS_ERR;
+    int64_t seq = 1;
+    bool isAuthLink = true;
+    bool notAuthLink = false;
+    SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", isAuthLink);
+
+    ret = SendVerifyP2pRsp(authId, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", isAuthLink);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = SendVerifyP2pRsp(authId, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", notAuthLink);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OpenNewAuthConn004
+ * @tc.desc: OpenNewAuthConn.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    if (appInfo == nullptr) {
+        return ;
+    }
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == nullptr) {
+        SoftBusFree(appInfo);
+        appInfo = nullptr;
+        return ;
+    }
+    int32_t ret;
+    int32_t newChannelId = 1;
+
+    (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
+    ret = OpenNewAuthConn(appInfo, conn, newChannelId, conn->requestId);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    SoftBusFree(appInfo);
+    appInfo = nullptr;
+    SoftBusFree(conn);
+    conn = nullptr;
+}
+
+/**
+ * @tc.name: StartVerifyP2pInfo005
+ * @tc.desc: StartVerifyP2pInfo.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    if (appInfo == nullptr) {
+        return ;
+    }
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == nullptr) {
+        SoftBusFree(appInfo);
+        appInfo = nullptr;
+        return ;
+    }
+    int32_t ret;
+
+    conn->authId = AUTH_INVALID_ID;
+    ret = StartVerifyP2pInfo(appInfo, conn);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    conn->authId = 1;
+    ret = StartVerifyP2pInfo(appInfo, conn);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    SoftBusFree(appInfo);
+    appInfo = nullptr;
+    SoftBusFree(conn);
+    conn = nullptr;
 }
 }

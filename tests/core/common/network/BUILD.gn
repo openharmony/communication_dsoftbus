@@ -13,6 +13,8 @@
 
 import("../../../../dsoftbus.gni")
 
+dsoftbus_root_path = "../../../.."
+
 if (defined(ohos_lite)) {
 } else {
   import("//build/test.gni")

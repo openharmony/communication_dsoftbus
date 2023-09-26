@@ -16,6 +16,8 @@ import("../../../../core/bus_center/lnn/decision_center/decision_center.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/LNN"
+dsoftbus_root_path = "../../../.."
+
 bus_center_unittest_dirs = [
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",

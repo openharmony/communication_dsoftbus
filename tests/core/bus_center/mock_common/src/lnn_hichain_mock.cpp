@@ -18,6 +18,7 @@
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_log.h"
+#include "softbus_adapter_json.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,6 +27,10 @@ namespace OHOS {
 const int32_t GRUOP_NUM1 = 10;
 const int32_t GRUOP_NUM2 = 12;
 const int32_t GRUOP_NUM3 = 100;
+char jsonChar = 'A';
+bool flage  = false;
+bool is_return_device_num = false;
+bool is_return_true = false;
 void *g_hichainInterface;
 
 LnnHichainInterfaceMock::LnnHichainInterfaceMock()
@@ -110,7 +115,6 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, con
 {
     (void)osAccountId;
     (void)appId;
-    (void)groupType;
     *groupNum = 1;
 
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
@@ -142,5 +146,100 @@ int32_t LnnHichainInterfaceMock::ActionofunRegDataChangeListener(const char *app
     (void)appId;
     LnnHichainInterfaceMock::g_datachangelistener.clear();
     return SOFTBUS_OK;
+}
+int32_t LnnHichainInterfaceMock::getRelatedGroups(
+    int32_t accountId, const char *auth_appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
+{
+    (void)accountId;
+    (void)auth_appId;
+    (void)groupId;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "getRelatedGroups test");
+    if (!flage) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "getRelatedGroups test return false");
+        flage = true;
+        return SOFTBUS_ERR;
+    }
+    if (is_return_device_num) {
+        char* testChar = &jsonChar;
+        *deviceNum = strlen(testChar) + 1;
+        *returnDevInfoVec = testChar;
+        return SOFTBUS_OK;
+    }
+    is_return_device_num = true;
+    return SOFTBUS_OK;
+}
+int32_t LnnHichainInterfaceMock::getRelatedGroups1(
+    int32_t accountId, const char *auth_appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
+{
+    (void)accountId;
+    (void)auth_appId;
+    (void)groupId;
+    *deviceNum = 1;
+    JsonObj *obj = JSON_CreateObject();
+    if (obj == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create jsonObject err");
+        return SOFTBUS_ERR;
+    }
+    if (!JSON_AddStringToObject(obj, "groupName", "mygroup<256>E469") ||
+        !JSON_AddStringToObject(obj, "groupId", "1D77EBFF0349B27EED57014DD7B2449A") ||
+        !JSON_AddStringToObject(obj, "groupOwner", "com.hhhs.secueity") ||
+        !JSON_AddInt32ToObject(obj, "groupType", 256) ||
+        !JSON_AddInt32ToObject(obj, "groupVisibility", 26)) {
+        return SOFTBUS_ERR;
+    }
+    char* jsons = JSON_PrintUnformatted(obj);
+    *returnDevInfoVec = jsons;
+
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "getRelatedGroups1 test");
+    JSON_Delete(obj);
+    return SOFTBUS_OK;
+}
+int32_t LnnHichainInterfaceMock::getTrustedDevices(
+        int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
+{
+    (void)osAccountId;
+    (void)appId;
+    (void)groupId;
+    *deviceNum = 1;
+    JsonObj *obj = JSON_CreateObject();
+    if (obj == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create jsonObject err");
+        return SOFTBUS_ERR;
+    }
+    if (!JSON_AddStringToObject(obj, "authId", "ABCDEDF00ABCDE0021DD55ACFF")) {
+        return SOFTBUS_ERR;
+    }
+    char* jsons = JSON_PrintUnformatted(obj);
+    *returnDevInfoVec = jsons;
+    if (!is_return_true) {
+        is_return_true = true;
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnHichainInterfaceMock::getTrustedDevices1(
+        int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
+{
+    (void)osAccountId;
+    (void)appId;
+    (void)groupId;
+    
+    char jsonsStr[] = "{\"groupId\":\"1111\", \"groupType\":1}";
+    char* data = jsonsStr;
+    *returnDevInfoVec = data;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "returnDevInfoVec is invalid");
+    if (is_return_device_num) {
+        is_return_device_num = false;
+        return SOFTBUS_OK;
+    }
+    *deviceNum = 1;
+    return SOFTBUS_OK;
+}
+
+void LnnHichainInterfaceMock::destroyInfo(char **returnDevInfoVec)
+{
+    (void)returnDevInfoVec;
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "destroyInfo test");
 }
 } // namespace OHOS

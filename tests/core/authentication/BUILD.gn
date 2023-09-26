@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/auth"
+dsoftbus_root_path = "../../.."
 
 ohos_unittest("AuthTest") {
   module_out_path = module_output_path
@@ -398,6 +399,7 @@ ohos_unittest("AuthHichainTest") {
     "$dsoftbus_root_path/tests/core/authentication/unittest/auth_common_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "unittest/auth_hichain_test.cpp",
+    "unittest/auth_net_ledger_mock.cpp",
   ]
 
   include_dirs = [
@@ -417,6 +419,7 @@ ohos_unittest("AuthHichainTest") {
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/tests/sdk/common/include",
