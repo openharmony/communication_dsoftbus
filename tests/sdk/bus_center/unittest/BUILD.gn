@@ -13,6 +13,8 @@
 
 import("../../../../dsoftbus.gni")
 
+dsoftbus_root_path = "../../../.."
+
 bus_center_sdk_test_src = [ "bus_center_sdk_test.cpp" ]
 client_bus_center_test_src = [ "client_bus_center_test.cpp" ]
 softbus_center_sdk_test_src = [ "softbus_center_sdk_test.cpp" ]

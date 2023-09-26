@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
+dsoftbus_root_path = "../../../../../.."
 
 if (defined(ohos_lite)) {
   executable("dsoftbus_app_dfile") {
