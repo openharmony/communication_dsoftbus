@@ -292,6 +292,17 @@ EXIT_ERR:
     return NULL;
 }
 
+static void ShowClientSessionServer(void) {
+    ClientSessionServer *pos = NULL;
+    ClientSessionServer *tmp = NULL;
+    int count = 0;
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_clientSessionServerList->list, ClientSessionServer, node) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "ShowClientSessionServer: [%d] client session server [%s] is exist", count, pos->sessionName);
+        count++;
+    }
+}
+
 int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const char *sessionName,
     const ISessionListener *listener)
 {
@@ -313,8 +324,9 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     }
 
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
+        (void)ShowClientSessionServer();
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server num reach max");
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientAddSessionServer: client server num reach max");
         return SOFTBUS_INVALID_NUM;
     }
 
