@@ -88,6 +88,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.
 HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(hbStrateMock, LnnSetGearModeBySpecificType)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -105,7 +106,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = LnnShiftLNNGear(PKGNAME, CALLERID, TARGETNETWORKID, &mode);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -118,6 +119,7 @@ HWTEST_F(HeartBeatCtrlTest, HMOS_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 {
     GearMode mode;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(hbStrateMock, LnnSetGearModeBySpecificType)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -143,13 +145,17 @@ HWTEST_F(HeartBeatCtrlTest, HMOS_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> serviceMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(serviceMock, LnnRegisterEventHandler)
     .WillOnce(Return(SOFTBUS_ERR))
     .WillOnce(Return(SOFTBUS_OK))
     .WillOnce(Return(SOFTBUS_ERR))
     .WillRepeatedly(Return(SOFTBUS_OK));
-    LnnInitHeartbeat();
-    LnnInitHeartbeat();
-    LnnInitHeartbeat();
+    int32_t ret = LnnInitHeartbeat();
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnInitHeartbeat();
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnInitHeartbeat();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

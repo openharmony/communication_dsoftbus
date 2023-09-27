@@ -126,4 +126,32 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_BR_OFFLINE_TEST_001, TestSize.Level1
     OnReceiveBrOffline(LNN_INFO_TYPE_OFFLINE, nullptr, nullptr, TEST_VALID_UDID_LEN);
     OnReceiveBrOffline(LNN_INFO_TYPE_OFFLINE, nullptr, nullptr, TEST_VALID_UDID_LEN);
 }
+
+/*
+* @tc.name: FILL_TARGET_WIIFI_CONFIG_TEST_001
+* @tc.desc: test FillTargetWifiConfig
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNSyncInfoItemTest, FILL_TARGET_WIIFI_CONFIG_TEST_001, TestSize.Level1)
+{
+    SoftBusWifiDevConf conWifiConf;
+    SoftBusWifiDevConf targetWifiConf;
+    const unsigned char targetBssid[] = "123456";
+    int32_t ret = FillTargetWifiConfig(targetBssid, TEST_VALID_PEER_NETWORKID1, &conWifiConf, &targetWifiConf);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: WIFI_CONNECT_TO_TARGET_AP_TEST_001
+* @tc.desc: test WifiConnectToTargetAp
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level1)
+{
+    const unsigned char targetBssid[] = "123456";
+    int32_t ret = WifiConnectToTargetAp(targetBssid, TEST_VALID_PEER_NETWORKID1);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
 } // namespace OHOS
