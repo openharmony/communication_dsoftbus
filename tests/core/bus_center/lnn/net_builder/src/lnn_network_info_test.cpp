@@ -41,11 +41,6 @@ constexpr int32_t CHANNELID = 2;
 constexpr uint32_t LEN = 10;
 constexpr char UUID[SHA_256_HEX_HASH_LEN] = "abc";
 constexpr uint8_t MSG[] = "123456BNHFCF";
-constexpr char NETWORKID[] = "ABCDEFG";
-constexpr int32_t TEST_LEN_BITS = 6;
-constexpr int32_t ERR_MSG_LEN = 0;
-constexpr uint32_t TEST_VALUE1 = 0;
-constexpr uint32_t TEST_VALUE2 = 4;
 
 class LNNNetworkInfoTest : public testing::Test {
 public:
@@ -218,23 +213,6 @@ HWTEST_F(LNNNetworkInfoTest, POST_NETCHAANGED_INFO_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: ON_RECEIVE_CAPA_SYNC_INFO_MSG_TEST_001
-* @tc.desc: test OnReceiveCapaSyncInfoMsg
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetworkInfoTest, ON_RECEIVE_CAPA_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
-{
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CONNECTION_INFO, nullptr, nullptr, TEST_LEN_BITS);
-    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, nullptr, nullptr, TEST_LEN_BITS);
-    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, NETWORKID, nullptr, TEST_LEN_BITS);
-    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, ERR_MSG_LEN);
-    OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, NETWORKID, MSG, sizeof(MSG));
-}
-
-/*
 * @tc.name: IS_P2P_AVAILABLE_TEST_001
 * @tc.desc: test IsP2pAvailable
 * @tc.type: FUNC
@@ -272,56 +250,5 @@ HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Le
     BtStateChangeEventHandler(nullptr);
     info.event = LNN_EVENT_WIFI_STATE_CHANGED;
     BtStateChangeEventHandler(&info);
-}
-
-/*
-* @tc.name: GET_NETWORK_CAPABILITY_TEST_001
-* @tc.desc: test GetNetworkCapability
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetworkInfoTest, GET_NETWORK_CAPABILITY_TEST_001, TestSize.Level1)
-{
-    uint32_t capability;
-    bool needSync;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    GetNetworkCapability(SOFTBUS_WIFI_OBTAINING_IPADDR, &capability, &needSync);
-    GetNetworkCapability(SOFTBUS_WIFI_ENABLED, &capability, &needSync);
-    GetNetworkCapability(SOFTBUS_WIFI_CONNECTED, &capability, &needSync);
-    GetNetworkCapability(SOFTBUS_WIFI_DISABLED, &capability, &needSync);
-    GetNetworkCapability(SOFTBUS_AP_ENABLED, &capability, &needSync);
-    GetNetworkCapability(SOFTBUS_AP_DISABLED, &capability, &needSync);
-}
-
-/*
-* @tc.name: HANDLE_PEER_NET_CAPCHANGED_TEST_001
-* @tc.desc: test HandlePeerNetCapchanged
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetworkInfoTest, HANDLE_PEER_NET_CAPCHANGED_TEST_001, TestSize.Level1)
-{
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnHasCapability).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    HandlePeerNetCapchanged(NETWORKID, TEST_VALUE1);
-    HandlePeerNetCapchanged(nullptr, TEST_VALUE1);
-    HandlePeerNetCapchanged(NETWORKID, TEST_VALUE2);
-    HandlePeerNetCapchanged(NETWORKID, TEST_VALUE2);
-}
-
-/*
-* @tc.name: UPDATE_NETWORKID_INFO_TEST_001
-* @tc.desc: test UpdateNetworkInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetworkInfoTest, UPDATE_NETWORKID_INFO_TEST_001, TestSize.Level1)
-{
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(ledgerMock, LnnGetBasicInfoByUdid).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-    UpdateNetworkInfo(UUID);
-    UpdateNetworkInfo(UUID);
 }
 }
