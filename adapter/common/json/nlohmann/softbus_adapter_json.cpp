@@ -303,7 +303,7 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
         JSON_LOGE("cannot find or invalid [%{public}s]", key);
         return false;
     }
-    if (*len < item.size()) {
+    if ((unsigned long)(*len) < (unsigned long)item.size()) {
         JSON_LOGE("item size invalid, size=%lu.", (unsigned long)item.size());
         return false;
     }
