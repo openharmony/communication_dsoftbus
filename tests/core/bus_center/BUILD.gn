@@ -18,6 +18,7 @@ group("unittest") {
   testonly = true
   deps = [
     "lnn:unittest",
+    "service:unittest",
     "test:unittest",
     "utils:unittest",
   ]
