@@ -100,6 +100,18 @@ bool TransSessionServerIsExist(const char *sessionName)
     return false;
 }
 
+static void ShowSessionServer(void)
+{
+    SessionServer  *pos = NULL;
+    SessionServer  *tmp = NULL;
+    int count = 0;
+    LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "ShowSessionServer: [%d] session server [%s] is exist", count, pos->sessionName);
+        count++;
+    }
+}
+
 int32_t TransSessionServerAddItem(SessionServer *newNode)
 {
     if (newNode == NULL) {
@@ -115,7 +127,9 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         return SOFTBUS_ERR;
     }
     if (g_sessionServerList->cnt >= MAX_SESSION_SERVER_NUM) {
+        (void)ShowSessionServer();
         (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransSessionServerAddItem: session server num reach max");
         return SOFTBUS_INVALID_NUM;
     }
     SessionServer  *pos = NULL;
