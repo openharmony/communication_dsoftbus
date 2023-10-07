@@ -185,7 +185,16 @@ static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *
     uint32_t listNum = request->list.linkTypeNum;
     *resNum = 0;
     bool isIgnoreScore = IsIgnoreLinkScore(networkId, preferredList, listNum);
+    bool isStream = (request->transType == LANE_T_RAW_STREAM ||
+                    request->transType == LANE_T_COMMON_VIDEO ||
+                    request->transType == LANE_T_COMMON_VOICE);
     for (uint32_t i = 0; i < listNum; i++) {
+        bool isBt = (preferredList[i] == LANE_BR || preferredList[i] == LANE_BLE ||
+                    preferredList[i] == LANE_BLE_DIRECT || preferredList[i] == LANE_BLE_REUSE ||
+                    preferredList[i] == LANE_COC || preferredList[i] == LANE_COC_DIRECT);
+        if (isStream && isBt) {
+            continue;
+        }
         if (!IsValidLane(networkId, preferredList[i], request->expectedBw, isIgnoreScore)) {
             continue;
         }
