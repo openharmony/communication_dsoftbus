@@ -36,6 +36,7 @@ extern "C" {
 #define TYPE_IPCAMERA_ID 0X08
 #define TYPE_PC_ID 0x0C
 #define TYPE_SMART_DISPLAY_ID 0xA02
+#define TYPE_2IN1_ID 0xA2F
 
 typedef struct {
     char deviceName[DEVICE_NAME_BUF_LEN];
