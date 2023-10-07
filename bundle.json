@@ -87,8 +87,7 @@
           ],
           "service_group":[
             "//foundation/communication/dsoftbus/core:softbus_server",
-            "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile",
-            "//foundation/communication/dsoftbus/tools:tool"
+            "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
           ]
         },
         "inner_kits": [
