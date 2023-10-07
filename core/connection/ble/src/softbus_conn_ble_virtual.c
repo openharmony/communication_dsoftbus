@@ -34,6 +34,14 @@ ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtoco
     return NULL;
 }
 
+ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol)
+{
+    (void)addr;
+    (void)udid;
+    (void)protocol;
+    return NULL;
+}
+
 void ConnBleReturnConnection(ConnBleConnection **connection)
 {
     (void)connection;
