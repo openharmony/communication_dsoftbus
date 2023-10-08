@@ -17,6 +17,7 @@
 #include <securec.h>
 
 #include "lnn_node_weight.h"
+#include "lnn_net_ledger_mock.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
@@ -69,5 +70,20 @@ HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == (WEIGHT - WEIGHT2));
     ret = LnnCompareNodeWeight(WEIGHT2, UDID1, WEIGHT3, UDID2);
     EXPECT_TRUE(ret < 0);
+}
+
+/*
+* @tc.name: LNN_GET_LOCAL_WEIGHT_TEST_001
+* @tc.desc: test LnnGetLocalWeight
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNNodeWeightTest, LNN_GET_LOCAL_WEIGHT_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock>  netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo)
+    .WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = LnnGetLocalWeight();
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 } // namespace OHOS
