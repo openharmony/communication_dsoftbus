@@ -677,12 +677,12 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Broadcast
     if (advData == NULL || broadcastData == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    advData->advData = (char *)SoftBusCalloc(ADV_DATA_MAX_LEN + ADV_HEAD_LEN);
+    advData->advData = (unsigned char *)SoftBusCalloc(ADV_DATA_MAX_LEN + ADV_HEAD_LEN);
     if (advData->advData == NULL) {
         DLOGE("malloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    advData->scanRspData = (char *)SoftBusCalloc(RESP_DATA_MAX_LEN + RSP_HEAD_LEN);
+    advData->scanRspData = (unsigned char *)SoftBusCalloc(RESP_DATA_MAX_LEN + RSP_HEAD_LEN);
     if (advData->scanRspData == NULL) {
         DLOGE("malloc failed");
         SoftBusFree(advData->advData);
