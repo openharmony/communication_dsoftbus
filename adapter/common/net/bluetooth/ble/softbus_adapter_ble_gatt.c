@@ -390,9 +390,9 @@ static unsigned char ConvertAdvFilter(unsigned char advFilter)
 static void ConvertAdvData(const SoftBusBleAdvData *src, StartAdvRawData *dst)
 {
     dst->advDataLen = src->advLength;
-    dst->advData = (unsigned char *)src->advData;
+    dst->advData = src->advData;
     dst->rspDataLen = src->scanRspLength;
-    dst->rspData = (unsigned char *)src->scanRspData;
+    dst->rspData = src->scanRspData;
 }
 
 static void ConvertAdvParam(const SoftBusBleAdvParams *src, BleAdvParams *dst)
