@@ -90,7 +90,7 @@ void FreeMessage(SoftBusMessage *msg)
     }
 }
 
-static void *LoopTask(void *arg)
+NO_SANITIZE("cfi") static void *LoopTask(void *arg)
 {
     SoftBusLooper *looper = arg;
     SoftBusLooperContext *context = looper->context;
