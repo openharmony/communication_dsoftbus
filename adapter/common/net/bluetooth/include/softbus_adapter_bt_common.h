@@ -86,9 +86,9 @@ typedef enum {
 
 typedef struct {
     unsigned short advLength;
-    unsigned char *advData;
+    uint8_t *advData;
     unsigned short scanRspLength;
-    unsigned char *scanRspData;
+    uint8_t *scanRspData;
 } SoftBusBleAdvData;
 
 typedef struct {
