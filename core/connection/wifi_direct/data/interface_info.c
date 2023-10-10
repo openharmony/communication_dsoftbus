@@ -24,7 +24,7 @@
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] InterfaceInfo: "
+#define LOG_LABEL "[WD] II: "
 
 #define II_TAG_DYNAMIC_MAC 0
 #define II_TAG_INTERFACE_NAME 1
@@ -307,24 +307,18 @@ static int32_t SetP2pGroupConfig(struct InterfaceInfo *self, char *groupConfig)
 
 static void IncreaseRefCount(struct InterfaceInfo *self)
 {
-    int32_t *count = self->get(self, II_KEY_REUSE_COUNT, NULL, NULL);
-    if (count) {
-        ++*count;
-        CLOGI(LOG_LABEL "reuseCount=%d", *count);
-    } else {
-        CLOGI(LOG_LABEL "Count is null");
-    }
+    int32_t count = self->getInt(self, II_KEY_REUSE_COUNT, 0);
+    ++count;
+    self->putInt(self, II_KEY_REUSE_COUNT, count);
+    CLOGI(LOG_LABEL "reuseCount=%d", count);
 }
 
 static void DecreaseRefCount(struct InterfaceInfo *self)
 {
-    int32_t *count = self->get(self, II_KEY_REUSE_COUNT, NULL, NULL);
-    if (count) {
-        --*count;
-        CLOGI(LOG_LABEL "reuseCount=%d", *count);
-    } else {
-        CLOGI(LOG_LABEL "Count is null");
-    }
+    int32_t count = self->getInt(self, II_KEY_REUSE_COUNT, 0);
+    --count;
+    self->putInt(self, II_KEY_REUSE_COUNT, count);
+    CLOGI(LOG_LABEL "reuseCount=%d", count);
 }
 
 /* private method implement */

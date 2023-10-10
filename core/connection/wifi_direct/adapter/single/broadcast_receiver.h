@@ -17,31 +17,31 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "common_list.h"
 #include "wifi_p2p.h"
-#include "wifi_direct_p2p_adapter.h"
+#include "common_list.h"
+#include "wifi_p2p_config.h"
+#include "wifi_direct_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 enum BroadcastReceiverAction {
+    BROADCAST_RECEIVER_ACTION_INVALID = -1,
     WIFI_P2P_STATE_CHANGED_ACTION = 0,
     WIFI_P2P_CONNECTION_CHANGED_ACTION = 1,
     BROADCAST_RECEIVER_ACTION_MAX,
 };
 
-struct P2pConnChangedInfo {
-    WifiP2pLinkedInfo p2pLinkInfo;
+struct P2pBroadcastParam {
+    P2pState p2pState;
+    WifiP2pLinkedInfo p2pLinkedInfo;
     struct WifiDirectP2pGroupInfo *groupInfo;
 };
 
 struct BroadcastParam {
     enum BroadcastReceiverAction action;
-    union {
-        P2pState p2pState;
-        struct P2pConnChangedInfo changedInfo;
-    };
+    struct P2pBroadcastParam p2pParam;
 };
 
 typedef void (*BroadcastListener)(enum BroadcastReceiverAction action, const struct BroadcastParam *param);

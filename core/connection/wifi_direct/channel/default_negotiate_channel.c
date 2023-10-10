@@ -25,8 +25,64 @@
 #include "utils/wifi_direct_work_queue.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] DefaultNegotiateChannel: "
+#define LOG_LABEL "[WD] DNC: "
 #define MAX_AUTH_DATA_LEN (1024 * 1024)
+
+struct TlvFeatureCacheNode {
+    ListNode node;
+    char uuid[UUID_BUF_LEN];
+    bool isTlvSupported;
+};
+
+static SoftBusMutex g_tlvCacheLock;
+static ListNode g_tlvCache;
+
+static struct TlvFeatureCacheNode* FindCacheNode(const char *uuid)
+{
+    struct TlvFeatureCacheNode *target = NULL;
+
+    int32_t ret = SoftBusMutexLock(&g_tlvCacheLock);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, NULL, LOG_LABEL "mutex lock failed");
+    struct TlvFeatureCacheNode *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_tlvCache, struct TlvFeatureCacheNode, node) {
+        if (strcmp(item->uuid, uuid) == 0) {
+            target = item;
+            break;
+        }
+    }
+    SoftBusMutexUnlock(&g_tlvCacheLock);
+    return target;
+}
+
+static void AddCacheNode(const char *uuid, bool isTlvSupported)
+{
+    int32_t ret = SoftBusMutexLock(&g_tlvCacheLock);
+    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "mutex lock failed");
+    struct TlvFeatureCacheNode *old = FindCacheNode(uuid);
+    if (old != NULL) {
+        old->isTlvSupported = isTlvSupported;
+        (void)SoftBusMutexUnlock(&g_tlvCacheLock);
+        return;
+    }
+
+    struct TlvFeatureCacheNode *new = SoftBusCalloc(sizeof(*new));
+    if (new == NULL) {
+        CLOGE(LOG_LABEL "malloc new node failed");
+        (void)SoftBusMutexUnlock(&g_tlvCacheLock);
+        return;
+    }
+
+    ListInit(&new->node);
+    new->isTlvSupported = isTlvSupported;
+    if (strcpy_s(new->uuid, sizeof(new->uuid), uuid) != EOK) {
+        CLOGE(LOG_LABEL "copy uuid failed");
+        SoftBusFree(new);
+        (void)SoftBusMutexUnlock(&g_tlvCacheLock);
+        return;
+    }
+    ListAdd(&g_tlvCache, &new->node);
+    (void)SoftBusMutexUnlock(&g_tlvCacheLock);
+}
 
 static void OnAuthDataReceived(int64_t authId, const AuthTransData *data);
 static void OnAuthDisconnected(int64_t authId);
@@ -35,7 +91,15 @@ static AuthTransListener g_authListener = {.onDataReceived = OnAuthDataReceived,
 
 int32_t DefaultNegotiateChannelInit(void)
 {
-    int32_t ret = RegAuthTransListener(MODULE_P2P_LINK, &g_authListener);
+    ListInit(&g_tlvCache);
+    SoftBusMutexAttr attr;
+    int32_t ret = SoftBusMutexAttrInit(&attr);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "init mutex attr failed");
+    attr.type = SOFTBUS_MUTEX_RECURSIVE;
+    ret = SoftBusMutexInit(&g_tlvCacheLock, &attr);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "init mutex failed");
+
+    ret = RegAuthTransListener(MODULE_P2P_LINK, &g_authListener);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "register auth transfer listener failed");
     CLOGI(LOG_LABEL "register auth transfer listener success");
     return SOFTBUS_OK;
@@ -54,6 +118,7 @@ static void DataReceivedWorkHandler(void *data)
     DefaultNegotiateChannelConstructor(&channel, dataStruct->authId);
     GetWifiDirectManager()->onNegotiateChannelDataReceived((struct WifiDirectNegotiateChannel *)&channel,
                                                            dataStruct->data, dataStruct->len);
+    DefaultNegotiateChannelDestructor(&channel);
     SoftBusFree(dataStruct);
 }
 
@@ -83,7 +148,6 @@ static void OnAuthDisconnected(int64_t authId)
 {
     struct DefaultNegotiateChannel channel;
     DefaultNegotiateChannelConstructor(&channel, authId);
-    GetWifiDirectManager()->onNegotiateChannelDisconnected((struct WifiDirectNegotiateChannel *)&channel);
 }
 
 static int64_t GenerateSequence(void)
@@ -128,7 +192,20 @@ static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *device
 static int32_t GetP2pMac(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
-    int32_t ret = strcpy_s(p2pMac, p2pMacSize, self->p2pMac);
+    int32_t ret = SOFTBUS_OK;
+    if (strlen(self->p2pMac) == 0) {
+        char uuid[UUID_BUF_LEN] = {0};
+        char networkId[NETWORK_ID_BUF_LEN] = {0};
+        ret = self->getDeviceId(base, uuid, sizeof(uuid));
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get uuid id failed");
+        ret = LnnGetNetworkIdByUdid(uuid, networkId, sizeof(networkId));
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get network id failed");
+        ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, p2pMac, p2pMacSize);
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get remote p2p mac failed");
+        return ret;
+    }
+
+    ret = strcpy_s(p2pMac, p2pMacSize, self->p2pMac);
     return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
@@ -158,20 +235,38 @@ static bool IsMetaChannel(struct WifiDirectNegotiateChannel *base)
     return isMeta;
 }
 
-static bool GetTlvFeature(struct DefaultNegotiateChannel *self)
+static bool GetTlvFeatureFromLnn(struct DefaultNegotiateChannel *self, bool *isTlvSupport)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    int32_t ret = self->getDeviceId((struct WifiDirectNegotiateChannel *)self, uuid, sizeof(uuid));
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get uuid failed");
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    ret = LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get networkId failed");
+
+    bool result = false;
+    ret = LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get key failed");
+    CLOGI(LOG_LABEL "uuid=%s isTlvSupport=%s", AnonymizesUUID(uuid), result ? "true" : "false");
+    *isTlvSupport = result;
+    AddCacheNode(uuid, result);
+    return result;
+}
+
+static bool GetTlvFeatureFromCache(struct DefaultNegotiateChannel *self)
 {
     char uuid[UUID_BUF_LEN] = {0};
     int32_t ret = self->getDeviceId((struct WifiDirectNegotiateChannel *)self, uuid, sizeof(uuid));
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get uuid failed");
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    ret = LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get networkId failed");
 
+    ret = SoftBusMutexLock(&g_tlvCacheLock);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "mutex lock failed");
+    struct TlvFeatureCacheNode *node = FindCacheNode(uuid);
     bool result = false;
-    ret = LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get key failed");
-    CLOGI(LOG_LABEL "uuid=%s isTlvSupport=%s", AnonymizesUUID(uuid), result ? "true" : "false");
-
+    if (node != NULL) {
+        result = node->isTlvSupported;
+    }
+    (void)SoftBusMutexUnlock(&g_tlvCacheLock);
     return result;
 }
 
@@ -179,6 +274,7 @@ static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateCh
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
     struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authId);
+    copy->tlvFeature = self->tlvFeature;
     return (struct WifiDirectNegotiateChannel*)copy;
 }
 
@@ -202,7 +298,12 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
     self->duplicate = Duplicate;
     self->destructor = Destructor;
 
-    self->tlvFeature = GetTlvFeature(self);
+    if (GetTlvFeatureFromLnn(self, &self->tlvFeature) == SOFTBUS_OK) {
+        return;
+    }
+
+    CLOGI(LOG_LABEL "get tlv feature from cache");
+    self->tlvFeature = GetTlvFeatureFromCache(self);
 }
 
 void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)

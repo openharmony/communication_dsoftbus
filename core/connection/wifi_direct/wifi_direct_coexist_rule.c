@@ -19,8 +19,9 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
+#include "wifi_direct_p2p_adapter.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectCoexistRule: "
+#define LOG_LABEL "[WD] CoR: "
 #define RULE_BUFFER_LEN 128
 
 struct CombinationHead {
@@ -133,6 +134,40 @@ static bool RuleContainsAll(struct CombinationHead *rule, ListNode *combinations
     return true;
 }
 
+static void ShowCombinations(ListNode *combinations)
+{
+    int32_t pos = 0;
+    char buffer[RULE_BUFFER_LEN] = {0};
+    struct CombinationEntry *entry = NULL;
+    LIST_FOR_EACH_ENTRY(entry, combinations, struct CombinationEntry, node) {
+        int32_t ret = sprintf_s(buffer + pos, sizeof(buffer) - pos, " %s", entry->interface);
+        if (ret > 0) {
+            pos += ret;
+        }
+    }
+    CLOGI(LOG_LABEL "%s", buffer);
+}
+
+static bool RecoverCoexistRule(void)
+{
+    char *coexistCap = NULL;
+    int32_t ret = GetWifiDirectP2pAdapter()->getInterfaceCoexistCap(&coexistCap);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get interface coexist cap failed");
+
+    if (coexistCap == NULL || strlen(coexistCap) == 0) {
+        CLOGE(LOG_LABEL "coexistCap is empty");
+        GetWifiDirectCoexistRule()->bypass = true;
+        return true;
+    }
+
+    if (GetWifiDirectCoexistRule()->setCoexistRule(coexistCap) != SOFTBUS_OK) {
+        SoftBusFree(coexistCap);
+        return false;
+    }
+    SoftBusFree(coexistCap);
+    return true;
+}
+
 static bool IsCombinationAvailable(ListNode *combinations)
 {
     struct WifiDirectCoexistRule *self = GetWifiDirectCoexistRule();
@@ -149,6 +184,18 @@ static bool IsCombinationAvailable(ListNode *combinations)
     }
 
     CLOGE(LOG_LABEL "conflict coexist rules");
+    ShowRulesList(&self->rulesList);
+    ShowCombinations(combinations);
+
+    if (IsListEmpty(&self->rulesList)) {
+        CLOGE(LOG_LABEL "rule list empty");
+        if (!RecoverCoexistRule()) {
+            CLOGE(LOG_LABEL "recover coexist rule failed");
+            return false;
+        }
+        CLOGI(LOG_LABEL "recover coexist rule success");
+        return IsCombinationAvailable(combinations);
+    }
     return false;
 }
 

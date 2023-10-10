@@ -20,7 +20,7 @@
 #include "data/negotiate_message.h"
 #include "processor/wifi_direct_processor_factory.h"
 
-#define LOG_LABEL "[WifiDirect] NegoProcessingState: "
+#define LOG_LABEL "[WD] NPrS: "
 
 /* private method forward declare */
 
@@ -40,6 +40,10 @@ static void Exit(void)
 static int32_t HandleNegotiateMessageFromRemote(struct WifiDirectProcessor *processor,
                                                 enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg)
 {
+    if (cmd == CMD_DISCONNECT_V2_RESP) {
+        CLOGI(LOG_LABEL "abandon disconnect response");
+        return SOFTBUS_OK;
+    }
     if (cmd == CMD_PC_GET_INTERFACE_INFO_REQ) {
         CLOGI(LOG_LABEL "pc get interface info request");
         return processor->processNegotiateMessage(cmd, msg);

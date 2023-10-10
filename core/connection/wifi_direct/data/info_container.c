@@ -23,7 +23,7 @@
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] InfoContainer: "
+#define LOG_LABEL "[WD] IC: "
 
 #define INT_ARRAY_BUFFER_LEN 128
 #define IPV4_INFO_ARRAY_BUFFER_LEN 256
@@ -117,11 +117,13 @@ static void PutContainer(struct InfoContainer *self, size_t key, struct InfoCont
     self->putRawData(self, key, value, size);
     struct InfoContainer *container = self->entries[key].data;
 
-    for (size_t i = 0; i < container->getKeySize(); i++) {
-        container->entries[i].data = NULL;
-    }
+    if (container) {
+        for (size_t i = 0; i < container->getKeySize(); i++) {
+            container->entries[i].data = NULL;
+        }
 
-    container->deepCopy(container, value);
+        container->deepCopy(container, value);
+    }
 }
 
 static void PutContainerArray(struct InfoContainer *self, size_t key, struct InfoContainer *containerArray,
@@ -144,6 +146,9 @@ static void PutContainerArray(struct InfoContainer *self, size_t key, struct Inf
     self->entries[key].count = containerArraySizes;
 
     data = self->entries[key].data;
+    if (data == NULL) {
+        return;
+    }
     for (size_t i = 0; i < containerArraySizes; i++) {
         struct InfoContainer *container = (struct InfoContainer *)data;
         for (size_t j = 0; j < container->getKeySize(); j++) {
@@ -235,6 +240,17 @@ static char* GetString(struct InfoContainer *self, size_t key, const char *defau
         return value;
     }
     return (char *)defaultValue;
+}
+
+static int32_t *GetIntArray(struct InfoContainer *self, size_t key, size_t *arraySize, void *defaultValue)
+{
+    size_t size = 0;
+    int32_t *value = self->get(self, key, &size, NULL);
+    if (value) {
+        *arraySize = size / sizeof(int32_t);
+        return value;
+    }
+    return defaultValue;
 }
 
 static void *GetContainer(struct InfoContainer *self, size_t key)
@@ -408,6 +424,7 @@ void InfoContainerConstructor(struct InfoContainer *self, struct InfoContainerKe
     self->getPointer = GetPointer;
     self->getInt = GetInt;
     self->getString = GetString;
+    self->getIntArray = GetIntArray;
     self->getContainer = GetContainer;
     self->getContainerArray = GetContainerArray;
     self->getRawData = GetRawData;
@@ -424,6 +441,7 @@ void InfoContainerDestructor(struct InfoContainer *self, size_t max)
         char *data = self->entries[key].data;
         if (data) {
             uint32_t keyFlag = self->getKeyProperty(self, key)->flag;
+
             if (keyFlag == CONTAINER_FLAG) {
                 ((struct InfoContainer *)data)->destructor((struct InfoContainer *)data);
             } else if (keyFlag == CONTAINER_ARRAY_FLAG) {

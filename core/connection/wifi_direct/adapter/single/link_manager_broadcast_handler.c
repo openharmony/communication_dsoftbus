@@ -27,7 +27,7 @@
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] LinkManagerBroadcastHandler: "
+#define LOG_LABEL "[WD] LMBrH: "
 
 static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
 {
@@ -75,27 +75,27 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
     GetLinkManager()->refreshLinks(WIFI_DIRECT_CONNECT_TYPE_P2P, clientDeviceSize, clientDevices);
 }
 
-static void HandleP2pConnectionChanged(const struct P2pConnChangedInfo *changedInfo)
+static void WifiDirectConnectionChangeCallback(const struct P2pBroadcastParam *param)
 {
     CLOGI(LOG_LABEL "enter");
-    if (changedInfo->p2pLinkInfo.connectState == P2P_DISCONNECTED) {
+    if (param->p2pLinkedInfo.connectState == P2P_DISCONNECTED) {
         GetLinkManager()->removeLinksByConnectType(WIFI_DIRECT_CONNECT_TYPE_P2P);
         return;
     }
 
-    if (!changedInfo->groupInfo) {
+    if (!param->groupInfo) {
         CLOGI(LOG_LABEL "groupInfo is null");
         return;
     }
 
-    UpdateInnerLink(changedInfo->groupInfo);
+    UpdateInnerLink(param->groupInfo);
 }
 
 static void Listener(enum BroadcastReceiverAction action, const struct BroadcastParam *param)
 {
     if (action == WIFI_P2P_CONNECTION_CHANGED_ACTION) {
         CLOGI(LOG_LABEL "WIFI_P2P_CONNECTION_CHANGED_ACTION");
-        HandleP2pConnectionChanged(&param->changedInfo);
+        WifiDirectConnectionChangeCallback(&param->p2pParam);
     }
 }
 
