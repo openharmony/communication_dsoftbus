@@ -450,9 +450,9 @@ HWTEST_F(AdapterBleGattTest, AdvertiseLifecycle, TestSize.Level3)
         0x18, 0x33, 0x39, 0x36, 0x62, 0x33, 0x61, 0x33, 0x31, 0x21, 0x00, 0x02, 0x0A, 0xEF};
     const unsigned char scanRspDataExample[] = {0x03, 0xFF, 0x7D, 0x02};
     SoftBusBleAdvData data = {.advLength = sizeof(advDataExample),
-        .advData = (unsigned char *)advDataExample,
+        .advData = (uint8_t *)advDataExample,
         .scanRspLength = sizeof(scanRspDataExample),
-        .scanRspData = (unsigned char *)scanRspDataExample};
+        .scanRspData = (uint8_t *)scanRspDataExample};
     ASSERT_EQ(SoftBusSetAdvData(advId, &data), SOFTBUS_OK);
     ASSERT_TRUE(advDataCtx.Expect(advId, SOFTBUS_BT_STATUS_SUCCESS));
 
