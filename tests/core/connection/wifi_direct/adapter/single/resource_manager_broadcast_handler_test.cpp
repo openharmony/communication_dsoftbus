@@ -114,13 +114,13 @@ struct InterfaceInfo* GetInterfaceInfo(const char *interface)
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest001, TestSize.Level1)
 {
     enum P2pState state = P2P_STATE_NONE;
-    (void)HandleP2pStateChanged(state);
+    (void)WifiDirectStateChangeCallback(state);
 
     state = P2P_STATE_STARTED;
-    (void)HandleP2pStateChanged(state);
+    (void)WifiDirectStateChangeCallback(state);
 
     GetResourceManager()->getInterfaceInfo = GetInterfaceInfo;
-    (void)HandleP2pStateChanged(state);
+    (void)WifiDirectStateChangeCallback(state);
 };
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest002, TestSize.Level1)
@@ -161,15 +161,15 @@ HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest003, TestSize.Level1)
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest004, TestSize.Level1)
 {
-    struct P2pConnChangedInfo changedInfo;
+    struct P2pBroadcastParam p2PBroadcastParam;
     struct WifiDirectP2pGroupInfo groupInfo;
 
-    changedInfo.p2pLinkInfo.connectState = P2P_DISCONNECTED;
-    (void)HandleP2pConnectionChanged(&changedInfo);
+    p2PBroadcastParam.p2pLinkedInfo.connectState = P2P_DISCONNECTED;
+    (void)WifiDirectConnectionChangeCallback(&p2PBroadcastParam);
 
-    changedInfo.p2pLinkInfo.connectState = P2P_CONNECTED;
-    changedInfo.groupInfo = &groupInfo;
-    (void)HandleP2pConnectionChanged(&changedInfo);
+    p2PBroadcastParam.p2pLinkedInfo.connectState = P2P_CONNECTED;
+    p2PBroadcastParam.groupInfo = &groupInfo;
+    (void)WifiDirectConnectionChangeCallback(&p2PBroadcastParam);
 };
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest005, TestSize.Level1)

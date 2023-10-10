@@ -22,7 +22,7 @@
 #include "processor/wifi_direct_processor.h"
 #include "utils/wifi_direct_utils.h"
 
-#define LOG_LABEL "[WifiDirect] NegoWaitingConnectRequestState: "
+#define LOG_LABEL "[WD] NWCReqS: "
 
 /* private method forward declare */
 static int32_t HandleRequest(struct WifiDirectProcessor *processor, enum WifiDirectNegotiateCmdType cmd,
@@ -47,6 +47,7 @@ static int32_t HandleNegotiateMessageFromRemote(struct WifiDirectProcessor *proc
     CONN_CHECK_AND_RETURN_RET_LOG(processor, SOFTBUS_INVALID_PARAM, LOG_LABEL "processor is null");
     switch (cmd) {
         case CMD_CONN_V1_REQ:
+        case CMD_CONN_V1_RESP:
         case CMD_CONN_V2_REQ_1:
         case CMD_CONN_V2_REQ_2:
         case CMD_CTRL_CHL_HANDSHAKE:

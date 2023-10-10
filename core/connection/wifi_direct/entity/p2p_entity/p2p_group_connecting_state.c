@@ -19,7 +19,7 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 
-#define LOG_LABEL "[WifiDirect] P2pGroupConnectingState: "
+#define LOG_LABEL "[WD] PGCoS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)

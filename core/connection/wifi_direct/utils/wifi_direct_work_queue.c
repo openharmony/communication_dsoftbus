@@ -20,7 +20,7 @@
 #include "softbus_log.h"
 #include "softbus_adapter_mem.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectWorkQueue: "
+#define LOG_LABEL "[WD] WQ: "
 
 struct WifiDirectWork {
     WorkFunction work;
