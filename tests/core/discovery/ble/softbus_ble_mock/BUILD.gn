@@ -22,6 +22,7 @@ module_output_path = "dsoftbus/discovery"
 ohos_unittest("DiscBleTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
     "ble_mock.cpp",
@@ -35,6 +36,7 @@ ohos_unittest("DiscBleTest") {
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",

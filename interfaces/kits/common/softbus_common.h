@@ -334,7 +334,9 @@ typedef enum {
     /** Osd capability */
     OSD_CAPABILITY_BITMAP,
     /**Share capability */
-    SHARE_CAPABILITY_BITMAP
+    SHARE_CAPABILITY_BITMAP,
+    /**Approach capability */
+    APPROACH_CAPABILITY_BITMAP
 } DataBitMap;
 
 /**
@@ -362,6 +364,7 @@ static const CapabilityMap g_capabilityMap[] = {
     {DDMP_CAPABILITY_BITMAP, (char *)"ddmpCapability"},
     {OSD_CAPABILITY_BITMAP, (char *)"osdCapability"},
     {SHARE_CAPABILITY_BITMAP, (char *)"share"},
+    {APPROACH_CAPABILITY_BITMAP, (char *)"approach"},
 };
 
 /**

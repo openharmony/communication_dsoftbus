@@ -14,16 +14,17 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-disc_dep_dir = "dsoftbus_enhance/core/discovery/ble/share_ble"
-enhanced_share = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                             [
-                               "$native_source_path",
-                               "$disc_dep_dir",
-                             ],
-                             "value")
+disc_dep_dir = "dsoftbus_enhance/core/discovery/ble"
+disc_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                            [
+                              "$native_source_path",
+                              "$disc_dep_dir",
+                            ],
+                            "value")
 
 ble_discovery_inc = [
   "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+  "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/share_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
   "$dsoftbus_root_path/core/common/include",
@@ -46,13 +47,18 @@ if (!support_bluetooth) {
   }
 }
 
-if (enhanced_share) {
+if (disc_enhanced) {
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/approach_ble/approach_ble.gni")
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/share_ble.gni")
 
-  ble_discovery_src += share_sources
-  ble_discovery_inc += share_include_dirs
-  ble_discovery_deps += share_deps
+  ble_discovery_src += share_sources + approach_sources
+  ble_discovery_inc += share_include_dirs + approach_include_dirs
+  ble_discovery_deps += share_deps + approach_deps
 } else {
-  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c" ]
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c",
+    "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
+  ]
 }

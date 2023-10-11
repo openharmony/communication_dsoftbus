@@ -27,6 +27,7 @@ ohos_unittest("DiscSoftBusBleTest") {
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
