@@ -103,11 +103,6 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     return BusCenterIpcInterfaceInstance()->LnnUnPublishService(pkgName, publishId, isInnerRequest);
 }
 
-void SetCallLnnStatus(bool flag)
-{
-    return BusCenterIpcInterfaceInstance()->SetCallLnnStatus(flag);
-}
-
 int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest)
 {
     return BusCenterIpcInterfaceInstance()->LnnStartDiscDevice(pkgName, info, cb, isInnerRequest);

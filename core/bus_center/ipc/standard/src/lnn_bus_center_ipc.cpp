@@ -406,7 +406,6 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const Subscrib
     } else {
         (void)AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
     }
-    SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
