@@ -27,7 +27,7 @@
 #define SEND_BUF_SIZE 0x200000  // 2M
 #define RECV_BUF_SIZE 0x100000  // 1M
 #define USER_TIMEOUT_MS 500000  // 500000us
-#define SOFTBUS_TCP_USER_TIME (15 * 1000)
+#define SOFTBUS_TCP_USER_TIME (15 * 1000) // 15s
 
 #ifndef __LITEOS_M__
 static int SetReusePort(int fd, int on)
