@@ -697,6 +697,27 @@ int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality)
     return ret;
 }
 
+static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH},
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_LENGTH},
+    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_LENGTH},
+};
+
+int32_t FindConfigType(int32_t channelType, int32_t businessType)
+{
+    const uint32_t nums = sizeof(g_configTypeMap) / sizeof(ConfigTypeMap);
+    for (uint32_t i = 0; i < nums; i++) {
+        if ((g_configTypeMap[i].channelType == channelType) &&
+            (g_configTypeMap[i].businessType == businessType)) {
+                return g_configTypeMap[i].configType;
+            }
+    }
+    return SOFTBUS_CONFIG_TYPE_MAX;
+}
+
 int ReadMaxSendBytesSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
     if (valueSize != sizeof(uint32_t)) {
