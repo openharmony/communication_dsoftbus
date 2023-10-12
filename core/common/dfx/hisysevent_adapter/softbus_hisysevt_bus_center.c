@@ -331,6 +331,12 @@ static void ReleaseDevUdidInfoNode(void)
     }
     DevUdidNode *item = NULL;
     DevUdidNode *nextItem = NULL;
+    if (g_devUdidList.prev == NULL && g_devUdidList.next == NULL) {
+        MLOGE("g_devUdidList is NULL");
+        ListInit(&g_devUdidList);
+        (void)SoftBusMutexUnlock(&g_devUdidLock);
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_devUdidList, DevUdidNode, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
@@ -500,6 +506,12 @@ static void ReleaseAppDiscInfoNode(void)
     }
     AppDiscNode *item = NULL;
     AppDiscNode *nextItem = NULL;
+    if (g_appDiscList.prev == NULL && g_appDiscList.next == NULL) {
+        MLOGE("g_appDiscList is NULL");
+        ListInit(&g_appDiscList);
+        (void)SoftBusMutexUnlock(&g_appDiscLock);
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_appDiscList, AppDiscNode, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
