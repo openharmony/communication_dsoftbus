@@ -150,6 +150,10 @@ static void ClearConnResultRecord(void)
 {
     PIdOfPkgNameNode *pIdItem = NULL;
     PIdOfPkgNameNode *pIdNext = NULL;
+    if (g_pIdOfPkgName.prev == NULL && g_pIdOfPkgName.next == NULL) {
+        MLOGE("g_pIdOfPkgName is NULL");
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(pIdItem, pIdNext, &(g_pIdOfPkgName), PIdOfPkgNameNode, node) {
         ListDelete(&pIdItem->node);
         SoftBusFree(pIdItem);
@@ -157,6 +161,10 @@ static void ClearConnResultRecord(void)
 
     ConnResultApiRecordNode *conItem = NULL;
     ConnResultApiRecordNode *conNext = NULL;
+    if (g_connResultApiRecord.prev == NULL && g_connResultApiRecord.next == NULL) {
+        MLOGE("g_connResultApiRecord is NULL");
+        return;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(conItem, conNext, &(g_connResultApiRecord), ConnResultApiRecordNode, node) {
         ListDelete(&conItem->node);
         SoftBusFree(conItem);
@@ -168,6 +176,10 @@ static void ClearProcessStep(void)
     for (int32_t i = SOFTBUS_HISYSEVT_CONN_TYPE_P2P; i < SOFTBUS_HISYSEVT_CONN_TYPE_BUTT; i++) {
         for (int32_t j = NEGOTIATION_STEP; j < STEP_BUTT; j++) {
             ProcessStepRecord *stepRecord = &g_processStep[i][j];
+            if (stepRecord == NULL) {
+                MLOGE("stepRecord is NULL");
+                continue;
+            }
             stepRecord->mStepTotalTime = 0;
             stepRecord->mStepTotalCount = 0;
             stepRecord->mStepCount1 = 0;

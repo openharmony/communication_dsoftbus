@@ -923,6 +923,10 @@ int32_t InitTransStatisticSysEvt(void)
 
 void DeinitTransStatisticSysEvt(void)
 {
+    if (g_calledApiInfoList == NULL || g_calledApiCntlist == NULL) {
+        MLOGE("g_calledApiInfoList or g_calledApiCntlist is NULL");
+        return;
+    }
     DetroyApiInfoList(g_calledApiInfoList);
     DetroyApiInfoList(g_calledApiCntlist);
 }
