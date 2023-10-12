@@ -196,6 +196,10 @@ static inline void ClearDiscDetails()
 {
     DiscDetailNode *item = NULL;
     DiscDetailNode *next = NULL;
+    if (g_discDetailList.prev == NULL && g_discDetailList.next == NULL) {
+        MLOGE("g_discDetailList is NULL");
+        return;
+    }
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_discDetailList), DiscDetailNode, node) {
         ListDelete(&item->node);
