@@ -52,6 +52,11 @@ typedef struct {
     int8_t power;
 } DeviceWrapper;
 
+typedef struct {
+    uint8_t version;
+    uint8_t business;
+} DiscBleScanFilter;
+
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap);
 bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos);
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
@@ -64,6 +69,10 @@ int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len);
 
 int32_t AssembleTLV(BroadcastData *broadcastData, unsigned char dataType, const void *data, uint32_t dataLen);
 int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *info, const unsigned char *data, uint32_t dataLen);
+
+int32_t ConvertBleAddr(DeviceInfo *foundInfo);
+int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power);
+bool CheckAdvFlagExist(const uint8_t *data, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus
