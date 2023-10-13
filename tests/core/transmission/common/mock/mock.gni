@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 trans_comm_mock_path = "$dsoftbus_test_path/core/transmission/common/mock"
 trans_comm_mock_src = [

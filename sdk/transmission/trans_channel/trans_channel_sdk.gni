@@ -11,17 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/auth/trans_auth_sdk.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/proxy/trans_proxy_sdk.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/qos/trans_qos_sdk.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/tcp_direct/trans_tcp_sdk.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
+import("../../../dsoftbus.gni")
+import("../../../sdk/transmission/trans_channel/auth/trans_auth_sdk.gni")
+import("../../../sdk/transmission/trans_channel/proxy/trans_proxy_sdk.gni")
+import("../../../sdk/transmission/trans_channel/qos/trans_qos_sdk.gni")
+import("../../../sdk/transmission/trans_channel/tcp_direct/trans_tcp_sdk.gni")
+import("../../../sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
 
 trans_channel_sdk_inc =
     trans_auth_channel_sdk_inc + trans_proxy_channel_sdk_inc +

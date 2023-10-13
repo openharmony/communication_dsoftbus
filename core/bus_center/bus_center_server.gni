@@ -11,28 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import(
-    "//foundation/communication/dsoftbus/adapter/common/bus_center/bus_center_adapter.gni")
-import("//foundation/communication/dsoftbus/adapter/common/net/hdi/net_hdi.gni")
-import(
-    "//foundation/communication/dsoftbus/adapter/common/net/wifi/net_wifi.gni")
-import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/lnn/decision_center/decision_center.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/lnn/disc_mgr/bus_center_disc_mgr.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/lnn/lane_hub/lane_hub.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/lnn/net_builder/net_builder.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/lnn/net_buscenter/net_manager.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/lnn/net_ledger/net_ledger.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/monitor/bus_center_monitor.gni")
-import(
-    "//foundation/communication/dsoftbus/core/bus_center/utils/bus_center_utils.gni")
+import("../../adapter/common/bus_center/bus_center_adapter.gni")
+import("../../adapter/common/net/hdi/net_hdi.gni")
+import("../../adapter/common/net/wifi/net_wifi.gni")
+import("../../core/adapter/core_adapter.gni")
+import("../../core/bus_center/lnn/decision_center/decision_center.gni")
+import("../../core/bus_center/lnn/disc_mgr/bus_center_disc_mgr.gni")
+import("../../core/bus_center/lnn/lane_hub/lane_hub.gni")
+import("../../core/bus_center/lnn/net_builder/net_builder.gni")
+import("../../core/bus_center/lnn/net_buscenter/net_manager.gni")
+import("../../core/bus_center/lnn/net_ledger/net_ledger.gni")
+import("../../core/bus_center/monitor/bus_center_monitor.gni")
+import("../../core/bus_center/utils/bus_center_utils.gni")
 
 bus_center_server_src =
     bus_center_adapter_src + bus_center_core_adapter_src +
@@ -122,8 +112,7 @@ agcr_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                             "value")
 
 if (agcr_enhanced) {
-  import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/agcr/agcr.gni")
+  import("../../dsoftbus_enhance/components/newip/agcr/agcr.gni")
 
   bus_center_server_src += agcr_src
   bus_center_server_inc += agcr_inc
@@ -138,8 +127,7 @@ route_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              "value")
 
 if (route_enhanced) {
-  import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/route/route.gni")
+  import("../../dsoftbus_enhance/components/newip/route/route.gni")
 
   bus_center_server_src += route_src
   bus_center_server_inc += route_inc
@@ -154,8 +142,7 @@ btn_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                            "value")
 
 if (btn_enhanced) {
-  import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/btn/btn.gni")
+  import("../../dsoftbus_enhance/components/newip/btn/btn.gni")
 
   bus_center_server_src += btn_src
   bus_center_server_inc += btn_inc

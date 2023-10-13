@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../dsoftbus.gni")
 conn_common_src = [
   "$dsoftbus_root_path/core/connection/common/src/softbus_base_listener.c",
   "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
@@ -36,8 +36,7 @@ newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              "value")
 
 if (newip_enhanced) {
-  import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/network/network.gni")
+  import("../../../dsoftbus_enhance/components/newip/network/network.gni")
 
   conn_common_src += newip_connection_src
   conn_common_inc += newip_connection_include

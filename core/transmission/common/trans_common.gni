@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../dsoftbus.gni")
 trans_common_inc = [
   "$dsoftbus_root_path/core/transmission/common/include",
   "$dsoftbus_root_path/interfaces/kits/transport",

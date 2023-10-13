@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 lnn_dep_dir = "dsoftbus_enhance/core/bus_center/lnn/net_builder"

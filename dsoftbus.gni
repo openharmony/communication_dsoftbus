@@ -12,7 +12,7 @@
 # limitations under the License.
 
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
-dsoftbus_root_path = "//foundation/communication/dsoftbus"
+dsoftbus_root_path = rebase_path(".")
 dsoftbus_sdk_path = "${dsoftbus_root_path}/sdk"
 dsoftbus_core_path = "${dsoftbus_root_path}/core"
 dsoftbus_test_path = "${dsoftbus_root_path}/tests"
