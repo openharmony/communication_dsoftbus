@@ -15,12 +15,12 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/communication/dsoftbus/sdk/bus_center/bus_center_sdk.gni")
-import("//foundation/communication/dsoftbus/sdk/discovery/disc_sdk.gni")
-import("//foundation/communication/dsoftbus/sdk/frame/frame_sdk.gni")
-import("//foundation/communication/dsoftbus/sdk/frame/frame_sdk.gni")
-import("//foundation/communication/dsoftbus/sdk/transmission/trans_sdk.gni")
 import("../../../../../dsoftbus.gni")
+import("../../../../../sdk/bus_center/bus_center_sdk.gni")
+import("../../../../../sdk/discovery/disc_sdk.gni")
+import("../../../../../sdk/frame/frame_sdk.gni")
+import("../../../../../sdk/frame/frame_sdk.gni")
+import("../../../../../sdk/transmission/trans_sdk.gni")
 dsoftbus_root_path = "../../../../.."
 
 common_client_src = bus_center_sdk_src + disc_sdk_src +

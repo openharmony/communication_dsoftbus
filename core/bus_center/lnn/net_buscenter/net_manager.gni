@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 if (dsoftbus_feature_lnn_net) {
   bus_center_net_mgr_src = [
@@ -42,8 +42,7 @@ newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                              "value")
 
 if (newip_enhanced) {
-  import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/components/newip/network/network.gni")
+  import("../../../../dsoftbus_enhance/components/newip/network/network.gni")
 
   bus_center_net_mgr_src += newip_manager_src
   bus_center_net_mgr_inc += newip_manager_include

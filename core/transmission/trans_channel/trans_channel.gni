@@ -11,17 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../../../core/transmission/trans_channel/common/common.gni")
+import("../../../core/transmission/trans_channel/proxy/proxy.gni")
+import("../../../core/transmission/trans_channel/qos/qos.gni")
+import("../../../core/transmission/trans_channel/tcp_direct/tcp_direct.gni")
 import(
-    "//foundation/communication/dsoftbus/core/transmission/trans_channel/common/common.gni")
-import(
-    "//foundation/communication/dsoftbus/core/transmission/trans_channel/proxy/proxy.gni")
-import(
-    "//foundation/communication/dsoftbus/core/transmission/trans_channel/qos/qos.gni")
-import(
-    "//foundation/communication/dsoftbus/core/transmission/trans_channel/tcp_direct/tcp_direct.gni")
-import(
-    "//foundation/communication/dsoftbus/core/transmission/trans_channel/udp_negotiation/udp_negotiation.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+    "../../../core/transmission/trans_channel/udp_negotiation/udp_negotiation.gni")
+import("../../../dsoftbus.gni")
 
 trans_channel_src =
     trans_channel_common_src + trans_proxy_channel_src +

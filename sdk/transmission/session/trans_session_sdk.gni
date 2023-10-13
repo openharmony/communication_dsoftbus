@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 trans_session_sdk_src = [
@@ -20,6 +20,14 @@ trans_session_sdk_src = [
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_message_service.c",
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_session_service.c",
 ]
+
+broadcast_dep_dir = "dsoftbus_enhance/interfaces/kits/broadcast"
+enhanced_kits_broadcast = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                      [
+                                        "$native_source_path",
+                                        "$broadcast_dep_dir",
+                                      ],
+                                      "value")
 if (defined(ohos_lite)) {
   trans_session_sdk_inc = [
     "$dsoftbus_sdk_path/transmission/session/include",
@@ -74,7 +82,7 @@ schema_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (schema_enhanced) {
   import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/sdk/transmission/session/src/trans_schema.gni")
+      "../../../dsoftbus_enhance/sdk/transmission/session/src/trans_schema.gni")
 
   trans_session_sdk_src += schema_src
   trans_session_sdk_inc += schema_inc
