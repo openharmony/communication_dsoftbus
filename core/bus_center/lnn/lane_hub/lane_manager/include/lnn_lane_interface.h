@@ -140,6 +140,9 @@ typedef struct {
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
+    char peerBleMac[MAX_MAC_LEN];
+    //'psm' is valid only when 'expectedlink' contains 'LANE_COC'
+    int32_t psm;
     LaneTransType transType;
     uint32_t expectedBw;
     int32_t pid;
