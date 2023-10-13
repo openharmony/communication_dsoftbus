@@ -1352,6 +1352,7 @@ ohos_unittest("LNNLaneMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
