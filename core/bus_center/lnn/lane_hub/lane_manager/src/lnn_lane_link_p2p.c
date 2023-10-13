@@ -754,15 +754,18 @@ static int32_t OpenProxyChannelToConnP2p(const LinkRequest *request,
         .onChannelOpenFailed = OnProxyChannelOpenFailed,
     };
     int32_t requestId = TransProxyPipelineGenRequestId();
-    int32_t ret = TransProxyPipelineOpenChannel(requestId, request->peerNetworkId, &option, &channelCallback);
-    LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "open channel failed, ret=%d", ret);
-    CLOGI("requestId=%d", requestId);
-
-    ret = AddConnRequestItem(0, 0, laneLinkReqId, request, requestId, callback);
+    int32_t ret = AddConnRequestItem(0, 0, laneLinkReqId, request, requestId, callback);
     if (ret != SOFTBUS_OK) {
         LLOGE("add new connect node failed");
         return ret;
     }
+    ret = TransProxyPipelineOpenChannel(requestId, request->peerNetworkId, &option, &channelCallback);
+    if (ret != SOFTBUS_OK) {
+        DelConnRequestItem(0, 0);
+        LLOGE("open channel failed, ret=%d", ret);
+        return ret;
+    }
+    CLOGI("requestId=%d", requestId);
 
     return SOFTBUS_OK;
 }
