@@ -29,6 +29,7 @@
 #include <netinet/in.h>
 #endif
 #include <coap3/utlist.h>
+#include <coap3/coap_session_internal.h>
 #include "nstackx_device.h"
 #include "nstackx_error.h"
 #include "nstackx_dfinder_log.h"
@@ -41,24 +42,12 @@
 #define DEFAULT_COAP_BUFFER_LENGTH 256
 #define COAP_CERT_CHAIN_DEPTH 2
 
-/* Must align with coap_session_internal.h */
-struct coap_endpoint_t {
-    struct coap_endpoint_t *next;
-    coap_context_t *context;        /**< endpoint's context */
-    coap_proto_t proto;             /**< protocol used on this interface */
-    uint16_t default_mtu;           /**< default mtu for this interface */
-    coap_socket_t sock;             /**< socket object for the interface, if
-                                       any */
-    coap_address_t bind_addr;       /**< local interface address */
-    coap_session_t *sessions;       /**< hash table or list of active sessions */
-};
-
 /*
  * the initial timeout will be set to a random duration between COAP_ACK_TIMEOUT and
  * (COAP_ACK_TIMEOUT * COAP_ACK_RANDOM_FACTOR).
  */
-#define COAP_ACK_TIMEOUT ((coap_fixed_point_t){1, 0}) // 1 seconds
-#define COAP_ACK_RANDOM_FACTOR ((coap_fixed_point_t){1, 200}) // 1.2
+#define DFINDER_COAP_ACK_TIMEOUT ((coap_fixed_point_t){1, 0}) // 1 seconds
+#define DFINDER_COAP_ACK_RANDOM_FACTOR ((coap_fixed_point_t){1, 200}) // 1.2
 
 int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
 {
@@ -267,8 +256,8 @@ static void CoapSetAckTimeOut(coap_session_t *session)
     if (session == NULL) {
         return;
     }
-    coap_session_set_ack_timeout(session, COAP_ACK_TIMEOUT);
-    coap_session_set_ack_random_factor(session, COAP_ACK_RANDOM_FACTOR);
+    coap_session_set_ack_timeout(session, DFINDER_COAP_ACK_TIMEOUT);
+    coap_session_set_ack_random_factor(session, DFINDER_COAP_ACK_RANDOM_FACTOR);
 }
 
 static coap_session_t *CoapGetSessionEx(coap_context_t *ctx, const char *localAddr, const char *localPort,
@@ -341,7 +330,7 @@ uint8_t IsCoapCtxEndpointSocket(const coap_context_t *ctx, int fd)
     if (ctx == NULL) {
         return NSTACKX_FALSE;
     }
-    listeningEndpoints = coap_get_endpoint(ctx);
+    listeningEndpoints = coap_context_get_endpoint(ctx);
     LL_FOREACH_SAFE(listeningEndpoints, iterator, tmp) {
         if (iterator->sock.fd == fd) {
             return NSTACKX_TRUE;
