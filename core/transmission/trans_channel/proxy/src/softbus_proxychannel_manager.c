@@ -1305,13 +1305,14 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             }
             TransProxyPostOpenClosedMsgToLoop(removeNode);
             TransProxyPostDisConnectMsgToLoop(connId);
-        }
-        if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
+        } else if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
             TransProxyPostDisConnectMsgToLoop(connId);
-        }
-        if (status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
+        } else if (status == PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT) {
+            (void)TransDelConnByReqId(removeNode->reqId);
+            TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+        } else if (status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send keepalive channel %d.", removeNode->myId);
             TransProxyPostKeepAliveMsgToLoop(removeNode);
         }
@@ -1347,22 +1348,18 @@ void TransProxyTimerProc(void)
         if (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKEING ||
             removeNode->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
             if (removeNode->timeout >= PROXY_CHANNEL_CONTROL_TIMEOUT) {
-                removeNode->status = PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT;
+                removeNode->status = (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) ?
+                    PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT : PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT;
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel (%d) handshake is timeout", removeNode->myId);
+                ReleaseProxyChannelId(removeNode->channelId);
                 ListDelete(&(removeNode->node));
                 ListAdd(&proxyProcList, &(removeNode->node));
                 g_proxyChannelList->cnt--;
             }
         }
-        if (removeNode->status == PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT) {
-            (void)TransDelConnByReqId(removeNode->reqId);
-            TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
-        }
         if (removeNode->status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
             if (removeNode->timeout >= PROXY_CHANNEL_CONTROL_TIMEOUT) {
                 removeNode->status = PROXY_CHANNEL_STATUS_TIMEOUT;
-                removeNode->status = (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) ?
-                    PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT : PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT;
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "channel (%d) keepalvie is timeout", removeNode->myId);
                 ReleaseProxyChannelId(removeNode->channelId);
                 ListDelete(&(removeNode->node));
