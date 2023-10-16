@@ -25,7 +25,7 @@
 static int32_t GetNetworkIfIp(int32_t fd, struct ifreq *req, char *ip, char *netmask, uint32_t len)
 {
     if (ioctl(fd, SIOCGIFFLAGS, (char*)req) < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "ioctl SIOCGIFFLAGS fail, errno = %d", errno);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "ioctl SIOCGIFFLAGS fail, errno = %{public}d", errno);
         return SOFTBUS_ERR;
     }
     if (!((uint16_t)req->ifr_flags & IFF_UP)) {
@@ -35,7 +35,7 @@ static int32_t GetNetworkIfIp(int32_t fd, struct ifreq *req, char *ip, char *net
 
     /* get IP of this interface */
     if (ioctl(fd, SIOCGIFADDR, (char*)req) < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "ioctl SIOCGIFADDR fail, errno = %d", errno);
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "ioctl SIOCGIFADDR fail, errno = %{public}d", errno);
         return SOFTBUS_ERR;
     }
     struct sockaddr_in *sockAddr = (struct sockaddr_in *)&(req->ifr_addr);
@@ -47,7 +47,7 @@ static int32_t GetNetworkIfIp(int32_t fd, struct ifreq *req, char *ip, char *net
     /* get netmask of this interface */
     if (netmask != NULL) {
         if (ioctl(fd, SIOCGIFNETMASK, (char*)req) < 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "ioctl SIOCGIFNETMASK fail, errno = %d", errno);
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "ioctl SIOCGIFNETMASK fail, errno = %{public}d", errno);
             return SOFTBUS_ERR;
         }
         sockAddr = (struct sockaddr_in *)&(req->ifr_netmask);
