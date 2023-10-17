@@ -46,9 +46,13 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
+    if (samgr == nullptr) {
+        LLOGE("Get samgr failed!");
+        return nullptr;
+    }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get GetSystemAbility failed!\n");
+        LLOGE("Get GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
