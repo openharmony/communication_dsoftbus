@@ -92,7 +92,8 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
         return SOFTBUS_INVALID_PARAM;
     }
     struct timeval time = {0};
-    gettimeofday(&time, NULL);
+    // (void)clock_gettime(CLOCK_MONOTONIC, &time);
+    (void)clock_gettime(CLOCK_MONOTONIC_RAW, &time);
 
     sysTime->sec = time.tv_sec;
     sysTime->usec = time.tv_usec;
