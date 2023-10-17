@@ -330,6 +330,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         stateVersion != deviceInfo.localStateVersion) {
         LLOGI("don't support ble direct online because local state version change, ver:%d->%d",
             deviceInfo.localStateVersion, stateVersion);
+        return true;
     }
     if ((int32_t)hbResp->stateVersion != deviceInfo.stateVersion) {
         LLOGI("don't support ble direct online because state version change");

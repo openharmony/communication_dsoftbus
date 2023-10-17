@@ -58,7 +58,7 @@ static void UpdateStateVersionAndStore(void)
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
         g_localNetLedger.localInfo.stateVersion = 0;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "local state version changed to:",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "local state version changed to: %d",
         g_localNetLedger.localInfo.stateVersion);
     if ((ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update local store fail!");
