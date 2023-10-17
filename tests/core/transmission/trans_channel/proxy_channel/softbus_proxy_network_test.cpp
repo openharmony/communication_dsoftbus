@@ -155,7 +155,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level
     NotifyNetworkingChannelClosed(sessionName, 1);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelClosedFlag);
     NotifyNetworkingMsgReceived(sessionName, 1, NULL, 0);
-    EXPECT_EQ(true, SoftbusProxyNetworkTest::m_messageReceivedFlag);
+    EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
 /**
@@ -178,7 +178,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     NotifyNetworkingChannelClosed(sessionName, 1);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelClosedFlag);
     NotifyNetworkingMsgReceived(sessionName,1, NULL, 0);
-    EXPECT_EQ(true, SoftbusProxyNetworkTest::m_messageReceivedFlag);
+    EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
 /**

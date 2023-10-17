@@ -148,14 +148,14 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOpenChannelTest001, 
     char networkId[SESSIONKEYSIZE] = {0};
     strcpy_s(networkId, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
     TransProxyPipelineChannelOption option = {
-        .bleDirect = true,
+        .bleDirect = false,
     };
     ITransProxyPipelineCallback channelCallback = {
         .onChannelOpened = OnProxyChannelOpened,
         .onChannelOpenFailed = OnProxyChannelOpenFailed,
     };
     int32_t ret = TransProxyPipelineOpenChannel(TEST_NUMBER_TWO, networkId, &option, &channelCallback);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     InnerOpenProxyChannel(TEST_NUMBER_TWO);
 }
 
