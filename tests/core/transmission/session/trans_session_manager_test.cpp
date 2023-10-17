@@ -27,7 +27,7 @@
 #define TRANS_TEST_INVALID_PID (-1)
 #define TRANS_TEST_INVALID_UID (-1)
 
-#define MAX_SESSION_SERVER_NUM 32
+#define MAX_SESSION_SERVER_NUM 100
 
 using namespace testing::ext;
 
