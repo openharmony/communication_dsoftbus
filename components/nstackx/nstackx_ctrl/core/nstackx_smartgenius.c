@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "nstackx_smartgenius.h"
+ #include "nstackx_smartgenius.h"
 #include <errno.h>
 #include <string.h>
 #include <securec.h>
@@ -25,6 +25,7 @@
 #include <linux/rtnetlink.h>
 #include <arpa/inet.h>
 #endif /* SUPPORT_SMARTGENIUS */
+#include <time.h>
 
 #include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
@@ -34,14 +35,28 @@
 #include "nstackx_timer.h"
 #include "coap_discover/coap_discover.h"
 #include "nstackx_statistics.h"
+#include "nstackx_device_local.h"
+#include "nstackx_device_remote.h"
 
 #define TAG "nStackXDFinder"
 #ifdef SUPPORT_SMARTGENIUS
 #define BUFLEN 256
 #define NSTACKX_POSTPONE_DELAY_MS 500
+#define NSTACKX_NETLINK_RECOVER_MS 300000 // 5min
+#define NSTACKX_ERROR_INTERVAL_S 5 // 5s
+
+typedef enum {
+    NETLINK_SOCKET_READ_EVENT = 0,
+    NETLINK_SOCKET_WRITE_EVENT,
+    NETLINK_SOCKET_ERROR_EVENT,
+    NETLINK_SOCKET_EVENT
+} NetLinkSocketEventType;
+static uint64_t g_netlinkSocketEventNum[NETLINK_SOCKET_EVENT];
+
 static EpollTask g_netlinkTask;
-static Timer *g_postponeTimer;
 static uint8_t g_smartGeniusInit = NSTACKX_FALSE;
+static Timer *g_recoverTimer;
+static long g_lastErrorTimeS = -1;
 
 static void ParseRTattr(struct rtattr **tb, uint32_t max, struct rtattr *attr, uint32_t len)
 {
@@ -54,6 +69,32 @@ static void ParseRTattr(struct rtattr **tb, uint32_t max, struct rtattr *attr, u
             tb[attr->rta_type] = attr;
         }
     }
+}
+
+static int CreateNetLinkSocketFd()
+{
+    struct sockaddr_nl local = {0};
+    local.nl_family = AF_NETLINK;
+    local.nl_groups = RTMGRP_NOTIFY | RTMGRP_IPV4_IFADDR | RTMGRP_IPV4_ROUTE | RTMGRP_LINK;
+    local.nl_pid = getpid();
+    socklen_t len = sizeof(local);
+
+    int fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (fd < 0) {
+        DFINDER_LOGE(TAG, "unable to create netlink socket: %d", errno);
+        return NSTACKX_EFAILED;
+    }
+    if (bind(fd, (struct sockaddr *)&local, len) < 0) {
+        DFINDER_LOGE(TAG, "bind for netlink socket failed: %d", errno);
+        close(fd);
+        return NSTACKX_EFAILED;
+    }
+    if (getsockname(fd, (struct sockaddr *)&local, &len)) {
+        DFINDER_LOGE(TAG, "getsockname failed: %d", errno);
+        close(fd);
+        return NSTACKX_EFAILED;
+    }
+    return fd;
 }
 
 static void IfAddrMsgHandle(struct nlmsghdr *msgHdr)
@@ -84,7 +125,9 @@ static void IfAddrMsgHandle(struct nlmsghdr *msgHdr)
     UpdateAllNetworkInterfaceNameIfNeed(&interfaceInfo);
 
     /* Use macro RTA_DATA() to get network insterface name from attribute "IFA_LABEL". */
-    if (!FilterNetworkInterface((char *)RTA_DATA(tb[IFA_LABEL]))) {
+    uint8_t ifaceType = GetIfaceType((char *)RTA_DATA(tb[IFA_LABEL]));
+    if (ifaceType >= IFACE_TYPE_UNKNOWN) {
+        DFINDER_LOGE(TAG, "unknown iface type %s", (char *)RTA_DATA(tb[IFA_LABEL]));
         return;
     }
 
@@ -93,26 +136,17 @@ static void IfAddrMsgHandle(struct nlmsghdr *msgHdr)
             RTA_DATA(tb[IFA_ADDRESS]), sizeof(interfaceInfo.ip)) != EOK) {
             return;
         }
-        /* delay 500 ms after WiFi connection avoid "Network Unreachable" error, only activate when wlan/eth online */
-        if (!(IsUsbIpAddr((char *)RTA_DATA(tb[IFA_LABEL])) || IsP2pIpAddr((char *)RTA_DATA(tb[IFA_LABEL])))) {
-            TimerSetTimeout(g_postponeTimer, NSTACKX_POSTPONE_DELAY_MS, NSTACKX_FALSE);
-        }
         DFINDER_LOGD(TAG, "Interface %s got new address.", interfaceInfo.name);
+        AddLocalIface(interfaceInfo.name, &interfaceInfo.ip);
     } else {
         DFINDER_LOGD(TAG, "Interface %s delete address.", interfaceInfo.name);
-    }
-
-    if (IsP2pIpAddr((char *)RTA_DATA(tb[IFA_LABEL]))) {
-        UpdateLocalNetworkInterfaceP2pMode(&interfaceInfo, msgHdr->nlmsg_type);
-    } else if (IsUsbIpAddr((char *)RTA_DATA(tb[IFA_LABEL]))) {
-        UpdateLocalNetworkInterfaceUsbMode(&interfaceInfo, msgHdr->nlmsg_type);
-    } else {
-        UpdateLocalNetworkInterface(&interfaceInfo);
+        RemoveLocalIface(interfaceInfo.name);
     }
 }
 
 static void SmartGeniusCallback(void *arg)
 {
+    g_netlinkSocketEventNum[NETLINK_SOCKET_READ_EVENT]++;
     struct nlmsghdr *innerNlmsghdr = NULL;
     struct nlmsgerr *nlmErr = NULL;
     char innerBuf[BUFLEN] = {0};
@@ -151,67 +185,95 @@ static void SmartGeniusCallback(void *arg)
     return;
 }
 
-static void PostponeTimerHandle(void *data)
+static void NetlinkWriteHandle(void *data)
 {
     (void)data;
-    CoapServiceDiscoverInner(0);
+    g_netlinkSocketEventNum[NETLINK_SOCKET_WRITE_EVENT]++;
+}
+
+static void NetlinkErrorHandle(void *data UNUSED)
+{
+    g_netlinkSocketEventNum[NETLINK_SOCKET_ERROR_EVENT]++;
+    DFINDER_LOGE(TAG, "Netlink Socket ErrorHandle");
+    struct timespec errorTime;
+    if (clock_gettime(CLOCK_MONOTONIC, &errorTime) != 0) {
+        DFINDER_LOGE(TAG, "Get current time fail");
+        NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
+        return;
+    }
+    long currErrorTimeS = errorTime.tv_sec;
+    if (g_lastErrorTimeS > 0 && (currErrorTimeS - g_lastErrorTimeS < NSTACKX_ERROR_INTERVAL_S)) {
+        // if exception triggered more than twice within 5s: close socket and restart it after 5min
+        (void)DeRegisterEpollTask(&g_netlinkTask);
+        close(g_netlinkTask.taskfd);
+        g_netlinkTask.taskfd = -1;
+        if (TimerSetTimeout(g_recoverTimer, NSTACKX_NETLINK_RECOVER_MS, NSTACKX_FALSE) != NSTACKX_EOK) {
+            DFINDER_LOGE(TAG, "Timer setting timer fail");
+            g_lastErrorTimeS = currErrorTimeS;
+            NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
+            return;
+        }
+        g_lastErrorTimeS = -1;
+        return;
+    }
+    g_lastErrorTimeS = currErrorTimeS;
+}
+
+static void RecoverNetLinkTask()
+{
+    if (!g_smartGeniusInit) {
+        return;
+    }
+    g_netlinkTask.taskfd = CreateNetLinkSocketFd();
+    if (g_netlinkTask.taskfd < 0) {
+        DFINDER_LOGE(TAG, "unable to create netlink socket: %d", errno);
+        NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
+        return;
+    }
+    if (RegisterEpollTask(&g_netlinkTask, EPOLLIN) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "RegisterEpollTask fail");
+        close(g_netlinkTask.taskfd);
+        g_netlinkTask.taskfd = -1;
+        NotifyDFinderMsgRecver(DFINDER_ON_INNER_ERROR);
+        return;
+    }
+    DFINDER_LOGI(TAG, "Recover netlink task success");
 }
 
 int32_t SmartGeniusInit(EpollDesc epollfd)
 {
-    socklen_t len;
-    struct sockaddr_nl local = {0};
-    int fd = -1;
-
     if (g_smartGeniusInit) {
         return NSTACKX_EOK;
     }
-
-    local.nl_family = AF_NETLINK;
-    local.nl_groups = RTMGRP_NOTIFY | RTMGRP_IPV4_IFADDR | RTMGRP_IPV4_ROUTE | RTMGRP_LINK;
-    local.nl_pid = getpid();
-    len = sizeof(local);
-
-    fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    int fd = CreateNetLinkSocketFd();
     if (fd < 0) {
-        DFINDER_LOGE(TAG, "unable to create netlink socket: %d", errno);
+        DFINDER_LOGE(TAG, "unable to create netlink socket");
         return NSTACKX_EFAILED;
     }
-
-    if (bind(fd, (struct sockaddr *)&local, sizeof(local)) < 0) {
-        DFINDER_LOGE(TAG, "bind for netlink socket failed: %d", errno);
-        close(fd);
-        return NSTACKX_EFAILED;
-    }
-
-    if (getsockname(fd, (struct sockaddr *)&local, &len) < 0) {
-        DFINDER_LOGE(TAG, "getsockname failed: %d", errno);
-        close(fd);
-        return NSTACKX_EFAILED;
-    }
-
     g_netlinkTask.taskfd = fd;
     g_netlinkTask.epollfd = epollfd;
     g_netlinkTask.readHandle = SmartGeniusCallback;
-    g_netlinkTask.writeHandle = NULL;
-    g_netlinkTask.errorHandle = NULL;
+    g_netlinkTask.writeHandle = NetlinkWriteHandle;
+    g_netlinkTask.errorHandle = NetlinkErrorHandle;
     g_netlinkTask.count = 0;
     if (RegisterEpollTask(&g_netlinkTask, EPOLLIN) != NSTACKX_EOK) {
-        close(fd);
         DFINDER_LOGE(TAG, "RegisterEpollTask fail");
-        return NSTACKX_EFAILED;
+        goto L_CLOSE;
     }
-
-    g_postponeTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, PostponeTimerHandle, NULL);
-    if (g_postponeTimer == NULL) {
-        DeRegisterEpollTask(&g_netlinkTask);
-        close(g_netlinkTask.taskfd);
-        DFINDER_LOGE(TAG, "Create timer fail");
-        return NSTACKX_EFAILED;
+    g_recoverTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, RecoverNetLinkTask, NULL);
+    if (g_recoverTimer == NULL) {
+        DFINDER_LOGE(TAG, "Create recover timer fail");
+        goto L_ERR;
     }
-
+    g_lastErrorTimeS = -1;
     g_smartGeniusInit = NSTACKX_TRUE;
     return NSTACKX_EOK;
+L_ERR:
+    (void)DeRegisterEpollTask(&g_netlinkTask);
+L_CLOSE:
+    close(g_netlinkTask.taskfd);
+    g_netlinkTask.taskfd = -1;
+    return NSTACKX_EFAILED;
 }
 
 void SmartGeniusClean(void)
@@ -220,10 +282,14 @@ void SmartGeniusClean(void)
         return;
     }
 
-    TimerDelete(g_postponeTimer);
-    g_postponeTimer = NULL;
-    DeRegisterEpollTask(&g_netlinkTask);
-    close(g_netlinkTask.taskfd);
+    TimerDelete(g_recoverTimer);
+    g_recoverTimer = NULL;
+    g_lastErrorTimeS = -1;
+    if (g_netlinkTask.taskfd != -1) {
+        (void)DeRegisterEpollTask(&g_netlinkTask);
+        close(g_netlinkTask.taskfd);
+        g_netlinkTask.taskfd = -1;
+    }
     g_smartGeniusInit = NSTACKX_FALSE;
 }
 
@@ -234,12 +300,15 @@ void ResetSmartGeniusTaskCount(uint8_t isBusy)
     }
     g_netlinkTask.count = 0;
 
-    if (g_postponeTimer != NULL) {
-        if (isBusy) {
-            DFINDER_LOGI(TAG, "in this busy interval: g_postponeTimer task count %llu", g_postponeTimer->task.count);
-        }
-        g_postponeTimer->task.count = 0;
+    if (isBusy) {
+        DFINDER_LOGI(TAG, "SmartGeniusCallback has been called %lu times",
+            g_netlinkSocketEventNum[NETLINK_SOCKET_READ_EVENT]);
+        DFINDER_LOGI(TAG, "NetlinkWriteHandle has been called %lu times",
+            g_netlinkSocketEventNum[NETLINK_SOCKET_WRITE_EVENT]);
+        DFINDER_LOGI(TAG, "NetlinkErrorHandle has benn called %lu times",
+            g_netlinkSocketEventNum[NETLINK_SOCKET_ERROR_EVENT]);
     }
+    (void)memset_s(g_netlinkSocketEventNum, sizeof(g_netlinkSocketEventNum), 0, sizeof(g_netlinkSocketEventNum));
 }
 #else
 int32_t SmartGeniusInit(EpollDesc epollfd)

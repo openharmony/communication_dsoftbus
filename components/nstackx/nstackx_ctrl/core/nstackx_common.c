@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@
 #include "nstackx_statistics.h"
 #include "nstackx_dfinder_hidump.h"
 #include "nstackx_dfinder_hievent.h"
+#include "nstackx_device_local.h"
+#include "nstackx_device_remote.h"
 
 #ifdef DFINDER_USE_MINI_NSTACKX
 #include "cmsis_os2.h"
@@ -68,6 +70,7 @@ static uint8_t g_terminateFlag = NSTACKX_FALSE;
 
 static NSTACKX_Parameter g_parameter;
 static uint8_t g_nstackInitState;
+static bool g_isNotifyPerDevice;
 
 #define EVENT_COUNT_RATE_INTERVAL 2000 /* 2 SECONDS */
 #define MAX_EVENT_PROCESS_NUM_PER_INTERVAL 700
@@ -82,6 +85,19 @@ static EventProcessRatePara g_processRatePara;
 static uint32_t g_continuousBusyIntervals;
 
 static int32_t CheckDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySettings);
+static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType);
+
+bool GetIsNotifyPerDevice(void)
+{
+    return g_isNotifyPerDevice;
+}
+
+#ifdef DFINDER_SUPPORT_COVERITY_TAINTED_SET
+void Coverity_Tainted_Set(void *buf)
+{
+    (void)buf;
+}
+#endif
 
 List *GetEventNodeChain(void)
 {
@@ -113,6 +129,9 @@ int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType)
         case NSTACKX_BUSINESS_TYPE_SOFTBUS:
             return NSTACKX_EFAILED;
 
+        case NSTACKX_BUSINESS_TYPE_AUTONET:
+            return NSTACKX_EFAILED;
+
         case NSTACKX_BUSINESS_TYPE_NEARBY:
             return NSTACKX_EOK;
 
@@ -132,10 +151,11 @@ uint32_t GetDefaultDiscoverInterval(uint32_t discoverCount)
     }
 }
 
-int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, DeviceInfo *deviceInfo, char **remoteUrlPtr)
+int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, struct DeviceInfo *deviceInfo, char **remoteUrlPtr)
 {
     uint8_t *newBuf = NULL;
     if (size <= 0) {
+        DFINDER_LOGE(TAG, "buf size <= 0");
         return NSTACKX_EFAILED;
     }
     if (buf[size - 1] != '\0') {
@@ -288,22 +308,8 @@ static int32_t InternalInit(EpollDesc epollfd, uint32_t maxDeviceNum)
         return ret;
     }
 
-#if !defined(DFINDER_SUPPORT_MULTI_NIF) && !defined(DFINDER_USE_MINI_NSTACKX)
-    ret = P2pUsbTimerInit(epollfd);
-    if (ret != NSTACKX_EOK) {
-        return ret;
-    }
-#endif
-
 #ifdef _WIN32
     ret = CoapThreadInit();
-    if (ret != NSTACKX_EOK) {
-        return ret;
-    }
-#endif
-
-#ifndef DFINDER_SUPPORT_MULTI_NIF
-    ret = CoapServerInit(NULL);
     if (ret != NSTACKX_EOK) {
         return ret;
     }
@@ -322,14 +328,11 @@ static int32_t InternalInit(EpollDesc epollfd, uint32_t maxDeviceNum)
 
 static int32_t NstackxInitInner(uint32_t maxDeviceNum)
 {
-    int32_t ret;
-#ifdef DFINDER_USE_MINI_NSTACKX
-    ret = InternalInit(g_epollfd, maxDeviceNum);
+    int32_t ret = InternalInit(g_epollfd, maxDeviceNum);
     if (ret != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "internal init failed");
         return ret;
     }
-#endif
     g_terminateFlag = NSTACKX_FALSE;
     g_validTidFlag = NSTACKX_FALSE;
 #ifndef DFINDER_USE_MINI_NSTACKX
@@ -351,18 +354,13 @@ static int32_t NstackxInitInner(uint32_t maxDeviceNum)
     }
 #endif
     g_validTidFlag = NSTACKX_TRUE;
-#ifndef DFINDER_USE_MINI_NSTACKX
-    ret = InternalInit(g_epollfd, maxDeviceNum);
-    if (ret != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "internal init failed");
-        return ret;
-    }
-#endif
     return ret;
 }
 
-int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
+static int32_t NstackxInitEx(const NSTACKX_Parameter *parameter, bool isNotifyPerDevice)
 {
+    Coverity_Tainted_Set((void *)parameter);
+
     int32_t ret;
 
     if (g_nstackInitState != NSTACKX_INIT_STATE_START) {
@@ -404,7 +402,7 @@ int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
 #ifndef DFINDER_USE_MINI_NSTACKX
     CoapInitSubscribeModuleInner(); /* initialize subscribe module number */
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
-
+    g_isNotifyPerDevice = isNotifyPerDevice;
     g_nstackInitState = NSTACKX_INIT_STATE_DONE;
     DFINDER_LOGI(TAG, "DFinder init successfully");
     return NSTACKX_EOK;
@@ -414,21 +412,31 @@ L_ERR_INIT:
     return ret;
 }
 
+int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
+{
+    return NstackxInitEx(parameter, false);
+}
+ 
+int32_t NSTACKX_InitV2(const NSTACKX_Parameter *parameter, bool isNotifyPerDevice)
+{
+    return NstackxInitEx(parameter, isNotifyPerDevice);
+}
+
 #ifdef DFINDER_USE_MINI_NSTACKX
 static void ReportMainLoopStopInner(void *argument)
 {
     (void)argument;
-    LOGI(TAG, "receive message to stop main loop");
+    DFINDER_LOGI(TAG, "receive message to stop main loop");
 }
 
 static void ReportMainLoopStop(void)
 {
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
-        LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, ReportMainLoopStopInner, NULL) != NSTACKX_EOK) {
-        LOGE(TAG, "Failed to report mainloop stop!");
+        DFINDER_LOGE(TAG, "Failed to report mainloop stop!");
     }
 }
 #endif
@@ -445,7 +453,7 @@ void NSTACKX_Deinit(void)
 #else
         ReportMainLoopStop();
         if (osThreadTerminate(g_threadId) != osOK) {
-            LOGE(TAG, "os thread terminate failed");
+            DFINDER_LOGE(TAG, "os thread terminate failed");
         }
 #endif
         g_validTidFlag = NSTACKX_FALSE;
@@ -454,21 +462,7 @@ void NSTACKX_Deinit(void)
     SmartGeniusClean();
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
     CoapDiscoverDeinit();
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-    for (uint32_t i = 0; i < NSTACKX_MAX_LISTENED_NIF_NUM; ++i) {
-        DFINDER_LOGE(TAG, "nstackx_deinit nif with idx-%u", i);
-        CoapServerDestroyWithIdx(i);
-    }
-#else
-#ifndef DFINDER_USE_MINI_NSTACKX
-    DestroyP2pUsbServerInitRetryTimer();
-#endif /* END OF DFINDER_USE_MINI_NSTACKX */
-    CoapServerDestroy();
-#ifndef DFINDER_USE_MINI_NSTACKX
-    CoapP2pServerDestroy();
-    CoapUsbServerDestroy();
-#endif /* END OF DFINDER_USE_MINI_NSTACKX */
-#endif /* END OF DFINDER_SUPPORT_MULTI_NIF */
+
 #ifdef _WIN32
     CoapThreadDestroy();
 #endif
@@ -486,40 +480,59 @@ void NSTACKX_Deinit(void)
 
 static void DeviceDiscoverInner(void *argument)
 {
-    (void)argument;
-    CoapServiceDiscoverInner(INNER_DISCOVERY);
+    if (!IsCoapContextReady()) {
+        DFINDER_LOGE(TAG, "no iface is ready, notify user with empty list");
+        NotifyDeviceFound(NULL, 0);
+        return;
+    }
 
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-    if (!IsApConnected()) {
-        DFINDER_LOGE(TAG, "all ap not connected, notify user with empty list");
-        NotifyDeviceFound(NULL, 0);
-    }
-#else
-    /* If both Wifi AP and BLE are disabled, we should also notify user, with empty list. */
-    if (!IsWifiApConnected()) {
-        NotifyDeviceFound(NULL, 0);
-    }
-#endif
+    (void)argument;
+    SetCoapDiscoverType(COAP_BROADCAST_TYPE_DEFAULT);
+    SetLocalDeviceBusinessType(NSTACKX_BUSINESS_TYPE_NULL);
+    CoapServiceDiscoverInner(INNER_DISCOVERY);
 }
 
 static void DeviceDiscoverInnerAn(void *argument)
 {
     (void)argument;
+    SetCoapDiscoverType(COAP_BROADCAST_TYPE_DEFAULT);
+    SetLocalDeviceBusinessType(NSTACKX_BUSINESS_TYPE_NULL);
     CoapServiceDiscoverInnerAn(INNER_DISCOVERY);
 }
 
 static void DeviceDiscoverInnerConfigurable(void *argument)
 {
     NSTACKX_DiscoverySettings *discoverySettings = argument;
-    if (discoverySettings->businessType != GetLocalDeviceInfoPtr()->businessType) {
-        DFINDER_LOGE(TAG, "businessType is diff when check discover settings");
-        free(discoverySettings->businessData);
-        free(discoverySettings);
-        return;
-    }
-    ConfigureDiscoverySettings(discoverySettings);
+    int32_t configResult = ConfigureDiscoverySettings(discoverySettings);
     free(discoverySettings->businessData);
     free(discoverySettings);
+    if (configResult != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "config discovery settings failed");
+        return;
+    }
+    CoapServiceDiscoverInnerConfigurable(INNER_DISCOVERY);
+}
+
+static void DiscConfig(void *argument)
+{
+    DFinderDiscConfig *discConfig = argument;
+    uint8_t businessTypeLocal = GetLocalDeviceBusinessType();
+    if (discConfig->businessType != businessTypeLocal) {
+        DFINDER_LOGE(TAG, "business type is different, config: %hhu, local: %hhu",
+            discConfig->businessType, businessTypeLocal);
+        free(discConfig->businessData);
+        free(discConfig->bcastInterval);
+        free(discConfig);
+        return;
+    }
+    int32_t configResult = DiscConfigInner(discConfig);
+    free(discConfig->businessData);
+    free(discConfig->bcastInterval);
+    free(discConfig);
+    if (configResult != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "config for discover failed");
+        return;
+    }
     CoapServiceDiscoverInnerConfigurable(INNER_DISCOVERY);
 }
 
@@ -545,6 +558,7 @@ int32_t NSTACKX_StartDeviceFind(void)
 
 int32_t NSTACKX_StartDeviceFindAn(uint8_t mode)
 {
+    Coverity_Tainted_Set((void *)&mode);
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -652,6 +666,109 @@ int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySettings *discoveryS
     return NSTACKX_EOK;
 }
 
+static int32_t CopyDiscConfig(const DFinderDiscConfig *src, DFinderDiscConfig *dst)
+{
+    dst->businessType = src->businessType;
+    dst->discoveryMode = src->discoveryMode;
+    dst->intervalArrLen = src->intervalArrLen;
+    for (size_t idx = 0; idx < dst->intervalArrLen; ++idx) {
+        (dst->bcastInterval)[idx] = (src->bcastInterval)[idx];
+    }
+    if (src->businessData != NULL) {
+        if (strncpy_s(dst->businessData, dst->businessDataLen, src->businessData, src->businessDataLen) != EOK) {
+            DFINDER_LOGE(TAG, "copy business data failed");
+            return NSTACKX_EFAILED;
+        }
+    }
+    return NSTACKX_EOK;
+}
+
+static int32_t CheckDiscInterval(uint32_t *intervalArr, uint32_t arrLen)
+{
+    if (intervalArr == NULL || arrLen == 0) {
+        return NSTACKX_EINVAL;
+    }
+    // check interval values one by one
+    for (size_t i = 0; i < arrLen; ++i) {
+        if (intervalArr[i] < NSTACKX_MIN_ADVERTISE_INTERVAL || intervalArr[i] > NSTACKX_MAX_ADVERTISE_INTERVAL) {
+            DFINDER_LOGE(TAG, "invalid interval");
+            return NSTACKX_EINVAL;
+        }
+    }
+    return NSTACKX_EOK;
+}
+
+static int32_t CheckDiscConfig(const DFinderDiscConfig *discConfig)
+{
+    if (discConfig == NULL) {
+        DFINDER_LOGE(TAG, "disc config passed in is null");
+        return NSTACKX_EINVAL;
+    }
+    // minus one for the first broadcast without interval
+    if (discConfig->bcastInterval == NULL || discConfig->intervalArrLen > (NSTACKX_MAX_ADVERTISE_COUNT - 1) ||
+        discConfig->intervalArrLen == 0) {
+        DFINDER_LOGE(TAG, "invalid broadcast interval params");
+        return NSTACKX_EINVAL;
+    }
+    if (CheckDiscInterval(discConfig->bcastInterval, discConfig->intervalArrLen) != NSTACKX_EOK) {
+        return NSTACKX_EINVAL;
+    }
+    if ((discConfig->businessData == NULL) && (discConfig->businessDataLen != 0)) {
+        DFINDER_LOGE(TAG, "invalid business data params");
+        return NSTACKX_EINVAL;
+    }
+    if (discConfig->businessDataLen >= NSTACKX_MAX_BUSINESS_DATA_LEN) {
+        DFINDER_LOGE(TAG, "business data is too long");
+        return NSTACKX_EINVAL;
+    }
+    return NSTACKX_EOK;
+}
+
+int32_t NSTACKX_StartDeviceDiscoveryWithConfig(const DFinderDiscConfig *discConfig)
+{
+    DFINDER_LOGI(TAG, "dfinder start disc with config");
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "nstackx ctrl is not initialed yet");
+        return NSTACKX_EFAILED;
+    }
+    if (CheckDiscConfig(discConfig) != NSTACKX_EOK) {
+        return NSTACKX_EINVAL;
+    }
+    DFinderDiscConfig *dupDiscConfig = (DFinderDiscConfig *)malloc(sizeof(DFinderDiscConfig));
+    if (dupDiscConfig == NULL) {
+        DFINDER_LOGE(TAG, "malloc for duplicate disc config failed");
+        return NSTACKX_ENOMEM;
+    }
+    dupDiscConfig->bcastInterval = (uint32_t *)malloc(sizeof(uint32_t) * (discConfig->intervalArrLen));
+    if (dupDiscConfig->bcastInterval == NULL) {
+        DFINDER_LOGE(TAG, "malloc for duplicate broadcast interval failed");
+        free(dupDiscConfig);
+        return NSTACKX_ENOMEM;
+    }
+    dupDiscConfig->businessData = (char *)calloc((discConfig->businessDataLen + 1), sizeof(char));
+    if (dupDiscConfig->businessData == NULL) {
+        DFINDER_LOGE(TAG, "malloc for duplicate business data failed");
+        free(dupDiscConfig->bcastInterval);
+        free(dupDiscConfig);
+        return NSTACKX_ENOMEM;
+    }
+    // 1 to store the terminator
+    dupDiscConfig->businessDataLen = discConfig->businessDataLen + 1;
+    if (CopyDiscConfig(discConfig, dupDiscConfig) != NSTACKX_EOK) {
+        free(dupDiscConfig->businessData);
+        free(dupDiscConfig->bcastInterval);
+        free(dupDiscConfig);
+        return NSTACKX_EFAILED;
+    }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, DiscConfig, dupDiscConfig) != NSTACKX_EOK) {
+        free(dupDiscConfig->businessData);
+        free(dupDiscConfig->bcastInterval);
+        free(dupDiscConfig);
+        return NSTACKX_EFAILED;
+    }
+    return NSTACKX_EOK;
+}
+
 #ifndef DFINDER_USE_MINI_NSTACKX
 static void SubscribeModuleInner(void *argument)
 {
@@ -691,89 +808,47 @@ int32_t NSTACKX_UnsubscribeModule(void)
 }
 #endif /* END OF DFINDER_USE_MINI_NSTACKX */
 
-static void ConfigureLocalDeviceInfoInner(void *argument)
+static bool IsNetworkNameValid(const char *networkName, size_t len)
 {
-    NSTACKX_LocalDeviceInfo *localDeviceInfo = argument;
-
-    ConfigureLocalDeviceInfo(localDeviceInfo);
-    free(localDeviceInfo);
-}
-
-static void ConfigureLocalDeviceNameInner(void *argument)
-{
-    char *localDevName = (char *)argument;
-
-    ConfigureLocalDeviceName(localDevName);
-    free(localDevName);
-}
-
-#ifndef _WIN32
-static int32_t VerifyNifNameIp(const char *networkName, const char *networkIp, uint32_t *matchCnt)
-{
-    if (networkName == NULL || networkIp == NULL || matchCnt == NULL) {
-        DFINDER_LOGE(TAG, "invalid nif info passed in");
-        return NSTACKX_EINVAL;
+    if (!StringHasEOF(networkName, len)) {
+        DFINDER_LOGE(TAG, "network name is not ended");
+        return NSTACKX_FALSE;
     }
+
+    return NSTACKX_TRUE;
+}
+
+static bool IsIpAddressValid(const char *ipStr, size_t len)
+{
+    if (!StringHasEOF(ipStr, len)) {
+        DFINDER_LOGE(TAG, "ip addr is not ended");
+        return NSTACKX_FALSE;
+    }
+
     struct in_addr ipAddr;
-    if (inet_pton(AF_INET, networkIp, &ipAddr) != 1) {
-        return NSTACKX_EINVAL;
+    if (len != 0 && ipStr[0] != '\0' && inet_pton(AF_INET, ipStr, &ipAddr) != 1) {
+        DFINDER_LOGE(TAG, "invalid ip address");
+        return NSTACKX_FALSE;
     }
-    ++(*matchCnt);
+
+    return NSTACKX_TRUE;
+}
+
+static int32_t CheckInterfaceInfo(const NSTACKX_InterfaceInfo *ifaces, uint32_t count)
+{
+    for (uint32_t i = 0; i < count; ++i) {
+        if (!IsNetworkNameValid(ifaces[i].networkName, sizeof(ifaces[i].networkName)) ||
+            !IsIpAddressValid(ifaces[i].networkIpAddr, sizeof(ifaces[i].networkIpAddr))) {
+            DFINDER_LOGE(TAG, "invalid network name or ip address of No.%u local iface", i);
+            return NSTACKX_EINVAL;
+        }
+    }
+
     return NSTACKX_EOK;
 }
 
-static int32_t CheckNifInfoPassedIn(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
+static int CheckLocalDeviceInfo(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
 {
-    uint32_t matchCnt = 0;
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-    for (uint32_t i = 0; i < localDeviceInfo->ifNums; ++i) {
-        if (VerifyNifNameIp(localDeviceInfo->localIfInfo[i].networkName,
-            localDeviceInfo->localIfInfo[i].networkIpAddr, &matchCnt) != NSTACKX_EOK) {
-            return NSTACKX_EFAILED;
-        }
-    }
-    return (matchCnt == localDeviceInfo->ifNums) ? NSTACKX_EOK : NSTACKX_EFAILED;
-#else
-    int32_t verifyResult;
-    if (localDeviceInfo->ifNums == 0) {
-        verifyResult = VerifyNifNameIp(localDeviceInfo->networkName, localDeviceInfo->networkIpAddr, &matchCnt);
-        return verifyResult;
-    } else {
-        verifyResult = VerifyNifNameIp(localDeviceInfo->localIfInfo[0].networkName,
-            localDeviceInfo->localIfInfo[0].networkIpAddr, &matchCnt);
-        if ((verifyResult == NSTACKX_EOK) && (matchCnt == localDeviceInfo->ifNums)) {
-            return NSTACKX_EOK;
-        }
-        return NSTACKX_EFAILED;
-    }
-#endif
-}
-#endif
-
-#ifndef DFINDER_SUPPORT_MULTI_NIF
-static int32_t CopyNifNameAndIp(NSTACKX_LocalDeviceInfo *destDev, const NSTACKX_LocalDeviceInfo *srcDev)
-{
-    if (destDev == NULL || srcDev == NULL) {
-        DFINDER_LOGE(TAG, "invalid device info passed in");
-        return NSTACKX_EINVAL;
-    }
-    if (srcDev->ifNums != 0) {
-        if (strcpy_s(destDev->networkName, NSTACKX_MAX_INTERFACE_NAME_LEN, srcDev->localIfInfo[0].networkName) != EOK) {
-            DFINDER_LOGE(TAG, "network name strcpy failed");
-            return NSTACKX_EFAILED;
-        }
-        if (strcpy_s(destDev->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, srcDev->localIfInfo[0].networkIpAddr) != EOK) {
-            DFINDER_LOGE(TAG, "network ip strcpy failed");
-            return NSTACKX_EFAILED;
-        }
-    }
-    return NSTACKX_EOK;
-}
-#endif
-
-int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
-{
-    DFINDER_LOGI(TAG, "begin to NSTACKX_RegisterDevice!");
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -784,54 +859,89 @@ int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
         return NSTACKX_EINVAL;
     }
 
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-    if (localDeviceInfo->ifNums > NSTACKX_MAX_LISTENED_NIF_NUM || localDeviceInfo->ifNums == 0) {
-#else
-    if (localDeviceInfo->ifNums > NSTACKX_MAX_LISTENED_NIF_NUM) {
-#endif
-        DFINDER_LOGE(TAG, "Invalid ifNums %hhu", localDeviceInfo->ifNums);
+    if (!StringHasEOF(localDeviceInfo->deviceId, sizeof(localDeviceInfo->deviceId)) ||
+        !StringHasEOF(localDeviceInfo->name, sizeof(localDeviceInfo->name)) ||
+        !StringHasEOF(localDeviceInfo->version, sizeof(localDeviceInfo->version))) {
+        DFINDER_LOGE(TAG, "device id or device name or version is not ended");
         return NSTACKX_EINVAL;
     }
-#ifndef _WIN32
-    if (CheckNifInfoPassedIn(localDeviceInfo) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "check nif info passed in return fail");
-        return NSTACKX_EFAILED;
-    }
-#endif
-    NSTACKX_LocalDeviceInfo *dupLocalDeviceInfo = malloc(sizeof(NSTACKX_LocalDeviceInfo));
-    if (dupLocalDeviceInfo == NULL) {
-        return NSTACKX_ENOMEM;
+
+    if (localDeviceInfo->ifNums > NSTACKX_MAX_LISTENED_NIF_NUM) {
+        DFINDER_LOGE(TAG, "invalid iface number %u", localDeviceInfo->ifNums);
+        return NSTACKX_EINVAL;
+    } else if (localDeviceInfo->ifNums == 0) {
+        if (!IsNetworkNameValid(localDeviceInfo->networkName, sizeof(localDeviceInfo->networkName)) ||
+            !IsIpAddressValid(localDeviceInfo->networkIpAddr, sizeof(localDeviceInfo->networkIpAddr))) {
+            DFINDER_LOGE(TAG, "invalid network name or ip address when iface number is 0");
+            return NSTACKX_EINVAL;
+        }
     }
 
-    if (memcpy_s(dupLocalDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo),
-        localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo)) != EOK) {
-        DFINDER_LOGE(TAG, "memcpy failed");
-        goto L_ERROR;
-    }
-#ifndef DFINDER_SUPPORT_MULTI_NIF
-    if (CopyNifNameAndIp(dupLocalDeviceInfo, localDeviceInfo) != NSTACKX_EOK) {
-        goto L_ERROR;
-    }
-#endif
-    if (PostEvent(&g_eventNodeChain, g_epollfd, ConfigureLocalDeviceInfoInner, dupLocalDeviceInfo) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "Failed to configure local device info!");
-        goto L_ERROR;
-    }
     return NSTACKX_EOK;
-L_ERROR:
-    free(dupLocalDeviceInfo);
-    return NSTACKX_EFAILED;
+}
+
+static void DeviceInfoV2Init(NSTACKX_LocalDeviceInfoV2 *v2,
+    const NSTACKX_LocalDeviceInfo *localDeviceInfo, bool hasDeviceHash, uint64_t deviceHash)
+{
+    v2->name = localDeviceInfo->name;
+    v2->deviceId = localDeviceInfo->deviceId;
+    v2->version = localDeviceInfo->version;
+    v2->deviceType = localDeviceInfo->deviceType;
+    v2->businessType = localDeviceInfo->businessType;
+    v2->hasDeviceHash = hasDeviceHash;
+    v2->deviceHash = deviceHash;
+}
+
+static int32_t RegisterDeviceWithDeviceHash(const NSTACKX_LocalDeviceInfo *localDeviceInfo,
+    bool hasDeviceHash, uint64_t deviceHash)
+{
+    int ret = CheckLocalDeviceInfo(localDeviceInfo);
+    if (ret != NSTACKX_EOK) {
+        return ret;
+    }
+
+    NSTACKX_LocalDeviceInfoV2 v2;
+    DeviceInfoV2Init(&v2, localDeviceInfo, hasDeviceHash, deviceHash);
+
+    NSTACKX_InterfaceInfo ifaceInfo = { {0}, {0} };
+    if (localDeviceInfo->ifNums == 0) {
+        if (strcpy_s(ifaceInfo.networkName, sizeof(ifaceInfo.networkName), localDeviceInfo->networkName) != EOK ||
+            strcpy_s(ifaceInfo.networkIpAddr, sizeof(ifaceInfo.networkIpAddr),
+            localDeviceInfo->networkIpAddr) != EOK) {
+            DFINDER_LOGE(TAG, "copy network name or ip addr failed");
+            return NSTACKX_EINVAL;
+        }
+        v2.localIfInfo = &ifaceInfo;
+        v2.ifNums = 1;
+    } else {
+        v2.localIfInfo = &localDeviceInfo->localIfInfo[0];
+        v2.ifNums = localDeviceInfo->ifNums;
+    }
+
+    return RegisterDeviceWithType(&v2, hasDeviceHash ? REGISTER_TYPE_UPDATE_SPECIFIED : REGISTER_TYPE_UPDATE_ALL);
+}
+
+int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo)
+{
+    Coverity_Tainted_Set((void *)localDeviceInfo);
+    DFINDER_LOGI(TAG, "begin to NSTACKX_RegisterDevice!");
+
+    return RegisterDeviceWithDeviceHash(localDeviceInfo, NSTACKX_FALSE, 0);
+}
+
+static void ConfigureLocalDeviceNameInner(void *argument)
+{
+    char *localDevName = (char *)argument;
+
+    ConfigureLocalDeviceName(localDevName);
+    free(localDevName);
 }
 
 int32_t NSTACKX_RegisterDeviceName(const char *devName)
 {
-    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
-        return NSTACKX_EFAILED;
-    }
     if (devName == NULL || devName[0] == '\0') {
         DFINDER_LOGE(TAG, "register local device name is invalid");
-        return NSTACKX_EFAILED;
+        return NSTACKX_EINVAL;
     }
     char *dupDevName = (char *)malloc(sizeof(char) * NSTACKX_MAX_DEVICE_NAME_LEN);
     if (dupDevName == NULL) {
@@ -852,35 +962,71 @@ int32_t NSTACKX_RegisterDeviceName(const char *devName)
 
 int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo, uint64_t deviceHash)
 {
-    NSTACKX_LocalDeviceInfo *dupLocalDeviceInfo = NULL;
+    Coverity_Tainted_Set((void *)localDeviceInfo);
+    Coverity_Tainted_Set((void *)&deviceHash);
+
+    DFINDER_LOGI(TAG, "begin to NSTACKX_RegisterDeviceAn!");
+    return RegisterDeviceWithDeviceHash(localDeviceInfo, NSTACKX_TRUE, deviceHash);
+}
+
+struct RegDeviceInfo {
+    const NSTACKX_LocalDeviceInfoV2 *info;
+    int registerType;
+    int32_t err;
+    sem_t wait;
+};
+
+static void RegisterDeviceV2(void *arg)
+{
+    struct RegDeviceInfo *regInfo = (struct RegDeviceInfo *)arg;
+    regInfo->err = RegisterLocalDeviceV2(regInfo->info, regInfo->registerType);
+    SemPost(&regInfo->wait);
+}
+
+#define NSTACKX_MAX_LOCAL_IFACE_NUM 10
+
+static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType)
+{
+    if (localDeviceInfo == NULL || localDeviceInfo->name == NULL ||
+        localDeviceInfo->deviceId == NULL || localDeviceInfo->version == NULL ||
+        localDeviceInfo->ifNums > NSTACKX_MAX_LOCAL_IFACE_NUM ||
+        (localDeviceInfo->ifNums != 0 && localDeviceInfo->localIfInfo == NULL) ||
+        CheckInterfaceInfo(localDeviceInfo->localIfInfo, localDeviceInfo->ifNums) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "invalid args");
+        return NSTACKX_EINVAL;
+    }
+
+    struct RegDeviceInfo regInfo;
+    if (SemInit(&regInfo.wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "sem init fail");
+        return NSTACKX_EBUSY;
+    }
+
+    regInfo.info = localDeviceInfo;
+    regInfo.registerType = registerType;
+    regInfo.err = NSTACKX_EOK;
+
+    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterDeviceV2, &regInfo) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to configure local device info!");
+        SemDestroy(&regInfo.wait);
+        return NSTACKX_EBUSY;
+    }
+
+    SemWait(&regInfo.wait);
+    SemDestroy(&regInfo.wait);
+    return regInfo.err;
+}
+
+int32_t NSTACKX_RegisterDeviceV2(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo)
+{
+    Coverity_Tainted_Set((void *)localDeviceInfo);
 
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
     }
 
-    if (localDeviceInfo == NULL) {
-        DFINDER_LOGE(TAG, "Invalid local device info");
-        return NSTACKX_EINVAL;
-    }
-
-    dupLocalDeviceInfo = malloc(sizeof(NSTACKX_LocalDeviceInfo));
-    if (dupLocalDeviceInfo == NULL) {
-        return NSTACKX_ENOMEM;
-    }
-
-    if (memcpy_s(dupLocalDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo),
-        localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo)) != EOK) {
-        free(dupLocalDeviceInfo);
-        return NSTACKX_EFAILED;
-    }
-    if (PostEvent(&g_eventNodeChain, g_epollfd, ConfigureLocalDeviceInfoInner, dupLocalDeviceInfo) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "Failed to configure local device info!");
-        free(dupLocalDeviceInfo);
-        return NSTACKX_EFAILED;
-    }
-    SetDeviceHash(deviceHash);
-    return NSTACKX_EOK;
+    return RegisterDeviceWithType(localDeviceInfo, REGISTER_TYPE_UPDATE_ALL);
 }
 
 typedef struct {
@@ -890,10 +1036,10 @@ typedef struct {
 
 static void RegisterCapabilityInner(void *argument)
 {
-    LOGI(TAG, "Register Capability Inner");
+    DFINDER_LOGI(TAG, "Register Capability Inner");
     CapabilityProcessData *capabilityData = argument;
 
-    RegisterCapability(capabilityData->capabilityBitmapNum, capabilityData->capabilityBitmap);
+    (void)SetLocalDeviceCapability(capabilityData->capabilityBitmapNum, capabilityData->capabilityBitmap);
     free(capabilityData);
 }
 
@@ -901,16 +1047,24 @@ static void SetFilterCapabilityInner(void *argument)
 {
     CapabilityProcessData *capabilityData = argument;
 
-    SetFilterCapability(capabilityData->capabilityBitmapNum, capabilityData->capabilityBitmap);
+    (void)SetFilterCapability(capabilityData->capabilityBitmapNum, capabilityData->capabilityBitmap);
     free(capabilityData);
 }
 
 static int32_t NSTACKX_CapabilityHandle(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[], EventHandle handle)
 {
+    Coverity_Tainted_Set((void *)&capabilityBitmapNum);
+    Coverity_Tainted_Set((void *)capabilityBitmap);
+
     CapabilityProcessData *capabilityData = NULL;
 
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+
+    if (capabilityBitmapNum != 0 && capabilityBitmap == NULL) {
+        DFINDER_LOGE(TAG, "bitmap array is null");
         return NSTACKX_EFAILED;
     }
 
@@ -950,12 +1104,101 @@ int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
     DFINDER_LOGI(TAG, "Set Filter Capability");
     return NSTACKX_CapabilityHandle(capabilityBitmapNum, capabilityBitmap, SetFilterCapabilityInner);
 }
+typedef struct SetMaxDeviceNumMsg_ {
+    uint32_t maxDeviceNum;
+    sem_t wait;
+} SetMaxDeviceNumMsg;
+
+static void SetMaxDeviceNumInner(void *argument)
+{
+    SetMaxDeviceNumMsg *msg = (SetMaxDeviceNumMsg *)argument;
+    SetMaxDeviceNum(msg->maxDeviceNum);
+    SemPost(&msg->wait);
+}
+
+int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
+{
+    SetMaxDeviceNumMsg msg = {
+        .maxDeviceNum = maxDeviceNum,
+    };
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+    if (SemInit(&msg.wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "Failed to init sem!");
+        return NSTACKX_EFAILED;
+    }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, SetMaxDeviceNumInner, &msg) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to set max device num!");
+        SemDestroy(&msg.wait);
+        return NSTACKX_EFAILED;
+    }
+    SemWait(&msg.wait);
+    SemDestroy(&msg.wait);
+    return NSTACKX_EOK;
+}
+
+#ifdef DFINDER_SAVE_DEVICE_LIST
+typedef struct SetDeviceListAgingTimeMsg_ {
+    uint32_t agingTime;
+    sem_t wait;
+} SetDeviceListAgingTimeMsg;
+
+static void SetDeviceListAgingTimeInner(void *argument)
+{
+    SetDeviceListAgingTimeMsg *msg = (SetDeviceListAgingTimeMsg *)argument;
+    SetDeviceListAgingTime(msg->agingTime);
+    SemPost(&msg->wait);
+}
+
+int32_t NSTACKX_SetDeviceListAgingTime(uint32_t agingTime)
+{
+    SetDeviceListAgingTimeMsg msg = {
+        .agingTime = agingTime,
+    };
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+    if (SemInit(&msg.wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "Failed to init sem!");
+        return NSTACKX_EFAILED;
+    }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, SetDeviceListAgingTimeInner, &msg) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to set agingtime!");
+        SemDestroy(&msg.wait);
+        return NSTACKX_EFAILED;
+    }
+    SemWait(&msg.wait);
+    SemDestroy(&msg.wait);
+    return NSTACKX_EOK;
+}
+#else
+int32_t NSTACKX_SetDeviceListAgingTime(uint32_t agingTime)
+{
+    (void)agingTime;
+    DFINDER_LOGE(TAG, "device list not supported");
+    return NSTACKX_EFAILED;
+}
+#endif /* END OF DFINDER_SAVE_DEVICE_LIST */
+
+int32_t NSTACKX_ScreenStatusChange(bool isScreenOn)
+{
+#ifdef DFINDER_SUPPORT_SET_SCREEN_STATUS
+    SetScreenStatus(isScreenOn);
+#else
+    (void)isScreenOn;
+    DFINDER_LOGI(TAG, "do not support set screen status");
+#endif
+    return NSTACKX_EOK;
+}
 
 static void RegisterServiceDataInner(void *argument)
 {
-    LOGI(TAG, "Register Service Data Inner");
+    DFINDER_LOGI(TAG, "Register Service Data Inner");
     char *serviceData = argument;
-    if (RegisterServiceData(serviceData) != NSTACKX_EOK) {
+    if (SetLocalDeviceServiceData(serviceData) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "RegisterServiceData failed");
     }
     free(serviceData);
@@ -963,7 +1206,9 @@ static void RegisterServiceDataInner(void *argument)
 
 int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 {
-    LOGI(TAG, "Register Service Data");
+    Coverity_Tainted_Set((void *)serviceData);
+
+    DFINDER_LOGI(TAG, "Register Service Data");
     char *serviceDataTmp = NULL;
 
     if (serviceData == NULL) {
@@ -993,6 +1238,55 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
         free(serviceDataTmp);
         return NSTACKX_EFAILED;
     }
+
+    return NSTACKX_EOK;
+}
+
+static void RegisterBusinessDataInner(void *argument)
+{
+    DFINDER_LOGI(TAG, "Register Business Data Inner");
+    char *businessData = argument;
+    if (SetLocalDeviceBusinessData(businessData, NSTACKX_TRUE) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "RegisterBusinessData failed");
+    }
+    free(businessData);
+}
+
+int32_t NSTACKX_RegisterBusinessData(const char *businessData)
+{
+    DFINDER_LOGI(TAG, "begin to call NSTACKX_RegisterBusinessData");
+
+    char *businessDataTmp = NULL;
+    if (businessData == NULL) {
+        DFINDER_LOGE(TAG, "businessData is null");
+        return NSTACKX_EINVAL;
+    }
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
+    if (strlen(businessData) >= NSTACKX_MAX_BUSINESS_DATA_LEN) {
+        DFINDER_LOGE(TAG, "businessData (%u) exceed max number", strlen(businessData));
+        return NSTACKX_EINVAL;
+    }
+
+    businessDataTmp = calloc(1, NSTACKX_MAX_BUSINESS_DATA_LEN);
+    if (businessDataTmp == NULL) {
+        DFINDER_LOGE(TAG, "businessDataTmp is null");
+        return NSTACKX_ENOMEM;
+    }
+    if (strncpy_s(businessDataTmp, NSTACKX_MAX_BUSINESS_DATA_LEN, businessData,
+        strlen(businessData)) != EOK) {
+        DFINDER_LOGE(TAG, "Failed to copy businessData");
+        free(businessDataTmp);
+        return NSTACKX_EFAILED;
+    }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterBusinessDataInner, businessDataTmp) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to register businessData!");
+        free(businessDataTmp);
+        return NSTACKX_EFAILED;
+    }
+
     return NSTACKX_EOK;
 }
 
@@ -1000,14 +1294,16 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 static void RegisterExtendServiceDataInner(void *argument)
 {
     char *extendServiceData = argument;
-    if (RegisterExtendServiceData(extendServiceData) != NSTACKX_EOK) {
+    if (SetLocalDeviceExtendServiceData(extendServiceData) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "RegisterExtendServiceData failed");
     }
     free(extendServiceData);
 }
+#endif
 
 int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData)
 {
+#ifndef DFINDER_USE_MINI_NSTACKX
     char *extendServiceDataTmp = NULL;
 
     if (extendServiceData == NULL) {
@@ -1039,36 +1335,26 @@ int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData)
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
+#else
+    (void)extendServiceData;
+    DFINDER_LOGI(TAG, "NSTACKX_RegisterExtendServiceData not supported");
+    return NSTACKX_EOK;
+#endif
 }
 
-#ifndef DFINDER_SUPPORT_MULTI_NIF
-static void SendMsgInner(void *arg)
+#ifndef DFINDER_USE_MINI_NSTACKX
+struct DirectMsgCtx {
+    MsgCtx msg;
+    const char *ipStr;
+    struct in_addr ip;
+};
+
+static void SendMsgDirectInner(void *arg)
 {
-    MsgCtx *msg = arg;
-    if (msg == NULL) {
-        DFINDER_LOGE(TAG, "SendMsgInner: msg is NULL");
-        return;
-    }
-    if (strlen(msg->p2pAddr) != 0) {
-        DFINDER_LOGD(TAG, "Enter WifiDirect send");
-        msg->err = CoapSendServiceMsgWithDefiniteTargetIp(msg, NULL);
-    } else {
-#ifdef DFINDER_SAVE_DEVICE_LIST
-        DeviceInfo *deviceInfo = GetDeviceInfoById(msg->deviceId, GetDeviceDB());
-        if (deviceInfo == NULL) {
-            DFINDER_LOGW(TAG, "no device found in device list, try to find in backup");
-            deviceInfo = GetDeviceInfoById(msg->deviceId, GetDeviceDBBackup());
-            if (deviceInfo == NULL) {
-                DFINDER_LOGE(TAG, "no device found in device list backup yet");
-            }
-        }
-        msg->err = CoapSendServiceMsg(msg, deviceInfo);
-#else
-        DFINDER_LOGE(TAG, "Invalid p2pAddr");
-        msg->err = NSTACKX_EINVAL;
-#endif /* #ifdef DFINDER_SAVE_DEVICE_LIST */
-    }
-    SemPost(&msg->wait);
+    struct DirectMsgCtx *msg = arg;
+    DFINDER_LOGD(TAG, "Enter WifiDirect send");
+    msg->msg.err = CoapSendServiceMsg(&msg->msg, msg->ipStr, &msg->ip);
+    SemPost(&msg->msg.wait);
 }
 
 static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *deviceId, const uint8_t *data,
@@ -1091,66 +1377,29 @@ static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *dev
     return NSTACKX_EOK;
 }
 
-static MsgCtx *NSTACKX_GetMsgCtx(const char *moduleName, const char *deviceId, const uint8_t *data,
-    uint32_t len, const char *ipaddr, uint8_t type)
+static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId,
+    const uint8_t *data, uint32_t len, uint8_t type)
 {
-    MsgCtx *msg = NULL;
+    if (SemInit(&msg->wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "sem init fail");
+        return NSTACKX_EFAILED;
+    }
 
-    msg = calloc(1U, sizeof(MsgCtx));
-    if (msg == NULL) {
-        DFINDER_LOGE(TAG, "MsgCtx malloc fail");
-        return NULL;
-    }
-    if ((strcpy_s(msg->deviceId, sizeof(msg->deviceId), deviceId) != EOK) ||
-        (strcpy_s(msg->moduleName, sizeof(msg->moduleName), moduleName) != EOK)) {
-        DFINDER_LOGE(TAG, "Cpy deviceId fail");
-        goto FAILED;
-    }
-    if (ipaddr != NULL) {
-        if (strcpy_s(msg->p2pAddr, sizeof(msg->p2pAddr), ipaddr) != EOK) {
-            DFINDER_LOGE(TAG, "Cpy p2pAddr fail.");
-            goto FAILED;
-        }
-    }
-    msg->data = malloc(len);
-    if (msg->data == NULL) {
-        DFINDER_LOGE(TAG, "Msg data malloc fail");
-        goto FAILED;
-    }
-    if (memcpy_s(msg->data, len, data, len) != EOK) {
-        DFINDER_LOGE(TAG, "Msg data memcpy error");
-        goto FAILED;
-    }
+    msg->deviceId = deviceId;
+    msg->moduleName = moduleName;
+    msg->data = data;
     msg->len = len;
     msg->type = type;
     msg->err = NSTACKX_EOK;
-    if (SemInit(&(msg->wait), 0, 0)) {
-        DFINDER_LOGE(TAG, "sem init fail");
-        goto FAILED;
-    }
 
-    return msg;
-FAILED:
-    free(msg->data);
-    free(msg);
-    return NULL;
+    return NSTACKX_EOK;
 }
-#endif /* #ifndef DFINDER_SUPPORT_MULTI_NIF */
+#endif
 
 int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, const uint8_t *data,
     uint32_t len, const char *ipaddr, uint8_t type)
 {
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-    (void)moduleName;
-    (void)deviceId;
-    (void)data;
-    (void)len;
-    (void)ipaddr;
-    (void)type;
-    DFINDER_LOGE(TAG, "Do not support SendMsgDirect");
-    return NSTACKX_EFAILED;
-#else
-    MsgCtx *msg = NULL;
+#ifndef DFINDER_USE_MINI_NSTACKX
     int32_t ret = NSTACKX_EOK;
     DFINDER_LOGD(TAG, "NSTACKX_SendMsgDirect");
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
@@ -1161,39 +1410,77 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
         DFINDER_LOGE(TAG, "ipaddr needed");
         return NSTACKX_EINVAL;
     }
+
+    if (type > SERVER_TYPE_USB) {
+        DFINDER_LOGE(TAG, "invalid type %hhu", type);
+        return NSTACKX_EINVAL;
+    }
+
     if (NSTACKX_SendMsgParamCheck(moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EINVAL;
     }
-    msg = NSTACKX_GetMsgCtx(moduleName, deviceId, data, len, ipaddr, type);
-    if (msg == NULL) {
+
+    struct DirectMsgCtx directMsg;
+    if (inet_pton(AF_INET, ipaddr, &directMsg.ip) != 1 || directMsg.ip.s_addr == 0) {
+        DFINDER_LOGE(TAG, "invalid ip addr");
+        return NSTACKX_EINVAL;
+    }
+    directMsg.ipStr = ipaddr;
+
+    if (MsgCtxInit(&directMsg.msg, moduleName, deviceId, data, len, type) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
-    if (PostEvent(&g_eventNodeChain, g_epollfd, SendMsgInner, msg) != NSTACKX_EOK) {
+
+    if (PostEvent(&g_eventNodeChain, g_epollfd, SendMsgDirectInner, &directMsg) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to send msg");
         ret = NSTACKX_EFAILED;
     }
     if (ret == NSTACKX_EOK) {
-        SemWait(&(msg->wait));
-        ret = msg->err;
+        SemWait(&directMsg.msg.wait);
+        ret = directMsg.msg.err;
     }
-    SemDestroy(&(msg->wait));
-    free(msg->data);
-    free(msg);
+    SemDestroy(&directMsg.msg.wait);
     return ret;
-#endif /* #ifdef DFINDER_SUPPORT_MULTI_NIF */
-}
-
-int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint8_t *data, uint32_t len)
-{
-#ifdef DFINDER_SUPPORT_MULTI_NIF
+#else
     (void)moduleName;
     (void)deviceId;
     (void)data;
     (void)len;
-    DFINDER_LOGE(TAG, "Do not support SendMsgDirect");
+    (void)ipaddr;
+    (void)type;
+    DFINDER_LOGI(TAG, "NSTACKX_SendMsgDirect not supported");
     return NSTACKX_EFAILED;
-#else
-#ifdef DFINDER_SAVE_DEVICE_LIST
+#endif
+}
+
+#if defined(DFINDER_SAVE_DEVICE_LIST) && !defined(DFINDER_USE_MINI_NSTACKX)
+static void SendMsgInner(void *arg)
+{
+    MsgCtx *msg = arg;
+    const struct in_addr *remoteIp = GetRemoteDeviceIp(msg->deviceId);
+    if (remoteIp == NULL) {
+        DFINDER_LOGW(TAG, "no device found");
+        msg->err = NSTACKX_EINVAL;
+    } else {
+        char ipStr[INET_ADDRSTRLEN] = {0};
+        if (inet_ntop(AF_INET, remoteIp, ipStr, sizeof(ipStr)) != NULL) {
+            msg->err = CoapSendServiceMsg(msg, ipStr, remoteIp);
+        } else {
+            DFINDER_LOGE(TAG, "ip format failed");
+        }
+    }
+
+    SemPost(&msg->wait);
+}
+#endif
+
+int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint8_t *data, uint32_t len)
+{
+    Coverity_Tainted_Set((void *)moduleName);
+    Coverity_Tainted_Set((void *)deviceId);
+    Coverity_Tainted_Set((void *)data);
+    Coverity_Tainted_Set((void *)&len);
+#if defined(DFINDER_SAVE_DEVICE_LIST) && !defined(DFINDER_USE_MINI_NSTACKX)
     int32_t ret = NSTACKX_EOK;
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
@@ -1202,45 +1489,35 @@ int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint
     if (NSTACKX_SendMsgParamCheck(moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EINVAL;
     }
-    MsgCtx *msg = NSTACKX_GetMsgCtx(moduleName, deviceId, data, len, NULL, SERVER_TYPE_WLANORETH);
-    if (msg == NULL) {
+
+    MsgCtx msg;
+    if (MsgCtxInit(&msg, moduleName, deviceId, data, len, INVALID_TYPE) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
-    if (PostEvent(&g_eventNodeChain, g_epollfd, SendMsgInner, msg) != NSTACKX_EOK) {
+
+    if (PostEvent(&g_eventNodeChain, g_epollfd, SendMsgInner, &msg) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "failed to send msg");
         ret = NSTACKX_EFAILED;
     }
     if (ret == NSTACKX_EOK) {
-        SemWait(&(msg->wait));
-        ret = msg->err;
+        SemWait(&msg.wait);
+        ret = msg.err;
     }
-    SemDestroy(&(msg->wait));
-    free(msg->data);
-    free(msg);
+    SemDestroy(&msg.wait);
     return ret;
 #else
     (void)moduleName;
     (void)deviceId;
     (void)data;
     (void)len;
-
-    DFINDER_LOGE(TAG, "SendMsg not supported");
-
+    DFINDER_LOGI(TAG, "SendMsg not supported");
     return NSTACKX_EFAILED;
-#endif /* END OF DFINDER_SAVE_DEVICE_LIST */
-#endif /* #ifdef DFINDER_SUPPORT_MULTI_NIF */
+#endif
 }
-#endif /* END OF DFINDER_USE_MINI_NSTACKX */
 
 static void SendDiscoveryRspInner(void *arg)
 {
     NSTACKX_ResponseSettings *responseSettings = arg;
-    if (responseSettings->businessType != GetLocalDeviceInfoPtr()->businessType) {
-        DFINDER_LOGE(TAG, "businessType is diff when check response settings");
-        free(responseSettings->businessData);
-        free(responseSettings);
-        return;
-    }
     SendDiscoveryRsp(responseSettings);
     free(responseSettings->businessData);
     free(responseSettings);
@@ -1299,6 +1576,9 @@ int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSetting
         return NSTACKX_EINVAL;
     }
 
+    DFINDER_LOGI(TAG, "response settings, business type: %hu, local network name: %s",
+        responseSettings->businessType, responseSettings->localNetworkName);
+
     NSTACKX_ResponseSettings *dupResponseSettings = malloc(sizeof(NSTACKX_ResponseSettings));
     if (dupResponseSettings == NULL) {
         DFINDER_LOGE(TAG, "malloc failed");
@@ -1330,7 +1610,7 @@ static void GetDeviceListInner(void *argument)
 {
     GetDeviceListMessage *message = argument;
 
-    GetDeviceListWrapper(message->deviceList, message->deviceCountPtr, true);
+    GetDeviceList(message->deviceList, message->deviceCountPtr, true);
     SemPost(&message->wait);
 }
 #endif
@@ -1394,11 +1674,12 @@ void NotifyDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCoun
 }
 
 #ifndef DFINDER_USE_MINI_NSTACKX
-void NotifyMsgReceived(const char *moduleName, const char *deviceId, const uint8_t *data, uint32_t len)
+void NotifyMsgReceived(const char *moduleName, const char *deviceId, const uint8_t *data,
+    uint32_t len, const char *srcIp)
 {
     if (g_parameter.onMsgReceived != NULL) {
         DFINDER_LOGI(TAG, "notify callback: message received, data length %u", len);
-        g_parameter.onMsgReceived(moduleName, deviceId, data, len);
+        g_parameter.onMsgReceived(moduleName, deviceId, data, len, srcIp);
         DFINDER_LOGI(TAG, "finish to notify msg received");
     } else {
         DFINDER_LOGI(TAG, "notify callback: message received callback is null");
@@ -1407,14 +1688,17 @@ void NotifyMsgReceived(const char *moduleName, const char *deviceId, const uint8
 
 int32_t NSTACKX_InitRestart(const NSTACKX_Parameter *parameter)
 {
-#ifdef DFINDER_SUPPORT_MULTI_NIF
+    Coverity_Tainted_Set((void *)parameter);
+
+#if defined(_WIN32) || defined(DFINDER_USE_MINI_NSTACKX)
+    DFINDER_LOGE(TAG, "do not support init restart");
     (void)parameter;
-    return NSTACKX_EOK;
+    return NSTACKX_EFAILED;
 #else
     DFINDER_LOGI(TAG, "NSTACKX_InitRestart");
     int32_t ret = NSTACKX_Init(parameter);
     if (ret == NSTACKX_EOK) {
-        if (PostEvent(&g_eventNodeChain, g_epollfd, GetLocalNetworkInterface, NULL) != NSTACKX_EOK) {
+        if (PostEvent(&g_eventNodeChain, g_epollfd, DetectLocalIface, NULL) != NSTACKX_EOK) {
             DFINDER_LOGE(TAG, "Failed to GetLocalNetworkInterface");
         }
     }
@@ -1468,17 +1752,17 @@ int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinder
         DFINDER_LOGE(TAG, "dump is null");
         return NSTACKX_EINVAL;
     }
-    
+
     if (argc == 0 || argc > MAX_DUMP_ARGC) {
         DFINDER_LOGE(TAG, "argc is invalid %u", argc);
         return NSTACKX_EINVAL;
     }
-    
+
     if (argv == NULL) {
         DFINDER_LOGE(TAG, "argv is null");
         return NSTACKX_EINVAL;
     }
-    
+
     uint32_t i;
     for (i = 0; i < argc; i++) {
         if (argv[i] == NULL) {
@@ -1496,7 +1780,7 @@ int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinder
     (void)argc;
     (void)softObj;
     (void)dump;
-    DFINDER_LOGE(TAG, "Unsupport dfinder dump");
+    DFINDER_LOGE(TAG, "unsupport dfinder dump");
     return NSTACKX_NOTSUPPORT;
 }
 #endif
@@ -1506,11 +1790,6 @@ int NSTACKX_DFinderSetEventFunc(void *softobj, DFinderEventFunc func)
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
-    }
-
-    if (func == NULL) {
-        DFINDER_LOGE(TAG, "func is null");
-        return NSTACKX_EINVAL;
     }
 
     return SetEventFunc(softobj, func);

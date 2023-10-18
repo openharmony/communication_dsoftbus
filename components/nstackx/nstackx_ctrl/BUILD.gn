@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,7 @@ cflags = [
   "-DDFINDER_SAVE_DEVICE_LIST",
   "-DNSTACKX_EXTEND_BUSINESSDATA",
   "-DNSTACKX_DFINDER_HIDUMP",
+  "-DDFINDER_SUPPORT_SET_SCREEN_STATUS",
 ]
 
 if (defined(board_toolchain_type)) {
@@ -30,10 +31,6 @@ if (defined(board_toolchain_type)) {
 }
 
 include_dirs = []
-
-if (dsoftbus_standard_feature_dfinder_support_multi_nif) {
-  cflags += [ "-DDFINDER_SUPPORT_MULTI_NIF" ]
-}
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
@@ -48,8 +45,9 @@ if (defined(ohos_lite)) {
         "core/mini_discover/coap_app.c",
         "core/mini_discover/coap_discover.c",
         "core/nstackx_common.c",
-        "core/nstackx_database.c",
         "core/nstackx_device.c",
+        "core/nstackx_device_local.c",
+        "core/nstackx_device_remote.c",
         "core/nstackx_dfinder_hidump.c",
         "core/nstackx_dfinder_hievent.c",
         "core/nstackx_dfinder_log.c",
@@ -101,8 +99,9 @@ if (defined(ohos_lite)) {
         "core/coap_discover/coap_discover.c",
         "core/json_payload.c",
         "core/nstackx_common.c",
-        "core/nstackx_database.c",
         "core/nstackx_device.c",
+        "core/nstackx_device_local.c",
+        "core/nstackx_device_remote.c",
         "core/nstackx_dfinder_hidump.c",
         "core/nstackx_dfinder_hievent.c",
         "core/nstackx_dfinder_log.c",
@@ -168,8 +167,9 @@ if (defined(ohos_lite)) {
       "core/coap_discover/coap_discover.c",
       "core/json_payload.c",
       "core/nstackx_common.c",
-      "core/nstackx_database.c",
       "core/nstackx_device.c",
+      "core/nstackx_device_local.c",
+      "core/nstackx_device_remote.c",
       "core/nstackx_dfinder_hidump.c",
       "core/nstackx_dfinder_hievent.c",
       "core/nstackx_dfinder_log.c",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,32 @@ extern "C" {
 #define COAP_SRV_DEFAULT_PORT 5684
 #define COAP_SRV_DEFAULT_ADDR "0.0.0.0"
 
-int32_t CoapServerInit(const struct in_addr *ip);
-void CoapServerDestroy(void);
+typedef enum {
+    SOCKET_READ_EVENT = 0,
+    SOCKET_WRITE_EVENT,
+    SOCKET_ERROR_EVENT,
+    SOCKET_END_EVENT
+} SocketEventType;
+
+typedef struct {
+    bool inited;
+    uint8_t socketErrFlag;
+    int32_t listenFd;
+    EpollTask task;
+    uint64_t socketEventNum[SOCKET_END_EVENT];
+    void *iface;
+} CoapCtxType;
+
+bool IsCoapContextReady(void);
+
+const char *CoapGetLocalIfaceName(void);
+CoapCtxType *CoapGetCoapCtxType(void);
+
+CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface);
+void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit);
+
 void ResetCoapSocketTaskCount(uint8_t isBusy);
-int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, bool isAckMsg);
+int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, uint8_t bType, bool isAckMsg);
 
 #ifdef __cplusplus
 }
