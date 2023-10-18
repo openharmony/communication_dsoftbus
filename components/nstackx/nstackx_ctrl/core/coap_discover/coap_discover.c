@@ -314,7 +314,7 @@ static int32_t CoapResponseService(const char *remoteUrl, coap_context_t *contex
         return NSTACKX_EFAILED;
     }
 
-    return CoapSendRequest(COAP_MESSAGE_CON, remoteUrl, data, strlen(data) + 1, &para);
+    return CoapSendRequest(COAP_MESSAGE_NON, remoteUrl, data, strlen(data) + 1, &para);
 }
 
 static void IncreaseRecvDiscoverNum(void)
