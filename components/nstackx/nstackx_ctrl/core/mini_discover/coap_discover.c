@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@
 #include "nstackx_timer.h"
 #include "securec.h"
 #include "nstackx_statistics.h"
+#include "nstackx_device_local.h"
+#include "nstackx_device_remote.h"
 
 #define TAG "nStackXCoAP"
 
@@ -51,13 +53,14 @@ static uint32_t g_coapMaxDiscoverCount = COAP_DEFAULT_DISCOVER_COUNT;
 static uint32_t g_coapDiscoverType = COAP_BROADCAST_TYPE_DEFAULT;
 static uint32_t g_coapUserMaxDiscoverCount;
 static uint32_t g_coapUserDiscoverInterval;
+static uint32_t *g_coapIntervalArr = NULL;
 static uint32_t g_coapDiscoverTargetCount;
 static uint8_t g_userRequest;
 static uint8_t g_forceUpdate;
 
 static int32_t CheckBusinessTypeCanNotify(const uint8_t businessType)
 {
-    uint8_t localBusinessType = GetLocalDeviceInfoPtr()->businessType;
+    uint8_t localBusinessType = GetLocalDeviceBusinessType();
     if (businessType == localBusinessType) {
         return NSTACKX_EOK;
     }
@@ -89,8 +92,11 @@ static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char
             return NSTACKX_ENOMEM;
         }
         (void)memset_s(deviceList, deviceListLen, 0, deviceListLen);
-        PushPublishInfo(deviceInfo, deviceList, PUBLISH_DEVICE_NUM);
-        NotifyDeviceFound(deviceList, PUBLISH_DEVICE_NUM);
+        if (GetNotifyDeviceInfo(deviceList, deviceInfo) == NSTACKX_EOK) {
+            NotifyDeviceFound(deviceList, PUBLISH_DEVICE_NUM);
+        } else {
+            DFINDER_LOGE(TAG, "GetNotifyDeviceInfo failed");
+        }
         free(deviceList);
         return NSTACKX_EFAILED;
     }
@@ -99,7 +105,7 @@ static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char
 
 void GetBuildCoapParam(const CoapPacket *pkt, const char *remoteUrl, const char *remoteIp, CoapBuildParam *param)
 {
-    param->remoteIp = (char *)remoteIp;
+    param->remoteIp = remoteIp;
     param->uriPath = COAP_DEVICE_DISCOVER_URI;
     if (remoteUrl != NULL) {
         param->msgType = COAP_TYPE_CON;
@@ -118,12 +124,28 @@ static int32_t CreateUnicastCoapParam(const char *remoteUrl, const char *remoteI
     if ((remoteUrl == NULL) || (remoteIp == NULL)) {
         return NSTACKX_EFAILED;
     }
-    param->remoteIp = (char *)remoteIp;
+    param->remoteIp = remoteIp;
     param->uriPath = COAP_DEVICE_DISCOVER_URI;
     param->msgType = COAP_TYPE_CON;
     param->methodType = COAP_METHOD_POST;
     param->msgId = CoapSoftBusMsgId();
     return NSTACKX_EOK;
+}
+
+static void CoapResponseServiceDiscovery(const char *remoteUrl, const CoapPacket *pkt,
+    const struct in_addr *ip, uint8_t businessType)
+{
+    char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
+    CoapBuildParam param = {0};
+    (void)inet_ntop(AF_INET, ip, wifiIpAddr, sizeof(wifiIpAddr));
+    GetBuildCoapParam(pkt, remoteUrl, wifiIpAddr, &param);
+    if (remoteUrl != NULL) {
+        if (CheckBusinessTypeReplyUnicast(businessType) == NSTACKX_EOK) {
+            (void)CoapSendMessage(&param, NSTACKX_FALSE, businessType, false);
+        }
+    } else {
+        (void)CoapSendMessage(&param, NSTACKX_FALSE, businessType, true);
+    }
 }
 
 static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
@@ -132,16 +154,26 @@ static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
     if (pkt == NULL) {
         return ret;
     }
+
+    const CoapCtxType *coapCtx = CoapGetCoapCtxType();
+    if (coapCtx == NULL) {
+        DFINDER_LOGE(TAG, "get coap ctx type failed");
+        return ret;
+    }
+
     char *remoteUrl = NULL;
-    CoapBuildParam param;
-    (void)memset_s(&param, sizeof(CoapBuildParam), 0, sizeof(CoapBuildParam));
-    char wifiIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    DeviceInfo *deviceInfo = (DeviceInfo *)malloc(sizeof(DeviceInfo));
+    DeviceInfo *deviceInfo = (DeviceInfo *)calloc(1, sizeof(DeviceInfo));
     if (deviceInfo == NULL) {
         DFINDER_LOGE(TAG, "malloc device info failed");
         return ret;
     }
-    (void)memset_s(deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+
+    if (strcpy_s(deviceInfo->networkName, sizeof(deviceInfo->networkName),
+        GetLocalIfaceName(coapCtx->iface)) != EOK) {
+        DFINDER_LOGE(TAG, "copy network name failed");
+        goto FAIL;
+    }
+
     if (HndPostServiceDiscoverInner(pkt->payload.buffer, pkt->payload.len, &remoteUrl, deviceInfo) != NSTACKX_EOK) {
         goto FAIL;
     }
@@ -150,10 +182,12 @@ static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
         goto FAIL;
     }
 #ifdef DFINDER_SAVE_DEVICE_LIST
-    if (UpdateDeviceDb(deviceInfo, g_forceUpdate) != NSTACKX_EOK) {
+    uint8_t receiveBcast = (remoteUrl == NULL) ? NSTACKX_FALSE : NSTACKX_TRUE;
+    if (UpdateDeviceDb(coapCtx, deviceInfo, g_forceUpdate, receiveBcast) != NSTACKX_EOK)
 #else
-    if (DeviceInfoNotify(&deviceInfo, g_forceUpdate) != NSTACKX_EOK) {
+    if (DeviceInfoNotify(&deviceInfo) != NSTACKX_EOK)
 #endif /* END OF DFINDER_SAVE_DEVICE_LIST */
+    {
         goto FAIL;
     }
     if (g_forceUpdate) {
@@ -163,15 +197,9 @@ static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
         DFINDER_LOGD(TAG, "peer is PUBLISH_MODE_PROACTIVE");
         goto FAIL;
     }
-    (void)inet_ntop(AF_INET, &(deviceInfo->netChannelInfo.wifiApInfo.ip), wifiIpAddr, sizeof(wifiIpAddr));
-    GetBuildCoapParam(pkt, remoteUrl, wifiIpAddr, &param);
-    if (remoteUrl != NULL) {
-        if (CheckBusinessTypeReplyUnicast(deviceInfo->businessType) == NSTACKX_EOK) {
-            (void)CoapSendMessage(&param, NSTACKX_FALSE, false);
-        }
-    } else {
-        (void)CoapSendMessage(&param, NSTACKX_FALSE, true);
-    }
+
+    CoapResponseServiceDiscovery(remoteUrl, pkt, &deviceInfo->netChannelInfo.wifiApInfo.ip, deviceInfo->businessType);
+
     ret = NSTACKX_EOK;
 FAIL:
     free(remoteUrl);
@@ -186,13 +214,24 @@ void HndPostServiceDiscover(const CoapPacket *pkt)
     }
 }
 
+static uint32_t GetUserDefineInterval(uint32_t discoverCount)
+{
+    if (discoverCount >= (g_coapMaxDiscoverCount - 1)) {
+        DFINDER_LOGD(TAG, "discover end");
+        return 0;
+    }
+    return g_coapIntervalArr[discoverCount];
+}
+
 static uint32_t GetDiscoverInterval(uint32_t discoverCount)
 {
     switch (g_coapDiscoverType) {
-        case COAP_BROADCAST_TYPE_DEFAULT:
-            return GetDefaultDiscoverInterval(discoverCount);
         case COAP_BROADCAST_TYPE_USER:
             return g_coapUserDiscoverInterval;
+        case COAP_BROADCAST_TYPE_USER_DEFINE_INTERVAL:
+            return GetUserDefineInterval(discoverCount);
+        case COAP_BROADCAST_TYPE_DEFAULT:
+            return GetDefaultDiscoverInterval(discoverCount);
         default:
             return GetDefaultDiscoverInterval(discoverCount);
     }
@@ -204,25 +243,28 @@ static void CoapServiceDiscoverStop(void)
     g_forceUpdate = NSTACKX_FALSE;
     SetModeInfo(DISCOVER_MODE);
 #ifdef DFINDER_SAVE_DEVICE_LIST
-    ClearDevices(GetDeviceDBBackup());
+    ClearRemoteDeviceListBackup();
     DFINDER_LOGW(TAG, "clear device list backup");
 #endif /* END OF DFINDER_SAVE_DEVICE_LIST */
     g_coapDiscoverType = COAP_BROADCAST_TYPE_DEFAULT;
     g_coapMaxDiscoverCount = COAP_DEFAULT_DISCOVER_COUNT;
     /* Can call PostDeviceFindWrapper() to notify user if needed. */
     g_userRequest = NSTACKX_FALSE;
+    // release interval array
+    if (g_coapIntervalArr != NULL) {
+        free(g_coapIntervalArr);
+        g_coapIntervalArr = NULL;
+    }
 }
 
-static int32_t CoapPostServiceDiscoverEx(void)
+static int32_t CoapPostServiceDiscoverEx()
 {
     char ipString[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    char ifName[NSTACKX_MAX_INTERFACE_NAME_LEN] = {0};
-
-    if (GetNetworkName(ifName, sizeof(ifName)) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "get local interface name error");
+    char *ifName = CoapGetLocalIfaceName();
+    if (ifName == NULL) {
+        DFINDER_LOGE(TAG, "get ifname failed");
         return NSTACKX_EFAILED;
     }
-
     struct ifreq ifr;
     if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), ifName, strlen(ifName)) != EOK) {
         DFINDER_LOGE(TAG, "copy netIfName:%s fail", ifName);
@@ -248,7 +290,7 @@ static int32_t CoapPostServiceDiscoverEx(void)
     param.msgType = COAP_TYPE_NONCON;
     param.methodType = COAP_METHOD_POST;
     param.msgId = CoapSoftBusMsgId();
-    if (CoapSendMessage(&param, NSTACKX_TRUE, false) != NSTACKX_EOK) {
+    if (CoapSendMessage(&param, NSTACKX_TRUE, GetLocalDeviceBusinessType(), false) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "coap broadcast failed");
         return NSTACKX_EFAILED;
     }
@@ -257,11 +299,13 @@ static int32_t CoapPostServiceDiscoverEx(void)
 
 static int32_t CoapPostServiceDiscover(void)
 {
-    int32_t ret = CoapPostServiceDiscoverEx();
-    if (ret != NSTACKX_EOK) {
+    if (CoapPostServiceDiscoverEx() != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "no iface send request");
         IncStatistics(STATS_POST_SD_REQUEST_FAILED);
+        return NSTACKX_EFAILED;
     }
-    return ret;
+
+    return NSTACKX_EOK;
 }
 
 static void CoapServiceDiscoverTimerHandle(void *argument)
@@ -270,7 +314,7 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
 
     (void)argument;
 
-    if (g_discoverCount >= g_coapDiscoverTargetCount || !IsWifiApConnected()) {
+    if (g_discoverCount >= g_coapDiscoverTargetCount || !IsCoapContextReady()) {
         /* Discover done, or wifi AP disconnected. */
         CoapServiceDiscoverStop();
         return;
@@ -302,11 +346,12 @@ L_ERR_SERVICE_DISCOVER:
 static void SetCoapMaxDiscoverCount(void)
 {
     switch (g_coapDiscoverType) {
-        case COAP_BROADCAST_TYPE_USER:
-            g_coapMaxDiscoverCount = g_coapUserMaxDiscoverCount;
-            break;
         case COAP_BROADCAST_TYPE_DEFAULT:
             g_coapMaxDiscoverCount = COAP_DEFAULT_DISCOVER_COUNT;
+            break;
+        case COAP_BROADCAST_TYPE_USER:
+        case COAP_BROADCAST_TYPE_USER_DEFINE_INTERVAL:
+            g_coapMaxDiscoverCount = g_coapUserMaxDiscoverCount;
             break;
         default:
             g_coapMaxDiscoverCount = COAP_DEFAULT_DISCOVER_COUNT;
@@ -334,7 +379,7 @@ static void CoapServiceDiscoverFirstTime(void)
 
 void CoapServiceDiscoverInner(uint8_t userRequest)
 {
-    if (!IsWifiApConnected()) {
+    if (!IsCoapContextReady()) {
         IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGI(TAG, "Network not connected when discovery inner for mini");
         return;
@@ -351,7 +396,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
         SetModeInfo(DISCOVER_MODE);
 #ifdef DFINDER_SAVE_DEVICE_LIST
         DFINDER_LOGW(TAG, "clear device list backup for mini");
-        ClearDevices(GetDeviceDBBackup());
+        ClearRemoteDeviceListBackup();
 #endif /* END OF DFINDER_SAVE_DEVICE_LIST */
         TimerSetTimeout(g_discoverTimer, 0, NSTACKX_FALSE);
     }
@@ -362,12 +407,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
     }
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
-    if (BackupDeviceDB() != NSTACKX_EOK) {
-        IncStatistics(STATS_START_SD_FAILED);
-        DFINDER_LOGE(TAG, "backup device list fail");
-        return;
-    }
-    ClearDevices(GetDeviceDB());
+    BackupRemoteDeviceList();
     DFINDER_LOGW(TAG, "clear device list");
 #endif /* END OF DFINDER_SAVE_DEVICE_LIST */
     SetModeInfo(DISCOVER_MODE);
@@ -376,7 +416,7 @@ void CoapServiceDiscoverInner(uint8_t userRequest)
 
 void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 {
-    if (!IsWifiApConnected()) {
+    if (!IsCoapContextReady()) {
         IncStatistics(STATS_START_SD_FAILED);
         return;
     }
@@ -395,7 +435,7 @@ void CoapServiceDiscoverInnerAn(uint8_t userRequest)
 
 void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
 {
-    if (!IsWifiApConnected()) {
+    if (!IsCoapContextReady()) {
         IncStatistics(STATS_START_SD_FAILED);
         DFINDER_LOGI(TAG, "Network not connected when discovery inner for configurable");
         return;
@@ -410,7 +450,7 @@ void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
     if (g_coapDiscoverTargetCount > 0 && g_discoverCount >= g_coapDiscoverTargetCount) {
         g_discoverCount = 0;
 #ifdef DFINDER_SAVE_DEVICE_LIST
-        ClearDevices(GetDeviceDBBackup());
+        ClearRemoteDeviceListBackup();
         DFINDER_LOGW(TAG, "clear device list backup");
 #endif /* END OF DFINDER_SAVE_DEVICE_LIST */
         TimerSetTimeout(g_discoverTimer, 0, NSTACKX_FALSE);
@@ -423,12 +463,7 @@ void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest)
     }
 #ifdef DFINDER_SAVE_DEVICE_LIST
     /* First discover */
-    if (BackupDeviceDB() != NSTACKX_EOK) {
-        IncStatistics(STATS_START_SD_FAILED);
-        DFINDER_LOGE(TAG, "backup device list fail");
-        return;
-    }
-    ClearDevices(GetDeviceDB());
+    BackupRemoteDeviceList();
     DFINDER_LOGW(TAG, "clear device list");
 #endif /* END OF DFINDER_SAVE_DEVICE_LIST */
     CoapServiceDiscoverFirstTime();
@@ -469,6 +504,10 @@ void CoapDiscoverDeinit(void)
         TimerDelete(g_discoverTimer);
         g_discoverTimer = NULL;
     }
+    if (g_coapIntervalArr != NULL) {
+        free(g_coapIntervalArr);
+        g_coapIntervalArr = NULL;
+    }
 }
 
 void ResetCoapDiscoverTaskCount(uint8_t isBusy)
@@ -486,6 +525,30 @@ void SetCoapDiscoverType(CoapBroadcastType type)
     g_coapDiscoverType = (uint32_t)type;
 }
 
+int32_t SetCoapDiscConfig(const DFinderDiscConfig *discConfig)
+{
+    uint32_t *tmp = (uint32_t *)malloc(discConfig->intervalArrLen * sizeof(uint32_t));
+    if (tmp != NULL) {
+        if (g_coapIntervalArr != NULL) {
+            free(g_coapIntervalArr);
+        }
+        g_coapIntervalArr = tmp;
+        for (size_t i = 0; i < discConfig->intervalArrLen; ++i) {
+            g_coapIntervalArr[i] = (discConfig->bcastInterval)[i];
+        }
+        // add 1: first broadcast starts immediately
+        g_coapUserMaxDiscoverCount = discConfig->intervalArrLen + 1;
+        return NSTACKX_EOK;
+    }
+    DFINDER_LOGE(TAG, "malloc for user define interval array failed");
+    if (g_coapIntervalArr != NULL) {
+        DFINDER_LOGD(TAG, "going to use last interval config");
+        return NSTACKX_EOK;
+    }
+    DFINDER_LOGE(TAG, "failed to use last interval config");
+    return NSTACKX_EFAILED;
+}
+
 static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettings)
 {
     if (responseSettings == NULL) {
@@ -497,8 +560,7 @@ static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettin
         return NSTACKX_EFAILED;
     }
 
-    if (SetLocalDeviceBusinessDataUnicast(responseSettings->businessData,
-                                          responseSettings->length) != NSTACKX_EOK) {
+    if (SetLocalDeviceBusinessData(responseSettings->businessData, NSTACKX_TRUE) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
     char remoteUrl[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
@@ -512,9 +574,9 @@ static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettin
         DFINDER_LOGE(TAG, "failed to get discoveryRsp remoteUrl");
         return NSTACKX_EFAILED;
     }
-    CoapBuildParam param = {0};
+    CoapBuildParam param;
     CreateUnicastCoapParam(remoteUrl, host, &param);
-    return CoapSendMessage(&param, NSTACKX_FALSE, false);
+    return CoapSendMessage(&param, NSTACKX_FALSE,  responseSettings->businessType, false);
 }
 
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)

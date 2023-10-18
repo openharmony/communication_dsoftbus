@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,7 @@ coap_response_t CoapMessageHandler(coap_session_t *session,
         DFINDER_LOGE(TAG, "block not support.");
         goto FAIL;
     }
+
     coap_pdu_code_t rcv_code = coap_pdu_get_code(received);
     DFINDER_LOGD(TAG, "%d.%02d", COAP_RESPONSE_CLASS(rcv_code), rcv_code & 0x1F);
     return COAP_RESPONSE_OK;
@@ -198,6 +199,8 @@ static coap_context_t *CoapGetContextEx(const char *node, const char *port,
             }
             if (needBind && BindToDevice(ep->sock.fd, sockIpPtr) != NSTACKX_EOK) {
                 DFINDER_LOGE(TAG, "bind to device fail");
+                coap_free_context(ctx);
+                ctx = NULL;
             }
         } else {
             DFINDER_LOGE(TAG, "coap_new_endpoint get null");
@@ -290,7 +293,6 @@ static coap_session_t *CoapGetSessionEx(coap_context_t *ctx, const char *localAd
     }
 
     if (localAddr != NULL) {
-        int s;
         struct addrinfo hints;
         struct addrinfo *result = NULL;
 
@@ -298,7 +300,7 @@ static coap_session_t *CoapGetSessionEx(coap_context_t *ctx, const char *localAd
         hints.ai_family = AF_UNSPEC;  /* Allow IPv4 or IPv6 */
         hints.ai_socktype = COAP_PROTO_RELIABLE(proto) ? SOCK_STREAM : SOCK_DGRAM; /* Coap uses UDP */
         hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-        s = getaddrinfo(localAddr, localPort, &hints, &result);
+        int s = getaddrinfo(localAddr, localPort, &hints, &result);
         if (s != 0) {
             DFINDER_LOGE(TAG, "getaddrinfo error");
             return NULL;

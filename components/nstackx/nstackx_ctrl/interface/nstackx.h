@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,9 @@ extern "C" {
 #define NSTACKX_MIN_DEVICE_NUM 1
 #define NSTACKX_DEFAULT_DEVICE_NUM 20
 #define NSTACKX_MAX_DEVICE_NUM 400
+#define NSTACKX_DEFAULT_AGING_TIME 1
+#define NSTACKX_MIN_AGING_TIME 1
+#define NSTACKX_MAX_AGING_TIME 10
 #else
 #define NSTACKX_MAX_DEVICE_NUM 1
 #endif
@@ -85,24 +88,19 @@ typedef struct NSTACKX_DeviceInfo {
     char deviceName[NSTACKX_MAX_DEVICE_NAME_LEN];
     uint32_t capabilityBitmapNum;
     uint32_t capabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM];
-    uint8_t deviceType;
+    uint32_t deviceType;
     uint8_t mode;
-#ifdef DFINDER_SAVE_DEVICE_LIST
     uint8_t update : 1;
     uint8_t reserved : 7;
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
-#endif
     uint8_t discoveryType;
     uint8_t businessType;
     char version[NSTACKX_MAX_HICOM_VERSION];
     char reservedInfo[NSTACKX_MAX_RESERVED_INFO_LEN];
 } NSTACKX_DeviceInfo;
 
-#ifdef DFINDER_SUPPORT_MULTI_NIF
 #define NSTACKX_MAX_LISTENED_NIF_NUM 2
-#else
-#define NSTACKX_MAX_LISTENED_NIF_NUM 1
-#endif
+
 typedef struct {
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
     char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN];
@@ -125,7 +123,7 @@ typedef struct {
     /* Obsoleted. Use localIfInfo instead. */
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
     uint8_t is5GHzBandSupported;
-    uint8_t deviceType;
+    uint32_t deviceType;
     char version[NSTACKX_MAX_HICOM_VERSION];
     uint8_t businessType;
 } NSTACKX_LocalDeviceInfo;
@@ -134,14 +132,17 @@ typedef enum {
     NSTACKX_BUSINESS_TYPE_NULL = 0,
     NSTACKX_BUSINESS_TYPE_HICOM = 1,
     NSTACKX_BUSINESS_TYPE_SOFTBUS = 2,
-    NSTACKX_BUSINESS_TYPE_NEARBY = 3
+    NSTACKX_BUSINESS_TYPE_NEARBY = 3,
+    NSTACKX_BUSINESS_TYPE_AUTONET = 4
 } NSTACKX_BusinessType;
 
 #define NSTACKX_MIN_ADVERTISE_COUNT 1
 #define NSTACKX_MAX_ADVERTISE_COUNT 100
-/* The unit of duration is ms. */
+/* The unit is ms. */
 #define NSTACKX_MIN_ADVERTISE_DURATION 5000
 #define NSTACKX_MAX_ADVERTISE_DURATION 50000
+#define NSTACKX_MIN_ADVERTISE_INTERVAL 10
+#define NSTACKX_MAX_ADVERTISE_INTERVAL 10000
 
 typedef struct {
     uint8_t businessType;
@@ -152,6 +153,27 @@ typedef struct {
     uint32_t length;
 } NSTACKX_DiscoverySettings;
 
+typedef struct {
+    uint8_t businessType;
+    uint8_t discoveryMode;
+    uint32_t *bcastInterval;
+    uint32_t intervalArrLen;
+    char *businessData;
+    uint32_t businessDataLen;
+} DFinderDiscConfig;
+
+typedef struct {
+    const char *name;
+    const char *deviceId;
+    const char *version;
+    const NSTACKX_InterfaceInfo *localIfInfo;
+    uint32_t ifNums;
+    uint32_t deviceType;
+    uint64_t deviceHash;
+    bool hasDeviceHash;
+    uint8_t businessType;
+} NSTACKX_LocalDeviceInfoV2;
+
 /* Register local device information */
 DFINDER_EXPORT int32_t NSTACKX_RegisterDevice(const NSTACKX_LocalDeviceInfo *localDeviceInfo);
 
@@ -161,17 +183,20 @@ DFINDER_EXPORT int32_t NSTACKX_RegisterDeviceName(const char *devName);
 /* Register local device information with deviceHash */
 DFINDER_EXPORT int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo, uint64_t deviceHash);
 
+/* New interface to register local device with multiple interfaces */
+DFINDER_EXPORT int32_t NSTACKX_RegisterDeviceV2(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo);
+
 /* Device list change callback type */
 typedef void (*NSTACKX_OnDeviceListChanged)(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
 
-/* Data receive callback type */
 typedef void (*NSTACKX_OnMsgReceived)(const char *moduleName, const char *deviceId,
-                                      const uint8_t *data, uint32_t len);
+    const uint8_t *data, uint32_t len, const char *srcIp); /* Data receive callback type */
 
 /* DFinder message type list. */
 typedef enum {
     DFINDER_ON_TOO_BUSY = 1,
     DFINDER_ON_INNER_ERROR,
+    DFINDER_ON_TOO_MANY_DEVICE,
 } DFinderMsgType;
 
 /* Data receive callback type */
@@ -221,7 +246,7 @@ typedef enum {
     DFINDER_PARAM_TYPE_STRING,
 } DFinderEventParamType;
 
-#define DFINDER_EVENT_NAME_LEN 33
+#define DFINDER_EVENT_NAME_LEN 32
 #define DFINDER_EVENT_TAG_LEN 16
 
 typedef struct {
@@ -244,8 +269,10 @@ typedef struct {
     char eventName[DFINDER_EVENT_NAME_LEN];
     DFinderEventType type;
     DFinderEventLevel level;
-    uint32_t paramNum;
+    char tag[DFINDER_EVENT_TAG_LEN];
+    char desc[DFINDER_EVENT_NAME_LEN];
     DFinderEventParam *params;
+    uint32_t paramNum;
 } DFinderEvent;
 
 typedef void (*DFinderEventFunc)(void *softObj, const DFinderEvent *info);
@@ -260,6 +287,13 @@ DFINDER_EXPORT int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *s
  * return 0 on success, negative value on failure
  */
 DFINDER_EXPORT int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter);
+
+/*
+ * NSTACKX Initialization V2
+ * support notify device info one by one
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_InitV2(const NSTACKX_Parameter *parameter, bool isNotifyPerDevice);
 
 /* NSTACKX Destruction */
 DFINDER_EXPORT void NSTACKX_Deinit(void);
@@ -307,10 +341,35 @@ DFINDER_EXPORT int32_t NSTACKX_RegisterCapability(uint32_t capabilityBitmapNum, 
 DFINDER_EXPORT int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 
 /*
+ * Set the agingTime of the device list.
+ * The unit of agingTime is seconds, and the range is 1 to 10 seconds.
+ */
+DFINDER_EXPORT int32_t NSTACKX_SetDeviceListAgingTime(uint32_t agingTime);
+
+/*
+ * Set the size of the device list.
+ * The range is 20 to 400.
+ */
+DFINDER_EXPORT int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum);
+
+/*
+ * dfinder set screen status
+ * param: isScreenOn, screen status
+ * return: always return 0 on success
+ */
+DFINDER_EXPORT int32_t NSTACKX_ScreenStatusChange(bool isScreenOn);
+
+/*
  * Register the serviceData of local device.
  * return 0 on success, negative value on failure
  */
 DFINDER_EXPORT int32_t NSTACKX_RegisterServiceData(const char *serviceData);
+
+/*
+ * Register the serviceData of local device.
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_RegisterBusinessData(const char *businessData);
 
 /*
  * Register the extendServiceData of local device.
@@ -360,6 +419,12 @@ DFINDER_EXPORT void NSTACKX_StartDeviceFindRestart(void);
  * return 0 on success, negative value on failure
  */
 DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySettings *discoverySettings);
+
+/*
+ * Start device discovery with configured broadcast interval and other settings
+ * return 0 on success, negative value on failure
+ */
+DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscoveryWithConfig(const DFinderDiscConfig *discConfig);
 
 typedef struct {
     uint8_t businessType;

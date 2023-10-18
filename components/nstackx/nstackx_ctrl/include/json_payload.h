@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ extern "C" {
 #define JSON_DEVICE_NAME "devicename"
 #define JSON_DEVICE_WLAN_IP "wlanIp"
 #define JSON_DEVICE_TYPE "type"
+#define JSON_DEVICE_TYPE_EXTERN "typeEx"
 #define JSON_HICOM_VERSION "hicomversion"
 #define JSON_REQUEST_MODE "mode"
 #define JSON_DEVICE_HASH "deviceHash"
@@ -45,11 +46,7 @@ extern "C" {
 
 struct DeviceInfo;
 
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-char *PrepareServiceDiscoverWithIdx(uint8_t isBroadcast, uint32_t idx);
-#else
-char *PrepareServiceDiscover(uint8_t isBroadcast);
-#endif
+char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t bType, uint8_t isPrinter);
 int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
 
 #ifdef __cplusplus
