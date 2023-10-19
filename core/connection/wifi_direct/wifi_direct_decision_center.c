@@ -30,7 +30,7 @@
 #include "processor/wifi_direct_processor_factory.h"
 #include "utils/wifi_direct_utils.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectDecisionCenter: "
+#define LOG_LABEL "[WD] DC: "
 
 #define LENGTH_HEADER 2
 #define LINK_MODE_HML_HML 1
@@ -43,7 +43,6 @@
 /* private method forward declare */
 static struct WifiDirectProcessor* GetProcessorByLinkInfo(struct LinkInfo *linkInfo);
 static struct LinkInfo* CreateLinkInfo(struct NegotiateMessage *msg);
-
 static struct WifiDirectProtocol* GetProtocol(struct WifiDirectNegotiateChannel *channel)
 {
     enum WifiDirectProtocolType type = WIFI_DIRECT_PROTOCOL_TLV;
@@ -102,7 +101,6 @@ static struct WifiDirectProcessor* GetProcessorByNegotiateMessage(struct Negotia
     if (linkInfo) {
         return GetProcessorByLinkInfo(linkInfo);
     }
-
     linkInfo = CreateLinkInfo(msg);
     CONN_CHECK_AND_RETURN_RET_LOG(linkInfo, NULL, "create link info failed");
     struct WifiDirectProcessor *processor = GetProcessorByLinkInfo(linkInfo);
@@ -445,7 +443,7 @@ static int32_t GetRemoteWifiConfigInfo(struct NegotiateMessage *msg, struct Wifi
 {
     size_t configSize = 0;
     uint8_t *config = msg->getRawData(msg, NM_KEY_WIFI_CFG_INFO, &configSize, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOG(configInfo, SOFTBUS_ERR, LOG_LABEL "remote config is null");
+    CONN_CHECK_AND_RETURN_RET_LOG(config != NULL, SOFTBUS_ERR, LOG_LABEL "remote config is null");
 
     int32_t ret = GetWifiDirectP2pAdapter()->setPeerWifiConfigInfoV2(config, configSize);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "set remote wifi config failed");
@@ -511,12 +509,10 @@ static struct LinkInfo* CreateLinkInfo(struct NegotiateMessage *msg)
 {
     struct LinkInfo *finalLink = NULL;
     struct WifiConfigInfo remoteConfigInfo;
-    remoteConfigInfo.msg = msg;
     int32_t ret = GetRemoteWifiConfigInfo(msg, &remoteConfigInfo);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, NULL, LOG_LABEL "get remote config info failed");
 
     struct WifiConfigInfo localConfigInfo;
-    localConfigInfo.msg = msg;
     if (GetLocalWifiConfigInfo(&localConfigInfo) != SOFTBUS_OK) {
         goto OUT1;
     }

@@ -26,7 +26,7 @@
 #include "utils/wifi_direct_network_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] P2pAvailableState: "
+#define LOG_LABEL "[WD] PAvS: "
 #define LINK_ATTR_STR_LEN 64
 
 /* public interface */

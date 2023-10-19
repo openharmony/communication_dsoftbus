@@ -133,20 +133,20 @@ HWTEST_F(LinkManagerBroadcastTest, LinkManagerBroadcastTest001, TestSize.Level1)
 
 HWTEST_F(LinkManagerBroadcastTest, LinkManagerBroadcastTest002, TestSize.Level1)
 {
-    struct P2pConnChangedInfo changedInfo;
-    changedInfo.p2pLinkInfo.connectState = P2P_DISCONNECTED;
+    struct P2pBroadcastParam p2PBroadcastParam;
+    p2PBroadcastParam.p2pLinkedInfo.connectState = P2P_DISCONNECTED;
     GetLinkManager()->removeLinksByConnectType = RemoveLinksByConnectType;
-    (void)HandleP2pConnectionChanged(&changedInfo);
+    (void) WifiDirectConnectionChangeCallback(&p2PBroadcastParam);
 
-    changedInfo.p2pLinkInfo.connectState = P2P_CONNECTED;
-    changedInfo.groupInfo = nullptr;
-    (void)HandleP2pConnectionChanged(&changedInfo);
+    p2PBroadcastParam.p2pLinkedInfo.connectState = P2P_CONNECTED;
+    p2PBroadcastParam.groupInfo = nullptr;
+    (void)WifiDirectConnectionChangeCallback(&p2PBroadcastParam);
 
-    changedInfo.groupInfo =
+    p2PBroadcastParam.groupInfo =
         reinterpret_cast<struct WifiDirectP2pGroupInfo *>(SoftBusMalloc(sizeof(WifiDirectP2pGroupInfo)));
-    EXPECT_TRUE(changedInfo.groupInfo != nullptr);
-    (void)HandleP2pConnectionChanged(&changedInfo);
-    SoftBusFree(changedInfo.groupInfo);
+    EXPECT_TRUE(p2PBroadcastParam.groupInfo != nullptr);
+    (void)WifiDirectConnectionChangeCallback(&p2PBroadcastParam);
+    SoftBusFree(p2PBroadcastParam.groupInfo);
 };
 
 HWTEST_F(LinkManagerBroadcastTest, LinkManagerBroadcastTest003, TestSize.Level1)

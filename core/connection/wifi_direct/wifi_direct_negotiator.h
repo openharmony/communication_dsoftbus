@@ -67,7 +67,6 @@ struct WifiDirectNegotiator {
     int32_t (*handleMessageFromProcessor)(struct NegotiateMessage *msg, enum NegotiateStateType nextState);
 
     void (*onNegotiateChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len);
-    void (*onNegotiateChannelDisconnected)(struct WifiDirectNegotiateChannel *channel);
 
     void (*handleSuccess)(struct NegotiateMessage *msg);
     void (*handleFailure)(int32_t reason);
