@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,14 +27,8 @@
 #include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_control.h"
-#ifdef  __cplusplus
-extern "C" {
-#endif
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_proxychannel_pipeline.c"
-#ifdef  __cplusplus
-}
-#endif
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_transmission_interface.h"
@@ -67,8 +61,8 @@ namespace OHOS {
 #define TEST_NUMBER_THREE 3
 #define TEST_NUMBER_TWENTY 20
 #define TEST_NUMBER_TWO 2
-#define TEST_NUMBER_VALID -1
-#define TEST_NUMBER_ZERO -1
+#define TEST_NUMBER_VALID (-1)
+#define TEST_NUMBER_ZERO (-1)
 #define TEST_NUMBER_25 25
 #define TEST_NUMBER_26 26
 #define TEST_NUMBER_5000 5000
@@ -110,7 +104,6 @@ static void OnDisconnected(int32_t channelId)
 
 void SoftbusProxyChannelPipelineTest::SetUpTestCase(void)
 {
-
     TransProxyPipelineInit();
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnDataReceived,
