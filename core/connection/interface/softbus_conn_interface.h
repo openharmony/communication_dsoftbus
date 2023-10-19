@@ -93,7 +93,7 @@ struct BleInfo {
     BleProtocolType protocol;
     uint32_t psm;
 };
-struct SocketInfo {
+struct ConnSocketInfo {
     char addr[IP_LEN];
     ProtocolType protocol;
     int32_t port;
@@ -108,7 +108,7 @@ typedef struct {
     union {
         struct BrInfo brInfo;
         struct BleInfo bleInfo;
-        struct SocketInfo socketInfo;
+        struct ConnSocketInfo socketInfo;
     };
 } ConnectionInfo;
 
