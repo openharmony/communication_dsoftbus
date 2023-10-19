@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,9 +92,7 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
         return SOFTBUS_INVALID_PARAM;
     }
     struct timeval time = {0};
-    // (void)clock_gettime(CLOCK_MONOTONIC, &time);
     (void)clock_gettime(CLOCK_MONOTONIC_RAW, &time);
-
     sysTime->sec = time.tv_sec;
     sysTime->usec = time.tv_usec;
     return SOFTBUS_OK;
