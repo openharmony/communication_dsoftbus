@@ -221,7 +221,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
         if ((permission != nullptr) &&
             (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
             SoftbusReportPermissionFaultEvt(code);
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "access token permission %s denied!", permission);
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "access token permission %s denied!", permission);
             return SOFTBUS_ACCESS_TOKEN_DENIED;
         }
     }
