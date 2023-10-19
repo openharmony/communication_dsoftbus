@@ -44,8 +44,10 @@ int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t s
     }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
-    if (remote->SendRequest(CLIENT_ON_PERMISSION_CHANGE, data, reply, option) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "DataSyncPermissionChange send request failed");
+    int32_t ret = remote->SendRequest(CLIENT_ON_PERMISSION_CHANGE, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "DataSyncPermissionChange send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -142,8 +144,9 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened send request failed");
+    int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpened send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
@@ -181,8 +184,10 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
     }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
-    if (remote->SendRequest(CLIENT_ON_CHANNEL_OPENFAILED, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed send request failed");
+    int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_OPENFAILED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed send request failed, ret=%{public}d",
+            ret);
         return SOFTBUS_ERR;
     }
 
@@ -215,8 +220,9 @@ int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t route
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (remote->SendRequest(CLIENT_ON_CHANNEL_LINKDOWN, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnChannelLinkDwon send request failed");
+    int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_LINKDOWN, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnChannelLinkDwon send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -245,8 +251,9 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelClosed send request failed");
+    int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelClosed send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
@@ -294,8 +301,10 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    if (remote->SendRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelMsgReceived send request failed");
+    int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelMsgReceived send request failed, ret=%{public}d",
+            ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -338,8 +347,9 @@ int32_t TransClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelTy
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(CLIENT_ON_CHANNEL_QOSEVENT, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelQosEvent send request failed");
+    int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_QOSEVENT, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OnChannelQosEvent send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
