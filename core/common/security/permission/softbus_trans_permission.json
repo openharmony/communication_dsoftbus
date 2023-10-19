@@ -196,6 +196,18 @@
     ]
   },
   {
+    "SESSION_NAME": "ohos.msdp.user_status_awareness.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "PKG_NAME": "ohos.msdp.user_status_awareness",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "IShare*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
