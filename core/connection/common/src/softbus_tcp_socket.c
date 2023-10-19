@@ -27,6 +27,7 @@
 #define SEND_BUF_SIZE 0x200000  // 2M
 #define RECV_BUF_SIZE 0x100000  // 1M
 #define USER_TIMEOUT_MS 500000  // 500000us
+#define SOFTBUS_TCP_USER_TIME (15 * 1000) // 15s
 
 #ifndef __LITEOS_M__
 static int SetReusePort(int fd, int on)
@@ -67,6 +68,7 @@ static void SetServerOption(int fd)
 #ifndef __LITEOS_M__
     (void)SetReusePort(fd, 1);
 #endif
+    (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_TCP_USER_TIME);
 }
 
 static void SetClientOption(int fd)
@@ -76,6 +78,7 @@ static void SetClientOption(int fd)
 #ifndef __LITEOS_M__
     SetReusePort(fd, 1);
 #endif
+    (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_TCP_USER_TIME);
 }
 
 
