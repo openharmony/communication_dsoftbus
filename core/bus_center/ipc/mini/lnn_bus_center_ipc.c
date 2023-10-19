@@ -117,7 +117,6 @@ int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
 {
     (void)callingPid;
-    SetCallLnnStatus(false);
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };

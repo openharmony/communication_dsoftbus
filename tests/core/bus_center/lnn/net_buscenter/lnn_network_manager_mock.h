@@ -39,7 +39,6 @@ public:
     virtual void LnnOnOhosAccountChanged(void) =0;
     virtual void LnnStopDiscovery(void) = 0;
     virtual int32_t LnnStartDiscovery(void) = 0;
-    virtual void SetCallLnnStatus(bool flag) = 0;
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium) = 0;
     virtual void LnnStopPublish(void) = 0;
@@ -64,7 +63,6 @@ public:
     MOCK_METHOD0(LnnOnOhosAccountChanged, void (void));
     MOCK_METHOD0(LnnStopDiscovery, void (void));
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
-    MOCK_METHOD1(SetCallLnnStatus, void (bool));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(DiscLinkStatusChanged, void (LinkStatus, ExchangeMedium));
     MOCK_METHOD0(LnnStopPublish, void (void));

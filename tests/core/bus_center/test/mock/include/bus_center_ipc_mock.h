@@ -44,7 +44,6 @@ public:
     virtual int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId) = 0;
     virtual int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest) = 0;
     virtual int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest) = 0;
-    virtual void SetCallLnnStatus(bool flag) = 0;
     virtual int32_t LnnStartDiscDevice(
         const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb, bool isInnerRequest) = 0;
     virtual int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest) = 0;
@@ -89,7 +88,6 @@ public:
     MOCK_METHOD2(LnnStopTimeSync, int32_t(const char *, const char *));
     MOCK_METHOD3(LnnPublishService, int32_t(const char *, const PublishInfo *, bool));
     MOCK_METHOD3(LnnUnPublishService, int32_t(const char *, int32_t, bool));
-    MOCK_METHOD1(SetCallLnnStatus, void(bool));
     MOCK_METHOD4(LnnStartDiscDevice, int32_t(const char *, const SubscribeInfo *, const InnerCallback *, bool));
     MOCK_METHOD3(LnnStopDiscDevice, int32_t(const char *, int32_t, bool));
     MOCK_METHOD2(LnnActiveMetaNode, int32_t(const MetaNodeConfigInfo *, char *));

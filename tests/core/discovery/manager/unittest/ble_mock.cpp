@@ -118,13 +118,3 @@ void BleMock::SetupStub()
     EXPECT_CALL(*this, Unsubscribe(NotNull())).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, StopAdvertise(NotNull())).WillRepeatedly(Return(SOFTBUS_OK));
 }
-
-void SetCallLnnStatus(bool flag)
-{
-    BleMock::callLnnStatus = flag;
-}
-
-bool GetCallLnnStatus(void)
-{
-    return BleMock::callLnnStatus;
-}

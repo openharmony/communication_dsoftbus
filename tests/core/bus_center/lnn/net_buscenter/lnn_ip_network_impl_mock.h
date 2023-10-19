@@ -48,7 +48,6 @@ public:
     virtual int32_t LnnStartPublish(void) = 0;
     virtual bool LnnIsAutoNetWorkingEnabled(void) = 0;
     virtual int32_t LnnStartDiscovery(void) = 0;
-    virtual void SetCallLnnStatus(bool flag) = 0;
     virtual int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port) = 0;
     virtual int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info) = 0;
     virtual int32_t ConnStartLocalListening(const LocalListenerInfo *info) = 0;
@@ -77,7 +76,6 @@ public:
     MOCK_METHOD0(LnnStartPublish, int32_t (void));
     MOCK_METHOD0(LnnIsAutoNetWorkingEnabled, bool (void));
     MOCK_METHOD0(LnnStartDiscovery, int32_t (void));
-    MOCK_METHOD1(SetCallLnnStatus, void (bool));
     MOCK_METHOD3(AuthStartListening, int32_t (AuthLinkType, const char *, int32_t));
     MOCK_METHOD2(TransTdcStartSessionListener, int32_t (ListenerModule, const LocalListenerInfo *));
     MOCK_METHOD1(ConnStartLocalListening, int32_t (const LocalListenerInfo *));

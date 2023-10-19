@@ -420,7 +420,6 @@ void RestartCoapDiscovery(void)
     if (LnnStartDiscovery() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed");
     }
-    SetCallLnnStatus(true);
 }
 
 static void OnGroupCreated(const char *groupId, int32_t groupType)
