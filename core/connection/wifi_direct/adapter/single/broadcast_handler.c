@@ -19,7 +19,7 @@
 #include "link_manager_broadcast_handler.h"
 #include "resource_manager_broadcast_handler.h"
 
-#define LOG_LABEL "[WifiDirect] BroadcastHandler: "
+#define LOG_LABEL "[WD] BrH: "
 
 int32_t BroadcastHandlerInit(void)
 {

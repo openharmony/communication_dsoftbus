@@ -19,6 +19,7 @@
 #include "wifi_p2p.h"
 #include "wifi_hid2d.h"
 #include "softbus_log.h"
+#include "wifi_p2p_config.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_crypto.h"
@@ -27,7 +28,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "data/resource_manager.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectP2pAdapter: "
+#define LOG_LABEL "[WD] PAdp: "
 #define DEFAULT_NET_MASK "255.255.255.0"
 
 static bool IsWifiP2pEnabled(void)
@@ -75,21 +76,29 @@ static int32_t GetStationFrequency(void)
     CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR, LOG_LABEL "get wifi linked info failed");
     CLOGI(LOG_LABEL "frequency=%d", linkedInfo.frequency);
 
-    struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
-    if (netWorkUtils->is2GBand(linkedInfo.frequency)) {
-        return linkedInfo.frequency;
-    }
+    return linkedInfo.frequency;
+}
 
-    if (netWorkUtils->is5GBand(linkedInfo.frequency)) {
+static int32_t GetStationFrequencyWithFilter(void)
+{
+    int32_t ret;
+    int32_t frequency = GetWifiDirectP2pAdapter()->getStationFrequency();
+    CONN_CHECK_AND_RETURN_RET_LOG(frequency > 0, FREQUENCY_INVALID, LOG_LABEL "invailid frequency");
+    struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
+    if (netWorkUtils->is5GBand(frequency)) {
         int32_t channelArray[CHANNEL_ARRAY_NUM_MAX];
         size_t channelArraySize = CHANNEL_ARRAY_NUM_MAX;
         ret = GetChannel5GListIntArray(channelArray, &channelArraySize);
         CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get channel list failed", ret);
 
-        int32_t channel = netWorkUtils->frequencyToChannel(linkedInfo.frequency);
+        int32_t channel = netWorkUtils->frequencyToChannel(frequency);
         if (netWorkUtils->isInChannelList(channel, channelArray, channelArraySize)) {
-            return linkedInfo.frequency;
+            return frequency;
         }
+        return FREQUENCY_INVALID;
+    }
+    if (netWorkUtils->is2GBand(frequency)) {
+        return frequency;
     }
 
     CLOGE(LOG_LABEL "get local frequency failed");
@@ -560,6 +569,7 @@ static struct WifiDirectP2pAdapter g_adapter = {
     .getChannel5GListIntArray = GetChannel5GListIntArray,
     .getStationFrequency = GetStationFrequency,
     .getRecommendChannel = GetRecommendChannel,
+    .getStationFrequencyWithFilter = GetStationFrequencyWithFilter,
     .getSelfWifiConfigInfo = GetSelfWifiConfigInfo,
     .setPeerWifiConfigInfo = SetPeerWifiConfigInfo,
     .getGroupConfig = GetGroupConfig,

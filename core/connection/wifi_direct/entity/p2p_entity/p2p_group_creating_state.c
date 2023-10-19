@@ -19,7 +19,7 @@
 #include "softbus_adapter_mem.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
-#define LOG_LABEL "[WifiDirect] P2pGroupCreatingState: "
+#define LOG_LABEL "[WD] PGCrS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
@@ -73,7 +73,7 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
         entity->isConnectionChangeReceived = false;
         entity->isConnectStateChangeReceived = false;
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(SOFTBUS_OK);
+        entity->notifyOperationComplete(ENTITY_EVENT_P2P_CREATE_COMPLETE);
         return;
     }
 }
@@ -95,7 +95,7 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
             entity->isConnectionChangeReceived = false;
             entity->isConnectStateChangeReceived = false;
             entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-            entity->notifyOperationComplete(SOFTBUS_OK);
+            entity->notifyOperationComplete(ENTITY_EVENT_P2P_CREATE_COMPLETE);
         }
     } else {
         CLOGI(LOG_LABEL "create group error");
@@ -103,7 +103,7 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
         entity->isConnectStateChangeReceived = false;
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(SOFTBUS_OK);
+        entity->notifyOperationComplete(ERROR_P2P_CREATE_GROUP_FAILED);
     }
 }
 

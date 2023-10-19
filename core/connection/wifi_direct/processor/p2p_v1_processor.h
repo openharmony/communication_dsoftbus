@@ -29,6 +29,8 @@ struct P2pV1Processor {
     struct NegotiateMessage *pendingRequestMsg;
     int32_t currentRequestId;
     int32_t goPort;
+    int32_t busyTimes;
+    bool isActiveDisconnect;
 };
 
 struct P2pV1Processor* GetP2pV1Processor(void);

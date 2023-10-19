@@ -41,7 +41,7 @@ struct WifiDirectManager {
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
 
     void (*onNegotiateChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len);
-    void (*onNegotiateChannelDisconnected)(struct WifiDirectNegotiateChannel *channel);
+    void (*onRemoteP2pDisable)(const char *networkId);
 
     /* implement connect callback interface */
     void (*onConnectSuccess)(int32_t requestId, const struct WifiDirectLink *link);

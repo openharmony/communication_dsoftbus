@@ -20,8 +20,8 @@
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_negotiate_channel.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectCommandManager: "
-#define MAX_EXECUTE_TIMES 8
+#define LOG_LABEL "[WD] CM: "
+#define MAX_EXECUTE_TIMES 5
 
 static int32_t ExecuteConnection(struct WifiDirectCommand *self)
 {

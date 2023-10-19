@@ -41,7 +41,7 @@ struct LinkManager {
     void (*registerListener)(struct LinkManagerListener *listener);
     int32_t (*generateLinkId)(struct InnerLink *innerLink, int32_t requestId, int32_t pid);
     void (*recycleLinkId)(int32_t linkId, const char *remoteMac);
-    void (*setNegoChannelForLink)(struct WifiDirectNegotiateChannel *auth);
+    void (*setNegoChannelForLink)(struct WifiDirectNegotiateChannel *channel);
     void  (*clearNegoChannelForLink)(const char *uuid, bool destroy);
     void (*dump)(void);
     bool (*checkAll)(enum WifiDirectConnectType type, const char *interface, bool (*checker)(struct InnerLink *));
