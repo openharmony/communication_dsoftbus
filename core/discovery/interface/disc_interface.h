@@ -216,17 +216,6 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId);
 void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium);
 
 /**
- * @brief Set the networking status and modify the networking connection status.
- * @param[in] flag Network connection flag.
- */
-void SetCallLnnStatus(bool flag);
-
-/**
- * @brief Get the networking connection status.
- */
-bool GetCallLnnStatus(void);
-
-/**
  * @ingroup softbus_disc_manager
  * @brief Update broadcast packets when the local device information changes.
  * @param[in] type Information that changes

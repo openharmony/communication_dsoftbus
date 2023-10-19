@@ -60,10 +60,6 @@ int32_t LnnStartDiscovery(void)
     return GetNetworkManagerInterface()->LnnStartDiscovery();
 }
 
-void SetCallLnnStatus(bool flag)
-{
-    return GetNetworkManagerInterface()->SetCallLnnStatus(flag);
-}
 int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetNetworkManagerInterface()->SoftbusGetConfig(type, val, len);

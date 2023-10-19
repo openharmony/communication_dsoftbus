@@ -127,11 +127,6 @@ int32_t LnnStartDiscovery(void)
     return GetLnnIpNetworkImplInterface()->LnnStartDiscovery();
 }
 
-void SetCallLnnStatus(bool flag)
-{
-    return GetLnnIpNetworkImplInterface()->SetCallLnnStatus(flag);
-}
-
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
 {
     return GetLnnIpNetworkImplInterface()->AuthStartListening(type, ip, port);

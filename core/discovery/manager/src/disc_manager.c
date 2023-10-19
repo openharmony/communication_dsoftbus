@@ -241,12 +241,10 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
         return;
     }
 
-    if (GetCallLnnStatus()) {
-        DLOGI("call from inner module.");
-        if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
-            DfxRecordDeviceFound(infoNode, device, additions);
-            infoNode->item->callback.innerCb.OnDeviceFound(device, additions);
-        }
+    DLOGI("call from inner module.");
+    if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
+        DfxRecordDeviceFound(infoNode, device, additions);
+        infoNode->item->callback.innerCb.OnDeviceFound(device, additions);
     }
 }
 

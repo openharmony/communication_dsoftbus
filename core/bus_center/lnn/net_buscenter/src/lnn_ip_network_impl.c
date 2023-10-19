@@ -412,7 +412,6 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
     if (LnnStartDiscovery() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed");
     }
-    SetCallLnnStatus(true);
     return SOFTBUS_OK;
 }
 
