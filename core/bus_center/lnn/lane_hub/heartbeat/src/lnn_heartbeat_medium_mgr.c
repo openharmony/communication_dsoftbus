@@ -141,10 +141,10 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         return;
     }
     uint32_t oldNetCapa = nodeInfo.netCapacity;
-    if ((hbResp->capabiltiy & (1 << ENABLE_WIFI_CAP)) != 0) {
+    if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
     }
-    if ((hbResp->capabiltiy & (1 << P2P_GO)) != 0 || (hbResp->capabiltiy & (1 << P2P_GC)) != 0) {
+    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
         (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
     }
     (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BLE);
@@ -344,10 +344,10 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     }
 
     // update capability
-    if ((hbResp->capabiltiy & (1 << ENABLE_WIFI_CAP)) != 0) {
+    if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_WIFI);
     }
-    if ((hbResp->capabiltiy & (1 << P2P_GO)) != 0 || (hbResp->capabiltiy & (1 << P2P_GC))) {
+    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC)) {
         (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_WIFI_P2P);
     }
     (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BR);
