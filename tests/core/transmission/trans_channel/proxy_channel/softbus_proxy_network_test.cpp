@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -177,7 +177,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(sessionName, 1);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(sessionName,1, NULL, 0);
+    NotifyNetworkingMsgReceived(sessionName, 1, NULL, 0);
     EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
@@ -311,7 +311,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Le
     char sessionName[TEST_NUMBER_256] = {0};
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
     int32_t ret = SOFTBUS_OK;
-    ret = TransOpenNetWorkingChannel(sessionName ,NULL, &preferred);
+    ret = TransOpenNetWorkingChannel(sessionName, NULL, &preferred);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     ret = TransOpenNetWorkingChannel(sessionName, NULL, &preferred);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
