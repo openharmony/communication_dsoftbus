@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/core/adapter/core_adapter.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../core/adapter/core_adapter.gni")
+import("../../../dsoftbus.gni")
 
 br_connection_inc = br_adapter_inc
 if (!support_bluetooth) {

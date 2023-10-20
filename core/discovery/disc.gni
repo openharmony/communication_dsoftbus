@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/core/discovery/ble/disc_ble.gni")
-import("//foundation/communication/dsoftbus/core/discovery/coap/disc_coap.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../core/discovery/ble/disc_ble.gni")
+import("../../core/discovery/coap/disc_coap.gni")
+import("../../dsoftbus.gni")
 
 disc_server_src = ble_discovery_src + disc_coap_src
 disc_server_inc = ble_discovery_inc + disc_coap_inc

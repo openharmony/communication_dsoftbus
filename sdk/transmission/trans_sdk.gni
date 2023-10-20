@@ -11,13 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/ipc/trans_ipc_sdk.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/session/trans_session_sdk.gni")
-import(
-    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/trans_channel_sdk.gni")
+import("../../dsoftbus.gni")
+import("../../sdk/transmission/ipc/trans_ipc_sdk.gni")
+import("../../sdk/transmission/session/trans_session_sdk.gni")
+import("../../sdk/transmission/trans_channel/trans_channel_sdk.gni")
 
 trans_session_manager_sdk_inc =
     trans_ipc_proxy_sdk_inc + trans_session_sdk_inc + trans_channel_sdk_inc

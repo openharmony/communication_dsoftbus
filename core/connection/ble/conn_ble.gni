@@ -11,9 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import(
-    "//foundation/communication/dsoftbus/adapter/common/net/bluetooth/net_bluetooth.gni")
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../adapter/common/net/bluetooth/net_bluetooth.gni")
+import("../../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 conn_ble_dir = "dsoftbus_enhance/core/connection/ble/src"
