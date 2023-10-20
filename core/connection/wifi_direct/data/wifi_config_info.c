@@ -24,7 +24,7 @@
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_network_utils.h"
 
-#define LOG_LABEL "[WD] WCI: "
+#define LOG_LABEL "[WifiDirect] WifiConfigInfo: "
 
 #define WC_TAG_INVALID 0
 #define WC_TAG_VERSION 1

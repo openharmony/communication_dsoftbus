@@ -21,7 +21,7 @@
 #include "processor/wifi_direct_processor_factory.h"
 #include "protocol/wifi_direct_protocol_factory.h"
 
-#define LOG_LABEL "[WD] NAvS: "
+#define LOG_LABEL "[WifiDirect] NegoAvailableState: "
 
 /* private method forward declare */
 
@@ -45,7 +45,6 @@ static int32_t HandleNegotiateMessageFromRemote(struct WifiDirectProcessor *proc
         case CMD_CONN_V1_REQ:
         case CMD_REUSE_REQ:
         case CMD_CONN_V2_REQ_1:
-        case CMD_CONN_V2_REQ_2:
         case CMD_CONN_V2_REQ_3:
         case CMD_DISCONNECT_V1_REQ:
         case CMD_DISCONNECT_V2_REQ:
@@ -54,9 +53,6 @@ static int32_t HandleNegotiateMessageFromRemote(struct WifiDirectProcessor *proc
         case CMD_CLIENT_JOIN_FAIL_NOTIFY:
             GetWifiDirectNegotiator()->context.currentProcessor = processor;
             return processor->processNegotiateMessage(cmd, msg);
-        case CMD_DISCONNECT_V2_RESP:
-            CLOGI(LOG_LABEL "abandon disconnect response");
-            return SOFTBUS_OK;
         default:
             CLOGE(LOG_LABEL "unhandled cmd=%d", cmd);
             GetWifiDirectNegotiator()->handleUnhandledRequest(msg);

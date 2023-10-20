@@ -50,6 +50,7 @@ enum WifiConfigInfoKey {
 struct NegotiateMessage;
 struct WifiConfigInfo {
     INFO_CONTAINER_BASE(WifiConfigInfo, WC_KEY_MAX);
+    struct NegotiateMessage *msg;
 };
 
 int32_t WifiConfigInfoConstruct(struct WifiConfigInfo *self, uint8_t *cfg, size_t size);

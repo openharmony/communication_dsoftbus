@@ -19,7 +19,7 @@
 #include "softbus_error_code.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
-#define LOG_LABEL "[WD] PEnS: "
+#define LOG_LABEL "[WifiDirect] P2pEntityState: "
 
 static void Enter(struct P2pEntityState *self)
 {

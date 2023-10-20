@@ -24,9 +24,9 @@
 #include "data/resource_manager.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WD] RMBrH: "
+#define LOG_LABEL "[WifiDirect] ResourceManagerBroadcastHandler: "
 
-static void WifiDirectStateChangeCallback(enum P2pState state)
+static void HandleP2pStateChanged(enum P2pState state)
 {
     struct InterfaceInfo info;
     InterfaceInfoConstructorWithName(&info, IF_NAME_P2P);
@@ -130,31 +130,31 @@ static void UpdateInterfaceInfo(struct WifiDirectP2pGroupInfo *groupInfo)
     InterfaceInfoDestructor(&info);
 }
 
-static void WifiDirectConnectionChangeCallback(const struct P2pBroadcastParam *param)
+static void HandleP2pConnectionChanged(const struct P2pConnChangedInfo *changedInfo)
 {
     CLOGI(LOG_LABEL "enter");
     struct InterfaceInfo info;
     InterfaceInfoConstructor(&info);
     info.putName(&info, IF_NAME_P2P);
 
-    if (param->p2pLinkedInfo.connectState == P2P_DISCONNECTED || !param->groupInfo) {
+    if (changedInfo->p2pLinkInfo.connectState == P2P_DISCONNECTED || !changedInfo->groupInfo) {
         CLOGI(LOG_LABEL "p2p disconnected, reset p2p interface info");
         ResetInterfaceInfo();
         return;
     }
 
     CLOGI(LOG_LABEL "p2p has group, update p2p interface info");
-    UpdateInterfaceInfo(param->groupInfo);
+    UpdateInterfaceInfo(changedInfo->groupInfo);
 }
 
 static void Listener(enum BroadcastReceiverAction action, const struct BroadcastParam *param)
 {
     if (action == WIFI_P2P_STATE_CHANGED_ACTION) {
         CLOGI(LOG_LABEL "WIFI_P2P_STATE_CHANGED_ACTION");
-        WifiDirectStateChangeCallback(param->p2pParam.p2pState);
+        HandleP2pStateChanged(param->p2pState);
     } else if (action == WIFI_P2P_CONNECTION_CHANGED_ACTION) {
         CLOGI(LOG_LABEL "WIFI_P2P_CONNECTION_CHANGED_ACTION");
-        WifiDirectConnectionChangeCallback(&param->p2pParam);
+        HandleP2pConnectionChanged(&param->changedInfo);
     }
 }
 

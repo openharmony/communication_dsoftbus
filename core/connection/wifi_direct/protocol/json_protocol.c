@@ -21,7 +21,7 @@
 #include "string.h"
 #include "softbus_json_utils.h"
 
-#define LOG_LABEL "[WD] Json: "
+#define LOG_LABEL "[WifiDirect] JsonProtocol: "
 
 #define DEFAULT_CAPACITY 1000
 #define CAPACITY_MAX (1024 * 64)

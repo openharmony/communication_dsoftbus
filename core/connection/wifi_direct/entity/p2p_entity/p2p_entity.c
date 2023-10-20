@@ -31,7 +31,7 @@
 #include "entity/p2p_entity/p2p_group_connecting_state.h"
 #include "entity/p2p_entity/p2p_group_removing_state.h"
 
-#define LOG_LABEL "[WD] PE: "
+#define LOG_LABEL "[WifiDirect] P2pEntity: "
 
 /* private method forward declare */
 static void OnEntityTimeout(void *data);

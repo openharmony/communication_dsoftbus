@@ -45,14 +45,6 @@ enum EntityState {
     ENTITY_STATE_UNAVAILABLE_RPT_ENABLED = 3,
 };
 
-enum EntityOperationEvent {
-    ENTITY_EVENT_P2P_START = 0,
-    ENTITY_EVENT_P2P_CONNECT_COMPLETE,
-    ENTITY_EVENT_P2P_CREATE_COMPLETE,
-    ENTITY_EVENT_P2P_REMOVE_COMPLETE,
-    ENTITY_EVENT_P2P_END,
-};
-
 struct EntityListener {
     void (*onOperationComplete)(int32_t requestId, int32_t result);
     void (*onEntityChanged)(enum EntityState state);

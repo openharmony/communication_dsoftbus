@@ -25,7 +25,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_network_utils.h"
 
-#define LOG_LABEL "[WD] RM: "
+#define LOG_LABEL "[WifiDirect] ResourceManager: "
 
 /* private method forward declare */
 static int32_t InitInterfaceInfo(const char *interface);
@@ -47,15 +47,9 @@ static int32_t InitWifiDirectInfo(void)
         return ret;
     }
 
-    CLOGI(LOG_LABEL "cap=%s", coexistCap);
-    ret = GetWifiDirectCoexistRule()->setCoexistRule(coexistCap);
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "set coexist rule failed");
-    }
-
     ret = InitInterfacesByCoexistCap(coexistCap);
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "init InterfacesByCoexistCap failed");
+    if (ret == SOFTBUS_OK) {
+        ret = GetWifiDirectCoexistRule()->setCoexistRule(coexistCap);
     }
     SoftBusFree(coexistCap);
     return ret;
@@ -198,14 +192,9 @@ static bool IsStationAndHmlDBAC(void)
             hmlFreq = hmlInfo->getInt(hmlInfo, II_KEY_CENTER_20M, -1);
         }
     }
-
-    CLOGI(LOG_LABEL "staFreq=%d hmlFreq=%d", staFreq, hmlFreq);
     if (staFreq != -1 && hmlFreq != -1 && staFreq != hmlFreq) {
-        struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
-        if (((netWorkUtils->is2GBand(staFreq)) && netWorkUtils->is5GBand(hmlFreq)) ||
-            ((netWorkUtils->is5GBand(staFreq)) && netWorkUtils->is2GBand(hmlFreq))) {
-            return true;
-        }
+        CLOGI(LOG_LABEL "staFreq=%d hmlFreq=%d", staFreq, hmlFreq);
+        return true;
     }
     return false;
 }
@@ -394,9 +383,6 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
     InterfaceInfoConstructor(&info);
     info.putName(&info, interface);
     info.putInt(&info, II_KEY_CONNECT_CAPABILITY, cap);
-    info.putInt(&info, II_KEY_REUSE_COUNT, 0);
-
-    CLOGI(LOG_LABEL "interface=%s cap=0x%x", interface, cap);
     if (((uint32_t)cap & WIFI_DIRECT_API_ROLE_GO) || ((uint32_t)cap & WIFI_DIRECT_API_ROLE_GC)) {
         int32_t channelArray[CHANNEL_ARRAY_NUM_MAX];
         size_t channelArraySize = CHANNEL_ARRAY_NUM_MAX;
@@ -407,15 +393,13 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
     }
 
     if (GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
-        CLOGI(LOG_LABEL "set %s enable=true", interface);
         info.putBoolean(&info, II_KEY_IS_ENABLE, true);
         char baseMac[MAC_ADDR_STR_LEN] = {0};
         if (GetWifiDirectP2pAdapter()->getBaseMac(interface, (uint32_t)cap, baseMac, sizeof(baseMac)) == SOFTBUS_OK) {
             info.putString(&info, II_KEY_BASE_MAC, baseMac);
         }
     } else {
-        CLOGI(LOG_LABEL "set %s enable=false", interface);
-        info.putBoolean(&info, II_KEY_IS_ENABLE, true);
+        info.putBoolean(&info, II_KEY_IS_ENABLE, false);
     }
 
     GetResourceManager()->notifyInterfaceInfoChange(&info);

@@ -264,26 +264,26 @@ enum WifiDirectErrorCode {
     /* Error code representing p2p server already exists */
     ERROR_P2P_SERVER_EXISTS = ERROR_BASE - 5601,
 
-    /* Error code representing fail disconnect wifi direct */
-    ERROR_WD_DISCONNECT_FAIL = ERROR_BASE - 6000,
+    /* Error code representing fail disconnect hml */
+    ERROR_HML_DISCONNECT_FAIL = ERROR_BASE - 6000,
 
     /* Error code representing config ip fail */
-    ERROR_WD_CONFIG_IP_FAIL = ERROR_BASE - 6001,
+    ERROR_HML_CONFIG_IP_FAIL = ERROR_BASE - 6001,
 
     /* Error code representing apply ip fail */
-    ERROR_WD_APPLY_IP_FAIL = ERROR_BASE - 6002,
+    ERROR_HML_APPLY_IP_FAIL = ERROR_BASE - 6002,
 
-    /* Error code representing fail to connect wifi direct group */
-    ERROR_WD_CONNECT_GROUP_FAIL = ERROR_BASE - 6200,
+    /* Error code representing fail to connect hml group */
+    ERROR_HML_CONNECT_GROUP_FAIL = ERROR_BASE - 6200,
 
-    /* Error code representing fail to create wifi direct group */
-    ERROR_WD_CREATE_GROUP_FAIL = ERROR_BASE - 6600,
+    /* Error code representing fail to create hml group */
+    ERROR_HML_CREATE_GROUP_FAIL = ERROR_BASE - 6600,
 
-    /* Error code representing fail to destroy wifi direct group */
-    ERROR_WD_DESTROY_FAIL = ERROR_BASE - 6601,
+    /* Error code representing fail to destroy hml group */
+    ERROR_HML_DESTROY_FAIL = ERROR_BASE - 6601,
 
     /* Error code representing fail to notify connect */
-    ERROR_WD_CONNECT_NOTIFY_FAIL = ERROR_BASE - 6602,
+    ERROR_HML_CONNECT_NOTIFY_FAIL = ERROR_BASE - 6602,
 
     /* Error code representing 3 vap conflict */
     ERROR_LOCAL_THREE_VAP_CONFLICT = ERROR_BASE - 6603,
@@ -299,9 +299,6 @@ enum WifiDirectErrorCode {
 
     /* Error code representing Entity is unavailable */
     ERROR_ENTITY_UNAVAILABLE = ERROR_BASE - 6607,
-
-    /* Error code representing remote client join failed*/
-    ERROR_WD_CLIENT_JOIN_FAIL = ERROR_BASE - 6608,
 
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
