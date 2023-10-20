@@ -22,7 +22,7 @@
 #include "wifi_direct_types.h"
 #include "data/link_info.h"
 
-#define LOG_LABEL "[WD] Ut: "
+#define LOG_LABEL "[WifiDirect] WifiDirectUtils: "
 
 #define HEX_DUMP_LINE_NUM 16
 #define PRINT_BUFFER_LEN 128

@@ -73,9 +73,9 @@ HWTEST_F(BroadcastReceiverTest, BroadcastReceiverTest001, TestSize.Level1)
     param = reinterpret_cast<struct BroadcastParam *>(SoftBusMalloc(sizeof(*param)));
     EXPECT_TRUE(param != nullptr);
     param->action = WIFI_P2P_CONNECTION_CHANGED_ACTION;
-    param->p2pParam.groupInfo =
+    param->changedInfo.groupInfo =
         reinterpret_cast<struct WifiDirectP2pGroupInfo *>(SoftBusMalloc(sizeof(WifiDirectP2pGroupInfo)));
-    EXPECT_TRUE(param->p2pParam.groupInfo != nullptr);
+    EXPECT_TRUE(param->changedInfo.groupInfo != nullptr);
     (void)DispatchWorkHandler(param);
 };
 
@@ -84,10 +84,10 @@ HWTEST_F(BroadcastReceiverTest, BroadcastReceiverTest002, TestSize.Level1)
     P2pState state = P2P_STATE_NONE;
     NiceMock<WifiDirectP2PAdapterInterfaceMock> wifiDirectP2PAdapterInterfaceMock;
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, CallMethodAsync).WillRepeatedly(Return(SOFTBUS_ERR));
-    (void)WifiDirectStateChangeCallback(state);
+    (void)P2pStateChangeHandler(state);
 
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, CallMethodAsync).WillRepeatedly(Return(SOFTBUS_OK));
-    (void)WifiDirectStateChangeCallback(state);
+    (void)P2pStateChangeHandler(state);
 };
 
 HWTEST_F(BroadcastReceiverTest, BroadcastReceiverTest003, TestSize.Level1)
@@ -96,10 +96,10 @@ HWTEST_F(BroadcastReceiverTest, BroadcastReceiverTest003, TestSize.Level1)
     GetWifiDirectP2pAdapter()->getGroupInfo = GetGroupInfo;
     NiceMock<WifiDirectP2PAdapterInterfaceMock> wifiDirectP2PAdapterInterfaceMock;
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, CallMethodAsync).WillRepeatedly(Return(SOFTBUS_ERR));
-    (void)WifiDirectConnectionChangeCallback(info);
+    (void)P2pConnectionChangeHandler(info);
 
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, CallMethodAsync).WillRepeatedly(Return(SOFTBUS_OK));
-    (void)WifiDirectConnectionChangeCallback(info);
+    (void)P2pConnectionChangeHandler(info);
 };
 
 HWTEST_F(BroadcastReceiverTest, BroadcastReceiverTest004, TestSize.Level1)

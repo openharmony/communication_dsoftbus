@@ -19,7 +19,7 @@
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_types.h"
 
-#define LOG_LABEL "[WD] TL: "
+#define LOG_LABEL "[WifiDirect] WifiDirectTimerList: "
 
 struct WifiDirectTimerStruct {
     ListNode node;

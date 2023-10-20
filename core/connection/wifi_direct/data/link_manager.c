@@ -29,7 +29,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_ip_manager.h"
 
-#define LOG_LABEL "[WD] LM: "
+#define LOG_LABEL "[WifiDirect] LinkManager: "
 
 /* private method forward declare */
 static void UpdateLink(struct InnerLink *oldLink, struct InnerLink *newLink);
@@ -237,8 +237,6 @@ static void RemoveLinksByConnectType(enum WifiDirectConnectType connectType)
         if (connectType == WIFI_DIRECT_CONNECT_TYPE_HML) {
             ReleaseLinkIp(link);
         }
-        ListDelete(&link->node);
-        self->count--;
         InnerLinkDelete(link);
     }
     SoftBusMutexUnlock(&self->mutex);
@@ -275,8 +273,6 @@ static void RefreshLinks(enum WifiDirectConnectType connectType, int32_t clientD
             link->setState(link, INNER_LINK_STATE_DISCONNECTED);
             OnInnerLinkChange(link, true);
             CloseP2pNegotiateChannel(link);
-            ListDelete(&link->node);
-            self->count--;
             InnerLinkDelete(link);
         }
     }
@@ -349,10 +345,24 @@ static void SetNegoChannelForLink(struct WifiDirectNegotiateChannel *channel)
     target->putPointer(target, IL_KEY_NEGO_CHANNEL, (void **)&channelNew);
 }
 
+static bool RemoveServerChecker(struct InnerLink *innerLink)
+{
+    int state = innerLink->getInt(innerLink, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
+    return state != INNER_LINK_STATE_CONNECTED && state != INNER_LINK_STATE_CONNECTING;
+}
+
+static void RemoveHmlServerIfNeeded(struct InnerLink *link)
+{
+    const char *interface = link->getString(link, IL_KEY_LOCAL_INTERFACE, IF_NAME_HML);
+    if (GetLinkManager()->checkAll(WIFI_DIRECT_CONNECT_TYPE_HML, interface, RemoveServerChecker)) {
+        CLOGI(LOG_LABEL "destroy group");
+    }
+}
+
 static void RemoveP2pGroupIfNeeded(struct InnerLink *link)
 {
     enum WifiDirectConnectType type =
-        (enum WifiDirectConnectType)link->getInt(link, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_INVALID);
+         (enum WifiDirectConnectType)link->getInt(link, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_INVALID);
     if (type != WIFI_DIRECT_CONNECT_TYPE_P2P) {
         return;
     }
@@ -411,7 +421,6 @@ static void ClearNegoChannelForLink(const char *uuid, bool destroy)
         CLOGE(LOG_LABEL "uuid=%s failed", AnonymizesUUID(uuid));
         return;
     }
-
     struct DefaultNegotiateChannel *channelOld = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
     if (channelOld) {
         DefaultNegotiateChannelDelete(channelOld);
@@ -421,6 +430,8 @@ static void ClearNegoChannelForLink(const char *uuid, bool destroy)
         int32_t type = target->getInt(target, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_INVALID);
         if (type == WIFI_DIRECT_CONNECT_TYPE_P2P) {
             RemoveP2pGroupIfNeeded(target);
+        } else if (type == WIFI_DIRECT_CONNECT_TYPE_HML) {
+            RemoveHmlServerIfNeeded(target);
         }
     }
     SoftBusMutexUnlock(&self->mutex);
@@ -600,10 +611,7 @@ static void AdjustIfRemoteMacChange(struct InnerLink *innerLink)
     LIST_FOR_EACH_ENTRY(target, &self->linkLists[type], struct InnerLink, node) {
         char *targetDeviceId = target->getString(target, IL_KEY_DEVICE_ID, "");
         char *targetRemoteMac = target->getString(target, IL_KEY_REMOTE_BASE_MAC, "");
-        CLOGI(LOG_LABEL "remoteMac=%s targetRemoteMac=%s", WifiDirectAnonymizeMac(remoteMac),
-              WifiDirectAnonymizeMac(targetRemoteMac));
-        if (strlen(remoteMac) != 0 && strlen(targetRemoteMac) != 0 &&
-            strcmp(remoteMac, targetRemoteMac) != 0 && strcmp(deviceId, targetDeviceId) == 0) {
+        if (strcmp(remoteMac, targetRemoteMac) != 0 && strcmp(deviceId, targetDeviceId) == 0) {
             CLOGD(LOG_LABEL "find");
             found = true;
             break;

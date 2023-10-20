@@ -1292,7 +1292,7 @@ ConnBrConnection *ConnBrGetConnectionByAddr(const char *addr, ConnSideType side)
 
     int32_t status = SoftBusMutexLock(&g_brManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("lock manager connections failed, addr=%s, error=%d", animizeAddress, status);
+        CLOGE("lock manager connnections failed, addr=%s, error=%d", animizeAddress, status);
         return NULL;
     }
 
@@ -1321,7 +1321,7 @@ ConnBrConnection *ConnBrGetConnectionById(uint32_t connectionId)
 {
     int32_t status = SoftBusMutexLock(&g_brManager.connections->lock);
     CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, NULL,
-        "br get connection by id: lock manager connections failed, conn id=%u, error=%d", connectionId, status);
+        "br get connection by id: lock manager connnections failed, conn id=%u, error=%d", connectionId, status);
 
     ConnBrConnection *it = NULL;
     ConnBrConnection *target = NULL;

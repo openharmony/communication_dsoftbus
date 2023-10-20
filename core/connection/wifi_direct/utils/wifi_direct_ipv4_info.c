@@ -19,7 +19,7 @@
 #include "wifi_direct_defines.h"
 #include "wifi_direct_network_utils.h"
 
-#define LOG_LABEL "[WD] IPV4: "
+#define LOG_LABEL "[WifiDirect] WifiDirectIpv4: "
 
 int32_t WifiDirectIpStringToIpv4(const char *ipString, struct WifiDirectIpv4Info *ipv4)
 {

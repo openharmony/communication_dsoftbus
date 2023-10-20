@@ -22,7 +22,7 @@
 #include "wifi_direct_p2p_adapter.h"
 #include "utils/wifi_direct_work_queue.h"
 
-#define LOG_LABEL "[WD] BrR: "
+#define LOG_LABEL "[WifiDirect] BroadcastReceiver: "
 
 struct ActionListenerNode {
     ListNode node;
@@ -59,8 +59,8 @@ static void DispatchWorkHandler(void *data)
         }
     }
 
-    if (param->action == WIFI_P2P_CONNECTION_CHANGED_ACTION && param->p2pParam.groupInfo != NULL) {
-        SoftBusFree(param->p2pParam.groupInfo);
+    if (param->action == WIFI_P2P_CONNECTION_CHANGED_ACTION && param->changedInfo.groupInfo != NULL) {
+        SoftBusFree(param->changedInfo.groupInfo);
     }
     SoftBusFree(param);
 }
@@ -75,32 +75,28 @@ struct BroadcastReceiver* GetBroadcastReceiver(void)
     return &g_broadcastReceiver;
 }
 
-static void WifiDirectStateChangeCallback(P2pState state)
+static void P2pStateChangeHandler(P2pState state)
 {
     struct BroadcastParam *param = (struct BroadcastParam *)SoftBusCalloc(sizeof(struct BroadcastParam));
     CONN_CHECK_AND_RETURN_LOG(param, LOG_LABEL "alloc failed");
-
     param->action = WIFI_P2P_STATE_CHANGED_ACTION;
-    param->p2pParam.p2pState = state;
-
+    param->p2pState = state;
     if (CallMethodAsync(DispatchWorkHandler, param, 0) != SOFTBUS_OK) {
         SoftBusFree(param);
     }
 }
 
-static void WifiDirectConnectionChangeCallback(const WifiP2pLinkedInfo info)
+static void P2pConnectionChangeHandler(const WifiP2pLinkedInfo info)
 {
     struct BroadcastParam *param = (struct BroadcastParam *)SoftBusCalloc(sizeof(struct BroadcastParam));
     CONN_CHECK_AND_RETURN_LOG(param, LOG_LABEL "alloc failed");
-
     param->action = WIFI_P2P_CONNECTION_CHANGED_ACTION;
-    (void)memcpy_s(&param->p2pParam.p2pLinkedInfo, sizeof(WifiP2pLinkedInfo), &info, sizeof(WifiP2pLinkedInfo));
-    param->p2pParam.groupInfo = NULL;
-    (void)GetWifiDirectP2pAdapter()->getGroupInfo(&param->p2pParam.groupInfo);
-
+    (void)memcpy_s(&param->changedInfo.p2pLinkInfo, sizeof(WifiP2pLinkedInfo), &info, sizeof(WifiP2pLinkedInfo));
+    param->changedInfo.groupInfo = NULL;
+    (void)GetWifiDirectP2pAdapter()->getGroupInfo(&param->changedInfo.groupInfo);
     if (CallMethodAsync(DispatchWorkHandler, param, 0) != SOFTBUS_OK) {
-        if (param->p2pParam.groupInfo) {
-            SoftBusFree(param->p2pParam.groupInfo);
+        if (param->changedInfo.groupInfo) {
+            SoftBusFree(param->changedInfo.groupInfo);
         }
         SoftBusFree(param);
     }
@@ -112,13 +108,17 @@ int32_t BroadcastReceiverInit(void)
         ListInit(g_broadcastReceiver.listeners + i);
     }
 
-    WifiErrorCode ret = RegisterP2pStateChangedCallback(WifiDirectStateChangeCallback);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR,
-                                  LOG_LABEL "RegisterP2pStateChangedCallback failed, error code=%d", ret);
+    WifiErrorCode ret = RegisterP2pStateChangedCallback(P2pStateChangeHandler);
+    if (ret != WIFI_SUCCESS) {
+        CLOGE(LOG_LABEL "RegisterP2pStateChangedCallback failed, error code=%d", ret);
+        return SOFTBUS_ERR;
+    }
 
-    ret = RegisterP2pConnectionChangedCallback(WifiDirectConnectionChangeCallback);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR,
-                                  LOG_LABEL "RegisterP2pConnectionChangedCallback failed, error code=%d", ret);
+    ret = RegisterP2pConnectionChangedCallback(P2pConnectionChangeHandler);
+    if (ret != WIFI_SUCCESS) {
+        CLOGE(LOG_LABEL "RegisterP2pConnectionChangedCallback failed, error code=%d", ret);
+        return SOFTBUS_ERR;
+    }
 
     g_broadcastReceiver.isInited = true;
     return SOFTBUS_OK;

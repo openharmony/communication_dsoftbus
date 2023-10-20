@@ -611,7 +611,7 @@ static void ClientWaitDiconnetTimeoutMsgHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(connection != NULL,
-        "ble client wait disconnect timeout handler failed: connection not exist, connId=%u", connectionId);
+        "ble client wait disconnect timeout handler failed: connnection not exist, connId=%u", connectionId);
     CLOGI("ble client disconnect wait timeout, connId=%u", connectionId);
     do {
         int32_t status = SoftBusMutexLock(&connection->lock);
