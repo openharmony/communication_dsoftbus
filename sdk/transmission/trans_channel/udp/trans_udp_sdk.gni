@@ -11,10 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
-import("$dsoftbus_sdk_path/transmission/trans_channel/udp/file/file_sdk.gni")
-import(
-    "$dsoftbus_sdk_path/transmission/trans_channel/udp/stream/stream_sdk.gni")
+udp_sdk_path = rebase_path("../../../../sdk")
+import("$udp_sdk_path/transmission/trans_channel/udp/file/file_sdk.gni")
+import("$udp_sdk_path/transmission/trans_channel/udp/stream/stream_sdk.gni")
+import("../../../../dsoftbus.gni")
 
 dsoftbus_udp_sdk_path = "$dsoftbus_sdk_path/transmission/trans_channel/udp"
 if (dsoftbus_feature_trans_udp == true) {

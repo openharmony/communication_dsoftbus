@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+stream_sdk_path = rebase_path("../../../../../sdk")
 import(
-    "$dsoftbus_sdk_path/transmission/trans_channel/udp/stream/libsoftbus_stream/libsoftbus_stream.gni")
+    "$stream_sdk_path/transmission/trans_channel/udp/stream/libsoftbus_stream/libsoftbus_stream.gni")
+import("../../../../../dsoftbus.gni")
 
 dsoftbus_stream_sdk_path =
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream"

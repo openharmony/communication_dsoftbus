@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 trans_proxy_channel_sdk_src = [
   "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_manager.c",

@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 tcp_direct_channel_path =
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct"
 trans_direct_channel_src = [

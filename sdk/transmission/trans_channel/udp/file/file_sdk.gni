@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 dsoftbus_file_sdk_path =
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file"

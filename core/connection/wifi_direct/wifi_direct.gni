@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 wifi_direct_enhance_dir = "dsoftbus_enhance/core/connection/wifi_direct"
@@ -89,7 +89,7 @@ if (dsoftbus_feature_conn_p2p == true &&
 
   if (enhanced_wifi_direct) {
     import(
-        "//foundation/communication/dsoftbus/dsoftbus_enhance/core/connection/wifi_direct/wifi_direct.gni")
+        "../../../dsoftbus_enhance/core/connection/wifi_direct/wifi_direct.gni")
 
     wifi_direct_connection_inc += wifi_direct_connection_enhance_inc
     wifi_direct_connection_src += wifi_direct_connection_enhance_src

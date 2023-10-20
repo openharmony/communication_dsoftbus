@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/communication/dsoftbus/dsoftbus.gni")
+import("../../dsoftbus.gni")
 
 disc_sdk_src =
     [ "$dsoftbus_root_path/sdk/discovery/service/src/client_disc_service.c" ]
@@ -23,7 +23,7 @@ disc_sdk_inc = [
 if (defined(ohos_lite)) {
   disc_sdk_inc += [ "$dsoftbus_root_path/core/discovery/interface" ]
   if (ohos_kernel_type == "liteos_m") {
-    import("//foundation/communication/dsoftbus/core/discovery/disc.gni")
+    import("../../core/discovery/disc.gni")
     disc_sdk_src += [
       "$dsoftbus_root_path/sdk/discovery/ipc/mini/disc_server_proxy.c",
       "$dsoftbus_root_path/sdk/discovery/manager/src/client_disc_manager.c",
