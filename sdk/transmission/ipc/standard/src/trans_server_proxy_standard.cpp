@@ -111,8 +111,10 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_CREATE_SESSION_SERVER, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_CREATE_SESSION_SERVER, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer send request failed! ret=%{public}d",
+            ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
@@ -149,8 +151,10 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_REMOVE_SESSION_SERVER, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_REMOVE_SESSION_SERVER, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer send request failed! ret=%{public}d",
+            ret);
         return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
     }
     int32_t serverRet = 0;
@@ -250,8 +254,9 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_OPEN_SESSION, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_OPEN_SESSION, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed! ret=%{public}d", ret);
         return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
     }
     TransSerializer *transSerializer = (TransSerializer *)reply.ReadRawData(sizeof(TransSerializer));
@@ -292,8 +297,9 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_OPEN_AUTH_SESSION, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_OPEN_AUTH_SESSION, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t channelId = 0;
@@ -327,8 +333,10 @@ int32_t TransServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTy
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_NOTIFY_AUTH_SUCCESS, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_NOTIFY_AUTH_SUCCESS, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "ServerIpcNotifyAuthSuccess send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
@@ -362,8 +370,9 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_CLOSE_CHANNEL, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_CLOSE_CHANNEL, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
@@ -410,8 +419,9 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, co
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_SESSION_SENDMSG, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_SESSION_SENDMSG, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
@@ -453,8 +463,9 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
 
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_QOS_REPORT, data, reply, option) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport send request failed!");
+    int32_t ret = remote->SendRequest(SERVER_QOS_REPORT, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
@@ -492,8 +503,8 @@ int32_t TransServerProxy::StreamStats(int32_t channelId, int32_t channelType, co
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_STREAM_STATS, data, reply, option);
-    if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats send request failed, ret:%d", ret);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats send request failed, ret:%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
@@ -530,8 +541,8 @@ int32_t TransServerProxy::RippleStats(int32_t channelId, int32_t channelType, co
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_RIPPLE_STATS, data, reply, option);
-    if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats send request failed, ret:%d", ret);
+    if (ret != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats send request failed, ret:%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
@@ -570,7 +581,7 @@ int32_t TransServerProxy::GrantPermission(int uid, int pid, const char *sessionN
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GRANT_PERMISSION, data, reply, option);
     if (ret != ERR_NONE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission send request failed, ret=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
@@ -601,7 +612,7 @@ int32_t TransServerProxy::RemovePermission(const char *sessionName)
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_REMOVE_PERMISSION, data, reply, option);
     if (ret != ERR_NONE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission send request failed, ret=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
@@ -711,7 +722,8 @@ int32_t TransServerProxy::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GET_SOFTBUS_SPEC_OBJECT, data, reply, option);
     if (ret != ERR_NONE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject send request failed, ret=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject send request failed, ret=%{public}d",
+            ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
