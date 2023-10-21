@@ -329,9 +329,6 @@ static inline bool IsApproachBusiness(const uint8_t *data)
 
 static int32_t ScanFilter(const uint8_t *advData, uint32_t advLen)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(advLen > (ADV_HEAD_LEN_NO_FLAG + POS_BUSINESS), SOFTBUS_ERR,
-        "advLen[%u] is too short, less than adv business header length", advLen);
-
     DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID_NO_FLAG] == (uint8_t)(BLE_UUID & BYTE_MASK), SOFTBUS_ERR,
         "uuid low byte[%hhu] is invalid", advData[POS_UUID_NO_FLAG]);
     DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID_NO_FLAG + 1] ==
@@ -497,6 +494,34 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
     }
 }
 
+static bool IgnoreUnConcernedData(SoftBusBleScanResult *scanResult)
+{
+    DISC_CHECK_AND_RETURN_RET_LOG(scanResult->advData != NULL, false, "scan result advData is null");
+    uint8_t *advData = scanResult->advData;
+    uint32_t curPos = 0;
+    while (curPos < scanResult->advLen) {
+        uint32_t len = advData[curPos++] & BYTE_MASK;
+        if (len == 0) {
+            break;
+        }
+        uint32_t dataLen = len - 1;
+        uint8_t fieldType = advData[curPos++] & BYTE_MASK;
+        switch (fieldType) {
+            case AD_TYPE:
+                // fall-through
+            case RSP_TYPE:
+                scanResult->advData += curPos - TL_LEN - TL_LEN;
+                scanResult->advLen -= curPos - TL_LEN - TL_LEN;
+                return true;
+            default:
+                // ignore other type
+                break;
+        }
+        curPos += dataLen;
+    }
+    return false;
+}
+
 static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *scanResultData)
 {
     (void)listenerId;
@@ -512,18 +537,31 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
         advLen -= (FLAG_BYTE_LEN + TL_LEN);
         advData += (FLAG_BYTE_LEN + TL_LEN);
     }
+    DISC_CHECK_AND_RETURN_LOG(advLen > (ADV_HEAD_LEN_NO_FLAG + POS_BUSINESS),
+        "advLen[%u] is too short, less than adv business header length", advLen);
 
-    if (ScanFilter(advData, advLen) != SOFTBUS_OK) {
-        DLOGE("scan filter failed");
+    if (IsDistributedBusiness(advData)) {
+        if (ScanFilter(advData, advLen) != SOFTBUS_OK) {
+            DLOGE("scan filter failed");
+            return;
+        }
+        SignalingMsgPrint("ble rcv", scanResultData->advData, scanResultData->advLen, SOFTBUS_LOG_DISC);
+        ProcessDistributePacket(scanResultData);
         return;
     }
 
-    if (IsDistributedBusiness(advData)) {
-        SignalingMsgPrint("ble rcv", advData, advLen, SOFTBUS_LOG_DISC);
-        ProcessDistributePacket(scanResultData);
-    } else if (IsApproachBusiness(advData)) {
+    SoftBusBleScanResult *scanResult = (SoftBusBleScanResult *)scanResultData;
+    if (!IgnoreUnConcernedData(scanResult)) {
+        DLOGE("ignore unconcerned data failed");
+        return;
+    }
+    if (IsApproachBusiness(scanResult->advData)) {
         DLOGI("Process packet for approach business");
-        ProcessApproachPacket(scanResultData, g_discBleInnerCb);
+        if (ScanFilter(scanResult->advData, scanResult->advLen) != SOFTBUS_OK) {
+            DLOGE("scan filter failed");
+            return;
+        }
+        ProcessApproachPacket(scanResult, g_discBleInnerCb);
     } else {
         DLOGI("ignore other business");
     }
