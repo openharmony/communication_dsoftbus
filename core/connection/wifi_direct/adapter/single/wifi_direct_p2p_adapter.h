@@ -53,12 +53,8 @@ enum WifiDirectP2pConnectState {
 };
 
 enum WifiDirectP2pAdapterEvent {
-    WIFI_P2P_ADAPTER_EVENT_START = 0,
-    WIFI_P2P_ADAPTER_EVENT_STATE_CHANGED = WIFI_P2P_ADAPTER_EVENT_START + 1,
-    WIFI_P2P_ADAPTER_EVENT_CONNECTION_CHANGED = WIFI_P2P_ADAPTER_EVENT_START + 2,
-    WIFI_P2P_ADAPTER_EVENT_CONNECT_STATE_CHANGE = WIFI_P2P_ADAPTER_EVENT_START + 3,
-    WIFI_P2P_ADAPTER_EVENT_RPT_STATE_CHANGE = WIFI_P2P_ADAPTER_EVENT_START + 4,
-    WIFI_P2P_ADAPTER_EVENT_END,
+    WIFI_P2P_ADAPTER_EVENT_STATE_CHANGED = 0,
+    WIFI_P2P_ADAPTER_EVENT_CONNECTION_CHANGED = 1,
 };
 
 struct WifiDirectP2pAdapter {
@@ -69,7 +65,6 @@ struct WifiDirectP2pAdapter {
 
     int32_t (*getChannel5GListIntArray)(int32_t *array, size_t *size);
     int32_t (*getStationFrequency)(void);
-    int32_t (*getStationFrequencyWithFilter)(void);
     int32_t (*getRecommendChannel)(void);
     int32_t (*getSelfWifiConfigInfo)(uint8_t *config, size_t *configSize);
     int32_t (*setPeerWifiConfigInfo)(const char *config);

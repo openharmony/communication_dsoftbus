@@ -29,7 +29,7 @@
 #include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_work_queue.h"
 
-#define LOG_LABEL "[WD] Init: "
+#define LOG_LABEL "[WifiDirect] WifiDirectInitiator: "
 
 typedef int32_t (*WifiDirectSubInitFunc)(void);
 

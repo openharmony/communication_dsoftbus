@@ -22,7 +22,7 @@
 #include "protocol/wifi_direct_protocol.h"
 #include "utils/wifi_direct_ipv4_info.h"
 
-#define LOG_LABEL "[WD] LI: "
+#define LOG_LABEL "[WifiDirect] LinkInfo: "
 
 #define LI_TAG_LOCAL_INTERFACE 0
 #define LI_TAG_REMOTE_INTERFACE 1

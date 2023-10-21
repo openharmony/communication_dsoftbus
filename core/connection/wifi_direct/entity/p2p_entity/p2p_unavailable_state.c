@@ -18,7 +18,7 @@
 #include "softbus_error_code.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
-#define LOG_LABEL  "[WD] PUnS: "
+#define LOG_LABEL  "[WifiDirect] P2pUnavailableState: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)

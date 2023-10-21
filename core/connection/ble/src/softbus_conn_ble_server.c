@@ -587,7 +587,7 @@ static void BleServerWaitStartServerTimeoutHandler(void)
     }
 }
 
-// server acceoped(be connected) not need switch thread, as it just save the connection globally
+// server acceoped(be connected) not need switch thread, as it just save the connnection globally
 static void BleConnectServerCallback(int32_t underlayerHandle, const SoftBusBtAddr *btAddr)
 {
     CLOGI("gatt server callback, server connected, underlayer handle=%u, address=%02X:*:*:*:%02X:%02X",
@@ -961,7 +961,7 @@ static void BleServerWaitDisconnectTimeoutHandler(uint32_t connectionId)
     CLOGI("server wait disconnect timeout, connId=%u", connectionId);
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOG(connection != NULL,
-        "ble server wait disconnect timeout handler failed: connection not exist, connId=%u", connectionId);
+        "ble server wait disconnect timeout handler failed: connnection not exist, connId=%u", connectionId);
     ConnBleReturnConnection(&connection);
     g_serverEventListener.onServerConnectionClosed(connectionId, SOFTBUS_CONN_BLE_DISCONNECT_WAIT_TIMEOUT_ERR);
 }

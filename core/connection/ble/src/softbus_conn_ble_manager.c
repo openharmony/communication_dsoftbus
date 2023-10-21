@@ -1161,7 +1161,7 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
     }
     int32_t status = SoftBusMutexLock(&g_bleManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("try to get manager connections lock failed, err=%d", status);
+        CLOGE("try to get manager connnections lock failed, err=%d", status);
         return NULL;
     }
     ConnBleConnection *it = NULL;
