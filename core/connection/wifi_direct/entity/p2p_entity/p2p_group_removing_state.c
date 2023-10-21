@@ -16,7 +16,7 @@
 #include "entity/p2p_entity/p2p_group_removing_state.h"
 #include "softbus_log.h"
 
-#define LOG_LABEL "[WD] PGReS: "
+#define LOG_LABEL "[WifiDirect] P2pGroupRemovingState: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
@@ -50,7 +50,7 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
         struct P2pEntity *entity = GetP2pEntity();
         entity->clearJoiningClient();
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(ENTITY_EVENT_P2P_REMOVE_COMPLETE);
+        entity->notifyOperationComplete(OK);
     }
 }
 

@@ -19,7 +19,6 @@
 #include "softbus_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_hisysevt_connreporter.h"
-#include "lnn_distributed_net_ledger.h"
 #include "wifi_direct_command_manager.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_role_option.h"
@@ -31,7 +30,7 @@
 #include "utils/wifi_direct_perf_recorder.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WD] Manager: "
+#define LOG_LABEL "[WifiDirect] WifiDirectManager: "
 
 /* inner class */
 struct ConnectCallbackNode {
@@ -78,7 +77,6 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
     int32_t ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
                                                              &connectInfo->expectApiRole, &connectInfo->isStrict);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get expected role failed");
     CLOGI(LOG_LABEL "requestId=%d pid=%d type=%d expectRole=0x%x remoteMac=%s uuid=%s",
           connectInfo->requestId, connectInfo->pid, connectInfo->connectType, connectInfo->expectApiRole,
           WifiDirectAnonymizeMac(connectInfo->remoteMac), AnonymizesUUID(uuid));
@@ -185,13 +183,9 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
     GetWifiDirectNegotiator()->onNegotiateChannelDataReceived(channel, data, len);
 }
 
-static void OnRemoteP2pDisable(const char *networkId)
+static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *channel)
 {
-    CLOGD(LOG_LABEL "networkId=%s", AnonymizesNetworkID(networkId));
-    char uuid[UUID_BUF_LEN] = {0};
-    int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, sizeof(uuid));
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "convert %s to uuid failed", AnonymizesNetworkID(networkId));
-    GetLinkManager()->clearNegoChannelForLink(uuid, true);
+    GetWifiDirectNegotiator()->onNegotiateChannelDisconnected(channel);
 }
 
 static void ConnectCallbackAsyncHandler(void *data)
@@ -391,7 +385,7 @@ static struct WifiDirectManager g_manager = {
     .getLocalIpByUuid = GetLocalIpByUuid,
 
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
-    .onRemoteP2pDisable = OnRemoteP2pDisable,
+    .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
 
     .onConnectSuccess = OnConnectSuccess,
     .onConnectFailure = OnConnectFailure,

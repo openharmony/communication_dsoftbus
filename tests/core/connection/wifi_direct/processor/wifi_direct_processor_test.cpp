@@ -323,7 +323,7 @@ HWTEST_F(WifiProcessorTest, testV1OnOperationEvent006, TestSize.Level1)
     struct P2pV1Processor *self = GetP2pV1Processor();
     constexpr int32_t result = OK;
     constexpr int32_t requestId = 1;
-    self->currentState = PROCESSOR_STATE_WAITING_SERVER_DESTROYED;
+    self->currentState = PROCESSOR_STATE_WAITING_SERVER_DISTROYED;
     int32_t ret = self->onOperationEvent(requestId, result);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
