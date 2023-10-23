@@ -26,7 +26,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "protocol/wifi_direct_protocol_factory.h"
 
-#define LOG_LABEL "[WifiDirect] InnerLink: "
+#define LOG_LABEL "[WD] IL: "
 
 #define IL_TAG_CONNECT_TYPE 1
 #define IL_TAG_STATE 2

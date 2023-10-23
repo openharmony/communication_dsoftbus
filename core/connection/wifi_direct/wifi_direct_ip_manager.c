@@ -23,7 +23,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_p2p_adapter.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectIpManager: "
+#define LOG_LABEL "[WD] IpM: "
 
 #define MAX_STATIC_ARP_COUNT 64
 

@@ -18,26 +18,26 @@
 #include "securec.h"
 #include "softbus_log.h"
 #include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "data/resource_manager.h"
 #include "entity/p2p_entity/p2p_entity.h"
-#include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_network_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] P2pAvailableState: "
+#define LOG_LABEL "[WD] PAvS: "
 #define LINK_ATTR_STR_LEN 64
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
     GetP2pEntity()->stopTimer();
 }
 
 static void Exit(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
 }
 
@@ -60,6 +60,7 @@ static void SetLinkAttr(struct WifiDirectConnectParams *params)
 
 static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
     CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
     SetLinkAttr(params);
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
@@ -72,6 +73,7 @@ static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnec
 
 static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
     CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
     SetLinkAttr(params);
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
@@ -84,6 +86,7 @@ static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectPara
 
 static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
     CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
     struct P2pEntity *entity = GetP2pEntity();
 
@@ -98,6 +101,7 @@ static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectP
 
 static int32_t DestroyServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
     CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
     struct P2pEntity *entity = GetP2pEntity();
 
@@ -111,6 +115,7 @@ static int32_t DestroyServer(struct P2pEntityState *self, struct WifiDirectConne
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
+    (void)self;
     struct P2pEntity *entity = GetP2pEntity();
     if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "no groupInfo");
@@ -141,6 +146,7 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
 static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirectP2pConnectState state)
 {
+    (void)self;
     if (state == WIFI_DIRECT_P2P_CONNECTED) {
         CLOGI(LOG_LABEL "connected");
     } else if (state == WIFI_DIRECT_P2P_CONNECTING) {

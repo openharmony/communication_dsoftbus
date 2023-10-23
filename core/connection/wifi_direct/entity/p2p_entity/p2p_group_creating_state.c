@@ -15,15 +15,14 @@
 
 #include "entity/p2p_entity/p2p_group_creating_state.h"
 #include "softbus_log.h"
-#include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
-#define LOG_LABEL "[WifiDirect] P2pGroupCreatingState: "
+#define LOG_LABEL "[WD] PGCrS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
     GetP2pEntity()->stopTimer();
     GetP2pEntity()->startTimer(TIMEOUT_CREATE_GROUP_MS, P2P_ENTITY_TIMEOUT_CREATE_SERVER);
@@ -31,11 +30,13 @@ static void Enter(struct P2pEntityState *self)
 
 static void Exit(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
 {
+    (void)self;
     struct P2pEntity *entity = GetP2pEntity();
     if (event != P2P_ENTITY_TIMEOUT_CREATE_SERVER) {
         CLOGE(LOG_LABEL "mismatch timeout event");
@@ -52,6 +53,7 @@ static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEven
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
+    (void)self;
     struct P2pEntity *entity = GetP2pEntity();
 
     if (groupInfo == NULL) {
@@ -73,13 +75,14 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
         entity->isConnectionChangeReceived = false;
         entity->isConnectStateChangeReceived = false;
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(SOFTBUS_OK);
+        entity->notifyOperationComplete(ENTITY_EVENT_P2P_CREATE_COMPLETE);
         return;
     }
 }
 
 static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirectP2pConnectState state)
 {
+    (void)self;
     struct P2pEntity *entity = GetP2pEntity();
 
     if (state == WIFI_DIRECT_P2P_CONNECTING) {
@@ -95,7 +98,7 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
             entity->isConnectionChangeReceived = false;
             entity->isConnectStateChangeReceived = false;
             entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-            entity->notifyOperationComplete(SOFTBUS_OK);
+            entity->notifyOperationComplete(ENTITY_EVENT_P2P_CREATE_COMPLETE);
         }
     } else {
         CLOGI(LOG_LABEL "create group error");
@@ -103,7 +106,7 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
         entity->isConnectStateChangeReceived = false;
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(SOFTBUS_OK);
+        entity->notifyOperationComplete(ERROR_P2P_CREATE_GROUP_FAILED);
     }
 }
 

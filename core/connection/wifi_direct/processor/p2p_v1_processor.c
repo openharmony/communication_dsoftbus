@@ -21,6 +21,7 @@
 #include "softbus_error_code.h"
 #include "wifi_direct_types.h"
 #include "wifi_direct_negotiate_channel.h"
+#include "command/wifi_direct_command.h"
 #include "channel/default_negotiate_channel.h"
 #include "data/inner_link.h"
 #include "data/negotiate_message.h"
@@ -36,27 +37,29 @@
 #include "entity/wifi_direct_entity.h"
 #include "entity/wifi_direct_entity_factory.h"
 #include "utils/wifi_direct_utils.h"
+#include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_perf_recorder.h"
 
-#define LOG_LABEL "[WifiDirect] P2pV1Processor: "
+#define LOG_LABEL "[WD] P1: "
 
 #define P2P_VERSION 2
 #define COMMON_BUFFER_LEN 256
-#define REMOVE_LINK_REQUEST_ID 555
+#define P2P_V1_WAITING_RESPONSE_TIME_MS 10000
+#define P2P_V1_WAITING_REQUEST_TIME_MS 10000
 
 /* private method forward declare */
 static int32_t CreateLinkAsNone(char *remoteMac, enum WifiDirectRole expectRole, struct InnerLink *innerLink,
                                 struct WifiDirectNegotiateChannel *channel);
-static int32_t CreateLinkAsGo(int32_t requestId, char *remoteMac, struct InnerLink *innerLink,
+static int32_t CreateLinkAsGo(int32_t requestId, const char *remoteMac, struct InnerLink *innerLink,
                               struct WifiDirectNegotiateChannel *channel);
-static int32_t CreateLinkAsGc(int32_t requestId, char *remoteMac, struct InnerLink *innerLink,
+static int32_t CreateLinkAsGc(int32_t requestId, const char *remoteMac, struct InnerLink *innerLink,
                               struct WifiDirectNegotiateChannel *channel);
 
-static int32_t ProcessConnectRequest(struct NegotiateMessage *msg);
-static int32_t ProcessConnectResponse(struct NegotiateMessage *msg);
-static int32_t ProcessDisconnectRequest(struct NegotiateMessage *msg);
-static int32_t ProcessReuseRequest(struct NegotiateMessage *msg);
-static int32_t ProcessReuseResponse(struct NegotiateMessage *msg);
+static int32_t ProcessConnectRequest(struct WifiDirectCommand *command);
+static int32_t ProcessConnectResponse(struct WifiDirectCommand *command);
+static int32_t ProcessDisconnectRequest(struct WifiDirectCommand *command);
+static int32_t ProcessReuseRequest(struct WifiDirectCommand *command);
+static int32_t ProcessReuseResponse(struct WifiDirectCommand *command);
 static int32_t ProcessGetInterfaceInfoRequest(struct NegotiateMessage *msg);
 static int32_t GetRoleInfo(struct NegotiateMessage *msg, enum WifiDirectRole *myRoleOut,
                            enum WifiDirectRole *peerRoleOut, enum WifiDirectRole *expectRoleOut);
@@ -67,9 +70,9 @@ static int32_t ConnectGroup(struct NegotiateMessage *msg);
 static int32_t ReuseP2p(void);
 static int32_t RemoveLink(const char *remoteMac);
 
-static int32_t OnCreateGroupComplete(void);
-static int32_t OnConnectGroupComplete(void);
-static int32_t OnRemoveGroupComplete(void);
+static int32_t OnCreateGroupComplete(int32_t event);
+static int32_t OnConnectGroupComplete(int32_t event);
+static int32_t OnRemoveGroupComplete(int32_t event);
 
 static struct NegotiateMessage* BuildConnectRequestAsGo(const char *remoteMac, const char *remoteIp,
                                                         struct WifiDirectNegotiateChannel *channel);
@@ -88,32 +91,33 @@ static struct NegotiateMessage* BuildInterfaceInfoResponse(struct NegotiateMessa
 static struct NegotiateMessage* BuildNegotiateResult(enum WifiDirectErrorCode reason,
                                                      struct WifiDirectNegotiateChannel *channel);
 
-static int32_t ProcessFailureResponse(struct NegotiateMessage *input, enum WifiDirectErrorCode reason);
 static void UpdateReuseCount(int32_t delta);
 static void InitBasicInnerLink(struct InnerLink *innerLink, bool isClient);
-static void NotifyNewClient(int requestId, char *localInterface, char *remoteMac);
-static void CancelNewClient(int requestId, char *localInterface, const char *remoteMac);
+static void NotifyNewClient(int requestId, const char *localInterface, const char *remoteMac);
+static void CancelNewClient(int requestId, const char *localInterface, const char *remoteMac);
 static int32_t ChoseFrequency(int32_t gcFreq, int32_t *gcChannelArray, size_t gcChannelArraySize);
-static int32_t SaveCurrentMessage(struct NegotiateMessage *msg);
 static void SetInnerLinkDeviceId(struct NegotiateMessage *msg, struct InnerLink *innerLink);
 static bool IsNeedDhcp(const char *gcIp, struct NegotiateMessage *msg);
 static enum WifiDirectRole TransferExpectedRole(uint32_t expectApiRole);
+
+static void StartTimer(int32_t timeMs);
+static void StopTimer(void);
+static void ProcessFailure(int32_t errorCode, bool reply);
+static void ProcessSuccess(struct InnerLink *innerLink);
 
 /* public interface */
 static int32_t CreateLink(struct WifiDirectConnectInfo *connectInfo)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(connectInfo, SOFTBUS_INVALID_PARAM, LOG_LABEL "connect info is null");
-    GetP2pV1Processor()->needReply = false;
-    GetP2pV1Processor()->currentRequestId = connectInfo->requestId;
 
+    int32_t ret = SOFTBUS_OK;
     char remoteDeviceId[UUID_BUF_LEN] = {0};
-    int32_t ret = connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, remoteDeviceId,
-                                                        sizeof(remoteDeviceId));
+    ret = connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, remoteDeviceId, sizeof(remoteDeviceId));
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, LOG_LABEL "get remote device id failed");
     CLOGI(LOG_LABEL "requestId=%d remoteDeviceId=%s", connectInfo->requestId, AnonymizesUUID(remoteDeviceId));
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
+    CONN_CHECK_AND_RETURN_RET_LOG(info, V1_ERROR_IF_NOT_AVAILABLE, LOG_LABEL "interface info is null");
 
     struct InnerLink link;
     InnerLinkConstructor(&link);
@@ -148,15 +152,18 @@ static int32_t ReuseLink(struct WifiDirectConnectInfo *connectInfo, struct Inner
     CONN_CHECK_AND_RETURN_RET_LOG(connectInfo, SOFTBUS_INVALID_PARAM, LOG_LABEL "connect info is null");
     CLOGI(LOG_LABEL "requestId=%d remoteMac=%s", connectInfo->requestId,
           WifiDirectAnonymizeMac(connectInfo->remoteMac));
-    GetP2pV1Processor()->needReply = false;
 
     struct WifiDirectIpv4Info *ipv4Info = link->getRawData(link, IL_KEY_REMOTE_IPV4, NULL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOG(ipv4Info, SOFTBUS_ERR, LOG_LABEL "p2p link is used by another service");
 
     struct NegotiateMessage *request = BuildReuseRequest(connectInfo->remoteMac, connectInfo->negoChannel);
     CONN_CHECK_AND_RETURN_RET_LOG(request, SOFTBUS_ERR, LOG_LABEL "build reuse request failed");
-    int32_t ret = GetWifiDirectNegotiator()->handleMessageFromProcessor(request, NEGO_STATE_WAITING_CONNECT_RESPONSE);
+    int32_t ret = GetWifiDirectNegotiator()->handleMessageFromProcessor(request);
     NegotiateMessageDelete(request);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, V1_ERROR_POST_MESSAGE_FAILED, LOG_LABEL "post request failed");
+
+    StartTimer(P2P_V1_WAITING_RESPONSE_TIME_MS);
+    GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_RESPONSE;
     return ret;
 }
 
@@ -166,8 +173,6 @@ static int32_t DisconnectLink(struct WifiDirectConnectInfo *connectInfo, struct 
     CONN_CHECK_AND_RETURN_RET_LOG(innerLink, SOFTBUS_INVALID_PARAM, LOG_LABEL "inner link is null");
 
     struct P2pV1Processor *self = GetP2pV1Processor();
-    self->needReply = false;
-
     char *remoteMac = innerLink->getString(innerLink, IL_KEY_REMOTE_BASE_MAC, "");
     struct NegotiateMessage *request = BuildDisconnectRequest(remoteMac, connectInfo->negoChannel);
     CONN_CHECK_AND_RETURN_RET_LOG(request, SOFTBUS_ERR, LOG_LABEL "build disconnect request failed");
@@ -183,80 +188,116 @@ static int32_t DisconnectLink(struct WifiDirectConnectInfo *connectInfo, struct 
           WifiDirectAnonymizeMac(remoteMac), reuseCount);
     if (reuseCount == 0) {
         CLOGI(LOG_LABEL "reuseCount already 0");
-        GetWifiDirectNegotiator()->handleSuccess(NULL);
+        ProcessSuccess(NULL);
         return SOFTBUS_OK;
     }
 
-    enum WifiDirectProcessorState state = PROCESSOR_STATE_WAITING_REMOVE_GROUP;
+    enum P2pV1ProcessorState state = P2P_V1_PROCESSOR_STATE_WAITING_REMOVE_GROUP;
     if (reuseCount > 1) {
-        state = PROCESSOR_STATE_AVAILABLE;
+        state = P2P_V1_PROCESSOR_STATE_AVAILABLE;
     }
 
     ret = RemoveLink(remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "remove link failed");
 
-    if (state == PROCESSOR_STATE_AVAILABLE) {
-        GetWifiDirectNegotiator()->handleSuccess(NULL);
+    if (state == P2P_V1_PROCESSOR_STATE_AVAILABLE) {
+        ProcessSuccess(NULL);
     } else {
         CLOGI(LOG_LABEL "wait removing group to be done");
-        self->currentState = PROCESSOR_STATE_WAITING_REMOVE_GROUP;
+        self->currentState = P2P_V1_PROCESSOR_STATE_WAITING_REMOVE_GROUP;
     }
 
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg)
+static void ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectCommand *command)
 {
+    bool reply = true;
+    int32_t ret = SOFTBUS_OK;
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    if (self->passiveCommand != NULL) {
+        self->passiveCommand->delete(self->passiveCommand);
+    }
+    self->passiveCommand = command;
+
     switch (cmd) {
         case CMD_CONN_V1_REQ:
-            return ProcessConnectRequest(msg);
+            ret = ProcessConnectRequest(command);
+            break;
         case CMD_CONN_V1_RESP:
-            return ProcessConnectResponse(msg);
+            reply = false;
+            ret = ProcessConnectResponse(command);
+            break;
         case CMD_DISCONNECT_V1_REQ:
-            return ProcessDisconnectRequest(msg);
+            reply = false;
+            ret = ProcessDisconnectRequest(command);
+            break;
         case CMD_REUSE_REQ:
-            return ProcessReuseRequest(msg);
+            ret = ProcessReuseRequest(command);
+            break;
         case CMD_REUSE_RESP:
-            return ProcessReuseResponse(msg);
+            reply = false;
+            ret = ProcessReuseResponse(command);
+            break;
         case CMD_PC_GET_INTERFACE_INFO_REQ:
-            return ProcessGetInterfaceInfoRequest(msg);
+            ret = ProcessGetInterfaceInfoRequest(command->msg);
+            break;
         default:
-            CLOGE(LOG_LABEL "unhandled cmd");
-            return SOFTBUS_INVALID_PARAM;
+            CLOGE("ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG");
+            ret = ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG;
+    }
+
+    if (ret != SOFTBUS_OK) {
+        ProcessFailure(ret, reply);
     }
 }
 
-static int32_t OnOperationEvent(int32_t requestId, int32_t result)
+static void OnOperationEvent(int32_t event)
 {
+    CLOGI(LOG_LABEL "event=%d", event);
+    bool reply = true;
+    int32_t ret = SOFTBUS_OK;
     struct P2pV1Processor *self = GetP2pV1Processor();
-    CLOGI(LOG_LABEL "requestId=%d result=%d currentState=%d", requestId, result, self->currentState);
+    enum P2pV1ProcessorState currentState = self->currentState;
 
-    if (result != OK) {
-        if (self->currentMsg) {
-            return ProcessFailureResponse(self->currentMsg, result);
-        }
-        return SOFTBUS_OK;
-    }
-
-    int32_t ret = SOFTBUS_ERR;
-    switch (self->currentState) {
-        case PROCESSOR_STATE_WAITING_CREATE_GROUP:
-            ret = OnCreateGroupComplete();
+    switch (currentState) {
+        case P2P_V1_PROCESSOR_STATE_WAITING_CREAT_GROUP:
+            ret = OnCreateGroupComplete(event);
             break;
-        case PROCESSOR_STATE_WAITING_CONNECT_GROUP:
-            ret = OnConnectGroupComplete();
+        case P2P_V1_PROCESSOR_STATE_WAITING_CONNECT_GROUP:
+            ret = OnConnectGroupComplete(event);
             break;
-        case PROCESSOR_STATE_WAITING_REMOVE_GROUP:
-            ret = OnRemoveGroupComplete();
+        case P2P_V1_PROCESSOR_STATE_WAITING_REMOVE_GROUP:
+            reply = false;
+            ret = OnRemoveGroupComplete(event);
             break;
         default:
-            CLOGE(LOG_LABEL "available state does not handle any operation event");
-            break;
+            CLOGE(LOG_LABEL "ignore entity event at available state");
     }
 
-    self->currentState = PROCESSOR_STATE_AVAILABLE;
-    self->needReply = false;
-    return ret;
+    if (ret != SOFTBUS_OK) {
+        ProcessFailure(ret, reply);
+    }
+}
+
+static void ResetContext(void)
+{
+    CLOGI(LOG_LABEL);
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    self->currentState = P2P_V1_PROCESSOR_STATE_AVAILABLE;
+    self->pendingErrorCode = OK;
+    if (self->currentInnerLink != NULL) {
+        self->currentInnerLink->destructor(self->currentInnerLink);
+        self->currentInnerLink = NULL;
+    }
+    if (self->activeCommand != NULL) {
+        self->activeCommand->delete(self->activeCommand);
+        self->activeCommand = NULL;
+    }
+    if (self->passiveCommand != NULL) {
+        self->passiveCommand->delete(self->passiveCommand);
+        self->passiveCommand = NULL;
+    }
 }
 
 static void ProcessUnhandledRequest(struct NegotiateMessage *msg, int32_t reason)
@@ -281,7 +322,6 @@ static void ProcessUnhandledRequest(struct NegotiateMessage *msg, int32_t reason
 
 static void OnReversal(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg)
 {
-    struct P2pV1Processor *self = GetP2pV1Processor();
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     enum WifiDirectApiRole myApiRole =
         (enum WifiDirectApiRole)(info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE));
@@ -289,7 +329,7 @@ static void OnReversal(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMess
         CLOGI(LOG_LABEL "decrease reuseCount and stop new client timer");
         char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
         RemoveLink(remoteMac);
-        CancelNewClient(self->currentRequestId, IF_NAME_P2P, remoteMac);
+        CancelNewClient(msg->getInt(msg, NM_KEY_SESSION_ID, -1), IF_NAME_P2P, remoteMac);
     }
 
     GetWifiDirectNegotiator()->handleFailureWithoutChangeState(ERROR_WIFI_DIRECT_BIDIRECTIONAL_SIMULTANEOUS_REQ);
@@ -309,7 +349,7 @@ static int32_t CreateLinkAsNone(char *remoteMac, enum WifiDirectRole expectRole,
     CONN_CHECK_AND_RETURN_RET_LOG(output, SOFTBUS_ERR, LOG_LABEL "build connect request with gc info failed");
 
     struct WifiDirectNegotiator *negotiator = GetWifiDirectNegotiator();
-    int32_t ret = negotiator->handleMessageFromProcessor(output, NEGO_STATE_WAITING_CONNECT_RESPONSE);
+    int32_t ret = negotiator->handleMessageFromProcessor(output);
     NegotiateMessageDelete(output);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "handle msg from processor failed");
 
@@ -317,10 +357,13 @@ static int32_t CreateLinkAsNone(char *remoteMac, enum WifiDirectRole expectRole,
     CONN_CHECK_AND_RETURN_RET_LOG(copyLink, SOFTBUS_ERR, LOG_LABEL "new copy link failed");
     copyLink->deepCopy(copyLink, innerLink);
     GetP2pV1Processor()->currentInnerLink = copyLink;
+
+    StartTimer(P2P_V1_WAITING_RESPONSE_TIME_MS);
+    GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_RESPONSE;
     return SOFTBUS_OK;
 }
 
-static int32_t CreateLinkAsGo(int32_t requestId, char *remoteMac, struct InnerLink *innerLink,
+static int32_t CreateLinkAsGo(int32_t requestId, const char *remoteMac, struct InnerLink *innerLink,
                               struct WifiDirectNegotiateChannel *channel)
 {
     CLOGI(LOG_LABEL "enter");
@@ -341,15 +384,22 @@ static int32_t CreateLinkAsGo(int32_t requestId, char *remoteMac, struct InnerLi
     CONN_CHECK_AND_RETURN_RET_LOG(output, SOFTBUS_ERR, LOG_LABEL "build connect request with go info failed");
 
     struct WifiDirectNegotiator *negotiator = GetWifiDirectNegotiator();
-    ret = negotiator->handleMessageFromProcessor(output, NEGO_STATE_WAITING_CONNECT_RESPONSE);
+    ret = negotiator->handleMessageFromProcessor(output);
     NegotiateMessageDelete(output);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "handle msg from processor failed");
+
+    StartTimer(P2P_V1_WAITING_RESPONSE_TIME_MS);
+    GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_RESPONSE;
     return SOFTBUS_OK;
 }
 
-static int32_t CreateLinkAsGc(int32_t requestId, char *remoteMac, struct InnerLink *innerLink,
+static int32_t CreateLinkAsGc(int32_t requestId, const char *remoteMac, struct InnerLink *innerLink,
                               struct WifiDirectNegotiateChannel *channel)
 {
+    (void)requestId;
+    (void)remoteMac;
+    (void)innerLink;
+    (void)channel;
     CLOGE(LOG_LABEL "V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE");
     return V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE;
 }
@@ -377,7 +427,6 @@ static int32_t CreateGroup(struct NegotiateMessage *msg)
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
 
-    int32_t requestId = msg->getInt(msg, NM_KEY_SESSION_ID, -1);
     bool isWideBandSupported = msg->getBoolean(msg, NM_KEY_WIDE_BAND_SUPPORTED, false);
     int32_t stationFrequency = msg->getInt(msg, NM_KEY_STATION_FREQUENCY, 0);
     char *channelListString = msg->getString(msg, NM_KEY_GC_CHANNEL_LIST, "");
@@ -394,7 +443,6 @@ static int32_t CreateGroup(struct NegotiateMessage *msg)
     bool isLocalWideBandSupported = adapter->isWideBandSupported();
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    params.requestId = requestId;
     params.freq = finalFrequency;
     params.isWideBandSupported = isLocalWideBandSupported && isWideBandSupported;
     ret = strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);
@@ -407,7 +455,6 @@ static int32_t DestroyGroup(void)
 {
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    params.requestId = REMOVE_LINK_REQUEST_ID;
     int32_t ret = strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy interface failed");
 
@@ -425,7 +472,6 @@ static int32_t ConnectGroup(struct NegotiateMessage *msg)
 
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    params.requestId = GetP2pV1Processor()->currentRequestId;
     params.isNeedDhcp = IsNeedDhcp(gcIp, msg);
     int32_t ret = strcpy_s(params.groupConfig, sizeof(params.groupConfig), groupConfig);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy group config failed");
@@ -451,9 +497,7 @@ static int32_t RemoveLink(const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-
     params.connectType = WIFI_DIRECT_CONNECT_TYPE_P2P;
-    params.requestId = REMOVE_LINK_REQUEST_ID;
 
     int32_t ret = strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy remote mac failed");
@@ -555,7 +599,7 @@ static struct NegotiateMessage* BuildConnectRequestAsNone(const char *remoteMac,
     request->putString(request, NM_KEY_GC_MAC, myMac);
     request->putString(request, NM_KEY_GO_MAC, "");
     request->putString(request, NM_KEY_GC_CHANNEL_LIST, channelString);
-    request->putInt(request, NM_KEY_STATION_FREQUENCY, adapter->getStationFrequency());
+    request->putInt(request, NM_KEY_STATION_FREQUENCY, adapter->getStationFrequencyWithFilter());
     request->putBoolean(request, NM_KEY_WIDE_BAND_SUPPORTED, adapter->isWideBandSupported());
     request->putString(request, NM_KEY_SELF_WIFI_CONFIG, (char *)selfWifiConfig);
     request->putPointer(request, NM_KEY_NEGO_CHANNEL, (void **)&channel);
@@ -641,7 +685,7 @@ static struct NegotiateMessage* BuildConnectResponseAsNone(const char *remoteMac
     response->putString(response, NM_KEY_GC_MAC, myMac);
     response->putString(response, NM_KEY_GC_CHANNEL_LIST, channelString);
     response->putString(response, NM_KEY_GO_MAC, remoteMac);
-    response->putInt(response, NM_KEY_STATION_FREQUENCY, adapter->getStationFrequency());
+    response->putInt(response, NM_KEY_STATION_FREQUENCY, adapter->getStationFrequencyWithFilter());
     response->putBoolean(response, NM_KEY_WIDE_BAND_SUPPORTED, adapter->isWideBandSupported());
     response->putString(response, NM_KEY_SELF_WIFI_CONFIG, (char *)selfWifiConfig);
     response->putPointer(response, NM_KEY_NEGO_CHANNEL, (void **)&channel);
@@ -738,82 +782,65 @@ static struct NegotiateMessage* BuildNegotiateResult(enum WifiDirectErrorCode re
     return result;
 }
 
-static int32_t ProcessConnectRequestAsGo(struct NegotiateMessage *msg, enum WifiDirectRole myRole)
+static int32_t SendConnectResponseAsGo(struct NegotiateMessage *msg, struct InnerLink *link, struct InterfaceInfo *info)
 {
-    enum WifiDirectP2pContentType contentType = msg->getInt(msg, NM_KEY_CONTENT_TYPE, -1);
-    if (contentType != P2P_CONTENT_TYPE_GC_INFO) {
-        CLOGE(LOG_LABEL "content type not equal gc info");
-        ProcessFailureResponse(msg, V1_ERROR_BOTH_GO);
-        return SOFTBUS_OK;
-    }
-
-    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
-
-    char *localMac = info->getString(info, II_KEY_BASE_MAC, "");
-    char *remoteMac = msg->getString(msg, NM_KEY_GC_MAC, "");
-
-    struct InnerLink link;
-    InnerLinkConstructor(&link);
-    InitBasicInnerLink(&link, false);
-    SetInnerLinkDeviceId(msg, &link);
-    link.putString(&link, IL_KEY_LOCAL_BASE_MAC, localMac);
-    link.putString(&link, IL_KEY_REMOTE_BASE_MAC, remoteMac);
-    link.putBoolean(&link, IL_KEY_IS_SOURCE, false);
-    link.putBoolean(&link, IL_KEY_IS_BEING_USED_BY_REMOTE, true);
-
-    if (myRole != WIFI_DIRECT_ROLE_GO) {
-        if (CreateGroup(msg) != SOFTBUS_OK) {
-            CLOGE(LOG_LABEL "create group failed");
-            ProcessFailureResponse(msg, V1_ERROR_CREATE_GROUP_FAILED);
-            return SOFTBUS_OK;
-        }
-
-        GetP2pV1Processor()->currentState = PROCESSOR_STATE_WAITING_CREATE_GROUP;
-        GetP2pV1Processor()->needReply = true;
-        GetLinkManager()->notifyLinkChange(&link);
-        InnerLinkDestructor(&link);
-        int32_t ret = SaveCurrentMessage(msg);
-        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "save current msg failed");
-
-        GetWifiDirectNegotiator()->changeState(NEGO_STATE_PROCESSING);
-        CLOGI(LOG_LABEL "waiting create group to be done");
-        return SOFTBUS_OK;
-    }
-
     char remoteIp[IP_ADDR_STR_LEN];
+    char *remoteMac = msg->getString(msg, NM_KEY_GC_MAC, "");
     int32_t ret = GetWifiDirectP2pAdapter()->requestGcIp(remoteMac, remoteIp, sizeof(remoteIp));
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "apply gc ip failed");
-        InnerLinkDestructor(&link);
-        ProcessFailureResponse(msg, ERROR_P2P_APPLY_GC_IP_FAIL);
-        return SOFTBUS_OK;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ERROR_P2P_APPLY_GC_IP_FAIL, LOG_LABEL "apply gc ip failed");
     CLOGI(LOG_LABEL "apply gc ip %s", WifiDirectAnonymizeIp(remoteIp));
 
     ret = ReuseP2p();
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "reuse p2p failed");
-        ProcessFailureResponse(msg, V1_ERROR_REUSE_FAILED);
-        return SOFTBUS_OK;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, V1_ERROR_REUSE_FAILED, LOG_LABEL "reuse p2p failed");
 
     struct WifiDirectIpv4Info *localIpv4 = info->get(info, II_KEY_IPV4, NULL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOG(localIpv4, SOFTBUS_ERR, LOG_LABEL "local ipv4 is null");
-    link.putRawData(&link, IL_KEY_LOCAL_IPV4, localIpv4, sizeof(*localIpv4));
-    link.putRemoteIpString(&link, remoteIp);
-    GetLinkManager()->notifyLinkChange(&link);
-    InnerLinkDestructor(&link);
+    link->putRawData(link, IL_KEY_LOCAL_IPV4, localIpv4, sizeof(*localIpv4));
+    link->putRemoteIpString(link, remoteIp);
+    GetLinkManager()->notifyLinkChange(link);
 
     NotifyNewClient(msg->getInt(msg, NM_KEY_SESSION_ID, -1), IF_NAME_P2P, remoteMac);
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOG(channel, SOFTBUS_ERR, LOG_LABEL "channel is null");
     struct NegotiateMessage *output = BuildConnectResponseAsGo(remoteMac, remoteIp, channel);
     CONN_CHECK_AND_RETURN_RET_LOG(output, SOFTBUS_ERR, LOG_LABEL "build connection response with go info failed");
-    GetP2pV1Processor()->needReply = false;
-    ret = GetWifiDirectNegotiator()->handleMessageFromProcessor(output, NEGO_STATE_AVAILABLE);
+    ret = GetWifiDirectNegotiator()->handleMessageFromProcessor(output);
     NegotiateMessageDelete(output);
 
+    return ret;
+}
+
+static int32_t ProcessConnectRequestAsGo(struct NegotiateMessage *msg, enum WifiDirectRole myRole)
+{
+    enum WifiDirectP2pContentType contentType = msg->getInt(msg, NM_KEY_CONTENT_TYPE, -1);
+    CONN_CHECK_AND_RETURN_RET_LOG(contentType == P2P_CONTENT_TYPE_GC_INFO, V1_ERROR_BOTH_GO,
+                                  LOG_LABEL "content type not equal gc info");
+
+    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
+    CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
+
+    struct InnerLink link;
+    InnerLinkConstructor(&link);
+    InitBasicInnerLink(&link, false);
+    SetInnerLinkDeviceId(msg, &link);
+    link.putString(&link, IL_KEY_LOCAL_BASE_MAC, info->getString(info, II_KEY_BASE_MAC, ""));
+    link.putString(&link, IL_KEY_REMOTE_BASE_MAC, msg->getString(msg, NM_KEY_GC_MAC, ""));
+    link.putBoolean(&link, IL_KEY_IS_SOURCE, false);
+    link.putBoolean(&link, IL_KEY_IS_BEING_USED_BY_REMOTE, true);
+
+    int32_t ret = SOFTBUS_OK;
+    if (myRole != WIFI_DIRECT_ROLE_GO) {
+        ret = CreateGroup(msg);
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, V1_ERROR_CREATE_GROUP_FAILED, LOG_LABEL "create group failed");
+        GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_CREAT_GROUP;
+        GetLinkManager()->notifyLinkChange(&link);
+        InnerLinkDestructor(&link);
+        CLOGI(LOG_LABEL "waiting create group to be done");
+        return SOFTBUS_OK;
+    }
+
+    ret = SendConnectResponseAsGo(msg, &link, info);
+    InnerLinkDestructor(&link);
     return ret;
 }
 
@@ -822,13 +849,13 @@ static int32_t ProcessConnectRequestAsGc(struct NegotiateMessage *msg, enum Wifi
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
-    char *localMac = info->getString(info, II_KEY_BASE_MAC, "");
 
     struct InnerLink link;
     InnerLinkConstructor(&link);
     InitBasicInnerLink(&link, true);
     SetInnerLinkDeviceId(msg, &link);
 
+    char *localMac = info->getString(info, II_KEY_BASE_MAC, "");
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
     link.putString(&link, IL_KEY_LOCAL_BASE_MAC, localMac);
     link.putString(&link, IL_KEY_REMOTE_BASE_MAC, remoteMac);
@@ -844,50 +871,35 @@ static int32_t ProcessConnectRequestAsGc(struct NegotiateMessage *msg, enum Wifi
         // None(go) -- None
         GetLinkManager()->notifyLinkChange(&link);
         InnerLinkDestructor(&link);
-        self->needReply = false;
-
         struct NegotiateMessage *response = BuildConnectResponseAsNone(remoteMac, channel);
         CONN_CHECK_AND_RETURN_RET_LOG(response, SOFTBUS_ERR, LOG_LABEL "build response with gc info failed");
-        GetWifiDirectNegotiator()->handleMessageFromProcessor(response, NEGO_STATE_WAITING_CONNECT_REQUEST);
+        GetWifiDirectNegotiator()->handleMessageFromProcessor(response);
         NegotiateMessageDelete(response);
+        StartTimer(P2P_V1_WAITING_REQUEST_TIME_MS);
+        self->currentState = P2P_V1_PROCESSOR_STATE_WAITING_REQUEST;
         CLOGD(LOG_LABEL "send response with gc info success");
         return SOFTBUS_OK;
     }
 
+    int32_t ret = SOFTBUS_OK;
     if (myRole == WIFI_DIRECT_ROLE_GC) {
-        int32_t ret = ReuseP2p();
-        if (ret != SOFTBUS_OK) {
-            CLOGE(LOG_LABEL "V1_ERROR_REUSE_FAILED");
-            ret = V1_ERROR_REUSE_FAILED;
-        }
-        struct NegotiateMessage *response = BuildNegotiateResult(ret, channel);
-        CONN_CHECK_AND_RETURN_RET_LOG(response, SOFTBUS_ERR, LOG_LABEL "build response resulut failed");
-        GetWifiDirectNegotiator()->handleMessageFromProcessor(response, NEGO_STATE_AVAILABLE);
-        NegotiateMessageDelete(response);
-        CLOGD(LOG_LABEL "send response result success");
+        ret = ReuseP2p();
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, V1_ERROR_REUSE_FAILED, LOG_LABEL "V1_ERROR_REUSE_FAILED");
+        ProcessSuccess(NULL);
         return SOFTBUS_OK;
     }
 
     // Go -- None
+    StopTimer();
     CLOGI(LOG_LABEL "start connect group");
-    if (ConnectGroup(msg) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "connect group failed");
-        return ProcessFailureResponse(msg, V1_ERROR_CONNECT_GROUP_FAILED);
-    }
-
-    char *localIp = msg->getString(msg, NM_KEY_GC_IP, "");
-    char *remoteIp = msg->getString(msg, NM_KEY_GO_IP, "");
-    link.putLocalIpString(&link, localIp);
-    link.putRemoteIpString(&link, remoteIp);
+    ret = ConnectGroup(msg);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, V1_ERROR_CONNECT_GROUP_FAILED, LOG_LABEL "connect group failed");
+    link.putLocalIpString(&link, msg->getString(msg, NM_KEY_GC_IP, ""));
+    link.putRemoteIpString(&link, msg->getString(msg, NM_KEY_GO_IP, ""));
     GetLinkManager()->notifyLinkChange(&link);
     InnerLinkDestructor(&link);
 
-    int32_t ret = SaveCurrentMessage(msg);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "save current msg failed");
-    self->currentState = PROCESSOR_STATE_WAITING_CONNECT_GROUP;
-    self->needReply = true;
-    GetWifiDirectNegotiator()->changeState(NEGO_STATE_PROCESSING);
-
+    self->currentState = P2P_V1_PROCESSOR_STATE_WAITING_CONNECT_GROUP;
     CLOGI(LOG_LABEL "waiting connect group to be done");
     return SOFTBUS_OK;
 }
@@ -898,8 +910,7 @@ static int32_t ProcessNoAvailableInterface(struct NegotiateMessage *msg, enum Wi
     char remoteDeviceId[UUID_BUF_LEN] = {0};
     int32_t ret = channel->getDeviceId(channel, remoteDeviceId, sizeof(remoteDeviceId));
     if (ret != SOFTBUS_OK) {
-        ProcessFailureResponse(msg, ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE);
-        return SOFTBUS_OK;
+        return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
     }
     CLOGI(LOG_LABEL "remoteDeviceId=%s", AnonymizesUUID(remoteDeviceId));
 
@@ -915,14 +926,12 @@ static int32_t ProcessNoAvailableInterface(struct NegotiateMessage *msg, enum Wi
         CLOGI(LOG_LABEL "fix the obsolete link");
         if (myRole == WIFI_DIRECT_ROLE_GC) {
             (void)DestroyGroup();
-            GetP2pV1Processor()->currentState = PROCESSOR_STATE_WAITING_REMOVE_GROUP;
-            ProcessFailureResponse(msg, ERROR_WIFI_DIRECT_LOCAL_DISCONNECTED_REMOTE_CONNECTED);
-            return SOFTBUS_OK;
+            GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_REMOVE_GROUP;
+            return ERROR_WIFI_DIRECT_LOCAL_DISCONNECTED_REMOTE_CONNECTED;
         }
     }
 
-    ProcessFailureResponse(msg, ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE);
-    return SOFTBUS_OK;
+    return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
 }
 
 static char *GetGoMac(enum WifiDirectRole myRole)
@@ -943,16 +952,20 @@ static char *GetGoMac(enum WifiDirectRole myRole)
     return link->getString(link, IL_KEY_REMOTE_BASE_MAC, "");
 }
 
-static int32_t ProcessConnectRequest(struct NegotiateMessage *msg)
+static int32_t ProcessConnectRequest(struct WifiDirectCommand *command)
 {
+    enum P2pV1ProcessorState currentState = GetP2pV1Processor()->currentState;
+    if (currentState != P2P_V1_PROCESSOR_STATE_AVAILABLE && currentState != P2P_V1_PROCESSOR_STATE_WAITING_REQUEST) {
+        CLOGE(LOG_LABEL "currentState=%d", currentState);
+        return V1_ERROR_BUSY;
+    }
+
     CLOGI(LOG_LABEL "enter");
+    struct NegotiateMessage *msg = command->msg;
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOG(channel, SOFTBUS_ERR, LOG_LABEL "channel is null");
     struct InterfaceInfo *interfaceInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(interfaceInfo, SOFTBUS_ERR, LOG_LABEL "interface info is null");
-
-    struct P2pV1Processor *self = GetP2pV1Processor();
-    self->needReply = true;
 
     enum WifiDirectRole myRole;
     enum WifiDirectRole peerRole;
@@ -962,8 +975,7 @@ static int32_t ProcessConnectRequest(struct NegotiateMessage *msg)
 
     if (myRole == WIFI_DIRECT_ROLE_NONE && !GetResourceManager()->isInterfaceAvailable(IF_NAME_P2P, false)) {
         CLOGE(LOG_LABEL "V1_ERROR_IF_NOT_AVAILABLE");
-        ProcessFailureResponse(msg, V1_ERROR_IF_NOT_AVAILABLE);
-        return SOFTBUS_OK;
+        return V1_ERROR_IF_NOT_AVAILABLE;
     }
 
     char *remoteConfig = msg->getString(msg, NM_KEY_SELF_WIFI_CONFIG, "");
@@ -987,8 +999,7 @@ static int32_t ProcessConnectRequest(struct NegotiateMessage *msg)
     }
 
     CLOGI(LOG_LABEL "finalRole invalid");
-    ProcessFailureResponse(msg, (enum WifiDirectErrorCode)finalRole);
-    return SOFTBUS_OK;
+    return finalRole;
 }
 
 static int32_t ProcessConnectResponseAsGo(struct NegotiateMessage *msg)
@@ -1015,13 +1026,8 @@ static int32_t ProcessConnectResponseAsGo(struct NegotiateMessage *msg)
     GetLinkManager()->notifyLinkChange(&link);
     InnerLinkDestructor(&link);
 
-    struct NegotiateMessage output;
-    NegotiateMessageConstructor(&output);
     struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
-    output.putContainer(&output, NM_KEY_INNER_LINK, (struct InfoContainer *)innerLink, sizeof(*innerLink));
-    GetWifiDirectNegotiator()->handleSuccess(&output);
-    NegotiateMessageDestructor(&output);
-
+    ProcessSuccess(innerLink);
     return SOFTBUS_OK;
 }
 
@@ -1030,24 +1036,9 @@ static int32_t ProcessConnectResponseWithGoInfoAsNone(struct NegotiateMessage *m
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
-    enum WifiDirectRole myRole = GetWifiDirectUtils()->transferModeToRole(
-        info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE));
-    int32_t requestId = msg->getInt(msg, NM_KEY_SESSION_ID, -1);
-
-    if (myRole != WIFI_DIRECT_ROLE_NONE) {
-        CLOGE(LOG_LABEL "recv wrong connection response with go info");
-        return SOFTBUS_ERR;
-    }
-
-    CLOGI(LOG_LABEL "start to connect group");
-    if (ConnectGroup(msg) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "connect to group failed");
-        return V1_ERROR_CONNECT_GROUP_FAILED;
-    }
-    if (!self->currentInnerLink) {
-        CLOGE(LOG_LABEL "current inner link is null");
-        return SOFTBUS_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOG(self->currentInnerLink != NULL, SOFTBUS_ERR, LOG_LABEL "current inner link is null");
+    int32_t ret = ConnectGroup(msg);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, V1_ERROR_CONNECT_GROUP_FAILED, LOG_LABEL "connect group failed");
 
     char *localIp = msg->getString(msg, NM_KEY_GC_IP, "");
     char *remoteIp = msg->getString(msg, NM_KEY_IP, "");
@@ -1057,7 +1048,7 @@ static int32_t ProcessConnectResponseWithGoInfoAsNone(struct NegotiateMessage *m
     CONN_CHECK_AND_RETURN_RET_LOG(groupConfigCopy, SOFTBUS_MALLOC_ERR, LOG_LABEL "dup group config failed");
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX] = {0};
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
-    int32_t ret = GetWifiDirectNetWorkUtils()->splitString(groupConfigCopy, "\n", configs, &configsSize);
+    ret = GetWifiDirectNetWorkUtils()->splitString(groupConfigCopy, "\n", configs, &configsSize);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(groupConfigCopy);
         CLOGE(LOG_LABEL "split group config failed");
@@ -1073,31 +1064,17 @@ static int32_t ProcessConnectResponseWithGoInfoAsNone(struct NegotiateMessage *m
     InnerLinkDelete(link);
     self->currentInnerLink = NULL;
 
-    self->currentState = PROCESSOR_STATE_WAITING_CONNECT_GROUP;
-    self->currentRequestId = requestId;
+    self->currentState = P2P_V1_PROCESSOR_STATE_WAITING_CONNECT_GROUP;
     SoftBusFree(groupConfigCopy);
-
-    ret = SaveCurrentMessage(msg);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "save current msg failed");
-
-    GetWifiDirectNegotiator()->changeState(NEGO_STATE_PROCESSING);
     CLOGI(LOG_LABEL "waiting connect group to be done");
-
     return SOFTBUS_OK;
 }
 
 static int32_t ProcessConnectResponseWithGcInfoAsNone(struct NegotiateMessage *msg)
 {
     int32_t ret = CreateGroup(msg);
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "create group failed");
-        return ret;
-    }
-
-    ret = SaveCurrentMessage(msg);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "save current msg failed");
-    GetP2pV1Processor()->currentState = PROCESSOR_STATE_WAITING_CREATE_GROUP;
-    GetWifiDirectNegotiator()->changeState(NEGO_STATE_PROCESSING);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "create group failed");
+    GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_CREAT_GROUP;
     return SOFTBUS_OK;
 }
 
@@ -1123,8 +1100,14 @@ static int32_t ProcessConnectResponseAsNone(struct NegotiateMessage *msg)
     return errorCode;
 }
 
-static int32_t ProcessConnectResponse(struct NegotiateMessage *msg)
+static int32_t ProcessConnectResponse(struct WifiDirectCommand *command)
 {
+    enum P2pV1ProcessorState currentState = GetP2pV1Processor()->currentState;
+    CONN_CHECK_AND_RETURN_RET_LOG(currentState == P2P_V1_PROCESSOR_STATE_WAITING_RESPONSE, ERROR_P2P_EXPIRED_RESP,
+                                  LOG_LABEL "currentState=%d", currentState);
+
+    StopTimer();
+    struct NegotiateMessage *msg = command->msg;
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
     enum WifiDirectRole myRole = GetWifiDirectUtils()->transferModeToRole(
@@ -1140,32 +1123,37 @@ static int32_t ProcessConnectResponse(struct NegotiateMessage *msg)
     return V1_ERROR_CONNECTED_WITH_MISMATCHED_ROLE;
 }
 
-static int32_t ProcessDisconnectRequest(struct NegotiateMessage *msg)
+static int32_t ProcessDisconnectRequest(struct WifiDirectCommand *command)
 {
+    struct NegotiateMessage *msg = command->msg;
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
     int32_t ret = RemoveLink(remoteMac);
-    if (ret != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "remove link failed");
-        return ProcessFailureResponse(msg, ERROR_REMOVE_LINK_FAILED);
-    }
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ERROR_REMOVE_LINK_FAILED, LOG_LABEL "remove link failed");
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, 0);
-    if (reuseCount != 0) {
-        GetWifiDirectNegotiator()->handleSuccess(NULL);
-        return SOFTBUS_OK;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOG(reuseCount == 0, SOFTBUS_OK, LOG_LABEL "reuseCount=%d", reuseCount);
 
     CLOGI(LOG_LABEL "wait removing group to be done");
-    GetP2pV1Processor()->currentState = PROCESSOR_STATE_WAITING_REMOVE_GROUP;
+    struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
+    if (innerLink != NULL) {
+        innerLink->setState(innerLink, INNER_LINK_STATE_DISCONNECTING);
+        CLOGI(LOG_LABEL "set innerLink state to disconnecting");
+    }
+    GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_REMOVE_GROUP;
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessReuseRequest(struct NegotiateMessage *msg)
+static int32_t ProcessReuseRequest(struct WifiDirectCommand *command)
 {
+    enum P2pV1ProcessorState currentState = GetP2pV1Processor()->currentState;
+    CONN_CHECK_AND_RETURN_RET_LOG(currentState == P2P_V1_PROCESSOR_STATE_AVAILABLE, V1_ERROR_BUSY,
+                                  LOG_LABEL "currentState=%d", currentState);
+
     int32_t result = V1_ERROR_REUSE_FAILED;
     struct NegotiateMessage *response = NULL;
+    struct NegotiateMessage *msg = command->msg;
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
     if (channel == NULL) {
         CLOGE(LOG_LABEL "channel is null");
@@ -1197,13 +1185,19 @@ static int32_t ProcessReuseRequest(struct NegotiateMessage *msg)
 
 Failed:
     response = BuildReuseResponse(result, channel);
-    result = GetWifiDirectNegotiator()->handleMessageFromProcessor(response, NEGO_STATE_AVAILABLE);
+    result = GetWifiDirectNegotiator()->handleMessageFromProcessor(response);
     NegotiateMessageDelete(response);
+    command->onFailure(command, result);
     return result;
 }
 
-static int32_t ProcessReuseResponse(struct NegotiateMessage *msg)
+static int32_t ProcessReuseResponse(struct WifiDirectCommand *command)
 {
+    enum P2pV1ProcessorState currentState = GetP2pV1Processor()->currentState;
+    CONN_CHECK_AND_RETURN_RET_LOG(currentState == P2P_V1_PROCESSOR_STATE_WAITING_RESPONSE, ERROR_P2P_EXPIRED_RESP,
+                                  LOG_LABEL "currentState=%d", currentState);
+
+    struct NegotiateMessage *msg = command->msg;
     int32_t result = ErrorCodeFromV1ProtocolCode(msg->getInt(msg, NM_KEY_RESULT, SOFTBUS_ERR));
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
 
@@ -1216,7 +1210,7 @@ static int32_t ProcessReuseResponse(struct NegotiateMessage *msg)
         struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         struct NegotiateMessage *request = BuildDisconnectRequest(remoteMac, channel);
         GetWifiDirectNegotiator()->postData(request);
-        return V1_ERROR_REUSE_FAILED;
+        return SOFTBUS_OK;
     }
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
@@ -1231,12 +1225,7 @@ static int32_t ProcessReuseResponse(struct NegotiateMessage *msg)
 
     struct InnerLink *newInnerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOG(newInnerLink, SOFTBUS_ERR, LOG_LABEL "inner link is null");
-    struct NegotiateMessage output;
-    NegotiateMessageConstructor(&output);
-    output.putContainer(&output, NM_KEY_INNER_LINK, (struct InfoContainer *)newInnerLink, sizeof(*newInnerLink));
-    GetWifiDirectNegotiator()->handleSuccess(&output);
-    NegotiateMessageDestructor(&output);
-
+    ProcessSuccess(newInnerLink);
     return SOFTBUS_OK;
 }
 
@@ -1303,6 +1292,8 @@ static void SendHandShakeToGoAsync(void *data)
     handShakeInfo.putPointer(&handShakeInfo, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     GetWifiDirectNegotiator()->postData(&handShakeInfo);
     NegotiateMessageDestructor(&handShakeInfo);
+
+    GetLinkManager()->setNegoChannelForLink((struct WifiDirectNegotiateChannel*)channel);
     channel->destructor(channel);
 }
 
@@ -1317,8 +1308,6 @@ static void OnAuthConnectSuccess(uint32_t authRequestId, int64_t p2pAuthId)
         DefaultNegotiateChannelDelete(channel);
         return;
     }
-
-    GetLinkManager()->setNegoChannelForLink((struct WifiDirectNegotiateChannel *)channel);
 }
 
 static void OnAuthConnectFailure(uint32_t authRequestId, int32_t reason)
@@ -1351,7 +1340,7 @@ static void UpdateInnerLinkOnCreateGroupComplete(const char *localMac, const cha
     InnerLinkConstructor(&link);
 
     InitBasicInnerLink(&link, false);
-    SetInnerLinkDeviceId(self->currentMsg, &link);
+    SetInnerLinkDeviceId(self->passiveCommand->msg, &link);
 
     link.putLocalIpString(&link, localIp);
     link.putRemoteIpString(&link, remoteIp);
@@ -1362,14 +1351,16 @@ static void UpdateInnerLinkOnCreateGroupComplete(const char *localMac, const cha
     InnerLinkDestructor(&link);
 }
 
-static int32_t OnCreateGroupComplete(void)
+static int32_t OnCreateGroupComplete(int32_t event)
 {
     GetWifiDirectPerfRecorder()->record(TP_P2P_CREATE_GROUP_END);
     GetWifiDirectPerfRecorder()->calculate();
+    CONN_CHECK_AND_RETURN_RET_LOG(event == ENTITY_EVENT_P2P_CREATE_COMPLETE, V1_ERROR_CREATE_GROUP_FAILED,
+                                  LOG_LABEL "create group failed");
     CLOGI(LOG_LABEL "create group done, timeUsed=%zuMS", GetWifiDirectPerfRecorder()->getTime(TC_CREATE_GROUP));
 
     struct P2pV1Processor *self = GetP2pV1Processor();
-    struct NegotiateMessage *msg = self->currentMsg;
+    struct NegotiateMessage *msg = self->passiveCommand->msg;
     CONN_CHECK_AND_RETURN_RET_LOG(msg, SOFTBUS_ERR, LOG_LABEL "current msg is null");
 
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
@@ -1390,19 +1381,20 @@ static int32_t OnCreateGroupComplete(void)
 
     UpdateReuseCount(1);
     UpdateInnerLinkOnCreateGroupComplete(localMac, localIp, remoteMac, remoteIp);
-    NotifyNewClient(self->currentRequestId, IF_NAME_P2P, remoteMac);
+    NotifyNewClient(msg->getInt(msg, NM_KEY_SESSION_ID, -1), IF_NAME_P2P, remoteMac);
     StartAuthListening(localIp);
 
     struct NegotiateMessage *output = NULL;
-    if (self->needReply) {
-        self->needReply = false;
+    if (self->activeCommand == NULL) {
         output = BuildConnectResponseAsGo(remoteMac, remoteIp, channel);
         CONN_CHECK_AND_RETURN_RET_LOG(output, SOFTBUS_ERR, LOG_LABEL "build connect response with go info failed");
-        GetWifiDirectNegotiator()->handleMessageFromProcessor(output, NEGO_STATE_AVAILABLE);
+        GetWifiDirectNegotiator()->handleMessageFromProcessor(output);
     } else {
         output = BuildConnectRequestAsGo(remoteMac, remoteIp, channel);
         CONN_CHECK_AND_RETURN_RET_LOG(output, SOFTBUS_ERR, LOG_LABEL "build connect request with go info failed");
-        GetWifiDirectNegotiator()->handleMessageFromProcessor(output, NEGO_STATE_WAITING_CONNECT_RESPONSE);
+        GetWifiDirectNegotiator()->handleMessageFromProcessor(output);
+        StartTimer(P2P_V1_WAITING_RESPONSE_TIME_MS);
+        self->currentState = P2P_V1_PROCESSOR_STATE_WAITING_RESPONSE;
     }
 
     NegotiateMessageDelete(output);
@@ -1424,14 +1416,16 @@ static void UpdateInnerLinkOnConnectGroupComplete(const char *localMac, const ch
     InnerLinkDestructor(&link);
 }
 
-static int32_t OnConnectGroupComplete(void)
+static int32_t OnConnectGroupComplete(int32_t event)
 {
     GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_GROUP_END);
     GetWifiDirectPerfRecorder()->calculate();
+    CONN_CHECK_AND_RETURN_RET_LOG(event == ENTITY_EVENT_P2P_CONNECT_COMPLETE, V1_ERROR_CONNECT_GROUP_FAILED,
+                                  LOG_LABEL "connect group failed");
     CLOGI(LOG_LABEL "connect group done, timeUsed=%zuMS", GetWifiDirectPerfRecorder()->getTime(TC_CONNECT_GROUP));
 
     struct P2pV1Processor *self = GetP2pV1Processor();
-    struct NegotiateMessage *msg = self->currentMsg;
+    struct NegotiateMessage *msg = self->passiveCommand->msg;
     CONN_CHECK_AND_RETURN_RET_LOG(msg, SOFTBUS_ERR, LOG_LABEL "current msg is null");
 
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
@@ -1458,54 +1452,26 @@ static int32_t OnConnectGroupComplete(void)
     CONN_CHECK_AND_RETURN_RET_LOG(innerLink, SOFTBUS_ERR, LOG_LABEL "inner link is null");
     OpenAuthConnection(channel, innerLink, self->goPort);
 
-    if (self->needReply) {
-        self->needReply = false;
-        struct NegotiateMessage *response = BuildNegotiateResult(OK, channel);
-        CONN_CHECK_AND_RETURN_RET_LOG(response, SOFTBUS_ERR, LOG_LABEL "build result failed");
-        GetWifiDirectNegotiator()->handleMessageFromProcessor(response, NEGO_STATE_AVAILABLE);
+    if (self->activeCommand == NULL) {
         GetWifiDirectNegotiator()->syncLnnInfo(innerLink);
-        NegotiateMessageDelete(response);
+        ProcessSuccess(NULL);
         return SOFTBUS_OK;
     }
 
-    struct NegotiateMessage success;
-    NegotiateMessageConstructor(&success);
-    success.putContainer(&success, NM_KEY_INNER_LINK, (struct InfoContainer *)innerLink, sizeof(*innerLink));
-    GetWifiDirectNegotiator()->handleSuccess(&success);
-    NegotiateMessageDestructor(&success);
-
+    ProcessSuccess(innerLink);
     if (self->pendingRequestMsg && (ProcessGetInterfaceInfoRequest(self->pendingRequestMsg) != SOFTBUS_OK)) {
         CLOGE(LOG_LABEL "process get interface info request failed");
     }
-
     return SOFTBUS_OK;
 }
 
-static int32_t OnRemoveGroupComplete(void)
+static int32_t OnRemoveGroupComplete(int32_t event)
 {
+    CONN_CHECK_AND_RETURN_RET_LOG(event == ENTITY_EVENT_P2P_REMOVE_COMPLETE, ERROR_REMOVE_LINK_FAILED,
+                                  LOG_LABEL "remove group failed");
     CLOGI(LOG_LABEL "remove group done");
-    GetWifiDirectNegotiator()->handleSuccess(NULL);
+    ProcessSuccess(NULL);
     return SOFTBUS_OK;
-}
-
-static int32_t ProcessFailureResponse(struct NegotiateMessage *input, enum WifiDirectErrorCode reason)
-{
-    if (!GetP2pV1Processor()->needReply) {
-        CLOGI(LOG_LABEL "no need reply");
-        return SOFTBUS_ERR;
-    }
-    GetP2pV1Processor()->needReply = false;
-
-    struct WifiDirectNegotiateChannel *channel = input->getPointer(input, NM_KEY_NEGO_CHANNEL, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOG(channel, SOFTBUS_ERR, LOG_LABEL "channel is null");
-
-    struct NegotiateMessage *response = BuildNegotiateResult(reason, channel);
-    CONN_CHECK_AND_RETURN_RET_LOG(response, SOFTBUS_ERR, LOG_LABEL "build result failed");
-
-    int32_t ret = GetWifiDirectNegotiator()->handleMessageFromProcessor(response, NEGO_STATE_AVAILABLE);
-    NegotiateMessageDelete(response);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "handle msg from processor failed");
-    return ret;
 }
 
 static void UpdateReuseCount(int32_t delta)
@@ -1532,22 +1498,20 @@ static void InitBasicInnerLink(struct InnerLink *innerLink, bool isClient)
     innerLink->putBoolean(innerLink, IL_KEY_IS_CLIENT, isClient);
 }
 
-static void NotifyNewClient(int requestId, char *localInterface, char *remoteMac)
+static void NotifyNewClient(int requestId, const char *localInterface, const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
     params.connectType = WIFI_DIRECT_CONNECT_TYPE_P2P;
-    params.requestId = requestId;
     (void)strcpy_s(params.interface, sizeof(params.interface), localInterface);
     (void)strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
 
     GetWifiDirectEntityFactory()->createEntity(ENTITY_TYPE_P2P)->notifyNewClientJoining(&params);
 }
 
-static void CancelNewClient(int requestId, char *localInterface, const char *remoteMac)
+static void CancelNewClient(int requestId, const char *localInterface, const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
     params.connectType = WIFI_DIRECT_CONNECT_TYPE_P2P;
-    params.requestId = requestId;
     (void)strcpy_s(params.interface, sizeof(params.interface), localInterface);
     (void)strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
 
@@ -1572,9 +1536,9 @@ static int32_t ChoseFrequency(int32_t gcFreq, int32_t *gcChannelArray, size_t gc
 {
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
-    int32_t goFreq = adapter->getStationFrequency();
+    int32_t goFreq = adapter->getStationFrequencyWithFilter();
 
-    CLOGI(LOG_LABEL "goFreq=%d gcFreq=%d", goFreq, goFreq);
+    CLOGI(LOG_LABEL "goFreq=%d gcFreq=%d", goFreq, gcFreq);
     if (goFreq != CHANNEL_INVALID || gcFreq != CHANNEL_INVALID) {
         int32_t recommendChannel = adapter->getRecommendChannel();
         if (recommendChannel != CHANNEL_INVALID) {
@@ -1606,31 +1570,6 @@ static int32_t ChoseFrequency(int32_t gcFreq, int32_t *gcChannelArray, size_t gc
 
     CLOGI(LOG_LABEL "use 2G_FIRST=%d", FREQUENCY_2G_FIRST);
     return FREQUENCY_2G_FIRST;
-}
-
-static int32_t SaveCurrentMessage(struct NegotiateMessage *msg)
-{
-    struct P2pV1Processor *self = GetP2pV1Processor();
-    struct NegotiateMessage *curMsg = self->currentMsg;
-    if (curMsg) {
-        struct WifiDirectNegotiateChannel *channel = curMsg->getPointer(curMsg, NM_KEY_NEGO_CHANNEL, NULL);
-        if (channel) {
-            channel->destructor(channel);
-        }
-        NegotiateMessageDelete(curMsg);
-        self->currentMsg = NULL;
-    }
-
-    struct NegotiateMessage *copyMsg = NegotiateMessageNew();
-    CONN_CHECK_AND_RETURN_RET_LOG(copyMsg, SOFTBUS_MALLOC_ERR, LOG_LABEL "malloc msg failed");
-    copyMsg->deepCopy(copyMsg, msg);
-    struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOG(channel, SOFTBUS_ERR, "channel is null");
-    struct WifiDirectNegotiateChannel *channelCopy = channel->duplicate(channel);
-    copyMsg->putPointer(copyMsg, NM_KEY_NEGO_CHANNEL, (void **)&channelCopy);
-
-    self->currentMsg = copyMsg;
-    return SOFTBUS_OK;
 }
 
 static void SetInnerLinkDeviceId(struct NegotiateMessage *msg, struct InnerLink *innerLink)
@@ -1686,18 +1625,100 @@ static enum WifiDirectRole TransferExpectedRole(uint32_t expectApiRole)
     }
 }
 
+static void OnTimeOut(void *data)
+{
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    self->timerId = TIMER_ID_INVALID;
+
+    CLOGI(LOG_LABEL "currentState=%d", self->currentState);
+    if (self->currentState == P2P_V1_PROCESSOR_STATE_WAITING_RESPONSE) {
+        CLOGE(LOG_LABEL "wait connect response timeout");
+        ProcessFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_RESPONSE_TIMEOUT, false);
+    } else if (self->currentState == P2P_V1_PROCESSOR_STATE_WAITING_REQUEST) {
+        CLOGE(LOG_LABEL "wait connect request timeout");
+        ProcessFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_REQUEST_TIMEOUT, false);
+    }
+}
+
+static void StartTimer(int32_t timeMs)
+{
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    self->timerId = GetWifiDirectTimerList()->startTimer(OnTimeOut, timeMs, TIMER_FLAG_ONE_SHOOT, NULL);
+}
+
+static void StopTimer(void)
+{
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    if (self->timerId >= 0) {
+        GetWifiDirectTimerList()->stopTimer(self->timerId);
+        self->timerId = TIMER_ID_INVALID;
+    }
+}
+
+static void ProcessFailure(int32_t errorCode, bool reply)
+{
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    CLOGI(LOG_LABEL "errorCode=%d", errorCode);
+    if (self->activeCommand != NULL) {
+        self->activeCommand->onFailure(self->activeCommand, errorCode);
+        return;
+    }
+
+    if (reply) {
+        struct NegotiateMessage *msg = self->passiveCommand->msg;
+        struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
+        CONN_CHECK_AND_RETURN_LOG(channel != NULL, LOG_LABEL "channel is null");
+
+        struct NegotiateMessage *response = BuildNegotiateResult(errorCode, channel);
+        CONN_CHECK_AND_RETURN_LOG(response != NULL, LOG_LABEL "build connect response failed");
+        GetWifiDirectNegotiator()->handleMessageFromProcessor(response);
+        NegotiateMessageDelete(response);
+    }
+    self->passiveCommand->onFailure(self->passiveCommand, errorCode);
+}
+
+static void ProcessSuccess(struct InnerLink *innerLink)
+{
+    struct P2pV1Processor *self = GetP2pV1Processor();
+    if (self->activeCommand != NULL) {
+        if (innerLink != NULL) {
+            struct NegotiateMessage output;
+            NegotiateMessageConstructor(&output);
+            output.putContainer(&output, NM_KEY_INNER_LINK, (struct InfoContainer *)innerLink, sizeof(*innerLink));
+            self->activeCommand->onSuccess(self->activeCommand, &output);
+            NegotiateMessageDestructor(&output);
+            return;
+        }
+
+        self->activeCommand->onSuccess(self->activeCommand, NULL);
+        return;
+    }
+
+    struct NegotiateMessage *msg = self->passiveCommand->msg;
+    struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
+    CONN_CHECK_AND_RETURN_LOG(channel != NULL, LOG_LABEL "channel is null");
+
+    struct NegotiateMessage *response = BuildNegotiateResult(OK, channel);
+    CONN_CHECK_AND_RETURN_LOG(response != NULL, LOG_LABEL "build connect response failed");
+    GetWifiDirectNegotiator()->handleMessageFromProcessor(response);
+    NegotiateMessageDelete(response);
+    self->passiveCommand->onSuccess(self->passiveCommand, NULL);
+}
+
 static struct P2pV1Processor g_processor = {
-    .needReply = false,
-    .pendingRequestMsg = NULL,
-    .currentRequestId = REQUEST_ID_INVALID,
     .createLink = CreateLink,
     .disconnectLink = DisconnectLink,
     .reuseLink = ReuseLink,
     .processNegotiateMessage = ProcessNegotiateMessage,
     .onOperationEvent = OnOperationEvent,
+    .resetContext = ResetContext,
     .processUnhandledRequest = ProcessUnhandledRequest,
     .onReversal = OnReversal,
     .name = "P2pV1Processor",
+    .timerId = TIMER_ID_INVALID,
+    .currentState = P2P_V1_PROCESSOR_STATE_AVAILABLE,
+    .currentInnerLink = NULL,
+    .pendingRequestMsg = NULL,
 };
 
 /* static class method */

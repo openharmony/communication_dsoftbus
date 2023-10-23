@@ -12,20 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEGOTIATE_AVAILABLE_STATE_H
-#define NEGOTIATE_AVAILABLE_STATE_H
 
-#include "negotiate_state.h"
+#ifndef WIFI_DIRECT_NEGOTIATE_COMMAND_H
+#define WIFI_DIRECT_NEGOTIATE_COMMAND_H
+
+#include "wifi_direct_command.h"
+#include "data/negotiate_message.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct AvailableState {
-    NEGOTIATE_STATE_BASE(AvailableState);
+struct WifiDirectNegotiateCommand {
+    WIFI_DIRECT_COMMAND_BASE;
+
+    int32_t cmdType;
 };
 
-struct AvailableState* GetAvailableState(struct WifiDirectNegotiator *negotiator);
+void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *self, int32_t cmdType,
+                                           struct NegotiateMessage *msg);
+void WifiDirectNegotiateCommandDestructor(struct WifiDirectNegotiateCommand *self);
+struct WifiDirectCommand* WifiDirectNegotiateCommandNew(int32_t cmdType, struct NegotiateMessage *msg);
+void WifiDirectNegotiateCommandDelete(struct WifiDirectCommand *base);
 
 #ifdef __cplusplus
 }

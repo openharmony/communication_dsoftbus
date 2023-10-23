@@ -20,7 +20,7 @@
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectRoleNegotiator: "
+#define LOG_LABEL "[WD] RNego: "
 
 static enum WifiDirectRole GetFinalRoleAsGo(enum WifiDirectRole peerRole, enum WifiDirectRole expectedRole,
                                             const char *localGoMac, const char *remoteGoMac)
