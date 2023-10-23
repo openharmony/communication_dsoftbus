@@ -67,7 +67,9 @@ void HeartBeatCtrlTest::TearDown() { }
 HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
-    EXPECT_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStrateMock, LnnStartOfflineTimingStrategy)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = LnnOfflineTimingByHeartbeat(nullptr, CONNECTION_ADDR_BLE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
