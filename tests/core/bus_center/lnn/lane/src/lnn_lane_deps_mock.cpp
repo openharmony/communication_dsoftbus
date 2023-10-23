@@ -16,6 +16,8 @@
 #include "lnn_lane_deps_mock.h"
 #include "softbus_error_code.h"
 
+const uint16_t SHA_HASH_LEN = 32;
+
 using namespace testing::ext;
 using namespace testing;
 
@@ -46,6 +48,12 @@ void LaneDepsInterfaceMock::SetDefaultResult()
     EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(*this, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    (void)strcpy_s((char *)hash, SHA_HASH_LEN, "1234567890123456");
+    return SOFTBUS_OK;
 }
 
 extern "C" {
@@ -198,6 +206,16 @@ bool ConnBleDirectIsEnable(BleProtocolType protocol)
 int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
+}
+
+int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo)
+{
+    return GetLaneDepsInterface()->GetAuthIdByConnInfo(connInfo);
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetLaneDepsInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 }
 } // namespace OHOS
