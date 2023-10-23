@@ -32,7 +32,7 @@
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectNetworkUtils: "
+#define LOG_LABEL "[WD] NetUt: "
 
 static int32_t SplitString(char *input, char *splitter, char **outputArray, size_t *outputArraySize)
 {
@@ -86,17 +86,36 @@ static int32_t StringToChannelList(char *channelListString, int32_t *channelArra
     CONN_CHECK_AND_RETURN_RET_LOG(*channelArraySize <= CHANNEL_ARRAY_NUM_MAX, SOFTBUS_INVALID_PARAM,
                                   LOG_LABEL "size too large");
 
-    CLOGI(LOG_LABEL "%s", channelListString);
+    if (channelListString == NULL || strlen(channelListString) == 0) {
+        *channelArraySize = 0;
+        return SOFTBUS_OK;
+    }
+    char *stringCopy = strdup(channelListString);
+    if (stringCopy == NULL) {
+        CLOGE(LOG_LABEL "copy string failed");
+        *channelArraySize = 0;
+        return SOFTBUS_MALLOC_ERR;
+    }
+
     char *channelStrings[CHANNEL_ARRAY_NUM_MAX];
-    int32_t ret = SplitString(channelListString, "##", channelStrings, channelArraySize);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "split channel failed");
-    CLOGI(LOG_LABEL "%d", *channelArraySize);
+    int32_t ret = SplitString(stringCopy, "##", channelStrings, channelArraySize);
+    if (ret != SOFTBUS_OK) {
+        CLOGE(LOG_LABEL "split channel failed");
+        SoftBusFree(stringCopy);
+        return ret;
+    }
 
     char *end = NULL;
     for (size_t i = 0; i < *channelArraySize; i++) {
         channelArray[i] = (int32_t)strtol(channelStrings[i], &end, DECIMAL_BASE);
-        CONN_CHECK_AND_RETURN_RET_LOG(channelArray[i] > 0, SOFTBUS_ERR, LOG_LABEL "convert to int failed");
+        if (channelArray[i] < 0) {
+            CLOGE(LOG_LABEL "to int failed");
+            SoftBusFree(stringCopy);
+            return SOFTBUS_ERR;
+        }
     }
+
+    SoftBusFree(stringCopy);
     return SOFTBUS_OK;
 }
 
@@ -183,7 +202,6 @@ static int32_t IpStringToIntArray(const char *addrString, uint32_t *addrArray, s
 {
     CONN_CHECK_AND_RETURN_RET_LOG(addrString, SOFTBUS_INVALID_PARAM, "addrString is null");
     CONN_CHECK_AND_RETURN_RET_LOG(addrArraySize >= IPV4_ADDR_ARRAY_LEN, SOFTBUS_INVALID_PARAM, "array to small");
-    CLOGI(LOG_LABEL, "%s", addrString);
 
     int32_t ret = sscanf_s(addrString, "%u.%u.%u.%u", addrArray, addrArray + 1, addrArray + 2, addrArray + 3);
     CONN_CHECK_AND_RETURN_RET_LOG(ret > 0, SOFTBUS_ERR, LOG_LABEL "scan ip number failed");

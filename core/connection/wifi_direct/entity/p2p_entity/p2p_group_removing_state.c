@@ -16,11 +16,12 @@
 #include "entity/p2p_entity/p2p_group_removing_state.h"
 #include "softbus_log.h"
 
-#define LOG_LABEL "[WifiDirect] P2pGroupRemovingState: "
+#define LOG_LABEL "[WD] PGReS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
     GetP2pEntity()->stopTimer();
     GetP2pEntity()->startTimer(TIMEOUT_WAIT_REMOVE_GROUP_MS, P2P_ENTITY_TIMEOUT_REMOVE_GROUP);
@@ -28,11 +29,13 @@ static void Enter(struct P2pEntityState *self)
 
 static void Exit(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
 {
+    (void)self;
     if (event != P2P_ENTITY_TIMEOUT_REMOVE_GROUP) {
         CLOGE(LOG_LABEL "mismatch timeout event");
         return;
@@ -45,12 +48,13 @@ static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEven
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
+    (void)self;
     if (groupInfo == NULL) {
         CLOGI(LOG_LABEL "remove group complete");
         struct P2pEntity *entity = GetP2pEntity();
         entity->clearJoiningClient();
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(OK);
+        entity->notifyOperationComplete(ENTITY_EVENT_P2P_REMOVE_COMPLETE);
     }
 }
 

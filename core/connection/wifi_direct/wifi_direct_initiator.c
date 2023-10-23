@@ -18,10 +18,10 @@
 #include "softbus_error_code.h"
 #include "wifi_direct_defines.h"
 #include "wifi_direct_manager.h"
-#include "wifi_direct_command_manager.h"
 #include "wifi_direct_negotiator.h"
 #include "broadcast_receiver.h"
 #include "broadcast_handler.h"
+#include "command/wifi_direct_command_manager.h"
 #include "channel/default_negotiate_channel.h"
 #include "channel/fast_connect_negotiate_channel.h"
 #include "data/resource_manager.h"
@@ -29,7 +29,7 @@
 #include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_work_queue.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectInitiator: "
+#define LOG_LABEL "[WD] Init: "
 
 typedef int32_t (*WifiDirectSubInitFunc)(void);
 

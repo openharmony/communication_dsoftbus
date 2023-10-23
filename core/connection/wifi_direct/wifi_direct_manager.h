@@ -17,7 +17,7 @@
 
 #include "common_list.h"
 #include "wifi_direct_types.h"
-#include "wifi_direct_negotiate_channel.h"
+#include "channel/wifi_direct_negotiate_channel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,15 +39,11 @@ struct WifiDirectManager {
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByRemoteIp)(const char *remoteIp, char *localIp, int32_t localIpSize);
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
+    bool (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectConnectType connectType);
 
     void (*onNegotiateChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len);
     void (*onNegotiateChannelDisconnected)(struct WifiDirectNegotiateChannel *channel);
-
-    /* implement connect callback interface */
-    void (*onConnectSuccess)(int32_t requestId, const struct WifiDirectLink *link);
-    void (*onConnectFailure)(int32_t requestId, enum WifiDirectErrorCode reason);
-    void (*onDisconnectSuccess)(int32_t requestId);
-    void (*onDisconnectFailure)(int32_t requestId, enum WifiDirectErrorCode reason);
+    void (*onRemoteP2pDisable)(const char *networkId);
 
     /* private data member */
     int32_t requestId;

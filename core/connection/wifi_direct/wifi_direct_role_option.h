@@ -27,7 +27,7 @@ struct WifiDirectRoleOption {
                                bool *isStrict);
 };
 
-struct WifiDirectRoleOption *GetWifiDirectRoleOption(void);
+struct WifiDirectRoleOption* GetWifiDirectRoleOption(void);
 
 #ifdef __cplusplus
 }

@@ -19,7 +19,6 @@
 #include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "broadcast_receiver.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "data/resource_manager.h"
 #include "utils/wifi_direct_timer_list.h"
@@ -31,7 +30,7 @@
 #include "entity/p2p_entity/p2p_group_connecting_state.h"
 #include "entity/p2p_entity/p2p_group_removing_state.h"
 
-#define LOG_LABEL "[WifiDirect] P2pEntity: "
+#define LOG_LABEL "[WD] PE: "
 
 /* private method forward declare */
 static void OnEntityTimeout(void *data);
@@ -40,15 +39,14 @@ static void OnClientJoinTimeout(void *data);
 /* public interface */
 static int32_t CreateServer(struct WifiDirectConnectParams *params)
 {
-    CLOGI(LOG_LABEL "requestId=%d freq=%d isNeedDhcp=%d isWideBandSupported=%d ifName=%s peerMac=%s",
-          params->requestId, params->freq, params->isNeedDhcp, params->isWideBandSupported, params->interface,
+    CLOGI(LOG_LABEL "freq=%d isNeedDhcp=%d isWideBandSupported=%d ifName=%s peerMac=%s",
+          params->freq, params->isNeedDhcp, params->isWideBandSupported, params->interface,
           WifiDirectAnonymizeMac(params->remoteMac));
 
     struct P2pEntity *self = GetP2pEntity();
     CONN_CHECK_AND_RETURN_RET_LOG(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
                                   "unavailable state");
 
-    self->currentRequestId = params->requestId;
     return self->currentState->createServer(self->currentState, params);
 }
 
@@ -58,7 +56,6 @@ static int32_t Connect(struct WifiDirectConnectParams *params)
     CONN_CHECK_AND_RETURN_RET_LOG(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
                                   "unavailable state");
 
-    self->currentRequestId = params->requestId;
     self->isNeedDhcp = params->isNeedDhcp;
     int32_t ret = strcpy_s(self->interface, sizeof(self->interface), params->interface);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy interface failed");
@@ -70,6 +67,7 @@ static int32_t Connect(struct WifiDirectConnectParams *params)
 
 static int32_t ReuseLink(struct WifiDirectConnectParams *params)
 {
+    (void)params;
     CLOGD(LOG_LABEL "enter");
     struct P2pEntity *self = GetP2pEntity();
     CONN_CHECK_AND_RETURN_RET_LOG(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
@@ -87,7 +85,6 @@ static int32_t Disconnect(struct WifiDirectConnectParams *params)
     CONN_CHECK_AND_RETURN_RET_LOG(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
                                   "unavailable state");
 
-    self->currentRequestId = params->requestId;
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(params->interface);
     CONN_CHECK_AND_RETURN_RET_LOG(info, SOFTBUS_ERR, LOG_LABEL "interface info is null");
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, -1);
@@ -107,18 +104,16 @@ static int32_t DestroyServer(struct WifiDirectConnectParams *params)
     struct P2pEntity *self = GetP2pEntity();
     CONN_CHECK_AND_RETURN_RET_LOG(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
                                   "unavailable state");
-    self->currentRequestId = params->requestId;
     return self->currentState->destroyServer(self->currentState, params);
 }
 
 static void NotifyNewClientJoining(struct WifiDirectConnectParams *params)
 {
-    CLOGI(LOG_LABEL "requestId=%d remoteMac=%s", params->requestId, WifiDirectAnonymizeMac(params->remoteMac));
+    CLOGI(LOG_LABEL "remoteMac=%s", WifiDirectAnonymizeMac(params->remoteMac));
     struct P2pEntity *self = GetP2pEntity();
     struct P2pEntityConnectingClient *client = SoftBusCalloc(sizeof(*client));
     CONN_CHECK_AND_RETURN_LOG(client, LOG_LABEL "malloc connecting client failed");
     ListInit(&client->node);
-    client->requestId = params->requestId;
     int32_t ret = strcpy_s(client->remoteMac, sizeof(client->remoteMac), params->remoteMac);
     if (ret != EOK) {
         CLOGE(LOG_LABEL "copy remote mac failed");
@@ -137,7 +132,7 @@ static void CancelNewClientJoining(struct WifiDirectConnectParams *params)
     struct P2pEntityConnectingClient *client = NULL;
     struct P2pEntityConnectingClient *clientNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
-        if (strcmp(client->remoteMac, params->remoteMac) == 0 && params->requestId == client->requestId) {
+        if (strcmp(client->remoteMac, params->remoteMac) == 0) {
             CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
             GetWifiDirectTimerList()->stopTimer(client->timerId);
             ListDelete(&client->node);
@@ -156,6 +151,7 @@ static void RegisterListener(struct EntityListener *listener)
 
 static int32_t P2pConnectNotify(struct WifiDirectConnectParams *params)
 {
+    (void)params;
     CLOGD(LOG_LABEL "not supported");
     return SOFTBUS_ERR;
 }
@@ -205,7 +201,7 @@ static void OperationCompleteWorkHandler(void *data)
     int32_t *result = data;
     struct P2pEntity *self = GetP2pEntity();
     if (self->listener && self->listener->onOperationComplete) {
-        self->listener->onOperationComplete(self->currentRequestId, *result);
+        self->listener->onOperationComplete(*result);
     }
     SoftBusFree(data);
 }
@@ -372,7 +368,6 @@ static void P2pEntityConstructor(struct P2pEntity *self)
 /* static class method */
 static struct P2pEntity g_entity = {
     .isInited = false,
-    .currentRequestId = REQUEST_ID_INVALID,
     .currentTimerId = TIMER_ID_INVALID,
     .listener = NULL,
     .isConnectionChangeReceived = false,

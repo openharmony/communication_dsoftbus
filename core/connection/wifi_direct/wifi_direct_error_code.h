@@ -252,6 +252,9 @@ enum WifiDirectErrorCode {
     /* Error code representing handling an expired request */
     ERROR_P2P_EXPIRED_REQ = ERROR_BASE - 5011,
 
+    /* Error code representing handling an expired response */
+    ERROR_P2P_EXPIRED_RESP = ERROR_BASE - 5012,
+
     /* Error code representing fail to connect group */
     ERROR_P2P_CONNECT_GROUP_FAILED = ERROR_BASE - 5200,
 
@@ -299,6 +302,9 @@ enum WifiDirectErrorCode {
 
     /* Error code representing Entity is unavailable */
     ERROR_ENTITY_UNAVAILABLE = ERROR_BASE - 6607,
+
+    /* Error code representing remote client join failed */
+    ERROR_HML_CLIENT_JOIN_FAIL = ERROR_BASE - 6608,
 
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
