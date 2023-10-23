@@ -170,6 +170,7 @@ char* TransProxyPackIdentity(const char *identity);
 int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len);
 char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen);
 int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo);
+int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

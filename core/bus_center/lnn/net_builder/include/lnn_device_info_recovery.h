@@ -33,6 +33,7 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo);
 NodeInfo *LnnRetrieveDeviceInfoByNetworkId(const char *networkId);
 void LnnDeleteDeviceInfo(const char *udid);
 void ClearDeviceInfo(void);
+int32_t LnnGetUdidByBrMac(const char *brMac, char *udid, uint32_t udidLen);
 
 #ifdef __cplusplus
 }

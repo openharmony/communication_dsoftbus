@@ -203,6 +203,24 @@ static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
     return AuthGetIdByConnInfo(&connInfo, isAuthServer, false);
 }
 
+int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
+{
+    AuthConnInfo connInfo;
+
+    if (peerBrMac == NULL || len <= 0 || len > BT_MAC_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
+        LLOGE("get connInfo fail connId[%d]", connId);
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(peerBrMac, len, connInfo.info.brInfo.brMac) != EOK) {
+        LLOGE("copy brMac fail.");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
     if (len <= PROXY_CHANNEL_HEAD_LEN) {
