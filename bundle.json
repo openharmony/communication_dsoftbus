@@ -67,7 +67,9 @@
           "c_utils",
           "safwk",
           "samgr",
-          "wifi"
+          "wifi",
+          "wifi_enhance",
+          "netmanager_base"
         ],
         "third_party": [
           "bounds_checking_function",

@@ -66,30 +66,30 @@ static enum WifiDirectRole GetExpectedP2pRole(const char *networkId)
     return WIFI_DIRECT_ROLE_AUTO;
 }
 
-static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType type, uint32_t *expectdRole,
+static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType type, uint32_t *expectedRole,
                                bool *isStrict)
 {
     if (type == WIFI_DIRECT_CONNECT_TYPE_HML) {
-        *expectdRole = WIFI_DIRECT_API_ROLE_HML;
+        *expectedRole = WIFI_DIRECT_API_ROLE_HML;
         *isStrict = true;
     } else if (type == WIFI_DIRECT_CONNECT_TYPE_P2P) {
         enum WifiDirectRole role = GetExpectedP2pRole(networkId);
         if (role == WIFI_DIRECT_ROLE_GC) {
-            *expectdRole = WIFI_DIRECT_API_ROLE_GC;
+            *expectedRole = WIFI_DIRECT_API_ROLE_GC;
         } else if (role == WIFI_DIRECT_ROLE_GO) {
-            *expectdRole = WIFI_DIRECT_API_ROLE_GO;
+            *expectedRole = WIFI_DIRECT_API_ROLE_GO;
         } else {
-            *expectdRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO;
+            *expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO;
         }
         *isStrict = true;
     } else if (type == WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT) {
         enum WifiDirectRole role = GetExpectedP2pRole(networkId);
         if (role == WIFI_DIRECT_ROLE_GC) {
-            *expectdRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_HML;
+            *expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_HML;
         } else if (role == WIFI_DIRECT_ROLE_GO) {
-            *expectdRole = WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
+            *expectedRole = WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
         } else {
-            *expectdRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
+            *expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
         }
         *isStrict = false;
     } else {
@@ -97,7 +97,7 @@ static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType
         return SOFTBUS_INVALID_PARAM;
     }
 
-    CLOGI(LOG_LABEL "expectdRole=0x%x isStrict=%d", *expectdRole, *isStrict);
+    CLOGI(LOG_LABEL "expectRole=0x%x isStrict=%d", *expectedRole, *isStrict);
     return SOFTBUS_OK;
 }
 
@@ -105,7 +105,7 @@ static struct WifiDirectRoleOption g_roleOption = {
     .getExpectedRole = GetExpectedRole,
 };
 
-struct WifiDirectRoleOption *GetWifiDirectRoleOption(void)
+struct WifiDirectRoleOption* GetWifiDirectRoleOption(void)
 {
     return &g_roleOption;
 }

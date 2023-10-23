@@ -86,6 +86,7 @@ static struct InfoContainerKeyProperty type##KeyProperties[max]
     bool (*getBoolean)(struct type *self, size_t key, bool defaultValue);                           \
     void* (*getPointer)(struct type *self, size_t key, void *defaultValue);                         \
     char* (*getString)(struct type *self, size_t key, const char *defaultValue);                    \
+    int32_t* (*getIntArray)(struct type *self, size_t key, size_t *arraySize, void *defaultValue);  \
     void* (*getContainer)(struct type *self, size_t key);                                           \
     void* (*getContainerArray)(struct type *self, size_t key, size_t *containerArraySize);          \
     void* (*getRawData)(struct type *self, size_t key, size_t *size, void *defaultValue);           \

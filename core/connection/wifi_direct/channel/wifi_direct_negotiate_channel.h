@@ -23,7 +23,6 @@ extern "C" {
 
 #define WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE \
     int32_t (*postData)(struct WifiDirectNegotiateChannel *base, const uint8_t *data, size_t size); \
-    bool (*isRemoteTlvSupported)(struct WifiDirectNegotiateChannel *base); \
     int32_t (*getDeviceId)(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize); \
     int32_t (*getP2pMac)(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize); \
     void (*setP2pMac)(struct WifiDirectNegotiateChannel *base, const char *p2pMac); \

@@ -18,56 +18,72 @@
 #include "softbus_error_code.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
-#define LOG_LABEL  "[WifiDirect] P2pUnavailableState: "
+#define LOG_LABEL  "[WD] PUnS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
     GetP2pEntity()->stopTimer();
 }
 
 static void Exit(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
 }
 
 static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
+    (void)params;
     CLOGE(LOG_LABEL "entity unavailable");
     return ERROR_ENTITY_UNAVAILABLE;
 }
 
 static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
+    (void)params;
     CLOGE(LOG_LABEL "entity unavailable");
     return ERROR_ENTITY_UNAVAILABLE;
 }
 
 static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
+    (void)params;
     CLOGE(LOG_LABEL "entity unavailable");
     return SOFTBUS_ERR;
 }
 
 static int32_t DestroyServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
+    (void)self;
+    (void)params;
     CLOGE(LOG_LABEL "entity unavailable");
     return SOFTBUS_ERR;
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
 {
+    (void)self;
+    (void)event;
     CLOGE(LOG_LABEL "entity unavailable");
 }
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
+    (void)self;
+    (void)groupInfo;
     CLOGE(LOG_LABEL "entity unavailable");
 }
 
 static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirectP2pConnectState state)
 {
+    (void)self;
+    (void)state;
     CLOGE(LOG_LABEL "entity unavailable");
 }
 

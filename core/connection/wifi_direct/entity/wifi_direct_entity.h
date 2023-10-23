@@ -24,7 +24,6 @@ extern "C" {
 #endif
 
 struct WifiDirectConnectParams {
-    int32_t requestId;
     int32_t freq;
     bool isNeedDhcp;
     bool isWideBandSupported;
@@ -45,8 +44,25 @@ enum EntityState {
     ENTITY_STATE_UNAVAILABLE_RPT_ENABLED = 3,
 };
 
+enum EntityOperationEvent {
+    ENTITY_EVENT_P2P_START = 0,
+    ENTITY_EVENT_P2P_CONNECT_COMPLETE,
+    ENTITY_EVENT_P2P_CREATE_COMPLETE,
+    ENTITY_EVENT_P2P_REMOVE_COMPLETE,
+    ENTITY_EVENT_P2P_END,
+
+    ENTITY_EVENT_HML_START,
+    ENTITY_EVENT_HML_CONNECT_COMPLETE,
+    ENTITY_EVENT_HML_CREATE_COMPLETE,
+    ENTITY_EVENT_HML_DISCONNECT_COMPLETE,
+    ENTITY_EVENT_HML_REMOVE_COMPLETE,
+    ENTITY_EVENT_HML_NOTIFY_COMPLETE,
+    ENTITY_EVENT_HML_JOIN_COMPLETE,
+    ENTITY_EVENT_HML_END,
+};
+
 struct EntityListener {
-    void (*onOperationComplete)(int32_t requestId, int32_t result);
+    void (*onOperationComplete)(int32_t event);
     void (*onEntityChanged)(enum EntityState state);
 };
 
