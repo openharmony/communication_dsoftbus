@@ -103,52 +103,6 @@ static void LinkUnlock(void)
     (void)SoftBusMutexUnlock(&g_p2pLinkMutex);
 }
 
-static bool IsPowerAlwaysOn(int32_t devTypeId)
-{
-    return devTypeId == TYPE_TV_ID || devTypeId == TYPE_CAR_ID || devTypeId == TYPE_SMART_DISPLAY_ID ||
-    devTypeId == TYPE_PC_ID || devTypeId == TYPE_2IN1_ID;
-}
-
-static bool IsGoPreferred(int32_t devTypeId)
-{
-    return devTypeId == TYPE_PAD_ID;
-}
-
-static int32_t GetExpectedP2pRole(const char *networkId)
-{
-    int32_t localDevTypeId = 0;
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
-    LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, "get local dev type id failed");
-    LLOGD("localDevTypeId=0x%03X", localDevTypeId);
-
-    if (IsPowerAlwaysOn(localDevTypeId)) {
-        LLOGI("local device's power is always-on");
-        return WIFI_DIRECT_ROLE_GO;
-    }
-
-    int32_t remoteDevTypeId = 0;
-    ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
-    LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, "get remote dev type id failed");
-    LLOGD("remoteDevTypeId=0x%03X", remoteDevTypeId);
-
-    if (IsPowerAlwaysOn(remoteDevTypeId)) {
-        LLOGI("remote device's power is always-on");
-        return WIFI_DIRECT_ROLE_GC;
-    }
-
-    if (IsGoPreferred(localDevTypeId)) {
-        LLOGI("local device prefers Go");
-        return WIFI_DIRECT_ROLE_GO;
-    }
-
-    if (IsGoPreferred(remoteDevTypeId)) {
-        LLOGI("remote device prefers Go");
-        return WIFI_DIRECT_ROLE_GC;
-    }
-
-    return WIFI_DIRECT_ROLE_AUTO;
-}
-
 static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connInfo, bool isMetaAuth)
 {
     char uuid[UDID_BUF_LEN] = {0};
@@ -367,7 +321,6 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
-        wifiDirectInfo->expectApiRole = GetExpectedP2pRole(item->laneRequestInfo.networkId);
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
