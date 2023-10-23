@@ -1,17 +1,17 @@
 {
-    "name": "@openharmony/dsoftbus",
-    "version": "3.0",
+    "name": "@ohos/dsoftbus",
+    "version": "4.0.2",
     "description": "dsoftbus",
     "publishAs": "code-segment",
     "segment": {
       "destPath": "foundation/communication/dsoftbus"
     },
     "dirs": {},
-    "scripts": {
-      "install": "DEST_PATH=${DEP_BUNDLE_BASE}/foundation/communication/dsoftbus && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
-    },
+    "scripts": {},
     "author": {},
-    "repository": "",
+    "homePage": "https://gitee.com/openharmony",
+    "repository": "https://gitee.com/openharmony/communication_dsoftbus",
+    "supplier":"Organization: OpenHarmony",
     "license": "Apache License 2.0",
     "component": {
       "name": "dsoftbus",
@@ -47,15 +47,12 @@
           "ability_base",
           "ability_runtime",
           "access_token",
-          "algorithm",
           "bluetooth",
           "bundle_framework",
-          "common",
           "common_event_service",
           "data_share",
           "device_auth",
           "drivers_interface_wlan",
-          "hicollie_native",
           "hisysevent",
           "hitrace",
           "hilog",
@@ -73,7 +70,6 @@
           "bounds_checking_function",
           "cJSON",
           "libcoap",
-          "libnl",
           "mbedtls",
           "openssl",
           "sqlite"
