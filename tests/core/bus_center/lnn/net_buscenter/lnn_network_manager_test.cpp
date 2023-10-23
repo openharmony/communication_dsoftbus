@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -268,6 +268,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_USER_STATE_EVENTHANDLER_TEST_001, TestSi
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     (void)NetUserStateEventHandler(nullptr);
     LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
+    EXPECT_TRUE(info1 != nullptr);
     info1->basic.event = LNN_EVENT_USER_STATE_CHANGED;
     info1->status = SOFTBUS_USER_FOREGROUND;
     LnnEventBasicInfo *info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
@@ -302,6 +303,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_OOB_STATE_EVENTHANDLER_TEST_001, TestSiz
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     (void)NetOOBEStateEventHandler(nullptr);
     LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
+    EXPECT_TRUE(info1 != nullptr);
     info1->basic.event = LNN_EVENT_OOBE_STATE_CHANGED;
     info1->status = SOFTBUS_OOBE_RUNNING;
     LnnEventBasicInfo *info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
@@ -364,6 +366,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_00
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     (void)NetAccountStateChangeEventHandler(nullptr);
     LnnMonitorHbStateChangedEvent *info1 = new LnnMonitorHbStateChangedEvent();
+    EXPECT_TRUE(info1 != nullptr);
     info1->basic.event = LNN_EVENT_ACCOUNT_CHANGED;
     info1->status = SOFTBUS_ACCOUNT_LOG_IN;
     LnnEventBasicInfo *info2 = reinterpret_cast<LnnEventBasicInfo*>(info1);
@@ -391,8 +394,10 @@ HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
 
     LnnProtocolManager manager;
     data = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnProtocolManager)));
+    EXPECT_TRUE(data != nullptr);
     ret = GetAllProtocols(&manager, data);
     EXPECT_TRUE(ret == CHOICE_VISIT_NEXT);
+    SoftBusFree(data);
 }
 
 HWTEST_F(LNNNetworkManagerMockTest, NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001, TestSize.Level1)
