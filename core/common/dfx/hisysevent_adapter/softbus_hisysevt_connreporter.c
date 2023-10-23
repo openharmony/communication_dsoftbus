@@ -424,7 +424,7 @@ static inline void ClearProcStepMsg(SoftBusEvtReportMsg *msg)
     SoftBusMutexUnlock(&g_procStepLock);
 }
 
-static int32_t SoftBusReportProcessStepRecordEvt()
+static int32_t SoftBusReportProcessStepRecordEvt(void)
 {
     MLOGD("report process step duration event");
     int32_t ret = SoftBusMutexLock(&g_procStepLock);
