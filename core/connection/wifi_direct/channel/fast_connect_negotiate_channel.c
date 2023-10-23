@@ -17,7 +17,6 @@
 #include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "bus_center_manager.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "wifi_direct_manager.h"
 #include "utils/wifi_direct_work_queue.h"
@@ -74,12 +73,6 @@ static int32_t PostData(struct WifiDirectNegotiateChannel *base, const uint8_t *
     return TransProxyPipelineSendMessage(self->channelId, data, size, MSG_TYPE_P2P_NEGO);
 }
 
-static bool IsRemoteTlvSupported(struct WifiDirectNegotiateChannel *base)
-{
-    struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
-    return self->tlvFeature;
-}
-
 static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
@@ -103,24 +96,8 @@ static void SetP2pMac(struct WifiDirectNegotiateChannel *base, const char *p2pMa
 
 static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
 {
+    (void)base;
     return false;
-}
-
-static bool GetTlvFeature(struct FastConnectNegotiateChannel *self)
-{
-    char uuid[UUID_BUF_LEN] = {0};
-    int32_t ret = self->getDeviceId((struct WifiDirectNegotiateChannel *)self, uuid, sizeof(uuid));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get uuid failed");
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    ret = LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get networkId failed");
-
-    bool result = false;
-    ret = LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get key failed");
-    CLOGI(LOG_LABEL "uuid=%s isTlvSupport=%s", AnonymizesUUID(uuid), result ? "true" : "false");
-
-    return result;
 }
 
 static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateChannel *base)
@@ -142,7 +119,6 @@ void FastConnectNegotiateChannelConstructor(struct FastConnectNegotiateChannel *
 
     self->postData = PostData;
     self->getDeviceId = GetDeviceId;
-    self->isRemoteTlvSupported = IsRemoteTlvSupported;
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
@@ -150,11 +126,11 @@ void FastConnectNegotiateChannelConstructor(struct FastConnectNegotiateChannel *
     self->destructor = Destructor;
 
     self->channelId = channelId;
-    self->tlvFeature = GetTlvFeature(self);
 }
 
 void FastConnectNegotiateChannelDestructor(struct FastConnectNegotiateChannel *self)
 {
+    (void)self;
 }
 
 struct FastConnectNegotiateChannel* FastConnectNegotiateChannelNew(int32_t channelId)

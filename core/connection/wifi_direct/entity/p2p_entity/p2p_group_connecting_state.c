@@ -19,11 +19,12 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 
-#define LOG_LABEL "[WifiDirect] P2pGroupConnectingState: "
+#define LOG_LABEL "[WD] PGCoS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
     GetP2pEntity()->stopTimer();
     int64_t timeout = TIMEOUT_CONNECT_GROUP_MS;
@@ -35,11 +36,13 @@ static void Enter(struct P2pEntityState *self)
 
 static void Exit(struct P2pEntityState *self)
 {
+    (void)self;
     CLOGI(LOG_LABEL "enter");
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
 {
+    (void)self;
     struct P2pEntity *entity = GetP2pEntity();
     if (event != P2P_ENTITY_TIMEOUT_CONNECT_SERVER) {
         CLOGE(LOG_LABEL "mismatch timeout events");
@@ -54,6 +57,7 @@ static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEven
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
+    (void)self;
     struct P2pEntity *entity = GetP2pEntity();
 
     if (groupInfo == NULL) {
@@ -66,12 +70,13 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
     if (entity->isNeedDhcp) {
         CLOGI(LOG_LABEL "connect group complete in DHCP mode");
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(SOFTBUS_OK);
+        entity->notifyOperationComplete(ENTITY_EVENT_P2P_CONNECT_COMPLETE);
     }
 }
 
 static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirectP2pConnectState state)
 {
+    (void)self;
     struct P2pEntity *entity = GetP2pEntity();
 
     if (state == WIFI_DIRECT_P2P_CONNECTING) {
@@ -92,7 +97,7 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
 
         CLOGI(LOG_LABEL "connect group complete");
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
-        entity->notifyOperationComplete(SOFTBUS_OK);
+        entity->notifyOperationComplete(ENTITY_EVENT_P2P_CONNECT_COMPLETE);
     } else {
         CLOGI(LOG_LABEL "p2p connect failed");
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);

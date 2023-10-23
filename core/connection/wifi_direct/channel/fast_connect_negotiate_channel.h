@@ -24,7 +24,6 @@ extern "C" {
 struct FastConnectNegotiateChannel {
     WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE;
 
-    bool tlvFeature;
     int32_t channelId;
     char p2pMac[MAC_ADDR_STR_LEN];
 };

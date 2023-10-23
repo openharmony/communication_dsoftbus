@@ -17,6 +17,7 @@
 #include "softbus_log.h"
 #include "wifi_direct_types.h"
 
+#define LOG_LABEL "[WD] Ano: "
 #define ANONYMOUS_BUF_NUM 2
 #define MAC_ANONYMOUS_START 6
 #define MAC_ANONYMOUS_END 11

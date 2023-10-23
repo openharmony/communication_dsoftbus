@@ -19,13 +19,12 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "interface_info.h"
-#include "broadcast_receiver.h"
 #include "wifi_direct_coexist_rule.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_network_utils.h"
 
-#define LOG_LABEL "[WifiDirect] ResourceManager: "
+#define LOG_LABEL "[WD] RM: "
 
 /* private method forward declare */
 static int32_t InitInterfaceInfo(const char *interface);
@@ -47,9 +46,15 @@ static int32_t InitWifiDirectInfo(void)
         return ret;
     }
 
+    CLOGI(LOG_LABEL "cap=%s", coexistCap);
+    ret = GetWifiDirectCoexistRule()->setCoexistRule(coexistCap);
+    if (ret != SOFTBUS_OK) {
+        CLOGE(LOG_LABEL "set coexist rule failed");
+    }
+
     ret = InitInterfacesByCoexistCap(coexistCap);
-    if (ret == SOFTBUS_OK) {
-        ret = GetWifiDirectCoexistRule()->setCoexistRule(coexistCap);
+    if (ret != SOFTBUS_OK) {
+        CLOGE(LOG_LABEL "init InterfacesByCoexistCap failed");
     }
     SoftBusFree(coexistCap);
     return ret;
@@ -79,6 +84,7 @@ static void NotifyInterfaceInfoChange(struct InterfaceInfo *info)
     CONN_CHECK_AND_RETURN_LOG(self->isInited, LOG_LABEL "not inited");
     bool isChanged = false;
     char *name = info->getName(info);
+    CONN_CHECK_AND_RETURN_LOG(strlen(name) > 0, LOG_LABEL "name is emtpy");
     SoftBusMutexLock(&self->mutex);
     struct InterfaceInfo *old = self->getInterfaceInfo(name);
     if (!old) {
@@ -184,17 +190,21 @@ static bool IsStationAndHmlDBAC(void)
 {
     int32_t staFreq = GetWifiDirectP2pAdapter()->getStationFrequency();
     int32_t hmlFreq = -1;
-    enum WifiDirectApiRole hmlRole = 0;
     struct InterfaceInfo *hmlInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_HML);
     if (hmlInfo) {
-        hmlRole = hmlInfo->getInt(hmlInfo, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE);
+        enum WifiDirectApiRole hmlRole = hmlInfo->getInt(hmlInfo, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE);
         if (hmlRole == WIFI_DIRECT_API_ROLE_HML) {
             hmlFreq = hmlInfo->getInt(hmlInfo, II_KEY_CENTER_20M, -1);
         }
     }
+
+    CLOGI(LOG_LABEL "staFreq=%d hmlFreq=%d", staFreq, hmlFreq);
     if (staFreq != -1 && hmlFreq != -1 && staFreq != hmlFreq) {
-        CLOGI(LOG_LABEL "staFreq=%d hmlFreq=%d", staFreq, hmlFreq);
-        return true;
+        struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
+        if ((netWorkUtils->is2GBand(staFreq) && netWorkUtils->is2GBand(hmlFreq)) ||
+            (netWorkUtils->is5GBand(staFreq) && netWorkUtils->is5GBand(hmlFreq))) {
+            return true;
+        }
     }
     return false;
 }
@@ -209,7 +219,7 @@ static bool IsInterfaceAvailable(const char *interface, bool forShare)
     CONN_CHECK_AND_RETURN_RET_LOG(info, false, "interface info is null");
 
     if (!info->getBoolean(info, II_KEY_IS_ENABLE, false)) {
-        CLOGE(LOG_LABEL "IS_ENABLE=0");
+        CLOGE(LOG_LABEL "%s IS_ENABLE=0", interface);
         return false;
     }
 
@@ -383,6 +393,9 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
     InterfaceInfoConstructor(&info);
     info.putName(&info, interface);
     info.putInt(&info, II_KEY_CONNECT_CAPABILITY, cap);
+    info.putInt(&info, II_KEY_REUSE_COUNT, 0);
+
+    CLOGI(LOG_LABEL "interface=%s cap=0x%x", interface, cap);
     if (((uint32_t)cap & WIFI_DIRECT_API_ROLE_GO) || ((uint32_t)cap & WIFI_DIRECT_API_ROLE_GC)) {
         int32_t channelArray[CHANNEL_ARRAY_NUM_MAX];
         size_t channelArraySize = CHANNEL_ARRAY_NUM_MAX;
@@ -393,13 +406,15 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
     }
 
     if (GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
+        CLOGI(LOG_LABEL "set %s enable=true", interface);
         info.putBoolean(&info, II_KEY_IS_ENABLE, true);
         char baseMac[MAC_ADDR_STR_LEN] = {0};
         if (GetWifiDirectP2pAdapter()->getBaseMac(interface, (uint32_t)cap, baseMac, sizeof(baseMac)) == SOFTBUS_OK) {
             info.putString(&info, II_KEY_BASE_MAC, baseMac);
         }
     } else {
-        info.putBoolean(&info, II_KEY_IS_ENABLE, false);
+        CLOGI(LOG_LABEL "set %s enable=false", interface);
+        info.putBoolean(&info, II_KEY_IS_ENABLE, true);
     }
 
     GetResourceManager()->notifyInterfaceInfoChange(&info);

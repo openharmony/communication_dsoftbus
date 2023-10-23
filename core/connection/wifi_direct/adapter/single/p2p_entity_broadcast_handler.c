@@ -15,12 +15,11 @@
 
 #include "p2p_entity_broadcast_handler.h"
 #include "softbus_log.h"
-#include "softbus_error_code.h"
 #include "broadcast_receiver.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
-#define LOG_LABEL "[WifiDirect] P2pEntityBroadcastHandler: "
+#define LOG_LABEL "[WD] P2pBrH: "
 
 static void HandleP2pStateChanged(enum P2pState state)
 {
@@ -34,13 +33,13 @@ static void HandleP2pStateChanged(enum P2pState state)
     GetP2pEntity()->enable(state == P2P_STATE_STARTED, entityState);
 }
 
-static void HandleP2pConnectionChanged(const struct P2pConnChangedInfo *changedInfo)
+static void HandleP2pConnectionChanged(const struct P2pBroadcastParam *param)
 {
     CLOGI(LOG_LABEL "enter");
-    if (changedInfo->p2pLinkInfo.connectState == P2P_DISCONNECTED || changedInfo->groupInfo == NULL) {
+    if (param->p2pLinkInfo.connectState == P2P_DISCONNECTED || param->groupInfo == NULL) {
         GetP2pEntity()->handleConnectionChange(NULL);
     } else {
-        GetP2pEntity()->handleConnectionChange(changedInfo->groupInfo);
+        GetP2pEntity()->handleConnectionChange(param->groupInfo);
         GetP2pEntity()->handleConnectStateChange(WIFI_DIRECT_P2P_CONNECTED);
     }
 }
@@ -49,10 +48,10 @@ static void Listener(enum BroadcastReceiverAction action, const struct Broadcast
 {
     if (action == WIFI_P2P_STATE_CHANGED_ACTION) {
         CLOGI(LOG_LABEL "WIFI_P2P_STATE_CHANGED_ACTION");
-        HandleP2pStateChanged(param->p2pState);
+        HandleP2pStateChanged(param->p2pParam.p2pState);
     } else if (action == WIFI_P2P_CONNECTION_CHANGED_ACTION) {
         CLOGI(LOG_LABEL "WIFI_P2P_CONNECTION_CHANGED_ACTION");
-        HandleP2pConnectionChanged(&param->changedInfo);
+        HandleP2pConnectionChanged(&param->p2pParam);
     }
 }
 

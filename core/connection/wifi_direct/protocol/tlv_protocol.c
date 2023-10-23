@@ -19,7 +19,7 @@
 #include "softbus_adapter_mem.h"
 #include "utils/wifi_direct_utils.h"
 
-#define LOG_LABEL "[WifiDirect] TlvProtocol: "
+#define LOG_LABEL "[WD] Tlv: "
 
 #define DEFAULT_CAPACITY 128
 #define CAPACITY_MAX (1024 * 64)

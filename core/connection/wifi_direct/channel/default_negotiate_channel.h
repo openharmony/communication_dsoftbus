@@ -17,7 +17,6 @@
 #define DEFAULT_NEGOTIATE_CHANNEL_H
 
 #include "wifi_direct_negotiate_channel.h"
-#include "common_list.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +26,6 @@ struct DefaultNegotiateChannel {
     WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE;
 
     int64_t authId;
-    bool tlvFeature;
     char p2pMac[MAC_ADDR_STR_LEN];
 };
 

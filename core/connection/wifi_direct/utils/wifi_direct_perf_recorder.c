@@ -19,7 +19,7 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_timer.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectPerfRecorder: "
+#define LOG_LABEL "[WD] Perf: "
 
 #define TIME_POINT_ITEM_DEFINE(TP) { TP, #TP }
 static const char* GetTimePointTypeString(enum TimePointType type)
@@ -53,6 +53,16 @@ static void SetPid(int32_t pid)
 static int32_t GetPid(void)
 {
     return GetWifiDirectPerfRecorder()->pid;
+}
+
+static void SetConnectType(enum WifiDirectConnectType type)
+{
+    GetWifiDirectPerfRecorder()->type = type;
+}
+
+static enum WifiDirectConnectType GetConnectType(void)
+{
+    return GetWifiDirectPerfRecorder()->type;
 }
 
 static void Record(enum TimePointType type)
@@ -118,6 +128,8 @@ static void Clear(void)
 static struct WifiDirectPerfRecorder g_perfRecorder = {
     .setPid = SetPid,
     .getPid = GetPid,
+    .setConnectType = SetConnectType,
+    .getConnectType = GetConnectType,
     .record = Record,
     .calculate = Calculate,
     .getTime = GetTime,

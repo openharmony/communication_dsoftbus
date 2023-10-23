@@ -17,48 +17,20 @@
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "softbus_log.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_hisysevt_connreporter.h"
-#include "wifi_direct_command_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_role_option.h"
+#include "command/wifi_direct_connect_command.h"
+#include "command/wifi_direct_disconnect_command.h"
+#include "command/wifi_direct_command_manager.h"
 #include "data/resource_manager.h"
 #include "data/link_manager.h"
 #include "utils/wifi_direct_work_queue.h"
-#include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_perf_recorder.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectManager: "
-
-/* inner class */
-struct ConnectCallbackNode {
-    ListNode node;
-    int32_t requestId;
-    struct WifiDirectConnectCallback connectCallback;
-};
-
-enum ConnectCallbackType {
-    CALLBACK_TYPE_CONNECT_SUCCESS = 0,
-    CALLBACK_TYPE_CONNECT_FAILURE = 1,
-    CALLBACK_TYPE_DISCONNECT_SUCCESS = 2,
-    CALLBACK_TYPE_DISCONNECT_FAILURE = 3,
-};
-
-struct ConnectResultStruct {
-    enum ConnectCallbackType type;
-    int32_t requestId;
-    int32_t reason;
-    struct WifiDirectLink link;
-};
-
-/* forward declare private member method */
-static int32_t SetupCommandAndCallback(struct WifiDirectCommand *command, struct WifiDirectConnectInfo *connectInfo,
-                                       struct WifiDirectConnectCallback *callback);
-static int32_t AddConnectCallbackNode(int32_t requestId, const struct WifiDirectConnectCallback *callback);
-static struct ConnectCallbackNode* FetchConnectCallbackNode(int32_t requestId);
-static void CommandTimeoutHandler(void *data);
+#define LOG_LABEL "[WD] Manager: "
 
 /* public interface implement */
 static int32_t GetRequestId(void)
@@ -77,6 +49,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
     int32_t ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
                                                              &connectInfo->expectApiRole, &connectInfo->isStrict);
+    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get expected role failed");
     CLOGI(LOG_LABEL "requestId=%d pid=%d type=%d expectRole=0x%x remoteMac=%s uuid=%s",
           connectInfo->requestId, connectInfo->pid, connectInfo->connectType, connectInfo->expectApiRole,
           WifiDirectAnonymizeMac(connectInfo->remoteMac), AnonymizesUUID(uuid));
@@ -84,16 +57,11 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     GetWifiDirectPerfRecorder()->clear();
     GetWifiDirectPerfRecorder()->setPid(connectInfo->pid);
     GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_START);
-    struct WifiDirectCommand *command = GenerateWifiDirectConnectCommand(connectInfo);
+    struct WifiDirectCommand *command = WifiDirectConnectCommandNew(connectInfo, callback);
     CONN_CHECK_AND_RETURN_RET_LOG(command, SOFTBUS_MALLOC_ERR, "alloc connect command failed");
 
-    ret = SetupCommandAndCallback(command, connectInfo, callback);
-    if (ret != SOFTBUS_OK) {
-        FreeWifiDirectCommand(command);
-        return ret;
-    }
-
-    ret = GetWifiDirectNegotiator()->processNewCommand();
+    GetWifiDirectCommandManager()->enqueueCommand(command);
+    ret = GetWifiDirectNegotiator()->processNextCommand();
     return ret;
 }
 
@@ -104,20 +72,15 @@ static int32_t DisconnectDevice(struct WifiDirectConnectInfo *connectInfo, struc
     if (connectInfo->negoChannel) {
         (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
     }
-    CLOGI(LOG_LABEL "requestId=%d pid=%d connectType=%d remoteMac=%s linkId=%d uuid=%s",
+    CLOGI(LOG_LABEL "requestId=%d pid=%d type=%d remoteMac=%s linkId=%d uuid=%s",
           connectInfo->requestId, connectInfo->pid, connectInfo->connectType,
           WifiDirectAnonymizeMac(connectInfo->remoteMac), connectInfo->linkId, AnonymizesUUID(uuid));
 
-    struct WifiDirectCommand *command = GenerateWifiDirectDisconnectCommand(connectInfo);
+    struct WifiDirectCommand *command = WifiDirectDisconnectCommandNew(connectInfo, callback);
     CONN_CHECK_AND_RETURN_RET_LOG(command, SOFTBUS_MALLOC_ERR, "alloc disconnect command failed");
 
-    int32_t ret = SetupCommandAndCallback(command, connectInfo, callback);
-    if (ret != SOFTBUS_OK) {
-        FreeWifiDirectCommand(command);
-    } else {
-        ret = GetWifiDirectNegotiator()->processNewCommand();
-    }
-    return ret;
+    GetWifiDirectCommandManager()->enqueueCommand(command);
+    return GetWifiDirectNegotiator()->processNextCommand();
 }
 
 static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
@@ -178,6 +141,11 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
     return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
 }
 
+static bool PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectConnectType connectType)
+{
+    return true;
+}
+
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
 {
     GetWifiDirectNegotiator()->onNegotiateChannelDataReceived(channel, data, len);
@@ -188,191 +156,16 @@ static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *ch
     GetWifiDirectNegotiator()->onNegotiateChannelDisconnected(channel);
 }
 
-static void ConnectCallbackAsyncHandler(void *data)
+static void OnRemoteP2pDisable(const char *networkId)
 {
-    struct ConnectResultStruct *connectResult = data;
-    struct ConnectCallbackNode *callbackNode = FetchConnectCallbackNode(connectResult->requestId);
-    if (callbackNode) {
-        switch (connectResult->type) {
-            case CALLBACK_TYPE_CONNECT_SUCCESS:
-                if (callbackNode->connectCallback.onConnectSuccess) {
-                    callbackNode->connectCallback.onConnectSuccess(connectResult->requestId, &connectResult->link);
-                }
-                break;
-            case CALLBACK_TYPE_CONNECT_FAILURE:
-                if (callbackNode->connectCallback.onConnectFailure) {
-                    callbackNode->connectCallback.onConnectFailure(connectResult->requestId, connectResult->reason);
-                }
-                break;
-            case CALLBACK_TYPE_DISCONNECT_SUCCESS:
-                if (callbackNode->connectCallback.onDisconnectSuccess) {
-                    callbackNode->connectCallback.onDisconnectSuccess(connectResult->requestId);
-                }
-                break;
-            case CALLBACK_TYPE_DISCONNECT_FAILURE:
-                if (callbackNode->connectCallback.onDisconnectFailure) {
-                    callbackNode->connectCallback.onDisconnectFailure(connectResult->requestId, connectResult->reason);
-                }
-                break;
-            default:
-                CLOGE(LOG_LABEL "invalid type");
-                break;
-        }
-    }
-
-    SoftBusFree(data);
-    SoftBusFree(callbackNode);
-}
-
-static void ReportPerfData(enum WifiDirectErrorCode reason)
-{
-    struct WifiDirectPerfRecorder *recorder = GetWifiDirectPerfRecorder();
-    recorder->calculate();
-    ProcessStepTime time;
-    time.totalTime = recorder->getTime(TC_TOTAL);
-    time.groupCreateTime = recorder->getTime(TC_CREATE_GROUP);
-    time.connGroupTime = recorder->getTime(TC_CONNECT_GROUP);
-    time.negotiationTime = recorder->getTime(TC_NEGOTIATE);
-    SoftbusRecordProccessDuration(recorder->getPid(), SOFTBUS_HISYSEVT_CONN_TYPE_P2P, SOFTBUS_EVT_CONN_SUCC,
-                                  &time, reason);
-    recorder->clear();
-}
-
-static void OnConnectSuccess(int32_t requestId, const struct WifiDirectLink *link)
-{
-    CLOGI(LOG_LABEL "requestId=%d localIp=%s remoteIp=%s",
-          requestId, WifiDirectAnonymizeIp(link->localIp), WifiDirectAnonymizeIp(link->remoteIp));
-    struct ConnectResultStruct *connectResult = SoftBusCalloc(sizeof(*connectResult));
-    CONN_CHECK_AND_RETURN_LOG(connectResult, LOG_LABEL "malloc connect result failed");
-
-    connectResult->type = CALLBACK_TYPE_CONNECT_SUCCESS;
-    connectResult->requestId = requestId;
-    if (memcpy_s(&connectResult->link, sizeof(connectResult->link), link, sizeof(struct WifiDirectLink)) != EOK) {
-        CLOGE(LOG_LABEL "memcpy_s failed");
-        SoftBusFree(connectResult);
-        connectResult = NULL;
-        return;
-    }
-
-    if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "async fail");
-        SoftBusFree(connectResult);
-        connectResult = NULL;
-    }
-    GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_END);
-    ReportPerfData(OK);
-}
-
-static void OnConnectFailure(int32_t requestId, enum WifiDirectErrorCode reason)
-{
-    CLOGE(LOG_LABEL "requestId=%d reason=%d", requestId, reason);
-    struct ConnectResultStruct *connectResult = SoftBusCalloc(sizeof(*connectResult));
-    CONN_CHECK_AND_RETURN_LOG(connectResult, LOG_LABEL "malloc connect result failed");
-
-    connectResult->type = CALLBACK_TYPE_CONNECT_FAILURE;
-    connectResult->requestId = requestId;
-    connectResult->reason = reason;
-
-    if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
-        SoftBusFree(connectResult);
-        connectResult = NULL;
-    }
-    GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_END);
-    ReportPerfData(reason);
-}
-
-static void OnDisconnectSuccess(int32_t requestId)
-{
-    CLOGI(LOG_LABEL "requestId=%d", requestId);
-    struct ConnectResultStruct *connectResult = SoftBusCalloc(sizeof(*connectResult));
-    CONN_CHECK_AND_RETURN_LOG(connectResult, LOG_LABEL "malloc connect result failed");
-
-    connectResult->type = CALLBACK_TYPE_DISCONNECT_SUCCESS;
-    connectResult->requestId = requestId;
-
-    if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
-        SoftBusFree(connectResult);
-        connectResult = NULL;
-    }
-}
-
-static void OnDisconnectFailure(int32_t requestId, enum WifiDirectErrorCode reason)
-{
-    CLOGE(LOG_LABEL "requestId=%d reason=%d", requestId, reason);
-    struct ConnectResultStruct *connectResult = SoftBusCalloc(sizeof(*connectResult));
-    CONN_CHECK_AND_RETURN_LOG(connectResult, LOG_LABEL "malloc connect result failed");
-
-    connectResult->type = CALLBACK_TYPE_DISCONNECT_FAILURE;
-    connectResult->requestId = requestId;
-    connectResult->reason = reason;
-
-    if (CallMethodAsync(ConnectCallbackAsyncHandler, connectResult, 0) != SOFTBUS_OK) {
-        SoftBusFree(connectResult);
-        connectResult = NULL;
-    }
+    CLOGD(LOG_LABEL "networkId=%s", AnonymizesNetworkID(networkId));
+    char uuid[UUID_BUF_LEN] = {0};
+    int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, sizeof(uuid));
+    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "convert %s to uuid failed", AnonymizesNetworkID(networkId));
+    GetLinkManager()->clearNegoChannelForLink(uuid, true);
 }
 
 /* private method implement */
-static int32_t SetupCommandAndCallback(struct WifiDirectCommand *command, struct WifiDirectConnectInfo *connectInfo,
-                                       struct WifiDirectConnectCallback *callback)
-{
-    command->timerId = GetWifiDirectTimerList()->startTimer(CommandTimeoutHandler, TIMEOUT_COMMAND_WAIT_MS,
-                                                            TIMER_FLAG_ONE_SHOOT, command);
-    if (command->timerId < 0) {
-        CLOGE("start timer failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
-
-    if (AddConnectCallbackNode(connectInfo->requestId, callback) != SOFTBUS_OK) {
-        CLOGE("add connect callback failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
-
-    GetWifiDirectCommandManager()->enqueueCommand(command);
-    return SOFTBUS_OK;
-}
-
-static int32_t AddConnectCallbackNode(int32_t requestId, const struct WifiDirectConnectCallback *callback)
-{
-    struct ConnectCallbackNode *callbackNode = (struct ConnectCallbackNode*)SoftBusCalloc(sizeof(*callbackNode));
-    CONN_CHECK_AND_RETURN_RET_LOG(callbackNode, SOFTBUS_MALLOC_ERR, "malloc callback node failed");
-    callbackNode->requestId = requestId;
-    ListInit(&callbackNode->node);
-    callbackNode->connectCallback = *callback;
-    ListAdd(&GetWifiDirectManager()->callbackList, &callbackNode->node);
-    return SOFTBUS_OK;
-}
-
-static struct ConnectCallbackNode* FetchConnectCallbackNode(int32_t requestId)
-{
-    struct WifiDirectManager *self = GetWifiDirectManager();
-    struct ConnectCallbackNode *callbackNode = NULL;
-    LIST_FOR_EACH_ENTRY(callbackNode, &self->callbackList, struct ConnectCallbackNode, node) {
-        if (callbackNode->requestId == requestId) {
-            ListDelete(&callbackNode->node);
-            return callbackNode;
-        }
-    }
-    return NULL;
-}
-
-static void CommandTimeoutHandler(void *data)
-{
-    struct WifiDirectCommand *command = data;
-    CLOGE("type=%d requestId=%d", command->type, command->connectInfo.requestId);
-    GetWifiDirectCommandManager()->removeCommand(command);
-
-    if (command->type == COMMAND_TYPE_CONNECT) {
-        GetWifiDirectManager()->onConnectFailure(command->connectInfo.requestId,
-                                                 ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
-    } else {
-        GetWifiDirectManager()->onDisconnectFailure(command->connectInfo.requestId,
-                                                    ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
-    }
-
-    FreeWifiDirectCommand(command);
-}
-
 /* static class method */
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
@@ -383,14 +176,11 @@ static struct WifiDirectManager g_manager = {
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
     .getLocalIpByUuid = GetLocalIpByUuid,
+    .prejudgeAvailability = PrejudgeAvailability,
 
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
-
-    .onConnectSuccess = OnConnectSuccess,
-    .onConnectFailure = OnConnectFailure,
-    .onDisconnectSuccess = OnDisconnectSuccess,
-    .onDisconnectFailure = OnDisconnectFailure,
+    .onRemoteP2pDisable = OnRemoteP2pDisable,
 
     .requestId = REQUEST_ID_INVALID,
     .myRole = WIFI_DIRECT_ROLE_NONE,

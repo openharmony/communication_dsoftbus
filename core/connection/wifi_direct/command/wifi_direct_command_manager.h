@@ -12,20 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NEGOTIATE_WAITING_CONNECT_REQUEST_STATE_H
-#define NEGOTIATE_WAITING_CONNECT_REQUEST_STATE_H
+#ifndef WIFI_DIRECT_COMMAND_MANAGER_H
+#define WIFI_DIRECT_COMMAND_MANAGER_H
 
-#include "negotiate_state.h"
+#include "common_list.h"
+#include "softbus_adapter_thread.h"
+#include "wifi_direct_types.h"
+#include "command/wifi_direct_command.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct WaitingConnectRequestState {
-    NEGOTIATE_STATE_BASE(WaitingConnectRequestState);
+struct WifiDirectCommandManager {
+    void (*enqueueCommand)(struct WifiDirectCommand *command);
+    struct WifiDirectCommand* (*dequeueCommand)(void);
+
+    struct ListNode commands;
+    SoftBusMutex mutex;
 };
 
-struct WaitingConnectRequestState* GetWaitingConnectRequestState(struct WifiDirectNegotiator *negotiator);
+struct WifiDirectCommandManager* GetWifiDirectCommandManager(void);
+int32_t WifiDirectCommandManagerInit(void);
 
 #ifdef __cplusplus
 }

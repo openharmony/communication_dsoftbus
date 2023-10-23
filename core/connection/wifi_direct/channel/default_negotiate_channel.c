@@ -15,6 +15,7 @@
 
 #include "default_negotiate_channel.h"
 #include "securec.h"
+#include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_log.h"
@@ -25,7 +26,7 @@
 #include "utils/wifi_direct_work_queue.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WifiDirect] DefaultNegotiateChannel: "
+#define LOG_LABEL "[WD] DNC: "
 #define MAX_AUTH_DATA_LEN (1024 * 1024)
 
 static void OnAuthDataReceived(int64_t authId, const AuthTransData *data);
@@ -54,6 +55,7 @@ static void DataReceivedWorkHandler(void *data)
     DefaultNegotiateChannelConstructor(&channel, dataStruct->authId);
     GetWifiDirectManager()->onNegotiateChannelDataReceived((struct WifiDirectNegotiateChannel *)&channel,
                                                            dataStruct->data, dataStruct->len);
+    DefaultNegotiateChannelDestructor(&channel);
     SoftBusFree(dataStruct);
 }
 
@@ -112,12 +114,6 @@ static int32_t PostData(struct WifiDirectNegotiateChannel *base, const uint8_t *
     return SOFTBUS_OK;
 }
 
-static bool IsRemoteTlvSupported(struct WifiDirectNegotiateChannel *base)
-{
-    struct DefaultNegotiateChannel *channel = (struct DefaultNegotiateChannel *)base;
-    return channel->tlvFeature;
-}
-
 static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
 {
     int32_t ret = AuthGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
@@ -128,7 +124,20 @@ static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *device
 static int32_t GetP2pMac(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
-    int32_t ret = strcpy_s(p2pMac, p2pMacSize, self->p2pMac);
+    int32_t ret = SOFTBUS_OK;
+    if (strlen(self->p2pMac) == 0) {
+        char uuid[UUID_BUF_LEN] = {0};
+        char networkId[NETWORK_ID_BUF_LEN] = {0};
+        ret = self->getDeviceId(base, uuid, sizeof(uuid));
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get uuid id failed");
+        ret = LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get network id failed");
+        ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, p2pMac, p2pMacSize);
+        CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get remote p2p mac failed");
+        return ret;
+    }
+
+    ret = strcpy_s(p2pMac, p2pMacSize, self->p2pMac);
     return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
@@ -158,23 +167,6 @@ static bool IsMetaChannel(struct WifiDirectNegotiateChannel *base)
     return isMeta;
 }
 
-static bool GetTlvFeature(struct DefaultNegotiateChannel *self)
-{
-    char uuid[UUID_BUF_LEN] = {0};
-    int32_t ret = self->getDeviceId((struct WifiDirectNegotiateChannel *)self, uuid, sizeof(uuid));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get uuid failed");
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    ret = LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get networkId failed");
-
-    bool result = false;
-    ret = LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get key failed");
-    CLOGI(LOG_LABEL "uuid=%s isTlvSupport=%s", AnonymizesUUID(uuid), result ? "true" : "false");
-
-    return result;
-}
-
 static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateChannel *base)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
@@ -194,23 +186,22 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
 
     self->postData = PostData;
     self->getDeviceId = GetDeviceId;
-    self->isRemoteTlvSupported = IsRemoteTlvSupported;
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
     self->isMetaChannel = IsMetaChannel;
     self->duplicate = Duplicate;
     self->destructor = Destructor;
-
-    self->tlvFeature = GetTlvFeature(self);
 }
 
 void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
 {
+    (void)self;
 }
 
 struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId)
 {
+    CLOGI(LOG_LABEL);
     struct DefaultNegotiateChannel *self = SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOG(self, NULL, LOG_LABEL "malloc failed");
     DefaultNegotiateChannelConstructor(self, authId);
@@ -219,6 +210,7 @@ struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId)
 
 void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self)
 {
+    CLOGI(LOG_LABEL);
     DefaultNegotiateChannelDestructor(self);
     SoftBusFree(self);
 }
