@@ -2311,8 +2311,8 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
     }
     nodeInfo->netCapacity = connCapability;
     if (LnnSaveRemoteDeviceInfo(nodeInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "save remote netCapacity fail");
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "save remote netCapacity fail");
         return SOFTBUS_ERR;
     }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
