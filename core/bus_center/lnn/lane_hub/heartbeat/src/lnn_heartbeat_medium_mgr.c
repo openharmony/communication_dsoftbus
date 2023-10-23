@@ -157,11 +157,6 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         LLOGE("update net capability fail");
         return;
     }
-    int32_t ret = LnnSaveRemoteDeviceInfo(&nodeInfo);
-    if (ret != SOFTBUS_OK) {
-        LLOGD("update device info fail,ret:%d", ret);
-        return;
-    }
 }
 
 static int32_t HbGetOnlineNodeByRecvInfo(const char *recvUdidHash,
