@@ -38,6 +38,13 @@ if (defined(ohos_lite)) {
 } else {
   # L2
   ohos_executable("auth_session_test") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    branch_protector_ret = "pac_ret"
+
     install_enable = true
     sources = [ "auth_session_test.c" ]
 

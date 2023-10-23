@@ -26,6 +26,13 @@ config("softbus_frame_test_config") {
 }
 
 ohos_executable("softbus_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
   install_enable = true
   sources = [ "softbus_test.c" ]
   configs = [ ":softbus_frame_test_config" ]
