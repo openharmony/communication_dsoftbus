@@ -159,6 +159,7 @@ uint8_t *ConnGattTransRecv(
         DiscardBuffer(buffer, false);
         SoftBusFree(packet);
         SoftBusFree(copyData);
+        return NULL;
     }
     ListInit(&packet->node);
     packet->header = header;
