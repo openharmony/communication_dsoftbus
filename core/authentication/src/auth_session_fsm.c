@@ -29,6 +29,8 @@
 
 #define AUTH_TIMEOUT_MS (10 * 1000)
 #define TO_AUTH_FSM(ptr) CONTAINER_OF(ptr, AuthFsm, fsm)
+#define SHORT_UDID_HASH_LEN 8
+#define SHORT_UDID_HASH_HEX_LEN 16
 
 typedef enum {
     STATE_SYNC_DEVICE_ID = 0,
@@ -176,8 +178,10 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
                 SoftBusFree(authFsm);
                 return NULL;
             }
-            if (LnnRetrieveDeviceInfo(
-                (const char *)request.connInfo.info.bleInfo.deviceIdHash, &nodeInfo) == SOFTBUS_OK) {
+            char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+            int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
+                (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
+            if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK) {
                 ALOGI("LnnRetrieveDeviceInfo success");
                 authFsm->info.idType = EXCHANGE_NETWORKID;
             }

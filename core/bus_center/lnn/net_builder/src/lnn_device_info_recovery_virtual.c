@@ -75,3 +75,11 @@ void ClearDeviceInfo(void)
 {
     return;
 }
+
+int32_t LnnGetUdidByBrMac(const char *brMac, char *udid, uint32_t udidLen)
+{
+    (void)brMac;
+    (void)udid;
+    (void)udidLen;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
