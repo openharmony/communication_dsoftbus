@@ -17,6 +17,8 @@
 
 #include <securec.h>
 
+#include "auth_device_common_key.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_lane_link.h"
 #include "lnn_network_manager.h"
 #include "message_handler.h"
@@ -752,6 +754,13 @@ static void TransProxyOnDataReceived(
         if (TransProxySendBadKeyMessage(&msg) != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send bad key msg err: %d", ret);
             return;
+        }
+        char peerBrMac[BT_MAC_LEN] = {0};
+        char udid[UDID_BUF_LEN] = {0};
+        if (GetBrMacFromConnInfo(connectionId, peerBrMac, BT_MAC_LEN) == SOFTBUS_OK) {
+            if (LnnGetUdidByBrMac(peerBrMac, udid, UDID_BUF_LEN) == SOFTBUS_OK) {
+                AuthRemoveDeviceKeyByUdid(udid);
+            }
         }
     }
     if (ret != SOFTBUS_OK) {
