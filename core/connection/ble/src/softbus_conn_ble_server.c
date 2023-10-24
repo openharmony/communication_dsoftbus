@@ -896,7 +896,14 @@ int32_t ConnGattServerConnect(ConnBleConnection *connection)
         CLOGE("ble server connection %u connect failed, underlay handle is invalid", connection->connectionId);
         return SOFTBUS_ERR;
     }
-    status = SoftBusGattsConnect(underlayerHandle);
+    SoftBusBtAddr binaryAddr = { 0 };
+    status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);
+    if (status != SOFTBUS_OK) {
+        CLOGE("ble server connection %u connect failed: convert string mac to binary fail, err=%d",
+            connection->connectionId, status);
+        return status;
+    }
+    status = SoftBusGattsConnect(binaryAddr);
     CLOGI("ble server connection %u connect, underlayer handle=%d, status=%d", connection->connectionId,
         underlayerHandle, status);
     return status;

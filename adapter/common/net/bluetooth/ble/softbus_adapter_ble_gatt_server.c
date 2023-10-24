@@ -150,9 +150,20 @@ int SoftBusGattsDeleteService(int srvcHandle)
     return SOFTBUS_OK;
 }
 
-int SoftBusGattsConnect(int connId)
+int SoftBusGattsConnect(SoftBusBtAddr btAddr)
 {
-    CLOGD("SoftBusGattsConnect stub is called, return success");
+    if (CheckGattsStatus() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    BdAddr addr;
+    if (memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN) != EOK) {
+        CLOGE("memcpy fail");
+        return SOFTBUS_ERR;
+    }
+    CLOGI("BleGattsConnect start");
+    if (BleGattsConnect(g_halServerId, addr) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -163,9 +174,10 @@ int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
     }
     BdAddr addr;
     if (memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN) != EOK) {
-        CLOGE("SoftBusGattsDisconnect memcpy fail");
+        CLOGE("memcpy fail");
         return SOFTBUS_ERR;
     }
+    CLOGI("BleGattsDisconnect start");
     if (BleGattsDisconnect(g_halServerId, addr, connId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
