@@ -397,3 +397,13 @@ char* SoftBusGetWifiInterfaceCoexistCap(void)
 {
     return NULL;
 }
+
+bool SoftBusIsWifiActive(void)
+{
+    int wifiState = IsWifiActive();
+    LNN_LOGI(LNN_STATE, "wifi state %d", wifiState);
+    if (wifiState == WIFI_STA_ACTIVE) {
+        return true;
+    }
+    return false;
+}
