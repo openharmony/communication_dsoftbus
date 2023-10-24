@@ -1458,6 +1458,15 @@ static void DelRecipient(int32_t sessionId)
     (void)SoftBusMutexUnlock(&g_recvFileInfoLock.lock);
 }
 
+void ClientDeleteRecvFileList(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session id is invalid");
+        return;
+    }
+    (void)DelRecipient(sessionId);
+}
+
 static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelId)
 {
     FileRecipientInfo *info = NULL;

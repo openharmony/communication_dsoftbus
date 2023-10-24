@@ -34,7 +34,7 @@ int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len, int32
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     if (dataConfig == 0) {
-        ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
+        ConfigType configType = (ConfigType)GetDefaultConfigType(channelType, businessType);
         if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType : %d, businessType : %d",
                 channelType, businessType);

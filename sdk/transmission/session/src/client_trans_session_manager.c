@@ -19,6 +19,7 @@
 
 #include "client_bus_center_manager.h"
 #include "client_trans_channel_manager.h"
+#include "client_trans_proxy_file_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
@@ -186,6 +187,7 @@ static void ClientDestroySession(const ListNode *destroyList)
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyClientSession start");
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
+        (void)ClientDeleteRecvFileList(id);
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
