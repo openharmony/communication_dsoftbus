@@ -18,14 +18,17 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_assign.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
+#include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
 #include "lnn_trans_lane.h"
@@ -310,12 +313,21 @@ int32_t LnnFreeLane(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo)
+int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo)
 {
-    if (queryInfo == NULL) {
-        return QUERY_RESULT_REQUEST_ILLEGAL;
+    if (queryInfo == NULL || qosInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
-    return QUERY_RESULT_OK;
+
+    if (!LnnGetOnlineStateById(queryInfo->networkId, CATEGORY_NETWORK_ID)) {
+        char *anonyNetworkId = NULL;
+        Anonymize(queryInfo->networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel query peerNetworkId:%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
+    }
+    return QueryLaneResource(queryInfo, qosInfo);
 }
 
 static void LaneInitChannelRatingDelay(void *para)
