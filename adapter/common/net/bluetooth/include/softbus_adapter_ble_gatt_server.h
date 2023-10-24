@@ -135,7 +135,7 @@ int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permis
 int SoftBusGattsStartService(int srvcHandle);
 int SoftBusGattsStopService(int srvcHandle);
 int SoftBusGattsDeleteService(int srvcHandle);
-int SoftBusGattsConnect(int connId);
+int SoftBusGattsConnect(SoftBusBtAddr btAddr);
 int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId);
 int SoftBusGattsSendResponse(SoftBusGattsResponse *param);
 int SoftBusGattsSendNotify(SoftBusGattsNotify *param);

@@ -721,13 +721,21 @@ static void BleServerAccepted(uint32_t connectionId)
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
-    CLOGI("ble server accept a new connection, connId=%u, peer addr=%s", connectionId, anomizeAddress);
 
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
         CLOGE("convert connection info failed, err=%d. It can not backoff now, just ahead.", status);
     }
+    char udidHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
+    status = ConvertBytesToHexString(udidHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN),
+        (unsigned char *)info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
+    if (status != SOFTBUS_OK) {
+        CLOGE("convert peerUdidHash to string failed, connectionId=%u, err=%d.", connectionId, status);
+    }
+    char anomizeUdid[UDID_BUF_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udidHashStr);
+    CLOGI("ble server accept a new connection, connId=%u, peer addr=%s, peer udid=%s", connectionId, anomizeAddress, anomizeUdid);
     g_connectCallback.OnConnected(connectionId, &info);
 
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
@@ -924,6 +932,7 @@ static void ConflictOnConnectSuccessed(uint32_t requestId, uint32_t connectionId
     (void)connectionId;
     (void)info;
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "conn not exist, connId=%u", connectionId);
     int32_t underlayHandle = connection->underlayerHandle;
     ConnBleReturnConnection(&connection);
     SoftbusBleConflictNotifyConnectResult(requestId, underlayHandle, true);
