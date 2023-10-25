@@ -123,7 +123,7 @@ int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
         DLOGE("GetDeviceId failed");
         return ret;
     }
-    ret = SoftBusGenerateStrHash((const uint8_t *)udid, strlen(udid) + 1, (uint8_t *)hashResult);
+    ret = SoftBusGenerateStrHash((const uint8_t *)udid, strlen(udid), (uint8_t *)hashResult);
     if (ret != SOFTBUS_OK) {
         DLOGE("GenerateStrHash failed");
         return ret;
