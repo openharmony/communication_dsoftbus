@@ -43,12 +43,17 @@ public:
     void TearDown() override {}
 };
 
+static InnerDeviceInfoAddtions g_testAddtions = {
+    .medium = AUTO
+};
+
 static void OnDeviceFoundTest(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     (void)device;
     (void)addtions;
     DLOGI("OnDeviceFoundTest in");
     isDeviceFound = true;
+    g_testAddtions.medium = addtions->medium;
 }
 
 static DiscInnerCallback g_discInnerCb = {
@@ -199,6 +204,42 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapAdapterStartDisc001, TestSize.Level
 }
 
 /*
+ * @tc.name: TestDiscCoapAdapterStartDisc002
+ * @tc.desc: Test DiscCoapStartDiscovery should return
+ *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given invalid DiscCoapOption.freq,
+ *           SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL when given invalid DiscCoapOption.freq and
+ *           ACTIVE_DISCOVERY DiscCoapOption.mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    DiscCoapOption testOption = {
+        .freq = LOW,
+        .mode = ACTIVE_PUBLISH
+    };
+    ret = DiscCoapStartDiscovery(&testOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testOption.freq = LOW - 1;
+    ret = DiscCoapStartDiscovery(&testOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+
+    testOption.mode = ACTIVE_DISCOVERY;
+    ret = DiscCoapStartDiscovery(&testOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+
+    DiscNstackxDeinit();
+    ret = DiscCoapStopDiscovery();
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
+}
+
+/*
  * @tc.name: testDiscCoapAdapterUpdate001
  * @tc.desc: test DiscCoapAdapterUpdate
  * @tc.type: FUNC
@@ -282,42 +323,195 @@ HWTEST_F(DiscNstackxAdapterTest, testDiscCoapAdapterFound001, TestSize.Level1)
 }
 
 /*
- * @tc.name: testDiscCoapAdapterParseResInfo001
- * @tc.desc: test ParseReservedInfo
+ * @tc.name: TestDiscCoapAdapterFound002
+ * @tc.desc: Test DiscOnDeviceFound should reach the branch when given valid NSTACKX_DeviceInfo and DeviceCount
+ *           when DiscCoapRegisterCb was given vaild and nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, testDiscCoapAdapterParseResInfo001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterFound002, TestSize.Level1)
 {
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    NSTACKX_DeviceInfo testDeviceList;
+    uint32_t testDeviceCount = 1;
+    testDeviceList.update = 1;
+    testDeviceList.mode = PUBLISH_MODE_PROACTIVE;
+    ret = strcpy_s(testDeviceList.deviceId, sizeof(testDeviceList.deviceId), "{\"UDID\":\"abcde\"}");
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo), "{\"version\":\"1.0.0\"}");
+    EXPECT_EQ(ret, EOK);
+    g_discInnerCb.OnDeviceFound = OnDeviceFoundTest;
+    ret = DiscCoapRegisterCb(&g_discInnerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    OnDeviceFound(&testDeviceList, testDeviceCount);
+    EXPECT_EQ(g_testAddtions.medium, COAP);
+
+    g_discInnerCb.OnDeviceFound = nullptr;
+    ret = DiscCoapRegisterCb(&g_discInnerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    g_testAddtions.medium = AUTO;
+    OnDeviceFound(&testDeviceList, testDeviceCount);
+    EXPECT_EQ(g_testAddtions.medium, AUTO);
+
+    ret = DiscCoapRegisterCb(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    g_testAddtions.medium = AUTO;
+    OnDeviceFound(&testDeviceList, testDeviceCount);
+    EXPECT_EQ(g_testAddtions.medium, AUTO);
+}
+
+/*
+ * @tc.name: TestDiscCoapAdapterParseResInfo001
+ * @tc.desc: Test DiscParseReservedInfo should return SOFTBUS_OK when given Json NSTACKX_DeviceInfo.reservedInfo,
+ *           should return SOFTBUS_PARSE_JSON_ERR when given non-Json format NSTACKX_DeviceInfo.reservedInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo001, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+	
     NSTACKX_DeviceInfo testNstackxDevice;
     DeviceInfo testDevice;
-    EXPECT_EQ(strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo),
-	"{\"version\":\"1.0.0\"}"), EOK);
-    int32_t ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
+    ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "{\"version\":\"1.0.0\"}");
+    EXPECT_EQ(ret, EOK);
+    ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    EXPECT_EQ(strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "test"), EOK);
+    ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "test");
+    EXPECT_EQ(ret, EOK);
     ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
 /*
- * @tc.name: testDiscCoapAdapterParseDevInfo001
- * @tc.desc: test ParseDiscDevInfo
+ * @tc.name: TestDiscCoapAdapterParseResInfo002
+ * @tc.desc: Test DiscParseReservedInfo should return SOFTBUS_OK when given nullptr DeviceInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNstackxAdapterTest, testDiscCoapAdapterParseDevInfo001, TestSize.Level1)
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseResInfo002, TestSize.Level1)
 {
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    
+    NSTACKX_DeviceInfo testNstackxDevice;
+    DeviceInfo testDevice;
+    ret = strcpy_s(testNstackxDevice.reservedInfo, sizeof(testNstackxDevice.reservedInfo), "{\"version\":\"1.0.0\"}");
+    EXPECT_EQ(ret, EOK);
+    ret = ParseReservedInfo(&testNstackxDevice, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ParseReservedInfo(&testNstackxDevice, &testDevice);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TestDiscCoapAdapterParseDevInfo001
+ * @tc.desc: Test DiscParseDiscDevInfo DeviceInfo.addr[0].type should be
+ *           CONNECTION_ADDR_WLAN and CONNECTION_ADDR_ETH when given PUBLISH_MODE_PROACTIVE NSTACKX_DeviceInfo.mode,
+ *           and when NSTACKX_DeviceInfo.networkName are "wlan" and "eth"
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo001, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    
     NSTACKX_DeviceInfo testNstackxDevice;
     DeviceInfo testDiscDevInfo;
     testNstackxDevice.mode = PUBLISH_MODE_PROACTIVE;
-    EXPECT_EQ(strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "wlan"), EOK);
+    ret = strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "wlan");
+    EXPECT_EQ(ret, EOK);
     ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
     EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_WLAN);
 
-    EXPECT_EQ(strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "eth"), EOK);
+    ret = strcpy_s(testNstackxDevice.networkName, sizeof(testNstackxDevice.networkName), "eth");
+    EXPECT_EQ(ret, EOK);
     ParseDiscDevInfo(&testNstackxDevice, &testDiscDevInfo);
     EXPECT_EQ(testDiscDevInfo.addr[0].type, CONNECTION_ADDR_ETH);
+}
+
+/*
+ * @tc.name: TestDiscCoapAdapterParseDevInfo002
+ * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_ERR when given non-Json NSTACKX_DeviceInfo.reservedInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    
+    NSTACKX_DeviceInfo testNstackxDevInfo {
+        .deviceId = "{\"UDID\":\"abcde\"}",
+        .reservedInfo = "{\"version\":\"1.0.0\"}",
+        .mode = PUBLISH_MODE_PROACTIVE,
+    };
+    DeviceInfo testDiscDevInfo {
+        .devId = "test",
+    };
+    ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = strcpy_s(testNstackxDevInfo.reservedInfo, sizeof(testNstackxDevInfo.reservedInfo), "test");
+    EXPECT_EQ(ret, EOK);
+    ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: TestDiscCoapAdapterParseDevInfo003
+ * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_ERR when given NSTACKX_DISCOVERY_TYPE_PASSIVE,
+ *           should return SOFTBUS_OK when given NSTACKX_DISCOVERY_TYPE_ACTIVE NSTACKX_DeviceInfo.discoveryType,
+ *           should return SOFTBUS_OK when given PUBLISH_MODE_PROACTIVE NSTACKX_DeviceInfo.mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo003, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    
+    NSTACKX_DeviceInfo testNstackxDevInfo {
+        .deviceId = "{\"UDID\":\"abcde\"}",
+        .reservedInfo = "{\"version\":\"1.0.0\"}",
+        .mode = DEFAULT_MODE,
+        .discoveryType = NSTACKX_DISCOVERY_TYPE_PASSIVE,
+    };
+    DeviceInfo testDiscDevInfo;
+    ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    testNstackxDevInfo.discoveryType = NSTACKX_DISCOVERY_TYPE_ACTIVE;
+    ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    testNstackxDevInfo.mode = PUBLISH_MODE_PROACTIVE;
+    ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TestDiscCoapAdapterRegisterCb001
+ * @tc.desc: Test DiscCoapRegisterCb should return SOFTBUS_OK when given valid,
+ *           should return SOFTBUS_INVALID_PARAM when given nullptr DiscInnerCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegisterCb001, TestSize.Level1)
+{
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = DiscCoapRegisterCb(&g_discInnerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = DiscCoapRegisterCb(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 }
