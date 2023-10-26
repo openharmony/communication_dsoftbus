@@ -50,7 +50,7 @@ bool IsWifiApEnabled(void)
 
 static bool IsWideBandSupported(void)
 {
-    return Hid2dIsWideBandwidthSupported() == WIFI_SUCCESS;
+    return Hid2dIsWideBandwidthSupported();
 }
 
 static int32_t GetChannel5GListIntArray(int32_t *array, size_t *size)
