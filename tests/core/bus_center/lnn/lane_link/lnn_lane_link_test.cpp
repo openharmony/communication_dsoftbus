@@ -23,6 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "lnn_select_rule.h"
 #include "lnn_lane_link_p2p.h"
+#include "bus_center_manager.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -109,7 +110,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
     if (request == NULL) {
-       return;
+        return;
     }
     
     request->pid = 1024;
@@ -145,6 +146,8 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
 HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
 {
     uint32_t laneLinkReqId = 22;
+    uint64_t local = 1 << 14;
+    uint64_t remote = 1 << 14;
     LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
     if (request == NULL) {
        return;
@@ -165,8 +168,10 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -266,7 +271,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
     SoftBusFree(request);
 }
 
-
 /*
 * @tc.name: LNN_LANE_LINK_005
 * @tc.desc: LnnDisconnectP2p
@@ -280,6 +284,50 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_005, TestSize.Level1)
     uint32_t laneLinkReqId = 2334;
     LnnDisconnectP2p(network, pid, laneLinkReqId);
     LnnDestroyP2p();
+}
+
+/*
+* @tc.name: LNN_LANE_LINK_006
+* @tc.desc: LnnConnectP2p
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_006, TestSize.Level1)
+{
+    uint32_t laneLinkReqId = 1;
+    const char *network = "network123";
+    LaneDepsInterfaceMock linkMock;
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+    const LaneLinkCb cb = {
+        .OnLaneLinkSuccess = OnLaneLinkSuccess,
+        .OnLaneLinkFail = OnLaneLinkFail,
+        .OnLaneLinkException = OnLaneLinkException,
+    };
+    LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
+    if (request == NULL) {
+       return;
+    }
+
+    request->pid = 1024;
+    request->networkDelegate = false;
+    request->p2pOnly = false;
+    request->transType = LANE_T_BYTE;
+    request->linkType = LANE_BLE;
+    request->acceptableProtocols = 0;
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(2), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, GetAuthIdByConnInfo).WillRepeatedly(Return(5));
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(5));
+    uint32_t ret = LnnConnectP2p(request, laneLinkReqId, &cb);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnDisconnectP2p(network, request->pid, laneLinkReqId);
+    SoftBusFree(request);
 }
 
 /*

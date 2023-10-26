@@ -68,6 +68,8 @@ public:
     virtual void ConnBleReturnConnection(ConnBleConnection **connection) = 0;
     virtual bool ConnBleDirectIsEnable(BleProtocolType protocol) = 0;
     virtual int32_t TransProxyCloseProxyChannel(int32_t channelId) = 0;
+    virtual int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo) = 0;
+    virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -104,8 +106,11 @@ public:
     MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));
     MOCK_METHOD1(ConnBleDirectIsEnable, bool (BleProtocolType));
     MOCK_METHOD1(TransProxyCloseProxyChannel, int32_t(int32_t));
+    MOCK_METHOD1(GetAuthIdByConnInfo, int64_t(const AuthConnInfo *));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
 
     void SetDefaultResult(void);
+    static int32_t ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H
