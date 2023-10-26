@@ -214,7 +214,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         CLOGI(LOG_LABEL "ignore CMD_CTRL_CHL_HANDSHAKE");
         struct WifiDirectNegotiateChannel *msgChannel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         if (msgChannel != NULL) {
-           msgChannel->destructor(msgChannel);
+            msgChannel->destructor(msgChannel);
         }
         NegotiateMessageDelete(msg);
         return;
