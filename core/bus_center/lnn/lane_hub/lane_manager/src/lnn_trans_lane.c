@@ -71,6 +71,11 @@ typedef struct {
     bool networkDelegate;
     bool p2pOnly;
     int32_t p2pErrCode;
+    /*summer del
+    char peerBleMac[MAX_MAC_LEN];
+    int32_t psm;
+    LaneTransType transType;
+    */
 } LaneLinkNodeInfo;
 
 static ListNode g_multiLinkList;
@@ -161,7 +166,7 @@ static void DeleteLaneLinkNode(uint32_t laneId)
 }
 
 static int32_t TriggerLink(uint32_t laneId, TransOption *request,
-    LanePreferredLinkList *recommendLinkList, uint32_t listNum)
+    LanePreferredLinkList *recommendLinkList)
 {
     LaneLinkNodeInfo *linkNode = (LaneLinkNodeInfo *)SoftBusCalloc(sizeof(LaneLinkNodeInfo));
     if (linkNode == NULL) {
@@ -172,16 +177,18 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
         SoftBusFree(linkNode);
         return SOFTBUS_MEM_ERR;
     }
+    /*summer del
     if (memcpy_s(linkNode->peerBleMac, MAX_MAC_LEN, request->peerBleMac, MAX_MAC_LEN) != EOK) {
         SoftBusFree(linkNode);
         return SOFTBUS_MEM_ERR;
     }
     linkNode->psm = request->psm;
+    linkNode->transType = request->transType;
+    */
     linkNode->laneId = laneId;
     linkNode->linkRetryIdx = 0;
-    linkNode->listNum = listNum;
+    linkNode->listNum = recommendLinkList->linkTypeNum;
     linkNode->linkList = recommendLinkList;
-    linkNode->transType = request->transType;
     linkNode->pid = request->pid;
     linkNode->networkDelegate = request->networkDelegate;
     linkNode->p2pOnly = request->p2pOnly;
@@ -238,6 +245,61 @@ static void DeleteRequestNode(uint32_t laneId)
     Unlock();
 }
 
+static int32_t StartTriggerLink(uint32_t laneId, TransOption *transRequest, const ILaneListener *listener,
+    LanePreferredLinkList *recommendLinkList)
+{
+    TransReqInfo *newItem = CreateRequestNode(laneId, transRequest, listener);
+    if (newItem == NULL) {
+        return SOFTBUS_ERR;
+    }
+    if (Lock() != SOFTBUS_OK) {
+        SoftBusFree(newItem);
+        return SOFTBUS_ERR;
+    }
+    ListTailInsert(&g_requestList->list, &newItem->node);
+    g_requestList->cnt++;
+    Unlock();
+    if (TriggerLink(laneId, transRequest, recommendLinkList) != SOFTBUS_OK) {
+        DeleteRequestNode(laneId);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+
+static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
+{
+    if ((request == NULL) || (request->type != LANE_TYPE_TRANS)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    TransOption *transRequest = (TransOption *)&request->requestInfo.trans;
+    LaneSelectParam selectParam;
+    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    selectParam.transType = transRequest->transType;
+    selectParam.qosRequire = transRequest->qosRequire
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
+    //放在这个链表中g_multiLinkList，最终选路成功或者失败的时候会释放
+    if (recommendLinkList == NULL) {
+        return SOFTBUS_ERR;
+    }
+    recommendLinkList->linkTypeNum = 0;
+    if (SelectExpectLanesByQos((const char *)transRequest->networkId, &selectParam,
+            recommendLinkList) != SOFTBUS_OK) {
+        SoftBusFree(recommendLinkList);
+        return SOFTBUS_ERR;
+    }
+    if (recommendLinkList->linkTypeNum == 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no link resources available, alloc fail");
+        SoftBusFree(recommendLinkList);
+        return SOFTBUS_ERR;
+    }
+    if (StartTriggerLink(laneId, request, listener, recommendLinkList) != SOFTBUS_OK){
+        SoftBusFree(recommendLinkList);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+/*summer del
 static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
 {
     if ((request == NULL) || (request->type != LANE_TYPE_TRANS)) {
@@ -282,13 +344,13 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
     ListTailInsert(&g_requestList->list, &newItem->node);
     g_requestList->cnt++;
     Unlock();
-    if (TriggerLink(laneId, transRequest, recommendLinkList, listNum) != SOFTBUS_OK) {
+    if (TriggerLink(laneId, transRequest, recommendLinkList) != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         DeleteRequestNode(laneId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
-}
+}*/
 
 static void UnbindLaneId(uint32_t laneId, const TransReqInfo *infoNode)
 {
@@ -370,7 +432,7 @@ static void UpdateLinkType(uint32_t laneId, LaneLinkType linkType)
     LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == laneId) {
             item->type = linkType;
-            UpdateP2pInfo(item);
+            UpdateP2pInfo(item);//summer 更新的意义在哪
             break;
         }
     }
@@ -482,18 +544,20 @@ static void LaneTriggerLink(SoftBusMessage *msg)
     requestInfo.linkType = nodeInfo->linkList->linkType[nodeInfo->linkRetryIdx];
     nodeInfo->linkRetryIdx++;
     requestInfo.pid = nodeInfo->pid;
-    requestInfo.transType = nodeInfo->transType;
     requestInfo.acceptableProtocols = acceptableProtocols;
     if (memcpy_s(requestInfo.peerNetworkId, sizeof(requestInfo.peerNetworkId),
         nodeInfo->networkId, sizeof(nodeInfo->networkId)) != EOK) {
         Unlock();
         return;
     }
+    /*summer del
+    requestInfo.transType = nodeInfo->transType;
     if (memcpy_s(requestInfo.peerBleMac, MAX_MAC_LEN, nodeInfo->peerBleMac, MAX_MAC_LEN) != EOK) {
         Unlock();
         return;
     }
     requestInfo.psm = nodeInfo->psm;
+    */
     Unlock();
     int32_t ret = BuildLink(&requestInfo, laneId, &linkCb);
     if (ret == SOFTBUS_OK) {
@@ -514,7 +578,11 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
     uint32_t laneId = (uint32_t)msg->arg1;
     DeleteLaneLinkNode(laneId);
     NotifyLaneAllocSuccess(laneId, info);
-    SoftBusFree(msg->obj);
+    //
+    info->laneId = laneId;
+    if (AddLinkInfoItem(info) != SOFTBUS_OK) {
+        SoftBusFree(info);
+    }
     return;
 }
 
@@ -649,7 +717,7 @@ static void Deinit(void)
 static LaneInterface g_transLaneObject = {
     .Init = Init,
     .Deinit = Deinit,
-    .AllocLane = Alloc,
+    .AllocLane = AllocLane,
     .FreeLane = Free,
 };
 
