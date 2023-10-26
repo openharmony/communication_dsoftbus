@@ -97,6 +97,8 @@ target(build_type, "softbus_client") {
       cfi_cross_dso = true
       debug = false
     }
+    branch_protector_ret = "pac_ret"
+
     version_script = "libsoftbus_client_map"
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]

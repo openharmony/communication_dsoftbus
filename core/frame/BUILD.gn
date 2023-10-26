@@ -184,6 +184,8 @@ if (defined(ohos_lite)) {
       debug = false
       blocklist = "../cfi_blocklist.txt"
     }
+    branch_protector_ret = "pac_ret"
+
     defines = AUTH_SERVER_DEFINES
     defines += [ "__STDC_FORMAT_MACROS" ]
     include_dirs = dsoftbus_server_common_inc
