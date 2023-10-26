@@ -42,6 +42,8 @@
 #include "lnn_net_builder.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
+#define MIN_META_LEN 6
+#define META_SESSION "IShare"
 
 typedef struct {
     ListNode node;
@@ -657,11 +659,25 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static bool IsMetaSession(const char *sessionName)
+{
+    if (strlen(sessionName) < MIN_META_LEN || strncmp(sessionName, META_SESSION, MIN_META_LEN)) {
+        return false;
+    }
+    return true;
+}
+
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenDataBusRequest channelId=%d, seq=%d.", channelId, seq);
     SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
     if (conn == NULL) {
+        return SOFTBUS_ERR;
+    }
+
+    if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+            "Request denied: session[%s] is not a meta session", conn->appInfo.myData.sessionName);
         return SOFTBUS_ERR;
     }
 
