@@ -90,6 +90,7 @@
         "DisableSessionListener";
         "RemoveSessionServerInner";
         "ClientTransTdcOnChannelOpenFailed";
+        "ClientDeleteRecvFileList";
         "InitSoftBus";
         "SetFileSendListener";
         "ClientTransAuthOnChannelOpened";
@@ -125,6 +126,7 @@
         "TransTdcGetInfoByFd";
         "SendFile";
         "GetAllNodeDeviceInfoInner";
+        "GetDefaultConfigType";
         "UnregNodeDeviceStateCb";
         "DeactiveMetaNodeInner";
         "SetNodeDataChangeFlag";

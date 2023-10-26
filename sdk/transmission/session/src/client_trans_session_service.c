@@ -706,7 +706,7 @@ static const ConfigTypeMap g_configTypeMap[] = {
     {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_LENGTH},
 };
 
-int32_t FindConfigType(int32_t channelType, int32_t businessType)
+int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType)
 {
     const uint32_t nums = sizeof(g_configTypeMap) / sizeof(ConfigTypeMap);
     for (uint32_t i = 0; i < nums; i++) {
