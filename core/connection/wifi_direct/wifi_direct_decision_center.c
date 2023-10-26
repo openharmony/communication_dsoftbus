@@ -55,7 +55,8 @@ static struct WifiDirectProcessor* GetProcessorByNegoChannelAndConnectType(struc
 static struct WifiDirectProcessor* GetProcessorByNegotiateMessage(struct NegotiateMessage *msg)
 {
     (void)msg;
-    return NULL;
+    struct WifiDirectProcessorFactory *factory = GetWifiDirectProcessorFactory();
+    return factory->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1);
 }
 
 /* static public method */
