@@ -427,7 +427,7 @@ static int32_t CreateGroup(struct NegotiateMessage *msg)
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
 
-    bool isWideBandSupported = msg->getBoolean(msg, NM_KEY_WIDE_BAND_SUPPORTED, false);
+    bool isRemoteWideBandSupported = msg->getBoolean(msg, NM_KEY_WIDE_BAND_SUPPORTED, false);
     int32_t stationFrequency = msg->getInt(msg, NM_KEY_STATION_FREQUENCY, 0);
     char *channelListString = msg->getString(msg, NM_KEY_GC_CHANNEL_LIST, "");
 
@@ -438,13 +438,15 @@ static int32_t CreateGroup(struct NegotiateMessage *msg)
 
     int32_t finalFrequency = ChoseFrequency(stationFrequency, channelArray, channelArraySize);
     CONN_CHECK_AND_RETURN_RET_LOG(finalFrequency > 0, SOFTBUS_ERR, LOG_LABEL "chose frequency failed");
-    CLOGI(LOG_LABEL "stationFrequency=%d finalFrequency=%d", stationFrequency, finalFrequency);
 
     bool isLocalWideBandSupported = adapter->isWideBandSupported();
+    CLOGI(LOG_LABEL "stationFrequency=%d finalFrequency=%d localWideBand=%d remoteWideBand=%d",
+          stationFrequency, finalFrequency, isLocalWideBandSupported, isRemoteWideBandSupported);
+
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
     params.freq = finalFrequency;
-    params.isWideBandSupported = isLocalWideBandSupported && isWideBandSupported;
+    params.isWideBandSupported = isLocalWideBandSupported && isRemoteWideBandSupported;
     ret = strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy interface failed");
 
