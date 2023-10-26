@@ -90,7 +90,7 @@ static void SoftBusOnBtSateChanged(int32_t status)
     }
 }
 
-NO_SANITIZE("cfi") static void WrapperStateChangeCallback(const int transport, const int status)
+static void WrapperStateChangeCallback(const int transport, const int status)
 {
     CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
     int st = ConvertBtState(transport, status);
