@@ -40,7 +40,7 @@ enum WifiDirectCommandType {
     ListNode node;                                                \
     enum WifiDirectCommandType type;                              \
     struct WifiDirectProcessor *processor; \
-    struct NegotiateMessage *msg;
+    struct NegotiateMessage *msg
 
 struct WifiDirectCommand {
     WIFI_DIRECT_COMMAND_BASE;
