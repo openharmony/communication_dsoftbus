@@ -59,11 +59,8 @@ int32_t WifiDirectInit(void)
         hasFailure = true;
     }
 
-    if (hasFailure) {
-        CLOGE(LOG_LABEL "init has failure");
-        return SOFTBUS_ERR;
+    if (hasFailure == false) {
+        CLOGI(LOG_LABEL "all init success");
     }
-
-    CLOGI(LOG_LABEL "all init success");
     return SOFTBUS_OK;
 }
