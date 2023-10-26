@@ -139,17 +139,27 @@ typedef struct {
 } LanePreferredLinkList;
 
 typedef struct {
+    uint32_t minBW;
+    uint32_t maxlatency;
+    uint32_t maxWaitTimeout;
+    uint32_t maxIdleTimeout;
+} QosInfo;
+
+typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
-    char peerBleMac[MAX_MAC_LEN];
-    //'psm' is valid only when 'expectedlink' contains 'LANE_COC'
-    int32_t psm;
+    QosInfo qosRequire;
     LaneTransType transType;
-    uint32_t expectedBw;
-    int32_t pid;
-    LanePreferredLinkList expectedLink;
     bool networkDelegate;
     bool p2pOnly;
     ProtocolType acceptableProtocols;
+    int32_t pid;
+    /*summer del
+    char peerBleMac[MAX_MAC_LEN];
+    //'psm' is valid only when 'expectedlink' contains 'LANE_COC'
+    int32_t psm;
+    uint32_t expectedBw;
+    LanePreferredLinkList expectedLink;
+    */
 } TransOption;
 
 typedef struct {
@@ -159,6 +169,14 @@ typedef struct {
     } requestInfo;
 } LaneRequestOption;
 
+typedef struct {
+    QueryResult (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo);
+    uint32_t (*applyLaneId)(LaneType type);
+    int32_t (*lnnRequestLane)(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
+    int32_t (*lnnFreeLane)(uint32_t laneId);
+} LnnLaneManager;
+
+LnnLaneManager* GetLaneManager(void);
 QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo);
 uint32_t ApplyLaneId(LaneType type);
 int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);

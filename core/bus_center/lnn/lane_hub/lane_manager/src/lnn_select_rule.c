@@ -88,6 +88,10 @@ static bool IsEnableWlan2P4G(const char *networkId)
         LLOGE("band isn't 2.4G or unknown");
         return false;
     }
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        LLOGE("peer node is not wifi online");
+        return SOFTBUS_ERR;//wifi未上线错误码
+    }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
@@ -107,6 +111,10 @@ static bool IsEnableWlan5G(const char *networkId)
     if (band != BAND_5G && band != BAND_UNKNOWN) {
         LLOGE("band isn't 5G or unknown");
         return false;
+    }
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        LLOGE("peer node is not wifi online");
+        return SOFTBUS_ERR;//wifi未上线错误码
     }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
@@ -314,4 +322,11 @@ LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
         return NULL;
     }
     return &g_linkAttr[linkType];
+}
+
+int32_t LaneDecisionModels(const LaneSelectParam *request, LanePreferredLinkList *recommendList)
+{
+    (void*)request;
+    (void*)recommendList;
+    return SOFTBUS_OK;
 }

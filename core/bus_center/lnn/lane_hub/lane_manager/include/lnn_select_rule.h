@@ -35,6 +35,8 @@ int32_t GetWlanLinkedFrequency(void);
 
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
 
+int32_t LaneDecisionModels(const LaneSelectParam *request, LanePreferredLinkList *recommendList);
+
 #ifdef __cplusplus
 }
 #endif

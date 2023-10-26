@@ -48,6 +48,13 @@
 #define LANE_SCORING_INTERVAL 300 /* 5min */
 #define CHANNEL_RATING_DELAY (5 * 60 * 1000)
 
+static LnnLaneManager g_LaneManager = {
+    .lnnQueryLaneResource = LnnQueryLaneResource,
+    .applyLaneId = ApplyLaneId,
+    .lnnRequestLane = LnnRequestLane,
+    .lnnFreeLane = lnnFreeLane,
+};
+
 typedef struct {
     ListNode node;
     ILaneIdStateListener listener;
@@ -139,6 +146,11 @@ static bool CheckListener(const ILaneIdStateListener *listener)
     }
     Unlock();
     return true;
+}
+
+LnnLaneManager* GetLaneManager(void)
+{
+    return &g_LaneManager;
 }
 
 void RegisterLaneIdListener(const ILaneIdStateListener *listener)

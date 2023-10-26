@@ -42,6 +42,104 @@
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
 
+static SoftBusMutex g_laneResourceMutex;
+static ListNode *g_laneResourceList = NULL;
+static ListNode *g_LinkInfoList = NULL;
+
+static int32_t LaneLock(void)
+{
+    return SoftBusMutexLock(&g_laneResourceMutex);
+}
+
+static void LaneUnlock(void)
+{
+    (void)SoftBusMutexUnlock(&g_laneResourceMutex);
+}
+
+static LaneResource* LaneResourceIsExist(LaneResource *resourceItem)
+{
+    //LINKTYPE 和地址
+}
+
+int32_t AddLaneResourceItem(LaneResource *resourceItem)//summer 传入的是堆上内存
+{
+    if (resourceItem = NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource* item = LaneResourceIsExist(resourceItem);
+    if (item != NULL) {
+        item->laneRef++;
+        SoftBusFree(resourceItem);
+    } else {
+        ListAdd(g_laneResourceList, resourceItem);
+    }
+    LaneUnlock();
+    return SOFTBUS_OK;
+}
+
+int32_t DelLaneResourceItem(LaneResource *resourceItem)//summer 传入的是栈上内存
+{
+    if (resourceItem = NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource* item = LaneResourceIsExist(resourceItem);
+    if (item != NULL) {
+        if (item->laneRef-- == 0) {
+           ListDelete(&item->node);
+           SoftBusFree(item);
+        } 
+    }
+    LaneUnlock();
+    return SOFTBUS_OK;
+}
+
+int32_t AddLinkInfoItem(LaneLinkInfo *linkInfoItem)//summer 传入的是堆上内存
+{
+    if (linkInfoItem = NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListAdd(g_LinkInfoList, linkInfoItem);
+    LaneUnlock();
+    return SOFTBUS_OK;
+}
+
+int32_t DelLinkInfoItem(uint32_t LaneId)
+{
+    if (LaneId = INVALID_LANE_ID) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    linkInfoItem *item = NULL;
+    linkInfoItem *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_LinkInfoList, linkInfoItem, node) {
+        if (item->LaneId == LaneId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+        }
+    }
+    LaneUnlock();
+    return SOFTBUS_OK;
+}
+
+int32_t LinkInfoToLaneResource(LaneLinkInfo *linkInfoItem, LaneResource *resourceItem)
+{
+    if (linkInfoItem == NULL || resourceItem == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    //将linktype以及对应的链路地址赋值
+}
+
 static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
@@ -486,10 +584,11 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
         LLOGW("can not get peer node");
         return SOFTBUS_ERR;
     }
+    /*summer del
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         LLOGE("peer node is not wifi online");
         return SOFTBUS_ERR;
-    }
+    }*/
     ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
     if (reqInfo->transType == LANE_T_MSG || reqInfo->transType == LANE_T_BYTE) {
         acceptableProtocols |= LNN_PROTOCOL_NIP;
@@ -604,7 +703,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
 {
-    if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK || !LinkTypeCheck(reqInfo->linkType)) {
+    if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK || !LinkTypeCheck(reqInfo->linkType)) {//summer 这个checktype的写法不好
         LLOGE("the reqInfo or type is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -640,6 +739,12 @@ void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32
 int32_t InitLaneLink(void)
 {
     LaneInitP2pAddrList();
+    if (SoftBusMutexInit(&g_laneResourceMutex, NULL) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "g_laneResourceMutex mutex init fail");
+        return SOFTBUS_ERR;
+    }
+    ListInit(g_laneResourceList);
+    ListInit(g_LinkInfoList);
     return SOFTBUS_OK;
 }
 
