@@ -1,0 +1,5 @@
+{
+    "files.associations": {
+        "softbus_conn_ble_trans.h": "c"
+    }
+}
