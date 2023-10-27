@@ -141,9 +141,9 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
     return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
 }
 
-static bool PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectConnectType connectType)
+static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectConnectType connectType)
 {
-    return true;
+    return SOFTBUS_OK;
 }
 
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
