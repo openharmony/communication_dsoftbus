@@ -735,7 +735,8 @@ static void BleServerAccepted(uint32_t connectionId)
     }
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udidHashStr);
-    CLOGI("ble server accept a new connection, connId=%u, peer addr=%s, peer udid=%s", connectionId, anomizeAddress, anomizeUdid);
+    CLOGI("ble server accept a new connection, connId=%u, peer addr=%s, peer udid=%s",
+        connectionId, anomizeAddress, anomizeUdid);
     g_connectCallback.OnConnected(connectionId, &info);
 
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
