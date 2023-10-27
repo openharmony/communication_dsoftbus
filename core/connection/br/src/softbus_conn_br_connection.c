@@ -441,7 +441,7 @@ int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *jso
     CLOGI(
         "connection %u: peerRc=%d, localRc=%d, current state=%d",
         connection->connectionId, peerRc, connection->connectionRc, connection->state);
-    if (peerRc > 0 && connection->state == BR_CONNECTION_STATE_CLOSING) {
+    if (peerRc > 0 && connection->state == BR_CONNECTION_STATE_NEGOTIATION_CLOSING) {
         ConnRemoveMsgFromLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
             connection->connectionId, 0, NULL);
         connection->state = BR_CONNECTION_STATE_CONNECTED;
