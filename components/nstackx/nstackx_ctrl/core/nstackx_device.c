@@ -70,6 +70,7 @@ static uint32_t g_filterCapabilityBitmapNum = 0;
 static uint32_t g_filterCapabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM] = {0};
 /* g_interfaceList store the actual interface name prefix for one platform */
 static NetworkInterfaceInfo g_interfaceList[NSTACKX_MAX_INTERFACE_NUM];
+static SeqAll g_seqAll = {0, 0, 0};
 
 #ifndef DFINDER_USE_MINI_NSTACKX
 /*
@@ -100,7 +101,7 @@ int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
         DFINDER_LOGE(TAG, "get notify device info failed");
         return NSTACKX_EFAILED;
     }
-    NotifyDeviceListChanged(&notifyDevice, NSTACKX_MAX_DEVICE_NUM);
+    NotifyDeviceListChanged(&notifyDevice, 1);
     /* when unicast reply is determined by the service side, there is no concept of discovery cycle, just notify */
     if (deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_AUTONET) {
         NotifyDeviceFound(&notifyDevice, 1);
@@ -419,7 +420,7 @@ int32_t ConfigureDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySet
         SetCoapDiscoverType(COAP_BROADCAST_TYPE_USER);
         SetCoapUserDiscoverInfo(advertiseCount, advertiseDuration);
     }
-
+    IncreaseSequenceNumber(NSTACKX_TRUE);
     return NSTACKX_EOK;
 }
 
@@ -461,6 +462,25 @@ uint32_t *GetFilterCapability(uint32_t *capabilityBitmapNum)
     }
 
     return g_filterCapabilityBitmap;
+}
+
+void IncreaseSequenceNumber(uint8_t sendBcast)
+{
+    if (sendBcast) {
+        ++g_seqAll.seqBcast;
+    } else {
+        ++g_seqAll.seqUcast;
+    }
+}
+
+uint16_t GetSequenceNumber(uint8_t sendBcast)
+{
+    return (sendBcast) ? g_seqAll.seqBcast : g_seqAll.seqUcast;
+}
+
+void ResetSequenceNumber()
+{
+    (void)memset_s(&g_seqAll, sizeof(g_seqAll), 0, sizeof(g_seqAll));
 }
 
 static void FilterCapabilityInit()

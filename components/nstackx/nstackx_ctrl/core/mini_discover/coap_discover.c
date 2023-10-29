@@ -174,7 +174,7 @@ static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
     {
         goto FAIL;
     }
-    g_forceUpdate = (!g_forceUpdate) ? : NSTACKX_FALSE;
+    g_forceUpdate = NSTACKX_FALSE;
     if (deviceInfo->mode == PUBLISH_MODE_PROACTIVE) {
         DFINDER_LOGD(TAG, "peer is PUBLISH_MODE_PROACTIVE");
         goto FAIL;

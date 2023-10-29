@@ -132,9 +132,9 @@ typedef enum {
     NSTACKX_BUSINESS_TYPE_NULL = 0,     /* if not set business type, type null will be used as default choice */
     NSTACKX_BUSINESS_TYPE_HICOM = 1,    /* designed for hicom, but not used currently */
     NSTACKX_BUSINESS_TYPE_SOFTBUS = 2,  /* designed for softbus-mineharmony to implement some customized features */
-    NSTACKX_BUSINESS_TYPE_NEARBY = 3,   /* designed to handle the interaction between two nearby service:
-                                           com.huawei.nearby and com.huawei.hms.nearby, but not used yet */
-    NSTACKX_BUSINESS_TYPE_AUTONET = 4   /* designed for softbus-autonet to implement some customized features */
+    NSTACKX_BUSINESS_TYPE_NEARBY = 3,   /* designed to handle the interaction between two nearby service */
+    NSTACKX_BUSINESS_TYPE_AUTONET = 4,  /* designed for softbus-autonet to implement some customized features */
+    NSTACKX_BUSINESS_TYPE_STRATEGY = 5  /* designed for softbus-strategy to report disc result in different rounds */
 } NSTACKX_BusinessType;
 
 #define NSTACKX_MIN_ADVERTISE_COUNT 1

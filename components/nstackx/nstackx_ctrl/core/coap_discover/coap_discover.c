@@ -610,6 +610,7 @@ static int32_t CoapPostServiceDiscoverEx(CoapCtxType *ctx)
         DFINDER_LOGE(TAG, "formate uri failed");
         return NSTACKX_EFAILED;
     }
+
     char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_TRUE, GetLocalDeviceBusinessType());
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare json failed");
@@ -1134,7 +1135,7 @@ static int32_t SendDiscoveryRspEx(CoapCtxType *ctx, const NSTACKX_ResponseSettin
         DFINDER_LOGE(TAG, "failed to get discoveryRsp remoteUrl");
         return NSTACKX_EFAILED;
     }
-
+    IncreaseSequenceNumber(NSTACKX_FALSE);
     return CoapResponseService(ctx, remoteUrl, responseSettings->businessType);
 }
 

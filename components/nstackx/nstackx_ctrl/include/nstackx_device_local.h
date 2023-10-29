@@ -37,7 +37,6 @@ void ResetLocalDeviceTaskCount(uint8_t isBusy);
 
 int RegisterLocalDeviceV2(const NSTACKX_LocalDeviceInfoV2 *devInfo, int registerType);
 void ConfigureLocalDeviceName(const char *localDeviceName);
-
 void SetLocalDeviceHash(uint64_t deviceHash);
 int SetLocalDeviceCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t SetLocalDeviceServiceData(const char *serviceData);
