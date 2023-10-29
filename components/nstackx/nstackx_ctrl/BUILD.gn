@@ -14,14 +14,17 @@
 DSOFTBUS_ROOT_PATH = "./../../.."
 import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 
+# basic compilation options
 cflags = [
   "-DENABLE_USER_LOG",
-  "-DDFINDER_SAVE_DEVICE_LIST",
-  "-DNSTACKX_EXTEND_BUSINESSDATA",
   "-DNSTACKX_DFINDER_HIDUMP",
+  "-DNSTACKX_EXTEND_BUSINESSDATA",
+  "-DDFINDER_SAVE_DEVICE_LIST",
   "-DDFINDER_SUPPORT_SET_SCREEN_STATUS",
+  "-DDFINDER_DISTINGUISH_ACTIVE_PASSIVE_DISCOVERY",
 ]
 
+# configure cflags based on build toolchain type
 if (defined(board_toolchain_type)) {
   if (board_toolchain_type != "iccarm") {
     cflags += [ "-Wall" ]
@@ -30,114 +33,114 @@ if (defined(board_toolchain_type)) {
   cflags += [ "-Wall" ]
 }
 
-include_dirs = []
+base_src = [
+  "core/json_payload.c",
+  "core/nstackx_common.c",
+  "core/nstackx_device.c",
+  "core/nstackx_device_local.c",
+  "core/nstackx_device_remote.c",
+  "core/nstackx_dfinder_log.c",
+]
+
+base_include_dirs = [
+  "interface",
+  "include",
+  "//third_party/cJSON",
+  "../nstackx_util/interface",
+]
+
+# mini platform
+if (defined(ohos_lite) && ohos_kernel_type == "liteos_m") {
+  mini_diff_src = [
+    "core/mini_discover/coap_adapter.c",
+    "core/mini_discover/coap_app.c",
+    "core/mini_discover/coap_discover.c",
+  ]
+  mini_diff_include_dirs = [
+    "include/mini_discover",
+    "../nstackx_util/platform/liteos",
+  ]
+  cflags += [
+    "-DNSTACKX_WITH_LITEOS",
+    "-DNSTACKX_WITH_LITEOS_M",
+    "-DLWIP_LITEOS_A_COMPAT",
+    "-D_GNU_SOURCE",
+    "-DDFINDER_USE_MINI_NSTACKX",
+  ]
+}
+
+# standard and small platform
+if (!defined(ohos_lite) ||
+    (defined(ohos_lite) && ohos_kernel_type != "liteos_m")) {
+  standard_small_diff_src = [
+    "core/coap_discover/coap_app.c",
+    "core/coap_discover/coap_client.c",
+    "core/coap_discover/coap_discover.c",
+    "core/nstackx_dfinder_hidump.c",
+    "core/nstackx_dfinder_mgt_msg_log.c",
+    "core/nstackx_dfinder_hievent.c",
+    "core/nstackx_statistics.c",
+    "core/nstackx_smartgenius.c",
+  ]
+  standard_small_diff_include_dirs = [
+    "include/coap_discover",
+    "//third_party/libcoap/include",
+  ]
+  standard_small_deps = [
+    "../nstackx_util:nstackx_util.open",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/libcoap:libcoap",
+  ]
+  cflags += [ "-DDFINDER_MGT_MSG_LOG" ]
+}
+
+config("nstackx_ctrl_interface") {
+  include_dirs = [ "interface" ]
+}
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     import("//build/lite/config/component/lite_component.gni")
-    config("dfinder_interface") {
-      include_dirs = [ "interface" ]
-    }
     static_library("nstackx_ctrl") {
-      sources = [
-        "core/json_payload.c",
-        "core/mini_discover/coap_adapter.c",
-        "core/mini_discover/coap_app.c",
-        "core/mini_discover/coap_discover.c",
-        "core/nstackx_common.c",
-        "core/nstackx_device.c",
-        "core/nstackx_device_local.c",
-        "core/nstackx_device_remote.c",
-        "core/nstackx_dfinder_hidump.c",
-        "core/nstackx_dfinder_hievent.c",
-        "core/nstackx_dfinder_log.c",
-        "core/nstackx_statistics.c",
-      ]
-      include_dirs = [
-        "include",
-        "include/mini_discover",
-        "//third_party/cJSON",
-        "../nstackx_util/interface",
-        "../nstackx_util/platform/liteos",
-      ]
-      defines = [
-        "NSTACKX_WITH_LITEOS",
-        "LWIP_LITEOS_A_COMPAT",
-        "_GNU_SOURCE",
-        "DFINDER_USE_MINI_NSTACKX",
-        "DFINDER_SAVE_DEVICE_LIST",
-        "NSTACKX_WITH_LITEOS_M",
-      ]
-      public_configs = [ ":dfinder_interface" ]
+      sources = base_src
+      sources += mini_diff_src
+      include_dirs = base_include_dirs
+      include_dirs += mini_diff_include_dirs
+      public_configs = [ ":nstackx_ctrl_interface" ]
       deps = [ "../nstackx_util:nstackx_util.open" ]
       if (board_toolchain_type != "iccarm") {
-        cflags += [
-          "-Wall",
-          "-std=c99",
-        ]
+        cflags += [ "-std=c99" ]
         cflags_cc = cflags
       } else {
-        include_dirs += [
-          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
-          "//third_party/lwip/src/include",
-        ]
         cflags += [
           "--diag_suppress",
           "Pa181",
+        ]
+        include_dirs += [
+          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
+          "//third_party/lwip/src/include",
         ]
       }
     }
   } else {
     import("//build/lite/config/component/lite_component.gni")
-    config("dfinder_interface") {
-      include_dirs = [ "interface" ]
-    }
     shared_library("nstackx_ctrl") {
-      sources = [
-        "core/coap_discover/coap_app.c",
-        "core/coap_discover/coap_client.c",
-        "core/coap_discover/coap_discover.c",
-        "core/json_payload.c",
-        "core/nstackx_common.c",
-        "core/nstackx_device.c",
-        "core/nstackx_device_local.c",
-        "core/nstackx_device_remote.c",
-        "core/nstackx_dfinder_hidump.c",
-        "core/nstackx_dfinder_hievent.c",
-        "core/nstackx_dfinder_log.c",
-        "core/nstackx_dfinder_mgt_msg_log.c",
-        "core/nstackx_smartgenius.c",
-        "core/nstackx_statistics.c",
-      ]
-      ctrl_include = [
-        "../nstackx_util/interface",
-        "interface",
-        "include",
-        "include/coap_discover",
-        "//third_party/libcoap/include",
-        "//third_party/cJSON",
-      ]
-      include_dirs += ctrl_include
-      public_configs = [ ":dfinder_interface" ]
-      deps = [
-        "../nstackx_util:nstackx_util.open",
-        "//build/lite/config/component/cJSON:cjson_shared",
-        "//third_party/bounds_checking_function:libsec_shared",
-        "//third_party/libcoap:libcoap",
-      ]
+      sources = base_src
+      sources += standard_small_diff_src
+      include_dirs = base_include_dirs
+      include_dirs += standard_small_diff_include_dirs
+      public_configs = [ ":nstackx_ctrl_interface" ]
+      deps = standard_small_deps
+      deps += [ "//build/lite/config/component/cJSON:cjson_shared" ]
       if (ohos_kernel_type == "liteos_a") {
-        defines = [
-          "NSTACKX_WITH_LITEOS",
-          "LWIP_LITEOS_A_COMPAT",
-          "DFINDER_SAVE_DEVICE_LIST",
+        cflags += [
+          "-DNSTACKX_WITH_LITEOS",
+          "-DLWIP_LITEOS_A_COMPAT",
         ]
-      } else if (ohos_kernel_type == "linux") {
-        defines = [ "DFINDER_SAVE_DEVICE_LIST" ]
       }
       cflags += [
         "-fPIC",
         "-std=c99",
-        "-DDFINDER_MGT_MSG_LOG",
       ]
       cflags_cc = cflags
       ldflags = [
@@ -149,54 +152,27 @@ if (defined(ohos_lite)) {
   }
 } else {
   import("//build/ohos.gni")
-
-  config("dfinder_interface") {
-    include_dirs = [ "interface" ]
-  }
   ohos_shared_library("nstackx_ctrl") {
     sanitize = {
       cfi = true
       cfi_cross_dso = true
       debug = false
     }
+    branch_protector_ret = "pac_ret"
+
     cflags += [ "-DDFINDER_MGT_MSG_LOG" ]
     cflags_cc = cflags
-    sources = [
-      "core/coap_discover/coap_app.c",
-      "core/coap_discover/coap_client.c",
-      "core/coap_discover/coap_discover.c",
-      "core/json_payload.c",
-      "core/nstackx_common.c",
-      "core/nstackx_device.c",
-      "core/nstackx_device_local.c",
-      "core/nstackx_device_remote.c",
-      "core/nstackx_dfinder_hidump.c",
-      "core/nstackx_dfinder_hievent.c",
-      "core/nstackx_dfinder_log.c",
-      "core/nstackx_dfinder_mgt_msg_log.c",
-      "core/nstackx_smartgenius.c",
-      "core/nstackx_statistics.c",
-    ]
+    sources = base_src
+    sources += standard_small_diff_src
+    include_dirs = base_include_dirs
+    include_dirs += standard_small_diff_include_dirs
     include_dirs += [
       "//third_party/bounds_checking_function/include",
       "../nstackx_util/platform/unix",
     ]
-    ctrl_include = [
-      "../nstackx_util/interface",
-      "interface",
-      "include",
-      "include/coap_discover",
-      "//third_party/libcoap/include",
-      "//third_party/cJSON",
-    ]
-    include_dirs += ctrl_include
-    public_configs = [ ":dfinder_interface" ]
-    deps = [
-      "../nstackx_util:nstackx_util.open",
-      "//third_party/bounds_checking_function:libsec_shared",
-      "//third_party/cJSON:cjson",
-      "//third_party/libcoap:libcoap",
-    ]
+    public_configs = [ ":nstackx_ctrl_interface" ]
+    deps = standard_small_deps
+    deps += [ "//third_party/cJSON:cjson" ]
     subsystem_name = "communication"
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
