@@ -58,7 +58,7 @@ static int32_t AddDeviceType(cJSON *data, const DeviceInfo *deviceInfo)
 }
 
 
-static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint8_t isNeedServicedata)
+static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
 {
     cJSON *item = cJSON_CreateString(deviceInfo->deviceId);
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_ID, item)) {
@@ -94,12 +94,7 @@ static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint
         return NSTACKX_EFAILED;
     }
 
-    char defaultServiceData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
-    if (isNeedServicedata) {
-        item = cJSON_CreateString(deviceInfo->serviceData);
-    } else {
-        item = cJSON_CreateString(defaultServiceData);
-    }
+    item = cJSON_CreateString(deviceInfo->serviceData);
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_SERVICE_DATA, item)) {
         cJSON_Delete(item);
         DFINDER_LOGE(TAG, "cJSON_CreateString for serviceData failed");
@@ -406,34 +401,6 @@ static int JsonAddStr(cJSON *data, const char *key, const char *value)
     return NSTACKX_EOK;
 }
 
-uint8_t IfContainsDiscoverServiceCapability(uint32_t capabilityBitmap)
-{
-    // need service data capability: cast+:0x8, dvKit:0x20, osd:0x80
-    uint32_t discoverServiceCapabilities[] = {0x8, 0x20, 0x80};
-    uint32_t discoverServiceCapabilitySize = sizeof(discoverServiceCapabilities) / sizeof(uint32_t);
-    for (uint32_t i = 0; i < discoverServiceCapabilitySize; i++) {
-        if (capabilityBitmap & discoverServiceCapabilities[i]) {
-            return NSTACKX_TRUE;
-        }
-    }
-    return NSTACKX_FALSE;
-}
-
-uint8_t CheckIfNeedServiceData(const DeviceInfo *deviceInfo, uint8_t isBroadcast, uint8_t isPrinter)
-{
-    for (uint32_t i = 0; i < deviceInfo->capabilityBitmapNum; i++) {
-        if (IfContainsDiscoverServiceCapability(deviceInfo->capabilityBitmap[i])) {
-            DFINDER_LOGI(TAG, "CheckIfNeedServiceData true, capability = %u", deviceInfo->capabilityBitmap[i]);
-            return NSTACKX_TRUE;
-        }
-    }
-    if (isBroadcast == NSTACKX_FALSE && isPrinter == NSTACKX_TRUE) {
-        DFINDER_LOGI(TAG, "CheckIfNeedServiceData true, isBroadcast = %hhu, isPrinter = %hhu", isBroadcast, isPrinter);
-        return NSTACKX_TRUE;
-    }
-    return NSTACKX_FALSE;
-}
-
 /*
  * Service Discover JSON format
  * {
@@ -446,7 +413,7 @@ uint8_t CheckIfNeedServiceData(const DeviceInfo *deviceInfo, uint8_t isBroadcast
  *   "coapUri":[coap uri for discover, string]   <-- optional. When present, means it's broadcast request.
  * }
  */
-static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast, uint8_t bType, uint8_t isPrinter)
+static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast, uint8_t bType)
 {
     cJSON *data = cJSON_CreateObject();
     if (data == NULL) {
@@ -457,8 +424,7 @@ static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast
     char *formatString = NULL;
     const DeviceInfo *deviceInfo = GetLocalDeviceInfo();
     /* Prepare local device info */
-    uint8_t isNeedServicedata = CheckIfNeedServiceData(deviceInfo, isBroadcast, isPrinter);
-    if ((AddDeviceJsonData(data, deviceInfo, isNeedServicedata) != NSTACKX_EOK) ||
+    if ((AddDeviceJsonData(data, deviceInfo) != NSTACKX_EOK) ||
         (JsonAddStr(data, JSON_DEVICE_WLAN_IP, locaIpStr) != NSTACKX_EOK) ||
         (AddCapabilityBitmap(data, deviceInfo) != NSTACKX_EOK) ||
         (AddBusinessJsonData(data, deviceInfo, isBroadcast, bType) != NSTACKX_EOK)) {
@@ -491,9 +457,9 @@ L_END_JSON:
     return formatString;
 }
 
-char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t bType, uint8_t isPrinter)
+char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t bType)
 {
-    char *str = PrepareServiceDiscoverEx(localIpStr, isBroadcast, bType, isPrinter);
+    char *str = PrepareServiceDiscoverEx(localIpStr, isBroadcast, bType);
     if (str == NULL) {
         DFINDER_LOGE(TAG, "prepare service discover ex failed");
         IncStatistics(STATS_PREPARE_SD_MSG_FAILED);

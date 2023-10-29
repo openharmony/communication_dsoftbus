@@ -40,8 +40,6 @@
 #define COAP_DISVOCER_MAX_RATE 200
 #define COAP_MSGID_SURVIVAL_SECONDS 100
 #define COAP_MAX_MSGID_RESERVE_NUM 100
-#define COAP_DEVICE_TYPE_PRINTER_OLD 9 // 0x9 is the truncation of 0xA09 for history reason
-#define COAP_DEVICE_TYPE_PRINTER_NEW 2569 // 0xA09 is real printer type
 
 typedef struct {
     coap_mid_t msgId;
@@ -219,9 +217,9 @@ static int32_t CoapSendRequest(CoapCtxType *ctx, uint8_t coapType, const char *u
     return ret;
 }
 
-static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint8_t bType, uint8_t isPrinter)
+static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint8_t bType)
 {
-    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_FALSE, bType, isPrinter);
+    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_FALSE, bType);
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare service failed");
         return NSTACKX_EFAILED;
@@ -289,13 +287,13 @@ static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **rem
 }
 
 static void CoapResponseServiceDiscovery(const char *remoteUrl, const coap_context_t *currCtx,
-    coap_pdu_t *response, uint8_t businessType, uint8_t isPrinter)
+    coap_pdu_t *response, uint8_t businessType)
 {
     if (remoteUrl != NULL) {
         if (CheckBusinessTypeReplyUnicast(businessType) == NSTACKX_EOK) {
             CoapCtxType *ctx = CoapGetCoapCtxType(currCtx);
             if (ctx != NULL) {
-                (void)CoapResponseService(ctx, remoteUrl, businessType, isPrinter);
+                (void)CoapResponseService(ctx, remoteUrl, businessType);
             }
         }
     } else {
@@ -348,9 +346,7 @@ static int32_t HndPostServiceDiscoverEx(coap_session_t *session, const coap_pdu_
         DFINDER_LOGD(TAG, "peer is PUBLISH_MODE_PROACTIVE");
         goto L_ERR;
     }
-    uint8_t isPrinter = ((deviceInfo->deviceType == COAP_DEVICE_TYPE_PRINTER_OLD
-        || deviceInfo->deviceType == COAP_DEVICE_TYPE_PRINTER_NEW) ? NSTACKX_TRUE : NSTACKX_FALSE);
-    CoapResponseServiceDiscovery(remoteUrl, currCtx, response, deviceInfo->businessType, isPrinter);
+    CoapResponseServiceDiscovery(remoteUrl, currCtx, response, deviceInfo->businessType);
 
     ret = NSTACKX_EOK;
 L_ERR:
@@ -632,7 +628,7 @@ static int32_t CoapPostServiceDiscoverEx(CoapCtxType *ctx)
         return NSTACKX_EFAILED;
     }
     char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_TRUE,
-        GetLocalDeviceBusinessType(), NSTACKX_FALSE);
+        GetLocalDeviceBusinessType());
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare json failed");
         return NSTACKX_EFAILED;
@@ -1157,7 +1153,7 @@ static int32_t SendDiscoveryRspEx(CoapCtxType *ctx, const NSTACKX_ResponseSettin
         return NSTACKX_EFAILED;
     }
 
-    return CoapResponseService(ctx, remoteUrl, responseSettings->businessType, NSTACKX_FALSE);
+    return CoapResponseService(ctx, remoteUrl, responseSettings->businessType);
 }
 
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
