@@ -46,7 +46,7 @@ extern "C" {
 
 struct DeviceInfo;
 
-char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t bType);
+char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t businessType);
 int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
 
 #ifdef __cplusplus

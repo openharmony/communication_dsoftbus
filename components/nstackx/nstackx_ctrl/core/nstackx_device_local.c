@@ -529,14 +529,14 @@ int32_t SetLocalDeviceServiceData(const char *serviceData)
     return NSTACKX_EOK;
 }
 
+void SetLocalDeviceBusinessType(uint8_t businessType)
+{
+    g_localDevice.deviceInfo.businessType = businessType;
+}
+
 uint8_t GetLocalDeviceBusinessType(void)
 {
     return g_localDevice.deviceInfo.businessType;
-}
-
-void SetLocalDeviceBusinessType(uint8_t bType)
-{
-    g_localDevice.deviceInfo.businessType = bType;
 }
 
 int SetLocalDeviceBusinessData(const char *data, bool unicast)

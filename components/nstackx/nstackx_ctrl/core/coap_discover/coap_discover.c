@@ -192,7 +192,6 @@ static int32_t CoapSendRequestEx(CoapCtxType *ctx, uint8_t coapType, const char 
         DFINDER_LOGE(TAG, "pack to pdu failed");
         goto SESSION_RELEASE;
     }
-    DFINDER_LOGD("MYCOAP", "send coap pdu mid: %d", coap_pdu_get_mid(pdu));
     DFINDER_MGT_REQ_LOG(&coapRequest);
     tid = coap_send(session, pdu);
     if (tid == COAP_INVALID_TID) {
@@ -217,9 +216,9 @@ static int32_t CoapSendRequest(CoapCtxType *ctx, uint8_t coapType, const char *u
     return ret;
 }
 
-static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint8_t bType)
+static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint8_t businessType)
 {
-    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_FALSE, bType);
+    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_FALSE, businessType);
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare service failed");
         return NSTACKX_EFAILED;
@@ -237,18 +236,6 @@ static void IncreaseRecvDiscoverNum(void)
     }
 }
 
-static int32_t CheckBusinessTypeCanNotify(const uint8_t businessType)
-{
-    uint8_t localBusinessType = GetLocalDeviceBusinessType();
-    // nearby service does not communicate with other service
-    if ((localBusinessType == (uint8_t)NSTACKX_BUSINESS_TYPE_NEARBY) ||
-        (businessType == (uint8_t)NSTACKX_BUSINESS_TYPE_NEARBY)) {
-        DFINDER_LOGD(TAG, "local device btype: %hu, remote device btype: %hu", localBusinessType, businessType);
-        return NSTACKX_EFAILED;
-    }
-    return NSTACKX_EOK;
-}
-
 static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **remoteUrl, DeviceInfo *deviceInfo)
 {
     size_t size;
@@ -263,9 +250,6 @@ static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **rem
         return NSTACKX_EFAILED;
     }
     if (GetServiceDiscoverInfo(buf, size, deviceInfo, remoteUrl) != NSTACKX_EOK) {
-        return NSTACKX_EFAILED;
-    }
-    if (CheckBusinessTypeCanNotify(deviceInfo->businessType) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
     /* receive coap broadcast, set peer device's discovery type to passive,
@@ -370,7 +354,6 @@ static void HndPostServiceDiscover(coap_resource_t *resource, coap_session_t *se
         DFINDER_LOGD(TAG, "invalid params");
         return;
     }
-    DFINDER_LOGD("MYCOAP", "recv coap pdu mid: %d", coap_pdu_get_mid(request));
     if (HndPostServiceDiscoverEx(session, request, response) != NSTACKX_EOK) {
         IncStatistics(STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED);
     }
@@ -627,8 +610,7 @@ static int32_t CoapPostServiceDiscoverEx(CoapCtxType *ctx)
         DFINDER_LOGE(TAG, "formate uri failed");
         return NSTACKX_EFAILED;
     }
-    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_TRUE,
-        GetLocalDeviceBusinessType());
+    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_TRUE, GetLocalDeviceBusinessType());
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare json failed");
         return NSTACKX_EFAILED;

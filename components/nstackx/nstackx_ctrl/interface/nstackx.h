@@ -129,11 +129,12 @@ typedef struct {
 } NSTACKX_LocalDeviceInfo;
 
 typedef enum {
-    NSTACKX_BUSINESS_TYPE_NULL = 0,
-    NSTACKX_BUSINESS_TYPE_HICOM = 1,
-    NSTACKX_BUSINESS_TYPE_SOFTBUS = 2,
-    NSTACKX_BUSINESS_TYPE_NEARBY = 3,
-    NSTACKX_BUSINESS_TYPE_AUTONET = 4
+    NSTACKX_BUSINESS_TYPE_NULL = 0,     /* if not set business type, type null will be used as default choice */
+    NSTACKX_BUSINESS_TYPE_HICOM = 1,    /* designed for hicom, but not used currently */
+    NSTACKX_BUSINESS_TYPE_SOFTBUS = 2,  /* designed for softbus-mineharmony to implement some customized features */
+    NSTACKX_BUSINESS_TYPE_NEARBY = 3,   /* designed to handle the interaction between two nearby service:
+                                           com.huawei.nearby and com.huawei.hms.nearby, but not used yet */
+    NSTACKX_BUSINESS_TYPE_AUTONET = 4   /* designed for softbus-autonet to implement some customized features */
 } NSTACKX_BusinessType;
 
 #define NSTACKX_MIN_ADVERTISE_COUNT 1
@@ -145,12 +146,12 @@ typedef enum {
 #define NSTACKX_MAX_ADVERTISE_INTERVAL 10000
 
 typedef struct {
-    uint8_t businessType;
-    uint8_t discoveryMode;
-    uint32_t advertiseCount;
-    uint32_t advertiseDuration;
-    char *businessData;
-    uint32_t length;
+    uint8_t businessType;       /* service identify */
+    uint8_t discoveryMode;      /* discovery mode, e.g. PUBLISH_MODE_PROACTIVE */
+    uint32_t advertiseCount;    /* the number of broadcasts to be sent */
+    uint32_t advertiseDuration; /* duration of discovery this time */
+    char *businessData;         /* business data in broadcast: {"bData":"xxx"} */
+    uint32_t length;            /* the length of business data, include '\0' */
 } NSTACKX_DiscoverySettings;
 
 typedef struct {
@@ -365,9 +366,21 @@ DFINDER_EXPORT int32_t NSTACKX_ScreenStatusChange(bool isScreenOn);
  */
 DFINDER_EXPORT int32_t NSTACKX_RegisterServiceData(const char *serviceData);
 
-/*
- * Register the serviceData of local device.
- * return 0 on success, negative value on failure
+/**
+ * @brief register business data to local device, the data will be used as bData filed in json format in coap payload
+ *
+ * @param [in] (const char *) businessData: specific data which need to be put into the coap payload
+ *
+ * @return (int32_t)
+ *      0                operation success
+ *      negative value   a number indicating the rough cause of this failure
+ *
+ * @note 1. the length of businessData should be less than NSTACKX_MAX_BUSINESS_DATA_LEN
+ *       2. the registered business data will only be used in unicast which is confusing
+ *       3. this interface will be DEPRECATED soon, in some special case, you can replace it with:
+ *          NSTACKX_StartDeviceDiscovery && NSTACKX_SendDiscoveryRsp
+ *
+ * @exception
  */
 DFINDER_EXPORT int32_t NSTACKX_RegisterBusinessData(const char *businessData);
 
@@ -413,10 +426,21 @@ DFINDER_EXPORT int32_t NSTACKX_InitRestart(const NSTACKX_Parameter *parameter);
  */
 DFINDER_EXPORT void NSTACKX_StartDeviceFindRestart(void);
 
-/*
- * Start device discovery with settings. If advertiseCount and advertiseDuration both 0, discovery with default
- * advertise settings.
- * return 0 on success, negative value on failure
+/**
+ * @brief start device find with configurable parameters
+ *
+ * @param [in] (const NSTACKX_DiscoverySettings *) discoverySettings: configurable discovery properties
+ *
+ * @return (int32_t)
+ *      0                operation success
+ *      negative value   a number indicating the rough cause of this failure
+ *
+ * @note 1. if the discovery is already running, calling this interface will stop the previous one and start a new one
+ *       2. if both advertiseCount and advertiseDuration in discoverySettings are zero, the discovery interval will
+ *          fallback to 5 sec 12 times(100 ms, 200, 200, 300...)
+ *       3. if advertiseCount is not zero, the broadcast interval equals advertiseDuration / advertiseCount
+ *
+ * @exception
  */
 DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySettings *discoverySettings);
 
@@ -427,16 +451,25 @@ DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySetti
 DFINDER_EXPORT int32_t NSTACKX_StartDeviceDiscoveryWithConfig(const DFinderDiscConfig *discConfig);
 
 typedef struct {
-    uint8_t businessType;
-    char localNetworkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
-    char remoteIp[NSTACKX_MAX_IP_STRING_LEN];
-    char *businessData;
-    uint32_t length;
+    uint8_t businessType;                                   /* service identify */
+    char localNetworkName[NSTACKX_MAX_INTERFACE_NAME_LEN];  /* nic name of local device */
+    char remoteIp[NSTACKX_MAX_IP_STRING_LEN];               /* ip of remote device */
+    char *businessData;                                     /* business data in unicast: {"bData":"xxx"} */
+    uint32_t length;                                        /* the length of business data, include '\0' */
 } NSTACKX_ResponseSettings;
 
-/*
- * Send discovery response to remote in unicast.
- * return 0 on success, negative value on failure
+/**
+ * @brief reply unicast to remote device specified by remoteIp, using local nic specified by localNetworkName
+ *
+ * @param [in] (const NSTACKX_ResponseSettings *) responseSettings: configurable unicast reply properties
+ *
+ * @return (int32_t)
+ *      0                operation success
+ *      negative value   a number indicating the rough cause of this failure
+ *
+ * @note only one unicast reply will be sent each time this interface is called
+ *
+ * @exception
  */
 DFINDER_EXPORT int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings);
 

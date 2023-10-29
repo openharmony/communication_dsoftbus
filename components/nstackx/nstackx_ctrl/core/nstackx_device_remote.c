@@ -351,6 +351,15 @@ static int32_t UpdateDeviceInfoInner(DeviceInfo *curInfo, const DeviceInfo *newI
         return NSTACKX_EFAILED;
     }
 
+    if (curInfo->mode != newInfo->mode) {
+        curInfo->mode = newInfo->mode;
+        *updated = NSTACKX_TRUE;
+    }
+
+    if (curInfo->businessType != newInfo->businessType) {
+        curInfo->businessType = newInfo->businessType;
+        *updated = NSTACKX_TRUE;
+    }
     return NSTACKX_EOK;
 }
 
@@ -371,11 +380,6 @@ static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, con
         updated = NSTACKX_TRUE;
     }
 
-    if (curInfo->mode != newInfo->mode) {
-        curInfo->mode = newInfo->mode;
-        updated = NSTACKX_TRUE;
-    }
-
     if (strcmp(curInfo->serviceData, newInfo->serviceData) != 0) {
         if (strcpy_s(curInfo->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, newInfo->serviceData) != EOK) {
             DFINDER_LOGE(TAG, "serviceData copy error");
@@ -387,15 +391,12 @@ static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, con
     if (strcmp(curInfo->extendServiceData, newInfo->extendServiceData) != 0) {
         if (strcpy_s(curInfo->extendServiceData, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN,
             newInfo->extendServiceData) != EOK) {
+            DFINDER_LOGE(TAG, "extendServiceData copy error");
             return NSTACKX_EFAILED;
         }
         updated = NSTACKX_TRUE;
     }
 #endif
-    if (curInfo->businessType != newInfo->businessType) {
-        curInfo->businessType = newInfo->businessType;
-        updated = NSTACKX_TRUE;
-    }
 
     if (UpdateDeviceInfoBusinessData(curInfo, newInfo, &updated) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "businessData copy error");

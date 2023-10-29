@@ -138,8 +138,8 @@ int32_t DeviceModuleInit(EpollDesc epollfd, uint32_t maxDeviceNum);
 void DeviceModuleClean(void);
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
-int32_t UpdateDeviceDb(const CoapCtxType *coapCtx, const DeviceInfo *deviceInfo,
-    uint8_t forceUpdate, uint8_t receiveBcast);
+int32_t UpdateDeviceDb(const CoapCtxType *coapCtx, const DeviceInfo *deviceInfo, uint8_t forceUpdate,
+    uint8_t receiveBcast);
 #endif
 
 int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo);

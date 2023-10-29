@@ -116,26 +116,16 @@ void NotifyDFinderMsgRecver(DFinderMsgType msgType)
     }
 }
 
-/* check if we need to reply a unicast based on businessType. */
 int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType)
 {
     switch (businessType) {
-        case NSTACKX_BUSINESS_TYPE_NULL:
-            return NSTACKX_EOK;
-
-        case NSTACKX_BUSINESS_TYPE_HICOM:
-            return NSTACKX_EOK;
-
         case NSTACKX_BUSINESS_TYPE_SOFTBUS:
-            return NSTACKX_EFAILED;
-
         case NSTACKX_BUSINESS_TYPE_AUTONET:
             return NSTACKX_EFAILED;
-
+        case NSTACKX_BUSINESS_TYPE_NULL:
+        case NSTACKX_BUSINESS_TYPE_HICOM:
         case NSTACKX_BUSINESS_TYPE_NEARBY:
-            return NSTACKX_EOK;
-
-        default: /* Unknown businessType */
+        default:
             return NSTACKX_EOK;
     }
 }
@@ -1266,7 +1256,7 @@ int32_t NSTACKX_RegisterBusinessData(const char *businessData)
         return NSTACKX_EFAILED;
     }
     if (strlen(businessData) >= NSTACKX_MAX_BUSINESS_DATA_LEN) {
-        DFINDER_LOGE(TAG, "businessData (%u) exceed max number", strlen(businessData));
+        DFINDER_LOGE(TAG, "businessData (%u) exceed max data len", strlen(businessData));
         return NSTACKX_EINVAL;
     }
 

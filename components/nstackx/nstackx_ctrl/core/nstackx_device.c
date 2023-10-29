@@ -71,7 +71,7 @@ static uint32_t g_filterCapabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM] = {0};
 /* g_interfaceList store the actual interface name prefix for one platform */
 static NetworkInterfaceInfo g_interfaceList[NSTACKX_MAX_INTERFACE_NUM];
 
-#if !defined(DFINDER_USE_MINI_NSTACKX)
+#ifndef DFINDER_USE_MINI_NSTACKX
 /*
  * g_interfacePrefixList store all interface name prefix to adapt different platform
  * when platform interface name prefix update, just update g_interfacePrefixList
@@ -187,10 +187,7 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
     }
 
     if (deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_AUTONET && receiveBcast == NSTACKX_TRUE) {
-        if (DeviceInfoNotify(deviceInfo) != NSTACKX_EOK) {
-            return NSTACKX_EFAILED;
-        }
-        return NSTACKX_EOK;
+        return DeviceInfoNotify(deviceInfo);
     }
 
     if (updated || forceUpdate) {
@@ -200,8 +197,8 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
     return NSTACKX_EOK;
 }
 
-int32_t UpdateDeviceDb(const CoapCtxType *coapCtx, const DeviceInfo *deviceInfo,
-    uint8_t forceUpdate, uint8_t receiveBcast)
+int32_t UpdateDeviceDb(const CoapCtxType *coapCtx, const DeviceInfo *deviceInfo, uint8_t forceUpdate,
+    uint8_t receiveBcast)
 {
     int32_t ret = UpdateDeviceDbInDeviceList(coapCtx, deviceInfo, forceUpdate, receiveBcast);
     if (ret != NSTACKX_EOK) {
@@ -302,13 +299,6 @@ int32_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, const Devi
     }
 
     if (deviceInfo->mode != 0 && !cJSON_AddNumberToObject(item, "mode", deviceInfo->mode)) {
-        goto L_END;
-    }
-    // hicom can only parse btype and nic name from reservedInfo currently
-    if (!cJSON_AddNumberToObject(item, "businessType", deviceInfo->businessType)) {
-        goto L_END;
-    }
-    if (!cJSON_AddStringToObject(item, "networkName", deviceInfo->networkName)) {
         goto L_END;
     }
     if (!cJSON_AddStringToObject(item, "hwAccountHashVal", deviceInfo->deviceHash)) {

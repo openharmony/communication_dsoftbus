@@ -42,7 +42,6 @@ void Coverity_Tainted_Set(void *buf);
 bool GetIsNotifyPerDevice(void);
 void NotifyDeviceListChanged(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
 void NotifyDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
-
 #ifndef DFINDER_USE_MINI_NSTACKX
 void NotifyMsgReceived(const char *moduleName, const char *deviceId, const uint8_t *data,
     uint32_t len, const char *srcIp);
