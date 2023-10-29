@@ -229,7 +229,7 @@ static int32_t CoapSendMessageEx(const CoapBuildParam *param, uint8_t isBroadcas
     sndPktBuff.size = COAP_MAX_PDU_SIZE;
     sndPktBuff.len = 0;
     if (!isAckMsg) {
-        payload = PrepareServiceDiscover(GetLocalIfaceIpStr(g_coapCtx.iface), isBroadcast, bType, NSTACKX_FALSE);
+        payload = PrepareServiceDiscover(GetLocalIfaceIpStr(g_coapCtx.iface), isBroadcast, bType);
         if (payload == NULL) {
             free(sndPktBuff.readWriteBuf);
             DFINDER_LOGE(TAG, "prepare payload data failed");
