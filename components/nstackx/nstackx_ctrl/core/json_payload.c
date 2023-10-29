@@ -146,12 +146,10 @@ L_END_JSON:
     return NSTACKX_EFAILED;
 }
 
-static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint8_t isBroadcast, uint8_t bType)
+static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint8_t isBroadcast, uint8_t businessType)
 {
-    cJSON *item = NULL;
-
-    uint8_t curType = (isBroadcast) ? deviceInfo->businessType : bType;
-    item = cJSON_CreateNumber(curType);
+    uint8_t tmpType = (isBroadcast) ? deviceInfo->businessType : businessType;
+    cJSON *item = cJSON_CreateNumber(tmpType);
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_BUSINESS_TYPE, item)) {
         cJSON_Delete(item);
         DFINDER_LOGE(TAG, "cJSON_CreateString for businessType failed");
@@ -413,7 +411,7 @@ static int JsonAddStr(cJSON *data, const char *key, const char *value)
  *   "coapUri":[coap uri for discover, string]   <-- optional. When present, means it's broadcast request.
  * }
  */
-static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast, uint8_t bType)
+static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast, uint8_t businessType)
 {
     cJSON *data = cJSON_CreateObject();
     if (data == NULL) {
@@ -427,7 +425,7 @@ static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast
     if ((AddDeviceJsonData(data, deviceInfo) != NSTACKX_EOK) ||
         (JsonAddStr(data, JSON_DEVICE_WLAN_IP, locaIpStr) != NSTACKX_EOK) ||
         (AddCapabilityBitmap(data, deviceInfo) != NSTACKX_EOK) ||
-        (AddBusinessJsonData(data, deviceInfo, isBroadcast, bType) != NSTACKX_EOK)) {
+        (AddBusinessJsonData(data, deviceInfo, isBroadcast, businessType) != NSTACKX_EOK)) {
         DFINDER_LOGE(TAG, "Add json data failed");
         goto L_END_JSON;
     }
@@ -457,9 +455,9 @@ L_END_JSON:
     return formatString;
 }
 
-char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t bType)
+char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t businessType)
 {
-    char *str = PrepareServiceDiscoverEx(localIpStr, isBroadcast, bType);
+    char *str = PrepareServiceDiscoverEx(localIpStr, isBroadcast, businessType);
     if (str == NULL) {
         DFINDER_LOGE(TAG, "prepare service discover ex failed");
         IncStatistics(STATS_PREPARE_SD_MSG_FAILED);

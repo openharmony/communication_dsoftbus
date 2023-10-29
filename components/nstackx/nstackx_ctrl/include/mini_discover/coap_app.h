@@ -54,7 +54,7 @@ CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface);
 void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit);
 
 void ResetCoapSocketTaskCount(uint8_t isBusy);
-int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, uint8_t bType, bool isAckMsg);
+int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, uint8_t businessType, bool isAckMsg);
 
 #ifdef __cplusplus
 }

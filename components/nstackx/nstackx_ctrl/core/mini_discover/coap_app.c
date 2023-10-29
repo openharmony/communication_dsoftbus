@@ -209,7 +209,7 @@ static int32_t CoapSendMsg(const CoapRequest *coapRequest, uint8_t isBroadcast)
     return NSTACKX_EOK;
 }
 
-static int32_t CoapSendMessageEx(const CoapBuildParam *param, uint8_t isBroadcast, uint8_t bType, bool isAckMsg)
+static int32_t CoapSendMessageEx(const CoapBuildParam *param, uint8_t isBroadcast, uint8_t businessType, bool isAckMsg)
 {
     if (param == NULL) {
         DFINDER_LOGE(TAG, "coap build param is null");
@@ -229,7 +229,7 @@ static int32_t CoapSendMessageEx(const CoapBuildParam *param, uint8_t isBroadcas
     sndPktBuff.size = COAP_MAX_PDU_SIZE;
     sndPktBuff.len = 0;
     if (!isAckMsg) {
-        payload = PrepareServiceDiscover(GetLocalIfaceIpStr(g_coapCtx.iface), isBroadcast, bType);
+        payload = PrepareServiceDiscover(GetLocalIfaceIpStr(g_coapCtx.iface), isBroadcast, businessType);
         if (payload == NULL) {
             free(sndPktBuff.readWriteBuf);
             DFINDER_LOGE(TAG, "prepare payload data failed");
@@ -256,14 +256,14 @@ static int32_t CoapSendMessageEx(const CoapBuildParam *param, uint8_t isBroadcas
     return ret;
 }
 
-int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, uint8_t bType, bool isAckMsg)
+int32_t CoapSendMessage(const CoapBuildParam *param, uint8_t isBroadcast, uint8_t businessType, bool isAckMsg)
 {
     if (!g_coapCtx.inited) {
         DFINDER_LOGE(TAG, "coap context not inited");
         return NSTACKX_EFAILED;
     }
 
-    int32_t ret = CoapSendMessageEx(param, isBroadcast, bType, isAckMsg);
+    int32_t ret = CoapSendMessageEx(param, isBroadcast, businessType, isAckMsg);
     if (ret != DISCOVERY_ERR_SUCCESS) {
         IncStatistics(STATS_SEND_MSG_FAILED);
     }

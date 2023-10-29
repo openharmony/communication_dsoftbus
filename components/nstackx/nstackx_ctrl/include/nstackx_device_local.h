@@ -42,8 +42,8 @@ void SetLocalDeviceHash(uint64_t deviceHash);
 int SetLocalDeviceCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t SetLocalDeviceServiceData(const char *serviceData);
 
+void SetLocalDeviceBusinessType(uint8_t businessType);
 uint8_t GetLocalDeviceBusinessType(void);
-void SetLocalDeviceBusinessType(uint8_t bType);
 
 int SetLocalDeviceBusinessData(const char *data, bool unicast);
 uint8_t GetLocalDeviceMode(void);

@@ -58,25 +58,9 @@ static uint32_t g_coapDiscoverTargetCount;
 static uint8_t g_userRequest;
 static uint8_t g_forceUpdate;
 
-static int32_t CheckBusinessTypeCanNotify(const uint8_t businessType)
-{
-    uint8_t localBusinessType = GetLocalDeviceBusinessType();
-    if (businessType == localBusinessType) {
-        return NSTACKX_EOK;
-    }
-    if ((localBusinessType == NSTACKX_BUSINESS_TYPE_NEARBY) ||
-        (businessType == NSTACKX_BUSINESS_TYPE_NEARBY)) {
-        return NSTACKX_EFAILED;
-    }
-    return NSTACKX_EOK;
-}
-
 static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char **remoteUrl, DeviceInfo *deviceInfo)
 {
     if (GetServiceDiscoverInfo(buf, size, deviceInfo, remoteUrl) != NSTACKX_EOK) {
-        return NSTACKX_EFAILED;
-    }
-    if (CheckBusinessTypeCanNotify(deviceInfo->businessType) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
     /* receive coap broadcast, set peer device's discovery type to passive,
@@ -190,9 +174,7 @@ static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
     {
         goto FAIL;
     }
-    if (g_forceUpdate) {
-        g_forceUpdate = NSTACKX_FALSE;
-    }
+    g_forceUpdate = (!g_forceUpdate) ? : NSTACKX_FALSE;
     if (deviceInfo->mode == PUBLISH_MODE_PROACTIVE) {
         DFINDER_LOGD(TAG, "peer is PUBLISH_MODE_PROACTIVE");
         goto FAIL;
@@ -576,7 +558,7 @@ static int32_t SendDiscoveryRspEx(const NSTACKX_ResponseSettings *responseSettin
     }
     CoapBuildParam param;
     CreateUnicastCoapParam(remoteUrl, host, &param);
-    return CoapSendMessage(&param, NSTACKX_FALSE,  responseSettings->businessType, false);
+    return CoapSendMessage(&param, NSTACKX_FALSE, responseSettings->businessType, false);
 }
 
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
