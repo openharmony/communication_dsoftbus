@@ -62,7 +62,7 @@ typedef struct LocalDevice_ {
 
 static LocalDevice g_localDevice;
 
-#define LOCAL_DEVICE_OFFLINE_DEFERRED_DURATION 1000 /* Defer local device offline event, 5s to 1s */
+#define LOCAL_DEVICE_OFFLINE_DEFERRED_DURATION 5000 /* Defer local device offline event, 5 seconds */
 
 #define NSTACKX_DEFAULT_DEVICE_NAME "nStack Device"
 

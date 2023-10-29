@@ -751,14 +751,6 @@ void DestroyRxIfaceByIfname(const char *ifName)
     LIST_FOR_EACH_SAFE(pos, tmp, g_remoteDeviceList) {
         device = (RemoteDevice *)pos;
         DestroyRxIfaceByIfnameInner(device, ifName);
-        if (ListIsEmpty(&device->rxIfaceList)) {
-            /*
-             * device has been discovered from down nic will not be reported,
-             * but if the device is also found on other local nic in up state, it will be reported.
-             */
-            DFINDER_LOGD(TAG, "free current remote device cause its rxIface count is 0");
-            DestroyRemoteDevice(device);
-        }
     }
 }
 
