@@ -121,6 +121,7 @@ int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType)
     switch (businessType) {
         case NSTACKX_BUSINESS_TYPE_SOFTBUS:
         case NSTACKX_BUSINESS_TYPE_AUTONET:
+        case NSTACKX_BUSINESS_TYPE_STRATEGY:
             return NSTACKX_EFAILED;
         case NSTACKX_BUSINESS_TYPE_NULL:
         case NSTACKX_BUSINESS_TYPE_HICOM:
@@ -464,6 +465,7 @@ void NSTACKX_Deinit(void)
     }
     ResetStatistics();
     ResetEventFunc();
+    ResetSequenceNumber();
     g_nstackInitState = NSTACKX_INIT_STATE_START;
     DFINDER_LOGI(TAG, "deinit successfully");
 }

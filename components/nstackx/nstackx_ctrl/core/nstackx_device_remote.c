@@ -387,7 +387,14 @@ static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, con
         }
         updated = NSTACKX_TRUE;
     }
-# ifndef DFINDER_USE_MINI_NSTACKX
+    updated = (newInfo->seq.dealBcast) ?
+        (curInfo->seq.seqBcast != newInfo->seq.seqBcast) : (curInfo->seq.seqUcast != newInfo->seq.seqUcast);
+    if (newInfo->seq.dealBcast) {
+        curInfo->seq.seqBcast = newInfo->seq.seqBcast;
+    } else {
+        curInfo->seq.seqUcast = newInfo->seq.seqUcast;
+    }
+#ifndef DFINDER_USE_MINI_NSTACKX
     if (strcmp(curInfo->extendServiceData, newInfo->extendServiceData) != 0) {
         if (strcpy_s(curInfo->extendServiceData, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN,
             newInfo->extendServiceData) != EOK) {

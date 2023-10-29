@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "nstackx_smartgenius.h"
+#include "nstackx_smartgenius.h"
 #include <errno.h>
 #include <string.h>
 #include <securec.h>

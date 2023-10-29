@@ -109,6 +109,12 @@ typedef struct BusinessDataAll {
     char businessDataUnicast[NSTACKX_MAX_BUSINESS_DATA_LEN];
 } BusinessDataAll;
 
+typedef struct SeqAll {
+    uint8_t dealBcast;
+    uint16_t seqBcast;
+    uint16_t seqUcast;
+} SeqAll;
+
 typedef struct DeviceInfo {
     char deviceId[NSTACKX_MAX_DEVICE_ID_LEN];
     char deviceName[NSTACKX_MAX_DEVICE_NAME_LEN];
@@ -132,6 +138,7 @@ typedef struct DeviceInfo {
     char extendServiceData[NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN];
 #endif
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
+    SeqAll seq;
 } DeviceInfo;
 
 int32_t DeviceModuleInit(EpollDesc epollfd, uint32_t maxDeviceNum);
@@ -159,6 +166,9 @@ void UpdateAllNetworkInterfaceNameIfNeed(const NetworkInterfaceInfo *interfaceIn
 void SetMaxDeviceNum(uint32_t maxDeviceNum);
 uint32_t GetMaxDeviceNum(void);
 uint32_t *GetFilterCapability(uint32_t *capabilityBitmapNum);
+void IncreaseSequenceNumber(uint8_t sendBcast);
+uint16_t GetSequenceNumber(uint8_t sendBcast);
+void ResetSequenceNumber();
 
 int32_t RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);

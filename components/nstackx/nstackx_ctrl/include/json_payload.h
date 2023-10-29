@@ -39,6 +39,7 @@ extern "C" {
 #define JSON_BUSINESS_TYPE "bType"
 #define JSON_BUSINESS_DATA "bData"
 #define JSON_EXTEND_SERVICE_DATA "extendServiceData"
+#define JSON_SEQUENCE_NUMBER "seqNo"
 
 #ifdef DFINDER_USE_MINI_NSTACKX
 #define COAP_DEVICE_DISCOVER_URI "device_discover"
