@@ -42,6 +42,10 @@ constexpr char LOCAL_NETWORK_ID[] = "444455556666abcdef";
 constexpr uint32_t FILE_DEFAULT_LINK_NUM = 4;
 constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
 constexpr uint32_t LANE_LINK_NUM = 2;
+constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 3000;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT = 3000;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT = 3000;
 
 static NodeInfo g_nodeInfo;
 constexpr int32_t DEFAULT_PID = 0;
@@ -240,8 +244,27 @@ HWTEST_F(LaneTest, LANE_ID_APPLY_Test_002, TestSize.Level1)
     SoftBusFree(laneIdList);
 }
 
+// /*
+// * @tc.name: LANE_SELECT_Test_001
+// * @tc.desc: lane select fileTransLane by LNN
+// * @tc.type: FUNC
+// * @tc.require: I5FBFG
+// */
+// HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
+// {
+//     LanePreferredLinkList recommendList;
+//     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+//     uint32_t listNum = 0;
+//     LaneSelectParam selectParam;
+//     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+//     selectParam.transType = LANE_T_FILE;
+//     selectParam.expectedBw = 0;
+//     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+//     EXPECT_EQ(ret, SOFTBUS_OK);
+//     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
+// }
 /*
-* @tc.name: LANE_SELECT_Test_001
+* @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_001
 * @tc.desc: lane select fileTransLane by LNN
 * @tc.type: FUNC
 * @tc.require: I5FBFG
@@ -254,15 +277,41 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_FILE;
-    selectParam.expectedBw = 0;
-    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
+    selectParam.qosRequire.maxlatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.maxWaitTimeout = DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT;
+    selectParam.qosRequire.maxIdleTimeout = DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT;
+    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
 }
 
+// /*
+// * @tc.name: LANE_SELECT_Test_002
+// * @tc.desc: lane select by preferredLinkList
+// * @tc.type: FUNC
+// * @tc.require: I5FBFG
+// */
+// HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
+// {
+//     LanePreferredLinkList recommendList;
+//     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+//     uint32_t listNum = 0;
+//     LaneSelectParam selectParam;
+//     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+//     selectParam.transType = LANE_T_BYTE;
+//     selectParam.expectedBw = 0;
+//     selectParam.list.linkTypeNum = LANE_PREFERRED_LINK_NUM;
+//     selectParam.list.linkType[0] = LANE_WLAN_5G;
+//     selectParam.list.linkType[1] = LANE_BR;
+//     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+//     EXPECT_TRUE(ret == SOFTBUS_OK);
+//     EXPECT_TRUE(listNum == LANE_PREFERRED_LINK_NUM);
+// }
+
 /*
-* @tc.name: LANE_SELECT_Test_002
-* @tc.desc: lane select by preferredLinkList
+* @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_002
+* @tc.desc: lane select by qos
 * @tc.type: FUNC
 * @tc.require: I5FBFG
 */
@@ -270,15 +319,14 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    uint32_t listNum = 0;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_BYTE;
-    selectParam.expectedBw = 0;
-    selectParam.list.linkTypeNum = LANE_PREFERRED_LINK_NUM;
-    selectParam.list.linkType[0] = LANE_WLAN_5G;
-    selectParam.list.linkType[1] = LANE_BR;
-    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
+    selectParam.qosRequire.maxlatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.maxWaitTimeout = DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT;
+    selectParam.qosRequire.maxIdleTimeout = DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT;
+    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_TRUE(listNum == LANE_PREFERRED_LINK_NUM);
 }

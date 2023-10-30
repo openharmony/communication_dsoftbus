@@ -29,8 +29,10 @@ public:
     TransLaneDepsInterface() {};
     virtual ~TransLaneDepsInterface() {};
 
-    virtual int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
-    LanePreferredLinkList *recommendList, uint32_t *listNum);
+    // virtual int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
+    // LanePreferredLinkList *recommendList, uint32_t *listNum);
+    virtual int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList);
     virtual int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb) = 0;
     virtual void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32_t pid) = 0;
     virtual uint32_t GenerateLaneProfileId(const LaneGenerateParam *param) = 0;
@@ -42,7 +44,8 @@ class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
 public:
     TransLaneDepsInterfaceMock();
     ~TransLaneDepsInterfaceMock() override;
-    MOCK_METHOD4(SelectLane, int32_t (const char*, const LaneSelectParam *, LanePreferredLinkList *, uint32_t *));
+    // MOCK_METHOD4(SelectLane, int32_t (const char*, const LaneSelectParam *, LanePreferredLinkList *, uint32_t *));
+    MOCK_METHOD4(SelectExpectLanesByQos, int32_t (const char*, const LaneSelectParam *, LanePreferredLinkList *));
     MOCK_METHOD3(BuildLink, int32_t (const LinkRequest *, uint32_t, const LaneLinkCb *));
     MOCK_METHOD4(DestroyLink, void (const char *, uint32_t, LaneLinkType, int32_t));
     MOCK_METHOD1(GenerateLaneProfileId, uint32_t (const LaneGenerateParam *));

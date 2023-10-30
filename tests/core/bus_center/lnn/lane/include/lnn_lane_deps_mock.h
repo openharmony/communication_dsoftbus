@@ -68,6 +68,11 @@ public:
     virtual void ConnBleReturnConnection(ConnBleConnection **connection) = 0;
     virtual bool ConnBleDirectIsEnable(BleProtocolType protocol) = 0;
     virtual int32_t TransProxyCloseProxyChannel(int32_t channelId) = 0;
+    virtual int32_t LaneLock(void) = 0;
+    virtual LaneResource *LaneResourceIsExist(LaneResource * resourceItem) = 0;
+    virtual void ListAdd(ListNode *list, ListNode *node) = 0;
+    virtual void ListDel(ListNode *node) = 0;
+
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -104,7 +109,10 @@ public:
     MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));
     MOCK_METHOD1(ConnBleDirectIsEnable, bool (BleProtocolType));
     MOCK_METHOD1(TransProxyCloseProxyChannel, int32_t(int32_t));
-
+    MOCK_METHOD1(LaneLock, uint32_t ());
+    MOCK_METHOD1(LaneResourceIsExist, LaneResource* (LaneResource *));
+    MOCK_METHOD1(ListAdd, bool (ListNode *,ListNode *));
+    MOCK_METHOD1(ListDel, bool (ListNode *));
     void SetDefaultResult(void);
 };
 } // namespace OHOS
