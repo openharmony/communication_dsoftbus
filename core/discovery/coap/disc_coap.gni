@@ -17,6 +17,7 @@ if (dsoftbus_feature_disc_coap == true) {
   disc_coap_src = [
     "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser.c",
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap.c",
+    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap_capability.c",
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_nstackx_adapter.c",
   ]
 } else {
