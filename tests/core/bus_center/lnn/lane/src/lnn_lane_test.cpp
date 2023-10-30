@@ -39,6 +39,13 @@ using namespace testing;
 
 constexpr char NODE_NETWORK_ID[] = "111122223333abcdef";
 constexpr uint32_t DEFAULT_SELECT_NUM = 4;
+constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 3000;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT = 3000;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT = 3000;
+constexpr uint32_t DEFAULT_LANE_RESOURCE_LANE_REF = 0;
+constexpr uint32_t ADD_LANE_SUCC_RESOURCE_LANE_REF = 1;
+
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
@@ -314,6 +321,7 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_001, TestSize.Level1)
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     info.type = LANE_BR;
+    info.LaneId = 0x10000001;
     LaneConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     LaneProfile profile;
@@ -333,6 +341,7 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_002, TestSize.Level1)
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     info.type = LANE_BLE;
+    info.LaneId = 0x10000001;
     LaneConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     LaneProfile profile;
@@ -352,6 +361,7 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_003, TestSize.Level1)
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     info.type = LANE_P2P;
+    info.LaneId = 0x10000001;
     LaneConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     LaneProfile profile;
@@ -371,6 +381,7 @@ HWTEST_F(LNNLaneMockTest, LANE_INFO_004, TestSize.Level1)
     LaneLinkInfo info;
     (void)memset_s(&info, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     info.type = LANE_LINK_TYPE_BUTT;
+    info.LaneId = 0x10000001;
     LaneConnInfo *connInfo = nullptr;
     LaneProfile *profile = nullptr;
     int32_t ret = LaneInfoProcess(nullptr, connInfo, profile);
@@ -451,22 +462,29 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_SELECT_LANE_001
-* @tc.desc: SelectLane
+* @tc.desc: SelectExpectLanesByQos
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
 {
     LanePreferredLinkList *linkList = nullptr;
-    uint32_t listNum = 0;
+    //uint32_t listNum = 0;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_FILE;
+    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
+    selectParam.qosRequire.maxlatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.maxWaitTimeout = DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT;
+    selectParam.qosRequire.maxIdleTimeout = DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT;
+    /*
     selectParam.expectedBw = 0;
     selectParam.list.linkTypeNum = 2;
     selectParam.list.linkType[0] = LANE_WLAN_5G;
     selectParam.list.linkType[1] = LANE_LINK_TYPE_BUTT;
-    int32_t ret = SelectLane(NODE_NETWORK_ID, nullptr, linkList, &listNum);
+    */
+    //int32_t ret = SelectLane(NODE_NETWORK_ID, nullptr, linkList, &listNum);
+    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, nullptr, linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     LaneDepsInterfaceMock mock;
@@ -476,7 +494,8 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(false));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
-    ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    //ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
@@ -484,34 +503,42 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
-    ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    //ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     selectParam.transType = LANE_T_MIX;
-    ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    //ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(linkList);
 }
 
 /*
 * @tc.name: LNN_SELECT_LANE_002
-* @tc.desc: SelectLane
+* @tc.desc: SelectExpectLanesByQos
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
 {
     LanePreferredLinkList *linkList = nullptr;
-    uint32_t listNum = 0;
+    //uint32_t listNum = 0;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_FILE;
+    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
+    selectParam.qosRequire.maxlatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.maxWaitTimeout = DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT;
+    selectParam.qosRequire.maxIdleTimeout = DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT;
+    /*
     selectParam.expectedBw = 0;
     selectParam.list.linkTypeNum = DEFAULT_SELECT_NUM;
     selectParam.list.linkType[0] = LANE_BLE;
     selectParam.list.linkType[1] = LANE_WLAN_2P4G;
     selectParam.list.linkType[2] = LANE_WLAN_5G;
     selectParam.list.linkType[3] = LANE_BR;
+    */
 
     LaneDepsInterfaceMock mock;
     mock.SetDefaultResult();
@@ -519,14 +546,16 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
-    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    //int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<1>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<2>(1), Return(SOFTBUS_OK)));
-    ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    //ret = SelectLane(NODE_NETWORK_ID, &selectParam, linkList, &listNum);
+    ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(linkList);
 }
@@ -694,4 +723,112 @@ HWTEST_F(LNNLaneMockTest, LANE_ADD_P2P_ADDRESS_TEST_001, TestSize.Level1)
     LaneAddP2pAddressByIp(ipAddr, port);
     LaneUpdateP2pAddressByIp(ipAddr, networkId);
 }
+
+/*
+* @tc.name: LANE_ADD_LANE_RESOURCE_ITEM_TEST_001
+* @tc.desc: LANE ADD LANE RESOURCE TEST
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ADD_LANE_RESOURCE_ITEM_TEST_001, TestSize.Level1)
+{
+    int32_t ret;
+    LaneDepsInterfaceMock mock;
+    ret = AddLaneResourceItem(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(mock, LaneLock).willOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneResource *resourceItem = (LaneResource*)SoftBusCalloc(sizeof(LaneResource));
+    resourceItem->laneRef = DEFAULT_LANE_RESOURCE_LANE_REF;
+    ret = AddLaneResourceItem(resourceItem);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(mock, LaneResourceIsExist).willOnce(Return(NULL)).WillRepeatedly(Return(resourceItem));
+    ret = AddLaneResourceItem(resourceItem);
+    EXPECT_EQ(resourceItem->laneRef, ADD_LANE_SUCC_RESOURCE_LANE_REF);
+
+    EXPECT_CALL(mock, ListAdd).WillRepeatedly(return(true));
+    ret = AddLaneResourceItem(resourceItem);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(resourceItem);
+}
+
+/*
+* @tc.name: LANE_DEL_LANE_RESOURCE_ITEM_TEST_001
+* @tc.desc: LANE DEL LANE RESOURCE TEST
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_DEL_LANE_RESOURCE_ITEM_TEST_001, TestSize.Level1)
+{
+    int32_t ret;
+    LaneDepsInterfaceMock mock;
+    ret = DelLaneResourceItem(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(mock, LaneLock).willOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneResource *resourceItem = (LaneResource*)SoftBusCalloc(sizeof(LaneResource));
+    ADD_LANE_SUCC_RESOURCE_LANE_REF
+    resourceItem->laneRef = ADD_LANE_SUCC_RESOURCE_LANE_REF;
+    ret = DelLaneResourceItem(resourceItem);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(mock, LaneResourceIsExist).willOnce(Return(NULL)).WillRepeatedly(Return(resourceItem));
+    ret = DelLaneResourceItem(resourceItem);
+    EXPECT_EQ(resourceItem->laneRef, DEFAULT_LANE_RESOURCE_LANE_REF);
+
+    EXPECT_CALL(mock, ListDel).WillRepeatedly(return(true));
+    ret = DelLaneResourceItem(resourceItem);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(resourceItem);
+}
+
+/*
+* @tc.name: LANE_ADD_LINK_INFO_ITEM_TEST_001
+* @tc.desc: LANE ADD LINK INFO TEST
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ADD_LINK_INFO_ITEM_TEST_001, TestSize.Level1)
+{
+    int32_t ret;
+    LaneDepsInterfaceMock mock;
+    ret = AddLinkInfoItem(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(mock, LaneLock).willOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo *linkInfoItem = (LaneLinkInfo*)SoftBusCalloc(sizeof(LaneLinkInfo));
+    ret = AddLinkInfoItem(linkInfoItem);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(mock, ListAdd).WillRepeatedly(return(true));
+    ret = AddLinkInfoItem(linkInfoItem);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(linkInfoItem);
+}
+/*
+* @tc.name: LANE_DEL_LINK_INFO_ITEM_TEST_001
+* @tc.desc: LANE DEL LINK INFO TEST
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ADD_LINK_INFO_ITEM_TEST_001, TestSize.Level1)
+{
+    int32_t ret;
+    LaneDepsInterfaceMock mock;
+    ret = DelLinkInfoItem(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(mock, LaneLock).willOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo *linkInfoItem = (LaneLinkInfo*)SoftBusCalloc(sizeof(LaneLinkInfo));
+    ret = DelLinkInfoItem(linkInfoItem);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    EXPECT_CALL(mock, ListDel).WillRepeatedly(return(true));
+    ret = DelLinkInfoItem(linkInfoItem);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(linkInfoItem);
+}
 } // namespace OHOS
+
+

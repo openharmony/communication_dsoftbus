@@ -36,10 +36,16 @@ static TransLaneDepsInterface *GetTransLaneIf()
 }
 
 extern "C" {
-int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
-    LanePreferredLinkList *recommendList, uint32_t *listNum)
+// int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
+//     LanePreferredLinkList *recommendList, uint32_t *listNum)
+// {
+//     return GetTransLaneIf()->SelectLane(networkId, request, recommendList, listNum);
+// }
+
+int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList)
 {
-    return GetTransLaneIf()->SelectLane(networkId, request, recommendList, listNum);
+        return GetTransLaneIf()->SelectExpectLanesByQos(networkId, request, recommendList)
 }
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb)

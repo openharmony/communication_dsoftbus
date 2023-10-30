@@ -199,5 +199,21 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
 }
+int32_t LaneLock(void)
+{
+    return GetLaneDepsInterface()->LaneLock();
+}
+int32_t LaneResourceIsExist(LaneResource *resourceItem)
+{
+    return GetLaneDepsInterface()->LaneResourceIsExist(resourceItem);
+}
+void ListDelete(ListNode *node)
+{
+    return GetLaneDepsInterface()->ListDelete(node);
+}
+void ListAdd(ListNode *list, ListNode *node)
+{
+    return GetLaneDepsInterface()->ListAdd(list,node);
+}
 }
 } // namespace OHOS
