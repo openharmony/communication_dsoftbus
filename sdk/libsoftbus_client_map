@@ -355,6 +355,8 @@
         "ClientDeleteEventListener";
         "TransProxyPackAndSendData";
         "ClientTransProxyGetInfoByChannelId";
+        "EnableDiscoveryPolicy";
+        "SetDiscoveryPolicy";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
