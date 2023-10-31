@@ -183,21 +183,24 @@ static const char *GetLinkType(LaneLinkType type)
 static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
 {
     printf("LaneRequestSucc: laneId:0x%x, linkType:%s\n", laneId, GetLinkType(info->type));
-    int32_t ret = LnnFreeLane(laneId);
+    const LnnLaneManager *laneManager = GetLaneManager();
+    int32_t ret = laneManager->LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 static void OnLaneRequestFail(uint32_t laneId, int32_t errCode)
 {
     printf("LaneRequestFail: laneId:0x%x, reason:%d\n", laneId, errCode);
-    int32_t ret = LnnFreeLane(laneId);
+    const LnnLaneManager *laneManager = GetLaneManager();
+    int32_t ret = laneManager->LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 static void OnLaneStateChange(uint32_t laneId, LaneState state)
 {
     printf("LaneStateChange: laneId:0x%x, state:%d\n", laneId, state);
-    int32_t ret = LnnFreeLane(laneId);
+    const LnnLaneManager *laneManager = GetLaneManager();
+    int32_t ret = laneManager->LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -209,10 +212,11 @@ static void OnLaneStateChange(uint32_t laneId, LaneState state)
 */
 HWTEST_F(LaneTest, LANE_ID_APPLY_Test_001, TestSize.Level1)
 {
+    const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneId = ApplyLaneId(laneType);
+    uint32_t laneId = laneManager->ApplyLaneId(laneType);
     EXPECT_TRUE(laneId != INVALID_LANE_ID);
-    int32_t ret = LnnFreeLane(laneId);
+    int32_t ret = laneManager->LnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -230,16 +234,17 @@ HWTEST_F(LaneTest, LANE_ID_APPLY_Test_002, TestSize.Level1)
     if (laneIdList == nullptr) {
         return;
     }
+    const LnnLaneManager *laneManager = GetLaneManager();
     uint32_t i;
     for (i = 0; i < MAX_LANE_ID_NUM; i++) {
-        laneId = ApplyLaneId(laneType);
+        laneId = laneManager->ApplyLaneId(laneType);
         EXPECT_TRUE(laneId != INVALID_LANE_ID);
         laneIdList[i] = laneId;
     }
-    laneId = ApplyLaneId(laneType);
+    laneId = laneManager->ApplyLaneId(laneType);
     EXPECT_TRUE(laneId == INVALID_LANE_ID);
     for (i = 0; i < MAX_LANE_ID_NUM; i++) {
-        EXPECT_EQ(LnnFreeLane(laneIdList[i]), SOFTBUS_OK);
+        EXPECT_EQ(laneManager->LnnFreeLane(laneIdList[i]), SOFTBUS_OK);
     }
     SoftBusFree(laneIdList);
 }
@@ -389,7 +394,8 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 */
 HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
 {
-    uint32_t laneId = ApplyLaneId(LANE_TYPE_TRANS);
+    const LnnLaneManager *laneManager = GetLaneManager();
+    uint32_t laneId = laneManager->ApplyLaneId(LANE_TYPE_TRANS);
     EXPECT_TRUE(laneId != INVALID_LANE_ID);
     LaneRequestOption request;
     (void)memset_s(&request, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -407,7 +413,7 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
         .OnLaneRequestFail = OnLaneRequestFail,
         .OnLaneStateChange = OnLaneStateChange,
     };
-    ret = LnnRequestLane(laneId, &request, &listener);
+    ret = laneManager->LnnRequestLane(laneId, &request, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(5);
 }

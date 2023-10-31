@@ -72,6 +72,7 @@ public:
     virtual LaneResource *LaneResourceIsExist(LaneResource * resourceItem) = 0;
     virtual void ListAdd(ListNode *list, ListNode *node) = 0;
     virtual void ListDel(ListNode *node) = 0;
+    virtual int32_t LaneDecisionModels(const LaneSelectParam *request, LanePreferredLinkList *recommendList) = 0;
 
 };
 
@@ -113,6 +114,7 @@ public:
     MOCK_METHOD1(LaneResourceIsExist, LaneResource* (LaneResource *));
     MOCK_METHOD1(ListAdd, bool (ListNode *,ListNode *));
     MOCK_METHOD1(ListDel, bool (ListNode *));
+    MOCK_METHOD2(LaneDecisionModels, int32_t (const LaneSelectParam *request, LanePreferredLinkList *recommendList));
     void SetDefaultResult(void);
 };
 } // namespace OHOS

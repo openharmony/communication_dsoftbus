@@ -88,6 +88,7 @@ typedef struct {
     uint16_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
+    uint16_t port;//verify p2p之后更新port
 } P2pConnInfo;
 
 typedef struct {
