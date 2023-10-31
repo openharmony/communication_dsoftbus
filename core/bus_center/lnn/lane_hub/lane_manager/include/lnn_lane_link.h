@@ -125,6 +125,9 @@ int32_t AddLaneResourceItem(LaneResource *resourceItem);
 int32_t DelLaneResourceItem(LaneResource *resourceItem);
 int32_t AddLinkInfoItem(LaneLinkInfo *linkInfoItem);
 int32_t DelLinkInfoItem(uint32_t LaneId);
+int32_t FindLaneLinkInfoByLaneId(uint32_t LaneId, LaneLinkInfo *linkInfoitem);
+int32_t AddItemOfLinkInfoAndLaneResoourse(LaneLinkInfo *linkInfoTemp, LaneResource *resourceItem);
+int32_t ConvertToLaneResource(LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
 
 #ifdef __cplusplus
 }
