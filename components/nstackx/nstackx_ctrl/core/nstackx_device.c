@@ -104,6 +104,7 @@ int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
     NotifyDeviceListChanged(&notifyDevice, 1);
     /* when unicast reply is determined by the service side, there is no concept of discovery cycle, just notify */
     if (deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_AUTONET) {
+        notifyDevice.update = NSTACKX_TRUE;
         NotifyDeviceFound(&notifyDevice, 1);
         return NSTACKX_EOK;
     }
@@ -186,11 +187,9 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
         DFINDER_LOGE(TAG, "update remote node by deviceinfo failed");
         return NSTACKX_EFAILED;
     }
-
     if (deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_AUTONET && receiveBcast == NSTACKX_TRUE) {
         return DeviceInfoNotify(deviceInfo);
     }
-
     if (updated || forceUpdate) {
         DFINDER_LOGD(TAG, "updated is: %hhu, forceUpdate is: %hhu", updated, forceUpdate);
         DeviceListChangeHandle();
