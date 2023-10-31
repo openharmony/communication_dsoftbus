@@ -215,5 +215,9 @@ void ListAdd(ListNode *list, ListNode *node)
 {
     return GetLaneDepsInterface()->ListAdd(list,node);
 }
+int32_t LaneDecisionModels(const LaneSelectParam *request, LanePreferredLinkList *recommendList)
+{
+    return GetLaneDepsInterface()->LaneDecisionModels(request, recommendList);
+}
 }
 } // namespace OHOS
