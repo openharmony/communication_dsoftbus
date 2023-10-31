@@ -15,6 +15,7 @@
 
 #include "softbus_server.h"
 
+#include "bus_center_ex_obj.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "lnn_bus_center_ipc.h"
@@ -336,6 +337,17 @@ int32_t SoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
     sptr<TransSpecObject> result = new(std::nothrow) TransSpecObject();
     if (result == nullptr) {
+        return SOFTBUS_MEM_ERR;
+    }
+    object = result;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
+{
+    sptr<BusCenterExObj> result = new(std::nothrow) BusCenterExObj();
+    if (result == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusServer GetBusCenterExObj failed!");
         return SOFTBUS_MEM_ERR;
     }
     object = result;
