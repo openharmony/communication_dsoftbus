@@ -522,6 +522,32 @@ static bool IgnoreUnConcernedData(SoftBusBleScanResult *scanResult)
     return false;
 }
 
+static void DuplicateScanResult(const SoftBusBleScanResult *src, SoftBusBleScanResult *dst)
+{
+    if (memcpy_s(dst, sizeof(SoftBusBleScanResult), src, sizeof(SoftBusBleScanResult)) != EOK) {
+        DLOGE("memcpy scanResultData failed");
+        return;
+    }
+    dst->advData = (unsigned char *)SoftBusCalloc(src->advLen);
+    if (dst->advData == NULL) {
+        DLOGE("malloc failed");
+        return;
+    }
+    if (memcpy_s(dst->advData, dst->advLen, src->advData, src->advLen) != EOK) {
+        DLOGE("memcpy advData failed");
+        return;
+    }
+}
+
+static void ReleaseScanResult(SoftBusBleScanResult *sr)
+{
+    if (sr->advData == NULL) {
+        return;
+    }
+    SoftBusFree(sr->advData);
+    sr->advData = NULL;
+}
+
 static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *scanResultData)
 {
     (void)listenerId;
@@ -550,21 +576,26 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
         return;
     }
 
-    SoftBusBleScanResult *scanResult = (SoftBusBleScanResult *)scanResultData;
+    SoftBusBleScanResult dupSr;
+    DuplicateScanResult(scanResultData, &dupSr);
+    SoftBusBleScanResult *scanResult = &dupSr;
     if (!IgnoreUnConcernedData(scanResult)) {
         DLOGE("ignore unconcerned data failed");
-        return;
+        goto FINISHED;
     }
     if (IsApproachBusiness(scanResult->advData)) {
         DLOGI("Process packet for approach business");
         if (ScanFilter(scanResult->advData, scanResult->advLen) != SOFTBUS_OK) {
             DLOGE("scan filter failed");
-            return;
+            goto FINISHED;
         }
         ProcessApproachPacket(scanResult, g_discBleInnerCb);
     } else {
         DLOGI("ignore other business");
     }
+
+FINISHED:
+    ReleaseScanResult(&dupSr);
 }
 
 static void BleOnScanStart(int listenerId, int status)
