@@ -132,6 +132,25 @@ int32_t DelLinkInfoItem(uint32_t LaneId)
     return SOFTBUS_OK;
 }
 
+int32_t FindLaneLinkInfoByLaneId(uint32_t LaneId, LaneLinkInfo *linkInfoitem)
+{
+    if (LaneId = INVALID_LANE_ID) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneLinkInfo *item = NULL;
+    LaneLinkInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_LinkInfoList, LaneLinkInfo, node) {
+        if (item->LaneId == LaneId) {
+            linkInfoitem = item;
+        }
+    }
+    LaneUnlock();
+    return SOFTBUS_OK;
+}
+
 int32_t LinkInfoToLaneResource(LaneLinkInfo *linkInfoItem, LaneResource *resourceItem)
 {
     if (linkInfoItem == NULL || resourceItem == NULL) {
@@ -159,6 +178,72 @@ static int32_t IsLinkRequestValid(const LinkRequest *reqInfo)
     if (reqInfo == NULL) {
         LLOGE("reqInfo is nullptr");
         return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertToLaneResource(LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo)
+{
+    if (linkInfo == NULL || laneResourceInfo == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "resourceItem or linkInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    laneResourceInfo->type = linkInfo->type;
+    switch (linkInfo->type) {
+        case LANE_BR:
+            if (memcpy_s(laneResourceInfo->linkInfo.br.brMac, BT_MAC_LEN, linkInfo.linkInfo.br.brMac, BT_MAC_LEN) != EOK) {
+                LLOGE("memcpy bleMac error");
+                return SOFTBUS_ERR;
+            }
+        case LANE_BLE:
+        case LANE_COC:
+            if (memcpy_s(&(laneResourceInfo->linkInfo.ble), sizeof(BleLinkInfo),
+                &(linkInfo.linkInfo.ble), sizeof(BleLinkInfo)) != EOK) {
+                LLOGE("memcpy BleLinkInfo error");
+                return SOFTBUS_ERR;
+            }
+        case LANE_P2P:
+            if (memcpy_s(&(laneResourceInfo->linkInfo.p2p), sizeof(P2pConnInfo),
+                &(linkInfo.linkInfo.p2p), sizeof(P2pConnInfo)) != EOK) {
+                LLOGE("memcpy BleLinkInfo error");
+                return SOFTBUS_ERR;
+            }
+        case LANE_WLAN_5G:
+        case LANE_WLAN_2P4G:
+        case LANE_P2P_REUSE:
+            if (memcpy_s(&(laneResourceInfo->linkInfo.wlan), sizeof(WlanLinkInfo),
+                &(linkInfo->linkInfo.wlan), sizeof(WlanLinkInfo)) != EOK) {
+                LLOGE("memcpy WlanLinkInfo error");
+                return SOFTBUS_ERR;
+            }
+        case LANE_BLE_DIRECT:
+            if (memcpy_s(&(laneResourceInfo->linkInfo.bleDirect), sizeof(BleDirectInfo),
+                &(linkInfo.linkInfo.bleDirect), sizeof(BleDirectInfo)) != EOK) {
+                LLOGE("memcpy BleDirectInfo error");
+                return SOFTBUS_ERR;
+            }
+        default:
+            LLOGE("linktype not support");
+            return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+int32_t AddItemOfLinkInfoAndLaneResoourse(LaneLinkInfo *linkInfoTemp, LaneResource *resourceItem)
+{
+    if (resourceItem == NULL || linkInfoTemp == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "resourceItem or linkInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (ConvertToLaneResource(linkInfoTemp, resourceItem) != SOFTBUS_OK) {
+        SoftBusFree(linkInfoTemp);
+        SoftBusFree(resourceItem);
+        return SOFTBUS_ERR;
+    }
+    if (AddLinkInfoItem(linkInfoTemp) != SOFTBUS_OK || AddLaneResourceItem(resourceItem) != SOFTBUS_OK) {
+        LLOGE("add LaneLinkInfo or LaneResource item failed");
+        SoftBusFree(linkInfoTemp);
+        SoftBusFree(resourceItem);
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -476,7 +561,6 @@ static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     if (memcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr, MAX_SOCKET_ADDR_LEN) != EOK) {
         return SOFTBUS_ERR;
     }
-
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;
 }
@@ -640,7 +724,6 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     if (!isConnected) {
         LLOGE("wlan is disconnected");
     }
-
     FillWlanLinkInfo(&linkInfo, is5GBand, channel, (uint16_t)port, protocol);
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;

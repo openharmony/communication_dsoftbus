@@ -121,12 +121,24 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "linkSuccess info malloc fail");
         return;
     }
+    LaneResource *resourceItem = (LaneResource *)SoftBusCalloc(sizeof(LaneResource));
+    if (resourceItem == NULL) {
+        SoftBusFree(linkParam);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LaneLinkInfo obj  malloc err");
+        return;
+    }
     if (memcpy_s(linkParam, sizeof(LaneLinkInfo), linkInfo, sizeof(LaneLinkInfo)) != EOK) {
         SoftBusFree(linkParam);
         return;
     }
+    linkParam->LaneId = laneId;
     if (PostMsgToHandler(MSG_TYPE_LANE_LINK_SUCCESS, laneId, 0, linkParam) != SOFTBUS_OK) {
         SoftBusFree(linkParam);
+        return;
+    }
+    int32_t ret = AddItemOfLinkInfoAndLaneResoourse(linkParam, resourceItem);
+    if (ret != SOFTBUS_OK) {
+        LLOGE("add LinkInfoAndLaneResoourse to node failed");
         return;
     }
 }
@@ -370,11 +382,22 @@ static int32_t Free(uint32_t laneId)
     }
     TransReqInfo *item = NULL;
     TransReqInfo *next = NULL;
+    LaneLinkInfo * laneLinkInfo = NULL;
+    LaneResource laneResourceInfo;
+    (void)memset_s(&laneResourceInfo, sizeof(LaneResource), 0, sizeof(LaneResource));
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == laneId) {
             ListDelete(&item->node);
             g_requestList->cnt--;
             Unlock();
+            if (FindLaneLinkInfoByLaneId(laneId, laneLinkInfo) != SOFTBUS_OK){
+                return SOFTBUS_NOT_FIND;
+            }
+            if (ConvertToLaneResource(laneLinkInfo, &laneResourceInfo) != SOFTBUS_OK) {
+                DelLinkInfoItem(laneId);
+            }
+            DelLinkInfoItem(laneId);
+            DelLaneResourceItem(&laneResourceInfo);
             DestroyLink(item->info.networkId, laneId, item->type, item->info.pid);
             UnbindLaneId(laneId, item);
             SoftBusFree(item);
@@ -578,11 +601,6 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
     uint32_t laneId = (uint32_t)msg->arg1;
     DeleteLaneLinkNode(laneId);
     NotifyLaneAllocSuccess(laneId, info);
-    //
-    info->laneId = laneId;
-    if (AddLinkInfoItem(info) != SOFTBUS_OK) {
-        SoftBusFree(info);
-    }
     return;
 }
 
