@@ -26,7 +26,6 @@
 #include "softbus_log.h"
 #include "softbus_utils.h"
 
-/*
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
@@ -92,6 +91,14 @@ static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink
     return SOFTBUS_OK;
 }
 
+static bool IsLinkTypeValid(LaneLinkType type)
+{
+    if ((type < 0) || (type >= LANE_LINK_TYPE_BUTT)) {
+        return false;
+    }
+    return true;
+}
+
 static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw, bool isIgnoreScore)
 {
     if (!IsLinkTypeValid(linkType)) {
@@ -114,14 +121,6 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
         return false;
     }
     return true;
-}*/
-
-static bool IsLinkTypeValid(LaneLinkType type)
-{
-    if ((type < 0) || (type >= LANE_LINK_TYPE_BUTT)) {
-        return false;
-    }
-    return true;
 }
 
 static bool GetValidLaneAndScore(const char *networkId, LaneLinkType linkType, uint16_t *score)
@@ -136,13 +135,7 @@ static bool GetValidLaneAndScore(const char *networkId, LaneLinkType linkType, u
     if (linkAttr->IsEnable(networkId) != true) {
         return false;
     }
-    if (isIgnoreScore) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ignore score");
-        return true;
-    }
-    //summer 信道结果应该返回 WiFi信道评分 蓝牙的评分结果暂定先用连接的拥塞成都
-    //summer 评分低不能不让用  优先级放低就行
-    //summer 对于p2p评分来说  应该是返回一个最高的信道排评分吗
+    uint32_t expectedBw = 0;
     score[linkType] = linkAttr->GetLinkScore(networkId, expectedBw);
     return true;
 }
@@ -179,7 +172,7 @@ static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
 {
     LLOGD("the %u priority link: %s", priority, GetLinkTypeStrng(preferredLink));
 }
-/* summer del
+
 static bool IsIgnoreLinkScore(const char *networkId, LaneLinkType *list, uint32_t num)
 {
     if (list == NULL || num == 0) {
@@ -290,12 +283,12 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     }
     *listNum = resNum;
     return SOFTBUS_OK;
-}*/
+}
 
-static int32_t LanePrioritization(LanePreferredLinkList *recommendList, unint16_t *laneScore)
+static int32_t LanePrioritization(LanePreferredLinkList *recommendList, uint16_t *laneScore)
 {
-    (void*)recommendList;
-    (void*)laneScore;
+    (void)recommendList;
+    (void)laneScore;
     return SOFTBUS_OK;
 }
 
@@ -319,24 +312,23 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     bool isStream = (request->transType == LANE_T_RAW_STREAM ||
                     request->transType == LANE_T_COMMON_VIDEO ||
                     request->transType == LANE_T_COMMON_VOICE);
-    unint16_t laneScore[LANE_LINK_TYPE_BUTT] = {0};
+    uint16_t laneScore[LANE_LINK_TYPE_BUTT] = {0};
     for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
-        bool isBt = (laneLinkList[i] == LANE_BR || laneLinkList[i] == LANE_BLE ||
-                    laneLinkList[i] == LANE_BLE_DIRECT || laneLinkList[i] == LANE_BLE_REUSE ||
-                    laneLinkList[i] == LANE_COC || laneLinkList[i] == LANE_COC_DIRECT);
+        bool isBt = (laneLinkList.linkType[i] == LANE_BR || laneLinkList.linkType[i] == LANE_BLE ||
+                    laneLinkList.linkType[i] == LANE_BLE_DIRECT || laneLinkList.linkType[i] == LANE_BLE_REUSE ||
+                    laneLinkList.linkType[i] == LANE_COC || laneLinkList.linkType[i] == LANE_COC_DIRECT);
         if (isStream && isBt) {
             continue;
         }
-        //summer 这里把每个链路的评分也都返回一下，思考一下这个评分在后面有用吗？没用的话就搞一个栈上的变量
-        //可以考虑把这个函数重写一下 便于新老流程互不干扰
-        if (!GetValidLaneAndScore(networkId, preferredList[i], &laneScore)) {
+
+        if (!GetValidLaneAndScore(networkId, laneLinkList.linkType[i], laneScore)) {
             continue;
         }
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
         recommendList->linkTypeNum++;
-        DumpPreferredLink(preferredList[i], i);
+        DumpPreferredLink(laneLinkList.linkType[i], i);
     }
-    //summer 王瑞接口linktype为索引
+
     if (LanePrioritization(recommendList, laneScore) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }

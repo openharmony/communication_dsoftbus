@@ -88,7 +88,7 @@ typedef struct {
     uint16_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
-    uint16_t port;//verify p2p之后更新port
+    uint16_t port;
 } P2pConnInfo;
 
 typedef struct {
@@ -154,13 +154,12 @@ typedef struct {
     bool p2pOnly;
     ProtocolType acceptableProtocols;
     int32_t pid;
-    /*summer del
+    //OldInfo
     char peerBleMac[MAX_MAC_LEN];
     //'psm' is valid only when 'expectedlink' contains 'LANE_COC'
     int32_t psm;
     uint32_t expectedBw;
     LanePreferredLinkList expectedLink;
-    */
 } TransOption;
 
 typedef struct {

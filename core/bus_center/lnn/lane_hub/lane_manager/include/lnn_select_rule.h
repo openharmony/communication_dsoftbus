@@ -17,6 +17,7 @@
 #define LNN_SELECT_RULE_H
 
 #include "softbus_common.h"
+#include "lnn_lane_select.h"
 #include "lnn_lane_interface.h"
 
 #ifdef __cplusplus

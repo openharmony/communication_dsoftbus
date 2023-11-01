@@ -33,11 +33,10 @@ typedef struct {
     LaneLinkType linkType;
     ProtocolType acceptableProtocols;
     int32_t pid;
-    /*
+    //OldInfo
     LaneTransType transType;
     char peerBleMac[MAX_MAC_LEN];
     int32_t psm;
-    */
 } LinkRequest;
 
 typedef struct {
@@ -74,7 +73,7 @@ typedef struct {
 } BleDirectInfo;
 
 typedef struct {
-    ListNode node;//summer 搞成链表
+    ListNode node;
     LaneLinkType type;
     union {
         WlanLinkInfo wlan;
@@ -83,11 +82,11 @@ typedef struct {
         BleLinkInfo ble;
         BleDirectInfo bleDirect;
     } linkInfo;
-    uint32_t LaneId;//summer 建链的时候给这个赋值
+    uint32_t LaneId;
 } LaneLinkInfo;
 
 typedef struct {
-    ListNode node;//summer 搞成链表
+    ListNode node;
     LaneLinkType type;
     union {
         WlanLinkInfo wlan;
@@ -128,6 +127,7 @@ int32_t DelLinkInfoItem(uint32_t LaneId);
 int32_t FindLaneLinkInfoByLaneId(uint32_t LaneId, LaneLinkInfo *linkInfoitem);
 int32_t AddItemOfLinkInfoAndLaneResoourse(LaneLinkInfo *linkInfoTemp, LaneResource *resourceItem);
 int32_t ConvertToLaneResource(LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
+int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy);
 
 #ifdef __cplusplus
 }
