@@ -23,6 +23,9 @@ extern "C" {
 #endif
 
 LaneInterface *TransLaneGetInstance(void);
+int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt);
+int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
+    void *obj, uint64_t delayMillis);
 
 #ifdef __cplusplus
 }

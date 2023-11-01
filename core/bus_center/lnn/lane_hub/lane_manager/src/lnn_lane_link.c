@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "lnn_trans_lane.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -28,6 +29,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "lnn_physical_subnet_manager.h"
+#include "lnn_lane_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_conn_ble_connection.h"
@@ -39,6 +41,8 @@
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
 #include "softbus_def.h"
+
+#define DELAY_DESTROY_LANE_TIME 5000
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
 
@@ -56,14 +60,63 @@ static void LaneUnlock(void)
     (void)SoftBusMutexUnlock(&g_laneResourceMutex);
 }
 
-static LaneResource* LaneResourceIsExist(LaneResource *resourceItem)
+static LaneResource* CompareLaneResource(LaneResource *resourceItem, LaneResource *item)
 {
-    //LINKTYPE 和地址
+    switch (resourceItem->type) {
+        case LANE_BR:
+            if (strncmp(resourceItem->linkInfo.br.brMac, item->linkInfo.br.brMac, BT_MAC_LEN) != EOK) {
+                return NULL;
+            }
+            return item;
+        case LANE_BLE:
+        case LANE_COC:
+            if (strncmp(resourceItem->linkInfo.ble.bleMac, item->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
+                return NULL;
+            }
+            return item;
+        case LANE_P2P:
+            if (strncmp(resourceItem->linkInfo.p2p.connInfo.peerIp, item->linkInfo.p2p.connInfo.peerIp, IP_LEN) != EOK) {
+                return NULL;
+            }
+            return item;
+        case LANE_WLAN_5G:
+        case LANE_WLAN_2P4G:
+        case LANE_P2P_REUSE:
+            if (strncmp(resourceItem->linkInfo.wlan.connInfo.addr, item->linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != EOK) {
+                return NULL;
+            }
+            return item;
+        case LANE_BLE_DIRECT:
+        case LANE_COC_DIRECT:
+            if (strncmp(resourceItem->linkInfo.bleDirect.peerUdidHash, item->linkInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN) != EOK) {
+                return NULL;
+            }
+            return item;
+        default:
+            LLOGE("linktype not support");
+            return NULL;
+    }
 }
 
-int32_t AddLaneResourceItem(LaneResource *resourceItem)//summer 传入的是堆上内存
+static LaneResource* LaneResourceIsExist(LaneResource *resourceItem)
 {
-    if (resourceItem = NULL) {
+    LaneResource * targetLaneResourse = NULL;
+    if (resourceItem == NULL) {
+        return NULL;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_laneResourceList, LaneResource, node) {
+        if (resourceItem->type == item->type) {
+            targetLaneResourse = CompareLaneResource(resourceItem, item);
+        }
+    }
+    return targetLaneResourse;
+}
+
+int32_t AddLaneResourceItem(LaneResource *resourceItem)
+{
+    if (resourceItem == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
@@ -74,15 +127,15 @@ int32_t AddLaneResourceItem(LaneResource *resourceItem)//summer 传入的是堆�
         item->laneRef++;
         SoftBusFree(resourceItem);
     } else {
-        ListAdd(g_laneResourceList, resourceItem);
+        ListAdd(g_laneResourceList, &resourceItem->node);
     }
     LaneUnlock();
     return SOFTBUS_OK;
 }
 
-int32_t DelLaneResourceItem(LaneResource *resourceItem)//summer 传入的是栈上内存
+int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
 {
-    if (resourceItem = NULL) {
+    if (resourceItem == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
@@ -90,39 +143,66 @@ int32_t DelLaneResourceItem(LaneResource *resourceItem)//summer 传入的是栈�
     }
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
-        if (item->laneRef-- == 0) {
+        if (item->type == LANE_P2P && item->laneRef == 1) {
+            if (LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneId, *isDelayDestroy, item,
+                DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
+                *isDelayDestroy = true;
+                LaneUnlock();
+                return SOFTBUS_OK;
+            }
+        }
+        if ((--item->laneRef) == 0) {
            ListDelete(&item->node);
            SoftBusFree(item);
-        } 
+        }
     }
     LaneUnlock();
     return SOFTBUS_OK;
 }
 
-int32_t AddLinkInfoItem(LaneLinkInfo *linkInfoItem)//summer 传入的是堆上内存
+int32_t DelLaneResourceItem(LaneResource *resourceItem)
 {
-    if (linkInfoItem = NULL) {
+    if (resourceItem == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
-    ListAdd(g_LinkInfoList, linkInfoItem);
+    LaneResource* item = LaneResourceIsExist(resourceItem);
+    if (item != NULL) {
+        if ((--item->laneRef) == 0) {
+           ListDelete(&item->node);
+           SoftBusFree(item);
+        }
+    }
+    LaneUnlock();
+    return SOFTBUS_OK;
+}
+
+int32_t AddLinkInfoItem(LaneLinkInfo *linkInfoItem)
+{
+    if (linkInfoItem == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListAdd(g_LinkInfoList, &linkInfoItem->node);
     LaneUnlock();
     return SOFTBUS_OK;
 }
 
 int32_t DelLinkInfoItem(uint32_t LaneId)
 {
-    if (LaneId = INVALID_LANE_ID) {
+    if (LaneId == INVALID_LANE_ID) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
-    linkInfoItem *item = NULL;
-    linkInfoItem *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_LinkInfoList, linkInfoItem, node) {
+    LaneLinkInfo *item = NULL;
+    LaneLinkInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_LinkInfoList, LaneLinkInfo, node) {
         if (item->LaneId == LaneId) {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -134,7 +214,7 @@ int32_t DelLinkInfoItem(uint32_t LaneId)
 
 int32_t FindLaneLinkInfoByLaneId(uint32_t LaneId, LaneLinkInfo *linkInfoitem)
 {
-    if (LaneId = INVALID_LANE_ID) {
+    if (LaneId == INVALID_LANE_ID) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
@@ -145,18 +225,11 @@ int32_t FindLaneLinkInfoByLaneId(uint32_t LaneId, LaneLinkInfo *linkInfoitem)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_LinkInfoList, LaneLinkInfo, node) {
         if (item->LaneId == LaneId) {
             linkInfoitem = item;
+            return SOFTBUS_OK;
         }
     }
     LaneUnlock();
-    return SOFTBUS_OK;
-}
-
-int32_t LinkInfoToLaneResource(LaneLinkInfo *linkInfoItem, LaneResource *resourceItem)
-{
-    if (linkInfoItem == NULL || resourceItem == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    //将linktype以及对应的链路地址赋值
+    return SOFTBUS_ERR;
 }
 
 static bool LinkTypeCheck(LaneLinkType type)
@@ -191,20 +264,20 @@ int32_t ConvertToLaneResource(LaneLinkInfo *linkInfo, LaneResource *laneResource
     laneResourceInfo->type = linkInfo->type;
     switch (linkInfo->type) {
         case LANE_BR:
-            if (memcpy_s(laneResourceInfo->linkInfo.br.brMac, BT_MAC_LEN, linkInfo.linkInfo.br.brMac, BT_MAC_LEN) != EOK) {
+            if (memcpy_s(&(laneResourceInfo->linkInfo.br), sizeof(BrLinkInfo), &(linkInfo->linkInfo.br), sizeof(BrLinkInfo)) != EOK) { // brmac
                 LLOGE("memcpy bleMac error");
                 return SOFTBUS_ERR;
             }
         case LANE_BLE:
         case LANE_COC:
             if (memcpy_s(&(laneResourceInfo->linkInfo.ble), sizeof(BleLinkInfo),
-                &(linkInfo.linkInfo.ble), sizeof(BleLinkInfo)) != EOK) {
+                &(linkInfo->linkInfo.ble), sizeof(BleLinkInfo)) != EOK) {
                 LLOGE("memcpy BleLinkInfo error");
                 return SOFTBUS_ERR;
             }
         case LANE_P2P:
             if (memcpy_s(&(laneResourceInfo->linkInfo.p2p), sizeof(P2pConnInfo),
-                &(linkInfo.linkInfo.p2p), sizeof(P2pConnInfo)) != EOK) {
+                &(linkInfo->linkInfo.p2p), sizeof(P2pConnInfo)) != EOK) {
                 LLOGE("memcpy BleLinkInfo error");
                 return SOFTBUS_ERR;
             }
@@ -218,7 +291,7 @@ int32_t ConvertToLaneResource(LaneLinkInfo *linkInfo, LaneResource *laneResource
             }
         case LANE_BLE_DIRECT:
             if (memcpy_s(&(laneResourceInfo->linkInfo.bleDirect), sizeof(BleDirectInfo),
-                &(linkInfo.linkInfo.bleDirect), sizeof(BleDirectInfo)) != EOK) {
+                &(linkInfo->linkInfo.bleDirect), sizeof(BleDirectInfo)) != EOK) {
                 LLOGE("memcpy BleDirectInfo error");
                 return SOFTBUS_ERR;
             }
@@ -662,17 +735,6 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     LaneLinkInfo linkInfo;
     int32_t port = 0;
     int32_t ret = SOFTBUS_OK;
-    NodeInfo node;
-    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetRemoteNodeInfoById(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
-        LLOGW("can not get peer node");
-        return SOFTBUS_ERR;
-    }
-    /*summer del
-    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
-        LLOGE("peer node is not wifi online");
-        return SOFTBUS_ERR;
-    }*/
     ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
     if (reqInfo->transType == LANE_T_MSG || reqInfo->transType == LANE_T_BYTE) {
         acceptableProtocols |= LNN_PROTOCOL_NIP;
@@ -766,6 +828,7 @@ static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, c
         LLOGE("ble direct common failed");
         return SOFTBUS_ERR;
     }
+    linkInfo.type = LANE_COC_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_COC;
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;
@@ -786,7 +849,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
 {
-    if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK || !LinkTypeCheck(reqInfo->linkType)) {//summer 这个checktype的写法不好
+    if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK || !LinkTypeCheck(reqInfo->linkType)) {
         LLOGE("the reqInfo or type is invalid");
         return SOFTBUS_INVALID_PARAM;
     }

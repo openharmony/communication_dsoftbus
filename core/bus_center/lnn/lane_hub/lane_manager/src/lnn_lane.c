@@ -52,7 +52,7 @@ static LnnLaneManager g_LaneManager = {
     .lnnQueryLaneResource = LnnQueryLaneResource,
     .applyLaneId = ApplyLaneId,
     .lnnRequestLane = LnnRequestLane,
-    .lnnFreeLane = lnnFreeLane,
+    .lnnFreeLane = LnnFreeLane,
 };
 
 typedef struct {
@@ -280,6 +280,11 @@ uint32_t ApplyLaneId(LaneType type)
     return AllocLaneId(type);
 }
 
+void FreeLaneId(uint32_t laneId)
+{
+    return DestroyLaneId(laneId);
+}
+
 int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
     const ILaneListener *listener)
 {
@@ -318,7 +323,6 @@ int32_t LnnFreeLane(uint32_t laneId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "freeLane fail, result:%d", result);
         return SOFTBUS_ERR;
     }
-    DestroyLaneId(laneId);
     return SOFTBUS_OK;
 }
 

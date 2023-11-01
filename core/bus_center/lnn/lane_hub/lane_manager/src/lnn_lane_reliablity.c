@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "lnn_lane_reliablity"
+#include "lnn_lane_reliablity.h"
 
 #include "softbus_errcode.h"
 
 bool LaneReliablityExplore(LaneResource *resourceItem)
 {
-    (void*)resourceItem;
+    (void)resourceItem;
     return true;
 }
 
 int32_t LaneFloadExplore(LaneResource *resourceItem)
 {
-    (void*)resourceItem;
+    (void)resourceItem;
     return SOFTBUS_OK;
 }

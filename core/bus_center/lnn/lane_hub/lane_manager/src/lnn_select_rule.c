@@ -39,6 +39,15 @@
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
 #define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/
 
+#define LOW_BW                  500 * 1024
+#define HIGH_BW                 80 * 1024 * 1024
+#define BLE_LATENCY             1000
+#define BR_LATENCY              2500
+#define WLAN_LATENCY            800
+#define P2P_LATENCY             1600
+#define HML_LATENCY             1000
+
+
 int32_t GetWlanLinkedFrequency(void)
 {
     LnnWlanLinkedInfo info;
@@ -88,6 +97,12 @@ static bool IsEnableWlan2P4G(const char *networkId)
         LLOGE("band isn't 2.4G or unknown");
         return false;
     }
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LLOGW("can not get peer node");
+        return SOFTBUS_ERR;
+    }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         LLOGE("peer node is not wifi online");
         return SOFTBUS_ERR;//wifi未上线错误码
@@ -111,6 +126,12 @@ static bool IsEnableWlan5G(const char *networkId)
     if (band != BAND_5G && band != BAND_UNKNOWN) {
         LLOGE("band isn't 5G or unknown");
         return false;
+    }
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LLOGW("can not get peer node");
+        return SOFTBUS_ERR;
     }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         LLOGE("peer node is not wifi online");
@@ -324,9 +345,89 @@ LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType)
     return &g_linkAttr[linkType];
 }
 
+static void DecideOptimalLinks(QosInfo qosOpt, LaneLinkType *linkList, uint32_t *linksNum)
+{
+    if (qosOpt.minBW >= HIGH_BW) {
+        linkList[(*linksNum)++] = LANE_P2P;
+    } else if (qosOpt.minBW >= LOW_BW) {
+        linkList[(*linksNum)++] = LANE_WLAN_5G;
+        linkList[(*linksNum)++] = LANE_WLAN_2P4G;
+    } else {
+        linkList[(*linksNum)++] = LANE_COC;
+    }
+}
+
+static void DecideBtRetryLinksByLatency(QosInfo qosOpt, LaneLinkType *linkList, uint32_t *linksNum)
+{
+    int32_t retryTime = qosOpt.maxlatency - BLE_LATENCY;
+    if (retryTime - WLAN_LATENCY >= 0) {
+        retryTime -= WLAN_LATENCY;
+        linkList[(*linksNum)++] = LANE_WLAN_2P4G;
+        linkList[(*linksNum)++] = LANE_WLAN_5G;
+    }
+    if (retryTime - P2P_LATENCY >= 0) {
+        retryTime -= P2P_LATENCY;
+        linkList[(*linksNum)++] = LANE_P2P;
+    }
+    if (retryTime - BR_LATENCY >= 0) {
+        retryTime -= BR_LATENCY;
+        linkList[(*linksNum)++] = LANE_BR;
+    }
+}
+
+static void DecideWLANRetryLinksByLatency(QosInfo qosOpt, LaneLinkType *linkList, uint32_t *linksNum)
+{
+    int32_t retryTime = qosOpt.maxlatency - WLAN_LATENCY;
+    if (retryTime - P2P_LATENCY >= 0) {
+        retryTime -= P2P_LATENCY;
+        linkList[(*linksNum)++] = LANE_P2P;
+    }
+    if (retryTime - BR_LATENCY >= 0) {
+        retryTime -= BR_LATENCY;
+        linkList[(*linksNum)++] = LANE_BR;
+    }
+}
+
+static void DecideWDRetryLinksByLatency(QosInfo qosOpt, LaneLinkType *linkList, uint32_t *linksNum)
+{
+    int32_t retryTime = qosOpt.maxlatency - P2P_LATENCY;
+    if (retryTime - WLAN_LATENCY >= 0) {
+        retryTime -= WLAN_LATENCY;
+        linkList[(*linksNum)++] = LANE_WLAN_2P4G;
+        linkList[(*linksNum)++] = LANE_WLAN_5G;
+    }
+}
+
+static void DecideRetryLinks(QosInfo qosOpt, LaneLinkType *linkList, uint32_t *linksNum)
+{
+    switch (linkList[0]) {
+        case LANE_P2P:
+            DecideWDRetryLinksByLatency(qosOpt, linkList, linksNum);
+            break;
+        case LANE_WLAN_5G:
+        case LANE_WLAN_2P4G:
+            DecideWLANRetryLinksByLatency(qosOpt, linkList, linksNum);
+            break;
+        case LANE_COC:
+            DecideBtRetryLinksByLatency(qosOpt, linkList, linksNum);
+            break;
+        default:
+            break;
+    }
+}
+
 int32_t LaneDecisionModels(const LaneSelectParam *request, LanePreferredLinkList *recommendList)
 {
-    (void*)request;
-    (void*)recommendList;
+    if (request == NULL || recommendList == NULL){
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneLinkType linkList[LANE_LINK_TYPE_BUTT] = {0};
+    uint32_t linksNum = 0;
+    DecideOptimalLinks(request->qosRequire, linkList, &linksNum);
+    DecideRetryLinks(request->qosRequire, linkList, &linksNum);
+    for (int32_t i = 0; i < linksNum; i++) {
+        recommendList->linkType[i] = linkList[i];
+    }
+    recommendList->linkTypeNum = linksNum;
     return SOFTBUS_OK;
 }

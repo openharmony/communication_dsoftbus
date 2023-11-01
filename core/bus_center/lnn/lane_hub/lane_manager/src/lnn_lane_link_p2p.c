@@ -38,6 +38,9 @@
 #include "softbus_proxychannel_pipeline.h"
 #include "wifi_direct_manager.h"
 
+#include "lnn_trans_lane.h"
+#include "lnn_lane_interface.h"
+
 typedef struct {
     uint32_t requestId;
     int64_t authId;
@@ -55,6 +58,7 @@ typedef struct {
     int32_t p2pModuleGenId;
     bool networkDelegate;
     bool p2pOnly;
+    uint32_t bandWidth;
 } P2pRequestInfo;
 
 typedef struct {
@@ -366,6 +370,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             LLOGE("get remote p2p mac fail");
             return SOFTBUS_ERR;
         }
+        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         wifiDirectInfo->expectApiRole = GetExpectedP2pRole(item->laneRequestInfo.networkId);
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
@@ -403,6 +408,7 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
         int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
                                item->laneRequestInfo.networkId);
         LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "copy networkId failed");
+        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType =
             item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_P2P : WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
@@ -618,6 +624,12 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
     if (memcpy_s(&item->laneRequestInfo.cb, sizeof(LaneLinkCb), callback, sizeof(LaneLinkCb)) != EOK) {
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
+    }
+    QosInfo qosOpt = {0};
+    if (GetQosInfoByLaneId(laneLinkReqId, &qosOpt) != SOFTBUS_OK) {
+        item->p2pInfo.bandWidth = 0;
+    } else {
+        item->p2pInfo.bandWidth = qosOpt.minBW;
     }
     item->laneRequestInfo.laneLinkReqId = laneLinkReqId;
     item->laneRequestInfo.pid = request->pid;
