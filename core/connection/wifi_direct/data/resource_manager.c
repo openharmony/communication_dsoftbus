@@ -396,6 +396,7 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
     info.putInt(&info, II_KEY_REUSE_COUNT, 0);
 
     CLOGI(LOG_LABEL "interface=%s cap=0x%x", interface, cap);
+    bool isEnable = false;
     if (((uint32_t)cap & WIFI_DIRECT_API_ROLE_GO) || ((uint32_t)cap & WIFI_DIRECT_API_ROLE_GC)) {
         int32_t channelArray[CHANNEL_ARRAY_NUM_MAX];
         size_t channelArraySize = CHANNEL_ARRAY_NUM_MAX;
@@ -403,9 +404,10 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
         if (ret == SOFTBUS_OK) {
             info.putIntArray(&info, II_KEY_CHANNEL_5G_LIST, channelArray, channelArraySize);
         }
+        isEnable = GetWifiDirectP2pAdapter()->isWifiP2pEnabled();
     }
 
-    if (GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
+    if (isEnable) {
         CLOGI(LOG_LABEL "set %s enable=true", interface);
         info.putBoolean(&info, II_KEY_IS_ENABLE, true);
         char baseMac[MAC_ADDR_STR_LEN] = {0};
@@ -414,7 +416,7 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
         }
     } else {
         CLOGI(LOG_LABEL "set %s enable=false", interface);
-        info.putBoolean(&info, II_KEY_IS_ENABLE, true);
+        info.putBoolean(&info, II_KEY_IS_ENABLE, false);
     }
 
     GetResourceManager()->notifyInterfaceInfoChange(&info);
