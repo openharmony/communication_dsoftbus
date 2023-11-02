@@ -21,6 +21,7 @@
 #include "nstackx.h"
 
 #include "bus_center_manager.h"
+#include "disc_coap_capability.h"
 #include "disc_coap_parser.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -35,7 +36,6 @@
 
 #define WLAN_IFACE_NAME_PREFIX "wlan"
 #define INVALID_IP_ADDR        "0.0.0.0"
-#define DEFAULT_DEVICE_TYPE    0xAF
 #define DISC_FREQ_COUNT_MASK   0xFFFF
 #define DISC_FREQ_DURATION_BIT 16
 #define DISC_USECOND           1000
@@ -47,6 +47,61 @@ static DiscInnerCallback *g_discCoapInnerCb = NULL;
 static char *g_capabilityData = NULL;
 static int32_t NstackxLocalDevInfoDump(int fd);
 
+static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo)
+{
+    settings->businessData = (char *)SoftBusCalloc(sizeof(deviceInfo->custData));
+    DISC_CHECK_AND_RETURN_RET_LOG(settings->businessData, SOFTBUS_MALLOC_ERR,
+        "malloc disc response settings business data failed");
+    settings->length = strlen(deviceInfo->custData);
+    // use default bType for unicast
+    settings->businessType = NSTACKX_BUSINESS_TYPE_NULL;
+    char localNetifName[NET_IF_NAME_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, localNetifName, sizeof(localNetifName));
+    if (ret != SOFTBUS_OK) {
+        DLOGE("get local network name from LNN failed, ret=%d", ret);
+        goto EXIT;
+    }
+    if (strcpy_s(settings->localNetworkName, sizeof(settings->localNetworkName), localNetifName) != EOK) {
+        DLOGE("copy disc response settings network name failed");
+        goto EXIT;
+    }
+    if (strcpy_s(settings->businessData, sizeof(settings->businessData), deviceInfo->custData) != EOK) {
+        DLOGE("copy disc response settings business data failed");
+        goto EXIT;
+    }
+    if (strcpy_s(settings->remoteIp, sizeof(settings->remoteIp), deviceInfo->addr[0].info.ip.ip) != EOK) {
+        DLOGE("copy disc response settings remote IP failed");
+        goto EXIT;
+    }
+    return SOFTBUS_OK;
+EXIT:
+    SoftBusFree(settings->businessData);
+    settings->businessData = NULL;
+    return SOFTBUS_STRCPY_ERR;
+}
+
+int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo)
+{
+    DISC_CHECK_AND_RETURN_RET_LOG(deviceInfo, SOFTBUS_INVALID_PARAM, "DiscRsp devInfo is null");
+    NSTACKX_ResponseSettings *settings = (NSTACKX_ResponseSettings *)SoftBusCalloc(sizeof(NSTACKX_ResponseSettings));
+    DISC_CHECK_AND_RETURN_RET_LOG(settings, SOFTBUS_MALLOC_ERR, "malloc disc response settings failed");
+
+    if (FillRspSettings(settings, deviceInfo) != SOFTBUS_OK) {
+        DLOGE("fill nstackx response settings failed");
+        SoftBusFree(settings);
+        return SOFTBUS_ERR;
+    }
+
+    int32_t ret = NSTACKX_SendDiscoveryRsp(settings);
+    if (ret != SOFTBUS_OK) {
+        DLOGE("disc send response failed, ret=%d", ret);
+    }
+    SoftBusFree(settings->businessData);
+    settings->businessData = NULL;
+    SoftBusFree(settings);
+    return ret;
+}
+
 static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device)
 {
     cJSON *reserveInfo = cJSON_Parse(nstackxDevice->reservedInfo);
@@ -55,19 +110,9 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
     DiscCoapParseWifiIpAddr(reserveInfo, device);
     DiscCoapParseHwAccountHash(reserveInfo, device);
     (void)DiscCoapParseServiceData(reserveInfo, device);
+    DiscCoapParseExtendServiceData(reserveInfo, device);
     cJSON_Delete(reserveInfo);
     return SOFTBUS_OK;
-}
-
-static bool IsReport(uint8_t mode, uint8_t discoveryType)
-{
-    if (discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE) {
-        return true;
-    }
-    if (mode == PUBLISH_MODE_PROACTIVE) {
-        return true;
-    }
-    return false;
 }
 
 static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, DeviceInfo *discDevInfo)
@@ -81,10 +126,6 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
 
     discDevInfo->devType = (DeviceType)nstackxDevInfo->deviceType;
     discDevInfo->capabilityBitmapNum = nstackxDevInfo->capabilityBitmapNum;
-    if (!IsReport(nstackxDevInfo->mode, nstackxDevInfo->discoveryType)) {
-        DLOGI("receive a discovery broadcast, do not report");
-        return SOFTBUS_ERR;
-    }
 
     if (strncmp(nstackxDevInfo->networkName, WLAN_IFACE_NAME_PREFIX, strlen(WLAN_IFACE_NAME_PREFIX)) == 0) {
         discDevInfo->addr[0].type = CONNECTION_ADDR_WLAN;
@@ -107,6 +148,24 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
     return SOFTBUS_OK;
 }
 
+static void BroadcastRsp(uint8_t bType, DeviceInfo *deviceInfo)
+{
+    switch (bType) {
+        case NSTACKX_BUSINESS_TYPE_NULL:
+            DLOGI("receive a discovery broadcast from %s, do not need report", deviceInfo->devName);
+            break;
+        case NSTACKX_BUSINESS_TYPE_SOFTBUS:
+            DiscVerifySoftbus(deviceInfo);
+            break;
+        default:
+            DLOGI("receive an unexpect type(%u) broadcast from %s, just send response", bType, deviceInfo->devName);
+            if (DiscCoapSendRsp(deviceInfo) != SOFTBUS_OK) {
+                DLOGE("send response failed");
+            }
+            break;
+    }
+}
+
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
     DISC_CHECK_AND_RETURN_LOG(deviceList != NULL && deviceCount != 0, "invalid param.");
@@ -120,9 +179,10 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
 
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
+        DISC_CHECK_AND_RETURN_LOG(nstackxDeviceInfo, "device count from nstackx is invalid");
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
-            DLOGI("duplicate device is not reported.");
+            DLOGI("duplicate device(%s) do not need report", nstackxDeviceInfo->deviceName);
             continue;
         }
         (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -131,11 +191,16 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             continue;
         }
 
-        DLOGI("Disc device found, devName=%s, localNetIfName=%s", discDeviceInfo->devName,
-            nstackxDeviceInfo->networkName);
-        if (g_discCoapInnerCb != NULL && g_discCoapInnerCb->OnDeviceFound != NULL) {
-            g_discCoapInnerCb->OnDeviceFound(discDeviceInfo, &addtions);
+        if (nstackxDeviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
+            nstackxDeviceInfo->mode == PUBLISH_MODE_PROACTIVE) {
+            DLOGI("Disc device found, devName=%s, localNetIfName=%s", discDeviceInfo->devName,
+                nstackxDeviceInfo->networkName);
+            if (g_discCoapInnerCb != NULL && g_discCoapInnerCb->OnDeviceFound != NULL) {
+                g_discCoapInnerCb->OnDeviceFound(discDeviceInfo, &addtions);
+            }
+            continue;
         }
+        BroadcastRsp(nstackxDeviceInfo->businessType, discDeviceInfo);
     }
 
     SoftBusFree(discDeviceInfo);
@@ -199,6 +264,36 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t d
         DLOGE("register service data to nstackx failed.");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability)
+{
+    if (capabilityData == NULL || dataLen == 0) {
+        // no capability data, no need to parse and register
+        return SOFTBUS_OK;
+    }
+    char *registerCapaData = (char *)SoftBusCalloc(dataLen);
+    DISC_CHECK_AND_RETURN_RET_LOG(registerCapaData, SOFTBUS_MALLOC_ERR, "malloc capability data failed");
+    int32_t ret = DiscCoapAssembleCapData(capability, (const char *)capabilityData, dataLen, registerCapaData);
+    if (ret == SOFTBUS_FUNC_NOT_SUPPORT) {
+        DLOGI("the capability(%u) not support yet", capability);
+        SoftBusFree(registerCapaData);
+        return SOFTBUS_OK;
+    }
+    if (ret != SOFTBUS_OK) {
+        DLOGE("assemble the data of capability(%u) failed", capability);
+        SoftBusFree(registerCapaData);
+        return SOFTBUS_ERR;
+    }
+
+    if (NSTACKX_RegisterExtendServiceData(registerCapaData) != SOFTBUS_OK) {
+        DLOGE("register extend service data to nstackx failed");
+        SoftBusFree(registerCapaData);
+        return SOFTBUS_ERR;
+    }
+    DLOGI("register extend service data to nstackx succ: %s", registerCapaData);
+    SoftBusFree(registerCapaData);
     return SOFTBUS_OK;
 }
 
