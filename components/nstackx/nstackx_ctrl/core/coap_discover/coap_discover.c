@@ -574,6 +574,7 @@ static int32_t HndPostServiceMsgEx(coap_resource_t *resource, coap_session_t *se
     }
     const coap_address_t *addPtr = coap_session_get_addr_remote(session);
     if (addPtr == NULL) {
+        DFINDER_LOGE(TAG, "coap session get remote addr failed");
         free(msg);
         return NSTACKX_EFAILED;
     }

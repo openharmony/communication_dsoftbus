@@ -200,7 +200,7 @@ static uint32_t GetUserDefineInterval(uint32_t discoverCount)
 {
     if (discoverCount >= (g_coapMaxDiscoverCount - 1)) {
         DFINDER_LOGD(TAG, "discover end");
-        return 0;
+        return NSTACKX_EOK;
     }
     return g_coapIntervalArr[discoverCount];
 }

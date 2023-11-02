@@ -101,10 +101,10 @@ int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
         DFINDER_LOGE(TAG, "get notify device info failed");
         return NSTACKX_EFAILED;
     }
+    notifyDevice.update = NSTACKX_TRUE;
     NotifyDeviceListChanged(&notifyDevice, 1);
     /* when unicast reply is determined by the service side, there is no concept of discovery cycle, just notify */
     if (deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_AUTONET) {
-        notifyDevice.update = NSTACKX_TRUE;
         NotifyDeviceFound(&notifyDevice, 1);
         return NSTACKX_EOK;
     }
