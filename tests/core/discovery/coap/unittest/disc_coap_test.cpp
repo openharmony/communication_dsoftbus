@@ -127,7 +127,7 @@ HWTEST_F(DiscCoapTest, TestCoapPublish002, TestSize.Level1)
 /*
  * @tc.name: TestCoapPublish003
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
- *           SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL when given invalid PublishOption.freq
+ *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given invalid PublishOption.freq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -137,13 +137,13 @@ HWTEST_F(DiscCoapTest, TestCoapPublish003, TestSize.Level1)
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_testPubOption.freq = LOW - 1;
     int32_t ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     g_testPubOption.freq = FREQ_BUTT + 1;
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -160,7 +160,7 @@ HWTEST_F(DiscCoapTest, TestCoapPublish003, TestSize.Level1)
 /*
  * @tc.name: TestCoapPublish004
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
- *           SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
+ *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
  *           should return SOFTBUS_ERR when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
@@ -179,13 +179,13 @@ HWTEST_F(DiscCoapTest, TestCoapPublish004, TestSize.Level1)
 
     DiscNstackxDeinit();
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
 
     g_testPubOption.capabilityBitmap[0] = 0;
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
@@ -251,7 +251,7 @@ HWTEST_F(DiscCoapTest, TestCoapStartScan002, TestSize.Level1)
 /*
  * @tc.name: TestCoapStartScan003
  * @tc.desc: Test DiscCoapStartScan and DiscCoapStopScan when should return
- *           SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
+ *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
  *           should return SOFTBUS_ERR when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
@@ -270,13 +270,13 @@ HWTEST_F(DiscCoapTest, TestCoapStartScan003, TestSize.Level1)
 
     DiscNstackxDeinit();
     ret = g_discCoapFuncInterface->StartScan(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->StopScan(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
 
     g_testPubOption.capabilityBitmap[0] = 0;
     ret = g_discCoapFuncInterface->StartScan(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->StopScan(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
