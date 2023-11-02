@@ -14,7 +14,7 @@
  */
 
 #include "softbus_qos.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #include "softbus_errcode.h"
 

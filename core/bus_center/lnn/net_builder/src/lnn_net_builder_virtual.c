@@ -17,7 +17,7 @@
 
 #include "lnn_p2p_info.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInitNetBuilder(void)
 {

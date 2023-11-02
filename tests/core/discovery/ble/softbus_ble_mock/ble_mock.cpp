@@ -18,7 +18,7 @@
 #include <sstream>
 #include <thread>
 #include "securec.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 
 using testing::_;

@@ -22,7 +22,7 @@ common_utils_src = [
   "bitmap/softbus_bitmap.c",
   "network/softbus_network_utils.c",
   "json_utils/softbus_json_utils.c",
-  "log/softbus_log.c",
+  "log/softbus_log_old.c",
   "message_handler/message_handler.c",
   "queue/softbus_queue.c",
   "security/sequence_verification/softbus_sequence_verification.c",

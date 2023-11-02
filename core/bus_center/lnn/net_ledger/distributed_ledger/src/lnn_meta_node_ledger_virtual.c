@@ -16,7 +16,7 @@
 #include "lnn_meta_node_ledger.h"
 
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInitMetaNodeLedger(void)
 {

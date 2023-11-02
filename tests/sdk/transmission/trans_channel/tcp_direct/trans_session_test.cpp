@@ -22,7 +22,7 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_session_service.h"
 

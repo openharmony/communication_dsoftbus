@@ -27,7 +27,7 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 

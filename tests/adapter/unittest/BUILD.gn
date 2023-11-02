@@ -266,7 +266,7 @@ if (defined(ohos_lite)) {
     module_out_path = module_output_path
     sources = [
       "$dsoftbus_root_path/adapter/common/net/wifi/common/softbus_wifi_api_adapter.c",
-      "$dsoftbus_root_path/core/common/log/softbus_log.c",
+      "$dsoftbus_root_path/core/common/log/softbus_log_old.c",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/wifi_mock.cpp",
       "softbus_wifi_api_test.cpp",
     ]
@@ -311,7 +311,7 @@ if (defined(ohos_lite)) {
     sources = [
       "$dsoftbus_root_path/adapter/common/kernel/liteos_m/softbus_adapter_mem.c",
       "$dsoftbus_root_path/adapter/common/log/softbus_adapter_log.c",
-      "$dsoftbus_root_path/core/common/log/softbus_log.c",
+      "$dsoftbus_root_path/core/common/log/softbus_log_old.c",
       "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/network_mock.cpp",

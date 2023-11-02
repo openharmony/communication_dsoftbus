@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #include <regex.h>
 #include <securec.h>

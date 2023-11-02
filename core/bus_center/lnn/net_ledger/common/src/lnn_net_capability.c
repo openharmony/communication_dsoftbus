@@ -19,7 +19,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
 #define DEFAUTL_LNN_CAPBILITY 0x16

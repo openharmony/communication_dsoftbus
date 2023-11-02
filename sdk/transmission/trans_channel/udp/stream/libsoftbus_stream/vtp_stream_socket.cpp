@@ -32,7 +32,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_trans_def.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"

@@ -19,7 +19,7 @@
 #include "softbus_adapter_perf.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {

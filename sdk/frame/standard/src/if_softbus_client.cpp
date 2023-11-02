@@ -14,7 +14,7 @@
  */
 
 #include "if_softbus_client.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {

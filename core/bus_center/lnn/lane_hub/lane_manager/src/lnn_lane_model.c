@@ -25,7 +25,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define LINK_TYPE_SHIFT 26
 #define TRANS_TYPE_SHIFT 22

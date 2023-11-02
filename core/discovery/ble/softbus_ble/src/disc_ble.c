@@ -38,7 +38,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define BLE_PUBLISH 0x0

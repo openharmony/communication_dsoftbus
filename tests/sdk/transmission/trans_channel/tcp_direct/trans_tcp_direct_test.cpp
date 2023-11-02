@@ -28,7 +28,7 @@
 #include "softbus_errcode.h"
 #include "softbus_app_info.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_access_token_test.h"
 #include "softbus_conn_interface.h"
 #include "softbus_socket.h"

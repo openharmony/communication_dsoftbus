@@ -24,7 +24,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_socket.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_message.h"

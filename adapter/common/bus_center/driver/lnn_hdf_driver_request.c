@@ -20,7 +20,7 @@
 #include <securec.h>
 
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define DRIVER_SERVICE_NAME "hdf_dsoftbus"
 

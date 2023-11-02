@@ -28,7 +28,7 @@
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
     void TransServerProxyDeInitTest(const uint8_t* data, size_t size)
