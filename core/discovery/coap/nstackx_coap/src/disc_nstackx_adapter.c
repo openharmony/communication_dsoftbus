@@ -331,6 +331,8 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_INVALID_PARAM, "option=NULL");
     DISC_CHECK_AND_RETURN_RET_LOG(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
         SOFTBUS_INVALID_PARAM, "option->mode is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        "invalid freq: %d", option->freq);
 
     NSTACKX_DiscoverySettings discSet;
     if (memset_s(&discSet, sizeof(NSTACKX_DiscoverySettings), 0, sizeof(NSTACKX_DiscoverySettings)) != EOK) {
@@ -343,11 +345,8 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     }
     if (NSTACKX_StartDeviceDiscovery(&discSet) != SOFTBUS_OK) {
         DLOGE("start device discovery failed");
-        if (option->mode == ACTIVE_PUBLISH) {
-            return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
-        } else {
-            return SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
-        }
+        return (option->mode == ACTIVE_PUBLISH) ? SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL :
+            SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
     }
     return SOFTBUS_OK;
 }
