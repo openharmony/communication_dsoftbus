@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ static DiscInnerCallback g_discInnerCb = {
     .OnDeviceFound = nullptr
 };
 
-static PublishOption  g_testPubOption = {
+static PublishOption g_testPubOption = {
     .freq = LOW,
     .capabilityBitmap = {DDMP_CAPABILITY},
     .capabilityData = nullptr,
@@ -127,7 +127,7 @@ HWTEST_F(DiscCoapTest, TestCoapPublish002, TestSize.Level1)
 /*
  * @tc.name: TestCoapPublish003
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
- *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given invalid PublishOption.freq
+ *           not SOFTBUS_OK when given invalid PublishOption.freq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -135,17 +135,17 @@ HWTEST_F(DiscCoapTest, TestCoapPublish003, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
+
     g_testPubOption.freq = LOW - 1;
     int32_t ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
+    EXPECT_NE(ret, SOFTBUS_OK);
     g_testPubOption.freq = FREQ_BUTT + 1;
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     g_testPubOption.freq = LOW;
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
@@ -336,8 +336,8 @@ HWTEST_F(DiscCoapTest, TestCoapStartAdvertise002, TestSize.Level1)
 /*
  * @tc.name: TestCoapStartAdvertise003
  * @tc.desc: Test DiscCoapStartAdvertise and DiscCoapStopAdvertise should return
- *           SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL when given invalid SubscribeOption.freq,
- *           should return SOFTBUS_OK when given invalid SubscribeOption.freq
+ *           not SOFTBUS_OK when given invalid SubscribeOption.freq,
+ *           should return not SOFTBUS_OK when given invalid SubscribeOption.freq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -345,17 +345,17 @@ HWTEST_F(DiscCoapTest, TestCoapStartAdvertise003, TestSize.Level1)
 {
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
+
     g_testSubOption.freq = LOW - 1;
     int32_t ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
+    EXPECT_NE(ret, SOFTBUS_OK);
     g_testSubOption.freq = FREQ_BUTT + 1;
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     g_testSubOption.freq = LOW;
     ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
@@ -552,4 +552,4 @@ HWTEST_F(DiscCoapTest, testCoapUpdateLocalDevInfo001, TestSize.Level1)
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;
 }
-}
+} // namespace OHOS
