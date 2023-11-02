@@ -678,6 +678,7 @@ static int32_t CopyDiscConfig(const DFinderDiscConfig *src, DFinderDiscConfig *d
 static int32_t CheckDiscInterval(uint32_t *intervalArr, uint32_t arrLen)
 {
     if (intervalArr == NULL || arrLen == 0) {
+        DFINDER_LOGE(TAG, "illegal param, arrlen: %ld", arrLen);
         return NSTACKX_EINVAL;
     }
     // check interval values one by one
@@ -1451,7 +1452,7 @@ static void SendMsgInner(void *arg)
     MsgCtx *msg = arg;
     const struct in_addr *remoteIp = GetRemoteDeviceIp(msg->deviceId);
     if (remoteIp == NULL) {
-        DFINDER_LOGW(TAG, "no device found");
+        DFINDER_LOGE(TAG, "no device found");
         msg->err = NSTACKX_EINVAL;
     } else {
         char ipStr[INET_ADDRSTRLEN] = {0};
