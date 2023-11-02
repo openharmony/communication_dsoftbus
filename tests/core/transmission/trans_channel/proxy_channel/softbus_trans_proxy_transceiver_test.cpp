@@ -22,7 +22,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"

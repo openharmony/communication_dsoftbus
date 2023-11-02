@@ -23,7 +23,7 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "stream_adaptor.h"
 #include "stream_adaptor_listener.h"
 #include "stream_common.h"

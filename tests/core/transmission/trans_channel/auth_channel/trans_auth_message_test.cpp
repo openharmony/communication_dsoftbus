@@ -16,7 +16,7 @@
 #include <securec.h>
 
 #include <gtest/gtest.h>
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
 #include "softbus_errcode.h"

@@ -15,7 +15,7 @@
 
 #include "softbus_client_death_recipient.h"
 
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_server_proxy_frame.h"
 
 namespace OHOS {

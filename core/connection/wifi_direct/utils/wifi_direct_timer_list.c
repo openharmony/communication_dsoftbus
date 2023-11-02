@@ -14,7 +14,7 @@
  */
 
 #include "wifi_direct_timer_list.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_types.h"

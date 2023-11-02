@@ -25,7 +25,7 @@
 #include "message_handler.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define UINT_TO_STR_MAX_LEN 11
 

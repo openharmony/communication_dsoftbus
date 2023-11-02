@@ -18,7 +18,7 @@
 #include "os_account_manager.h"
 #include "securec.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define ACCOUNT_STRTOLL_BASE 10
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"

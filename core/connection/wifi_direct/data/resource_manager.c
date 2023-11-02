@@ -15,7 +15,7 @@
 
 #include "resource_manager.h"
 #include "securec.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "interface_info.h"

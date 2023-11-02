@@ -26,7 +26,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_socket.h"
 #include "trans_lane_pending_ctl.h"

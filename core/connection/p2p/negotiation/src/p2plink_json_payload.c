@@ -20,7 +20,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 static int32_t PackGoInfo(const GoInfo *go, cJSON *data)
 {

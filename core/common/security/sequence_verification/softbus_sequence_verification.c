@@ -14,7 +14,7 @@
  */
 
 #include "softbus_sequence_verification.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define MAX_SEQ_BIAS 60
 

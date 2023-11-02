@@ -25,7 +25,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "trans_channel_callback.h"
 #include "trans_lane_manager.h"

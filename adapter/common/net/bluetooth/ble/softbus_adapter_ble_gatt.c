@@ -24,7 +24,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define BT_UUID "43d4a49f-604d-45b5-9302-4ddbbfd538fd"

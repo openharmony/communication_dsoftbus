@@ -29,7 +29,7 @@
 #include "message_handler.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_common.h"
 
 static NodeInfo info;

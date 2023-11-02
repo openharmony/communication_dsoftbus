@@ -18,7 +18,7 @@
 #include "common_list.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_nstack.h"

@@ -16,7 +16,7 @@
 #include "link_manager_broadcast_handler.h"
 #include <string.h>
 #include <securec.h>
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "broadcast_receiver.h"
 #include "wifi_direct_p2p_adapter.h"

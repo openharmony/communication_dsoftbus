@@ -24,7 +24,7 @@
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 

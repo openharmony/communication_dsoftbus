@@ -21,7 +21,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
 #include "softbus_hisysevt_common.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define MODULE_NAME_MAX_LEN 33

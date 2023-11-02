@@ -19,7 +19,7 @@
 #include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "auth_interface.h"
 #include "softbus_proxychannel_control.c"

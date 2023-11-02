@@ -27,7 +27,7 @@
 #include "message_handler.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "system_ability_definition.h"
 #include "uri.h"
 

@@ -19,7 +19,7 @@
 #include "securec.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 static P2pLinkRole g_role = ROLE_NONE;
 static char g_myIp[P2P_IP_LEN] = {0};

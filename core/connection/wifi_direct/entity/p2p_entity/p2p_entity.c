@@ -16,7 +16,7 @@
 #include "entity/p2p_entity/p2p_entity.h"
 #include <string.h>
 #include "securec.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_p2p_adapter.h"

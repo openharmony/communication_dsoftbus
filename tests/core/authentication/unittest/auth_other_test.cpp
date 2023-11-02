@@ -32,7 +32,7 @@
 #include "auth_session_message.c"
 #include "softbus_errcode.h"
 #include "softbus_adapter_json.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_socket.h"
 #include "lnn_lane_score.h"
 

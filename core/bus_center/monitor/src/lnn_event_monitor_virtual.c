@@ -16,7 +16,7 @@
 #include "lnn_event_monitor.h"
 
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInitEventMonitor(void)
 {

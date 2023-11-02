@@ -39,7 +39,7 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "lnn_async_callback_utils.h"
 #include "trans_channel_manager.h"

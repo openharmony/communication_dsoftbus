@@ -14,7 +14,7 @@
  */
 
 #include "entity/p2p_entity/p2p_group_removing_state.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define LOG_LABEL "[WD] PGReS: "
 
