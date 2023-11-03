@@ -28,22 +28,6 @@
 
 #define LOG_LABEL "[WD] ConCmd: "
 
-static int32_t g_retryErrorCodeTable[] = {
-    V1_ERROR_BUSY,
-    V1_ERROR_REUSE_FAILED,
-    V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE,
-    V1_ERROR_IF_NOT_AVAILABLE,
-    ERROR_MANAGER_BUSY,
-    ERROR_ENTITY_BUSY,
-    ERROR_ENTITY_UNAVAILABLE,
-    ERROR_SINK_NO_LINK,
-    ERROR_SOURCE_NO_LINK,
-    ERROR_WIFI_DIRECT_LOCAL_DISCONNECTED_REMOTE_CONNECTED,
-    ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE,
-    ERROR_WIFI_DIRECT_BIDIRECTIONAL_SIMULTANEOUS_REQ,
-    ERROR_P2P_SHARE_LINK_REUSE_FAILED,
-};
-
 static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
@@ -51,12 +35,7 @@ static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
         return false;
     }
 
-    for (size_t i = 0; i < ARRAY_SIZE(g_retryErrorCodeTable); i++) {
-        if (reason == g_retryErrorCodeTable[i]) {
-            return true;
-        }
-    }
-    return false;
+    return GetWifiDirectNegotiator()->isRetryErrorCode(reason);
 }
 
 static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
@@ -92,7 +71,7 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    GetWifiDirectNegotiator()->context.currentProcessor = processor;
+    GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->reuseLink(connectInfo, link);
 }
@@ -112,7 +91,7 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    GetWifiDirectNegotiator()->context.currentProcessor = processor;
+    GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->createLink(connectInfo);
 }
@@ -184,7 +163,7 @@ void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
     self->execute = ExecuteConnection;
     self->onSuccess = OnSuccess;
     self->onFailure = OnFailure;
-    self->delete = WifiDirectConnectCommandDelete;
+    self->deleteSelf = WifiDirectConnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
     if (connectInfo->negoChannel != NULL) {
         self->connectInfo.negoChannel = connectInfo->negoChannel->duplicate(connectInfo->negoChannel);

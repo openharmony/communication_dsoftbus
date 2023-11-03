@@ -54,8 +54,7 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     struct WifiDirectNegotiator *negotiator = GetWifiDirectNegotiator();
 
-    int32_t ret = strcpy_s(negotiator->context.currentRemoteMac, sizeof(negotiator->context.currentRemoteMac),
-                           connectInfo->remoteMac);
+    int32_t ret = strcpy_s(negotiator->currentRemoteMac, sizeof(negotiator->currentRemoteMac), connectInfo->remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy remote mac failed");
 
     struct InnerLink *link = GetLinkManager()->getLinkById(connectInfo->linkId);
@@ -87,7 +86,7 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    negotiator->context.currentProcessor = processor;
+    negotiator->currentProcessor = processor;
 
     return processor->disconnectLink(connectInfo, link);
 }
@@ -146,7 +145,7 @@ void WifiDirectDisconnectCommandConstructor(struct WifiDirectDisconnectCommand *
     self->execute = ExecuteDisconnection;
     self->onSuccess = OnSuccess;
     self->onFailure = OnFailure;
-    self->delete = WifiDirectDisconnectCommandDelete;
+    self->deleteSelf = WifiDirectDisconnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
     if (connectInfo->negoChannel != NULL) {
         self->connectInfo.negoChannel = connectInfo->negoChannel->duplicate(connectInfo->negoChannel);

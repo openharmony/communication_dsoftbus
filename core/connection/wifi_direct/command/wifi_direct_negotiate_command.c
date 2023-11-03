@@ -25,8 +25,8 @@
 static void ExecuteProcessRemoteNegotiateMessage(struct WifiDirectCommand *base)
 {
     struct WifiDirectNegotiateCommand *self = (struct WifiDirectNegotiateCommand *)base;
-    GetWifiDirectNegotiator()->context.currentCommand = base;
-    GetWifiDirectNegotiator()->context.currentProcessor = base->processor;
+    GetWifiDirectNegotiator()->currentCommand = base;
+    GetWifiDirectNegotiator()->currentProcessor = base->processor;
     base->processor->processNegotiateMessage(self->cmdType, base);
 }
 
@@ -58,7 +58,7 @@ void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *se
     self->execute = ExecuteProcessRemoteNegotiateMessage;
     self->onSuccess = OnNegotiateComplete;
     self->onFailure = OnFailure;
-    self->delete = WifiDirectNegotiateCommandDelete;
+    self->deleteSelf = WifiDirectNegotiateCommandDelete;
     self->msg = msg;
     self->cmdType = cmdType;
 }

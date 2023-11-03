@@ -38,6 +38,32 @@
 #define WAIT_POST_REQUEST_MS 450
 
 /* public interface */
+static int32_t g_retryErrorCodeTable[] = {
+    V1_ERROR_BUSY,
+    V1_ERROR_REUSE_FAILED,
+    V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE,
+    V1_ERROR_IF_NOT_AVAILABLE,
+    ERROR_MANAGER_BUSY,
+    ERROR_ENTITY_BUSY,
+    ERROR_ENTITY_UNAVAILABLE,
+    ERROR_SINK_NO_LINK,
+    ERROR_SOURCE_NO_LINK,
+    ERROR_WIFI_DIRECT_LOCAL_DISCONNECTED_REMOTE_CONNECTED,
+    ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE,
+    ERROR_WIFI_DIRECT_BIDIRECTIONAL_SIMULTANEOUS_REQ,
+    ERROR_P2P_SHARE_LINK_REUSE_FAILED,
+};
+
+static bool IsRetryErrorCode(int32_t reason)
+{
+    for (size_t i = 0; i < ARRAY_SIZE(g_retryErrorCodeTable); i++) {
+        if (reason == g_retryErrorCodeTable[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static int32_t HandleMessageFromProcessor(struct NegotiateMessage *msg)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
@@ -46,8 +72,8 @@ static int32_t HandleMessageFromProcessor(struct NegotiateMessage *msg)
     if (msg) {
         struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         CONN_CHECK_AND_RETURN_RET_LOG(channel != NULL, SOFTBUS_ERR, LOG_LABEL "channel is null");
-        (void)channel->getDeviceId(channel, self->context.currentRemoteDeviceId,
-                                   sizeof(self->context.currentRemoteDeviceId));
+        (void)channel->getDeviceId(channel, self->currentRemoteDeviceId,
+                                   sizeof(self->currentRemoteDeviceId));
         ret = self->postData(msg);
     }
     return ret;
@@ -182,9 +208,10 @@ static enum WifiDirectNegotiateCmdType GetNegotiateCmdType(struct NegotiateMessa
     return cmdType;
 }
 
-static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct NegotiateMessage *msg)
+static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, enum WifiDirectNegotiateCmdType cmdType,
+                                 struct NegotiateMessage *msg)
 {
-    if (strlen(self->context.currentRemoteDeviceId) == 0) {
+    if (strlen(self->currentRemoteDeviceId) == 0) {
         CLOGI(LOG_LABEL "current remote deviceId is empty");
         return false;
     }
@@ -196,9 +223,14 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct Negot
     int32_t ret = channel->getDeviceId(channel, remoteDeviceId, sizeof(remoteDeviceId));
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, true, LOG_LABEL "get device id failed");
 
-    CLOGI(LOG_LABEL "currentRemote=%s msgRemote=%s", AnonymizesUUID(self->context.currentRemoteDeviceId),
+    CLOGI(LOG_LABEL "currentRemote=%s msgRemote=%s", AnonymizesUUID(self->currentRemoteDeviceId),
           AnonymizesUUID(remoteDeviceId));
-    return GetWifiDirectUtils()->strCompareIgnoreCase(remoteDeviceId, self->context.currentRemoteDeviceId) != 0;
+    if (GetWifiDirectUtils()->strCompareIgnoreCase(remoteDeviceId, self->currentRemoteDeviceId) != 0) {
+        CLOGI(LOG_LABEL "mis deviceId");
+        return true;
+    }
+
+    return self->currentProcessor->isMessageNeedPending(cmdType, msg);
 }
 
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
@@ -220,7 +252,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         return;
     }
 
-    channel->getDeviceId(channel, self->context.currentRemoteDeviceId, sizeof(self->context.currentRemoteDeviceId));
+    channel->getDeviceId(channel, self->currentRemoteDeviceId, sizeof(self->currentRemoteDeviceId));
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getProcessorByNegotiateMessage(msg);
     struct WifiDirectCommand *command = WifiDirectNegotiateCommandNew(cmdType, msg);
     if (command == NULL) {
@@ -231,16 +263,19 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
 
     if (processor == NULL) {
         CLOGE(LOG_LABEL "processor is null");
-        if (self->context.currentProcessor != NULL) {
-            CLOGI(LOG_LABEL "use currentProcessor");
-            self->context.currentProcessor->processNegotiateMessage(cmdType, command);
+        if (self->currentProcessor == NULL) {
+            CLOGE(LOG_LABEL "currentProcessor is null, ignore this message");
+            NegotiateMessageDelete(msg);
+            return;
         }
-        return;
+        CLOGI(LOG_LABEL "use currentProcessor");
+        command->processor = self->currentProcessor;
+    } else {
+        command->processor = processor;
+        self->currentProcessor = processor;
     }
 
-    command->processor = processor;
-    self->context.currentProcessor = processor;
-    if (IsMessageNeedPending(self, msg)) {
+    if (IsMessageNeedPending(self, cmdType, msg)) {
         CLOGI(LOG_LABEL "queue negotiate command");
         GetWifiDirectCommandManager()->enqueueCommand(command);
     } else {
@@ -262,7 +297,7 @@ static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *ch
 static void OnOperationComplete(int32_t event)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    struct WifiDirectProcessor *processor = self->context.currentProcessor;
+    struct WifiDirectProcessor *processor = self->currentProcessor;
     CONN_CHECK_AND_RETURN_LOG(processor, LOG_LABEL "current processor is null");
 
     processor->onOperationEvent(event);
@@ -279,11 +314,11 @@ static void NegotiateSchedule(void)
     CONN_CHECK_AND_RETURN_LOG(nextCommand != NULL, LOG_LABEL "command queue is empty");
 
     CLOGI(LOG_LABEL "execute next command");
-    struct WifiDirectCommand *prevCommand = GetWifiDirectNegotiator()->context.currentCommand;
+    struct WifiDirectCommand *prevCommand = GetWifiDirectNegotiator()->currentCommand;
     if (prevCommand != NULL) {
-        prevCommand->delete(prevCommand);
+        prevCommand->deleteSelf(prevCommand);
     }
-    GetWifiDirectNegotiator()->context.currentCommand = nextCommand;
+    GetWifiDirectNegotiator()->currentCommand = nextCommand;
     nextCommand->execute(nextCommand);
 }
 
@@ -311,30 +346,39 @@ static void RetryCommandAsync(void *data)
 
 static int32_t RetryCurrentCommand(void)
 {
-    struct WifiDirectCommand *command = GetWifiDirectNegotiator()->context.currentCommand;
-    if (command == NULL) {
-        CLOGE(LOG_LABEL "current command is null");
+    struct WifiDirectCommand *command = GetWifiDirectNegotiator()->currentCommand;
+    if (command == NULL || command->type == COMMAND_TYPE_MESSAGE) {
+        CLOGE(LOG_LABEL "current command is null or message, ignore retry");
         return SOFTBUS_ERR;
     }
-    GetWifiDirectNegotiator()->context.currentCommand = NULL;
+    GetWifiDirectNegotiator()->currentCommand = NULL;
     return CallMethodAsync(RetryCommandAsync, command, RETRY_COMMAND_DELAY_MS);
 }
 
 static bool IsBusy(void)
 {
-    return GetWifiDirectNegotiator()->context.currentCommand != NULL;
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    if (self->currentCommand != NULL) {
+        CLOGI(LOG_LABEL "currentCommand is not null");
+        return true;
+    }
+    if (self->currentProcessor != NULL && self->currentProcessor->passiveCommand != NULL) {
+        CLOGI(LOG_LABEL "passiveCommand of currentProcessor is not null");
+        return true;
+    }
+    return false;
 }
 
 static void ResetContext(void)
 {
     CLOGI(LOG_LABEL);
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    (void)memset_s(self->context.currentRemoteDeviceId, sizeof(self->context.currentRemoteDeviceId), 0,
-                   sizeof(self->context.currentRemoteDeviceId));
-    self->context.currentCommand = NULL;
-    if (self->context.currentProcessor != NULL) {
-        self->context.currentProcessor->resetContext();
-        self->context.currentProcessor = NULL;
+    (void)memset_s(self->currentRemoteDeviceId, sizeof(self->currentRemoteDeviceId), 0,
+                   sizeof(self->currentRemoteDeviceId));
+    self->currentCommand = NULL;
+    if (self->currentProcessor != NULL) {
+        self->currentProcessor->resetContext();
+        self->currentProcessor = NULL;
     }
     self->processNextCommand();
 }
@@ -453,14 +497,6 @@ static void SyncLnnInfo(struct InnerLink *innerLink)
     }
 }
 
-static void HandleUnhandledRequest(struct NegotiateMessage *msg)
-{
-    struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getProcessorByNegotiateMessage(msg);
-    CONN_CHECK_AND_RETURN_LOG(processor, LOG_LABEL "no available processor");
-
-    processor->processUnhandledRequest(msg, ERROR_MANAGER_BUSY);
-}
-
 static void OnWifiDirectAuthOpened(uint32_t requestId, int64_t authId)
 {
     CLOGI(LOG_LABEL "requestId=%u authId=%zd", requestId, authId);
@@ -475,18 +511,16 @@ static struct WifiDirectNegotiator g_negotiator = {
     .postData = PostData,
     .processNextCommand = ProcessNextCommand,
     .retryCurrentCommand = RetryCurrentCommand,
+    .isRetryErrorCode = IsRetryErrorCode,
     .isBusy = IsBusy,
     .resetContext = ResetContext,
     .handleMessageFromProcessor = HandleMessageFromProcessor,
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
-    .handleUnhandledRequest = HandleUnhandledRequest,
     .syncLnnInfo = SyncLnnInfo,
     .onWifiDirectAuthOpened = OnWifiDirectAuthOpened,
-    .context = {
-        .currentProcessor = NULL,
-        .currentCommand = NULL,
-    },
+    .currentCommand = NULL,
+    .currentProcessor = NULL,
 };
 
 struct WifiDirectNegotiator* GetWifiDirectNegotiator(void)
