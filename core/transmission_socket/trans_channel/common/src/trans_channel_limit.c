@@ -21,7 +21,7 @@
 #include "softbus_log.h"
 
 
-#define AUTH_SESSION_WHITE_LIST_NUM (8)
+#define AUTH_SESSION_WHITE_LIST_NUM (9)
 static char g_sessionWhiteList[AUTH_SESSION_WHITE_LIST_NUM][SESSION_NAME_SIZE_MAX] = {
     "ohos.distributedhardware.devicemanager.resident",
     "com.huawei.devicegroupmanage",
@@ -31,6 +31,7 @@ static char g_sessionWhiteList[AUTH_SESSION_WHITE_LIST_NUM][SESSION_NAME_SIZE_MA
     "com.huawei.android.airsharing+CastPlusDiscoveryModule",
     "com.huawei.dmsdp+dmsdp",
     "com.huawei.devicemanager.dynamic",
+    "ohos.distributedhardware.devicemanager.pinholder",
 };
 
 #define NO_PKG_NAME_SESSION_WHITE_LIST_NUM (1)
