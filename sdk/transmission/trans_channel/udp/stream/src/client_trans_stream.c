@@ -18,7 +18,7 @@
 #include "client_trans_udp_stream_interface.h"
 #include "session.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "trans_server_proxy.h"
 

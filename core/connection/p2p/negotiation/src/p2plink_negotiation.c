@@ -27,7 +27,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "auth_interface.h"
 
 #define P2PLINK_VERSION 2

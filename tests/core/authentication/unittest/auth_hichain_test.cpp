@@ -25,7 +25,7 @@
 #include "softbus_app_info.h"
 #include "lnn_hichain_mock.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_socket.h"
 #include "auth_common_mock.h"
 

@@ -16,7 +16,7 @@
 #include "wifi_direct_manager.h"
 #include "securec.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "lnn_distributed_net_ledger.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_role_option.h"

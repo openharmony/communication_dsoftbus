@@ -15,7 +15,7 @@
 
 #include "wifi_direct_fast_connect.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "processor/wifi_direct_processor.h"
 #include "data/negotiate_message.h"
 #include "wifi_direct_negotiate_channel.h"

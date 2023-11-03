@@ -15,7 +15,7 @@
 
 #include "lnn_decision_center.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInitDecisionCenter(uint32_t version)
 {

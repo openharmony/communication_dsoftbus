@@ -23,7 +23,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 
 int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len, int32_t businessType)

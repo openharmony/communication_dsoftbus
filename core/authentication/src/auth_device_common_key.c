@@ -26,7 +26,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define UDID_SHORT_HASH 8

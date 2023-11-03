@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 #include "p2plink_manager.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "p2plink_interface.h"
 #include "p2plink_message.c"
 #include "p2plink_channel_freq.h"

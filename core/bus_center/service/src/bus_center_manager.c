@@ -32,7 +32,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"

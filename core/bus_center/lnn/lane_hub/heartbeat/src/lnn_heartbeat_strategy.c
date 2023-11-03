@@ -28,7 +28,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"

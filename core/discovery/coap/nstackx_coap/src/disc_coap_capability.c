@@ -17,7 +17,7 @@
 
 #include "disc_nstackx_adapter.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 void DiscCoapParseExtendServiceData(const cJSON *data, DeviceInfo *device)
 {

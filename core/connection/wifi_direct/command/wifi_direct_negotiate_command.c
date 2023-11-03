@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "wifi_direct_negotiate_command.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_negotiator.h"
 #include "channel/wifi_direct_negotiate_channel.h"

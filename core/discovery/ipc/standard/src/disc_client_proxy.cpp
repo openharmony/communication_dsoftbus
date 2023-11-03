@@ -19,7 +19,7 @@
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 using namespace OHOS;
 

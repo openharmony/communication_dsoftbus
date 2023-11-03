@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "p2plink_common.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "p2plink_type.h"
 #include "adapter_mock.h"
 #include "softbus_error_code.h"

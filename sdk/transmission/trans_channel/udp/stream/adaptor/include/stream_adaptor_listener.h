@@ -19,7 +19,7 @@
 #include "i_stream.h"
 #include "i_stream_manager.h"
 #include "softbus_def.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 using Communication::SoftBus::IStreamManagerListener;
 using Communication::SoftBus::IStream;

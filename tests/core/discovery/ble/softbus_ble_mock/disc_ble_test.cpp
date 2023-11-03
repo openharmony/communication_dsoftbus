@@ -23,7 +23,7 @@
 #include "bus_center_mock.h"
 #include "ble_mock.h"
 #include "message_handler.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "securec.h"
 #include "exception_branch_checker.h"

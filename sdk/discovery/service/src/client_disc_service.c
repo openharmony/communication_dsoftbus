@@ -19,7 +19,7 @@
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_type_def.h"
 #include "stdbool.h"
 

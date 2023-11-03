@@ -18,7 +18,7 @@
 #include "session.h"
 #include "session_mock.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace Communication {
 namespace SoftBus {

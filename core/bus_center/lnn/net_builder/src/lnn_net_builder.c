@@ -56,7 +56,7 @@
 #include "softbus_hisysevt_bus_center.h"
 #include "softbus_json_utils.h"
 #include "softbus_adapter_json.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN 8

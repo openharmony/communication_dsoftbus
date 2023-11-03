@@ -24,7 +24,7 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define STATE_LISTENER_MAX_NUM 8
 #define BR_STATE_CB_TRANSPORT 1

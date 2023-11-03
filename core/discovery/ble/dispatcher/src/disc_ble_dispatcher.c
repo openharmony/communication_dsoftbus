@@ -19,7 +19,7 @@
 #include "disc_share_ble.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define DISPATCHER_SIZE 2
 

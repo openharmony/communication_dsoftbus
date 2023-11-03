@@ -18,7 +18,7 @@
 #include "securec.h"
 
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define JSON_WLAN_IP      "wifiIpAddr"
 #define JSON_SERVICE_DATA "serviceData"

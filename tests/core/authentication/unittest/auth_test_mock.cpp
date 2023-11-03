@@ -35,7 +35,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "auth_session_message.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 using namespace testing;

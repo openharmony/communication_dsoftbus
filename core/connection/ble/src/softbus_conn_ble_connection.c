@@ -26,7 +26,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "ble_protocol_interface_factory.h"
 
 // basic info json key definition

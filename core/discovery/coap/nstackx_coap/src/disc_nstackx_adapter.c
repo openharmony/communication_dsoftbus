@@ -31,7 +31,7 @@
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define WLAN_IFACE_NAME_PREFIX "wlan"
