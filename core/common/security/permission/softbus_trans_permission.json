@@ -290,7 +290,7 @@
     "DEVID": "UUID",
     "APP_INFO": [
       {
-        "PKG_NAME": "com.huawei.devicemanager",
+        "PKG_NAME": "ohos.distributedhardware.devicemanager.adapter",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }
