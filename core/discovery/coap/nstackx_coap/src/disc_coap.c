@@ -120,6 +120,8 @@ static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option
 static int32_t Publish(const PublishOption *option, bool isActive)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        "invalid freq: %d", option->freq);
     if (option->ranging) {
         DLOGW("coap publish not support ranging, is it misuse? just ignore");
     }
@@ -180,6 +182,8 @@ static int32_t CoapStartScan(const PublishOption *option)
 static int32_t UnPublish(const PublishOption *option, bool isActive)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        "invalid freq: %d", option->freq);
     DISC_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
         "%s unPublish mutex lock failed", isActive ? "active" : "passive");
 
@@ -230,6 +234,8 @@ static int32_t CoapStopScan(const PublishOption *option)
 static int32_t Discovery(const SubscribeOption *option, bool isActive)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        "invalid freq: %d", option->freq);
     DISC_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
         "%s discovery mutex lock failed", isActive ? "active" : "passive");
 
@@ -289,6 +295,8 @@ static int32_t CoapSubscribe(const SubscribeOption *option)
 static int32_t StopDisc(const SubscribeOption *option, bool isActive)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        "invalid freq: %d", option->freq);
     DISC_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
         "stop %s discovery mutex lock failed", isActive ? "active" : "passive");
 
