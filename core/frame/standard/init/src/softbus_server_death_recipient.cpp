@@ -16,7 +16,7 @@
 #include "softbus_server_death_recipient.h"
 
 #include "softbus_client_info_manager.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_server_frame.h"
 
 namespace OHOS {

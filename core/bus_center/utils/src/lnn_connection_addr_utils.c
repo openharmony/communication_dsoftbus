@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "softbus_def.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define LNN_MAX_PRINT_ADDR_LEN 100
 #define SHORT_UDID_HASH_LEN 8

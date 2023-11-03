@@ -23,7 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnSyncBatteryInfo(const char *udid, int32_t level, bool isCharging)
 {

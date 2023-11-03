@@ -25,7 +25,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 static int32_t GetUuidFromFile(char *id, uint32_t len)

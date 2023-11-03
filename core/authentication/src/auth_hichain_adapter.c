@@ -29,7 +29,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUP_ID "groupId"

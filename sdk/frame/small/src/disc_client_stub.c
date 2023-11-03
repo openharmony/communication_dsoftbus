@@ -18,7 +18,7 @@
 #include "client_disc_manager.h"
 #include "ipc_skeleton.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t ClientOnDiscoverySuccess(IpcIo *data, IpcIo *reply)
 {

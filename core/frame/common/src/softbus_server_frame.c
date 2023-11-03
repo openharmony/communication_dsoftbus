@@ -26,7 +26,7 @@
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"

@@ -14,7 +14,7 @@
  */
 
 #include "entity/p2p_entity/p2p_unavailable_state.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "entity/p2p_entity/p2p_entity.h"
 

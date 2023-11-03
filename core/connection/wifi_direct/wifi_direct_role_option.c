@@ -14,7 +14,7 @@
  */
 
 #include "wifi_direct_role_option.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"

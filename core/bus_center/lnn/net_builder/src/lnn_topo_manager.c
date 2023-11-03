@@ -31,7 +31,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_adapter_json.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define JSON_KEY_TYPE "type"
 #define JSON_KEY_SEQ "seq"

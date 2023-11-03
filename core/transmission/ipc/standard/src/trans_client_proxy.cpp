@@ -18,7 +18,7 @@
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_trans_def.h"
 #include "trans_client_proxy_standard.h"
 

@@ -18,7 +18,7 @@
 
 #include "disc_interface.h"
 #include "disc_manager.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "ble_mock.h"
 #include "coap_mock.h"

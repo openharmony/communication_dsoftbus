@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_errcode.h"

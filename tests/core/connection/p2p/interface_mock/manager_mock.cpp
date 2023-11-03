@@ -14,7 +14,7 @@
  */
 #include "manager_mock.h"
 #include <atomic>
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "p2plink_device.h"
 

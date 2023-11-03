@@ -14,7 +14,7 @@
  */
 
 #include "lnn_heartbeat_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_errcode.h"
 
 int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen)

@@ -21,7 +21,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"

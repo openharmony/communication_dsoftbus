@@ -38,7 +38,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #undef NLMSG_OK
 #define NLMSG_OK(nlh, len)                                                                               \

@@ -34,7 +34,7 @@
 #include "softbus_errcode.h"
 #include "message_handler.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"
 #define JSON_KEY_P2P_MAC "P2P_MAC"

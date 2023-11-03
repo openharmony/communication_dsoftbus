@@ -25,7 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 static const uint32_t CONN_HEAD_SIZE = 24;
 static const uint32_t SHIFT_BITS = 16;

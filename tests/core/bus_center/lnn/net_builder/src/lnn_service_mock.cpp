@@ -19,7 +19,7 @@
 #include "lnn_service_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 using namespace testing;
 using namespace testing::ext;

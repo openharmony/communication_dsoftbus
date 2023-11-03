@@ -14,7 +14,7 @@
  */
 
 #include "wifi_direct_command_manager.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "channel/wifi_direct_negotiate_channel.h"
 

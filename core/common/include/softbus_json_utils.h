@@ -20,7 +20,7 @@
 #include "cJSON.h"
 #include "string.h"
 #include "stdbool.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #ifdef __cplusplus
 #if __cplusplus

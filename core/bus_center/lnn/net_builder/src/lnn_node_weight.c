@@ -22,7 +22,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define MAX_WEIGHT_VALUE        1000
 #define BASE_WEIGHT_PHONE_VALUE 2000

@@ -18,7 +18,7 @@
 #include <securec.h>
 
 #include "softbus_def.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 
 #define AUTH_SESSION_WHITE_LIST_NUM (8)

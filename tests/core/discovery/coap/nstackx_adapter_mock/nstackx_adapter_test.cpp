@@ -18,7 +18,7 @@
 
 #include "softbus_error_code.h"
 #include "nstackx_error.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "lnn_local_net_ledger.h"
 
 #include "disc_nstackx_adapter.h"
