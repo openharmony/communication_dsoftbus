@@ -141,8 +141,27 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
     return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
 }
 
+static int32_t IsP2pAvailable(const char *remoteNetworkId)
+{
+    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
+    if (!info->getBoolean(info, II_KEY_IS_ENABLE, false)) {
+        CLOGE(LOG_LABEL "%s IS_ENABLE=0", IF_NAME_P2P);
+        return V1_ERROR_IF_NOT_AVAILABLE;
+    }
+    if (info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE) == WIFI_DIRECT_API_ROLE_GC) {
+        CLOGE(LOG_LABEL "already gc");
+        return V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectConnectType connectType)
 {
+    if (connectType == WIFI_DIRECT_CONNECT_TYPE_P2P) {
+        return IsP2pAvailable(remoteNetworkId);
+    } else if (connectType == WIFI_DIRECT_CONNECT_TYPE_HML) {
+        return SOFTBUS_OK;
+    }
     return SOFTBUS_OK;
 }
 
