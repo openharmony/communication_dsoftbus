@@ -396,11 +396,13 @@ int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, cons
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+int32_t TransClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo,
+    uint32_t infoLen, int retCode)
 {
     (void)addr;
     (void)addrTypeLen;
-    (void)networkId;
+    (void)metaInfo;
+    (void)infoLen;
     (void)retCode;
     return SOFTBUS_OK;
 }

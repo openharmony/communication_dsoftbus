@@ -54,7 +54,8 @@ public:
 
     virtual int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode);
 
-    virtual int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode);
+    virtual int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo, uint32_t infoLen,
+                                         int retCode);
 
     virtual int32_t OnLeaveLNNResult(const char *networkId, int retCode);
 

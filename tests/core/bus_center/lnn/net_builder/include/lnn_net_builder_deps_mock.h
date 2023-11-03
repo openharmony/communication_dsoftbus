@@ -99,10 +99,10 @@ public:
     virtual int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
     virtual int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo);
     virtual void MetaNodeNotifyJoinResult(ConnectionAddr *addr,
-        const char *networkId, int32_t retCode);
+        MetaBasicInfo *metaInfo, int32_t retCode);
     virtual void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
     virtual int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen,
-        const char *networkId, int32_t retCode);
+        MetaBasicInfo *metaInfo, int32_t retCode);
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
     virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num,
         LnnSyncInfoMsgComplete complete);
@@ -200,9 +200,9 @@ public:
     MOCK_METHOD1(LnnNotifyAllTypeOffline, void (ConnectionAddrType));
     MOCK_METHOD1(SoftBusGetTime, int32_t (SoftBusSysTime *));
     MOCK_METHOD2(AuthGetConnInfo, int32_t (int64_t, AuthConnInfo *));
-    MOCK_METHOD3(MetaNodeNotifyJoinResult, void (ConnectionAddr *, const char *, int32_t));
+    MOCK_METHOD3(MetaNodeNotifyJoinResult, void (ConnectionAddr *, MetaBasicInfo *, int32_t));
     MOCK_METHOD2(LnnNotifyLeaveResult, void (const char *, int32_t));
-    MOCK_METHOD4(MetaNodeIpcNotifyJoinResult, int32_t (void *, uint32_t, const char *, int32_t));
+    MOCK_METHOD4(MetaNodeIpcNotifyJoinResult, int32_t (void *, uint32_t, MetaBasicInfo *, int32_t));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t (const char *, ConnectionAddrType *));
     MOCK_METHOD3(LnnSendNotTrustedInfo, int32_t (const NotTrustedDelayInfo *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));

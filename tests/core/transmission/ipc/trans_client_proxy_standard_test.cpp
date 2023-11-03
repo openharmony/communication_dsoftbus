@@ -82,11 +82,13 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
 
     void *addr = nullptr;
     uint32_t addrTypeLen = TEST_INVALID;
+    void *metaInfo = nullptr;
+    uint32_t infoLen = TEST_INVALID;
     const char *networkId = nullptr;
     ret = clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, tmp);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, networkId, tmp);
+    ret = clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, infoLen, tmp);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = clientProxy->OnLeaveLNNResult(networkId, tmp);

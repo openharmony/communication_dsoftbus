@@ -60,6 +60,7 @@ bus_center_unittest_dirs = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
   "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
   "$dsoftbus_root_path/core/authentication/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
 ]
 
 bus_center_unittest_deps = [
@@ -1077,6 +1078,7 @@ ohos_unittest("LNNLedgerMockTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [
