@@ -178,7 +178,7 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
 
 int32_t BusCenterServerProxy::JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
 {
-    if (pkgName == nullptr || addr == nullptr) {
+    if (pkgName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
@@ -196,13 +196,20 @@ int32_t BusCenterServerProxy::JoinMetaNode(const char *pkgName, void *addr, Cust
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write client name failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.WriteUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr type length failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!data.WriteRawData(addr, addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr failed!");
-        return SOFTBUS_IPC_ERR;
+    if (addr != nullptr) {
+        if (!data.WriteUint32(addrTypeLen)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr type length failed!");
+            return SOFTBUS_IPC_ERR;
+        }
+        if (!data.WriteRawData(addr, addrTypeLen)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr failed!");
+            return SOFTBUS_IPC_ERR;
+        }
+    } else {
+        if (!data.WriteUint32(0)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr type length failed!");
+            return SOFTBUS_IPC_ERR;
+        }
     }
     if (!data.WriteRawData(customData, sizeof(CustomData))) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "JoinMetaNode write addr failed!");

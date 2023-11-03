@@ -55,11 +55,11 @@ void BusCenterClientProxyTest::TearDown()
 HWTEST_F(BusCenterClientProxyTest, CLIENT_ON_JOIN_META_NODE_RESULT_Test_001, TestSize.Level1)
 {
     void *addr = nullptr;
+    MetaBasicInfo *metaInfo = nullptr;
     uint32_t addrTypeLen = TEST_DATA_LEN;
-    const char *networkId = "1234";
     int32_t retCode = 0;
     int32_t ret;
-    ret = ClientOnJoinMetaNodeResult(nullptr, addr, addrTypeLen, networkId, retCode);
+    ret = ClientOnJoinMetaNodeResult(nullptr, addr, addrTypeLen, metaInfo, retCode);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 

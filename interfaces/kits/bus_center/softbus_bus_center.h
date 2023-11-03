@@ -250,6 +250,12 @@ typedef struct {
     uint16_t deviceTypeId;                 /**< Device type id */
 } NodeBasicInfo;
 
+typedef struct {
+    MetaNodeType type;
+    char metaNodeId[NETWORK_ID_BUF_LEN];
+    uint8_t data[USER_DATA_MAX_LEN];
+} MetaBasicInfo;
+
 /**
  * @brief Enumerates device information change types. For details, see {@link INodeStateCb.onNodeBasicInfoChanged}.
  *
@@ -513,25 +519,13 @@ typedef struct {
 } GearMode;
 
 /**
- * @brief Enumerates secret key types.
- *
- * @since 1.0
- * @version 1.0
- */
-typedef enum {
-    PROXY_TRANSMISION = 0,  /**< Proxy Transmision */
-    PROXY_HEARTBEAT = 1,    /**< Proxy Heartbeat */
-    CUSTOM_UNKNOWN,         /**< Proxy Unknown */
-} CustomType;
-
-/**
  * @brief Defines  parameter, see {@link CustomData}.
  *
  * @since 1.0
  * @version 1.0
  */
 typedef struct {
-    CustomType type;                  /**< User type */
+    MetaNodeType type;                  /**< User type */
     uint8_t data[USER_DATA_MAX_LEN];  /**< User data */
 } CustomData;
 
@@ -561,7 +555,7 @@ typedef void (*OnJoinLNNResult)(ConnectionAddr *addr, const char *networkId, int
  * @since 1.0
  * @version 1.0
  */
-typedef void (*OnJoinMetaNodeResult)(ConnectionAddr *addr, const char *networkId, int32_t retCode);
+typedef void (*OnJoinMetaNodeResult)(ConnectionAddr *addr, MetaBasicInfo *metaInfo, int32_t retCode);
 
 /**
  * @brief Called when a device is removed from a LNN via {@link LeaveLNN}.
