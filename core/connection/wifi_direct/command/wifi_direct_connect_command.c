@@ -115,6 +115,9 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
     if (innerLink == NULL) {
         CLOGE(LOG_LABEL " no inner link");
         base->onFailure(base, ERROR_NO_CONTEXT);
+        GetWifiDirectNegotiator()->resetContext();
+        GetResourceManager()->dump();
+        GetLinkManager()->dump();
         return;
     }
 
