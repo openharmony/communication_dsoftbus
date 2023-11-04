@@ -122,7 +122,7 @@ void ConnDeinitSockets(void)
 
 int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
 {
-    if (option == NULL || bindAddr == NULL) {
+    if (option == NULL) {
         return SOFTBUS_ERR;
     }
     const SocketInterface *socketInterface = GetSocketInterface(option->socketOption.protocol);
