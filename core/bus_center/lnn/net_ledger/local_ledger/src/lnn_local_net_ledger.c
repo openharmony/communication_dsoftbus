@@ -42,6 +42,7 @@
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
+#define SUPPORT_EXCHANGE_NETWORKID 1
 
 typedef struct {
     NodeInfo localInfo;
@@ -1344,6 +1345,7 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
+    nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID;
     nodeInfo->feature = LnnGetFeatureCapabilty();
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
