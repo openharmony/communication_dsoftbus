@@ -321,8 +321,6 @@ static bool IsMessageNeedPending(enum WifiDirectNegotiateCmdType cmd, struct Neg
             return true;
         case P2P_V1_PROCESSOR_STATE_WAITING_REMOVE_GROUP:
             return true;
-        case P2P_V1_PROCESSOR_STATE_WAITING_CLIENT_JOIN:
-            return true;
         default:
             return true;
     }
@@ -1423,6 +1421,7 @@ static int32_t OnCreateGroupComplete(int32_t event)
         output = BuildConnectResponseAsGo(remoteMac, remoteIp, channel);
         CONN_CHECK_AND_RETURN_RET_LOG(output, SOFTBUS_ERR, LOG_LABEL "build connect response with go info failed");
         GetWifiDirectNegotiator()->handleMessageFromProcessor(output);
+        ProcessSuccess(NULL);
     } else {
         output = BuildConnectRequestAsGo(remoteMac, remoteIp, channel);
         CONN_CHECK_AND_RETURN_RET_LOG(output, SOFTBUS_ERR, LOG_LABEL "build connect request with go info failed");
@@ -1705,6 +1704,7 @@ static void ProcessFailure(int32_t errorCode, bool reply)
     CLOGI(LOG_LABEL "errorCode=%d", errorCode);
     if (self->activeCommand != NULL) {
         self->activeCommand->onFailure(self->activeCommand, errorCode);
+        self->resetContext();
         return;
     }
 
@@ -1719,6 +1719,7 @@ static void ProcessFailure(int32_t errorCode, bool reply)
         NegotiateMessageDelete(response);
     }
     self->passiveCommand->onFailure(self->passiveCommand, errorCode);
+    self->resetContext();
 }
 
 static void ProcessSuccess(struct InnerLink *innerLink)
@@ -1735,6 +1736,7 @@ static void ProcessSuccess(struct InnerLink *innerLink)
         }
 
         self->activeCommand->onSuccess(self->activeCommand, NULL);
+        self->resetContext();
         return;
     }
 
@@ -1747,6 +1749,7 @@ static void ProcessSuccess(struct InnerLink *innerLink)
     GetWifiDirectNegotiator()->handleMessageFromProcessor(response);
     NegotiateMessageDelete(response);
     self->passiveCommand->onSuccess(self->passiveCommand, NULL);
+    self->resetContext();
 }
 
 static struct P2pV1Processor g_processor = {
