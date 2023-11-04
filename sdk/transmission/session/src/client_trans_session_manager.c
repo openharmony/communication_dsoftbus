@@ -294,7 +294,8 @@ EXIT_ERR:
     return NULL;
 }
 
-static void ShowClientSessionServer(void) {
+static void ShowClientSessionServer(void)
+{
     ClientSessionServer *pos = NULL;
     ClientSessionServer *tmp = NULL;
     int count = 0;
