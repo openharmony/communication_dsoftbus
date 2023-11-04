@@ -42,10 +42,10 @@ constexpr char LOCAL_NETWORK_ID[] = "444455556666abcdef";
 constexpr uint32_t FILE_DEFAULT_LINK_NUM = 4;
 constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
 constexpr uint32_t LANE_LINK_NUM = 2;
-constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
-constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 3000;
-constexpr uint32_t DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT = 3000;
-constexpr uint32_t DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT = 3000;
+constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 2000;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 2000;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT = 5000;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT = 30000;
 
 static NodeInfo g_nodeInfo;
 constexpr int32_t DEFAULT_PID = 0;
@@ -184,7 +184,7 @@ static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
 {
     printf("LaneRequestSucc: laneId:0x%x, linkType:%s\n", laneId, GetLinkType(info->type));
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->LnnFreeLane(laneId);
+    int32_t ret = laneManager->lnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -192,7 +192,7 @@ static void OnLaneRequestFail(uint32_t laneId, int32_t errCode)
 {
     printf("LaneRequestFail: laneId:0x%x, reason:%d\n", laneId, errCode);
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->LnnFreeLane(laneId);
+    int32_t ret = laneManager->lnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -200,7 +200,7 @@ static void OnLaneStateChange(uint32_t laneId, LaneState state)
 {
     printf("LaneStateChange: laneId:0x%x, state:%d\n", laneId, state);
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->LnnFreeLane(laneId);
+    int32_t ret = laneManager->lnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -214,9 +214,9 @@ HWTEST_F(LaneTest, LANE_ID_APPLY_Test_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneId = laneManager->ApplyLaneId(laneType);
+    uint32_t laneId = laneManager->applyLaneId(laneType);
     EXPECT_TRUE(laneId != INVALID_LANE_ID);
-    int32_t ret = laneManager->LnnFreeLane(laneId);
+    int32_t ret = laneManager->lnnFreeLane(laneId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -237,44 +237,44 @@ HWTEST_F(LaneTest, LANE_ID_APPLY_Test_002, TestSize.Level1)
     const LnnLaneManager *laneManager = GetLaneManager();
     uint32_t i;
     for (i = 0; i < MAX_LANE_ID_NUM; i++) {
-        laneId = laneManager->ApplyLaneId(laneType);
+        laneId = laneManager->applyLaneId(laneType);
         EXPECT_TRUE(laneId != INVALID_LANE_ID);
         laneIdList[i] = laneId;
     }
-    laneId = laneManager->ApplyLaneId(laneType);
+    laneId = laneManager->applyLaneId(laneType);
     EXPECT_TRUE(laneId == INVALID_LANE_ID);
     for (i = 0; i < MAX_LANE_ID_NUM; i++) {
-        EXPECT_EQ(laneManager->LnnFreeLane(laneIdList[i]), SOFTBUS_OK);
+        EXPECT_EQ(laneManager->lnnFreeLane(laneIdList[i]), SOFTBUS_OK);
     }
     SoftBusFree(laneIdList);
 }
 
-// /*
-// * @tc.name: LANE_SELECT_Test_001
-// * @tc.desc: lane select fileTransLane by LNN
-// * @tc.type: FUNC
-// * @tc.require: I5FBFG
-// */
-// HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
-// {
-//     LanePreferredLinkList recommendList;
-//     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-//     uint32_t listNum = 0;
-//     LaneSelectParam selectParam;
-//     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
-//     selectParam.transType = LANE_T_FILE;
-//     selectParam.expectedBw = 0;
-//     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
-//     EXPECT_EQ(ret, SOFTBUS_OK);
-//     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
-// }
+/*
+* @tc.name: LANE_SELECT_Test_001
+* @tc.desc: lane select fileTransLane by LNN
+* @tc.type: FUNC
+* @tc.require: I5FBFG
+*/
+HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    uint32_t listNum = 0;
+    LaneSelectParam selectParam;
+    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    selectParam.transType = LANE_T_FILE;
+    selectParam.expectedBw = 0;
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
+}
 /*
 * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_001
 * @tc.desc: lane select fileTransLane by LNN
 * @tc.type: FUNC
 * @tc.require: I5FBFG
 */
-HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
+HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_001, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
@@ -291,28 +291,28 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
 }
 
-// /*
-// * @tc.name: LANE_SELECT_Test_002
-// * @tc.desc: lane select by preferredLinkList
-// * @tc.type: FUNC
-// * @tc.require: I5FBFG
-// */
-// HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
-// {
-//     LanePreferredLinkList recommendList;
-//     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-//     uint32_t listNum = 0;
-//     LaneSelectParam selectParam;
-//     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
-//     selectParam.transType = LANE_T_BYTE;
-//     selectParam.expectedBw = 0;
-//     selectParam.list.linkTypeNum = LANE_PREFERRED_LINK_NUM;
-//     selectParam.list.linkType[0] = LANE_WLAN_5G;
-//     selectParam.list.linkType[1] = LANE_BR;
-//     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
-//     EXPECT_TRUE(ret == SOFTBUS_OK);
-//     EXPECT_TRUE(listNum == LANE_PREFERRED_LINK_NUM);
-// }
+/*
+* @tc.name: LANE_SELECT_Test_002
+* @tc.desc: lane select by preferredLinkList
+* @tc.type: FUNC
+* @tc.require: I5FBFG
+*/
+HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
+{
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    uint32_t listNum = 0;
+    LaneSelectParam selectParam;
+    (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    selectParam.transType = LANE_T_BYTE;
+    selectParam.expectedBw = 0;
+    selectParam.list.linkTypeNum = LANE_PREFERRED_LINK_NUM;
+    selectParam.list.linkType[0] = LANE_WLAN_5G;
+    selectParam.list.linkType[1] = LANE_BR;
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &recommendList, &listNum);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(listNum == LANE_PREFERRED_LINK_NUM);
+}
 
 /*
 * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_002
@@ -320,7 +320,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5FBFG
 */
-HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
+HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_002, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
@@ -333,7 +333,6 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
     selectParam.qosRequire.maxIdleTimeout = DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_TRUE(listNum == LANE_PREFERRED_LINK_NUM);
 }
 
 /*
@@ -395,7 +394,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
-    uint32_t laneId = laneManager->ApplyLaneId(LANE_TYPE_TRANS);
+    uint32_t laneId = laneManager->applyLaneId(LANE_TYPE_TRANS);
     EXPECT_TRUE(laneId != INVALID_LANE_ID);
     LaneRequestOption request;
     (void)memset_s(&request, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -413,7 +412,7 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
         .OnLaneRequestFail = OnLaneRequestFail,
         .OnLaneStateChange = OnLaneStateChange,
     };
-    ret = laneManager->LnnRequestLane(laneId, &request, &listener);
+    ret = laneManager->lnnRequestLane(laneId, &request, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(5);
 }

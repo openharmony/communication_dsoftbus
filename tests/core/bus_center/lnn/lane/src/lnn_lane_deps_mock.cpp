@@ -199,25 +199,13 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
 }
-int32_t LaneLock(void)
+int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 {
-    return GetLaneDepsInterface()->LaneLock();
+    return GetLaneDepsInterface()->SoftBusMutexLock(mutex);
 }
-int32_t LaneResourceIsExist(LaneResource *resourceItem)
+LaneResource *LaneResourceIsExist(LaneResource *resourceItem)
 {
     return GetLaneDepsInterface()->LaneResourceIsExist(resourceItem);
-}
-void ListDelete(ListNode *node)
-{
-    return GetLaneDepsInterface()->ListDelete(node);
-}
-void ListAdd(ListNode *list, ListNode *node)
-{
-    return GetLaneDepsInterface()->ListAdd(list,node);
-}
-int32_t LaneDecisionModels(const LaneSelectParam *request, LanePreferredLinkList *recommendList)
-{
-    return GetLaneDepsInterface()->LaneDecisionModels(request, recommendList);
 }
 }
 } // namespace OHOS
