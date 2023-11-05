@@ -147,6 +147,11 @@ static uint32_t GetNextAuthFsmId(void)
     return ++authFsmId;
 }
 
+static bool IsNeedExchangeNetworkId(uint32_t feature, AuthCapability capaBit)
+{
+    return ((feature & (1 << (uint32_t)capaBit)) != 0);
+}
+
 static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t connId,
     const AuthConnInfo *connInfo, bool isServer)
 {
@@ -181,7 +186,8 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
             char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
             int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
                 (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
-            if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK) {
+            if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK &&
+                IsNeedExchangeNetworkId(nodeInfo.authCapacity, BIT_SUPPORT_EXCHANGE_NETWORKID)) {
                 ALOGI("LnnRetrieveDeviceInfo success");
                 authFsm->info.idType = EXCHANGE_NETWORKID;
             }
