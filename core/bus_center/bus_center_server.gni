@@ -158,7 +158,7 @@ meta_node_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (meta_node_enhanced) {
   import(
-      "//foundation/communication/dsoftbus/core/bus_center/lnn/meta_node/meta_node.gni")
+      "//foundation/communication/dsoftbus/dsoftbus_enhance/core/bus_center/lnn/meta_node/meta_node.gni")
 
   bus_center_server_src += bus_center_meta_node_src
   bus_center_server_inc += bus_center_meta_node_inc
