@@ -355,6 +355,11 @@
         "ClientDeleteEventListener";
         "TransProxyPackAndSendData";
         "ClientTransProxyGetInfoByChannelId";
+        "CreateMetaSocketServer";
+        "RemoveMetaSocketServer";
+        "OpenAuthMetaSocket";
+        "CloseAuthMetaSocket";
+        "SendMetaData";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
