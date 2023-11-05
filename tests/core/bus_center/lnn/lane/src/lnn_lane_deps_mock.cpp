@@ -118,24 +118,9 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetLaneDepsInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t P2pLinkGetRequestId(void)
-{
-    return GetLaneDepsInterface()->P2pLinkGetRequestId();
-}
-
 void AuthCloseConn(int64_t authId)
 {
     return GetLaneDepsInterface()->AuthCloseConn(authId);
-}
-
-int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
-{
-    return GetLaneDepsInterface()->P2pLinkConnectDevice(info);
-}
-
-int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
-{
-    return GetLaneDepsInterface()->P2pLinkDisconnectDevice(info);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
