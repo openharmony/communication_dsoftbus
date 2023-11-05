@@ -434,3 +434,9 @@ int32_t SoftbusAesGcmEncrypt(
     outData->len = encryptDataLen;
     return SOFTBUS_OK;
 }
+
+int32_t SoftbusAesCfbEncrypt(
+    const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
