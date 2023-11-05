@@ -59,6 +59,7 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message.c",
     ]
     auth_server_inc += [
+      "$dsoftbus_root_path/adapter/common/include/",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/include/",
     ]
   } else {
