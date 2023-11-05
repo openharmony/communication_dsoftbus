@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,8 @@ bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, doubl
 bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target);
 
 bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
+
+bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const char * const *strings, int32_t count);
 
 bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t num);
 
