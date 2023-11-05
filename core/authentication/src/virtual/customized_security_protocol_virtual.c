@@ -13,26 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_CCMP_INTERFACE_H
-#define SOFTBUS_CCMP_INTERFACE_H
+#include "customized_security_protocol.h"
 
-#include <stdint.h>
+#include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-
-/* init the channel create manager protocol */
-int32_t CcmpInit(void);
-
-/* deinit the channel create manager protocol */
-void CcmpDeinit(void);
-
-#ifdef __cplusplus
-#if __cplusplus
+int32_t CustomizedSecurityProtocolInit(void)
+{
+    ALOGW("%s not implement.", __func__);
+    return SOFTBUS_NOT_IMPLEMENT;
 }
-#endif
-#endif
-#endif /* SOFTBUS_CCMP_INTERFACE_H */
+
+void CustomizedSecurityProtocolDeinit(void)
+{
+}

@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-#include "ccmp_interface.h"
+#ifndef SOFTBUS_CUSTOMIZED_SECURITY_PROTOCAL_H
+#define SOFTBUS_CUSTOMIZED_SECURITY_PROTOCAL_H
 
-#include "softbus_errcode.h"
-#include "softbus_log_old.h"
+#include <stdint.h>
 
-int32_t CcmpInit(void)
-{
-    ALOGW("%s not implement.", __func__);
-    return SOFTBUS_NOT_IMPLEMENT;
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+int32_t CustomizedSecurityProtocolInit(void);
+void CustomizedSecurityProtocolDeinit(void);
+
+#ifdef __cplusplus
+#if __cplusplus
 }
-
-void CcmpDeinit(void)
-{
-}
+#endif
+#endif
+#endif /* SOFTBUS_CUSTOMIZED_SECURITY_PROTOCAL_H */
