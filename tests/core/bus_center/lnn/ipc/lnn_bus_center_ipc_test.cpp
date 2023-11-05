@@ -149,7 +149,7 @@ HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001, TestSiz
     (void)strcpy_s(metaInfoValue.metaNodeId, NETWORK_ID_BUF_LEN, networkIdValue);
     int32_t ret = MetaNodeIpcNotifyJoinResult(addr, addrTypeLen, metaInfo, retCode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcNotifyJoinResult((void *)&addrValue, addrTypeLen, metaInfoValue, retCode);
+    ret = MetaNodeIpcNotifyJoinResult((void *)&addrValue, addrTypeLen, &metaInfoValue, retCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
