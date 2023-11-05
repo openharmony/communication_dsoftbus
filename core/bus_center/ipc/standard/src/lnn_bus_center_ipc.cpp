@@ -251,7 +251,7 @@ int32_t MetaNodeIpcServerJoin(const char *pkgName, int32_t callingPid, void *add
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
     int32_t ret;
     (void)addrTypeLen;
-    if (pkgName == nullptr) {
+    if (pkgName == nullptr || (customData->type <= PROXY_HEARTBEAT && addr == nullptr)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are nullptr!\n");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -488,11 +488,14 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
 int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, MetaBasicInfo *metaInfo,
     int32_t retCode)
 {
+    if (metaInfo == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<JoinLnnRequestInfo *>::iterator iter;
     for (iter = g_joinMetaNodeRequestInfo.begin(); iter != g_joinMetaNodeRequestInfo.end();) {
-        if ((connAddr != NULL) && !LnnIsSameConnectionAddr(connAddr, &(*iter)->addr, false)) {
+        if ((connAddr != nullptr) && !LnnIsSameConnectionAddr(connAddr, &(*iter)->addr, false)) {
             ++iter;
             continue;
         }
