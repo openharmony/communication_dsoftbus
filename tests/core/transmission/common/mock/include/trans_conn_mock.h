@@ -19,7 +19,6 @@
 #include <gmock/gmock.h>
 
 #include "softbus_conn_interface.h"
-#include "p2plink_interface.h"
 #include "lnn_node_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_network_manager.h"
@@ -29,19 +28,6 @@ class TransConnInterface {
 public:
     TransConnInterface() {};
     virtual ~TransConnInterface() {};
-
-    virtual int32_t P2pLinkGetRequestId(void) = 0;
-    virtual int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info) = 0;
-    virtual int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info) = 0;
-    virtual int32_t P2pLinkInit(void) = 0;
-
-    virtual void P2pLinkRegPeerDevStateChange(const P2pLinkPeerDevStateCb *cb) = 0;
-    virtual int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen) = 0;
-
-    virtual int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info) = 0;
-
-    virtual int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char *peerMac, int32_t macLen) = 0;
-    virtual int32_t P2pLinkQueryDevIsOnline(const char *peerMac) = 0;
 
     virtual int32_t ConnConnectDevice(const ConnectOption *option, uint32_t requestId,
         const ConnectResult *result) = 0;
@@ -70,17 +56,6 @@ class TransConnInterfaceMock : public TransConnInterface {
 public:
     TransConnInterfaceMock();
     ~TransConnInterfaceMock() override;
-
-    MOCK_METHOD0(P2pLinkGetRequestId, int32_t ());
-    MOCK_METHOD1(P2pLinkConnectDevice, int32_t (const P2pLinkConnectInfo *));
-    MOCK_METHOD1(P2pLinkDisconnectDevice, int32_t (const P2pLinkDisconnectInfo *));
-    MOCK_METHOD0(P2pLinkInit, int32_t ());
-    MOCK_METHOD1(P2pLinkRegPeerDevStateChange, void (const P2pLinkPeerDevStateCb *));
-    MOCK_METHOD2(P2pLinkGetLocalIp, int32_t (char *, int32_t));
-    MOCK_METHOD1(P2pLinkIsRoleConflict, int32_t (const RoleIsConflictInfo *));
-
-    MOCK_METHOD3(P2pLinkGetPeerMacByPeerIp, int32_t (const char *, char *, int32_t));
-    MOCK_METHOD1(P2pLinkQueryDevIsOnline, int32_t (const char *));
 
     MOCK_METHOD3(ConnConnectDevice, int32_t (const ConnectOption *, uint32_t, const ConnectResult *));
     MOCK_METHOD1(ConnDisconnectDevice, int32_t (uint32_t));
