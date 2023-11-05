@@ -39,7 +39,7 @@ typedef struct {
 } AesCipherKey;
 
 typedef struct {
-    uint8_t *key;
+    const uint8_t *key;
     uint32_t len;
 } EncryptKey;
 
@@ -59,6 +59,9 @@ int32_t SoftBusGenerateHmacHash(
 // Aes-cfb encrypt and decrypt by randomKey and rootKey
 int32_t SoftbusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *randomKey, EncryptKey *rootKey,
     int32_t encMode, AesOutputData *outData);
+
+int32_t SoftbusAesCfbEncrypt(
+    const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData);
 
 int32_t SoftbusAesGcmEncrypt(
     const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData);
