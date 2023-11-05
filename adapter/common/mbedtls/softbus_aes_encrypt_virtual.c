@@ -28,6 +28,12 @@ int32_t SoftbusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *r
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t SoftbusAesCfbEncrypt(
+    const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t SoftbusAesGcmEncrypt(
     const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData)
 {
