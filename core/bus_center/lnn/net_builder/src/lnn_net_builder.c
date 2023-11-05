@@ -558,7 +558,9 @@ static int32_t PostJoinRequestToMetaNode(MetaJoinRequestNode *metaJoinNode, cons
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PostJoin Request To MetaNode failed");
         rc = SOFTBUS_ERR;
         if (needReportFailure) {
-            MetaNodeNotifyJoinResult((ConnectionAddr *)addr, NULL, SOFTBUS_ERR);
+            MetaBasicInfo metaInfo;
+            (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
+            MetaNodeNotifyJoinResult((ConnectionAddr *)addr, &metaInfo, SOFTBUS_ERR);
         }
     }
     return rc;
@@ -1067,8 +1069,9 @@ static int32_t ProcessLeaveMetaNodeRequest(const void *para)
         LeaveMetaInfoToLedger(item, networkId);
         ListDelete(&item->node);
         SoftBusFree(item);
+        rc = SOFTBUS_OK;
     }
-    MetaNodeNotifyLeaveResult(networkId, SOFTBUS_OK);
+    MetaNodeNotifyLeaveResult(networkId, rc);
     SoftBusFree((void *)networkId);
     return rc;
 }
@@ -1508,11 +1511,17 @@ static int32_t ProcessOnAuthMetaVerifyPassed(const void *para)
         ret = LnnAddMetaInfo(newInfo);
         SoftBusFree(newInfo);
     } while (0);
+    MetaBasicInfo metaInfo;
+    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
     if (ret == SOFTBUS_OK) {
-        MetaNodeNotifyJoinResult(&metaNode->addr, info->networkId, SOFTBUS_OK);
+        if (strncpy_s(metaInfo.metaNodeId, NETWORK_ID_BUF_LEN, info->networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+            LLOGE("copy meta node id fail");
+            return SOFTBUS_ERR;
+        }
+        MetaNodeNotifyJoinResult(&metaNode->addr, &metaInfo, SOFTBUS_OK);
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessOnAuthMetaVerifyPassed error");
-        MetaNodeNotifyJoinResult(&metaNode->addr, NULL, SOFTBUS_ERR);
+        MetaNodeNotifyJoinResult(&metaNode->addr, &metaInfo, SOFTBUS_ERR);
         ListDelete(&metaNode->node);
         SoftBusFree(metaNode);
     }
@@ -1528,7 +1537,9 @@ static int32_t ProcessOnAuthMetaVerifyFailed(const void *para)
     }
     MetaReason *mataReason = (MetaReason *)para;
     MetaJoinRequestNode *metaNode = mataReason->metaJoinNode;
-    MetaNodeNotifyJoinResult(&metaNode->addr, NULL, mataReason->reason);
+    MetaBasicInfo metaInfo;
+    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
+    MetaNodeNotifyJoinResult(&metaNode->addr, &metaInfo, mataReason->reason);
     ListDelete(&metaNode->node);
     SoftBusFree(metaNode);
     SoftBusFree(mataReason);

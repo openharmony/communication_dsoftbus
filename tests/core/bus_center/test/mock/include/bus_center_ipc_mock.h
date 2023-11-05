@@ -32,7 +32,10 @@ public:
     virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort) = 0;
     virtual int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid,
         ConnectionAddr *addr, CustomData *customData) = 0;
+    virtual int32_t MetaNodeServerJoinExt(CustomData *customData) = 0;
     virtual int32_t MetaNodeServerLeave(const char *networkId) = 0;
+    virtual int32_t MetaNodeServerLeaveExt(const char *metaNodeId, MetaNodeType type) = 0;
+    virtual MetaNodeType FindMetaNodeType(const char *metaNodeId) = 0;
     virtual int32_t LnnServerLeave(const char *networkId, const char *pkgName) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual bool LnnIsLSANode(const NodeBasicInfo *info) = 0;
@@ -55,7 +58,7 @@ public:
     virtual int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
         const char *networkId, int32_t retCode) = 0;
     virtual int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
-        const char *networkId, int32_t retCode) = 0;
+        MetaBasicInfo *metaInfo, int32_t retCode) = 0;
     virtual int32_t ClientOnLeaveLNNResult(
         const char *pkgName, int32_t pid, const char *networkId, int32_t retCode) = 0;
     virtual int32_t ClientOnLeaveMetaNodeResult(
@@ -77,8 +80,11 @@ public:
 
     MOCK_METHOD3(LnnIsSameConnectionAddr, bool(const ConnectionAddr *, const ConnectionAddr *, bool));
     MOCK_METHOD4(MetaNodeServerJoin, int32_t(const char*, int32_t, ConnectionAddr *, CustomData *));
+    MOCK_METHOD1(MetaNodeServerJoinExt, int32_t(CustomData *));
     MOCK_METHOD2(LnnServerLeave, int32_t(const char *, const char *));
     MOCK_METHOD1(MetaNodeServerLeave, int32_t(const char *));
+    MOCK_METHOD2(MetaNodeServerLeaveExt, int32_t(const char *, MetaNodeType));
+    MOCK_METHOD1(FindMetaNodeType, MetaNodeType(const char *));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
     MOCK_METHOD1(LnnIsLSANode, bool(const NodeBasicInfo *));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
@@ -95,7 +101,7 @@ public:
     MOCK_METHOD2(LnnGetAllMetaNodeInfo, int32_t(MetaNodeInfo *, int32_t *));
     MOCK_METHOD4(LnnShiftLNNGear, int32_t(const char *, const char *, const char *, const GearMode *));
     MOCK_METHOD5(ClientOnJoinLNNResult, int32_t(PkgNameAndPidInfo *, void *, uint32_t, const char *, int32_t));
-    MOCK_METHOD5(ClientOnJoinMetaNodeResult, int32_t(PkgNameAndPidInfo *, void *, uint32_t, const char *, int32_t));
+    MOCK_METHOD5(ClientOnJoinMetaNodeResult, int32_t(PkgNameAndPidInfo *, void *, uint32_t, MetaBasicInfo *, int32_t));
     MOCK_METHOD4(ClientOnLeaveLNNResult, int32_t(const char *, int32_t, const char *, int32_t));
     MOCK_METHOD4(ClientOnLeaveMetaNodeResult, int32_t(const char *, int32_t, const char *, int32_t));
     MOCK_METHOD3(ClinetOnNodeOnlineStateChanged, int32_t(bool, void *, uint32_t));

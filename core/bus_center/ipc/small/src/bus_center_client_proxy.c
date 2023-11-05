@@ -99,12 +99,12 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
 }
 
 int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
-    const char *networkId, int32_t retCode)
+    MetaBasicInfo *metaInfo, int32_t retCode)
 {
     (void)pkgName;
     (void)addr;
     (void)addrTypeLen;
-    (void)networkId;
+    (void)metaInfo;
     (void)retCode;
     return SOFTBUS_OK;
 }
