@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_range.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -41,8 +40,6 @@
 #define MAC_BIT_THREE 3
 #define MAC_BIT_FOUR 4
 #define MAC_BIT_FIVE 5
-
-#define INVALID_RANGE (-1)
 
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
@@ -308,58 +305,3 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     return ret;
 }
 
-int32_t ConvertBleAddr(DeviceInfo *foundInfo)
-{
-    DISC_CHECK_AND_RETURN_RET_LOG(foundInfo != NULL, SOFTBUS_INVALID_PARAM, "invalid foundInfo");
-    // convert ble bin mac to string mac before report
-    char bleMac[BT_MAC_LEN] = {0};
-    if (ConvertBtMacToStr(bleMac, BT_MAC_LEN,
-        (uint8_t *)foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN) != SOFTBUS_OK) {
-        DLOGE("convert ble mac to string failed");
-        return SOFTBUS_ERR;
-    }
-    if (memset_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, 0, BT_MAC_LEN) != EOK) {
-        DLOGE("memset ble mac failed");
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, bleMac, BT_MAC_LEN) != EOK) {
-        DLOGE("memcopy ble mac failed");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
-{
-    DISC_CHECK_AND_RETURN_RET_LOG(foundInfo != NULL, SOFTBUS_INVALID_PARAM, "invalid foundInfo");
-    if (power == SOFTBUS_ILLEGAL_BLE_POWER) {
-        foundInfo->range = INVALID_RANGE;
-        return SOFTBUS_OK;
-    }
-
-    int32_t range = INVALID_RANGE;
-    SoftBusRangeParam param = {
-        .rssi = *(signed char *)(&rssi),
-        .power = power,
-        .identity = {0}
-    };
-    (void)memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN, foundInfo->addr->info.ble.bleMac, BT_MAC_LEN);
-    int ret = SoftBusBleRange(&param, &range);
-    if (ret != SOFTBUS_OK) {
-        DLOGE("range device failed, ret=%d", ret);
-        range = INVALID_RANGE;
-        // range failed should report device continually
-    }
-    foundInfo->range = range;
-    return SOFTBUS_OK;
-}
-
-bool CheckAdvFlagExist(const uint8_t *data, uint32_t len)
-{
-    DISC_CHECK_AND_RETURN_RET_LOG(data != NULL, SOFTBUS_INVALID_PARAM, "invalid data");
-    if (len < FLAG_BYTE_LEN + TL_LEN) {
-        DLOGE("adv len too short, len=%u", len);
-        return false;
-    }
-    return (data[0] == FLAG_BYTE_LEN && data[1] == FLAG_AD_TYPE);
-}
