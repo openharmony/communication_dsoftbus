@@ -191,15 +191,9 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
         SoftBusFree(node);
         return NULL;
     }
-    node->listener.onConnectEvent = NULL;
-    node->listener.onDataEvent = NULL;
-
-    node->socketIf = NULL;
-
     ListInit(&node->info.waitEventFds);
     node->info.waitEventFdsLen = 0;
     node->info.modeType = UNSET_MODE;
-    (void)memset_s(&node->info.listenerInfo, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     node->info.listenFd = -1;
     node->info.listenPort = -1;
     // set root object reference count 1
