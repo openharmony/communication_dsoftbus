@@ -57,6 +57,8 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
 bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value);
 
 bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target);
+
+char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * const string, uint32_t limit);
 #ifdef __cplusplus
 #if __cplusplus
 }
