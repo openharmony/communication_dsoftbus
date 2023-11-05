@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {
     ListNode node;
-    ConnectionAddr addr;
+    MetaNodeType type;
     OnJoinMetaNodeResult cb;
 } JoinMetaNodeCbListItem;
 
@@ -127,13 +127,12 @@ static JoinLNNCbListItem *FindJoinLNNCbItem(ConnectionAddr *addr, OnJoinLNNResul
     return NULL;
 }
 
-static JoinMetaNodeCbListItem *FindJoinMetaNodeCbItem(ConnectionAddr *addr, OnJoinMetaNodeResult cb)
+static JoinMetaNodeCbListItem *FindJoinMetaNodeCbItem(MetaNodeType tType, OnJoinMetaNodeResult cb)
 {
     JoinMetaNodeCbListItem *item = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.joinMetaNodeCbList, JoinMetaNodeCbListItem, node) {
-        if (IsSameConnectionAddr(&item->addr, addr) &&
-            (cb == NULL || cb == item->cb)) {
+        if (item->type == tType && (cb == NULL || cb == item->cb)) {
             return item;
         }
     }
@@ -156,7 +155,7 @@ static int32_t AddJoinLNNCbItem(ConnectionAddr *target, OnJoinLNNResult cb)
     return SOFTBUS_OK;
 }
 
-static int32_t AddJoinMetaNodeCbItem(ConnectionAddr *target, OnJoinMetaNodeResult cb)
+static int32_t AddJoinMetaNodeCbItem(MetaNodeType tType, OnJoinMetaNodeResult cb)
 {
     JoinMetaNodeCbListItem *item = NULL;
 
@@ -166,7 +165,7 @@ static int32_t AddJoinMetaNodeCbItem(ConnectionAddr *target, OnJoinMetaNodeResul
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&item->node);
-    item->addr = *target;
+    item->type = tType;
     item->cb = cb;
     ListAdd(&g_busCenterClient.joinMetaNodeCbList, &item->node);
     return SOFTBUS_OK;
@@ -496,7 +495,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
     return rc;
 }
 
-int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinLNNResult cb)
+int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb)
 {
     int32_t rc;
 
@@ -509,7 +508,7 @@ int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomDat
     }
 
     do {
-        if (FindJoinMetaNodeCbItem(target, cb) != NULL) {
+        if (FindJoinMetaNodeCbItem(customData->type, cb) != NULL) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : join request already exist");
             rc = SOFTBUS_ALREADY_EXISTED;
             break;
@@ -518,7 +517,7 @@ int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomDat
         if (rc != SOFTBUS_OK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : request join MetaNode");
         } else {
-            rc = AddJoinMetaNodeCbItem(target, cb);
+            rc = AddJoinMetaNodeCbItem(customData->type, cb);
         }
     } while (false);
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
@@ -833,14 +832,11 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-int32_t MetaNodeOnJoinResult(void *addr, const char *networkId, int32_t retCode)
+int32_t MetaNodeOnJoinResult(void *addr, void *metaInfo, int32_t retCode)
 {
     JoinMetaNodeCbListItem *item = NULL;
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
-
-    if (connAddr == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
+    MetaBasicInfo *metaBasicInfo = (MetaBasicInfo *)metaInfo;
     if (!g_busCenterClient.isInit) {
         return SOFTBUS_ERR;
     }
@@ -848,13 +844,13 @@ int32_t MetaNodeOnJoinResult(void *addr, const char *networkId, int32_t retCode)
     if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: lock join MetaNode cb list in join result");
     }
-    while ((item = FindJoinMetaNodeCbItem((ConnectionAddr *)addr, NULL)) != NULL) {
+    while ((item = FindJoinMetaNodeCbItem(metaBasicInfo->type, NULL)) != NULL) {
         ListDelete(&item->node);
         if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: unlock join MetaNode cb list in join result");
         }
         if (item->cb != NULL) {
-            item->cb(connAddr, networkId, retCode);
+            item->cb(connAddr, metaBasicInfo, retCode);
         }
         SoftBusFree(item);
         if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
