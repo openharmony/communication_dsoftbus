@@ -22,9 +22,9 @@
 extern "C" {
 #endif
 
-bool LaneReliablityExplore(LaneResource *resourceItem);
+bool LaneDetectReliablity(const LaneResource *resourceItem);
 
-int32_t LaneFloadExplore(LaneResource *resourceItem);
+int32_t LaneDetectFload(const LaneResource *resourceItem);
 
 #ifdef __cplusplus
 }

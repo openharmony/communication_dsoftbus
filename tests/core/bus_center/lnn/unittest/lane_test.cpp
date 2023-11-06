@@ -41,11 +41,11 @@ constexpr char REMOTE_WLAN_IP[] = "10.146.181.134";
 constexpr char LOCAL_NETWORK_ID[] = "444455556666abcdef";
 constexpr uint32_t FILE_DEFAULT_LINK_NUM = 4;
 constexpr uint32_t LANE_PREFERRED_LINK_NUM = 2;
-constexpr uint32_t LANE_LINK_NUM = 2;
-constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 2000;
-constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 2000;
-constexpr uint32_t DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT = 5000;
-constexpr uint32_t DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT = 30000;
+constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
+constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 10000;
+constexpr uint32_t DEFAULT_QOSINFO_MIN_LATENCY = 2500;
+constexpr uint32_t LOW_BW = 500 * 1024;
+constexpr uint32_t HIGH_BW = 160 * 1024 * 1024;
 
 static NodeInfo g_nodeInfo;
 constexpr int32_t DEFAULT_PID = 0;
@@ -268,9 +268,10 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
 }
+
 /*
 * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_001
-* @tc.desc: lane select fileTransLane by LNN
+* @tc.desc: lane select fileTransLane by qos
 * @tc.type: FUNC
 * @tc.require: I5FBFG
 */
@@ -278,17 +279,14 @@ HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_001, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
     (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    uint32_t listNum = 0;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_FILE;
     selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
-    selectParam.qosRequire.maxlatency = DEFAULT_QOSINFO_MAX_LATENCY;
-    selectParam.qosRequire.maxWaitTimeout = DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT;
-    selectParam.qosRequire.maxIdleTimeout = DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT;
+    selectParam.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    selectParam.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(listNum, FILE_DEFAULT_LINK_NUM);
 }
 
 /*
@@ -316,7 +314,7 @@ HWTEST_F(LaneTest, LANE_SELECT_Test_002, TestSize.Level1)
 
 /*
 * @tc.name: EXPECT_LANE_SELECT_BY_QOS_Test_002
-* @tc.desc: lane select by qos
+* @tc.desc: lane select BYTE TransLane by qos
 * @tc.type: FUNC
 * @tc.require: I5FBFG
 */
@@ -327,10 +325,6 @@ HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_002, TestSize.Level1)
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     selectParam.transType = LANE_T_BYTE;
-    selectParam.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW;
-    selectParam.qosRequire.maxlatency = DEFAULT_QOSINFO_MAX_LATENCY;
-    selectParam.qosRequire.maxWaitTimeout = DEFAULT_QOSINFO_MAX_WAIT_TIMEOUT;
-    selectParam.qosRequire.maxIdleTimeout = DEFAULT_QOSINFO_MAX_IDLE_TIMEOUT;
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &recommendList);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -404,14 +398,18 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == EOK);
     trans->transType = LANE_T_RAW_STREAM;
     trans->pid = DEFAULT_PID;
-    trans->expectedLink.linkTypeNum = LANE_LINK_NUM;
-    trans->expectedLink.linkType[0] = LANE_P2P;
-    trans->expectedLink.linkType[1] = LANE_WLAN_5G;
+    trans->qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + HIGH_BW;
+    trans->qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    trans->qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
     ILaneListener listener = {
         .OnLaneRequestSuccess = OnLaneRequestSuccess,
         .OnLaneRequestFail = OnLaneRequestFail,
         .OnLaneStateChange = OnLaneStateChange,
     };
+    ret = laneManager->lnnRequestLane(laneId, &request, &listener);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    trans->qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
     ret = laneManager->lnnRequestLane(laneId, &request, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(5);

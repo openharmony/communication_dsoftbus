@@ -68,8 +68,7 @@ public:
     virtual void ConnBleReturnConnection(ConnBleConnection **connection) = 0;
     virtual bool ConnBleDirectIsEnable(BleProtocolType protocol) = 0;
     virtual int32_t TransProxyCloseProxyChannel(int32_t channelId) = 0;
-    virtual int32_t SoftBusMutexLock(SoftBusMutex *mutex) = 0;
-    virtual LaneResource *LaneResourceIsExist(LaneResource * resourceItem) = 0;
+    virtual LaneResource *LaneResourceIsExist(LaneResource *resourceItem) = 0;
 
 };
 
@@ -107,7 +106,6 @@ public:
     MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));
     MOCK_METHOD1(ConnBleDirectIsEnable, bool (BleProtocolType));
     MOCK_METHOD1(TransProxyCloseProxyChannel, int32_t(int32_t));
-    MOCK_METHOD1(SoftBusMutexLock, int32_t (SoftBusMutex *));
     MOCK_METHOD1(LaneResourceIsExist, LaneResource* (LaneResource *));
     void SetDefaultResult(void);
 };

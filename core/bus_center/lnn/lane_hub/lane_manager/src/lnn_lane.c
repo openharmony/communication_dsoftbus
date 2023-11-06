@@ -48,13 +48,6 @@
 #define LANE_SCORING_INTERVAL 300 /* 5min */
 #define CHANNEL_RATING_DELAY (5 * 60 * 1000)
 
-static LnnLaneManager g_LaneManager = {
-    .lnnQueryLaneResource = LnnQueryLaneResource,
-    .applyLaneId = ApplyLaneId,
-    .lnnRequestLane = LnnRequestLane,
-    .lnnFreeLane = LnnFreeLane,
-};
-
 typedef struct {
     ListNode node;
     ILaneIdStateListener listener;
@@ -146,11 +139,6 @@ static bool CheckListener(const ILaneIdStateListener *listener)
     }
     Unlock();
     return true;
-}
-
-LnnLaneManager* GetLaneManager(void)
-{
-    return &g_LaneManager;
 }
 
 void RegisterLaneIdListener(const ILaneIdStateListener *listener)
@@ -283,6 +271,34 @@ uint32_t ApplyLaneId(LaneType type)
 void FreeLaneId(uint32_t laneId)
 {
     return DestroyLaneId(laneId);
+}
+
+static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *request,
+    const ILaneListener *listener)
+{
+    if (RequestInfoCheck(request, listener) == false) {
+        return SOFTBUS_ERR;
+    }
+    if (g_laneObject[request->type] == NULL) {
+        return SOFTBUS_ERR;
+    }
+    int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
+    if (result != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static LnnLaneManager g_LaneManager = {
+    .lnnQueryLaneResource = LnnQueryLaneResource,
+    .applyLaneId = ApplyLaneId,
+    .lnnRequestLane = LnnRequestLaneByQos,
+    .lnnFreeLane = LnnFreeLane,
+};
+
+LnnLaneManager* GetLaneManager(void)
+{
+    return &g_LaneManager;
 }
 
 int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,

@@ -38,11 +38,14 @@ public:
     virtual uint32_t GenerateLaneProfileId(const LaneGenerateParam *param) = 0;
     virtual void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId) = 0;
     virtual int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile) = 0;
-    virtual int32_t DelLaneResourceItem(LaneResource *resourceItem) = 0;
-    virtual int32_t DelLinkInfoItem(uint32_t LaneId) = 0;
-    virtual int32_t FindLaneLinkInfoByLaneId(uint32_t LaneId, LaneLinkInfo *linkInfoitem) = 0;
-    virtual int32_t AddItemOfLinkInfoAndLaneResoourse(LaneLinkInfo *linkInfoTemp, LaneResource *resourceItem) = 0;
-    virtual int32_t ConvertToLaneResource(LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo) = 0;
+    virtual int32_t AddLaneResourceItem(const LaneResource *resourceItem) = 0;
+    virtual int32_t DelLaneResourceItem(const LaneResource *resourceItem) = 0;
+    virtual int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem) = 0;
+    virtual int32_t DelLinkInfoItem(uint32_t laneId) = 0;
+    virtual int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem) = 0;
+    virtual int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo) = 0;
+    virtual int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId,
+        bool *isDelayDestroy) = 0;
     virtual void FreeLaneId(uint32_t laneId) = 0;
 };
 
@@ -57,11 +60,14 @@ public:
     MOCK_METHOD1(GenerateLaneProfileId, uint32_t (const LaneGenerateParam *));
     MOCK_METHOD2(UnbindLaneIdFromProfile, void (uint32_t, uint32_t));
     MOCK_METHOD2(BindLaneIdToProfile, int32_t (uint32_t, LaneProfile *));
-    MOCK_METHOD1(DelLaneResourceItem, int32_t (LaneResource *resourceItem));
-    MOCK_METHOD1(DelLinkInfoItem, int32_t (uint32_t LaneId));
-    MOCK_METHOD2(FindLaneLinkInfoByLaneId, int32_t (uint32_t LaneId, LaneLinkInfo *linkInfoitem));
-    MOCK_METHOD2(AddItemOfLinkInfoAndLaneResoourse, int32_t (LaneLinkInfo *linkInfoTemp, LaneResource *resourceItem));
-    MOCK_METHOD2(ConvertToLaneResource, int32_t (LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo));
+    MOCK_METHOD1(AddLaneResourceItem, int32_t (const LaneResource *resourceItem));
+    MOCK_METHOD1(DelLaneResourceItem, int32_t (const LaneResource *resourceItem));
+    MOCK_METHOD1(AddLinkInfoItem, int32_t (const LaneLinkInfo *linkInfoItem));
+    MOCK_METHOD1(DelLinkInfoItem, int32_t (uint32_t laneId));
+    MOCK_METHOD2(FindLaneLinkInfoByLaneId, int32_t (uint32_t laneId, LaneLinkInfo *linkInfoitem));
+    MOCK_METHOD2(ConvertToLaneResource, int32_t (const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo));
+    MOCK_METHOD3(DelLaneResourceItemWithDelayDestroy, int32_t (LaneResource *resourceItem, uint32_t laneId,
+        bool *isDelayDestroy));
     MOCK_METHOD1(FreeLaneId, void (uint32_t laneId));
 };
 } // namespace OHOS

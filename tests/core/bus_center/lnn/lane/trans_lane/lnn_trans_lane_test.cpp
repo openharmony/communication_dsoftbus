@@ -144,7 +144,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     LaneRequestOption request;
     request.type = LANE_TYPE_TRANS;
     EXPECT_CALL(laneMock, SelectExpectLanesByQos).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = transObj->AllocLane(laneId, (const LaneRequestOption *)&request, nullptr);
+    int32_t ret = transObj->allocLaneByQos(laneId, (const LaneRequestOption *)&request, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->Deinit();

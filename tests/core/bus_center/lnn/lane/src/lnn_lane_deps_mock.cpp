@@ -199,10 +199,6 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
 }
-int32_t SoftBusMutexLock(SoftBusMutex *mutex)
-{
-    return GetLaneDepsInterface()->SoftBusMutexLock(mutex);
-}
 LaneResource *LaneResourceIsExist(LaneResource *resourceItem)
 {
     return GetLaneDepsInterface()->LaneResourceIsExist(resourceItem);

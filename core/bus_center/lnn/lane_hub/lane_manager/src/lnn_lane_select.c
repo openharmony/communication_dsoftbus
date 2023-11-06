@@ -105,7 +105,7 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
         return false;
     }
     LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
-    if ((linkAttr == NULL) || (linkAttr->available != true)) {
+    if ((linkAttr == NULL) || (!linkAttr->available)) {
         return false;
     }
     if (linkAttr->IsEnable(networkId) != true) {
@@ -123,23 +123,6 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
     return true;
 }
 
-static bool GetValidLaneAndScore(const char *networkId, LaneLinkType linkType, uint16_t *score)
-{
-    if (!IsLinkTypeValid(linkType)) {
-        return false;
-    }
-    LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
-    if ((linkAttr == NULL) || (linkAttr->available != true)) {
-        return false;
-    }
-    if (linkAttr->IsEnable(networkId) != true) {
-        return false;
-    }
-    uint32_t expectedBw = 0;
-    score[linkType] = linkAttr->GetLinkScore(networkId, expectedBw);
-    return true;
-}
-
 static char *GetLinkTypeStrng(LaneLinkType preferredLink)
 {
     switch (preferredLink) {
@@ -149,6 +132,8 @@ static char *GetLinkTypeStrng(LaneLinkType preferredLink)
             return "BLE";
         case LANE_P2P:
             return "P2P";
+        case LANE_HML:
+            return "HML";
         case LANE_WLAN_2P4G:
             return "WLAN 2.4G";
         case LANE_WLAN_5G:
@@ -285,43 +270,49 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     return SOFTBUS_OK;
 }
 
-static int32_t LanePrioritization(LanePreferredLinkList *recommendList, uint16_t *laneScore)
+static int32_t LanePrioritization(LanePreferredLinkList *recommendList, const uint16_t *laneScore)
 {
     (void)recommendList;
     (void)laneScore;
     return SOFTBUS_OK;
 }
 
+static bool GetLaneScore(const char *networkId, LaneLinkType linkType, uint16_t *score)
+{
+    if (!IsLinkTypeValid(linkType)) {
+        return false;
+    }
+    LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
+    if ((linkAttr == NULL) || (!linkAttr->available)) {
+        return false;
+    }
+    uint32_t expectedBw = 0;
+    score[linkType] = linkAttr->GetLinkScore(networkId, expectedBw);
+    return true;
+}
+
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneSelect params invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device not online, cancel selectLane, networkId:%s",
-            AnonymizesNetworkID(networkId));
-        return SOFTBUS_ERR;//设备未上线错误码
+        return SOFTBUS_ERR;
     }
     LanePreferredLinkList laneLinkList = {0};
-    if (LaneDecisionModels(request, &laneLinkList) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;//根据qos信息无法选到链路资源错误码
+    if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
+        request->qosRequire.minLaneLatency == 0) {
+        SelectByDefaultLink(networkId, request, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+    } else {
+        if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
     }
     recommendList->linkTypeNum = 0;
-    bool isStream = (request->transType == LANE_T_RAW_STREAM ||
-                    request->transType == LANE_T_COMMON_VIDEO ||
-                    request->transType == LANE_T_COMMON_VOICE);
     uint16_t laneScore[LANE_LINK_TYPE_BUTT] = {0};
     for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
-        bool isBt = (laneLinkList.linkType[i] == LANE_BR || laneLinkList.linkType[i] == LANE_BLE ||
-                    laneLinkList.linkType[i] == LANE_BLE_DIRECT || laneLinkList.linkType[i] == LANE_BLE_REUSE ||
-                    laneLinkList.linkType[i] == LANE_COC || laneLinkList.linkType[i] == LANE_COC_DIRECT);
-        if (isStream && isBt) {
-            continue;
-        }
-
-        if (!GetValidLaneAndScore(networkId, laneLinkList.linkType[i], laneScore)) {
+        if (!GetLaneScore(networkId, laneLinkList.linkType[i], laneScore)) {
             continue;
         }
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
