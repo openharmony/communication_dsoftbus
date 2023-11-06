@@ -24,7 +24,7 @@
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
 #include "bus_center_manager.h"
-#include "ccmp_interface.h"
+#include "customized_security_protocol.h"
 #include "lnn_decision_db.h"
 #include "lnn_ohos_account.h"
 #include "softbus_adapter_mem.h"
@@ -407,9 +407,9 @@ int32_t AuthInit(void)
         SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth device init failed");
         return ret;
     }
-    ret = CcmpInit();
+    ret = CustomizedSecurityProtocolInit();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
-        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "ccmp init failed, ret: %d", ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "customized protocol init failed, ret: %d", ret);
         return ret;
     }
     AuthLoadDeviceKey();
@@ -419,7 +419,7 @@ int32_t AuthInit(void)
 void AuthDeinit(void)
 {
     AuthDeviceDeinit();
-    CcmpDeinit();
+    CustomizedSecurityProtocolDeinit();
     AuthMetaDeinit();
 }
 

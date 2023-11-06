@@ -94,15 +94,24 @@ if (defined(ohos_lite)) {
         ]
       }
 
-      deps = [ "$hilog_lite_deps_path" ]
+      deps = [
+        "$hilog_lite_deps_path",
+        "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
+      ]
 
       if (dsoftbus_feature_encrypt == 0) {
-        sources +=
-            [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
+        sources += [
+          "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
+          "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
+          "$softbus_adapter_common/mbedtls/softbus_rsa_encrypt_virtual.c",
+        ]
         deps += [ "//third_party/mbedtls" ]
       } else if (dsoftbus_feature_encrypt == 1) {
-        sources +=
-            [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
+        sources += [
+          "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
+          "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
+          "$softbus_adapter_common/openssl/softbus_rsa_encrypt.c",
+        ]
         deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
@@ -135,17 +144,24 @@ if (defined(ohos_lite)) {
       ]
       deps = [
         "$hilog_lite_deps_path",
+        "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
         "//base/startup/init/interfaces/innerkits:libbegetutil",
         "//third_party/bounds_checking_function:libsec_shared",
       ]
 
       if (dsoftbus_feature_encrypt == 0) {
-        sources +=
-            [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
+        sources += [
+          "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
+          "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
+          "$softbus_adapter_common/mbedtls/softbus_rsa_encrypt_virtual.c",
+        ]
         deps += [ "//third_party/mbedtls" ]
       } else if (dsoftbus_feature_encrypt == 1) {
-        sources +=
-            [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
+        sources += [
+          "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
+          "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
+          "$softbus_adapter_common/openssl/softbus_rsa_encrypt.c",
+        ]
         deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
@@ -214,7 +230,7 @@ if (defined(ohos_lite)) {
       ]
     }
 
-    external_deps = []
+    external_deps = [ "huks:libhukssdk" ]
     if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
       include_dirs += [ "//base/msdp/algorithm/ble_range/include" ]
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
@@ -224,10 +240,18 @@ if (defined(ohos_lite)) {
     }
 
     if (dsoftbus_feature_encrypt == 0) {
-      sources += [ "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c" ]
+      sources += [
+        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
+        "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
+        "$softbus_adapter_common/mbedtls/softbus_rsa_encrypt_virtual.c",
+      ]
       public_deps += [ "//third_party/mbedtls" ]
     } else if (dsoftbus_feature_encrypt == 1) {
-      sources += [ "$softbus_adapter_common/openssl/softbus_adapter_crypto.c" ]
+      sources += [
+        "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
+        "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
+        "$softbus_adapter_common/openssl/softbus_rsa_encrypt.c",
+      ]
       public_deps += [ "//third_party/openssl:libcrypto_shared" ]
     }
     public_configs = [ ":config_adapter_common" ]

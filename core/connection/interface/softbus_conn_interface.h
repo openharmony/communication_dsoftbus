@@ -62,7 +62,7 @@ typedef enum {
 } ConnectType;
 
 #define CONN_INVALID_LISTENER_MODULE_ID    0xffff
-#define CONN_DYNAMIC_LISTENER_MODULE_COUNT 5
+#define CONN_DYNAMIC_LISTENER_MODULE_COUNT 32
 #define DEVID_BUFF_LEN                     65
 
 #define BT_LINK_TYPE_BR  1

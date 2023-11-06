@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef P2PLINK_LNN_SYNC_H
-#define P2PLINK_LNN_SYNC_H
+#include "customized_security_protocol.h"
 
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
+#include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
-void P2pLinkLnnSync(void);
-
-#ifdef __cplusplus
-#if __cplusplus
+int32_t CustomizedSecurityProtocolInit(void)
+{
+    ALOGW("%s not implement.", __func__);
+    return SOFTBUS_NOT_IMPLEMENT;
 }
-#endif /* __cplusplus */
-#endif /* __cplusplus */
-#endif /* P2PLINK_LNN_SYNC_H */
+
+void CustomizedSecurityProtocolDeinit(void)
+{
+}

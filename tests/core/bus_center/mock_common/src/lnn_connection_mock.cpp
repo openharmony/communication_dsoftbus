@@ -101,11 +101,6 @@ int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
 {
     return GetConnInterface()->ConnUpdateConnection(connectionId, option);
 }
-
-int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
-{
-    return GetConnInterface()->P2pLinkQueryDevIsOnline(peerMac);
-}
 }
 
 int32_t LnnConnectInterfaceMock::ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)

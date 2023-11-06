@@ -38,51 +38,6 @@ static TransConnInterfaceMock *GetConnectInterface()
 }
 
 extern "C" {
-int32_t P2pLinkGetRequestId(void)
-{
-    return GetConnectInterface()->P2pLinkGetRequestId();
-}
-
-int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
-{
-    return GetConnectInterface()->P2pLinkConnectDevice(info);
-}
-
-int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
-{
-    return GetConnectInterface()->P2pLinkDisconnectDevice(info);
-}
-
-int32_t P2pLinkInit(void)
-{
-    return GetConnectInterface()->P2pLinkInit();
-}
-
-void P2pLinkRegPeerDevStateChange(const P2pLinkPeerDevStateCb *cb)
-{
-    GetConnectInterface()->P2pLinkRegPeerDevStateChange(cb);
-}
-
-int32_t P2pLinkGetLocalIp(char *localIp, int32_t localIpLen)
-{
-    return GetConnectInterface()->P2pLinkGetLocalIp(localIp, localIpLen);
-}
-
-int32_t P2pLinkIsRoleConflict(const RoleIsConflictInfo *info)
-{
-    return GetConnectInterface()->P2pLinkIsRoleConflict(info);
-}
-
-int32_t P2pLinkGetPeerMacByPeerIp(const char *peerIp, char *peerMac, int32_t macLen)
-{
-    return GetConnectInterface()->P2pLinkGetPeerMacByPeerIp(peerIp, peerMac, macLen);
-}
-
-int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
-{
-    return GetConnectInterface()->P2pLinkQueryDevIsOnline(peerMac);
-}
-
 int32_t ConnConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     return GetConnectInterface()->ConnConnectDevice(option, requestId, result);
@@ -152,12 +107,12 @@ void NipConnectDevice(uint32_t connId, const char *mac)
 {
     return GetConnectInterface()->NipConnectDevice(connId, mac);
 }
- 
+
 void NipDisconnectDevice(uint32_t connId)
 {
     return GetConnectInterface()->NipDisconnectDevice(connId);
 }
- 
+
 ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode)
 {
     return GetConnectInterface()->LnnGetProtocolListenerModule(protocol, mode);
