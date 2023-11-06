@@ -270,6 +270,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         }
         CLOGI(LOG_LABEL "use currentProcessor");
         command->processor = self->currentProcessor;
+        processor = self->currentProcessor;
     } else {
         command->processor = processor;
         self->currentProcessor = processor;
