@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -192,6 +192,25 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
+        cJSON_Delete(item);
+        return false;
+    }
+    return true;
+}
+
+bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const char * const *strings, int32_t count)
+{
+    COMM_CHECK_AND_RETURN_RET_LOG(json != NULL && string != NULL && strings != NULL, false, "param is null");
+    COMM_CHECK_AND_RETURN_RET_LOG(count > 0, false, "count <= 0");
+
+    cJSON *item = cJSON_CreateStringArray(strings, count);
+    if (item == NULL) {
+        MLOGE("Cannot create cJSON string array object [%s]", string);
+        return false;
+    }
+
+    if (!cJSON_AddItemToObject(json, string, item)) {
+        MLOGE("Cannot add string array object to json [%s]", string);
         cJSON_Delete(item);
         return false;
     }
