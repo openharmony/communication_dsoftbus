@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "disc_ble_constant.h"
 #include "disc_ble_utils.h"
 #include "disc_manager.h"
-#include "disc_approach_ble.h"
 #include "discovery_service.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
@@ -61,8 +60,6 @@
 
 // Defination of boardcast
 #define BLE_VERSION 4
-#define APPROACH_VERSION 1
-#define APPROACH_BUSINESS 0x1
 #define DISTRIBUTE_BUSINESS 0x5
 #define BYTE_MASK 0xFF
 #define DEVICE_NAME_MAX_LEN 15
@@ -169,17 +166,11 @@ static DiscBleListener g_bleListener = {
     .scanListenerId = -1
 };
 
-static const DiscBleScanFilter g_bleScanFilters[MAX_BLE_FILTER_SIZE] = {
-    { BLE_VERSION, DISTRIBUTE_BUSINESS },
-    { APPROACH_VERSION, APPROACH_BUSINESS }
-};
-
 //g_conncernCapabilityMask support capability of this ble discovery
 static uint32_t g_concernCapabilityMask =
     1 << CASTPLUS_CAPABILITY_BITMAP |
     1 << DVKIT_CAPABILITY_BITMAP |
-    1 << OSD_CAPABILITY_BITMAP |
-    1 << APPROACH_CAPABILITY_BITMAP;
+    1 << OSD_CAPABILITY_BITMAP;
 
 static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {
     -1,
@@ -188,7 +179,7 @@ static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {
     -1,
     OSD_CAPABILITY_BITMAP,
     -1,
-    APPROACH_CAPABILITY_BITMAP,
+    -1,
     -1,
     -1,
     -1,
@@ -317,47 +308,30 @@ static bool CheckScanner(void)
     return scanCapBit != 0;
 }
 
-static inline bool IsDistributedBusiness(const uint8_t *data)
+static int32_t ScanFilter(const SoftBusBleScanResult *scanResultData)
 {
-    return data[POS_BUSINESS + ADV_HEAD_LEN_NO_FLAG] == DISTRIBUTE_BUSINESS;
-}
+    uint32_t advLen = scanResultData->advLen;
+    uint8_t *advData = scanResultData->advData;
+    DISC_CHECK_AND_RETURN_RET_LOG(scanResultData->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, SOFTBUS_ERR,
+        "dataStatus[%u] is invalid", scanResultData->dataStatus);
+    DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (POS_TLV + ADV_HEAD_LEN), SOFTBUS_ERR,
+        "advLen[%u] is too short, less than adv header length", advLen);
 
-static inline bool IsApproachBusiness(const uint8_t *data)
-{
-    return data[POS_BUSINESS + ADV_HEAD_LEN_NO_FLAG] == APPROACH_BUSINESS;
-}
+    uint32_t broadcastAdvLen = advData[POS_PACKET_LENGTH];
+    DISC_CHECK_AND_RETURN_RET_LOG(broadcastAdvLen >= (ADV_HEAD_LEN + RSP_HEAD_LEN - 1), SOFTBUS_ERR,
+        "broadcastAdvLen[%u] is too short, less than adv header length", broadcastAdvLen);
+    DISC_CHECK_AND_RETURN_RET_LOG(advLen > (POS_PACKET_LENGTH + broadcastAdvLen + 1), SOFTBUS_ERR,
+        "advLen[%u] is too short, less than adv packet length", advLen);
+    uint32_t broadcastRspLen = advData[POS_PACKET_LENGTH + broadcastAdvLen + 1];
+    DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (POS_PACKET_LENGTH + broadcastAdvLen + 1 + broadcastRspLen + 1),
+        SOFTBUS_ERR, "advLen[%u] is too short, less than adv+rsp packet length", advLen);
 
-static int32_t ScanFilter(const uint8_t *advData, uint32_t advLen)
-{
-    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID_NO_FLAG] == (uint8_t)(BLE_UUID & BYTE_MASK), SOFTBUS_ERR,
-        "uuid low byte[%hhu] is invalid", advData[POS_UUID_NO_FLAG]);
-    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID_NO_FLAG + 1] ==
-        (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK),
-        SOFTBUS_ERR, "uuid high byte[%hhu] is invalid", advData[POS_UUID_NO_FLAG + 1]);
-
-    uint32_t broadcastAdvLen = advData[0];
-    if (IsApproachBusiness(advData)) {
-        DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (POS_TLV_APPROACH + ADV_HEAD_LEN_NO_FLAG), SOFTBUS_ERR,
-            "advLen[%u] is too short, less than adv header length", advLen);
-        DISC_CHECK_AND_RETURN_RET_LOG(broadcastAdvLen >= ADV_HEAD_LEN_NO_FLAG, SOFTBUS_ERR,
-            "broadcastAdvLen[%u] is too short, less than adv header length", broadcastAdvLen);
-        DISC_CHECK_AND_RETURN_RET_LOG(advLen > broadcastAdvLen, SOFTBUS_ERR,
-            "advLen[%u] is too short, less than adv packet length", advLen);
-        DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_VERSION + ADV_HEAD_LEN_NO_FLAG] == APPROACH_VERSION, SOFTBUS_ERR,
-            "adv version[%hhu] is invalid", advData[POS_VERSION + ADV_HEAD_LEN_NO_FLAG]);
-    } else {
-        DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (POS_TLV + ADV_HEAD_LEN_NO_FLAG), SOFTBUS_ERR,
-            "advLen[%u] is too short, less than adv header length", advLen);
-        DISC_CHECK_AND_RETURN_RET_LOG(broadcastAdvLen >= (ADV_HEAD_LEN_NO_FLAG + RSP_HEAD_LEN - 1), SOFTBUS_ERR,
-            "broadcastAdvLen[%u] is too short, less than adv header length", broadcastAdvLen);
-        DISC_CHECK_AND_RETURN_RET_LOG(advLen > (broadcastAdvLen + 1), SOFTBUS_ERR,
-            "advLen[%u] is too short, less than adv packet length", advLen);
-        uint32_t broadcastRspLen = advData[broadcastAdvLen + 1];
-        DISC_CHECK_AND_RETURN_RET_LOG(advLen >= (broadcastAdvLen + 1 + broadcastRspLen + 1),
-            SOFTBUS_ERR, "advLen[%u] is too short, less than adv+rsp packet length", advLen);
-        DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_VERSION + ADV_HEAD_LEN_NO_FLAG] == BLE_VERSION, SOFTBUS_ERR,
-            "adv version[%hhu] is invalid", advData[POS_VERSION + ADV_HEAD_LEN_NO_FLAG]);
-    }
+    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID] == (uint8_t)(BLE_UUID & BYTE_MASK), SOFTBUS_ERR,
+        "uuid low byte[%hhu] is invalid", advData[POS_UUID]);
+    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_UUID + 1] == (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK),
+        SOFTBUS_ERR, "uuid high byte[%hhu] is invalid", advData[POS_UUID + 1]);
+    DISC_CHECK_AND_RETURN_RET_LOG(advData[POS_VERSION + ADV_HEAD_LEN] == BLE_VERSION, SOFTBUS_ERR,
+        "adv version[%hhu] is invalid", advData[POS_VERSION + ADV_HEAD_LEN]);
 
     if (!CheckScanner()) {
         DLOGI("no need to scan");
@@ -420,6 +394,55 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
         return false;
     }
     return false;
+}
+
+static int32_t ConvertBleAddr(DeviceInfo *foundInfo)
+{
+    // convert ble bin mac to string mac before report
+    char bleMac[BT_MAC_LEN] = {0};
+    if (ConvertBtMacToStr(bleMac, BT_MAC_LEN,
+        (uint8_t *)foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN) != SOFTBUS_OK) {
+        DLOGE("convert ble mac to string failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (memset_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, 0, BT_MAC_LEN) != EOK) {
+        DLOGE("memset failed");
+        return SOFTBUS_MEM_ERR;
+    }
+
+    if (memcpy_s(foundInfo->addr[0].info.ble.bleMac, BT_MAC_LEN, bleMac, BT_MAC_LEN) != EOK) {
+        DLOGE("memcpy failed");
+        return SOFTBUS_MEM_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
+{
+    int32_t range = -1;
+    if (power != SOFTBUS_ILLEGAL_BLE_POWER) {
+        SoftBusRangeParam param = {
+            .rssi = *(signed char *)(&rssi),
+            .power = power,
+            .identity = {0}
+        };
+
+        if (memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN, foundInfo->devId, DISC_MAX_DEVICE_ID_LEN) != EOK) {
+            DLOGE("memcpy failed");
+            return SOFTBUS_MEM_ERR;
+        }
+
+        int ret = SoftBusBleRange(&param, &range);
+        if (ret != SOFTBUS_OK) {
+            DLOGE("range device failed, ret=%d", ret);
+            range = -1;
+            // range failed should report device continually
+        }
+    }
+    foundInfo->range = range;
+    return SOFTBUS_OK;
 }
 
 static void ProcessDisNonPacket(const uint8_t *advData, uint32_t advLen, char rssi,
@@ -494,32 +517,9 @@ static void ProcessDistributePacket(const SoftBusBleScanResult *scanResultData)
     }
 }
 
-static bool IgnoreUnConcernedData(SoftBusBleScanResult *scanResult)
+static inline bool IsDistributedBusiness(const uint8_t *data)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(scanResult->advData != NULL, false, "scan result advData is null");
-    uint8_t *advData = scanResult->advData;
-    uint32_t curPos = 0;
-    while (curPos < scanResult->advLen) {
-        uint32_t len = advData[curPos++] & BYTE_MASK;
-        if (len == 0) {
-            break;
-        }
-        uint32_t dataLen = len - 1;
-        uint8_t fieldType = advData[curPos++] & BYTE_MASK;
-        switch (fieldType) {
-            case AD_TYPE:
-                // fall-through
-            case RSP_TYPE:
-                scanResult->advData += curPos - TL_LEN - TL_LEN;
-                scanResult->advLen -= curPos - TL_LEN - TL_LEN;
-                return true;
-            default:
-                // ignore other type
-                break;
-        }
-        curPos += dataLen;
-    }
-    return false;
+    return data[POS_BUSINESS + ADV_HEAD_LEN] == DISTRIBUTE_BUSINESS;
 }
 
 static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *scanResultData)
@@ -527,41 +527,12 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
     (void)listenerId;
     DISC_CHECK_AND_RETURN_LOG(scanResultData != NULL, "scan result is null");
     DISC_CHECK_AND_RETURN_LOG(scanResultData->advData != NULL, "scan result advData is null");
-    DISC_CHECK_AND_RETURN_LOG(scanResultData->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, "dataStatus[%u] is invalid",
-        scanResultData->dataStatus);
+    DISC_CHECK_AND_RETURN_LOG(ScanFilter(scanResultData) == SOFTBUS_OK, "scan filter failed");
 
     uint8_t *advData = scanResultData->advData;
-    uint32_t advLen = scanResultData->advLen;
-    // check adv flag and skip it
-    if (CheckAdvFlagExist(advData, advLen)) {
-        advLen -= (FLAG_BYTE_LEN + TL_LEN);
-        advData += (FLAG_BYTE_LEN + TL_LEN);
-    }
-    DISC_CHECK_AND_RETURN_LOG(advLen > (ADV_HEAD_LEN_NO_FLAG + POS_BUSINESS),
-        "advLen[%u] is too short, less than adv business header length", advLen);
-
     if (IsDistributedBusiness(advData)) {
-        if (ScanFilter(advData, advLen) != SOFTBUS_OK) {
-            DLOGE("scan filter failed");
-            return;
-        }
-        SignalingMsgPrint("ble rcv", scanResultData->advData, scanResultData->advLen, SOFTBUS_LOG_DISC);
+        SignalingMsgPrint("ble rcv", advData, scanResultData->advLen, SOFTBUS_LOG_DISC);
         ProcessDistributePacket(scanResultData);
-        return;
-    }
-
-    SoftBusBleScanResult scanResult = *scanResultData;
-    if (!IgnoreUnConcernedData(&scanResult)) {
-        DLOGE("ignore unconcerned data failed");
-        return;
-    }
-    if (IsApproachBusiness(scanResult.advData)) {
-        DLOGI("Process packet for approach business");
-        if (ScanFilter(scanResult.advData, scanResult.advLen) != SOFTBUS_OK) {
-            DLOGE("scan filter failed");
-            return;
-        }
-        ProcessApproachPacket(&scanResult, g_discBleInnerCb);
     } else {
         DLOGI("ignore other business");
     }
@@ -1600,45 +1571,41 @@ static int32_t DiscBleLooperInit(void)
     return SOFTBUS_OK;
 }
 
-static void DiscFreeBleScanFilter(SoftBusBleScanFilter *filters)
+static void DiscFreeBleScanFilter(SoftBusBleScanFilter *filter)
 {
-    DISC_CHECK_AND_RETURN_LOG(filters != NULL, "filters is NULL");
-    for (int32_t i = 0; i < MAX_BLE_FILTER_SIZE; i++) {
-        SoftBusFree(filters[i].serviceData);
-        SoftBusFree(filters[i].serviceDataMask);
+    if (filter) {
+        SoftBusFree(filter->serviceData);
+        SoftBusFree(filter->serviceDataMask);
+        SoftBusFree(filter);
     }
-    SoftBusFree(filters);
 }
 
 static void DiscBleSetScanFilter(int32_t listenerId)
 {
-    SoftBusBleScanFilter *filters = (SoftBusBleScanFilter *)SoftBusCalloc(sizeof(SoftBusBleScanFilter) *
-        MAX_BLE_FILTER_SIZE);
-    DISC_CHECK_AND_RETURN_LOG(filters != NULL, "calloc disc ble scan filters failed");
+    SoftBusBleScanFilter *filter = (SoftBusBleScanFilter *)SoftBusCalloc(sizeof(SoftBusBleScanFilter));
+    DISC_CHECK_AND_RETURN_LOG(filter != NULL, "malloc filter failed");
 
-    for (int32_t i = 0; i < MAX_BLE_FILTER_SIZE; i++) {
-        filters[i].serviceData = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
-        filters[i].serviceDataMask = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
-        if (filters[i].serviceData == NULL || filters[i].serviceDataMask == NULL) {
-            DLOGE("malloc filters data failed");
-            DiscFreeBleScanFilter(filters);
-            return;
-        }
-
-        filters[i].serviceDataLength = BLE_SCAN_FILTER_LEN;
-        filters[i].serviceData[0] = BLE_UUID & BYTE_MASK;
-        filters[i].serviceData[1] = (BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK;
-        filters[i].serviceData[UUID_LEN + POS_VERSION] = g_bleScanFilters[i].version;
-        filters[i].serviceData[UUID_LEN + POS_BUSINESS] = g_bleScanFilters[i].business;
-        filters[i].serviceDataMask[0] = BYTE_MASK;
-        filters[i].serviceDataMask[1] = BYTE_MASK;
-        filters[i].serviceDataMask[UUID_LEN + POS_VERSION] = BYTE_MASK;
-        filters[i].serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;
+    filter->serviceData = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
+    filter->serviceDataMask = (uint8_t *)SoftBusCalloc(BLE_SCAN_FILTER_LEN);
+    if (filter->serviceData == NULL || filter->serviceDataMask == NULL) {
+        DLOGE("malloc filter data failed");
+        DiscFreeBleScanFilter(filter);
+        return;
     }
 
-    if (SoftBusSetScanFilter(listenerId, filters, MAX_BLE_FILTER_SIZE) != SOFTBUS_OK) {
-        DLOGE("set scan filters failed");
-        DiscFreeBleScanFilter(filters);
+    filter->serviceDataLength = BLE_SCAN_FILTER_LEN;
+    filter->serviceData[0] = BLE_UUID & BYTE_MASK;
+    filter->serviceData[1] = (BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK;
+    filter->serviceData[UUID_LEN + POS_VERSION] = BLE_VERSION;
+    filter->serviceData[UUID_LEN + POS_BUSINESS] = DISTRIBUTE_BUSINESS;
+    filter->serviceDataMask[0] = BYTE_MASK;
+    filter->serviceDataMask[1] = BYTE_MASK;
+    filter->serviceDataMask[UUID_LEN + POS_VERSION] = BYTE_MASK;
+    filter->serviceDataMask[UUID_LEN + POS_BUSINESS] = BYTE_MASK;
+
+    if (SoftBusSetScanFilter(listenerId, filter, 1) != SOFTBUS_OK) {
+        DLOGE("set scan filter failed");
+        DiscFreeBleScanFilter(filter);
     }
 }
 
