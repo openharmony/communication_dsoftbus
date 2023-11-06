@@ -313,7 +313,7 @@ static int32_t OpensslAesGcmEncrypt(
         HILOG_ERROR(SOFTBUS_HILOG_ID, "GcmOpensslEvpInit failed.");
         return SOFTBUS_ERR;
     }
-    if (EVP_DecryptInit_ex(ctx, NULL, NULL, cipherKey->key, cipherKey->iv) != 1) {
+    if (EVP_EncryptInit_ex(ctx, NULL, NULL, cipherKey->key, cipherKey->iv) != 1) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_EncryptInit_ex failed.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_ERR;
