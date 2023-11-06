@@ -1643,17 +1643,17 @@ static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option)
     return status;
 }
 
-void OnServerAccepted(uint32_t connectionId)
+static void OnServerAccepted(uint32_t connectionId)
 {
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_SERVER_ACCEPTED, connectionId, 0, NULL, 0);
 }
 
-void OnConnected(uint32_t connectionId)
+static void OnConnected(uint32_t connectionId)
 {
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_SUCCESS, connectionId, 0, NULL, 0);
 }
 
-void OnConnectFailed(uint32_t connectionId, int32_t error)
+static void OnConnectFailed(uint32_t connectionId, int32_t error)
 {
     CLOGW("receive ble client connect failed notify, connId=%u, err=%d", connectionId, error);
     BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
@@ -1663,7 +1663,7 @@ void OnConnectFailed(uint32_t connectionId, int32_t error)
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_FAIL, 0, 0, ctx, 0);
 }
 
-void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
+static void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
 {
     ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)SoftBusCalloc(sizeof(ConnBleDataReceivedContext));
     if (ctx == NULL) {
@@ -1685,7 +1685,7 @@ void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *d
     }
 }
 
-void OnConnectionClosed(uint32_t connectionId, int32_t status)
+static void OnConnectionClosed(uint32_t connectionId, int32_t status)
 {
     BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
     CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "on connect failed failed, calloc error context failed");
@@ -1694,12 +1694,12 @@ void OnConnectionClosed(uint32_t connectionId, int32_t status)
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_CLOSED, 0, 0, ctx, 0);
 }
 
-void OnConnectionResume(uint32_t connectionId)
+static void OnConnectionResume(uint32_t connectionId)
 {
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_RESUME, connectionId, 0, NULL, 0);
 }
 
-void onPostBytesFinished(
+static void onPostBytesFinished(
     uint32_t connectionId, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, int32_t error)
 {
     CLOGD("ble post bytes finished, connId=%u, pid=%u, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), err=%d",

@@ -24,6 +24,8 @@ conn_manager_inc = ble_connection_inc + br_connection_inc + tcp_connection_inc +
                    wifi_direct_connection_inc
 conn_manager_external_deps =
     wifi_direct_connection_external_deps + ble_connection_external_deps
+conn_manager_common_deps = wifi_direct_connection_common_deps
+
 conn_manager_src +=
     [ "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c" ]
 conn_manager_inc += [

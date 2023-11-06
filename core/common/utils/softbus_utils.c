@@ -81,6 +81,9 @@ SoftBusList *CreateSoftBusList(void)
 
 void DestroySoftBusList(SoftBusList *list)
 {
+    if (list == NULL) {
+        return;
+    }
     ListDelInit(&list->list);
     SoftBusMutexDestroy(&list->lock);
     SoftBusFree(list);

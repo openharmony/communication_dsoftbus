@@ -22,8 +22,6 @@
 #include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "trans_link_listener.h"
-#include "p2plink_type.h"
-#include "p2plink_interface.h"
 #include "trans_channel_manager.h"
 
 using namespace testing::ext;

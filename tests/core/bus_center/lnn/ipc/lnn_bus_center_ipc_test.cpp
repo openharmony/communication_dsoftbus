@@ -117,6 +117,7 @@ HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Leve
     char *networkId = nullptr;
     char pkgNameValue[DEFAULT_LEN] = "test";
     char networkIdValue[DEFAULT_LEN] = "12345";
+    LnnInitMetaNodeExtLedger();
     int32_t ret = MetaNodeIpcServerLeave(pkgName, 0, networkIdValue);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = MetaNodeIpcServerLeave(pkgNameValue, 0, networkId);

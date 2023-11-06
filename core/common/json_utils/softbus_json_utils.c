@@ -16,6 +16,8 @@
 #include "softbus_json_utils.h"
 
 #include <securec.h>
+
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
@@ -281,4 +283,33 @@ bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
         return false;
     }
     return true;
+}
+
+char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * const string, uint32_t limit)
+{
+    if (json == NULL || string == NULL) {
+        return NULL;
+    }
+
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
+    if (item == NULL || !cJSON_IsString(item)) {
+        MLOGE("Cannot find or invalid [%s]", string);
+        return NULL;
+    }
+    uint32_t length = strlen(item->valuestring);
+    if (length > limit) {
+        MLOGE("key [%s] length [%u] is large than limit [%u]", string, length, limit);
+        return NULL;
+    }
+    char *value = SoftBusCalloc(length + 1);
+    if (value == NULL) {
+        MLOGE("malloc failed, length [%u]", length);
+        return NULL;
+    }
+    if (strcpy_s(value, length + 1, item->valuestring) != EOK) {
+        MLOGE("copy failed, length [%u]", length);
+        SoftBusFree(value);
+        return NULL;
+    }
+    return value;
 }
