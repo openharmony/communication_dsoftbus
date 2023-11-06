@@ -26,7 +26,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log.h"
-#include "softbus_adapter_mem.h"
 
 #define UINT_TO_STR_MAX_LEN 11
 
@@ -72,6 +71,20 @@ static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     profile->phyChannel = linkInfo->linkInfo.p2p.channel;
     return SOFTBUS_OK;
 }
+
+static int32_t HmlInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_HML;
+    if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
+        &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    profile->linkType = LANE_HML;
+    profile->bw = linkInfo->linkInfo.p2p.bw;
+    profile->phyChannel = linkInfo->linkInfo.p2p.channel;
+    return SOFTBUS_OK;
+}
+
 static int32_t P2pReuseInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_P2P_REUSE;
@@ -146,6 +159,7 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = BrInfoProc,
     [LANE_BLE] = BleInfoProc,
     [LANE_P2P] = P2pInfoProc,
+    [LANE_HML] = HmlInfoProc,
     [LANE_WLAN_2P4G] = Wlan2P4GInfoProc,
     [LANE_WLAN_5G] = Wlan5GInfoProc,
     [LANE_P2P_REUSE] = P2pReuseInfoProc,

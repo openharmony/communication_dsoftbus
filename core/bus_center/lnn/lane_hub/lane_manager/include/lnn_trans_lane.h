@@ -22,6 +22,14 @@
 extern "C" {
 #endif
 
+typedef enum {
+    MSG_TYPE_LANE_TRIGGER_LINK = 0,
+    MSG_TYPE_LANE_LINK_SUCCESS,
+    MSG_TYPE_LANE_LINK_FAIL,
+    MSG_TYPE_LANE_LINK_EXCEPTION,
+    MSG_TYPE_DELAY_DESTROY_LINK,
+} LaneMsgType;
+
 LaneInterface *TransLaneGetInstance(void);
 int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt);
 int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,

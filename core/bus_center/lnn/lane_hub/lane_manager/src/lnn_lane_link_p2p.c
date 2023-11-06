@@ -50,6 +50,7 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     uint32_t laneLinkReqId;
     int32_t pid;
+    LaneLinkType laneType;
     LaneLinkCb cb;
 } LaneLinkRequestInfo;
 
@@ -410,8 +411,12 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
         LNN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "copy networkId failed");
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        wifiDirectInfo->connectType =
-            item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_P2P : WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+        if (item->p2pInfo.p2pOnly) {
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_P2P;
+        } else {
+            wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
+                WIFI_DIRECT_CONNECT_TYPE_HML : WIFI_DIRECT_CONNECT_TYPE_P2P);
+        }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
         return SOFTBUS_OK;
@@ -550,7 +555,11 @@ static void OnWifiDirectConnectSuccess(int32_t p2pRequestId, const struct WifiDi
     }
     LLOGI("requestId=%d p2pGenLinkId=%d", p2pRequestId, link->linkId);
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    linkInfo.type = LANE_P2P;
+    if (link->connectType == WIFI_DIRECT_CONNECT_TYPE_HML) {
+        linkInfo.type = LANE_HML;
+    } else {
+        linkInfo.type = LANE_P2P;
+    }
     linkInfo.linkInfo.p2p.bw = LANE_BW_RANDOM;
     P2pConnInfo *p2p = (P2pConnInfo *)&(linkInfo.linkInfo.p2p.connInfo);
     if (strcpy_s(p2p->localIp, IP_LEN, link->localIp) != EOK) {
@@ -640,6 +649,7 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
     item->p2pInfo.p2pOnly = request->p2pOnly;
     item->p2pInfo.p2pRequestId = p2pRequestId;
     item->proxyChannelInfo.requestId = channelRequestId;
+    item->laneRequestInfo.laneType = request->linkType;
     if (LinkLock() != 0) {
         SoftBusFree(item);
         LLOGE("lock fail, add conn request fail");

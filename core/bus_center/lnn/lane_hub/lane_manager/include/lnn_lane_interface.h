@@ -40,6 +40,7 @@ typedef enum {
     LANE_BLE_REUSE,
     LANE_COC,
     LANE_COC_DIRECT,
+    LANE_HML,
     LANE_LINK_TYPE_BUTT,
 } LaneLinkType;
 
@@ -141,9 +142,8 @@ typedef struct {
 
 typedef struct {
     uint32_t minBW;
-    uint32_t maxlatency;
-    uint32_t maxWaitTimeout;
-    uint32_t maxIdleTimeout;
+    uint32_t maxLaneLatency;
+    uint32_t minLaneLatency;
 } QosInfo;
 
 typedef struct {
@@ -177,6 +177,7 @@ typedef struct {
 } LnnLaneManager;
 
 LnnLaneManager* GetLaneManager(void);
+
 QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo);
 uint32_t ApplyLaneId(LaneType type);
 int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);

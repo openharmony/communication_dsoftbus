@@ -17,13 +17,13 @@
 
 #include "softbus_errcode.h"
 
-bool LaneReliablityExplore(LaneResource *resourceItem)
+bool LaneDetectReliablity(const LaneResource *resourceItem)
 {
     (void)resourceItem;
     return true;
 }
 
-int32_t LaneFloadExplore(LaneResource *resourceItem)
+int32_t LaneDetectFload(const LaneResource *resourceItem)
 {
     (void)resourceItem;
     return SOFTBUS_OK;

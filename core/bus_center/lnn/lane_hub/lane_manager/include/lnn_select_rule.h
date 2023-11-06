@@ -26,6 +26,13 @@ extern "C" {
 
 #define UNACCEPT_SCORE 20
 
+typedef enum {
+    HIGH_BAND_WIDTH = 0,
+    MIDDLE_BAND_WIDTH,
+    LOW_BAND_WIDTH,
+    BW_TYPE_BUTT,
+} BandWidthType;
+
 typedef struct {
     bool available;
     bool (*IsEnable)(const char *networkId);
@@ -36,7 +43,8 @@ int32_t GetWlanLinkedFrequency(void);
 
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
 
-int32_t LaneDecisionModels(const LaneSelectParam *request, LanePreferredLinkList *recommendList);
+int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList);
 
 #ifdef __cplusplus
 }

@@ -25,14 +25,6 @@
 extern "C" {
 #endif
 
-typedef enum {
-    MSG_TYPE_LANE_TRIGGER_LINK = 0,
-    MSG_TYPE_LANE_LINK_SUCCESS,
-    MSG_TYPE_LANE_LINK_FAIL,
-    MSG_TYPE_LANE_LINK_EXCEPTION,
-    MSG_TYPE_DELAY_DESTROY_LINK,
-} LaneMsgType;
-
 int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile);
 int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueSize);
 void *LnnReadData(const Map *map, uint32_t key);

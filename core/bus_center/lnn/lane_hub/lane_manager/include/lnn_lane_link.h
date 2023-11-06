@@ -82,7 +82,7 @@ typedef struct {
         BleLinkInfo ble;
         BleDirectInfo bleDirect;
     } linkInfo;
-    uint32_t LaneId;
+    uint32_t laneId;
 } LaneLinkInfo;
 
 typedef struct {
@@ -120,13 +120,12 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 
-int32_t AddLaneResourceItem(LaneResource *resourceItem);
-int32_t DelLaneResourceItem(LaneResource *resourceItem);
-int32_t AddLinkInfoItem(LaneLinkInfo *linkInfoItem);
-int32_t DelLinkInfoItem(uint32_t LaneId);
-int32_t FindLaneLinkInfoByLaneId(uint32_t LaneId, LaneLinkInfo *linkInfoitem);
-int32_t AddItemOfLinkInfoAndLaneResoourse(LaneLinkInfo *linkInfoTemp, LaneResource *resourceItem);
-int32_t ConvertToLaneResource(LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
+int32_t AddLaneResourceItem(const LaneResource *resourceItem);
+int32_t DelLaneResourceItem(const LaneResource *resourceItem);
+int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem);
+int32_t DelLinkInfoItem(uint32_t laneId);
+int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem);
+int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
 int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy);
 
 #ifdef __cplusplus

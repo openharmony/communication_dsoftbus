@@ -28,6 +28,7 @@ typedef struct {
     void (*Init)(const ILaneIdStateListener *listener);
     void (*Deinit)(void);
     int32_t (*AllocLane)(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
+    int32_t (*allocLaneByQos)(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
     int32_t (*FreeLane)(uint32_t laneId);
 } LaneInterface;
 
