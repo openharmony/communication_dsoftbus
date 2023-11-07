@@ -47,14 +47,11 @@ static DiscInnerCallback *g_discCoapInnerCb = NULL;
 static char *g_capabilityData = NULL;
 static int32_t NstackxLocalDevInfoDump(int fd);
 
-static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo)
+static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
 {
-    settings->businessData = (char *)SoftBusCalloc(sizeof(deviceInfo->custData));
-    DISC_CHECK_AND_RETURN_RET_LOG(settings->businessData, SOFTBUS_MALLOC_ERR,
-        "malloc disc response settings business data failed");
-    settings->length = strlen(deviceInfo->custData);
-    // use default bType for unicast
-    settings->businessType = NSTACKX_BUSINESS_TYPE_NULL;
+    settings->businessData = NULL;
+    settings->length = 0;
+    settings->businessType = bType;
     char localNetifName[NET_IF_NAME_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, localNetifName, sizeof(localNetifName));
     if (ret != SOFTBUS_OK) {
@@ -63,10 +60,6 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     }
     if (strcpy_s(settings->localNetworkName, sizeof(settings->localNetworkName), localNetifName) != EOK) {
         DLOGE("copy disc response settings network name failed");
-        goto EXIT;
-    }
-    if (strcpy_s(settings->businessData, sizeof(settings->businessData), deviceInfo->custData) != EOK) {
-        DLOGE("copy disc response settings business data failed");
         goto EXIT;
     }
     if (strcpy_s(settings->remoteIp, sizeof(settings->remoteIp), deviceInfo->addr[0].info.ip.ip) != EOK) {
@@ -80,13 +73,13 @@ EXIT:
     return SOFTBUS_STRCPY_ERR;
 }
 
-int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo)
+int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
 {
     DISC_CHECK_AND_RETURN_RET_LOG(deviceInfo, SOFTBUS_INVALID_PARAM, "DiscRsp devInfo is null");
     NSTACKX_ResponseSettings *settings = (NSTACKX_ResponseSettings *)SoftBusCalloc(sizeof(NSTACKX_ResponseSettings));
     DISC_CHECK_AND_RETURN_RET_LOG(settings, SOFTBUS_MALLOC_ERR, "malloc disc response settings failed");
 
-    if (FillRspSettings(settings, deviceInfo) != SOFTBUS_OK) {
+    if (FillRspSettings(settings, deviceInfo, bType) != SOFTBUS_OK) {
         DLOGE("fill nstackx response settings failed");
         SoftBusFree(settings);
         return SOFTBUS_ERR;
@@ -110,7 +103,9 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
     DiscCoapParseWifiIpAddr(reserveInfo, device);
     DiscCoapParseHwAccountHash(reserveInfo, device);
     (void)DiscCoapParseServiceData(reserveInfo, device);
-    DiscCoapParseExtendServiceData(reserveInfo, device);
+    if (DiscCoapParseExtendServiceData(reserveInfo, device) != SOFTBUS_OK) {
+        DLOGW("parse extend service data failed");
+    }
     cJSON_Delete(reserveInfo);
     return SOFTBUS_OK;
 }
@@ -150,20 +145,11 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
 
 static void BroadcastRsp(uint8_t bType, DeviceInfo *deviceInfo)
 {
-    switch (bType) {
-        case NSTACKX_BUSINESS_TYPE_NULL:
-            DLOGI("receive a discovery broadcast from %s, do not need report", deviceInfo->devName);
-            break;
-        case NSTACKX_BUSINESS_TYPE_SOFTBUS:
-            DiscVerifySoftbus(deviceInfo);
-            break;
-        default:
-            DLOGI("receive an unexpect type(%u) broadcast from %s, just send response", bType, deviceInfo->devName);
-            if (DiscCoapSendRsp(deviceInfo) != SOFTBUS_OK) {
-                DLOGE("send response failed");
-            }
-            break;
+    if (bType == NSTACKX_BUSINESS_TYPE_NULL) {
+        DLOGI("receive a discovery broadcast from %s, do not need report", deviceInfo->devName);
+        return;
     }
+    DiscVerifyBroadcastType(deviceInfo, bType);
 }
 
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
@@ -195,6 +181,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             nstackxDeviceInfo->mode == PUBLISH_MODE_PROACTIVE) {
             DLOGI("Disc device found, devName=%s, localNetIfName=%s", discDeviceInfo->devName,
                 nstackxDeviceInfo->networkName);
+            DiscCheckBtype(discDeviceInfo, nstackxDeviceInfo->businessType);
             if (g_discCoapInnerCb != NULL && g_discCoapInnerCb->OnDeviceFound != NULL) {
                 g_discCoapInnerCb->OnDeviceFound(discDeviceInfo, &addtions);
             }
@@ -320,10 +307,18 @@ static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, cons
         DLOGE("get discovery freq config failed");
         return SOFTBUS_ERR;
     }
-    discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
     discSet->advertiseCount = discFreq & DISC_FREQ_COUNT_MASK;
     discSet->advertiseDuration = (discFreq >> DISC_FREQ_DURATION_BIT) * DISC_USECOND;
+    DiscFillBtype(option->capability, option->allCap, discSet);
     return SOFTBUS_OK;
+}
+
+static void FreeDiscSet(NSTACKX_DiscoverySettings *discSet)
+{
+    if (discSet != NULL) {
+        SoftBusFree(discSet->businessData);
+        SoftBusFree(discSet);
+    }
 }
 
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
@@ -334,20 +329,21 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         "invalid freq: %d", option->freq);
 
-    NSTACKX_DiscoverySettings discSet;
-    if (memset_s(&discSet, sizeof(NSTACKX_DiscoverySettings), 0, sizeof(NSTACKX_DiscoverySettings)) != EOK) {
-        DLOGE("memset_s failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (ConvertDiscoverySettings(&discSet, option) != SOFTBUS_OK) {
+    NSTACKX_DiscoverySettings *discSet = (NSTACKX_DiscoverySettings *)SoftBusCalloc(sizeof(NSTACKX_DiscoverySettings));
+    DISC_CHECK_AND_RETURN_RET_LOG(discSet != NULL, SOFTBUS_MEM_ERR, "malloc disc settings failed");
+
+    if (ConvertDiscoverySettings(discSet, option) != SOFTBUS_OK) {
         DLOGE("set discovery settings failed");
+        FreeDiscSet(discSet);
         return SOFTBUS_ERR;
     }
-    if (NSTACKX_StartDeviceDiscovery(&discSet) != SOFTBUS_OK) {
+    if (NSTACKX_StartDeviceDiscovery(discSet) != SOFTBUS_OK) {
         DLOGE("start device discovery failed");
+        FreeDiscSet(discSet);
         return (option->mode == ACTIVE_PUBLISH) ? SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL :
             SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
     }
+    FreeDiscSet(discSet);
     return SOFTBUS_OK;
 }
 

@@ -42,6 +42,8 @@ typedef struct {
 typedef struct {
     int32_t freq;
     DiscCoapMode mode;
+    uint32_t capability;
+    uint32_t allCap;
 } DiscCoapOption;
 
 int32_t DiscNstackxInit(void);
@@ -56,7 +58,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option);
 int32_t DiscCoapStopDiscovery(void);
 void DiscCoapUpdateLocalIp(LinkStatus status);
 void DiscCoapUpdateDevName(void);
-int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo);
+int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType);
 
 #ifdef __cplusplus
 #if __cplusplus
