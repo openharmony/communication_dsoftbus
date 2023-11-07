@@ -392,7 +392,7 @@ static int32_t P2pCreateGroup(int32_t frequency, bool wideBandSupported)
     return SOFTBUS_OK;
 }
 
-static int32_t P2pConnectGroup(char *groupConfigString)
+static int32_t P2pConnectGroup(char *groupConfigString, bool isLegacyGo)
 {
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX];
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
@@ -418,10 +418,16 @@ static int32_t P2pConnectGroup(char *groupConfigString)
     char *end = NULL;
     connectConfig.frequency = (int32_t)strtol(configs[P2P_GROUP_CONFIG_INDEX_FREQ], &end, DECIMAL_BASE);
 
-    connectConfig.dhcpMode = CONNECT_GO_NODHCP;
-    if (configsSize == P2P_GROUP_CONFIG_INDEX_MAX && !strcmp(configs[P2P_GROUP_CONFIG_INDEX_MODE], "1")) {
-        connectConfig.dhcpMode = CONNECT_AP_DHCP;
+    if (isLegacyGo) {
+        connectConfig.dhcpMode = CONNECT_AP_NODHCP;
+    } else {
+        connectConfig.dhcpMode = CONNECT_GO_NODHCP;
+        if (configsSize == P2P_GROUP_CONFIG_INDEX_MAX && !strcmp(configs[P2P_GROUP_CONFIG_INDEX_MODE], "1")) {
+            connectConfig.dhcpMode = CONNECT_AP_DHCP;
+        }
     }
+    CLOGI(LOG_LABEL "dhcpMode=%d", connectConfig.dhcpMode);
+
     ret = Hid2dConnect(&connectConfig);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR, LOG_LABEL "connect group failed");
 

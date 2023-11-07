@@ -77,7 +77,7 @@ static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectPara
     CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
     SetLinkAttr(params);
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
-    int32_t ret = adapter->connectGroup(params->groupConfig);
+    int32_t ret = adapter->connectGroup(params->groupConfig, false);
     CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "p2p connect group failed");
 
     GetP2pEntity()->changeState(P2P_ENTITY_STATE_GROUP_CONNECTING);
