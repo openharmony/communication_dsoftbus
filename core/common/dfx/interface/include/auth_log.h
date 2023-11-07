@@ -23,13 +23,21 @@ extern "C" {
 #endif
 typedef enum {
     AUTH_INIT,
+    AUTH_HICHAIN,
+    AUTH_CONN,
+    AUTH_FSM,
+    AUTH_KEY,
     AUTH_TEST,
-} TransLogLabel;
+} AuthLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel AUTH_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {AUTH_INIT,  0xd005720,      "AuthInit"},
-    { AUTH_TEST, DOMAIN_ID_TEST, "AuthTest"},
+    {AUTH_INIT,     0xd005720,      "AuthInit"   },
+    { AUTH_HICHAIN, 0xd005721,      "AuthHiChain"},
+    { AUTH_CONN,    0xd005722,      "AuthConn"   },
+    { AUTH_FSM,     0xd005723,      "AuthFsm"    },
+    { AUTH_KEY,     0xd005724,      "AuthKey"    },
+    { AUTH_TEST,    DOMAIN_ID_TEST, "AuthTest"   },
 };
 
 #define AUTH_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, AUTH_LABELS[label], ##__VA_ARGS__)

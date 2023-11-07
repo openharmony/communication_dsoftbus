@@ -15,13 +15,12 @@
 
 #include "anonymizer.h"
 
-#include <stdbool.h>
 #include <regex.h>
 #include <securec.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "comm_log.h"
-#include "softbus_error_code.h"
 
 #define REG_OK              0
 #define MATCH_SIZE          2
@@ -33,7 +32,26 @@
 #define REG_KEY_PATTERN     "[0-9A-Za-z+-//]{43}="
 
 #define WILDCARD "*"
-const static char *ANONYMIZE_WILDCARD = WILDCARD;
+static const char *ANONYMIZE_WILDCARD = WILDCARD;
+
+static void AnonymizedString(char **anonymizedStr, size_t length, const char *fmt, ...)
+{
+    va_list args;
+    if (memset_s(&args, sizeof(va_list), 0, sizeof(va_list)) != EOK) {
+        COMM_LOGE(COMM_DFX, "memset_s args fail");
+        return;
+    }
+    *anonymizedStr = (char *)malloc(length);
+    if (*anonymizedStr == NULL) {
+        COMM_LOGE(COMM_DFX, "malloc str fail");
+        return;
+    }
+    va_start(args, fmt);
+    if (vsprintf_s(*anonymizedStr, length, fmt, args) < 0) {
+        COMM_LOGE(COMM_DFX, "vsprintf_s *anonymizedStr fail");
+    }
+    va_end(args);
+}
 
 // Replace the first half with ANONYMIZE_WILDCARD and keep the second half.
 void Anonymize(const char *plainStr, char **anonymizedStr)
@@ -42,113 +60,157 @@ void Anonymize(const char *plainStr, char **anonymizedStr)
         return;
     }
     if (plainStr == NULL) {
-        *anonymizedStr = "NULL";
+        const char *retStr = "NULL";
+        AnonymizedString(anonymizedStr, strlen(retStr) + 1, "%s", retStr);
         return;
     }
     size_t len = strlen(plainStr);
     if (len < 2) {
-        *anonymizedStr = WILDCARD;
+        const char *retStr = WILDCARD;
+        AnonymizedString(anonymizedStr, strlen(retStr) + 1, "%s", retStr);
         return;
     }
     size_t wildcardLen = strlen(ANONYMIZE_WILDCARD);
-    size_t plaintextLen = (len / 2);
+    size_t plaintextLen = len / 2;
+    size_t plaintextOffset = len - plaintextLen;
     size_t outStrLen = wildcardLen + plaintextLen;
-    *anonymizedStr = (char *)malloc(outStrLen);
-    if (anonymizedStr == NULL) {
-        COMM_LOGD(COMM_DFX, "malloc anonymizedStr fail");
-        return;
-    }
-    (void)sprintf_s(*anonymizedStr, outStrLen, "%s%s", ANONYMIZE_WILDCARD, plainStr + plaintextLen);
+    AnonymizedString(anonymizedStr, outStrLen + 1, "%s%s", ANONYMIZE_WILDCARD, (plainStr + plaintextOffset));
 }
 
 #ifndef __LITEOS_M__
-static int32_t AnonymizeStringProcess(char *str, size_t len)
+static bool CopyString(char **dest, const char *src, size_t length)
 {
-    size_t wildcardLen = strlen(ANONYMIZE_WILDCARD);
-    size_t plaintextLen = (len / 2);
-    if (memset_s(str + plaintextLen, len - plaintextLen, '*', wildcardLen) != EOK) {
-        COMM_LOGD(COMM_DFX, "memset wildcard fail");
-        return SOFTBUS_MEM_ERR;
+    *dest = (char *)malloc(length + 1);
+    if (dest == NULL) {
+        COMM_LOGE(COMM_DFX, "malloc dest fail");
+        return false;
     }
-    uint32_t offset = plaintextLen + wildcardLen;
-    if (strncpy_s(str + offset, len - offset, str + len - plaintextLen, plaintextLen) != EOK) {
-        COMM_LOGD(COMM_DFX, "strncpy plaintext fail");
-        return SOFTBUS_MEM_ERR;
+    if (strncpy_s(*dest, length + 1, src, length) != EOK) {
+        COMM_LOGE(COMM_DFX, "strncpy_s dest fail");
+        return false;
     }
-    return SOFTBUS_OK;
+    return true;
 }
 
-static int32_t AnonymizeRegexp(const char *plainStr, const char *pattern, char **anonymizedStr)
+static bool InitAnonymizedStr(char **anonymizedStr)
 {
-    if (plainStr == NULL || pattern == NULL || anonymizedStr == NULL) {
-        COMM_LOGD(COMM_DFX, "plainStr or pattern or anonymizedStr is null");
-        return SOFTBUS_INVALID_PARAM;
+    *anonymizedStr = (char *)malloc(LOG_LINE_MAX_LENGTH + 1);
+    if (*anonymizedStr == NULL) {
+        COMM_LOGE(COMM_DFX, "malloc *anonymizedStr fail");
+        return false;
     }
-    size_t inLen = strlen(plainStr);
-    char *str = (char *)malloc(inLen + 1);
-    if (str == NULL) {
-        COMM_LOGD(COMM_DFX, "malloc str fail");
-        return SOFTBUS_MEM_ERR;
+    if (memset_s(*anonymizedStr, LOG_LINE_MAX_LENGTH + 1, 0, LOG_LINE_MAX_LENGTH + 1) != EOK) {
+        COMM_LOGE(COMM_DFX, "memset_s *anonymizedStr fail");
+        return false;
     }
-    if (strcpy_s(str, inLen + 1, plainStr) != EOK) {
-        COMM_LOGD(COMM_DFX, "strcpy str fail");
+    return true;
+}
+
+static bool ConcatString(char **dest, char *src)
+{
+    size_t len = strlen(*dest) + strlen(src);
+    if (sprintf_s(*dest, len + 1, "%s%s", *dest, src) < 0) {
+        COMM_LOGE(COMM_DFX, "sprintf_s *dest fail");
+        return false;
+    }
+    return true;
+}
+
+static void AnonymizeRegexp(const char *plainStr, const char *pattern, char **anonymizedStr)
+{
+    if ((plainStr == NULL) || (pattern == NULL) || (anonymizedStr == NULL)) {
+        COMM_LOGW(COMM_DFX, "plainStr or pattern or anonymizedStr is null");
+        return;
+    }
+    char *str;
+    if (!CopyString(&str, plainStr, strlen(plainStr))) {
+        COMM_LOGE(COMM_DFX, "copy str fail");
         free(str);
-        return SOFTBUS_MEM_ERR;
+        return;
     }
+
     regex_t reg;
     if (regcomp(&reg, pattern, REG_EXTENDED) != REG_OK) {
-        COMM_LOGD(COMM_DFX, "compile reg pattern fail");
+        COMM_LOGE(COMM_DFX, "compile reg pattern fail");
         free(str);
         regfree(&reg);
-        return SOFTBUS_ERR;
+        return;
     }
     regmatch_t match[MATCH_SIZE];
     if (memset_s(match, sizeof(regmatch_t) * MATCH_SIZE, 0, sizeof(regmatch_t) * MATCH_SIZE) != EOK) {
-        COMM_LOGD(COMM_DFX, "memset match fail");
+        COMM_LOGE(COMM_DFX, "memset match fail");
         free(str);
         regfree(&reg);
-        return SOFTBUS_MEM_ERR;
+        return;
     }
-    char *outExec = str;
+    if (!InitAnonymizedStr(anonymizedStr)) {
+        COMM_LOGE(COMM_DFX, "init anonymizedStr fail");
+        free(str);
+        regfree(&reg);
+        return;
+    }
+    char *pStr = str;
     do {
-        if (regexec(&reg, outExec, MATCH_SIZE, match, 0) != REG_OK) {
+        if (regexec(&reg, pStr, MATCH_SIZE, match, 0) != REG_OK) {
+            ConcatString(anonymizedStr, pStr);
             break;
         }
         regoff_t start = match[0].rm_so;
         regoff_t end = match[0].rm_eo;
         if (start != end) {
-            if (AnonymizeStringProcess(outExec + start, end - start) != SOFTBUS_OK) {
-                free(str);
-                regfree(&reg);
-                return SOFTBUS_ERR;
+            if (start != 0) {
+                char *tempStr;
+                if (!CopyString(&tempStr, pStr, start) || !ConcatString(anonymizedStr, tempStr)) {
+                    COMM_LOGE(COMM_DFX, "concat *anonymizedStr fail, start=%d", start);
+                    free(tempStr);
+                    break;
+                }
+                free(tempStr);
             }
-            int32_t offset = start + (int32_t)strlen(outExec + start);
-            char tmpStr[inLen + 1];
-            if (strcpy_s(tmpStr, inLen + 1, outExec + end) != EOK || strcat_s(str, inLen, tmpStr) != EOK) {
-                COMM_LOGD(COMM_DFX, "strcpy or strcat fail");
+            char *partPlainStr;
+            if (!CopyString(&partPlainStr, pStr + start, end - start)) {
+                COMM_LOGE(COMM_DFX, "copy partPlainStr fail, start=%d, end=%d", start, end);
+                free(partPlainStr);
                 break;
             }
-            outExec += offset;
+            char *tempAnonStr;
+            Anonymize(partPlainStr, &tempAnonStr);
+            if (tempAnonStr == NULL) {
+                COMM_LOGE(COMM_DFX, "tempAnonStr is NULL");
+                free(partPlainStr);
+                break;
+            }
+            size_t len = strlen(*anonymizedStr) + strlen(tempAnonStr);
+            if (sprintf_s(*anonymizedStr, len + 1, "%s%s", *anonymizedStr, tempAnonStr) < 0) {
+                COMM_LOGE(COMM_DFX, "sprintf_s *anonymizedStr fail, len=%d, tempAnonStr=%s", len, tempAnonStr);
+                free(partPlainStr);
+                AnonymizeFree(tempAnonStr);
+                break;
+            }
+            free(partPlainStr);
+            AnonymizeFree(tempAnonStr);
+            pStr += end;
         }
     } while (true);
-    *anonymizedStr = str;
+    free(str);
     regfree(&reg);
-    return SOFTBUS_OK;
 }
 
 void AnonymizePacket(const char *packet, char **anonymizedStr)
 {
-    if (packet == NULL || anonymizedStr == NULL) {
-        COMM_LOGD(COMM_DFX, "packet or anonymizedStr is null");
+    if ((packet == NULL) || (anonymizedStr == NULL)) {
+        COMM_LOGW(COMM_DFX, "packet or anonymizedStr is null");
         return;
     }
-    if (strlen(packet) > LOG_LINE_MAX_LENGTH) {
-        COMM_LOGD(COMM_DFX, "packet is too long, will lose some context"); // print log only, no need to return
+    size_t packetLen = strlen(packet);
+    if (packetLen > LOG_LINE_MAX_LENGTH) {
+        // print log only, no need to return
+        COMM_LOGW(COMM_DFX, "packet is too long, may lose some context, length=%zu", packetLen);
     }
     char pattern[REG_PATTERN_MAX_LEN] = { 0 };
     (void)sprintf_s(pattern, REG_PATTERN_MAX_LEN, "%s|%s|%s|%s|%s", REG_ID_PATTERN, REG_IDT_PATTERN, REG_IP_PATTERN,
         REG_MAC_PATTERN, REG_KEY_PATTERN);
-    (void)AnonymizeRegexp(packet, pattern, anonymizedStr);
+    AnonymizeRegexp(packet, pattern, anonymizedStr);
 }
 #endif // __LITEOS_M__
 
@@ -158,5 +220,4 @@ void AnonymizeFree(char *anonymizedStr)
         return;
     }
     free(anonymizedStr);
-    anonymizedStr = NULL;
 }

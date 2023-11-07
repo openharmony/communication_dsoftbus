@@ -24,7 +24,7 @@ extern "C" {
 typedef enum {
     DISC_INIT,
     DISC_TEST,
-} TransLogLabel;
+} DiscLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {

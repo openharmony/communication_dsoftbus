@@ -40,7 +40,7 @@ void AnonymizePacket(const char *packet, char **anonymizedStr);
 /**
  * Release the anonymized string.
  *
- * @param anonymizedStr The string to be anonymized.
+ * @param anonymizedStr The anonymized string.
  */
 void AnonymizeFree(char *anonymizedStr);
 

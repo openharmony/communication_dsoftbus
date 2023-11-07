@@ -25,7 +25,7 @@ typedef enum {
     COMM_INIT,
     COMM_DFX,
     COMM_TEST,
-} CommLogLabel;
+} CommLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {

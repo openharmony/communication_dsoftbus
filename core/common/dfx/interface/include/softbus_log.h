@@ -50,7 +50,7 @@ typedef enum {
 
 typedef struct {
     int32_t label;
-    int32_t domain;
+    uint32_t domain;
     char tag[LOG_TAG_MAX_LEN];
 } SoftBusLogLabel;
 

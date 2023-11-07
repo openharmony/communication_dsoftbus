@@ -21,10 +21,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef enum : uint32_t {
+typedef enum {
     CONN_INIT,
     CONN_TEST,
-} TransLogLabel;
+} TransLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel CONN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
