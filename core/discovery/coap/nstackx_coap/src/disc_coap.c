@@ -106,15 +106,18 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
     return SOFTBUS_OK;
 }
 
-static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option)
+static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option, uint32_t allCap)
 {
     if (option->isPublish) {
         discCoapOption->mode = ACTIVE_PUBLISH;
         discCoapOption->freq = option->option.publishOption.freq;
+        discCoapOption->capability = option->option.publishOption.capabilityBitmap[0];
     } else {
         discCoapOption->mode = ACTIVE_DISCOVERY;
         discCoapOption->freq = option->option.subscribeOption.freq;
+        discCoapOption->capability = option->option.subscribeOption.capabilityBitmap[0];
     }
+    discCoapOption->allCap = allCap;
 }
 
 static int32_t Publish(const PublishOption *option, bool isActive)
@@ -153,7 +156,7 @@ static int32_t Publish(const PublishOption *option, bool isActive)
             .isPublish = true,
             .option.publishOption = *option,
         };
-        SetDiscCoapOption(&discCoapOption, &discOption);
+        SetDiscCoapOption(&discCoapOption, &discOption, 0);
         if (DiscCoapStartDiscovery(&discCoapOption) != SOFTBUS_OK) {
             SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
                 SOFTBUS_HISYSEVT_DISCOVER_COAP_START_DISCOVER_FAIL);
@@ -270,7 +273,7 @@ static int32_t Discovery(const SubscribeOption *option, bool isActive)
         .isPublish = false,
         .option.subscribeOption = *option,
     };
-    SetDiscCoapOption(&discCoapOption, &discOption);
+    SetDiscCoapOption(&discCoapOption, &discOption, g_subscribeMgr->allCap[0]);
     if (DiscCoapStartDiscovery(&discCoapOption) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
         DLOGE("coap start discovery failed, filters: %u", g_subscribeMgr->allCap[0]);
