@@ -18,7 +18,7 @@
 #include "anonymizer.h"
 #include "comm_log.h"
 
-void PrintAnonymousPacket(TransLogLabel label, const char *msg, const char *packet)
+void PrintAnonymousPacket(TransLogLabelEnum label, const char *msg, const char *packet)
 {
     if ((msg == NULL) || (packet == NULL)) {
         COMM_LOGW(COMM_DFX, "msg or packet is null");

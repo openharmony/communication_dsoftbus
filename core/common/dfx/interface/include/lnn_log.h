@@ -23,13 +23,31 @@ extern "C" {
 #endif
 typedef enum {
     LNN_INIT,
+    LNN_HEART_BEAT,
+    LNN_LEDGER,
+    LNN_BUILDER,
+    LNN_LANE,
+    LNN_QOS,
+    LNN_EVENT,
+    LNN_STATE,
+    LNN_META_NODE,
+    LNN_TIMER,
     LNN_TEST,
-} TransLogLabel;
+} LnnLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel LNN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {LNN_INIT,  0xd005780,      "LnnInit"},
-    { LNN_TEST, DOMAIN_ID_TEST, "LnnTest"},
+    {LNN_INIT,        0xd005780,      "LnnInit"     },
+    { LNN_HEART_BEAT, 0xd005781,      "LnnHeartBeat"},
+    { LNN_LEDGER,     0xd005782,      "LnnLedger"   },
+    { LNN_BUILDER,    0xd005783,      "LnnBuilder"  },
+    { LNN_LANE,       0xd005784,      "LnnLane"     },
+    { LNN_QOS,        0xd005785,      "LnnQos"      },
+    { LNN_EVENT,      0xd005786,      "LnnEvent"    },
+    { LNN_STATE,      0xd005787,      "LnnState"    },
+    { LNN_META_NODE,  0xd005788,      "LnnMetaNode" },
+    { LNN_TIMER,      0xd005789,      "LnnTimer"    },
+    { LNN_TEST,       DOMAIN_ID_TEST, "LnnTest"     },
 };
 
 #define LNN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, LNN_LABELS[label], ##__VA_ARGS__)

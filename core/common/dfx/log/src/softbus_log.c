@@ -25,9 +25,9 @@
 #include "hilog/log.h"
 #endif
 
-static void SoftBusLogExtraInfoFormat(char *str, const char *fileName, int lineNum, const char *funName)
+static void SoftBusLogExtraInfoFormat(char **str, const char *fileName, int lineNum, const char *funName)
 {
-    (void)sprintf_s(str, sizeof(str), "[%s:%d] %s# ", fileName, lineNum, funName);
+    (void)sprintf_s(*str, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
 }
 
 static void SoftBusLogPrint(const char *buf, SoftBusLogLevel level, unsigned int domain, const char *tag)
@@ -45,15 +45,19 @@ static void SoftBusLogPrint(const char *buf, SoftBusLogLevel level, unsigned int
 void SoftBusLogInnerImpl(SoftBusLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
     const char *funName, const char *fmt, ...)
 {
-    uint32_t ulPos;
-    char szStr[LOG_LINE_MAX_LENGTH] = { 0 };
-    va_list arg;
-
-    SoftBusLogExtraInfoFormat(szStr, fileName, lineNum, funName);
-    ulPos = strlen(szStr);
-    (void)memset_s(&arg, sizeof(va_list), 0, sizeof(va_list));
-    va_start(arg, fmt);
-    (void)vsprintf_s(&szStr[ulPos], sizeof(szStr) - ulPos, fmt, arg);
-    va_end(arg);
-    SoftBusLogPrint(szStr, level, label.domain, label.tag);
+    uint32_t pos;
+    va_list args;
+    char *str = (char *)malloc(LOG_LINE_MAX_LENGTH + 1);
+    if (str == NULL) {
+        return; // Do not print log here
+    }
+    SoftBusLogExtraInfoFormat(&str, fileName, lineNum, funName);
+    pos = strlen(str);
+    if (memset_s(&args, sizeof(va_list), 0, sizeof(va_list)) != EOK) {
+        return; // Do not print log here
+    }
+    va_start(args, fmt);
+    (void)vsprintf_s(&str[pos], LOG_LINE_MAX_LENGTH + 1, fmt, args);
+    va_end(args);
+    SoftBusLogPrint(str, level, label.domain, label.tag);
 }

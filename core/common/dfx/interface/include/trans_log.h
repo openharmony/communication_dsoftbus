@@ -30,11 +30,11 @@ typedef enum {
     TRANS_STREAM,
     TRANS_QOS,
     TRANS_TEST,
-} TransLogLabel;
+} TransLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {TRANS_INIT,     0xd005740,      "TransFwk"    },
+    {TRANS_INIT,     0xd005740,      "TransInit"    },
     { TRANS_CONTROL, 0xd005741,      "TransControl"},
     { TRANS_BYTES,   0xd005742,      "TransBytes"  },
     { TRANS_FILE,    0xd005743,      "TransFile"   },
@@ -59,7 +59,7 @@ static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
 #define TRANS_CHECK_AND_RETURN_LOGE(cond, label, fmt, ...) \
     CHECK_AND_RETURN_LOG_INNER(cond, TRANS_LOGE, label, fmt, ##__VA_ARGS__)
 
-void PrintAnonymousPacket(TransLogLabel label, const char *msg, const char *packet);
+void PrintAnonymousPacket(TransLogLabelEnum label, const char *msg, const char *packet);
 
 #ifdef __cplusplus
 }
