@@ -69,6 +69,11 @@ config("dsoftbus_sdk_interface") {
     include_dirs +=
         [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/broadcast" ]
   }
+
+  if (dsoftbus_feature_ex_kits) {
+    include_dirs +=
+        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center" ]
+  }
 }
 
 target(build_type, "softbus_client") {

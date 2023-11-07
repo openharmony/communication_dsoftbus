@@ -157,6 +157,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
+    memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -1373,6 +1374,23 @@ int32_t SoftBusServerStub::GetSoftbusSpecObjectInner(MessageParcel &data, Messag
     if (ret == SOFTBUS_OK) {
         if (!reply.WriteRemoteObject(object)) {
             SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObjectInner write object failed!");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GetBusCenterExObjInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> object;
+    int32_t ret = GetBusCenterExObj(object);
+    if (!reply.WriteInt32(ret)) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetBusCenterExObjInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    if (ret == SOFTBUS_OK) {
+        if (!reply.WriteRemoteObject(object)) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetBusCenterExObjInner write object failed!");
             return SOFTBUS_ERR;
         }
     }

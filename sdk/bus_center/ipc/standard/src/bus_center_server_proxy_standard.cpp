@@ -928,4 +928,33 @@ int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *call
     }
     return serverRet;
 }
+
+int32_t BusCenterServerProxy::GetBusCenterExObj(sptr<IRemoteObject> &object)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LLOGE("remote is null");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LLOGE("GetBusCenterExObj write InterfaceToken failed!");
+        return SOFTBUS_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_GET_BUS_CENTER_EX_OBJ, data, reply, option);
+    if (ret != ERR_NONE) {
+        LLOGE("GetBusCenterExObj send request failed, ret=%d", ret);
+        return SOFTBUS_ERR;
+    }
+    if (!reply.ReadInt32(ret)) {
+        LLOGE("GetBusCenterExObj send ret failed");
+        return SOFTBUS_ERR;
+    }
+    if (ret == SOFTBUS_OK) {
+        object = reply.ReadRemoteObject();
+    }
+    return ret;
+}
 } // namespace OHOS

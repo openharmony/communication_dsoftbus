@@ -106,4 +106,10 @@ int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
     SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject ipc default impl");
     return SOFTBUS_ERR;
 }
+
+int32_t ISoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
+{
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetBusCenterExObj ipc default impl");
+    return SOFTBUS_ERR;
+}
 } // namespace OHOS
