@@ -492,7 +492,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo003, TestSize.Le
         .deviceId = "{\"UDID\":\"abcde\"}",
         .reservedInfo = "{\"version\":\"1.0.0\"}",
         .mode = DEFAULT_MODE,
-        .discoveryType = NSTACKX_DISCOVERY_TYPE_PASSIVE,
+        .discoveryType = NSTACKX_DISCOVERY_TYPE_ACTIVE,
     };
     DeviceInfo testDiscDevInfo;
     ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
