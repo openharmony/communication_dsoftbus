@@ -142,9 +142,10 @@ static int32_t P2pCreateGroup(int32_t frequency, bool wideBandSupported)
     return SOFTBUS_OK;
 }
 
-static int32_t P2pConnectGroup(char *groupConfigString)
+static int32_t P2pConnectGroup(char *groupConfigString, bool isLegacyGo)
 {
     (void)groupConfigString;
+    (void)isLegacyGo;
     return SOFTBUS_OK;
 }
 
