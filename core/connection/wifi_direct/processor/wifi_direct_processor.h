@@ -40,7 +40,7 @@ struct WifiDirectCommand;
     void (*processNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectCommand *command);      \
     void (*onOperationEvent)(int32_t result);                                                                     \
                                                                                                                   \
-    void (*processUnhandledRequest)(struct NegotiateMessage *msg, int32_t errorCode);                             \
+    bool (*isMessageNeedPending)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);              \
     void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \
     void (*resetContext)(void);                                                                                   \
                                                                                                                   \

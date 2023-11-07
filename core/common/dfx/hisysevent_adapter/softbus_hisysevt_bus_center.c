@@ -21,7 +21,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_hisysevt_common.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define BUS_CENTER_PARAM_TOTAL_TIME "TOTAL_TIME"
 #define BUS_CENTER_PARAM_TOTAL_COUNT "TOTAL_COUNT"

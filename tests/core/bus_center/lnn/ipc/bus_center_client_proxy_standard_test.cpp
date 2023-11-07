@@ -47,7 +47,7 @@
 #include "softbus_client_info_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "message_parcel.h"
 #include "softbus_permission.h"
 #include "lnn_bus_center_ipc.h"
@@ -95,19 +95,26 @@ using namespace testing::ext;
     {
         void *addr = nullptr;
         uint32_t addrTypeLen = 0;
+        void *metaInfo = nullptr;
+        uint32_t infoLen = 0;
         ConnectionAddr addrValue;
         (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-        char *networkId = nullptr;
         char networkIdValue[] = "12345";
         int32_t retCode = 0;
         char pkgNameValue[] = "test";
+        MetaBasicInfo metaInfoValue;
+        (void)memset_s(&metaInfoValue, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
+        (void)strcpy_s(metaInfoValue.metaNodeId, NETWORK_ID_BUF_LEN, networkIdValue);
         sptr<BusCenterClientProxy> clientProxy =  GetClientProxy(pkgNameValue);
-        int32_t ret = clientProxy->BusCenterClientProxy::OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
+        int32_t ret =
+            clientProxy->BusCenterClientProxy::OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, infoLen, retCode);
         EXPECT_EQ(ret, SOFTBUS_ERR);
         retCode = 1;
-        ret = clientProxy->BusCenterClientProxy::OnJoinMetaNodeResult(addr, addrTypeLen, networkIdValue, retCode);
+        ret = clientProxy->BusCenterClientProxy::OnJoinMetaNodeResult(addr, addrTypeLen, &metaInfoValue,
+            infoLen, retCode);
         EXPECT_TRUE(ret == SOFTBUS_ERR);
-        ret = clientProxy->BusCenterClientProxy::OnJoinMetaNodeResult(&addrValue, addrTypeLen, networkIdValue, retCode);
+        ret = clientProxy->BusCenterClientProxy::OnJoinMetaNodeResult(&addrValue, addrTypeLen, &metaInfoValue,
+            infoLen, retCode);
         EXPECT_TRUE(ret == SOFTBUS_ERR);
     }
 

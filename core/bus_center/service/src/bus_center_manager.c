@@ -28,11 +28,12 @@
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "lnn_decision_center.h"
+#include "lnn_meta_node_interface.h"
 #include "softbus_adapter_xcollie.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
@@ -190,6 +191,10 @@ int32_t BusCenterServerInit(void)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init net builder fail!");
         return SOFTBUS_ERR;
     }
+    if (LnnInitMetaNode() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init meta node fail!");
+        return SOFTBUS_ERR;
+    }
     SoftBusRunPeriodicalTask(WATCHDOG_TASK_NAME, WatchdogProcess, WATCHDOG_INTERVAL_TIME, WATCHDOG_DELAY_TIME);
     if (LnnInitLaneHub() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane hub fail!");
@@ -228,5 +233,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitDecisionCenter();
     DeinitDecisionCenter();
     LnnDeinitNetLedger();
+    LnnDeinitMetaNode();
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
 }

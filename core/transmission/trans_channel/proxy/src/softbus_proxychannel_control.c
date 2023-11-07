@@ -20,33 +20,13 @@
 
 #include "auth_interface.h"
 #include "cJSON.h"
-#include "softbus_adapter_crypto.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
-
-static int32_t TransProxyEncryptInnerMessage(const char *sessionKey,
-    const char *in, uint32_t inLen, char *out, uint32_t *outLen)
-{
-    AesGcmCipherKey cipherKey = {0};
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen);
-    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
-    if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusEncryptData fail(=%d).", ret);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    return SOFTBUS_OK;
-}
 
 int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
     uint32_t payLoadLen, int32_t priority)
@@ -56,19 +36,6 @@ int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint32_t outPayLoadLen = payLoadLen + OVERHEAD_LEN;
-    char *outPayLoad = (char *)SoftBusCalloc(outPayLoadLen);
-    if (outPayLoad == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc len[%u] fail", outPayLoadLen);
-        return SOFTBUS_MALLOC_ERR;
-    }
-    if (TransProxyEncryptInnerMessage(info->appInfo.sessionKey,
-        payLoad, payLoadLen, outPayLoad, &outPayLoadLen) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "encrypt msg fail channelid[%d]", info->channelId);
-        SoftBusFree(outPayLoad);
-        return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
-    }
-
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
@@ -76,14 +43,12 @@ int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;
 
-    dataInfo.inData = (uint8_t *)outPayLoad;
-    dataInfo.inLen = outPayLoadLen;
+    dataInfo.inData = (uint8_t *)payLoad;
+    dataInfo.inLen = payLoadLen;
     if (TransProxyPackMessage(&msgHead, info->authId, &dataInfo) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pack msg error");
-        SoftBusFree(outPayLoad);
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-    SoftBusFree(outPayLoad);
     return TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
         priority, info->appInfo.myData.pid);
 }

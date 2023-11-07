@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #include "softbus_json_utils.h"
 
 #include <securec.h>
+
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
@@ -196,6 +198,25 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
     return true;
 }
 
+bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const char * const *strings, int32_t count)
+{
+    COMM_CHECK_AND_RETURN_RET_LOG(json != NULL && string != NULL && strings != NULL, false, "param is null");
+    COMM_CHECK_AND_RETURN_RET_LOG(count > 0, false, "count <= 0");
+
+    cJSON *item = cJSON_CreateStringArray(strings, count);
+    if (item == NULL) {
+        MLOGE("Cannot create cJSON string array object [%s]", string);
+        return false;
+    }
+
+    if (!cJSON_AddItemToObject(json, string, item)) {
+        MLOGE("Cannot add string array object to json [%s]", string);
+        cJSON_Delete(item);
+        return false;
+    }
+    return true;
+}
+
 bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t num)
 {
     if (json == NULL || string == NULL) {
@@ -262,4 +283,33 @@ bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
         return false;
     }
     return true;
+}
+
+char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * const string, uint32_t limit)
+{
+    if (json == NULL || string == NULL) {
+        return NULL;
+    }
+
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
+    if (item == NULL || !cJSON_IsString(item)) {
+        MLOGE("Cannot find or invalid [%s]", string);
+        return NULL;
+    }
+    uint32_t length = strlen(item->valuestring);
+    if (length > limit) {
+        MLOGE("key [%s] length [%u] is large than limit [%u]", string, length, limit);
+        return NULL;
+    }
+    char *value = SoftBusCalloc(length + 1);
+    if (value == NULL) {
+        MLOGE("malloc failed, length [%u]", length);
+        return NULL;
+    }
+    if (strcpy_s(value, length + 1, item->valuestring) != EOK) {
+        MLOGE("copy failed, length [%u]", length);
+        SoftBusFree(value);
+        return NULL;
+    }
+    return value;
 }

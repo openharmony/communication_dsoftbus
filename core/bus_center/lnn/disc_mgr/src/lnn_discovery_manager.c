@@ -25,7 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 static void DeviceFound(const ConnectionAddr *addr);
 

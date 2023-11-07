@@ -29,7 +29,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"

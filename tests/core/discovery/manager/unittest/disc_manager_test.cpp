@@ -22,7 +22,7 @@
 #include <cstdint>
 
 #include "disc_manager.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "nstackx.h"
 #include "disc_coap.h"
 #include "softbus_errcode.h"

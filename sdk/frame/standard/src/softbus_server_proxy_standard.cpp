@@ -19,7 +19,7 @@
 #include "softbus_client_stub.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 sptr<IRemoteObject> SoftBusServerProxyFrame::clientCallbackStub_;

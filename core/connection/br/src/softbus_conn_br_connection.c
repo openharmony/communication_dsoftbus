@@ -22,7 +22,7 @@
 #include "softbus_conn_br_trans.h"
 #include "softbus_conn_common.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define UUID "8ce255c0-200a-11e0-ac64-0800200c9a66"

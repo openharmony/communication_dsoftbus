@@ -14,7 +14,7 @@
  */
 #include "wifi_direct_anonymous.h"
 #include "securec.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "wifi_direct_types.h"
 
 #define LOG_LABEL "[WD] Ano: "

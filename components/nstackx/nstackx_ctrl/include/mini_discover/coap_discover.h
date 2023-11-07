@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,21 +19,32 @@
 #include "coap_def.h"
 #include "nstackx_common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     COAP_BROADCAST_TYPE_DEFAULT = 0,
-    COAP_BROADCAST_TYPE_USER = 1
+    COAP_BROADCAST_TYPE_USER = 1,
+    COAP_BROADCAST_TYPE_USER_DEFINE_INTERVAL = 2
 } CoapBroadcastType;
 
+int32_t CoapDiscoverInit(EpollDesc epollfd);
+void SetCoapDiscoverType(CoapBroadcastType type);
+void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration);
+int32_t SetCoapDiscConfig(const DFinderDiscConfig *discConfig);
+void HndPostServiceDiscover(const CoapPacket *pkt);
 void CoapServiceDiscoverInner(uint8_t userRequest);
 void CoapServiceDiscoverInnerAn(uint8_t userRequest);
 void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest);
 void CoapServiceDiscoverStopInner(void);
 uint8_t CoapDiscoverRequestOngoing(void);
-int32_t CoapDiscoverInit(EpollDesc epollfd);
-void CoapDiscoverDeinit(void);
 void ResetCoapDiscoverTaskCount(uint8_t isBusy);
-void HndPostServiceDiscover(const CoapPacket *pkt);
-void SetCoapDiscoverType(CoapBroadcastType type);
-void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration);
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings);
+void CoapDiscoverDeinit(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* #ifndef COAP_DISCOVER_H */

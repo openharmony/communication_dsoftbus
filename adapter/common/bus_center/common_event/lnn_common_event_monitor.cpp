@@ -30,7 +30,7 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;

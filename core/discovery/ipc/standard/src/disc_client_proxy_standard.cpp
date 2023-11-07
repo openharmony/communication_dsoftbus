@@ -15,7 +15,7 @@
 
 #include "disc_client_proxy_standard.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 DiscClientProxy::DiscClientProxy(const sptr<IRemoteObject> &impl)

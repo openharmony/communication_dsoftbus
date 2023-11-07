@@ -26,7 +26,7 @@
 #include "softbus_datahead_transform.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"

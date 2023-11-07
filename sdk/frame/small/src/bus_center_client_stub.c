@@ -21,7 +21,7 @@
 #include "ipc_skeleton.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 {

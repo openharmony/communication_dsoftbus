@@ -19,7 +19,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t state)
@@ -396,11 +396,13 @@ int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, cons
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+int32_t TransClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo,
+    uint32_t infoLen, int retCode)
 {
     (void)addr;
     (void)addrTypeLen;
-    (void)networkId;
+    (void)metaInfo;
+    (void)infoLen;
     (void)retCode;
     return SOFTBUS_OK;
 }

@@ -23,7 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "v1_1/iwlan_interface.h"
 
 #define WLAN_SERVICE_NAME "wlan_interface_service"

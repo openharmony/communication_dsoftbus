@@ -15,7 +15,7 @@
 
 #include "json_protocol.h"
 #include "securec.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 #include "cJSON.h"
 #include "string.h"

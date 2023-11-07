@@ -19,7 +19,7 @@
 #include "softbus_app_info.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 #include "trans_udp_negotiation_exchange.h"
 

@@ -47,9 +47,24 @@ int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid, ConnectionAd
     return BusCenterIpcInterfaceInstance()->MetaNodeServerJoin(pkgName, callingPid, addr, customData);
 }
 
+int32_t MetaNodeServerJoinExt(CustomData *customData)
+{
+    return BusCenterIpcInterfaceInstance()->MetaNodeServerJoinExt(customData);
+}
+
 int32_t LnnServerLeave(const char *networkId, const char *pkgName)
 {
     return BusCenterIpcInterfaceInstance()->LnnServerLeave(networkId, pkgName);
+}
+
+int32_t MetaNodeServerLeaveExt(const char *metaNodeId, MetaNodeType type)
+{
+    return BusCenterIpcInterfaceInstance()->MetaNodeServerLeaveExt(metaNodeId, type);
+}
+
+MetaNodeType FindMetaNodeType(const char *metaNodeId)
+{
+    return BusCenterIpcInterfaceInstance()->FindMetaNodeType(metaNodeId);
 }
 
 int32_t MetaNodeServerLeave(const char *networkId)
@@ -139,10 +154,10 @@ int32_t ClientOnJoinLNNResult(
     return BusCenterIpcInterfaceInstance()->ClientOnJoinLNNResult(info, addr, addrTypeLen, networkId, retCode);
 }
 
-int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen, const char *networkId,
+int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen, MetaBasicInfo *metaInfo,
     int32_t retCode)
 {
-    return BusCenterIpcInterfaceInstance()->ClientOnJoinMetaNodeResult(info, addr, addrTypeLen, networkId, retCode);
+    return BusCenterIpcInterfaceInstance()->ClientOnJoinMetaNodeResult(info, addr, addrTypeLen, metaInfo, retCode);
 }
 
 int32_t ClientOnLeaveLNNResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)

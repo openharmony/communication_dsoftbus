@@ -29,7 +29,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"

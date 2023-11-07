@@ -19,7 +19,7 @@
 #include "c_header/ohos_bt_gatt.h"
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #include "assert_helper.h"
 #include "bluetooth_mock.h"

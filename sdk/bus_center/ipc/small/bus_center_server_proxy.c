@@ -27,7 +27,7 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define WAIT_SERVER_READY_INTERVAL_COUNT 50
 

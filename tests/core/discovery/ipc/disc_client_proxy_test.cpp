@@ -18,7 +18,7 @@
 
 #include "discovery_service.h"
 #include "disc_client_proxy.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "remote_object_mock.h"

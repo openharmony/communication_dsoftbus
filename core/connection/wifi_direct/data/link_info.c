@@ -17,7 +17,7 @@
 #include <securec.h>
 #include <string.h>
 #include <cJSON.h>
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "protocol/wifi_direct_protocol.h"
 #include "utils/wifi_direct_ipv4_info.h"

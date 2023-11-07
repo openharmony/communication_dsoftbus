@@ -28,7 +28,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
@@ -488,14 +488,28 @@ int32_t SoftBusClientStub::OnJoinLNNResultInner(MessageParcel &data, MessageParc
 int32_t SoftBusClientStub::OnJoinMetaNodeResultInner(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
+    uint32_t infoLen;
+    void *addr = nullptr;
+    if (!data.ReadUint32(addrTypeLen) || (addrTypeLen != 0 && addrTypeLen != sizeof(ConnectionAddr))) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
             "OnJoinMetaNodeResultInner read addrTypeLen:%d failed!", addrTypeLen);
         return SOFTBUS_ERR;
     }
-    void *addr = (void *)data.ReadRawData(addrTypeLen);
-    if (addr == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read addr failed!");
+    if (addrTypeLen != 0) {
+        addr = (void *)data.ReadRawData(addrTypeLen);
+        if (addr == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read addr failed!");
+            return SOFTBUS_ERR;
+        }
+    }
+    if (!data.ReadUint32(infoLen) || (infoLen != 0 && infoLen != sizeof(MetaBasicInfo))) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "OnJoinMetaNodeResultInner read infoLen:%d failed!", infoLen);
+        return SOFTBUS_ERR;
+    }
+    void *metaInfo = (void *)data.ReadRawData(infoLen);
+    if (metaInfo == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read metaInfo failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode;
@@ -503,15 +517,7 @@ int32_t SoftBusClientStub::OnJoinMetaNodeResultInner(MessageParcel &data, Messag
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read retCode failed!");
         return SOFTBUS_ERR;
     }
-    const char *networkId = nullptr;
-    if (retCode == 0) {
-        networkId = data.ReadCString();
-        if (networkId == nullptr) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read networkId failed!");
-            return SOFTBUS_ERR;
-        }
-    }
-    int32_t retReply = OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
+    int32_t retReply = OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, infoLen, retCode);
     if (retReply != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner notify join result failed!");
     }
@@ -703,10 +709,12 @@ int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, con
     return LnnOnJoinResult(addr, networkId, retCode);
 }
 
-int32_t SoftBusClientStub::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+int32_t SoftBusClientStub::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo, uint32_t infoLen,
+    int retCode)
 {
     (void)addrTypeLen;
-    return MetaNodeOnJoinResult(addr, networkId, retCode);
+    (void)infoLen;
+    return MetaNodeOnJoinResult(addr, metaInfo, retCode);
 }
 
 int32_t SoftBusClientStub::OnLeaveLNNResult(const char *networkId, int retCode)

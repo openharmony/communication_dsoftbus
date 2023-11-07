@@ -16,7 +16,7 @@
 #include "negotiate_message.h"
 #include <securec.h>
 #include <string.h>
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "data/link_info.h"
 #include "data/interface_info.h"
 #include "protocol/wifi_direct_protocol_factory.h"

@@ -21,7 +21,7 @@
 #include <securec.h>
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define DEVICE_TYPE_MAX_LENGTH 3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH  (DEVICE_TYPE_MAX_LENGTH * 4)

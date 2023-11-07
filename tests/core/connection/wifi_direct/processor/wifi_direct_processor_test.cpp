@@ -32,7 +32,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "channel/default_negotiate_channel.h"
 #include "resource_manager.h"
 #include "wifi_direct_ipv4_info.h"

@@ -20,7 +20,7 @@
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
 

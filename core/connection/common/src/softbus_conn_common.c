@@ -21,7 +21,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_type_def.h"
 
 #define HIGH_PRIORITY_DEFAULT_LIMIT   32

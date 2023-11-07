@@ -26,7 +26,7 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_type_def.h"
 
 #define MAC_BIT_ZERO 0
@@ -81,6 +81,9 @@ SoftBusList *CreateSoftBusList(void)
 
 void DestroySoftBusList(SoftBusList *list)
 {
+    if (list == NULL) {
+        return;
+    }
     ListDelInit(&list->list);
     SoftBusMutexDestroy(&list->lock);
     SoftBusFree(list);

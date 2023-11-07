@@ -14,7 +14,7 @@
  */
 
 #include "softbus_interface.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int StartDiscoveryWeak(const char *pkgName, const void *info)
 {
