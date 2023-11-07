@@ -19,10 +19,11 @@
 #include "softbus_errcode.h"
 #include "softbus_log_old.h"
 
-void DiscCoapParseExtendServiceData(const cJSON *data, DeviceInfo *device)
+int32_t DiscCoapParseExtendServiceData(const cJSON *data, DeviceInfo *device)
 {
     (void)data;
     (void)device;
+    return SOFTBUS_OK;
 }
 
 int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData)
@@ -34,9 +35,36 @@ int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData,
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-void DiscVerifySoftbus(DeviceInfo *device)
+void DiscVerifyBroadcastType(DeviceInfo *device, uint8_t bType)
 {
-    if (DiscCoapSendRsp(device) != SOFTBUS_OK) {
-        DLOGE("send response failed");
+    if (DiscCoapSendRsp(device, bType) != SOFTBUS_OK) {
+        DLOGE("send response failed for bType(%u)", bType);
+    }
+}
+
+void DiscCheckBtype(DeviceInfo *device, uint8_t bType)
+{
+    (void)device;
+    (void)bType;
+}
+
+void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
+{
+    (void)allCap;
+    DISC_CHECK_AND_RETURN_LOG(discSet != NULL, "discSet is NULL");
+    switch (capability) {
+        case 1 << OSD_CAPABILITY_BITMAP:
+            discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
+            break;
+        case 1 << DDMP_CAPABILITY_BITMAP:
+            discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_AUTONET;
+            break;
+        case 1 << SHARE_CAPABILITY_BITMAP:
+            discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_STRATEGY;
+            break;
+        default:
+            DLOGI("use the default bType for capability(%u)", capability);
+            discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
+            break;
     }
 }
