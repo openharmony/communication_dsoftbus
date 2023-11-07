@@ -70,6 +70,7 @@ public:
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
+    virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

@@ -66,6 +66,18 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy_standard.cpp",
     "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
   ]
+
+  if (dsoftbus_feature_ex_kits) {
+    import(
+        "$dsoftbus_root_path/dsoftbus_enhance/sdk/bus_center/extend/bus_center_ex_sdk.gni")
+
+    bus_center_manager_sdk_inc += bus_center_ex_sdk_inc
+    bus_center_manager_sdk_src += bus_center_ex_sdk_src
+  } else {
+    bus_center_manager_sdk_inc +=
+        [ "$dsoftbus_root_path/core/bus_center/extend/include" ]
+    bus_center_manager_sdk_src += [ "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj_proxy.cpp" ]
+  }
 }
 
 bus_center_sdk_src = bus_center_service_sdk_src + bus_center_manager_sdk_src

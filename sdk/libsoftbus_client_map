@@ -355,6 +355,8 @@
         "ClientDeleteEventListener";
         "TransProxyPackAndSendData";
         "ClientTransProxyGetInfoByChannelId";
+        "EnableDiscoveryPolicy";
+        "SetDiscoveryPolicy";
         "CreateMetaSocketServer";
         "RemoveMetaSocketServer";
         "OpenAuthMetaSocket";
