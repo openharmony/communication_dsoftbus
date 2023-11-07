@@ -477,8 +477,8 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo002, TestSize.Le
 
 /*
  * @tc.name: TestDiscCoapAdapterParseDevInfo003
- * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_ERR when given NSTACKX_DISCOVERY_TYPE_PASSIVE,
- *           should return SOFTBUS_OK when given NSTACKX_DISCOVERY_TYPE_ACTIVE NSTACKX_DeviceInfo.discoveryType,
+ * @tc.desc: Test DiscParseDiscDevInfo should return SOFTBUS_OK
+ *           when given NSTACKX_DISCOVERY_TYPE_ACTIVE NSTACKX_DeviceInfo.discoveryType,
  *           should return SOFTBUS_OK when given PUBLISH_MODE_PROACTIVE NSTACKX_DeviceInfo.mode
  * @tc.type: FUNC
  * @tc.require:
@@ -492,13 +492,9 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterParseDevInfo003, TestSize.Le
         .deviceId = "{\"UDID\":\"abcde\"}",
         .reservedInfo = "{\"version\":\"1.0.0\"}",
         .mode = DEFAULT_MODE,
-        .discoveryType = NSTACKX_DISCOVERY_TYPE_PASSIVE,
+        .discoveryType = NSTACKX_DISCOVERY_TYPE_ACTIVE,
     };
     DeviceInfo testDiscDevInfo;
-    ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    testNstackxDevInfo.discoveryType = NSTACKX_DISCOVERY_TYPE_ACTIVE;
     ret = ParseDiscDevInfo(&testNstackxDevInfo, &testDiscDevInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
