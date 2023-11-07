@@ -26,7 +26,7 @@
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
 #include "softbus_def.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
@@ -157,11 +157,11 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     return LnnOnJoinResult(addr, networkId, retCode);
 }
 
-int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
+int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, MetaBasicInfo *metaInfo, int32_t retCode)
 {
     (void)addr;
     (void)addrTypeLen;
-    (void)networkId;
+    (void)metaInfo;
     (void)retCode;
     return SOFTBUS_OK;
 }

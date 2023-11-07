@@ -23,7 +23,7 @@
 #include "resource_manager_broadcast_handler.c"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "wifi_p2p.h"
 #include "wifi_p2p_config.h"

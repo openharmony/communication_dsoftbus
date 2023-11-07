@@ -14,7 +14,7 @@
  */
 
 #include "p2p_entity_broadcast_handler.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "broadcast_receiver.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "entity/p2p_entity/p2p_entity.h"

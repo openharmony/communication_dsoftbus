@@ -26,11 +26,12 @@
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_meta_node_ledger.h"
+#include "lnn_meta_node_interface.h"
 #include "lnn_device_info_recovery.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 int32_t LnnInitNetLedger(void)
@@ -49,6 +50,10 @@ int32_t LnnInitNetLedger(void)
     }
     if (LnnInitHuksInterface() != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init huks interface fail!");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitMetaNodeExtLedger() != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init meta node ext ledger fail!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -112,6 +117,7 @@ void LnnDeinitNetLedger(void)
     LnnDeinitDistributedLedger();
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
+    LnnDeinitMetaNodeExtLedger();
 }
 
 static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)

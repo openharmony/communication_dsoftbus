@@ -18,7 +18,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "securec.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "wifi_direct_types.h"
 #include "data/link_info.h"
 

@@ -18,7 +18,7 @@
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 int32_t BusCenterClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
@@ -114,15 +114,12 @@ int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, 
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+int32_t BusCenterClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo,
+    uint32_t infoLen, int retCode)
 {
     sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
+    if (remote == nullptr || metaInfo == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
-        return SOFTBUS_ERR;
-    }
-    if ((retCode == 0 && networkId == nullptr) || addr == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
@@ -130,20 +127,31 @@ int32_t BusCenterClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrType
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteUint32(addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
+    if (addr != nullptr) {
+        if (!data.WriteUint32(addrTypeLen)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
+            return SOFTBUS_ERR;
+        }
+        if (!data.WriteRawData(addr, addrTypeLen)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr failed");
+            return SOFTBUS_ERR;
+        }
+    } else {
+        if (!data.WriteUint32(0)) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
+            return SOFTBUS_ERR;
+        }
+    }
+    if (!data.WriteUint32(infoLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write infoLen failed");
         return SOFTBUS_ERR;
     }
-    if (!data.WriteRawData(addr, addrTypeLen)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr failed");
+    if (!data.WriteRawData(metaInfo, infoLen)) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write metaInfo failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(retCode)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
-        return SOFTBUS_ERR;
-    }
-    if (retCode == 0 && !data.WriteCString(networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;

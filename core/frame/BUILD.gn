@@ -34,7 +34,7 @@ dsoftbus_server_common_inc =
     disc_server_inc + trans_session_inc + softbus_permission_inc
 dsoftbus_server_common_deps =
     auth_server_deps + bus_center_server_deps + disc_server_deps +
-    trans_session_deps + softbus_permission_deps
+    conn_manager_common_deps + trans_session_deps + softbus_permission_deps
 
 if (defined(ohos_lite)) {
   copy("permission_json") {

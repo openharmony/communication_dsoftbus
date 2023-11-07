@@ -17,9 +17,10 @@
 
 #include "bus_center_client_proxy_standard.h"
 #include "softbus_client_info_manager.h"
+#include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_permission.h"
 
 using namespace OHOS;
@@ -47,7 +48,7 @@ int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addr
 }
 
 int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
-    const char *networkId, int32_t retCode)
+    MetaBasicInfo *metaInfo, int32_t retCode)
 {
     if (info == nullptr) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
@@ -58,7 +59,7 @@ int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
-    return clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, networkId, retCode);
+    return clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, sizeof(MetaBasicInfo), retCode);
 }
 
 int32_t ClientOnLeaveLNNResult(

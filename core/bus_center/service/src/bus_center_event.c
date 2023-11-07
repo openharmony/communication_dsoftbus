@@ -28,7 +28,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_qos.h"
 
 typedef struct {
@@ -320,14 +320,10 @@ void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t re
     LnnIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
 }
 
-void MetaNodeNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
+void MetaNodeNotifyJoinResult(ConnectionAddr *addr, MetaBasicInfo *metaInfo, int32_t retCode)
 {
-    if (addr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para : addr or networkId = null!");
-        return;
-    }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify join MetaNode result :%d", retCode);
-    MetaNodeIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
+    MetaNodeIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), metaInfo, retCode);
 }
 
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)

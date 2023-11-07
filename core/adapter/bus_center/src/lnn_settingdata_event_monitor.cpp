@@ -27,7 +27,7 @@
 #include "message_handler.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "system_ability_definition.h"
 #include "uri.h"
 
@@ -87,8 +87,12 @@ static void CreateDataShareHelperInstance(void)
 static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
 {
     if (g_dataShareHelper == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper NULL.");
-        return SOFTBUS_ERR;
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "retry to create datashare intance.");
+        OHOS::BusCenter::CreateDataShareHelperInstance();
+        if (g_dataShareHelper == nullptr) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper NULL.");
+            return SOFTBUS_ERR;
+        }
     }
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataShareHelper enter.");

@@ -18,7 +18,7 @@
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"

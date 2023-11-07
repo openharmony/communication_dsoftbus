@@ -34,7 +34,7 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"

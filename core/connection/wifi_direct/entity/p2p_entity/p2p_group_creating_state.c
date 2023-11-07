@@ -14,7 +14,7 @@
  */
 
 #include "entity/p2p_entity/p2p_group_creating_state.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
 #define LOG_LABEL "[WD] PGCrS: "

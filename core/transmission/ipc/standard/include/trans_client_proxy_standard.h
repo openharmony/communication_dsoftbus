@@ -40,7 +40,8 @@ public:
         const QosTv *tvList) override;
 
     int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
-    int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
+    int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo, uint32_t infoLen,
+        int retCode) override;
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
     int32_t OnLeaveMetaNodeResult(const char *networkId, int retCode) override;
     int32_t OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen) override;

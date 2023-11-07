@@ -215,7 +215,7 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler);
 void LnnNotifyJoinResult(ConnectionAddr *addr,
     const char *networkId, int32_t retCode);
 void MetaNodeNotifyJoinResult(ConnectionAddr *addr,
-    const char *networkId, int32_t retCode);
+    MetaBasicInfo *metaInfo, int32_t retCode);
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
 void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode);
 

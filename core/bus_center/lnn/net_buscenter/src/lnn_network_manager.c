@@ -32,7 +32,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","

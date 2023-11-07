@@ -23,7 +23,7 @@
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 
@@ -220,7 +220,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 
 int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb)
 {
-    if (pkgName == NULL || target == NULL || customData == NULL || cb == NULL) {
+    if (pkgName == NULL || customData == NULL || cb == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : params are NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -228,7 +228,7 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (target->type == CONNECTION_ADDR_SESSION) {
+    if (target != NULL && target->type == CONNECTION_ADDR_SESSION) {
         ret = ClientGetChannelBySessionId(target->info.session.sessionId, &target->info.session.channelId,
             &target->info.session.type, NULL);
         if (ret != SOFTBUS_OK) {

@@ -16,7 +16,7 @@
 #include "wifi_config_info.h"
 #include <securec.h>
 #include <string.h>
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "data/interface_info.h"
 #include "protocol/wifi_direct_protocol.h"

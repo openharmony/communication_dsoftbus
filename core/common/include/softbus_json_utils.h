@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "cJSON.h"
 #include "string.h"
 #include "stdbool.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,6 +48,8 @@ bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *t
 
 bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
 
+bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const char * const *strings, int32_t count);
+
 bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t num);
 
 bool AddNumberToJsonObject(cJSON *json, const char * const string, int num);
@@ -57,6 +59,8 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
 bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value);
 
 bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target);
+
+char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * const string, uint32_t limit);
 #ifdef __cplusplus
 #if __cplusplus
 }

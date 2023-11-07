@@ -88,6 +88,7 @@
 #define VERSION_TYPE "VERSION_TYPE"
 #define BT_MAC "BT_MAC"
 #define CONN_CAP "CONN_CAP"
+#define AUTH_CAP "AUTH_CAP"
 #define SW_VERSION "SW_VERSION"
 #define MASTER_UDID "MASTER_UDID"
 #define MASTER_WEIGHT "MASTER_WEIGHT"
@@ -736,6 +737,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     }
     if (!JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
         !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
+        !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
         !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
@@ -810,6 +812,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     (void)JSON_GetStringFromOject(json, NETWORK_ID, info->networkId, NETWORK_ID_BUF_LEN);
     (void)JSON_GetStringFromOject(json, VERSION_TYPE, info->versionType, VERSION_MAX_LEN);
     (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
+    (void)JSON_GetInt32FromOject(json, AUTH_CAP, (int32_t *)&info->authCapacity);
 
     info->isBleP2p = false;
     (void)JSON_GetBoolFromOject(json, BLE_P2P, &info->isBleP2p);

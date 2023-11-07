@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ extern "C" {
 
 // max adv and scan limit
 #define ADV_MAX_NUM 9
-#define SCAN_MAX_NUM 8
+#define SCAN_MAX_NUM 9
 
 // Bluetooth scan duty cycle, unit: ms
 #define SOFTBUS_BLE_SCAN_INTERVAL_P2 3000

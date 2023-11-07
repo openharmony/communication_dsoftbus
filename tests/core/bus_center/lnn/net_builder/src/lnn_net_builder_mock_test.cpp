@@ -22,7 +22,7 @@
 #include "lnn_net_builder_deps_mock.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInitCipherKeyManager(void)
 {

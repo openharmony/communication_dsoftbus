@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,15 @@
  */
 
 #include "disc_ble_dispatcher.h"
-#include "disc_manager.h"
+#include "disc_approach_ble.h"
 #include "disc_ble.h"
+#include "disc_manager.h"
 #include "disc_share_ble.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
-#define DISPATCHER_SIZE 2
+#define DISPATCHER_SIZE 3
 
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
@@ -176,6 +177,13 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     }
     g_dispatchers[g_dispatcherSize++] = shareInterface;
 
+    DiscoveryBleDispatcherInterface *approachInterface = DiscApproachBleInit(discInnerCb);
+    if (approachInterface == NULL) {
+        DLOGE("DiscShareBleInit err");
+        return NULL;
+    }
+    g_dispatchers[g_dispatcherSize++] = approachInterface;
+
     return &g_discBleFrameFuncInterface;
 }
 
@@ -197,4 +205,5 @@ void DiscBleDeinit(void)
     g_dispatcherSize = 0;
     DiscSoftBusBleDeinit();
     DiscShareBleDeinit();
+    DiscApproachBleDeinit();
 }

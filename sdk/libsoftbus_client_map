@@ -357,6 +357,11 @@
         "ClientTransProxyGetInfoByChannelId";
         "EnableDiscoveryPolicy";
         "SetDiscoveryPolicy";
+        "CreateMetaSocketServer";
+        "RemoveMetaSocketServer";
+        "OpenAuthMetaSocket";
+        "CloseAuthMetaSocket";
+        "SendMetaData";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
