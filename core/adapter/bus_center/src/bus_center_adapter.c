@@ -72,14 +72,9 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
     const char *devType = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
-            if (LnnGetSettingDeviceName(value, len) == SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnGetSettingDeviceName success");
-                return SOFTBUS_OK;
-            } else {
-                if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
-                    return SOFTBUS_ERR;
-                }
-                return SOFTBUS_OK;
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set default devicename in netledger init");
+            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+                return SOFTBUS_ERR;
             }
             break;
         case COMM_DEVICE_KEY_UDID:
