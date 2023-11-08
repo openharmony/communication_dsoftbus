@@ -34,7 +34,7 @@ int32_t ConnGattServerSend(ConnBleConnection *connection, const uint8_t *data, u
 int32_t ConnGattServerDisconnect(ConnBleConnection *connection);
 int32_t ConnGattServerConnect(ConnBleConnection *connection);
 int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId);
-void RegisterServerListener(const ConnBleServerEventListener *listener, GattServiceType serviceId);
+int32_t RegisterServerListener(const ConnBleServerEventListener *listener, GattServiceType serviceId);
 
 #ifdef __cplusplus
 }

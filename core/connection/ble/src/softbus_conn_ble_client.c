@@ -435,31 +435,6 @@ static int32_t NotificatedConnHandler(int32_t underlayerHandle, ConnBleConnectio
         return status;
     }
 
-    SoftBusBtUuid serviceUuid = {
-        .uuid = (char *)SOFTBUS_SERVICE_UUID,
-        .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
-    };
-    SoftBusBtUuid netUuid = {
-        .uuid = (char *)SOFTBUS_CHARA_BLENET_UUID,
-        .uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
-    };
-    SoftBusBtUuid descriptorUuid = {
-        .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
-        .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
-    };
-    status = SoftbusGattcRegisterNotification(underlayerHandle, &serviceUuid, &netUuid, &descriptorUuid);
-    if (status != SOFTBUS_OK) {
-        CLOGE("register conn characteristic notification failed, connId=%u, handle=%d, err=%d",
-            connection->connectionId, underlayerHandle, status);
-        return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_NOTIFICATION_ERR;
-    }
-    status = UpdateBleConnectionStateInOrder(
-        connection, BLE_CONNECTION_STATE_CONN_NOTIFICATED, BLE_CONNECTION_STATE_NET_NOTIFICATING);
-    if (status != SOFTBUS_OK) {
-        CLOGE("update connection state failed, connId=%u, underlayer handle=%d, error=%d", connection->connectionId,
-            underlayerHandle, status);
-    }
-
     GattServiceType serviceId = connection->serviceId;
     enum ConnBleConnectionState expectState = BLE_CONNECTION_STATE_CONN_NOTIFICATED;
     enum ConnBleConnectionState nextState = BLE_CONNECTION_STATE_NET_NOTIFICATING;
@@ -853,9 +828,14 @@ static int BleCompareGattClientLooperEventFunc(const SoftBusMessage *msg, void *
     return COMPARE_SUCCESS;
 }
 
-void RegisterClientListener(const ConnBleClientEventListener *listener, GattServiceType serviceId)
+int32_t RegisterClientListener(const ConnBleClientEventListener *listener, GattServiceType serviceId)
 {
+    if (serviceId <= GATT_SERVICE_TYPE_UNKOWN || serviceId >= GATT_SERVICE_MAX) {
+        CLOGE("serviceId=%d is invalid", serviceId);
+        return SOFTBUS_INVALID_PARAM;
+    }
     g_clientEventListener[serviceId] = *listener;
+    return SOFTBUS_OK;
 }
 
 int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId)
@@ -883,6 +863,7 @@ int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEvent
     SoftbusGattcRegisterCallback(&gattcCallback);
 
     g_bleGattClientAsyncHandler.handler.looper = looper;
-    RegisterClientListener(listener, serviceId);
+    int32_t status = RegisterClientListener(listener, serviceId);
+    CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, "register client listener failed");
     return SOFTBUS_OK;
 }
