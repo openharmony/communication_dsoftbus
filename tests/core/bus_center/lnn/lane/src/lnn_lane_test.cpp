@@ -782,6 +782,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     LinkRequest reqInfo;
     int32_t ret;
     const char *udid = "testuuid";
+    const char *bleMac = "127.1.1.1";
     LaneDepsInterfaceMock mock;
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
@@ -791,6 +792,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     };
 
     reqInfo.linkType = LANE_BLE;
+    (void)strcpy_s(reqInfo.peerBleMac, MAX_MAC_LEN, bleMac);
     EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_ERR));
