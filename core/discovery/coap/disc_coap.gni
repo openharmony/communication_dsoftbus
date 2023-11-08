@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("../../../dsoftbus.gni")
+import("../../common/dfx/dsoftbus_dfx.gni")
 
 if (dsoftbus_feature_disc_coap == true) {
   disc_coap_src = [
@@ -44,5 +45,7 @@ if (dsoftbus_feature_ex_kits) {
 } else {
   disc_coap_src += [ "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap_capability.c" ]
 }
-disc_coap_deps =
-    [ "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl" ]
+disc_coap_deps = [
+  "$dsoftbus_dfx_path/log:softbus_dfx_log",
+  "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+]

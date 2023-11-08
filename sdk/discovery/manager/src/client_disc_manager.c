@@ -15,11 +15,11 @@
 
 #include "client_disc_manager.h"
 
+#include "disc_log.h"
 #include "disc_server_proxy.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 typedef struct {
     IPublishCallback publishCb;
@@ -34,7 +34,7 @@ int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, co
 
     int32_t ret = ServerIpcPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server PublishService failed, ret = %d", ret);
+        DISC_LOGE(DISC_CONTROL, "Server PublishService failed, ret = %d", ret);
         return ret;
     }
 
@@ -45,7 +45,7 @@ int32_t UnPublishServiceInner(const char *packageName, int32_t publishId)
 {
     int32_t ret = ServerIpcUnPublishService(packageName, publishId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server UnPublishService failed, ret = %d", ret);
+        DISC_LOGE(DISC_CONTROL, "Server UnPublishService failed, ret = %d", ret);
         return ret;
     }
 
@@ -57,7 +57,7 @@ int32_t StartDiscoveryInner(const char *packageName, const SubscribeInfo *info, 
     g_discInfo->subscribeCb = *cb;
     int32_t ret = ServerIpcStartDiscovery(packageName, info);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server StartDiscovery failed, ret = %d", ret);
+        DISC_LOGE(DISC_CONTROL, "Server StartDiscovery failed, ret = %d", ret);
         return ret;
     }
 
@@ -68,7 +68,7 @@ int32_t StopDiscoveryInner(const char *packageName, int32_t subscribeId)
 {
     int32_t ret = ServerIpcStopDiscovery(packageName, subscribeId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Server StopDiscovery failed, ret = %d", ret);
+        DISC_LOGE(DISC_CONTROL, "Server StopDiscovery failed, ret = %d", ret);
         return ret;
     }
 
@@ -82,14 +82,14 @@ int32_t DiscClientInit(void)
     }
     g_discInfo = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
     if (g_discInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "Calloc failed");
+        DISC_LOGE(DISC_INIT, "Calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
     if (DiscServerProxyInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "disc server proxy init failed.");
+        DISC_LOGE(DISC_INIT, "disc server proxy init failed.");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Init success as client side");
+    DISC_LOGI(DISC_INIT, "Init success as client side");
     return SOFTBUS_OK;
 }
 
@@ -101,15 +101,15 @@ void DiscClientDeinit(void)
     SoftBusFree(g_discInfo);
     g_discInfo = NULL;
     DiscServerProxyDeInit();
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DeInit success");
+    DISC_LOGI(DISC_CONTROL, "DeInit success");
 }
 
 void DiscClientOnDeviceFound(const DeviceInfo *device)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDeviceFound, capabilityBitmap = %d",
+    DISC_LOGI(DISC_CONTROL, "Sdk OnDeviceFound, capabilityBitmap = %d",
         device->capabilityBitmap[0]);
     if (g_discInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDeviceFound callback failed!");
+        DISC_LOGE(DISC_CONTROL, "OnDeviceFound callback failed!");
         return;
     }
     g_discInfo->subscribeCb.OnDeviceFound(device);
@@ -117,9 +117,9 @@ void DiscClientOnDeviceFound(const DeviceInfo *device)
 
 void DiscClientOnDiscoverySuccess(int32_t subscribeId)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverySuccess, subscribeId = %d", subscribeId);
+    DISC_LOGI(DISC_CONTROL, "Sdk OnDiscoverySuccess, subscribeId = %d", subscribeId);
     if (g_discInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverySuccess callback failed!");
+        DISC_LOGE(DISC_CONTROL, "OnDiscoverySuccess callback failed!");
         return;
     }
     g_discInfo->subscribeCb.OnDiscoverySuccess(subscribeId);
@@ -127,9 +127,9 @@ void DiscClientOnDiscoverySuccess(int32_t subscribeId)
 
 void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnDiscoverFailed, subscribeId = %d", subscribeId);
+    DISC_LOGI(DISC_CONTROL, "Sdk OnDiscoverFailed, subscribeId = %d", subscribeId);
     if (g_discInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnDiscoverFailed callback failed!");
+        DISC_LOGE(DISC_CONTROL, "OnDiscoverFailed callback failed!");
         return;
     }
     g_discInfo->subscribeCb.OnDiscoverFailed(subscribeId, failReason);
@@ -137,9 +137,9 @@ void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failRea
 
 void DiscClientOnPublishSuccess(int32_t publishId)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishSuccess, publishId = %d", publishId);
+    DISC_LOGI(DISC_CONTROL, "Sdk OnPublishSuccess, publishId = %d", publishId);
     if (g_discInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishSuccess callback failed!");
+        DISC_LOGE(DISC_CONTROL, "OnPublishSuccess callback failed!");
         return;
     }
     g_discInfo->publishCb.OnPublishSuccess(publishId);
@@ -147,9 +147,9 @@ void DiscClientOnPublishSuccess(int32_t publishId)
 
 void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "Sdk OnPublishFail, publishId = %d", publishId);
+    DISC_LOGI(DISC_CONTROL, "Sdk OnPublishFail, publishId = %d", publishId);
     if (g_discInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "OnPublishFail callback failed!");
+        DISC_LOGE(DISC_CONTROL, "OnPublishFail callback failed!");
         return;
     }
     g_discInfo->publishCb.OnPublishFail(publishId, reason);

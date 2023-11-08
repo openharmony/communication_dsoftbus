@@ -16,12 +16,12 @@
 #include "disc_coap.h"
 
 #include <stdio.h>
+#include "disc_log.h"
 #include "disc_nstackx_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
@@ -49,15 +49,15 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
     uint32_t count)
 {
     if (info == NULL || capBitmapNum == 0 || capBitmapNum > CAPABILITY_NUM || count > MAX_CAP_NUM) {
-        DLOGE("invalid param.");
+        DISC_LOGW(DISC_COAP, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    DISC_CHECK_AND_RETURN_RET_LOG((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
-        "CoAP not support approach capability");
+    DISC_CHECK_AND_RETURN_RET_LOGW((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "CoAP not support approach capability");
 
     info->isUpdate = false;
     for (uint32_t i = 0; i < capBitmapNum; i++) {
-        DLOGI("register input bitmap = [%u].", inCapBitmap[i]);
+        DISC_LOGI(DISC_COAP, "register input bitmap = [%u].", inCapBitmap[i]);
         for (uint32_t pos = 0; pos < count; pos++) {
             if (((inCapBitmap[i] >> (pos % INT32_MAX_BIT_NUM)) & 0x1) == 0) {
                 continue;
@@ -68,7 +68,7 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
             }
             (info->capCount)[pos]++;
         }
-        DLOGI("register all cap bitmap = [%u].", (info->allCap)[i]);
+        DISC_LOGI(DISC_COAP, "register all cap bitmap = [%u].", (info->allCap)[i]);
     }
     return SOFTBUS_OK;
 }
@@ -77,16 +77,16 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
     uint32_t count)
 {
     if (info == NULL || capBitmapNum == 0 || capBitmapNum > CAPABILITY_NUM || count > MAX_CAP_NUM) {
-        DLOGE("invalid param.");
+        DISC_LOGW(DISC_COAP, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    DISC_CHECK_AND_RETURN_RET_LOG((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
-        "CoAP not support approach capability");
+    DISC_CHECK_AND_RETURN_RET_LOGW((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "CoAP not support approach capability");
 
     info->isEmpty = true;
     info->isUpdate = false;
     for (uint32_t i = 0; i < capBitmapNum; i++) {
-        DLOGI("unregister input bitmap = [%u].", inCapBitmap[i]);
+        DISC_LOGI(DISC_COAP, "unregister input bitmap = [%u].", inCapBitmap[i]);
         for (uint32_t pos = 0; pos < count; pos++) {
             if (((inCapBitmap[i] >> (pos % INT32_MAX_BIT_NUM)) & 0x1) == 0) {
                 continue;
@@ -101,7 +101,7 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
         if ((info->allCap)[i] != 0) {
             info->isEmpty = false;
         }
-        DLOGI("register all cap bitmap = [%u].", (info->allCap)[i]);
+        DISC_LOGI(DISC_COAP, "register all cap bitmap = [%u].", (info->allCap)[i]);
     }
     return SOFTBUS_OK;
 }
@@ -122,32 +122,33 @@ static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option
 
 static int32_t Publish(const PublishOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        "invalid freq: %d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP,
+        "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "invalid freq: %d", option->freq);
     if (option->ranging) {
-        DLOGW("coap publish not support ranging, is it misuse? just ignore");
+        DISC_LOGW(DISC_COAP, "coap publish not support ranging, is it misuse? just ignore");
     }
 
-    DISC_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "%s publish mutex lock failed", isActive ? "active" : "passive");
     if (RegisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL);
-        DLOGE("merge %s publish capability failed", isActive ? "active" : "passive");
+        DISC_LOGW(DISC_COAP, "merge %s publish capability failed", isActive ? "active" : "passive");
         goto PUB_FAIL;
     }
     if (g_publishMgr->isUpdate && DiscCoapRegisterCapability(CAPABILITY_NUM, g_publishMgr->allCap) != SOFTBUS_OK) {
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL);
-        DLOGE("register all capability to dfinder failed.");
+        DISC_LOGW(DISC_COAP, "register all capability to dfinder failed.");
         goto PUB_FAIL;
     }
     if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen) != SOFTBUS_OK) {
-        DLOGE("register service data to dfinder failed.");
+        DISC_LOGW(DISC_COAP, "register service data to dfinder failed.");
         goto PUB_FAIL;
     }
     if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen,
         option->capabilityBitmap[0]) != SOFTBUS_OK) {
-        DLOGE("register capability data to dfinder failed.");
+        DISC_LOGW(DISC_COAP, "register capability data to dfinder failed.");
         goto PUB_FAIL;
     }
     if (isActive) {
@@ -160,12 +161,12 @@ static int32_t Publish(const PublishOption *option, bool isActive)
         if (DiscCoapStartDiscovery(&discCoapOption) != SOFTBUS_OK) {
             SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
                 SOFTBUS_HISYSEVT_DISCOVER_COAP_START_DISCOVER_FAIL);
-            DLOGE("coap active publish failed, allCap: %u", g_publishMgr->allCap[0]);
+            DISC_LOGE(DISC_COAP, "coap active publish failed, allCap: %u", g_publishMgr->allCap[0]);
             goto PUB_FAIL;
         }
     }
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-    DLOGI("coap %s publish succ, allCap: %u", isActive ? "active" : "passive", g_publishMgr->allCap[0]);
+    DISC_LOGW(DISC_COAP, "coap %s publish succ, allCap: %u", isActive ? "active" : "passive", g_publishMgr->allCap[0]);
     return SOFTBUS_OK;
 PUB_FAIL:
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
@@ -184,22 +185,23 @@ static int32_t CoapStartScan(const PublishOption *option)
 
 static int32_t UnPublish(const PublishOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        "invalid freq: %d", option->freq);
-    DISC_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "invalid freq: %d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "%s unPublish mutex lock failed", isActive ? "active" : "passive");
 
     if (UnregisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-        DLOGE("unRegister %s publish capability failed", isActive ? "active" : "passive");
+        DISC_LOGE(DISC_COAP, "unRegister %s publish capability failed", isActive ? "active" : "passive");
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_CANCEL_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_CANCEL_CAP_FAIL;
     }
     if (g_publishMgr->isUpdate) {
         if (DiscCoapRegisterCapability(CAPABILITY_NUM, g_publishMgr->allCap) != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-            DLOGE("register all capability to dfinder failed.");
+            DISC_LOGE(DISC_COAP, "register all capability to dfinder failed.");
             SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
                 SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL);
             return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL;
@@ -207,20 +209,21 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
     }
     if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-        DLOGE("register service data to dfinder failed.");
+        DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         return SOFTBUS_ERR;
     }
     if (isActive && g_publishMgr->isEmpty) {
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-            DLOGE("coap unpublish failed, allCap: %u", g_publishMgr->allCap[0]);
+            DISC_LOGE(DISC_COAP, "coap unpublish failed, allCap: %u", g_publishMgr->allCap[0]);
             SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
                 SOFTBUS_HISYSEVT_DISCOVER_COAP_STOP_DISCOVER_FAIL);
             return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
         }
     }
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-    DLOGI("coap %s unPublish succ, allCap: %u", isActive ? "active" : "passive", g_publishMgr->allCap[0]);
+    DISC_LOGI(DISC_COAP, "coap %s unPublish succ, allCap: %u", isActive ?
+        "active" : "passive", g_publishMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -236,22 +239,23 @@ static int32_t CoapStopScan(const PublishOption *option)
 
 static int32_t Discovery(const SubscribeOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        "invalid freq: %d", option->freq);
-    DISC_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "invalid freq: %d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "%s discovery mutex lock failed", isActive ? "active" : "passive");
 
     if (RegisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_subscribeMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-        DLOGE("merge %s discovery capability failed", isActive ? "active" : "passive");
+        DISC_LOGE(DISC_COAP, "merge %s discovery capability failed", isActive ? "active" : "passive");
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_MERGE_CAP_FAIL;
     }
     if (g_subscribeMgr->isUpdate) {
         if (DiscCoapSetFilterCapability(CAPABILITY_NUM, g_subscribeMgr->allCap) != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-            DLOGE("set all filter capability to dfinder failed.");
+            DISC_LOGE(DISC_COAP, "set all filter capability to dfinder failed.");
             SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
                 SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
             return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
@@ -259,12 +263,12 @@ static int32_t Discovery(const SubscribeOption *option, bool isActive)
     }
     if (!isActive) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-        DLOGI("coap start passive discovery succ, filters: %u", g_subscribeMgr->allCap[0]);
+        DISC_LOGI(DISC_COAP, "coap start passive discovery succ, filters: %u", g_subscribeMgr->allCap[0]);
         return SOFTBUS_OK;
     }
     if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-        DLOGE("coap stop discovery failed, filters: %u", g_subscribeMgr->allCap[0]);
+        DISC_LOGE(DISC_COAP, "coap stop discovery failed, filters: %u", g_subscribeMgr->allCap[0]);
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_STOP_DISCOVER_FAIL);
         return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
     }
@@ -276,12 +280,12 @@ static int32_t Discovery(const SubscribeOption *option, bool isActive)
     SetDiscCoapOption(&discCoapOption, &discOption, g_subscribeMgr->allCap[0]);
     if (DiscCoapStartDiscovery(&discCoapOption) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-        DLOGE("coap start discovery failed, filters: %u", g_subscribeMgr->allCap[0]);
+        DISC_LOGE(DISC_COAP, "coap start discovery failed, filters: %u", g_subscribeMgr->allCap[0]);
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_START_DISCOVER_FAIL);
         return SOFTBUS_DISCOVER_COAP_START_DISCOVER_FAIL;
     }
     (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-    DLOGI("coap start active discovery succ, filters: %u", g_subscribeMgr->allCap[0]);
+    DISC_LOGI(DISC_COAP, "coap start active discovery succ, filters: %u", g_subscribeMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -297,22 +301,23 @@ static int32_t CoapSubscribe(const SubscribeOption *option)
 
 static int32_t StopDisc(const SubscribeOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOG(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        "invalid freq: %d", option->freq);
-    DISC_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
-        "stop %s discovery mutex lock failed", isActive ? "active" : "passive");
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "invalid freq: %d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
+        DISC_COAP, "stop %s discovery mutex lock failed", isActive ? "active" : "passive");
 
     if (UnregisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_subscribeMgr,  MAX_CAP_NUM) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-        DLOGE("unRegister %s discovery capability failed", isActive ? "active" : "passive");
+        DISC_LOGE(DISC_COAP, "unRegister %s discovery capability failed", isActive ? "active" : "passive");
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_CANCEL_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_CANCEL_CAP_FAIL;
     }
     if (g_subscribeMgr->isUpdate) {
         if (DiscCoapSetFilterCapability(CAPABILITY_NUM, g_subscribeMgr->allCap) != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-            DLOGE("set all filter capability to dfinder failed.");
+            DISC_LOGE(DISC_COAP, "set all filter capability to dfinder failed.");
             SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
                 SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
             return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
@@ -321,14 +326,15 @@ static int32_t StopDisc(const SubscribeOption *option, bool isActive)
     if (isActive && g_subscribeMgr->isEmpty) {
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-            DLOGE("coap stop active discovery failed, filters: %u", g_subscribeMgr->allCap[0]);
+            DISC_LOGE(DISC_COAP, "coap stop active discovery failed, filters: %u", g_subscribeMgr->allCap[0]);
             SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
                 SOFTBUS_HISYSEVT_DISCOVER_COAP_STOP_DISCOVER_FAIL);
             return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
         }
     }
     (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-    DLOGI("coap stop %s discovery succ, filters: %u", isActive ? "active" : "passive", g_subscribeMgr->allCap[0]);
+    DISC_LOGI(DISC_COAP, "coap stop %s discovery succ, filters: %u",
+        isActive ? "active" : "passive", g_subscribeMgr->allCap[0]);
     return SOFTBUS_OK;
 }
 
@@ -354,7 +360,7 @@ static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
     } else if (type == TYPE_ACCOUNT) {
         DiscCoapUpdateAccount();
     } else {
-        DLOGE("invalid info change type: %d", type);
+        DISC_LOGW(DISC_COAP, "invalid info change type: %d", type);
     }
 }
 
@@ -374,7 +380,7 @@ static DiscoveryFuncInterface g_discCoapFuncInterface = {
 static DiscCoapInfo *NewDiscCoapInfo(void)
 {
     DiscCoapInfo *coapInfo = (DiscCoapInfo*)SoftBusCalloc(sizeof(DiscCoapInfo));
-    DISC_CHECK_AND_RETURN_RET_LOG(coapInfo != NULL, NULL, "softbus malloc failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(coapInfo != NULL, NULL, DISC_INIT, "softbus malloc failed");
 
     if (SoftBusMutexInit(&(coapInfo->lock), NULL) != 0) {
         SoftBusFree(coapInfo);
@@ -385,7 +391,7 @@ static DiscCoapInfo *NewDiscCoapInfo(void)
 
 static void DeleteDiscCoapInfo(DiscCoapInfo *coapInfo)
 {
-    DISC_CHECK_AND_RETURN_LOG(coapInfo != NULL, "coapInfo=NULL");
+    DISC_CHECK_AND_RETURN_LOGW(coapInfo != NULL, DISC_COAP, "coapInfo=NULL");
     (void)SoftBusMutexDestroy(&(coapInfo->lock));
     SoftBusFree(coapInfo);
 }
@@ -416,22 +422,22 @@ static int32_t InitCoapManager(void)
 DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
 {
     if (InitCoapManager() != SOFTBUS_OK) {
-        DLOGE("coap manager init failed.");
+        DISC_LOGE(DISC_INIT, "coap manager init failed.");
         return NULL;
     }
     if (DiscNstackxInit() != SOFTBUS_OK) {
-        DLOGE("dfinder init failed.");
+        DISC_LOGE(DISC_INIT, "dfinder init failed.");
         DeinitCoapManager();
         return NULL;
     }
     if (DiscCoapRegisterCb(discInnerCb) != SOFTBUS_OK) {
-        DLOGE("register coap callback to dfinder failed.");
+        DISC_LOGE(DISC_INIT, "register coap callback to dfinder failed.");
         DiscCoapDeinit();
         return NULL;
     }
     SoftBusRegDiscVarDump(COAP_PUBLISH_INFO, &CoapPubInfoDump);
     SoftBusRegDiscVarDump(COAP_SUBSCRIBE_INFO, &CoapSubInfoDump);
-    DLOGI("coap discovery init success.");
+    DISC_LOGI(DISC_INIT, "coap discovery init success.");
     return &g_discCoapFuncInterface;
 }
 
@@ -444,7 +450,7 @@ void DiscCoapDeinit(void)
 static int CoapPubInfoDump(int fd)
 {
     if (SoftBusMutexLock(&(g_publishMgr->lock)) != SOFTBUS_OK) {
-        DLOGE("g_publishMgr mutex lock failed.");
+        DISC_LOGE(DISC_COAP, "g_publishMgr mutex lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
     SOFTBUS_DPRINTF(fd, "\n---------------CoapPublishInfo------------------\n");
@@ -459,7 +465,7 @@ static int CoapPubInfoDump(int fd)
 static int CoapSubInfoDump(int fd)
 {
     if (SoftBusMutexLock(&(g_subscribeMgr->lock)) != SOFTBUS_OK) {
-        DLOGE("g_subscribeMgr mutex lock failed.");
+        DISC_LOGE(DISC_COAP, "g_subscribeMgr mutex lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
     SOFTBUS_DPRINTF(fd, "\n---------------CoapSubscribeInfo------------------\n");

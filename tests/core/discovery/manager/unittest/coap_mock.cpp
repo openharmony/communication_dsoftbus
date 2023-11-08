@@ -14,7 +14,7 @@
  */
 
 #include "coap_mock.h"
-#include "softbus_log_old.h"
+#include "disc_log.h"
 #include "softbus_error_code.h"
 
 using testing::Return;
@@ -27,7 +27,7 @@ DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *callback)
 
 void DiscCoapDeinit()
 {
-    DLOGI("destroy");
+    DISC_LOGI(DISC_TEST, "destroy");
 }
 
 int32_t CoapMock::CoapPublish(const PublishOption *option)

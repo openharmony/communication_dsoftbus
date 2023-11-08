@@ -15,8 +15,8 @@
 
 #include "remote_object_mock.h"
 #include <cstring>
+#include "disc_log.h"
 #include "if_softbus_client.h"
-#include "softbus_log_old.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "securec.h"
 
@@ -25,12 +25,12 @@ namespace OHOS {
 RemoteObjectMock::RemoteObjectMock()
     : IRemoteObject(std::u16string())
 {
-    DLOGI("construct");
+    DISC_LOGI(DISC_TEST, "construct");
 }
 
 RemoteObjectMock::~RemoteObjectMock()
 {
-    DLOGI("destroy");
+    DISC_LOGI(DISC_TEST, "destroy");
     instance_ = nullptr;
 }
 
@@ -68,29 +68,29 @@ bool RemoteObjectMock::GetResult(uint32_t code, const DeviceInfo *deviceInfo, in
                                  int reason)
 {
     if (descriptor_ != ISoftBusClient::GetDescriptor()) {
-        DLOGE("descriptor mismatch");
+        DISC_LOGE(DISC_TEST, "descriptor mismatch");
         return false;
     }
     if (deviceInfo != nullptr) {
         if (memcmp(deviceInfo, &deviceInfo_, sizeof(DeviceInfo)) != 0) {
-            DLOGE("device info mismatch");
+            DISC_LOGE(DISC_TEST, "device info mismatch");
             return false;
         }
     }
     if (code != code_) {
-        DLOGE("code mismatch");
+        DISC_LOGE(DISC_TEST, "code mismatch");
         return false;
     }
     if (publishId != publishId_) {
-        DLOGE("publish id mismatch");
+        DISC_LOGE(DISC_TEST, "publish id mismatch");
         return false;
     }
     if (subscribeId != subscribeId_) {
-        DLOGE("subscribe id mismatch");
+        DISC_LOGE(DISC_TEST, "subscribe id mismatch");
         return false;
     }
     if (reason != reason_) {
-        DLOGE("reason mismatch");
+        DISC_LOGE(DISC_TEST, "reason mismatch");
         return false;
     }
     return true;
@@ -99,7 +99,7 @@ bool RemoteObjectMock::GetResult(uint32_t code, const DeviceInfo *deviceInfo, in
 int RemoteObjectMock::ActionOfSendRequestForOnDeviceFound(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                           MessageOption &option)
 {
-    DLOGI("code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     return memcpy_s(&Get()->deviceInfo_, sizeof(DeviceInfo), data.ReadBuffer(sizeof(DeviceInfo)), sizeof(DeviceInfo));
@@ -108,7 +108,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnDeviceFound(uint32_t code, Message
 int RemoteObjectMock::ActionOfSendRequestForOnDiscoveryFailed(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                               MessageOption &option)
 {
-    DLOGI("code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->subscribeId_ = data.ReadInt32();
@@ -119,7 +119,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnDiscoveryFailed(uint32_t code, Mes
 int RemoteObjectMock::ActionOfSendRequestForOnDiscoverySuccess(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                                MessageOption &option)
 {
-    DLOGI("code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->subscribeId_ = data.ReadInt32();
@@ -129,7 +129,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnDiscoverySuccess(uint32_t code, Me
 int RemoteObjectMock::ActionOfSendRequestForOnPublishSuccess(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                              MessageOption &option)
 {
-    DLOGI("code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->publishId_ = data.ReadInt32();
@@ -139,7 +139,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnPublishSuccess(uint32_t code, Mess
 int RemoteObjectMock::ActionOfSendRequestForOnPublishFail(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                           MessageOption &option)
 {
-    DLOGI("code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->publishId_ = data.ReadInt32();
