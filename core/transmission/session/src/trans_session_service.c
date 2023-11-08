@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@
 
 static bool g_transSessionInitFlag = false;
 
-int TransServerInit(void)
+int32_t TransServerInit(void)
 {
     if (g_transSessionInitFlag) {
         return SOFTBUS_OK;
@@ -56,7 +56,7 @@ int TransServerInit(void)
 
 void TransServerDeinit(void)
 {
-    if (g_transSessionInitFlag == false) {
+    if (!g_transSessionInitFlag) {
         return;
     }
 
@@ -72,8 +72,7 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
     TransDelItemByPackageName(pkgName, pid);
 }
 
-int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid,
-    int32_t pid)
+int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) ||
         !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
