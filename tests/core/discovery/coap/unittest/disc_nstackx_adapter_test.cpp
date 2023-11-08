@@ -19,6 +19,7 @@
 
 #include "bus_center_info_key.h"
 #include "disc_manager.h"
+#include "disc_log.h"
 #include "disc_nstackx_adapter.c"
 #include "disc_nstackx_adapter.h"
 #include "lnn_local_net_ledger.h"
@@ -51,7 +52,7 @@ static void OnDeviceFoundTest(const DeviceInfo *device, const InnerDeviceInfoAdd
 {
     (void)device;
     (void)addtions;
-    DLOGI("OnDeviceFoundTest in");
+    DISC_LOGI(DISC_TEST, "OnDeviceFoundTest in");
     isDeviceFound = true;
     g_testAddtions.medium = addtions->medium;
 }
