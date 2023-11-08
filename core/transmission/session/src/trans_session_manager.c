@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,13 +82,12 @@ bool TransSessionServerIsExist(const char *sessionName)
         return false;
     }
 
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return false;
     }
-
-    SessionServer *pos = NULL;
-    SessionServer *tmp = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server [%s] is exist", sessionName);
@@ -167,13 +166,12 @@ int32_t TransSessionServerDelItem(const char *sessionName)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
     bool isFind = false;
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             isFind = true;
@@ -196,13 +194,12 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
         return;
     }
 
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return;
     }
-
-    SessionServer *pos = NULL;
-    SessionServer *tmp = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if ((strcmp(pos->pkgName, pkgName) == 0) && (pos->pid == pid)) {
             ListDelete(&pos->node);
@@ -226,18 +223,17 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
         return SOFTBUS_ERR;
     }
 
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-
-    SessionServer *pos = NULL;
-    SessionServer *tmp = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             int32_t ret = strcpy_s(pkgName, len, pos->pkgName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-            if (ret != SOFTBUS_OK) {
+            if (ret != EOK) {
                 SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s error ret, [%d]", ret);
                 return SOFTBUS_ERR;
             }
@@ -303,13 +299,12 @@ static int32_t TransListCopy(ListNode *sessionServerList)
         return SOFTBUS_ERR;
     }
 
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex failed");
         return SOFTBUS_ERR;
     }
-
-    SessionServer *pos = NULL;
-    SessionServer *tmp = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         SessionServer *newPos = (SessionServer *)SoftBusMalloc(sizeof(SessionServer));
         if (newPos == NULL) {
