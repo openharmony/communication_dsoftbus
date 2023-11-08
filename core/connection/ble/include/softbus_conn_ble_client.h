@@ -30,7 +30,7 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
 int32_t ConnGattClientSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
 int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePriority priority);
 int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId);
-void RegisterClientListener(const ConnBleClientEventListener *listener, GattServiceType serviceId);
+int32_t RegisterClientListener(const ConnBleClientEventListener *listener, GattServiceType serviceId);
 
 #ifdef __cplusplus
 }
