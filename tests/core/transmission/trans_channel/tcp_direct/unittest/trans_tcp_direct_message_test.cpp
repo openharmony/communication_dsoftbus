@@ -598,4 +598,34 @@ HWTEST_F(TransTcpDirectMessageTest, OpenTcpDirectChannelTest0018, TestSize.Level
     EXPECT_TRUE(ret != SOFTBUS_OK);
     AuthDeinit();
 }
+
+/**
+ * @tc.name: TransGetLocalConfigTest001
+ * @tc.desc: TransGetLocalConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageTest, TransGetLocalConfigTest001, TestSize.Level1)
+{
+    int32_t channelType = -1;
+    int32_t bussinessType = BUSINESS_TYPE_BYTE;
+    uint32_t len;
+    int32_t ret = TransGetLocalConfig(channelType, bussinessType, &len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransGetLocalConfigTest002
+ * @tc.desc: TransGetLocalConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageTest, TransGetLocalConfigTest002, TestSize.Level1)
+{
+    int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
+    int32_t bussinessType = BUSINESS_TYPE_BYTE;
+    uint32_t len;
+    int32_t ret = TransGetLocalConfig(channelType, bussinessType, &len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 }
