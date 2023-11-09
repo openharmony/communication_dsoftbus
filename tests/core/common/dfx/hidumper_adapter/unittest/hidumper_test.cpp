@@ -14,10 +14,10 @@
  */
 #include <gtest/gtest.h>
 
+#include "comm_log.h"
 #include "securec.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_log_old.h"
 #include "softbus_common.h"
 #include "softbus_hidumper_interface.h"
 #include "softbus_hidumper.h"
@@ -544,7 +544,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess007, TestSize.Level1)
 
 int32_t DumpHandlerTest1(int fd, int32_t argc, const char **argv)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "DumpHandlerTest1:fd = %d, argc = %d", fd, argc);
+    COMM_LOGE(COMM_TEST, "DumpHandlerTest1:fd = %d, argc = %d", fd, argc);
     return SOFTBUS_OK;
 }
 /**
