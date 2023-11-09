@@ -63,7 +63,7 @@ SoftBusList *CreateSoftBusList(void)
 {
     SoftBusList *list = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     if (list == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed");
+        COMM_LOGE(COMM_UTILS, "malloc failed");
         return NULL;
     }
     (void)memset_s(list, sizeof(SoftBusList), 0, sizeof(SoftBusList));
@@ -71,7 +71,7 @@ SoftBusList *CreateSoftBusList(void)
     SoftBusMutexAttr mutexAttr;
     mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
     if (SoftBusMutexInit(&list->lock, &mutexAttr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init lock failed");
+        COMM_LOGE(COMM_UTILS, "init lock failed");
         SoftBusFree(list);
         return NULL;
     }
@@ -121,7 +121,7 @@ int32_t SoftBusTimerInit(void)
     SetTimerFunc(HandleTimeoutFun);
     g_timerId = SoftBusCreateTimer(&g_timerId, TIMER_TYPE_PERIOD);
     if (SoftBusStartTimer(g_timerId, TIMER_TIMEOUT) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "start timer failed.");
+        COMM_LOGE(COMM_UTILS, "start timer failed.");
         (void)SoftBusDeleteTimer(g_timerId);
         g_timerId = NULL;
         return SOFTBUS_ERR;
@@ -141,7 +141,7 @@ int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param, inlen:%u, outBufLen:%u", inLen, outBufLen);
+        COMM_LOGE(COMM_UTILS, "invalid param, inlen:%u, outBufLen:%u", inLen, outBufLen);
         return SOFTBUS_ERR;
     }
 
@@ -169,7 +169,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
 {
     (void)outBufLen;
     if ((outBuf == NULL) || (inBuf == NULL) || (inLen % HEXIFY_UNIT_LEN != 0)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_ERR;
     }
 
@@ -184,7 +184,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c >= 'A') && (c <= 'F')) {
             c -= 'A' - DEC_MAX_NUM;
         } else {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HexToString Error! %c", c);
+            COMM_LOGE(COMM_UTILS, "HexToString Error! %c", c);
             return SOFTBUS_ERR;
         }
         unsigned char c2 = *inBuf++;
@@ -195,7 +195,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c2 >= 'A') && (c2 <= 'F')) {
             c2 -= 'A' - DEC_MAX_NUM;
         } else {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HexToString Error! %c2", c2);
+            COMM_LOGE(COMM_UTILS, "HexToString Error! %c2", c2);
             return SOFTBUS_ERR;
         }
         *outBuf++ = (c << HEX_MAX_BIT_NUM) | c2;
@@ -208,7 +208,7 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "outBufLen=%d inLen=%d", outBufLen, inLen);
+        COMM_LOGE(COMM_UTILS, "outBufLen=%d inLen=%d", outBufLen, inLen);
         return SOFTBUS_ERR;
     }
 
@@ -448,7 +448,7 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
         ret = ConvertBytesToHexString(signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, dataLen);
     }
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "intercept signaling msg faile");
+        COMM_LOGE(COMM_UTILS, "intercept signaling msg faile");
         return;
     }
     if (module == SOFTBUS_LOG_DISC) {
@@ -517,11 +517,11 @@ void IdInstead(char *data, uint32_t length)
 void DataMasking(const char *data, uint32_t length, char delimiter, char *container)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return;
     }
     if (memcpy_s(container, length, data, length) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "container memcpy_s failed");
+        COMM_LOGE(COMM_UTILS, "container memcpy_s failed");
         return;
     }
     switch (delimiter) {

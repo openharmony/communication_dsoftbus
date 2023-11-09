@@ -15,13 +15,13 @@
 
 #include "softbus_hisysevt_discreporter.h"
 
+#include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
 #include "softbus_hisysevt_common.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define MODULE_NAME_MAX_LEN 33
@@ -143,7 +143,7 @@ static int32_t SetMsgParamNameAndType(SoftBusEvtReportMsg *msg, SoftBusEvtParamS
         param = &msg->paramArray[i];
         param->paramType = paramSize[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, paramSize[i].paramName) != EOK) {
-            MLOGE("set msg strcpy_s param name %s fail", paramSize[i].paramName);
+            COMM_LOGE(COMM_EVENT, "set msg strcpy_s param name %s fail", paramSize[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -154,10 +154,10 @@ static int32_t SetDevFirstDiscMsgParamValve(SoftBusEvtReportMsg *msg, uint32_t m
 {
     SoftBusEvtParam *param = msg->paramArray;
     errno_t ret = strcpy_s(param[SOFTBUS_EVT_PARAM_ZERO].paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, g_softbusVersion);
-    COMM_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, "strcpy softbus version fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy softbus version fail");
 
     ret = strcpy_s(param[SOFTBUS_EVT_PARAM_ONE].paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, g_packageVersion);
-    COMM_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, "strcpy package version fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy package version fail");
 
     param[SOFTBUS_EVT_PARAM_TWO].paramValue.u32v = medium;
     FirstDiscTime *firstDisc = &g_firstDiscTime[medium];
@@ -175,18 +175,18 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint32_t m
 {
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_FIRST_DISC_DURATION);
     if (errnoRet != EOK) {
-        MLOGE("strcpy evtname %s fail", STATISTIC_EVT_FIRST_DISC_DURATION);
+        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_FIRST_DISC_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = FIRST_DISC_DURATION_PARAM_NUM;
 
     if (SetMsgParamNameAndType(msg, g_firstDsicTimeParam) != SOFTBUS_OK) {
-        MLOGE("set param name and type fail");
+        COMM_LOGE(COMM_EVENT, "set param name and type fail");
         return SOFTBUS_ERR;
     }
     if (SetDevFirstDiscMsgParamValve(msg, medium) != SOFTBUS_OK) {
-        MLOGE("set param valve fail");
+        COMM_LOGE(COMM_EVENT, "set param valve fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -197,7 +197,7 @@ static inline void ClearDiscDetails()
     DiscDetailNode *item = NULL;
     DiscDetailNode *next = NULL;
     if (g_discDetailList.prev == NULL && g_discDetailList.next == NULL) {
-        MLOGE("g_discDetailList is NULL");
+        COMM_LOGE(COMM_EVENT, "g_discDetailList is NULL");
         return;
     }
 
@@ -223,9 +223,9 @@ static DiscDetailNode *GetDiscDetailByModuleName(char *moduleName)
 static int32_t AddDiscDetailNode(DiscDetailNode **discDetailNode, char *moduleName)
 {
     DiscDetailNode *newNode = (DiscDetailNode *)SoftBusCalloc(sizeof(DiscDetailNode));
-    COMM_CHECK_AND_RETURN_RET_LOG(newNode != NULL, SOFTBUS_ERR, "malloc fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->moduleName, MODULE_NAME_MAX_LEN, moduleName) != EOK) {
-        MLOGE("strcpy module name %s fail", moduleName);
+        COMM_LOGE(COMM_EVENT, "strcpy module name %s fail", moduleName);
         SoftBusFree(newNode);
         return SOFTBUS_ERR;
     }
@@ -242,7 +242,7 @@ static int32_t AddDiscDetailNode(DiscDetailNode **discDetailNode, char *moduleNa
 static int32_t SoftBusCreateDiscDetailsMsg(SoftBusEvtReportMsg *msg, DiscDetailNode *discDetailItem)
 {
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISCOVERY_DETAILS);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy evtName %s fail",
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy evtName %s fail",
                                   STATISTIC_EVT_DISCOVERY_DETAILS);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = DISCOVERY_DETAILS_PARAM_NUM;
@@ -250,38 +250,42 @@ static int32_t SoftBusCreateDiscDetailsMsg(SoftBusEvtReportMsg *msg, DiscDetailN
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, MODULE_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", MODULE_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", MODULE_KEY);
     errnoRet = strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, discDetailItem->moduleName);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy moduleName %s fail", g_softbusVersion);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy moduleName %s fail", g_softbusVersion);
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_TYPE_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", DISC_TYPE_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", DISC_TYPE_KEY);
     param->paramValue.u32v = discDetailItem->discType;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT64;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DURATION_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", DURATION_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", DURATION_KEY);
     param->paramValue.u64v = discDetailItem->duration;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, REPORT_TIMES_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", REPORT_TIMES_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName %s fail", REPORT_TIMES_KEY);
     param->paramValue.u32v = discDetailItem->repTimes;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FOUR];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DEVICE_NUM_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", DEVICE_NUM_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName %s fail", DEVICE_NUM_KEY);
     param->paramValue.u32v = discDetailItem->devNum;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FIVE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_TIMES_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", DISC_TIMES_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName %s fail", DISC_TIMES_KEY);
     param->paramValue.u32v = discDetailItem->discTimes;
     return SOFTBUS_OK;
 }
@@ -289,7 +293,7 @@ static int32_t SoftBusCreateDiscDetailsMsg(SoftBusEvtReportMsg *msg, DiscDetailN
 static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
 {
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISCOVERY_BLE_RSSI);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy evtname %s fail",
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy evtname %s fail",
                                   STATISTIC_EVT_DISCOVERY_BLE_RSSI);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = DISCOVERY_BLE_RSSI_PARAM_NUM;
@@ -297,7 +301,7 @@ static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, RANGE_ID_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", RANGE_ID_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", RANGE_ID_KEY);
     for (int i = 0; i < SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE; i++) {
         param->paramValue.u32a[i] = g_bleRssiRangeId[i];
     }
@@ -305,7 +309,7 @@ static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, RANGE_DATA_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOG(errnoRet == EOK, SOFTBUS_ERR, "strcpy paramName %s fail", RANGE_DATA_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", RANGE_DATA_KEY);
     for (int i = 0; i < SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE; i++) {
         param->paramValue.u32a[i] = g_bleRssiRangeData[i];
     }
@@ -314,14 +318,14 @@ static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportFirstDiscDurationEvt(void)
 {
-    MLOGD("report first disc duration event");
+    COMM_LOGD(COMM_EVENT, "report first disc duration event");
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(FIRST_DISC_DURATION_PARAM_NUM);
-    COMM_CHECK_AND_RETURN_RET_LOG(msg != NULL, SOFTBUS_ERR, "create reportMsg fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_ERR, COMM_EVENT, "create reportMsg fail");
     for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         if (SoftBusMutexLock(&g_firstDiscTime[i].lock) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
             ClearFirstDiscTime();
-            MLOGE("lock first disc time fail");
+            COMM_LOGE(COMM_EVENT, "lock first disc time fail");
             return SOFTBUS_ERR;
         }
         if (g_firstDiscTime[i].mDiscTotalCount == 0) {
@@ -332,14 +336,14 @@ static int32_t SoftBusReportFirstDiscDurationEvt(void)
             SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
             SoftbusFreeEvtReporMsg(msg);
             ClearFirstDiscTime();
-            MLOGE("create first disc duration reportMsg fail");
+            COMM_LOGE(COMM_EVENT, "create first disc duration reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
             SoftbusFreeEvtReporMsg(msg);
             ClearFirstDiscTime();
-            MLOGE("write first disc duration reportMsg fail");
+            COMM_LOGE(COMM_EVENT, "write first disc duration reportMsg fail");
             return SOFTBUS_ERR;
         }
         SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
@@ -358,13 +362,13 @@ static inline void FreeDiscDetailsMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportDiscDetailsEvt(void)
 {
-    MLOGD("report disc detail event");
+    COMM_LOGD(COMM_EVENT, "report disc detail event");
     int32_t ret = SoftBusMutexLock(&g_discDetailLock);
-    COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "disc detail lock fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, "disc detail lock fail");
 
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(DISCOVERY_DETAILS_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("create disc details reportMsg fail");
+        COMM_LOGE(COMM_EVENT, "create disc details reportMsg fail");
         ClearDiscDetails();
         (void)SoftBusMutexUnlock(&g_discDetailLock);
         return SOFTBUS_MEM_ERR;
@@ -375,11 +379,11 @@ static int32_t SoftBusReportDiscDetailsEvt(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_discDetailList), DiscDetailNode, node) {
         if (SoftBusCreateDiscDetailsMsg(msg, item) != SOFTBUS_OK) {
             FreeDiscDetailsMsg(msg);
-            MLOGE("create first disc detials reportMsg fail");
+            COMM_LOGE(COMM_EVENT, "create first disc detials reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
-            MLOGE("write disc detail evt fail");
+            COMM_LOGE(COMM_EVENT, "write disc detail evt fail");
             FreeDiscDetailsMsg(msg);
             return SOFTBUS_ERR;
         }
@@ -397,24 +401,24 @@ static inline void FreeDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
 
 static int32_t SoftBusReportDiscBleRssiEvt(void)
 {
-    MLOGD("report disc ble rssi event");
+    COMM_LOGD(COMM_EVENT, "report disc ble rssi event");
     int32_t ret = SoftBusMutexLock(&g_bleRssiRangeLock);
-    COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "ble rssi range lock fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, "ble rssi range lock fail");
 
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(DISCOVERY_BLE_RSSI_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("create disc ble rssi reportMsg fail");
+        COMM_LOGE(COMM_EVENT, "create disc ble rssi reportMsg fail");
         ClearBleRssi();
         SoftBusMutexUnlock(&g_bleRssiRangeLock);
         return SOFTBUS_MEM_ERR;
     }
     if (SoftBusCreateDiscBleRssiMsg(msg) != SOFTBUS_OK) {
         FreeDiscBleRssiMsg(msg);
-        MLOGE("create disc ble rssi reportMsg fail");
+        COMM_LOGE(COMM_EVENT, "create disc ble rssi reportMsg fail");
         return SOFTBUS_ERR;
     }
     if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
-        MLOGE("write disc ble rssi evt fail");
+        COMM_LOGE(COMM_EVENT, "write disc ble rssi evt fail");
         FreeDiscBleRssiMsg(msg);
         return SOFTBUS_ERR;
     }
@@ -424,13 +428,13 @@ static int32_t SoftBusReportDiscBleRssiEvt(void)
 
 int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
 {
-    MLOGD("record first disc time start");
+    COMM_LOGD(COMM_EVENT, "record first disc time start");
     if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT || medium < SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE) {
-        MLOGE("medium is invalid");
+        COMM_LOGE(COMM_EVENT, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_firstDiscTime[medium].lock) != SOFTBUS_OK) {
-        MLOGE("first disc time lock fail");
+        COMM_LOGE(COMM_EVENT, "first disc time lock fail");
         return SOFTBUS_ERR;
     }
     FirstDiscTime *record = &g_firstDiscTime[medium];
@@ -452,7 +456,7 @@ int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
         record->mDiscCount5++;
     }
     if (SoftBusMutexUnlock(&record->lock) != SOFTBUS_OK) {
-        MLOGE("record first disc time unlock fail");
+        COMM_LOGE(COMM_EVENT, "record first disc time unlock fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -461,15 +465,16 @@ int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
 int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_t repTimes, uint32_t devNum,
                                     uint32_t discTimes)
 {
-    MLOGD("record ble disc detail");
-    COMM_CHECK_AND_RETURN_RET_LOG(IsValidString(moduleName, MODULE_NAME_MAX_LEN), SOFTBUS_ERR, "invalid param!");
+    COMM_LOGD(COMM_EVENT, "record ble disc detail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(moduleName, MODULE_NAME_MAX_LEN), SOFTBUS_ERR, COMM_EVENT,
+        "invalid param!");
     int32_t ret = SoftBusMutexLock(&g_discDetailLock);
-    COMM_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "disc detail lock fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, "disc detail lock fail");
     DiscDetailNode *discDetailNode = GetDiscDetailByModuleName(moduleName);
     if (discDetailNode == NULL) {
         ret = AddDiscDetailNode(&discDetailNode, moduleName);
         if (ret != SOFTBUS_OK) {
-            MLOGE("add disc detail node fail");
+            COMM_LOGE(COMM_EVENT, "add disc detail node fail");
             SoftBusMutexUnlock(&g_discDetailLock);
             return SOFTBUS_ERR;
         }
@@ -484,12 +489,12 @@ int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_
 
 int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
 {
-    MLOGD("record disc ble rssi");
+    COMM_LOGD(COMM_EVENT, "record disc ble rssi");
     if (rssi > MAX_RANGE_ID || rssi <= MIN_RANGE_ID) {
-        MLOGE("invalid param");
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    COMM_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_ERR,
+    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, 
                                   "ble rssi range lock fail");
 
     size_t rangeId = (MAX_RANGE_ID - rssi) / INTERVAL_OF_RSSI;
@@ -502,7 +507,7 @@ int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
 static int32_t InitDiscItemMutexLock(uint32_t index, SoftBusMutexAttr *mutexAttr)
 {
     if (SoftBusMutexInit(&g_firstDiscTime[index].lock, mutexAttr) != SOFTBUS_OK) {
-        MLOGE("init first disc time lock fail");
+        COMM_LOGE(COMM_EVENT, "init first disc time lock fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -511,18 +516,18 @@ static int32_t InitDiscItemMutexLock(uint32_t index, SoftBusMutexAttr *mutexAttr
 static int32_t InitDiscEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
-    COMM_CHECK_AND_RETURN_RET_LOG(SoftBusMutexInit(&g_discDetailLock, &mutexAttr) == SOFTBUS_OK, SOFTBUS_ERR,
-                                  "init disc detail lock fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_discDetailLock, &mutexAttr) == SOFTBUS_OK, SOFTBUS_ERR,
+                                  COMM_EVENT, "init disc detail lock fail");
     int32_t nRet = SoftBusMutexInit(&g_bleRssiRangeLock, &mutexAttr);
     if (nRet != SOFTBUS_OK) {
-        MLOGE("init ble rssi range lock fail");
+        COMM_LOGE(COMM_EVENT, "init ble rssi range lock fail");
         (void)SoftBusMutexDestroy(&g_discDetailLock);
     }
     for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         nRet = InitDiscItemMutexLock(i, &mutexAttr);
     }
     if (nRet != SOFTBUS_OK) {
-        MLOGE("init disc first time lock fail");
+        COMM_LOGE(COMM_EVENT, "init disc first time lock fail");
         (void)SoftBusMutexDestroy(&g_discDetailLock);
         (void)SoftBusMutexDestroy(&g_bleRssiRangeLock);
     }
@@ -531,9 +536,9 @@ static int32_t InitDiscEvtMutexLock(void)
 
 int32_t SoftbusReportDiscFault(SoftBusDiscMedium medium, int32_t errCode)
 {
-    MLOGI("report disc fault event");
+    COMM_LOGI(COMM_EVENT, "report disc fault event");
     if (medium >= SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT || medium < SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE) {
-        MLOGE("medium is invalid");
+        COMM_LOGE(COMM_EVENT, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     SoftBusFaultEvtInfo discFaultInfo;
@@ -542,7 +547,7 @@ int32_t SoftbusReportDiscFault(SoftBusDiscMedium medium, int32_t errCode)
     discFaultInfo.linkType = medium;
     discFaultInfo.errorCode = errCode;
     if (SoftBusReportBusCenterFaultEvt(&discFaultInfo) != SOFTBUS_OK) {
-        MLOGE("report disc fault evt fail");
+        COMM_LOGE(COMM_EVENT, "report disc fault evt fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -552,7 +557,7 @@ int32_t InitDiscStatisticSysEvt(void)
 {
     ListInit(&g_discDetailList);
     if (InitDiscEvtMutexLock() != SOFTBUS_OK) {
-        MLOGE("disc Statistic Evt Lock Init Fail!");
+        COMM_LOGE(COMM_EVENT, "disc Statistic Evt Lock Init Fail!");
         return SOFTBUS_ERR;
     }
     ClearDiscDetails();

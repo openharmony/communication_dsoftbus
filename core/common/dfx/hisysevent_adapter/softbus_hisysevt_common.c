@@ -17,6 +17,7 @@
 
 #include "securec.h"
 
+#include "comm_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_hisysevent.h"
 #include "softbus_adapter_mem.h"
@@ -26,7 +27,6 @@
 #include "softbus_hisysevt_connreporter.h"
 #include "softbus_hisysevt_discreporter.h"
 #include "softbus_hisysevt_transreporter.h"
-#include "softbus_log_old.h"
 #include "softbus_hisysevt_nstack.h"
 
 #define MS_OF_DAY (24 * 3600 * 1000)
@@ -89,7 +89,7 @@ static inline SoftBusHandler* CreateHandler(SoftBusLooper *looper, HandleMessage
 {
     SoftBusHandler *handler = SoftBusMalloc(sizeof(SoftBusHandler));
     if (handler == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create handler failed");
+        COMM_LOGE(COMM_EVENT, "create handler failed");
         return NULL;
     }
     handler->looper = looper;
@@ -103,7 +103,7 @@ static SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc ca
 {
     SoftBusMessage* msg = SoftBusMalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc softbus message failed");
+        COMM_LOGE(COMM_EVENT, SOFTBUS_LOG_ERROR, "malloc softbus message failed");
         return NULL;
     }
     SoftBusHandler *handler = CreateHandler(looper, callback);

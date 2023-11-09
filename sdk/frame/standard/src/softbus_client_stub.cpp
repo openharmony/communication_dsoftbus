@@ -21,6 +21,7 @@
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_channel_callback.h"
+#include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
@@ -28,7 +29,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log_old.h"
 
 namespace OHOS {
 SoftBusClientStub::SoftBusClientStub()
@@ -82,9 +82,9 @@ SoftBusClientStub::SoftBusClientStub()
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusClientStub::OnReceived, code = %u", code);
+    COMM_LOGI(COMM_SDK, "SoftBusClientStub::OnReceived, code = %u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusClientStub: ReadInterfaceToken faild!");
+        COMM_LOGE(COMM_SDK, "SoftBusClientStub: ReadInterfaceToken faild!");
         return SOFTBUS_ERR;
     }
     auto itFunc = memberFuncMap_.find(code);
@@ -94,7 +94,7 @@ int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
             return (this->*memberFunc)(data, reply);
         }
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusClientStub: default case, need check.");
+    COMM_LOGI(COMM_SDK, "SoftBusClientStub: default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -102,12 +102,12 @@ int32_t SoftBusClientStub::OnClientPermissonChangeInner(MessageParcel &data, Mes
 {
     int32_t state;
     if (!data.ReadInt32(state)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnClientPermissonChangeInner read state failed!");
+        COMM_LOGE(COMM_SDK, "OnClientPermissonChangeInner read state failed!");
         return SOFTBUS_ERR;
     }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnClientPermissonChangeInner read pkgName failed!");
+        COMM_LOGE(COMM_SDK, "OnClientPermissonChangeInner read pkgName failed!");
         return SOFTBUS_ERR;
     }
     PermissionStateChange(pkgName, state);
@@ -219,64 +219,64 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
 {
     const char *sessionName = data.ReadCString();
     if (sessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read sessionName failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read sessionName failed!");
         return SOFTBUS_ERR;
     }
 
     ChannelInfo channel = {0};
     if (!data.ReadInt32(channel.channelId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     if (!data.ReadInt32(channel.channelType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.fd = data.ReadFileDescriptor();
     }
     if (!data.ReadBool(channel.isServer)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     if (!data.ReadBool(channel.isEnabled)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     if (!data.ReadBool(channel.isEncrypt)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read isEncrypt failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read isEncrypt failed!");
         return SOFTBUS_ERR;
     }
     if (!data.ReadInt32(channel.peerUid)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     if (!data.ReadInt32(channel.peerPid)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     channel.groupId = (char *)data.ReadCString();
     if (channel.groupId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read addr failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
         return SOFTBUS_ERR;
     }
     if (!data.ReadUint32(channel.keyLen)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner len failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner len failed!");
         return SOFTBUS_ERR;
     }
     channel.sessionKey = (char *)data.ReadRawData(channel.keyLen);
     if (channel.sessionKey == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read addr failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
         return SOFTBUS_ERR;
     }
     channel.peerSessionName = (char *)data.ReadCString();
     if (channel.peerSessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read addr failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
         return SOFTBUS_ERR;
     }
     channel.peerDeviceId = (char *)data.ReadCString();
     if (channel.peerDeviceId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read addr failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read addr failed!");
         return SOFTBUS_ERR;
     }
     data.ReadInt32(channel.businessType);
@@ -294,14 +294,14 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     data.ReadInt32(channel.algorithm);
     data.ReadInt32(channel.crc);
     if (!data.ReadUint32(channel.dataConfig)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner data config failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner data config failed!");
         return SOFTBUS_ERR;
     }
 
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
     if (!res) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner write reply failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -311,25 +311,25 @@ int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, Message
 {
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner read channel id failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenFailedInner read channel id failed!");
         return SOFTBUS_ERR;
     }
 
     int32_t channelType;
     if (!data.ReadInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner read channel type failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenFailedInner read channel type failed!");
         return SOFTBUS_ERR;
     }
 
     int32_t errCode;
     if (!data.ReadInt32(errCode)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner read channel type failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenFailedInner read channel type failed!");
         return SOFTBUS_ERR;
     }
     
     int32_t ret = OnChannelOpenFailed(channelId, channelType, errCode);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailed failed! ret=%d.", ret);
+        COMM_LOGE(COMM_SDK, "OnChannelOpenFailed failed! ret=%d.", ret);
     }
     return ret;
 }
@@ -338,17 +338,17 @@ int32_t SoftBusClientStub::OnChannelLinkDownInner(MessageParcel &data, MessagePa
 {
     const char *networkId = data.ReadCString();
     if (networkId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDownInner read networkId failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelLinkDownInner read networkId failed!");
         return SOFTBUS_ERR;
     }
     int32_t routeType;
     if (!data.ReadInt32(routeType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDownInner read routeType failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelLinkDownInner read routeType failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnChannelLinkDown(networkId, routeType);
     if (retReply != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelLinkDown proc error!");
+        COMM_LOGE(COMM_SDK, "OnChannelLinkDown proc error!");
     }
     return SOFTBUS_OK;
 }
@@ -357,20 +357,20 @@ int32_t SoftBusClientStub::OnChannelClosedInner(MessageParcel &data, MessageParc
 {
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelClosedInner read channel id failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelClosedInner read channel id failed!");
         return SOFTBUS_ERR;
     }
 
     int32_t channelType;
     if (!data.ReadInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenFailedInner read channel type failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenFailedInner read channel type failed!");
         return SOFTBUS_ERR;
     }
 
     int ret = OnChannelClosed(channelId, channelType);
     bool res = reply.WriteInt32(ret);
     if (!res) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelClosedInner write reply failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelClosedInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -380,27 +380,27 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
 {
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read channel id failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read channel id failed!");
         return SOFTBUS_ERR;
     }
     int32_t channelType;
     if (!data.ReadInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read channel type failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read channel type failed!");
         return SOFTBUS_ERR;
     }
     uint32_t len;
     if (!data.ReadUint32(len)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read data len failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read data len failed!");
         return SOFTBUS_ERR;
     }
     char *dataInfo = (char *)data.ReadRawData(len);
     if (dataInfo == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelOpenedInner read dataInfo failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read dataInfo failed!");
         return SOFTBUS_ERR;
     }
     int32_t type;
     if (!data.ReadInt32(type)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner read type failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner read type failed!");
         return SOFTBUS_ERR;
     }
     char *infoData = (char *)SoftBusMalloc(len);
@@ -409,7 +409,7 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
     SoftBusFree(infoData);
     bool res = reply.WriteInt32(ret);
     if (!res) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelMsgReceivedInner write reply failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelMsgReceivedInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -420,33 +420,33 @@ int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessagePa
     SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnChannelQosEventInner");
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read channel id failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read channel id failed!");
         return SOFTBUS_ERR;
     }
     int32_t channelType;
     if (!data.ReadInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read channel type failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read channel type failed!");
         return SOFTBUS_ERR;
     }
     int32_t eventId;
     if (!data.ReadInt32(eventId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read eventId failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read eventId failed!");
         return SOFTBUS_ERR;
     }
     int32_t tvCount;
     if (!data.ReadInt32(tvCount) || tvCount <= 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read tv count:%d failed!", tvCount);
+        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read tv count:%d failed!", tvCount);
         return SOFTBUS_ERR;
     }
     QosTv *tvList = (QosTv *)data.ReadRawData(sizeof(QosTv) * tvCount);
     if (tvList == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner read tv list failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read tv list failed!");
         return SOFTBUS_ERR;
     }
     int ret = OnChannelQosEvent(channelId, channelType, eventId, tvCount, tvList);
     bool res = reply.WriteInt32(ret);
     if (!res) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnChannelQosEventInner write reply failed!");
+        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -456,31 +456,30 @@ int32_t SoftBusClientStub::OnJoinLNNResultInner(MessageParcel &data, MessageParc
 {
     uint32_t addrTypeLen;
     if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnJoinLNNResultInner read addr type length:%d failed!", addrTypeLen);
+        COMM_LOGE(COMM_SDK, "OnJoinLNNResultInner read addr type length:%d failed!", addrTypeLen);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
     if (addr == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinLNNResultInner read addr failed!");
+        COMM_LOGE(COMM_SDK, "OnJoinLNNResultInner read addr failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode;
     if (!data.ReadInt32(retCode)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinLNNResultInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnJoinLNNResultInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     const char *networkId = nullptr;
     if (retCode == 0) {
         networkId = data.ReadCString();
         if (networkId == nullptr) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinLNNResultInner read networkId failed!");
+            COMM_LOGE(COMM_SDK, "OnJoinLNNResultInner read networkId failed!");
             return SOFTBUS_ERR;
         }
     }
     int32_t retReply = OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
     if (retReply != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinLNNResultInner notify join result failed!");
+        COMM_LOGE(COMM_SDK, "OnJoinLNNResultInner notify join result failed!");
     }
     return SOFTBUS_OK;
 }
@@ -491,35 +490,33 @@ int32_t SoftBusClientStub::OnJoinMetaNodeResultInner(MessageParcel &data, Messag
     uint32_t infoLen;
     void *addr = nullptr;
     if (!data.ReadUint32(addrTypeLen) || (addrTypeLen != 0 && addrTypeLen != sizeof(ConnectionAddr))) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnJoinMetaNodeResultInner read addrTypeLen:%d failed!", addrTypeLen);
+        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read addrTypeLen:%d failed!", addrTypeLen);
         return SOFTBUS_ERR;
     }
     if (addrTypeLen != 0) {
         addr = (void *)data.ReadRawData(addrTypeLen);
         if (addr == nullptr) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read addr failed!");
+            COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read addr failed!");
             return SOFTBUS_ERR;
         }
     }
     if (!data.ReadUint32(infoLen) || (infoLen != 0 && infoLen != sizeof(MetaBasicInfo))) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnJoinMetaNodeResultInner read infoLen:%d failed!", infoLen);
+        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read infoLen:%d failed!", infoLen);
         return SOFTBUS_ERR;
     }
     void *metaInfo = (void *)data.ReadRawData(infoLen);
     if (metaInfo == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read metaInfo failed!");
+        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read metaInfo failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode;
     if (!data.ReadInt32(retCode)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, infoLen, retCode);
     if (retReply != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResultInner notify join result failed!");
+        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner notify join result failed!");
     }
     return SOFTBUS_OK;
 }
@@ -528,17 +525,17 @@ int32_t SoftBusClientStub::OnLeaveLNNResultInner(MessageParcel &data, MessagePar
 {
     const char *networkId = data.ReadCString();
     if (networkId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveLNNResultInner read networkId failed!");
+        COMM_LOGE(COMM_SDK, "OnLeaveLNNResultInner read networkId failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode;
     if (!data.ReadInt32(retCode)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveLNNResultInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnLeaveLNNResultInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnLeaveLNNResult(networkId, retCode);
     if (retReply != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveLNNResultInner notify leave result failed!");
+        COMM_LOGE(COMM_SDK, "OnLeaveLNNResultInner notify leave result failed!");
     }
     return SOFTBUS_OK;
 }
@@ -547,17 +544,17 @@ int32_t SoftBusClientStub::OnLeaveMetaNodeResultInner(MessageParcel &data, Messa
 {
     const char *networkId = data.ReadCString();
     if (networkId == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResultInner read networkId failed!");
+        COMM_LOGE(COMM_SDK, "OnLeaveMetaNodeResultInner read networkId failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode;
     if (!data.ReadInt32(retCode)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResultInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnLeaveMetaNodeResultInner read retCode failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnLeaveMetaNodeResult(networkId, retCode);
     if (retReply != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResultInner notify leave result failed!");
+        COMM_LOGE(COMM_SDK, "OnLeaveMetaNodeResultInner notify leave result failed!");
     }
     return SOFTBUS_OK;
 }
@@ -566,28 +563,27 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
 {
     const char *pkgName = data.ReadCString();
     if (strlen(pkgName) == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid package name, length is zero");
+        COMM_LOGE(COMM_SDK, "Invalid package name, length is zero");
         return SOFTBUS_ERR;
     }
     bool isOnline = false;
     if (!data.ReadBool(isOnline)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChangedInner read online state failed!");
+        COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner read online state failed!");
         return SOFTBUS_ERR;
     }
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnNodeOnlineStateChangedInner read info type length:%d failed!", infoTypeLen);
+        COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner read info type length:%d failed!", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
     if (info == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChangedInner read basic info failed!");
+        COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner read basic info failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnNodeOnlineStateChanged(pkgName, isOnline, info, infoTypeLen);
     if (!reply.WriteInt32(retReply)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChangedInner write reply failed!");
+        COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -597,29 +593,28 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
 {
     const char *pkgName = data.ReadCString();
     if (strlen(pkgName) == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Invalid package name, length is zero");
+        COMM_LOGE(COMM_SDK, "Invalid package name, length is zero");
         return SOFTBUS_ERR;
     }
     int32_t type;
     if (!data.ReadInt32(type)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner read type failed!");
+        COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnNodeBasicInfoChangedInner type %d", type);
+    COMM_LOGI(COMM_SDK, "OnNodeBasicInfoChangedInner type %d", type);
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnNodeBasicInfoChangedInner read info type length:%d failed!", infoTypeLen);
+        COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read info type length:%d failed!", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
     if (info == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner read basic info failed!");
+        COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read basic info failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = OnNodeBasicInfoChanged(pkgName, info, infoTypeLen, type);
     if (!reply.WriteInt32(retReply)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChangedInner write reply failed!");
+        COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -629,24 +624,23 @@ int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessagePar
 {
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(TimeSyncResultInfo)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnTimeSyncResultInner read info length:%d failed!", infoTypeLen);
+        COMM_LOGE(COMM_SDK, "OnTimeSyncResultInner read info length:%d failed!", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
     if (info == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner read info failed!");
+        COMM_LOGE(COMM_SDK, "OnTimeSyncResultInner read info failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode;
     if (!data.ReadInt32(retCode)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner read retCode failed!");
+        COMM_LOGE(COMM_SDK, "OnTimeSyncResultInner read retCode failed!");
         return SOFTBUS_ERR;
     }
 
     int32_t retReply = OnTimeSyncResult(info, infoTypeLen, retCode);
     if (!reply.WriteInt32(retReply)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnTimeSyncResultInner write reply failed!");
+        COMM_LOGE(COMM_SDK, "OnTimeSyncResultInner write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -656,12 +650,12 @@ int32_t SoftBusClientStub::OnPublishLNNResultInner(MessageParcel &data, MessageP
 {
     int32_t publishId;
     if (!data.ReadInt32(publishId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnPublishLNNResultInner read publishId failed!");
+        COMM_LOGE(COMM_SDK, "OnPublishLNNResultInner read publishId failed!");
         return SOFTBUS_ERR;
     }
     int32_t reason;
     if (!data.ReadInt32(reason)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnPublishLNNResultInner read reason failed!");
+        COMM_LOGE(COMM_SDK, "OnPublishLNNResultInner read reason failed!");
         return SOFTBUS_ERR;
     }
 
@@ -673,12 +667,12 @@ int32_t SoftBusClientStub::OnRefreshLNNResultInner(MessageParcel &data, MessageP
 {
     int32_t refreshId;
     if (!data.ReadInt32(refreshId)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnRefreshLNNResultInner read publishId failed!");
+        COMM_LOGE(COMM_SDK, "OnRefreshLNNResultInner read publishId failed!");
         return SOFTBUS_ERR;
     }
     int32_t reason;
     if (!data.ReadInt32(reason)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnRefreshLNNResultInner read reason failed!");
+        COMM_LOGE(COMM_SDK, "OnRefreshLNNResultInner read reason failed!");
         return SOFTBUS_ERR;
     }
 
@@ -690,13 +684,12 @@ int32_t SoftBusClientStub::OnRefreshDeviceFoundInner(MessageParcel &data, Messag
 {
     uint32_t deviceLen;
     if (!data.ReadUint32(deviceLen) || deviceLen != sizeof(DeviceInfo)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-            "OnRefreshDeviceFoundInner read info length:%d failed!", deviceLen);
+        COMM_LOGE(COMM_SDK, "OnRefreshDeviceFoundInner read info length:%d failed!", deviceLen);
         return SOFTBUS_ERR;
     }
     void *device = (void *)data.ReadRawData(deviceLen);
     if (device == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OnRefreshDeviceFoundInner read info failed!");
+        COMM_LOGE(COMM_SDK, "OnRefreshDeviceFoundInner read info failed!");
         return SOFTBUS_ERR;
     }
     OnRefreshDeviceFound(device, deviceLen);
