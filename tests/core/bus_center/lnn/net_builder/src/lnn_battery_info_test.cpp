@@ -100,8 +100,8 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
