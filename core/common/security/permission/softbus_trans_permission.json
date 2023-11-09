@@ -296,5 +296,17 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.devicemanager.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.distributedhardware.devicemanager.adapter",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
