@@ -351,8 +351,10 @@ static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     if (type == TYPE_LOCAL_DEVICE_NAME) {
         DiscCoapUpdateDevName();
+    } else if (type == TYPE_ACCOUNT) {
+        DiscCoapUpdateAccount();
     } else {
-        DLOGW("the change type not support: %d", type);
+        DLOGE("invalid info change type: %d", type);
     }
 }
 

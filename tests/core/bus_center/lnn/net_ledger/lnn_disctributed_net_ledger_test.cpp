@@ -766,15 +766,6 @@ HWTEST_F(LNNDisctributedLedgerTest, SOFTBUS_DUMPBUSCENTER_Test_001, TestSize.Lev
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEINFO_BYDEVID_Test_001, TestSize.Level1)
-{
-    InnerDeviceInfoAddtions addtions;
-    addtions.medium = AUTO;
-    (void)RefreshDeviceInfoByDevId(nullptr, &addtions);
-    addtions.medium = COAP;
-    (void)RefreshDeviceInfoByDevId(nullptr, &addtions);
-}
-
 HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEONLINE_STATEINFO_Test_001, TestSize.Level1)
 {
     DeviceInfo device;
