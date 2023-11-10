@@ -40,11 +40,11 @@ class SoftBusLogTest : public testing::Test { };
  */
 HWTEST_F(SoftBusLogTest, SoftBusLogTest001, TestSize.Level0)
 {
-    EXPECT_EQ(static_cast<int>(LOG_DEBUG), static_cast<int>(SOFTBUS_LOG_DEBUG));
-    EXPECT_EQ(static_cast<int>(LOG_INFO), static_cast<int>(SOFTBUS_LOG_INFO));
-    EXPECT_EQ(static_cast<int>(LOG_WARN), static_cast<int>(SOFTBUS_LOG_WARN));
-    EXPECT_EQ(static_cast<int>(LOG_ERROR), static_cast<int>(SOFTBUS_LOG_ERROR));
-    EXPECT_EQ(static_cast<int>(LOG_FATAL), static_cast<int>(SOFTBUS_LOG_FATAL));
+    EXPECT_EQ(static_cast<int>(LOG_DEBUG), static_cast<int>(SOFTBUS_DFX_LOG_DEBUG));
+    EXPECT_EQ(static_cast<int>(LOG_INFO), static_cast<int>(SOFTBUS_DFX_LOG_INFO));
+    EXPECT_EQ(static_cast<int>(LOG_WARN), static_cast<int>(SOFTBUS_DFX_LOG_WARN));
+    EXPECT_EQ(static_cast<int>(LOG_ERROR), static_cast<int>(SOFTBUS_DFX_LOG_ERROR));
+    EXPECT_EQ(static_cast<int>(LOG_FATAL), static_cast<int>(SOFTBUS_DFX_LOG_FATAL));
 }
 
 /**
@@ -55,7 +55,7 @@ HWTEST_F(SoftBusLogTest, SoftBusLogTest001, TestSize.Level0)
  */
 HWTEST_F(SoftBusLogTest, SoftBusLogTest002, TestSize.Level0)
 {
-    const SoftBusLogLevel level = SOFTBUS_LOG_INFO;
+    const SoftBusDfxLogLevel level = SOFTBUS_DFX_LOG_INFO;
     const SoftBusLogLabel label = {
         .domain = DOMAIN_ID_TEST,
         .tag = "SoftBusTest",
