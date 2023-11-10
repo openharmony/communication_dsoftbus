@@ -267,19 +267,19 @@ HWTEST_F(HidumperTest, SoftBusRegConnVarDump004, TestSize.Level1)
 // -------------------------------------------------buscenter-----------------------------------------//
 static int32_t LnnVarTest1Dumper(int fd)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnVarTest1Dumper called, fd = %d", fd);
+    LNN_LOGI(LNN_TEST, "LnnVarTest1Dumper called, fd = %d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t LnnVarTest2Dumper(int fd)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnVarTest2Dumper called, fd = %d", fd);
+    LNN_LOGI(LNN_TEST, "LnnVarTest2Dumper called, fd = %d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t LnnVarTest3Dumper(int fd)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnVarTest3Dumper called, fd = %d", fd);
+    LNN_LOGI(LNN_TEST, "LnnVarTest3Dumper called, fd = %d", fd);
     return SOFTBUS_OK;
 }
 
@@ -296,7 +296,7 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump001, TestSize.Level1)
         {"lnn_var_test_2", &LnnVarTest2Dumper},
         {"lnn_var_test_3", &LnnVarTest3Dumper},
     };
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegDiscVarDump001, Start");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusRegDiscVarDump001, Start");
     int32_t ret;
     for (int i = 0; i < HIDUMPER_VAR_CASE_NUM; i++) {
         ret = SoftBusRegBusCenterVarDump(testLnnVarArray[i].varName, testLnnVarArray[i].dumpCallback);
@@ -313,10 +313,10 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump001, TestSize.Level1)
  */
 HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegBusCenterVarDump002, Start");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusRegBusCenterVarDump002, Start");
     int32_t ret = SoftBusRegBusCenterVarDump(NULL, &DiscVarTest1Dumper);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegBusCenterVarDump002, end");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusRegBusCenterVarDump002, end");
 }
 
 /**
@@ -327,10 +327,10 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump002, TestSize.Level1)
  */
 HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump003, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegBusCenterVarDump003, Start");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusRegBusCenterVarDump003, Start");
     int32_t ret = SoftBusRegBusCenterVarDump(const_cast<char *>(g_testDumpVar), NULL);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegBusCenterVarDump003, end");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusRegBusCenterVarDump003, end");
 }
 
 /**
@@ -342,10 +342,10 @@ HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump003, TestSize.Level1)
  */
 HWTEST_F(HidumperTest, SoftBusRegBusCenterVarDump004, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegBusCenterVarDump004, Start");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusRegBusCenterVarDump004, Start");
     int32_t ret = SoftBusRegBusCenterVarDump(NULL, NULL);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusRegBusCenterVarDump004, end");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusRegBusCenterVarDump004, end");
 }
 
 // --------------------------------------------trans------------------------------------------------- //
@@ -481,14 +481,14 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess005, TestSize.Level1)
         {TEST_FD_ZERO, TEST_ARGC_THREE, {"buscenter", "-l", "buscenter_var_test_2"}},
         {TEST_FD_ZERO, TEST_ARGC_THREE, {"buscenter", "-l", "buscenter_var_test_3"}},
     };
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusDumpProcess005, Start");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusDumpProcess005, Start");
     int32_t ret;
     for (int i = 0; i < BUSCENTER_DUMP_PROCESS_VALID_TEST_NUM; i++) {
         ret = SoftBusDumpProcess(testValiBusCenterCmdArray[i].fd, testValiBusCenterCmdArray[i].argc,
             testValiBusCenterCmdArray[i].argv);
         EXPECT_EQ(SOFTBUS_OK, ret);
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusDumpProcess005, end");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusDumpProcess005, end");
 }
 
 /**
@@ -506,7 +506,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess006, TestSize.Level1)
         {ERR_FD, TEST_ARGC_TWO, {"buscenter", "-l"}},
         {ERR_FD, TEST_ARGC_THREE, {"buscenter", "-l", "buscenter_var_test_1"}},
     };
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusDumpProcess006, Start");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusDumpProcess006, Start");
     int32_t ret;
     for (int i = 0; i < BUSCENTER_DUMP_PROCESS_INVALID_TEST_NUM; i++) {
         ret = SoftBusDumpProcess(testInValidBusCenterCmdArray[i].fd, testInValidBusCenterCmdArray[i].argc,
@@ -515,7 +515,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess006, TestSize.Level1)
     }
     ret = SoftBusDumpProcess(0, 1, NULL);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HidumperTest, SoftBusDumpProcess006, end");
+    LNN_LOGI(LNN_TEST, "HidumperTest, SoftBusDumpProcess006, end");
 }
 
 /**

@@ -21,11 +21,11 @@
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
+#include "lnn_log.h"
 #include "lnn_map.h"
 #include "message_handler.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 #define UINT_TO_STR_MAX_LEN 11
 
@@ -157,11 +157,11 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
 int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     if ((linkInfo == NULL) || (connInfo == NULL) || (profile == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneInfoProcess param invalid");
+        LNN_LOGE(LNN_LANE, "laneInfoProcess param invalid");
         return SOFTBUS_ERR;
     }
     if ((linkInfo->type >= LANE_LINK_TYPE_BUTT) || (g_funcList[linkInfo->type] == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unsupport linkType[%d]", linkInfo->type);
+        LNN_LOGE(LNN_LANE, "unsupport linkType=%d", linkInfo->type);
         return SOFTBUS_ERR;
     }
     return g_funcList[linkInfo->type](linkInfo, connInfo, profile);
@@ -171,11 +171,11 @@ int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueS
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[create]convert dataType fail");
+        LNN_LOGE(LNN_LANE, "convert dataType fail");
         return SOFTBUS_ERR;
     }
     if (LnnMapSet(map, (const char *)keyStr, value, valueSize) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "save data fail");
+        LNN_LOGE(LNN_LANE, "save data fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -185,7 +185,7 @@ void *LnnReadData(const Map *map, uint32_t key)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[read]convert dataType fail");
+        LNN_LOGE(LNN_LANE, "convert dataType fail");
         return NULL;
     }
     void *data = LnnMapGet(map, (const char *)keyStr);
@@ -196,11 +196,11 @@ void LnnDeleteData(Map *map, uint32_t key)
 {
     char keyStr[UINT_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(keyStr, UINT_TO_STR_MAX_LEN, "%u", key) < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "[delete]convert dataType fail");
+        LNN_LOGE(LNN_LANE, "convert dataType fail");
         return;
     }
     if (LnnMapErase(map, (const char *)keyStr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "delete data fail");
+        LNN_LOGE(LNN_LANE, "delete data fail");
         return;
     }
 }
@@ -214,11 +214,11 @@ int32_t LnnInitLaneLooper(void)
 {
     SoftBusLooper *looper = CreateNewLooper("Lane-looper");
     if (!looper) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init laneLooper fail");
+        LNN_LOGE(LNN_LANE, "init laneLooper fail");
         return SOFTBUS_ERR;
     }
     SetLooper(LOOP_TYPE_LANE, looper);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init laneLooper success");
+    LNN_LOGI(LNN_LANE, "init laneLooper success");
     return SOFTBUS_OK;
 }
 

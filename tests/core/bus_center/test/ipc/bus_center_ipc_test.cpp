@@ -19,7 +19,6 @@
 #include "lnn_bus_center_ipc.cpp"
 #include "bus_center_ipc_mock.h"
 #include "softbus_bus_center.h"
-#include "softbus_log_old.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
