@@ -58,6 +58,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option);
 int32_t DiscCoapStopDiscovery(void);
 void DiscCoapUpdateLocalIp(LinkStatus status);
 void DiscCoapUpdateDevName(void);
+void DiscCoapUpdateAccount(void);
 int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType);
 
 #ifdef __cplusplus

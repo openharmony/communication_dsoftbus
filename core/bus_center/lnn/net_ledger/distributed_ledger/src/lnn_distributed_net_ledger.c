@@ -2525,33 +2525,9 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
     return NULL;
 }
 
-static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
-{
-    if (addtions->medium != COAP) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameter error");
-        return;
-    }
-    unsigned char shortUdidHash[SHORT_UDID_HASH_LEN + 1] = {0};
-    if (GenerateStrHashAndConvertToHexString((const unsigned char *)device->devId,
-        SHORT_UDID_HASH_LEN, shortUdidHash, SHORT_UDID_HASH_LEN + 1) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "refresh device info get short udid hash fail");
-        return;
-    }
-    if (memset_s(device->devId, DISC_MAX_DEVICE_ID_LEN, 0, DISC_MAX_DEVICE_ID_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "refresh device info memset_s fail");
-        return;
-    }
-    if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, shortUdidHash, SHORT_UDID_HASH_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s device short udid hash fail");
-    }
-}
-
 static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
-    if (addtions->medium == COAP) {
-        device->isOnline = LnnGetOnlineStateById(device->devId, CATEGORY_UDID);
-    }
-    if (addtions->medium == BLE) {
+    if (addtions->medium == COAP || addtions->medium == BLE) {
         device->isOnline = ((LnnGetOnlineNodeByUdidHash(device->devId)) != NULL) ? true : false;
     }
 }
@@ -2561,7 +2537,8 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 {
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
-    RefreshDeviceInfoByDevId(device, addtions);
+    // udid hash hex strLen report to ohter service is 8, same as ble
+    device->devId[SHORT_UDID_HASH_LEN] = '\0';
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "device found by medium=%d, udidhash=%s, online status=%d",
-        addtions->medium, AnonymizesUDID(device->devId), device->isOnline);
+        addtions->medium, device->devId, device->isOnline);
 }
