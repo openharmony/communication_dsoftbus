@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,18 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/lite_component.gni")
-import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
-import("../../../../../dsoftbus.gni")
-
-dsoftbus_root_path = "../../../../.."
-
-static_library("softbus_test_message_handler") {
-  sources = [ "message_handler_test.c" ]
-  include_dirs = [
-    "$dsoftbus_root_path/core/common/message_handler/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$softbus_adapter_common/include",
-    "$hilog_lite_include_path",
-  ]
+group("unittest") {
+  testonly = true
+  deps = [ "unittest:SoftBusDfxAnonymizeTest" ]
 }
