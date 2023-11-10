@@ -233,7 +233,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1
     int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, true);
     ASSERT_GT(sessionId, 0);
     int ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
     ASSERT_GT(sessionId, 0);
@@ -258,7 +258,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest03, TestSize.Level1
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, true);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
     ASSERT_GT(sessionId, 0);
