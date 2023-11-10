@@ -15,6 +15,7 @@ import("../../dsoftbus.gni")
 import("../adapter/core_adapter.gni")
 import("../authentication/authentication.gni")
 import("../bus_center/bus_center_server.gni")
+import("../common/dfx/dsoftbus_dfx.gni")
 import("../common/security/permission/permission.gni")
 import("../connection/conn.gni")
 import("../discovery/disc.gni")
@@ -54,6 +55,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/common",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
         "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+        "$dsoftbus_root_path/core/common/dfx/interface/include",
         "$softbus_adapter_config/spec_config",
         "//base/security/device_auth/interfaces/inner_api",
       ]
@@ -85,6 +87,8 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common:softbus_utils",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
+      public_deps =
+          [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
         deps += [
@@ -110,6 +114,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
         "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+        "$dsoftbus_root_path/core/common/dfx/interface/include",
         "//base/security/device_auth/interfaces/inner_api",
         "//commonlibrary/utils_lite/include",
         "//third_party/bounds_checking_function/include",
@@ -140,6 +145,8 @@ if (defined(ohos_lite)) {
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
       ]
+      public_deps =
+          [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
         deps += [
@@ -199,6 +206,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
       "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+      "$dsoftbus_root_path/core/common/dfx/interface/include",
       "//base/security/access_token/interfaces/innerkits/privacy/include",
       "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_core/include/bundlemgr",
       "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include",
@@ -226,6 +234,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:softbus_utils",
       "//third_party/cJSON:cjson",
     ]
+    public_deps = [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
     dsoftbus_server_common_external_deps =
         bus_center_server_external_deps + disc_server_external_deps +
         softbus_permission_external_deps + trans_session_external_deps +

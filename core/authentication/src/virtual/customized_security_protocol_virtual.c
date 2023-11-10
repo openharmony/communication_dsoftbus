@@ -15,12 +15,12 @@
 
 #include "customized_security_protocol.h"
 
+#include "auth_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t CustomizedSecurityProtocolInit(void)
 {
-    ALOGW("%s not implement.", __func__);
+    AUTH_LOGW(AUTH_INIT, "not implement");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

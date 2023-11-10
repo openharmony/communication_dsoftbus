@@ -15,15 +15,15 @@
 
 #include "auth_tcp_connection.h"
 #include "auth_channel.h"
+#include "auth_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listener)
 {
     (void)module;
     (void)listener;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
+    AUTH_LOGW(AUTH_CONN, "not implement.");
     return SOFTBUS_OK;
 }
 
@@ -37,7 +37,7 @@ int32_t AuthOpenChannel(const char *ip, int32_t port)
 {
     (void)ip;
     (void)port;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
+    AUTH_LOGW(AUTH_CONN, "not implement.");
     return INVALID_CHANNEL_ID;
 }
 
@@ -70,7 +70,7 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     (void)ip;
     (void)port;
     (void)isBlockMode;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
+    AUTH_LOGW(AUTH_CONN, "not implement.");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -101,7 +101,7 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
 {
     (void)module;
     (void)info;
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
+    AUTH_LOGW(AUTH_CONN, "not implement.");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
