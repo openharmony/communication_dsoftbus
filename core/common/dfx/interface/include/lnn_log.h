@@ -31,7 +31,7 @@ typedef enum {
     LNN_EVENT,
     LNN_STATE,
     LNN_META_NODE,
-    LNN_TIMER,
+    LNN_CLOCK,
     LNN_TEST,
 } LnnLogLabelEnum;
 
@@ -46,15 +46,15 @@ static const SoftBusLogLabel LNN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { LNN_EVENT,      0xd005786,      "LnnEvent"    },
     { LNN_STATE,      0xd005787,      "LnnState"    },
     { LNN_META_NODE,  0xd005788,      "LnnMetaNode" },
-    { LNN_TIMER,      0xd005789,      "LnnTimer"    },
+    { LNN_CLOCK,      0xd005789,      "LnnClock"    },
     { LNN_TEST,       DOMAIN_ID_TEST, "LnnTest"     },
 };
 
-#define LNN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_ERROR, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_WARN, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_INFO, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_DEBUG, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_ERROR, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_WARN, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_INFO, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_DEBUG, LNN_LABELS[label], ##__VA_ARGS__)
 
 #define LNN_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, LNN_LOGW, label, fmt, ##__VA_ARGS__)
