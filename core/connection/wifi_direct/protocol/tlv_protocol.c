@@ -15,11 +15,9 @@
 
 #include "tlv_protocol.h"
 #include "securec.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "utils/wifi_direct_utils.h"
-
-#define LOG_LABEL "[WD] Tlv: "
 
 #define DEFAULT_CAPACITY 128
 #define CAPACITY_MAX (1024 * 64)
@@ -39,8 +37,8 @@ static enum WifiDirectProtocolType GetType(void)
 static bool Pack(struct WifiDirectProtocol *base, struct InfoContainer *container, uint8_t **outBuffer, size_t *size)
 {
     struct WifiDirectTlvProtocol *self = (struct WifiDirectTlvProtocol *)base;
-    CONN_CHECK_AND_RETURN_RET_LOG(container, false, LOG_LABEL "container is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(container->marshalling(container, base), false, LOG_LABEL "marshalling failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(container, false, CONN_WD_V2, "container is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(container->marshalling(container, base), false, CONN_WD_V2, "marshalling failed");
     *outBuffer = self->data;
     *size = self->writePos;
     return true;
@@ -49,13 +47,13 @@ static bool Pack(struct WifiDirectProtocol *base, struct InfoContainer *containe
 static bool SetDataSource(struct WifiDirectProtocol *base, const uint8_t *data, size_t size)
 {
     struct WifiDirectTlvProtocol *self = (struct WifiDirectTlvProtocol *)base;
-    CONN_CHECK_AND_RETURN_RET_LOG(data, false, LOG_LABEL "data is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(size > 0 && size <= CAPACITY_MAX, false, "size=%u invalid", size);
+    CONN_CHECK_AND_RETURN_RET_LOGW(data, false, CONN_WD_V2, "data is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(size > 0 && size <= CAPACITY_MAX, false, CONN_WD_V2, "size=%u invalid", size);
     self->data = (uint8_t *)SoftBusMalloc(size);
-    CONN_CHECK_AND_RETURN_RET_LOG(self->data, false, LOG_LABEL "alloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(self->data, false, CONN_WD_V2, "alloc failed");
 
     if (memcpy_s(self->data, size, data, size) != EOK) {
-        CLOGE("self->data memcpy fail");
+        CONN_LOGE(CONN_WD_V2, "self->data memcpy fail");
         return false;
     }
     self->size = size;
@@ -67,8 +65,8 @@ static bool SetDataSource(struct WifiDirectProtocol *base, const uint8_t *data, 
 static bool Unpack(struct WifiDirectProtocol *base, struct InfoContainer *container)
 {
     struct WifiDirectTlvProtocol *self = (struct WifiDirectTlvProtocol *)base;
-    CONN_CHECK_AND_RETURN_RET_LOG(self->data, false, LOG_LABEL "not set data source");
-    CONN_CHECK_AND_RETURN_RET_LOG(container, false, LOG_LABEL "container is NULL");
+    CONN_CHECK_AND_RETURN_RET_LOGW(self->data, false, CONN_WD_V2, "not set data source");
+    CONN_CHECK_AND_RETURN_RET_LOGW(container, false, CONN_WD_V2, "container is NULL");
     return container->unmarshalling(container, base);
 }
 
@@ -83,7 +81,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
 {
     struct WifiDirectTlvProtocol *self = (struct WifiDirectTlvProtocol *)base;
     if (self->format.tagSize == 0 || self->format.lengthSize == 0) {
-        CLOGE(LOG_LABEL "no setting of tlv format");
+        CONN_LOGW(CONN_WD_V2, "no setting of tlv format");
         return false;
     }
     if (self->size - self->readPos < self->format.tagSize + self->format.lengthSize) {
@@ -96,7 +94,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
     *size = GetWifiDirectUtils()->bytesToInt(self->data + self->readPos, self->format.lengthSize);
     self->readPos += self->format.lengthSize;
     if (self->readPos >= self->size || self->size - self->readPos < *size) {
-        CLOGE(LOG_LABEL "readPos=%zu is invalid", self->readPos);
+        CONN_LOGW(CONN_WD_V2, "readPos=%zu is invalid", self->readPos);
         return false;
     }
     *data = self->data + self->readPos;
@@ -124,9 +122,9 @@ static bool Grow(struct WifiDirectTlvProtocol *self, size_t writeSize)
     }
 
     uint8_t *data = SoftBusCalloc(capacity);
-    CONN_CHECK_AND_RETURN_RET_LOG(data, false, LOG_LABEL "alloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(data, false, CONN_WD_V2, "alloc failed");
     int32_t ret = memcpy_s(data, capacity, self->data, self->writePos);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, false, LOG_LABEL "copy failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, false, CONN_WD_V2, "copy failed");
 
     SoftBusFree(self->data);
     self->data = data;
@@ -139,7 +137,7 @@ static bool WriteTlvData(struct WifiDirectTlvProtocol *self, struct InfoContaine
                          size_t length, uint8_t *value)
 {
     if (self->format.tagSize == 0 || self->format.lengthSize == 0) {
-        CLOGE("not set tlv format");
+        CONN_LOGW(CONN_WD_V2, "not set tlv format");
         return false;
     }
 
@@ -157,7 +155,7 @@ static bool WriteTlvData(struct WifiDirectTlvProtocol *self, struct InfoContaine
                                      self->capacity - self->writePos);
     self->writePos += self->format.lengthSize;
     int32_t ret = memcpy_s(self->data + self->writePos, self->capacity - self->writePos, value, length);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, false, LOG_LABEL "copy value failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, false, CONN_WD_V2, "copy value failed");
     self->writePos += length;
 
     return true;
@@ -170,7 +168,7 @@ bool WifiDirectTlvProtocolConstructor(struct WifiDirectTlvProtocol *self)
     self->format.lengthSize = 0;
     self->capacity = DEFAULT_CAPACITY;
     self->data = SoftBusCalloc(self->capacity);
-    CONN_CHECK_AND_RETURN_RET_LOG(self->data, false, LOG_LABEL "alloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(self->data, false, CONN_WD_V2, "alloc failed");
 
     self->getType = GetType;
     self->pack = Pack;

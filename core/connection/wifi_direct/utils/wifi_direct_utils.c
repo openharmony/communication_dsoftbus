@@ -18,11 +18,9 @@
 #include <string.h>
 #include <ctype.h>
 #include "securec.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "wifi_direct_types.h"
 #include "data/link_info.h"
-
-#define LOG_LABEL "[WD] Ut: "
 
 #define HEX_DUMP_LINE_NUM 16
 #define PRINT_BUFFER_LEN 128
@@ -61,26 +59,27 @@ static enum WifiDirectApiRole TransferRoleToPreferLinkMode(enum WifiDirectRole r
 
 static uint32_t BytesToInt(const uint8_t *data, uint32_t len)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(len <= sizeof(uint32_t), 0, LOG_LABEL "len=%u invalid", len);
+    CONN_CHECK_AND_RETURN_RET_LOGW(len <= sizeof(uint32_t), 0, CONN_WIFI_DIRECT, "len=%u invalid", len);
     uint32_t res = 0;
-    CONN_CHECK_AND_RETURN_RET_LOG(memcpy_s(&res, sizeof(res), data, len) == EOK, 0, LOG_LABEL "memcpy_s failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(memcpy_s(&res, sizeof(res), data, len) == EOK, 0, CONN_WIFI_DIRECT,
+        "memcpy_s failed");
     return le32toh(res);
 }
 
 static void IntToBytes(uint32_t data, uint32_t len, uint8_t *out, uint32_t outSize)
 {
     if (len > sizeof(uint32_t)) {
-        CLOGE(LOG_LABEL "len=%u invalid", len);
+        CONN_LOGW(CONN_WIFI_DIRECT, "len=%u invalid", len);
         return;
     }
 
     data = htole32(data);
-    CONN_CHECK_AND_RETURN_LOG(memcpy_s(out, outSize, &data, len) == EOK, "memcpy_s failed");
+    CONN_CHECK_AND_RETURN_LOGW(memcpy_s(out, outSize, &data, len) == EOK, CONN_WIFI_DIRECT, "memcpy_s failed");
 }
 
 static void HexDump(const char *banana, const uint8_t *data, size_t size)
 {
-    CLOGI(LOG_LABEL "%s size=%d", banana, size);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s size=%d", banana, size);
     char line[64];
     int32_t pos = 0;
     bool isLastPrinted = false;
@@ -93,27 +92,27 @@ static void HexDump(const char *banana, const uint8_t *data, size_t size)
             ret = sprintf_s(line + pos, sizeof(line) - pos, " %02x", data[i - 1]);
         }
         if (ret <= 0) {
-            CLOGI(LOG_LABEL "sprintf failed");
+            CONN_LOGI(CONN_WIFI_DIRECT, "sprintf failed");
             return;
         }
         pos += ret;
         if (i % HEX_DUMP_LINE_NUM == 0) {
             pos = 0;
             isLastPrinted = true;
-            CLOGI(LOG_LABEL "%s", line);
+            CONN_LOGI(CONN_WIFI_DIRECT, "%s", line);
         }
     }
     if (!isLastPrinted) {
-        CLOGI(LOG_LABEL "%s", line);
+        CONN_LOGI(CONN_WIFI_DIRECT, "%s", line);
     }
 }
 
 static void ShowLinkInfoList(const char *banana, ListNode *list)
 {
-    CLOGI(LOG_LABEL "%s", banana);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s", banana);
     struct LinkInfo *info = NULL;
     LIST_FOR_EACH_ENTRY(info, list, struct LinkInfo, node) {
-        CLOGI(LOG_LABEL "interface=%s mode=%d", info->getString(info, LI_KEY_LOCAL_INTERFACE, ""),
+        CONN_LOGI(CONN_WIFI_DIRECT, "interface=%s mode=%d", info->getString(info, LI_KEY_LOCAL_INTERFACE, ""),
               info->getInt(info, LI_KEY_LOCAL_LINK_MODE, -1));
     }
 }
@@ -126,12 +125,12 @@ static void PrintLargeString(const char *string)
     while (printLen < stringLen) {
         size_t copyLen = MIN(PRINT_BUFFER_LEN, stringLen - printLen);
         if (memcpy_s(buffer, copyLen, string + printLen, copyLen) != EOK) {
-            CLOGE("buffer memcpy fail");
+            CONN_LOGW(CONN_WIFI_DIRECT, "buffer memcpy fail");
             return;
         }
         buffer[copyLen] = 0;
         printLen += copyLen;
-        CLOGI(LOG_LABEL "%s", buffer);
+        CONN_LOGI(CONN_WIFI_DIRECT, "%s", buffer);
     }
 }
 

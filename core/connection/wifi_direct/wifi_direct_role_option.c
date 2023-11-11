@@ -14,12 +14,10 @@
  */
 
 #include "wifi_direct_role_option.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"
-
-#define LOG_LABEL "[WD] RO: "
 
 static bool IsPowerAlwaysOn(int32_t devTypeId)
 {
@@ -36,31 +34,33 @@ static enum WifiDirectRole GetExpectedP2pRole(const char *networkId)
 {
     int32_t localDevTypeId = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, LOG_LABEL "get local dev type id failed");
-    CLOGD(LOG_LABEL "localDevTypeId=0x%03X", localDevTypeId);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT,
+        "get local dev type id failed");
+    CONN_LOGD(CONN_WIFI_DIRECT, "localDevTypeId=0x%03X", localDevTypeId);
 
     if (IsPowerAlwaysOn(localDevTypeId)) {
-        CLOGI(LOG_LABEL "local device's power is always-on");
+        CONN_LOGI(CONN_WIFI_DIRECT, "local device's power is always-on");
         return WIFI_DIRECT_ROLE_GO;
     }
 
     int32_t remoteDevTypeId = 0;
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, LOG_LABEL "get remote dev type id failed");
-    CLOGD(LOG_LABEL "remoteDevTypeId=0x%03X", remoteDevTypeId);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT,
+        "get remote dev type id failed");
+    CONN_LOGD(CONN_WIFI_DIRECT, "remoteDevTypeId=0x%03X", remoteDevTypeId);
 
     if (IsPowerAlwaysOn(remoteDevTypeId)) {
-        CLOGI(LOG_LABEL "remote device's power is always-on");
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote device's power is always-on");
         return WIFI_DIRECT_ROLE_GC;
     }
 
     if (IsGoPreferred(localDevTypeId)) {
-        CLOGI(LOG_LABEL "local device prefers Go");
+        CONN_LOGI(CONN_WIFI_DIRECT, "local device prefers Go");
         return WIFI_DIRECT_ROLE_GO;
     }
 
     if (IsGoPreferred(remoteDevTypeId)) {
-        CLOGI(LOG_LABEL "remote device prefers Go");
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote device prefers Go");
         return WIFI_DIRECT_ROLE_GC;
     }
 
@@ -94,11 +94,11 @@ static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType
         }
         *isStrict = false;
     } else {
-        CLOGE(LOG_LABEL "type=%d invalid", type);
+        CONN_LOGW(CONN_WIFI_DIRECT, "type=%d invalid", type);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    CLOGI(LOG_LABEL "expectRole=0x%x isStrict=%d", *expectedRole, *isStrict);
+    CONN_LOGI(CONN_WIFI_DIRECT, "expectRole=0x%x isStrict=%d", *expectedRole, *isStrict);
     return SOFTBUS_OK;
 }
 

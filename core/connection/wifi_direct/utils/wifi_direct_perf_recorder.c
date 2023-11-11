@@ -15,11 +15,9 @@
 #include "wifi_direct_perf_recorder.h"
 #include <securec.h>
 #include <string.h>
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_timer.h"
-
-#define LOG_LABEL "[WD] Perf: "
 
 #define TIME_POINT_ITEM_DEFINE(TP) { TP, #TP }
 static const char* GetTimePointTypeString(enum TimePointType type)
@@ -67,10 +65,10 @@ static enum WifiDirectConnectType GetConnectType(void)
 
 static void Record(enum TimePointType type)
 {
-    CONN_CHECK_AND_RETURN_LOG(type >= 0 && type < TP_MAX, LOG_LABEL "type invalid");
+    CONN_CHECK_AND_RETURN_LOGW(type >= 0 && type < TP_MAX, CONN_WIFI_DIRECT, "type invalid");
     uint64_t currentMs = SoftBusGetSysTimeMs();
     GetWifiDirectPerfRecorder()->timePoints[type] = currentMs;
-    CLOGI(LOG_LABEL "%s=%zu", GetTimePointTypeString(type), currentMs);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s=%zu", GetTimePointTypeString(type), currentMs);
 }
 
 static void Calculate(void)
@@ -106,14 +104,14 @@ static void Calculate(void)
             self->timeCosts[TC_CONNECT_GROUP] - self->timeCosts[TC_GET_WIFI_CONFIG];
     }
 
-    CLOGI(LOG_LABEL "pid=%d total=%zuMS create=%zuMS connect=%zuMS wifiConfig=%zuMS negotiate=%zuMS", self->pid,
-          self->timeCosts[TC_TOTAL], self->timeCosts[TC_CREATE_GROUP], self->timeCosts[TC_CONNECT_GROUP],
-          self->timeCosts[TC_GET_WIFI_CONFIG], self->timeCosts[TC_NEGOTIATE]);
+    CONN_LOGI(CONN_WIFI_DIRECT, "pid=%d total=%zuMS create=%zuMS connect=%zuMS wifiConfig=%zuMS negotiate=%zuMS",
+        self->pid, self->timeCosts[TC_TOTAL], self->timeCosts[TC_CREATE_GROUP], self->timeCosts[TC_CONNECT_GROUP],
+        self->timeCosts[TC_GET_WIFI_CONFIG], self->timeCosts[TC_NEGOTIATE]);
 }
 
 static uint64_t GetTime(enum TimeCostType type)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(type >= 0 && type < TC_MAX, -1, LOG_LABEL "invalid type");
+    CONN_CHECK_AND_RETURN_RET_LOGW(type >= 0 && type < TC_MAX, -1, CONN_WIFI_DIRECT, "invalid type");
     return GetWifiDirectPerfRecorder()->timeCosts[type];
 }
 

@@ -15,7 +15,7 @@
 
 #include "wifi_direct_connect_command.h"
 #include "securec.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_negotiator.h"
@@ -25,8 +25,6 @@
 #include "data/inner_link.h"
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
-
-#define LOG_LABEL "[WD] ConCmd: "
 
 static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
 {
@@ -43,20 +41,21 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     char remoteUuid[UUID_BUF_LEN] = {0};
     int32_t ret = connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, remoteUuid, sizeof(remoteUuid));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "get remote uuid failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get remote uuid failed");
     struct InnerLink *link = GetLinkManager()->getLinkByUuid(remoteUuid);
-    CONN_CHECK_AND_RETURN_RET_LOG(link, SOFTBUS_ERR, LOG_LABEL "link is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(link, SOFTBUS_ERR, CONN_WIFI_DIRECT, "link is null");
     enum InnerLinkState state = link->getInt(link, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
-    CONN_CHECK_AND_RETURN_RET_LOG(state == INNER_LINK_STATE_CONNECTED, SOFTBUS_ERR, LOG_LABEL "link is not connected");
+    CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, SOFTBUS_ERR, CONN_WIFI_DIRECT,
+        "link is not connected");
 
     struct WifiDirectIpv4Info *ipv4 = link->getRawData(link, IL_KEY_REMOTE_IPV4, NULL, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOG(ipv4, SOFTBUS_ERR, LOG_LABEL "ipv4 is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ipv4, SOFTBUS_ERR, CONN_WIFI_DIRECT, "ipv4 is null");
 
     bool isBeingUsedByLocal = link->getBoolean(link, IL_KEY_IS_BEING_USED_BY_LOCAL, false);
-    CLOGI(LOG_LABEL "isBeingUsedByLocal=%d", isBeingUsedByLocal);
+    CONN_LOGI(CONN_WIFI_DIRECT, "isBeingUsedByLocal=%d", isBeingUsedByLocal);
 
     if (isBeingUsedByLocal) {
-        CLOGI(LOG_LABEL "reuse success");
+        CONN_LOGI(CONN_WIFI_DIRECT, "reuse success");
         struct NegotiateMessage output;
         NegotiateMessageConstructor(&output);
         output.putContainer(&output, NM_KEY_INNER_LINK, (struct InfoContainer *)link, sizeof(*link));
@@ -80,14 +79,15 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
 
-    CLOGI(LOG_LABEL "try reuse link");
+    CONN_LOGI(CONN_WIFI_DIRECT, "try reuse link");
     if (ReuseLink(command) == SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
 
     struct WifiDirectProcessor *processor =
         GetWifiDirectDecisionCenter()->getProcessorByNegoChannel(connectInfo->negoChannel);
-    CONN_CHECK_AND_RETURN_RET_LOG(processor, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, LOG_LABEL "no suitable processor");
+    CONN_CHECK_AND_RETURN_RET_LOGW(processor, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, CONN_WIFI_DIRECT,
+        "no suitable processor");
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
@@ -100,7 +100,7 @@ static void ExecuteConnection(struct WifiDirectCommand *base)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
     self->times++;
-    CLOGI(LOG_LABEL "times=%d", self->times);
+    CONN_LOGI(CONN_WIFI_DIRECT, "times=%d", self->times);
 
     int32_t ret = OpenLink(self);
     if (ret != SOFTBUS_OK) {
@@ -113,7 +113,7 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
     struct InnerLink *innerLink = msg->get(msg, NM_KEY_INNER_LINK, NULL, NULL);
     if (innerLink == NULL) {
-        CLOGE(LOG_LABEL " no inner link");
+        CONN_LOGW(CONN_WIFI_DIRECT, " no inner link");
         base->onFailure(base, ERROR_NO_CONTEXT);
         GetWifiDirectNegotiator()->resetContext();
         GetResourceManager()->dump();
@@ -125,10 +125,10 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
     (void)memset_s(&link, sizeof(link), 0, sizeof(link));
     int32_t requestId = self->connectInfo.requestId;
     innerLink->getLink(innerLink, requestId, self->connectInfo.pid, &link);
-    CLOGI(LOG_LABEL "requestId=%d linkId=%d", requestId, link.linkId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d", requestId, link.linkId);
 
     if (self->callback.onConnectSuccess != NULL) {
-        CLOGI(LOG_LABEL "call onConnectSuccess");
+        CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectSuccess");
         self->callback.onConnectSuccess(requestId, &link);
     }
     GetWifiDirectNegotiator()->resetContext();
@@ -139,16 +139,16 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
 static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
-    CLOGI(LOG_LABEL "requestId=%d reason=%d", self->connectInfo.requestId, reason);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d reason=%d", self->connectInfo.requestId, reason);
 
     if (IsNeedRetry(base, reason)) {
-        CLOGI(LOG_LABEL "retry command");
+        CONN_LOGI(CONN_WIFI_DIRECT, "retry command");
         GetWifiDirectNegotiator()->retryCurrentCommand();
         return;
     }
 
     if (self->callback.onConnectFailure != NULL) {
-        CLOGI(LOG_LABEL "call onConnectFailure");
+        CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectFailure");
         self->callback.onConnectFailure(self->connectInfo.requestId, reason);
     }
 
@@ -184,16 +184,16 @@ void WifiDirectConnectCommandDestructor(struct WifiDirectConnectCommand *self)
 struct WifiDirectCommand* WifiDirectConnectCommandNew(struct WifiDirectConnectInfo *connectInfo,
                                                       struct WifiDirectConnectCallback *callback)
 {
-    CLOGI(LOG_LABEL);
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)SoftBusCalloc(sizeof(*self));
-    CONN_CHECK_AND_RETURN_RET_LOG(self != NULL, NULL, LOG_LABEL "malloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "malloc failed");
     WifiDirectConnectCommandConstructor(self, connectInfo, callback);
     return (struct WifiDirectCommand *)self;
 }
 
 void WifiDirectConnectCommandDelete(struct WifiDirectCommand *base)
 {
-    CLOGI(LOG_LABEL);
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     WifiDirectConnectCommandDestructor((struct WifiDirectConnectCommand *)base);
     SoftBusFree(base);
 }
