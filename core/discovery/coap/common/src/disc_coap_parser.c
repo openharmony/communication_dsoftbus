@@ -17,31 +17,44 @@
 
 #include "securec.h"
 
+#include "softbus_adapter_crypto.h"
 #include "softbus_error_code.h"
 #include "softbus_log_old.h"
+#include "softbus_utils.h"
 
 #define JSON_WLAN_IP      "wifiIpAddr"
 #define JSON_SERVICE_DATA "serviceData"
 #define JSON_HW_ACCOUNT   "hwAccountHashVal"
 
 #define MAX_SERVICE_DATA_LEN 64
+#define HEX_HASH_LEN 16
 
 int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
 {
-    cJSON *udid = cJSON_Parse(raw);
-    DISC_CHECK_AND_RETURN_RET_LOG(udid != NULL, SOFTBUS_ERR, "parse udid failed.");
-    if (!GetJsonObjectStringItem(udid, DEVICE_UDID, device->devId, sizeof(device->devId))) {
-        cJSON_Delete(udid);
-        DLOGE("parse udid from remote failed.");
-        return SOFTBUS_ERR;
+    DISC_CHECK_AND_RETURN_RET_LOG(raw != NULL, SOFTBUS_INVALID_PARAM, "raw string is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOG(device != NULL, SOFTBUS_INVALID_PARAM, "device info is NULL");
+
+    cJSON *udidJson = cJSON_Parse(raw);
+    DISC_CHECK_AND_RETURN_RET_LOG(udidJson != NULL, SOFTBUS_PARSE_JSON_ERR, "parse udid json failed");
+    char tmpUdid[DISC_MAX_DEVICE_ID_LEN] = {0};
+    if (!GetJsonObjectStringItem(udidJson, DEVICE_UDID, tmpUdid, DISC_MAX_DEVICE_ID_LEN)) {
+        cJSON_Delete(udidJson);
+        DLOGE("parse remote udid failed");
+        return SOFTBUS_PARSE_JSON_ERR;
     }
-    DLOGI("devId=%s", AnonymizesUDID(device->devId));
-    cJSON_Delete(udid);
+    DLOGI("devId=%s", AnonymizesUDID(tmpUdid));
+    cJSON_Delete(udidJson);
+
+    int32_t ret = GenerateStrHashAndConvertToHexString((const unsigned char *)tmpUdid, HEX_HASH_LEN,
+        (unsigned char *)device->devId, HEX_HASH_LEN + 1);
+    DISC_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "generate udid hex hash failed, ret=%d", ret);
     return SOFTBUS_OK;
 }
 
 void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 {
+    DISC_CHECK_AND_RETURN_LOG(data != NULL, "json data is NULL");
+    DISC_CHECK_AND_RETURN_LOG(device != NULL, "device info is NULL");
     if (!GetJsonObjectStringItem(data, JSON_WLAN_IP, device->addr[0].info.ip.ip, sizeof(device->addr[0].info.ip.ip))) {
         DLOGE("parse wifi ip address failed.");
         return;
@@ -81,6 +94,8 @@ static void ParseItemDataFromServiceData(char *serviceData, const char *key, cha
 
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
 {
+    DISC_CHECK_AND_RETURN_RET_LOG(data != NULL, SOFTBUS_INVALID_PARAM, "json data is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOG(device != NULL, SOFTBUS_INVALID_PARAM, "device info is NULL");
     char serviceData[MAX_SERVICE_DATA_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_SERVICE_DATA, serviceData, sizeof(serviceData))) {
         DLOGE("parse service data failed.");
@@ -99,8 +114,15 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
 
 void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
 {
-    if (!GetJsonObjectStringItem(data, JSON_HW_ACCOUNT, device->accountHash, sizeof(device->accountHash))) {
-        DLOGE("parse hw account hash value failed.");
+    DISC_CHECK_AND_RETURN_LOG(data != NULL, "json data is NULL");
+    DISC_CHECK_AND_RETURN_LOG(device != NULL, "device info is NULL");
+    char tmpAccount[MAX_ACCOUNT_HASH_LEN] = {0};
+    if (!GetJsonObjectStringItem(data, JSON_HW_ACCOUNT, tmpAccount, MAX_ACCOUNT_HASH_LEN)) {
+        DLOGE("parse accountId failed");
         return;
     }
+
+    int32_t ret = SoftBusGenerateStrHash((const unsigned char *)tmpAccount, strlen(tmpAccount),
+        (unsigned char *)device->accountHash);
+    DISC_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "generate account hash failed, ret=%d", ret);
 }
