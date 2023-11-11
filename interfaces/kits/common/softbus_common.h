@@ -234,6 +234,7 @@ typedef enum {
     PROXY_HICAR,
     PROXY_WEAR,
     PROXY_SHARE,
+    PROXY_CUSTPLUS,
     CUSTOM_UNKNOWN,        /**< Proxy Unknown*/
 } MetaNodeType;
 
