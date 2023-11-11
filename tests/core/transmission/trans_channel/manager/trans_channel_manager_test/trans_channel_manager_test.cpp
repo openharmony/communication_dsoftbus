@@ -19,7 +19,6 @@
 #include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "trans_channel_manager.h"
 #include "trans_lane_manager.h"
@@ -30,6 +29,7 @@
 #include "trans_lane_pending_ctl.c"
 #include "trans_channel_callback.c"
 #include "trans_channel_manager.c"
+#include "trans_log.h"
 #include "trans_session_service.h"
 #include "lnn_lane_qos.h"
 #include "softbus_trans_def.h"
@@ -345,7 +345,7 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
 
     destBitRate[FRAME_BIT_RATE_MEDIUM] = MergeStatsInterval(srcBitRate, FRAME_BIT_RATE_LT30M, FRAME_BIT_RATE_LT6M);
     EXPECT_EQ(0, (int)destBitRate[FRAME_BIT_RATE_MEDIUM]);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d",
+    TRANS_LOGI(TRANS_TEST, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d",
         destBitRate[FRAME_BIT_RATE_MEDIUM]);
     ConvertStreamStats(src, dest);
 

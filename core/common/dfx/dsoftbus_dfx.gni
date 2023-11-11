@@ -35,7 +35,6 @@ if (defined(ohos_lite)) {
         "-Os",
         "-Wall",
         "-fPIC",
-        "-std=c99",
       ]
     } else {
       ohos_lite_cflags = [

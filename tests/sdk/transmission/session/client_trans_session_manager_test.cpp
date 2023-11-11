@@ -18,12 +18,12 @@
 #include <gtest/gtest.h>
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_trans_def.h"
 #include "softbus_app_info.h"
 #include "softbus_server_frame.h"
 #include "softbus_adapter_mem.h"
 #include "client_trans_session_manager.h"
+#include "trans_log.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_PID 0
@@ -77,23 +77,23 @@ void TransClientSessionManagerTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session bytes received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
 }
 
 static SessionInfo *GenerateSession(const SessionParam *param)

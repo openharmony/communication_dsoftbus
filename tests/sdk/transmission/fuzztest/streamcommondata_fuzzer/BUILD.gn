@@ -26,6 +26,7 @@ ohos_fuzztest("StreamCommonDataFuzzTest") {
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "../../../../../adapter/common/include",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
     "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
     "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",

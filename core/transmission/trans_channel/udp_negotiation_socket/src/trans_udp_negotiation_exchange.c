@@ -21,7 +21,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 
 #define BASE64_SESSION_KEY_LEN 45
 typedef enum {
@@ -35,7 +35,7 @@ static inline bool IsIShareSession(const char* sessionName)
 {
     regex_t regComp;
     if (regcomp(&regComp, ISHARE_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "regcomp failed.");
+        TRANS_LOGE(TRANS_CTRL, "regcomp failed.");
         regfree(&regComp);
         return false;
     }
@@ -54,7 +54,7 @@ static inline CodeType getCodeType(const AppInfo *appInfo)
 int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
 {
     if ((msg == NULL) && (errCode == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
     if (!GetJsonObjectInt32Item(msg, ERR_CODE, errCode)) {
@@ -65,9 +65,9 @@ int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
 
 int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack reply udp info in negotiation.");
+    TRANS_LOGI(TRANS_CTRL, "unpack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
 
@@ -91,7 +91,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
         case TYPE_UDP_CHANNEL_CLOSE:
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid udp channel type.");
+            TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -99,9 +99,9 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
 
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unpack request udp info in negotiation.");
+    TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
     unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
@@ -110,7 +110,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     int32_t ret = SoftBusBase64Decode((unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
         (unsigned char*)encodeSessionKey, strlen((char*)encodeSessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls decode failed.");
+        TRANS_LOGE(TRANS_CTRL, "mbedtls decode failed.");
         return SOFTBUS_ERR;
     }
 
@@ -142,7 +142,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid udp channel type.");
+            TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -150,9 +150,9 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 
 int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack request udp info in negotiation.");
+    TRANS_LOGI(TRANS_CTRL, "pack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
 
@@ -165,7 +165,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid udp channel type.");
+            TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_ERR;
     }
     char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
@@ -173,7 +173,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     int32_t ret = SoftBusBase64Encode((unsigned char*)encodeSessionKey, BASE64_SESSION_KEY_LEN, &len,
         (unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "mbedtls base64 encode failed.");
+        TRANS_LOGE(TRANS_CTRL, "mbedtls base64 encode failed.");
         return SOFTBUS_ERR;
     }
     (void)AddStringToJsonObject(msg, "SESSION_KEY", encodeSessionKey);
@@ -197,9 +197,9 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 
 int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack reply udp info in negotiation.");
+    TRANS_LOGI(TRANS_CTRL, "pack reply udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
 
@@ -212,7 +212,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
         case TYPE_UDP_CHANNEL_CLOSE:
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid udp channel type.");
+            TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_ERR;
     }
 
@@ -228,9 +228,9 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
 
 int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "pack reply error info in negotiation.");
+    TRANS_LOGI(TRANS_CTRL, "pack reply error info in negotiation.");
     if (msg == NULL || errDesc == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
 

@@ -20,16 +20,16 @@
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "trans_log.h"
 
 static IClientSessionCallBack g_sessionCb;
 
 int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb)
 {
     if (cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransTdcSetCallBack cb null.");
+        TRANS_LOGE(TRANS_SDK, "cb null.");
         return SOFTBUS_INVALID_PARAM;
     }
     g_sessionCb = *cb;
