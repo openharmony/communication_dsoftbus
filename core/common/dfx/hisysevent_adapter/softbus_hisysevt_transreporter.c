@@ -198,7 +198,7 @@ static ApiInfoList *CreateApiInfoList(void)
 {
     ApiInfoList *list = (ApiInfoList *)SoftBusMalloc(sizeof(ApiInfoList));
     if (list == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "malloc failed");
+        COMM_LOGE(COMM_EVENT, "malloc failed");
         return NULL;
     }
     (void)memset_s(list, sizeof(ApiInfoList), 0, sizeof(ApiInfoList));
@@ -269,11 +269,11 @@ static CalledApiCntStruct *GetNewApiCnt(char *apiName)
 {
     CalledApiCntStruct *apiCnt = (CalledApiCntStruct *)SoftBusMalloc(sizeof(CalledApiCntStruct));
     if (apiCnt == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiCnt malloc failed");
+        COMM_LOGE(COMM_EVENT, "GetNewApiCnt malloc failed");
         return NULL;
     }
     if (strcpy_s(apiCnt->apiName, SOFTBUS_HISYSEVT_PARAM_LEN, apiName) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiCnt strcpy failed");
+        COMM_LOGE(COMM_EVENT, "GetNewApiCnt strcpy failed");
         SoftBusFree(apiCnt);
         return NULL;
     }
@@ -286,13 +286,13 @@ static CalledApiInfoStruct *GetNewApiInfo(const char *appName, char *apiName)
 {
     CalledApiInfoStruct *apiInfo = (CalledApiInfoStruct *)SoftBusMalloc(sizeof(CalledApiInfoStruct));
     if (apiInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiInfo malloc failed");
+        COMM_LOGE(COMM_EVENT, "GetNewApiInfo malloc failed");
         return NULL;
     }
     if (strcpy_s(apiInfo->appName, SOFTBUS_HISYSEVT_PARAM_LEN, appName) != EOK ||
         strcpy_s(apiInfo->softbusVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_softbusVersion) != EOK ||
         strcpy_s(apiInfo->packageVersion, SOFTBUS_HISYSEVT_PARAM_LEN, g_pkgVersion) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetNewApiInfo strcpy failed");
+        COMM_LOGE(COMM_EVENT, "GetNewApiInfo strcpy failed");
         SoftBusFree(apiInfo);
         return NULL;
     }

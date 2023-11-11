@@ -309,7 +309,8 @@ static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, RANGE_DATA_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", RANGE_DATA_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName %s fail", RANGE_DATA_KEY);
     for (int i = 0; i < SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE; i++) {
         param->paramValue.u32a[i] = g_bleRssiRangeData[i];
     }
@@ -494,7 +495,7 @@ int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
         COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, 
+    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT,
                                   "ble rssi range lock fail");
 
     size_t rangeId = (MAX_RANGE_ID - rssi) / INTERVAL_OF_RSSI;

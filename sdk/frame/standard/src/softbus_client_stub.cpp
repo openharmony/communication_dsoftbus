@@ -417,7 +417,7 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
 
 int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessageParcel &reply)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnChannelQosEventInner");
+    COMM_LOGI(COMM_EVENT, "OnChannelQosEventInner");
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
         COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read channel id failed!");

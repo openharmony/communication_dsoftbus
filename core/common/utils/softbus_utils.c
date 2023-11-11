@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -545,22 +546,22 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     int32_t ret;
     unsigned char hashResult[SHA_256_HASH_LEN] = {0};
     if (hashStrLen < HEXIFY_LEN(len / HEXIFY_UNIT_LEN)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid hashStrLen");
+        COMM_LOGE(COMM_UTILS, "generate str hash invalid hashStrLen");
         return SOFTBUS_INVALID_PARAM;
     }
     if (str == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash invalid param");
+        COMM_LOGE(COMM_UTILS, "generate str hash invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate str hash fail, ret=%d", ret);
+        COMM_LOGE(COMM_UTILS, "generate str hash fail, ret=%d", ret);
         return ret;
     }
     ret = ConvertBytesToHexString((char *)hashStr, hashStrLen, (const unsigned char *)hashResult,
         len / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bytes to str hash fail, ret=%d", ret);
+        COMM_LOGE(COMM_UTILS, "convert bytes to str hash fail, ret=%d", ret);
         return ret;
     }
     return SOFTBUS_OK;

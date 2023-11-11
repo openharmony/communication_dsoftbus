@@ -144,7 +144,7 @@ static void *LoopTask(void *arg)
             SoftBusFree(itemNode);
             context->msgSize--;
             if (looper->dumpable) {
-                COMM_LOGD(COMM_UTILS, 
+                COMM_LOGD(COMM_UTILS,
                     "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u,time=%" PRId64,
                     context->name, msg->handler->name, msg->what, msg->arg1, context->msgSize, msg->time);
             }
@@ -162,7 +162,7 @@ static void *LoopTask(void *arg)
         context->currentMsg = msg;
         (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
-            COMM_LOGD(COMM_UTILS, 
+            COMM_LOGD(COMM_UTILS,
                 "LoopTask[%s], HandleMessage message. handle=%s,what=%" PRId32, context->name, msg->handler->name,
                 msg->what);
         }
@@ -173,7 +173,7 @@ static void *LoopTask(void *arg)
         if (looper->dumpable) {
             // Don`t print msg->handler, msg->handler->HandleMessage() may remove handler,
             // so msg->handler maybe invalid pointer
-            COMM_LOGD(COMM_UTILS, 
+            COMM_LOGD(COMM_UTILS,
                 "LoopTask[%s], after HandleMessage message. what=%" PRId32 ",arg1=%" PRIu64,
                 context->name, msg->what, msg->arg1);
         }
@@ -237,7 +237,7 @@ static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusH
         if (handler != NULL && handler != msg->handler) {
             continue;
         }
-        COMM_LOGD(COMM_UTILS, 
+        COMM_LOGD(COMM_UTILS,
             "DumpLooper. i=%d,handler=%s,what =%" PRId32 ",arg1=%" PRIu64 " arg2=%" PRIu64 ", time=%" PRId64,
             i, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
 

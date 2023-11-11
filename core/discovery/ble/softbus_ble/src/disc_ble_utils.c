@@ -40,6 +40,8 @@
 #define MAC_BIT_THREE 3
 #define MAC_BIT_FOUR 4
 #define MAC_BIT_FIVE 5
+#define TLV_MAX_DATA_LEN 15
+#define TLV_VARIABLE_DATA_LEN 0
 
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
@@ -151,16 +153,17 @@ int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
 int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
     uint32_t dataLen)
 {
-    uint32_t len = dataLen & DATA_LENGTH_MASK;
     broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT) & DATA_TYPE_MASK;
-    broadcastData->data.data[broadcastData->dataLen] |= dataLen & DATA_LENGTH_MASK;
+    if (dataLen <= TLV_MAX_DATA_LEN) {
+        broadcastData->data.data[broadcastData->dataLen] |= dataLen & DATA_LENGTH_MASK;
+    }
     broadcastData->dataLen += 1;
     uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen;
     if (remainLen == 0) {
         DLOGE("tlv remainLen is 0.");
         return SOFTBUS_ERR;
     }
-    uint32_t validLen = (len > remainLen) ? remainLen : len;
+    uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
     if (memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen) != EOK) {
         DLOGE("assemble tlv memcpy failed");
         return SOFTBUS_MEM_ERR;
@@ -227,6 +230,9 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 ret = ParseDeviceType(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_DEVICE_NAME:
+                if (len == TLV_VARIABLE_DATA_LEN) {
+                    len = strlen((char *)&data[curLen + 1]);
+                }
                 ret = CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
                                 (void *)&data[curLen + 1], len, "TLV_TYPE_DEVICE_NAME");
                 break;

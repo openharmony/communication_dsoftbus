@@ -103,7 +103,7 @@ static SoftBusMessage* CreateMessage(SoftBusLooper *looper, HandleMessageFunc ca
 {
     SoftBusMessage* msg = SoftBusMalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        COMM_LOGE(COMM_EVENT, SOFTBUS_LOG_ERROR, "malloc softbus message failed");
+        COMM_LOGE(COMM_EVENT, "malloc softbus message failed");
         return NULL;
     }
     SoftBusHandler *handler = CreateHandler(looper, callback);

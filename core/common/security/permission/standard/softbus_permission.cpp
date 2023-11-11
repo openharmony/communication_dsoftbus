@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
+#include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"

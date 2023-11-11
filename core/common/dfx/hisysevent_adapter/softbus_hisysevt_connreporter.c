@@ -581,7 +581,7 @@ int32_t SoftbusRecordProccessDuration(uint32_t pId, SoftBusConnType connType, So
         return SOFTBUS_INVALID_PARAM;
     }
     SoftbusRecordConnResult(pId, connType, status, stepTime->totalTime, errCode);
-    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_procStepLock) == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, 
+    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_procStepLock) == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT,
                                   "record g_procStepLock fail");
     for (ProcessStep i = NEGOTIATION_STEP; i < STEP_BUTT; i++) {
         uint64_t costTime = stepTime->connGroupTime;
