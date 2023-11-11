@@ -16,6 +16,7 @@
 #ifndef DSOFTBUS_CONN_LOG_H
 #define DSOFTBUS_CONN_LOG_H
 
+#include "anonymizer.h"
 #include "softbus_log.h"
 
 #ifdef __cplusplus
@@ -23,13 +24,26 @@ extern "C" {
 #endif
 typedef enum {
     CONN_INIT,
+    CONN_BLE,
+    CONN_BR,
+    CONN_COMMON,
+    CONN_WIFI_DIRECT,
+    CONN_WD_V1,
+    CONN_WD_V2,
+    // CONN_WD_HML,
     CONN_TEST,
 } ConnLogLabelEnum;
 
-/* Keep consistent with labels */
+/* Keep consistent with labels 0xd005760 - 0xd00577f*/
 static const SoftBusLogLabel CONN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {CONN_INIT,  0xd005760,      "ConnInit"},
-    { CONN_TEST, DOMAIN_ID_TEST, "ConnTest"},
+    {CONN_INIT,         0xd005760,      "ConnInit"},
+    {CONN_BLE,          0xd005761,      "ConnBle"},
+    {CONN_BR,           0xd005762,      "ConnBr"},
+    {CONN_COMMON,       0xd005763,      "ConnCommon"},
+    {CONN_WIFI_DIRECT,  0xd005764,      "ConnWD"},
+    {CONN_WD_V1,        0xd005765,      "ConnWDV1"},
+    {CONN_WD_V2,        0xd005766,      "ConnWDV2"},
+    {CONN_TEST, DOMAIN_ID_TEST, "ConnTest"},
 };
 
 #define CONN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, CONN_LABELS[label], ##__VA_ARGS__)

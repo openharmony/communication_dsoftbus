@@ -15,8 +15,6 @@
 
 #include "wifi_direct_intent.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectIntent: "
-
 #define INTENT_TAG_P2P_STATE 0
 #define INTENT_TAG_P2P_CONNECT_STATE 1
 #define INTENT_TAG_P2P_GROUP_INFO 2

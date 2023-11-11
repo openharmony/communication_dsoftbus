@@ -14,12 +14,10 @@
  */
 
 #include "wifi_direct_timer_list.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_types.h"
-
-#define LOG_LABEL "[WD] TL: "
 
 struct WifiDirectTimerStruct {
     ListNode node;
@@ -47,7 +45,7 @@ static void WorkHandler(void *data)
 {
     struct WifiDirectTimerList *self = GetWifiDirectTimerList();
     struct WifiDirectTimerStruct *timerStruct = data;
-    CLOGI(LOG_LABEL "timerId=%d", timerStruct->timerId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%d", timerStruct->timerId);
     timerStruct->handler(timerStruct->data);
 
     if (timerStruct->flag == TIMER_FLAG_ONE_SHOOT) {
@@ -62,7 +60,7 @@ static void WorkHandler(void *data)
         struct WifiDirectWorkQueue *queue = GetWifiDirectWorkQueue();
         struct WifiDirectWork *work = ObtainWifiDirectWork(WorkHandler, timerStruct);
         if (work == NULL) {
-            CLOGE(LOG_LABEL "obtain new work failed");
+            CONN_LOGE(CONN_WIFI_DIRECT, "obtain new work failed");
             SoftBusMutexLock(&self->mutex);
             ListDelete(&timerStruct->node);
             SoftBusMutexUnlock(&self->mutex);
@@ -77,7 +75,7 @@ static void WorkHandler(void *data)
 static int32_t StartTimer(TimeoutHandler handler, int64_t timeoutMs, enum WifiDirectTimerFlag flag, void *data)
 {
     struct WifiDirectTimerStruct *timerStruct = (struct WifiDirectTimerStruct*)SoftBusCalloc(sizeof(*timerStruct));
-    CONN_CHECK_AND_RETURN_RET_LOG(timerStruct, SOFTBUS_MALLOC_ERR, "malloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(timerStruct, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "malloc failed");
 
     ListInit(&timerStruct->node);
     timerStruct->timerId = AllocTimerId();
@@ -85,7 +83,7 @@ static int32_t StartTimer(TimeoutHandler handler, int64_t timeoutMs, enum WifiDi
     timerStruct->timeoutMs = timeoutMs;
     timerStruct->flag = flag;
     timerStruct->data = data;
-    CLOGI(LOG_LABEL "timerId=%d", timerStruct->timerId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%d", timerStruct->timerId);
 
     struct WifiDirectWorkQueue *queue = GetWifiDirectWorkQueue();
     struct WifiDirectWork *work = ObtainWifiDirectWork(WorkHandler, timerStruct);
@@ -106,7 +104,7 @@ static int32_t StartTimer(TimeoutHandler handler, int64_t timeoutMs, enum WifiDi
 
 static void* StopTimer(int32_t timeId)
 {
-    CLOGI(LOG_LABEL "timerId=%d", timeId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%d", timeId);
     struct WifiDirectTimerList *self = GetWifiDirectTimerList();
     struct WifiDirectTimerStruct *timerStruct = NULL;
     SoftBusMutexLock(&self->mutex);
@@ -120,7 +118,7 @@ static void* StopTimer(int32_t timeId)
             return res;
         }
     }
-    CLOGI(LOG_LABEL "not find timer");
+    CONN_LOGI(CONN_WIFI_DIRECT, "not find timer");
     SoftBusMutexUnlock(&self->mutex);
     return NULL;
 }
@@ -138,12 +136,13 @@ struct WifiDirectTimerList* GetWifiDirectTimerList(void)
 
 int32_t WifiDirectTimerListInit(void)
 {
+    CONN_LOGI(CONN_INIT, "init enter");
     ListInit(&g_timerList.timers);
     SoftBusMutexAttr attr;
     int32_t ret = SoftBusMutexAttrInit(&attr);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "init mutex attr failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_INIT, "init mutex attr failed");
     attr.type = SOFTBUS_MUTEX_RECURSIVE;
     ret = SoftBusMutexInit(&g_timerList.mutex, &attr);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "init mutex failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_INIT, "init mutex failed");
     return SOFTBUS_OK;
 }
