@@ -79,7 +79,7 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     info.channelType = channelType;
     ret = TransGetNameByChanId(&info, pkgName, sessionName, PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerCloseChannel invalid channel info");
+        COMM_LOGE(COMM_SVC, "ServerCloseChannel invalid channel info");
         return ret;
     }
 
@@ -383,7 +383,7 @@ static bool IsObjectstoreDbSessionName(const char* sessionName)
 #define OBJECTSTORE_DB_SESSION_NAME "objectstoreDB-*"
     regex_t regComp;
     if (regcomp(&regComp, OBJECTSTORE_DB_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "regcomp failed.");
+        COMM_LOGE(COMM_SVC, "regcomp failed.");
         regfree(&regComp);
         return false;
     }
@@ -399,16 +399,16 @@ static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
     sptr<IRemoteObject> remoteObject =
             systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (remoteObject == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get bundle manager service.");
+        COMM_LOGE(COMM_SVC, "Failed to get bundle manager service.");
         return SOFTBUS_ERR;
     }
     sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     if (iBundleMgr == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "iface_cast failed");
+        COMM_LOGE(COMM_SVC, "iface_cast failed");
         return SOFTBUS_ERR;
     }
     if (iBundleMgr->GetNameForUid(callingUid, bundleName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get bundleName failed");
+        COMM_LOGE(COMM_SVC, "get bundleName failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -420,11 +420,11 @@ static int32_t CheckSessionName(const char* sessionName, pid_t callingUid)
     if (IsObjectstoreDbSessionName(sessionName)) {
         std::string bundleName;
         if (GetBundleName(callingUid, bundleName) != 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get bundle name failed");
+            COMM_LOGE(COMM_SVC, "get bundle name failed");
             return SOFTBUS_ERR;
         }
         if (strcmp(bundleName.c_str(), sessionName + strlen(SESSION_NAME)) != 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "bundle name is different from session name");
+            COMM_LOGE(COMM_SVC, "bundle name is different from session name");
             return SOFTBUS_ERR;
         }
     }

@@ -161,16 +161,16 @@ static int32_t ConnClientInit(void)
 {
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
+        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
 
     ret = InitBaseListener();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
+        COMM_LOGE(COMM_EVENT, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init conn client success");
+    COMM_LOGI(COMM_EVENT, "init conn client success");
     return ret;
 }
 
