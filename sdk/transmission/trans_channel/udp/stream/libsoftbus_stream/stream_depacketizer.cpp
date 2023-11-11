@@ -26,9 +26,9 @@ void StreamDepacketizer::DepacketizeHeader(const char *header)
         const char *ptr = header;
         header_.Depacketize(ptr);
 
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
-            "streamPktHeader version = %d, subVersion = %d, extFlag = %d, streamType = %d, marker = %d, flag = %d"
-            "streamId = %d (%x), timestamp = %u (%x), dataLen = %u (%x), seqNum = %d (%x), subSeqNum = %d (%x)",
+        TRANS_LOGD(TRANS_STREAM,
+            "streamPktHeader version=%d, subVersion=%d, extFlag=%d, streamType=%d, marker=%d, flag=%d"
+            "streamId=%d (%x), timestamp=%u (%x), dataLen=%u (%x), seqNum=%d (%x), subSeqNum=%d (%x)",
             header_.GetVersion(), header_.GetSubVersion(), header_.GetExtFlag(), header_.GetStreamType(),
             header_.GetMarker(), header_.GetFlag(), header_.GetStreamId(), header_.GetStreamId(),
             header_.GetTimestamp(), header_.GetTimestamp(), header_.GetDataLen(), header_.GetDataLen(),
@@ -42,8 +42,8 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
     uint32_t tlvTotalLen = 0;
     if (header_.GetExtFlag() != 0) {
         tlvs_.Depacketize(ptr, bufferSize);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-            "TLV version: %d, num = %d, extLen = %zd, checksum = %u", tlvs_.GetVersion(), tlvs_.GetTlvNums(),
+        TRANS_LOGI(TRANS_STREAM,
+            "TLV version=%d, num=%d, extLen=%zd, checksum=%u", tlvs_.GetVersion(), tlvs_.GetTlvNums(),
             tlvs_.GetExtLen(), tlvs_.GetCheckSum());
 
         tlvTotalLen = tlvs_.GetCheckSum() + sizeof(tlvs_.GetCheckSum());
@@ -52,22 +52,22 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
 
     dataLength_ = static_cast<int>(header_.GetDataLen() - tlvTotalLen);
     if (dataLength_ <= 0 || dataLength_ > MAX_STREAM_LEN) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "DepacketizeBuffer error, header_dataLen = %u, tlvTotalLen = %u", header_.GetDataLen(), tlvTotalLen);
+        TRANS_LOGE(TRANS_STREAM,
+            "error, header dataLen=%u, tlvTotalLen=%u", header_.GetDataLen(), tlvTotalLen);
         return;
     }
 
     int remain = static_cast<int>(bufferSize - (ptr - buffer));
     if (remain < dataLength_) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "Data out of bounds, remain = %d, dataLength_ = %d", remain, dataLength_);
+        TRANS_LOGE(TRANS_STREAM,
+            "Data out of bounds, remain=%d, dataLen=%d", remain, dataLength_);
         return;
     }
 
     data_ = std::make_unique<char[]>(dataLength_);
     auto ret = memcpy_s(data_.get(), dataLength_, ptr, dataLength_);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data_, ret:%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data_, ret=%d", ret);
         dataLength_ = -1;
     }
 }

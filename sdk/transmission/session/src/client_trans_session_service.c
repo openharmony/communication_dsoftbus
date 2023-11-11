@@ -35,9 +35,9 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "softbus_log_old.h"
 #include "softbus_trans_def.h"
 #include "softbus_utils.h"
+#include "trans_log.h"
 #include "trans_server_proxy.h"
 
 typedef int (*SessionOptionRead)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
@@ -57,7 +57,7 @@ typedef struct {
 static bool IsValidSessionId(int sessionId)
 {
     if (sessionId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid sessionId [%d]", sessionId);
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId=%d", sessionId);
         return false;
     }
     return true;
@@ -70,26 +70,26 @@ static bool IsValidListener(const ISessionListener *listener)
         (listener->OnSessionClosed != NULL)) {
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid ISessionListener");
+    TRANS_LOGE(TRANS_SDK, "invalid ISessionListener");
     return false;
 }
 
 static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
 {
     if (!isEnabled) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "the channel is opening");
+        TRANS_LOGI(TRANS_SDK, "the channel is opening");
         return sessionId;
     }
 
     ISessionListener listener = {0};
     if (ClientGetSessionCallbackById(sessionId, &listener) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session listener failed");
+        TRANS_LOGE(TRANS_SDK, "get session listener failed");
         CloseSession(sessionId);
         return INVALID_SESSION_ID;
     }
 
     if (listener.OnSessionOpened(sessionId, SOFTBUS_OK) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session callback OnSessionOpened failed");
+        TRANS_LOGE(TRANS_SDK, "session callback OnSessionOpened failed");
         CloseSession(sessionId);
         return INVALID_SESSION_ID;
     }
@@ -100,69 +100,72 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         !IsValidListener(listener)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *anonyOut = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateSessionServer: pkgName=%s, sessionName=%s",
-        pkgName, AnonyDevId(&anonyOut, sessionName));
-    SoftBusFree(anonyOut);
-
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_SDK, "pkgName=%s, sessionName=%s",
+        pkgName, tmpName);
+    AnonymizeFree(tmpName);
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init softbus err");
+        TRANS_LOGE(TRANS_SDK, "init softbus err");
         return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
     }
 
     if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid pkg name");
+        TRANS_LOGE(TRANS_SDK, "invalid pkg name");
         return SOFTBUS_INVALID_PKGNAME;
     }
 
     int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServer is already created in client");
+        TRANS_LOGI(TRANS_SDK, "SessionServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session server err, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "add session server err, ret=%d.", ret);
         return ret;
     }
 
     ret = ServerIpcCreateSessionServer(pkgName, sessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServer is already created in server");
+        TRANS_LOGI(TRANS_SDK, "SessionServer is already created in server");
         ret = SOFTBUS_OK;
     } else if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Server createSessionServer failed");
+        TRANS_LOGE(TRANS_SDK, "Server createSessionServer failed");
         (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CreateSessionServer ok: ret=%d", ret);
+    TRANS_LOGI(TRANS_SDK, "ok: ret=%d", ret);
     return ret;
 }
 
 int RemoveSessionServer(const char *pkgName, const char *sessionName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *anonyOut = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer: pkgName=%s, sessionName=%s",
-        pkgName, AnonyDevId(&anonyOut, sessionName));
-    SoftBusFree(anonyOut);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGW(TRANS_SDK, "pkgName=%s, sessionName=%s",
+        pkgName, tmpName);
 
     int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remove in server failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "remove in server failed, ret=%d.", ret);
+        AnonymizeFree(tmpName);
         return ret;
     }
 
     ret = ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "delete session server[%s] failed, ret=%d.", sessionName, ret);
+        TRANS_LOGE(TRANS_SDK, "delete sessionName=%s failed, ret=%d.", tmpName, ret);
         DeleteFileListener(sessionName);
+        AnonymizeFree(tmpName);
         return ret;
     }
     DeleteFileListener(sessionName);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "RemoveSessionServer ok: ret=%d", ret);
+    AnonymizeFree(tmpName);
+    TRANS_LOGI(TRANS_SDK, "ok: ret=%d", ret);
     return ret;
 }
 
@@ -174,7 +177,7 @@ static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSess
         !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) ||
         (attr == NULL) ||
         (attr->dataType >= TYPE_BUTT)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -185,29 +188,35 @@ static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSess
     return SOFTBUS_OK;
 }
 
+static void PrintSessionName(const char *mySessionName, const char *peerSessionName)
+{
+    char *tmpMyName = NULL;
+    char *tmpPeerName = NULL;
+    Anonymize(mySessionName, &tmpMyName);
+    Anonymize(peerSessionName, &tmpPeerName);
+    TRANS_LOGI(TRANS_SDK, "OpenSession: mySessionName=%s, peerSessionName=%s",
+        tmpMyName, tmpPeerName);
+    AnonymizeFree(tmpMyName);
+    AnonymizeFree(tmpPeerName);
+}
+
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession invalid param, ret=%d.", ret);
+        TRANS_LOGW(TRANS_SDK, "invalid param, CheckParamIsValid ret=%d.", ret);
         return SOFTBUS_INVALID_PARAM;
     }
-    char *anonyOutMy = NULL;
-    char *anonyOutPeer = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession: mySessionName=%s, peerSessionName=%s",
-        AnonyDevId(&anonyOutMy, mySessionName), AnonyDevId(&anonyOutPeer, peerSessionName));
-    SoftBusFree(anonyOutMy);
-    SoftBusFree(anonyOutPeer);
-
+    PrintSessionName(mySessionName, peerSessionName);
     TransInfo transInfo;
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
     if (tmpAttr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc SessionAttribute failed");
+        TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(tmpAttr, sizeof(SessionAttribute), attr, sizeof(SessionAttribute)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s SessionAttribute failed");
+        TRANS_LOGE(TRANS_SDK, "memcpy_s SessionAttribute failed");
         SoftBusFree(tmpAttr);
         return SOFTBUS_ERR;
     }
@@ -228,16 +237,16 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session already opened");
+            TRANS_LOGI(TRANS_SDK, "session already opened");
             return OpenSessionWithExistSession(sessionId, isEnabled);
         }
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "add session err: ret=%d", ret);
         return ret;
     }
 
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session ipc err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%d", ret);
         SoftBusFree(tmpAttr);
         (void)ClientDeleteSession(sessionId);
         return ret;
@@ -245,12 +254,12 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 
     ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session failed");
+        TRANS_LOGE(TRANS_SDK, "open session failed");
         SoftBusFree(tmpAttr);
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSession ok: sessionId=%d, channelId=%d, channelType = %d",
+    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%d, channelId=%d, channelType=%d",
         sessionId, transInfo.channelId, transInfo.channelType);
     SoftBusFree(tmpAttr);
     return sessionId;
@@ -333,7 +342,7 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
 int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num, const char *mixAddr)
 {
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     TransInfo transInfo;
@@ -342,22 +351,21 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     ConnectionAddr mix;
     if (addrIndex < 0) {
         if (ConvertAddrStr(mixAddr, &mix) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid addrInfo param");
+            TRANS_LOGE(TRANS_SDK, "invalid addrInfo param");
             return SOFTBUS_INVALID_PARAM;
         }
         addr = &mix;
     } else {
         addr = (ConnectionAddr *)&addrInfo[addrIndex];
     }
-    char *anonyOut = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession: mySessionName=%s",
-        AnonyDevId(&anonyOut, sessionName));
-    SoftBusFree(anonyOut);
-
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%s", tmpName);
+    AnonymizeFree(tmpName);
     int32_t sessionId;
     int32_t ret = ClientAddAuthSession(sessionName, &sessionId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add non encrypt session err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "add non encrypt session err: ret=%d", ret);
         return ret;
     }
 
@@ -369,11 +377,11 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     }
     ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed");
+        TRANS_LOGE(TRANS_SDK, "failed");
         (void)ClientDeleteSession(sessionId);
         return INVALID_SESSION_ID;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenAuthSession ok: sessionId=%d, channelId=%d, channelType = %d",
+    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%d, channelId=%d, channelType=%d",
         sessionId, transInfo.channelId, transInfo.channelType);
     return sessionId;
 }
@@ -382,27 +390,27 @@ void NotifyAuthSuccess(int sessionId)
 {
     int32_t channelId = -1;
     int32_t channelType = -1;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "NotifyAuthSuccess sessionId:%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "sessionId=%d", sessionId);
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &channelType, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get session=%d channel err, ret:%d.", sessionId, ret);
+        TRANS_LOGE(TRANS_SDK, "get sessionId=%d channel err, ret:%d.", sessionId, ret);
         return;
     }
 
     int isServer = 0;
     if (ClientGetSessionIntegerDataById(sessionId, &isServer, KEY_IS_SERVER) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get isServer failed");
+        TRANS_LOGE(TRANS_SDK, "get isServer failed");
         return;
     }
     if (isServer) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "device is service side, no notification");
+        TRANS_LOGE(TRANS_SDK, "device is service side, no notification");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "device is client side");
+    TRANS_LOGI(TRANS_SDK, "device is client side");
 
     if (ServerIpcNotifyAuthSuccess(channelId, channelType) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "channel=%d type=%d ServerIpcNotifyAuthSuccess err", channelId, channelType);
+        TRANS_LOGE(TRANS_SDK,
+            "ServerIpcNotifyAuthSuccess err channelId=%d, channeltype=%d", channelId, channelType);
         return;
     }
 }
@@ -419,25 +427,15 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
             return SOFTBUS_NOT_FIND;
         }
         if (isEnable == true) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CheckSessionIsOpened session is enable");
+            TRANS_LOGI(TRANS_SDK, "session is enable");
             return SOFTBUS_OK;
         }
         usleep(SESSION_CHECK_PERIOD);
         i++;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened session open timeout");
+    TRANS_LOGE(TRANS_SDK, "session open timeout");
     return SOFTBUS_ERR;
-}
-
-static void OpenSessionSyncOutSessionName(const char *mySessionName, const char *peerSessionName)
-{
-    char *anonyOutMy = NULL;
-    char *anonyOutPeer = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync: mySessionName=%s, peerSessionName=%s",
-        AnonyDevId(&anonyOutMy, mySessionName), AnonyDevId(&anonyOutPeer, peerSessionName));
-    SoftBusFree(anonyOutMy);
-    SoftBusFree(anonyOutPeer);
 }
 
 int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
@@ -445,10 +443,10 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSessionSync invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return INVALID_SESSION_ID;
     }
-    OpenSessionSyncOutSessionName(mySessionName, peerSessionName);
+    PrintSessionName(mySessionName, peerSessionName);
 
     TransInfo transInfo;
     SessionParam param = {
@@ -465,65 +463,65 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session already opened");
+            TRANS_LOGI(TRANS_SDK, "session already opened");
             CheckSessionIsOpened(sessionId);
             return OpenSessionWithExistSession(sessionId, isEnabled);
         }
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "add session err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "add session err: ret=%d", ret);
         return ret;
     }
 
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open session ipc err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%d", ret);
         (void)ClientDeleteSession(sessionId);
         return ret;
     }
     ret = ClientSetChannelBySessionId(sessionId, &transInfo);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server open session err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "server open session err: ret=%d", ret);
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED;
     }
 
     ret = CheckSessionIsOpened(sessionId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CheckSessionIsOpened err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err: ret=%d", ret);
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenSessionSync ok: sessionId=%d, channelId=%d",
+    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%d, channelId=%d",
         sessionId, transInfo.channelId);
     return sessionId;
 }
 
 void CloseSession(int sessionId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CloseSession: sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "sessionId=%d", sessionId);
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t type = CHANNEL_TYPE_BUTT;
     int32_t ret;
 
     if (!IsValidSessionId(sessionId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return;
     }
     ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "get channel err: ret=%d", ret);
         return;
     }
     ret = ClientTransCloseChannel(channelId, type);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel err: ret=%d, channelId=%d, channeType=%d",
+        TRANS_LOGE(TRANS_SDK, "close channel err: ret=%d, channelId=%d, channeType=%d",
             ret, channelId, type);
     }
     ret = ClientDeleteSession(sessionId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseSession delete session err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "delete session err: ret=%d", ret);
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "CloseSession ok");
+    TRANS_LOGD(TRANS_SDK, "ok");
 }
 
 int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
@@ -561,12 +559,12 @@ int GetSessionSide(int sessionId)
 static bool IsValidFileReceivePath(const char *rootDir)
 {
     if (!IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive path[%s] invalid.", rootDir);
+        TRANS_LOGE(TRANS_SDK, "recvPath=%s invalid.", rootDir);
         return false;
     }
     char *absPath = realpath(rootDir, NULL);
     if (absPath == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "receive path[%s] not exist,[%d].", rootDir, errno);
+        TRANS_LOGE(TRANS_SDK, "recvPath=%s not exist, errno=%d.", rootDir, errno);
         return false;
     }
     SoftBusFree(absPath);
@@ -578,11 +576,11 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         !IsValidFileReceivePath(rootDir) || (recvListener == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file receive listener invalid param");
+        TRANS_LOGW(TRANS_SDK, "set file receive listener invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file receive listener init softbus client error");
+        TRANS_LOGE(TRANS_SDK, "set file receive listener init softbus client error");
         return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
     }
     return TransSetFileReceiveListener(sessionName, recvListener, rootDir);
@@ -592,11 +590,11 @@ int SetFileSendListener(const char *pkgName, const char *sessionName, const IFil
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         sendListener == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file send listener invalid param");
+        TRANS_LOGW(TRANS_SDK, "set file send listener invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set file send listener init softbus client error");
+        TRANS_LOGE(TRANS_SDK, "set file send listener init softbus client error");
         return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
     }
     return TransSetFileSendListener(sessionName, sendListener);
@@ -610,21 +608,21 @@ static int32_t IsValidDFSSession(int32_t sessionId, int32_t *channelId)
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
     int32_t type;
     if (GetMySessionName(sessionId, sessionName, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get dfs session name failed");
+        TRANS_LOGE(TRANS_SDK, "get dfs session name failed");
         return SOFTBUS_ERR;
     }
     if (strncmp(sessionName, g_busName, strlen(g_busName)) != 0 &&
         strncmp(sessionName, g_deviceStatusName, strlen(g_deviceStatusName)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session name");
+        TRANS_LOGE(TRANS_SDK, "invalid dfs session name");
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
 
     if (ClientGetChannelBySessionId(sessionId, channelId, &type, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel failed");
+        TRANS_LOGE(TRANS_SDK, "get channel failed");
         return SOFTBUS_ERR;
     }
     if (type != CHANNEL_TYPE_TCP_DIRECT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channel type");
+        TRANS_LOGE(TRANS_SDK, "invalid channel type");
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
@@ -634,11 +632,11 @@ int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len)
 {
     int32_t channelId;
     if (!IsValidSessionId(sessionId) || key == NULL || len < SESSION_KEY_LEN) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
+        TRANS_LOGE(TRANS_SDK, "invalid dfs session");
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientGetSessionKey(channelId, key, len);
@@ -648,11 +646,11 @@ int32_t GetSessionHandle(int32_t sessionId, int *handle)
 {
     int32_t channelId;
     if (!IsValidSessionId(sessionId) || handle == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
+        TRANS_LOGE(TRANS_SDK, "invalid dfs session");
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientGetHandle(channelId, handle);
@@ -662,11 +660,11 @@ int32_t DisableSessionListener(int32_t sessionId)
 {
     int32_t channelId;
     if (!IsValidSessionId(sessionId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (IsValidDFSSession(sessionId, &channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid dfs session");
+        TRANS_LOGE(TRANS_SDK, "invalid dfs session");
         return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
     }
     return ClientDisableSessionListener(channelId);
@@ -675,7 +673,7 @@ int32_t DisableSessionListener(int32_t sessionId)
 int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality)
 {
     if (quality != QOS_IMPROVE && quality != QOS_RECOVER) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "qos report invalid param");
+        TRANS_LOGW(TRANS_SDK, "qos report invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -683,16 +681,16 @@ int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality)
     int32_t type = CHANNEL_TYPE_BUTT;
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "get channel err, ret=%d.", ret);
         return ret;
     }
     if (ClientGetSessionSide(sessionId) != IS_CLIENT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "qos report sessionId[%d] not exist or not client side", sessionId);
+        TRANS_LOGE(TRANS_SDK,
+            "qos report sessionId=%d not exist or not client side", sessionId);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
     if ((ret = ClientQosReport(channelId, type, appType, quality)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "qos report sessionId[%d] failed", sessionId);
+        TRANS_LOGE(TRANS_SDK, "qos report sessionId=%d failed", sessionId);
     }
     return ret;
 }
@@ -721,13 +719,13 @@ int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType)
 int ReadMaxSendBytesSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
     if (valueSize != sizeof(uint32_t)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "value size is %d, not match", valueSize);
+        TRANS_LOGE(TRANS_SDK, "valueSize=%d, not match", valueSize);
         return SOFTBUS_INVALID_PARAM;
     }
 
     uint32_t dataConfig = INVALID_DATA_CONFIG;
     if (ClientGetDataConfigByChannelId(channelId, type, &dataConfig) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed.");
+        TRANS_LOGE(TRANS_SDK, "get config failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
 
@@ -738,13 +736,13 @@ int ReadMaxSendBytesSize(int32_t channelId, int32_t type, void* value, uint32_t 
 int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
     if (valueSize != sizeof(uint32_t)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "value size is %d, not match", valueSize);
+        TRANS_LOGE(TRANS_SDK, "valueSize=%d, not match", valueSize);
         return SOFTBUS_INVALID_PARAM;
     }
 
     uint32_t dataConfig = INVALID_DATA_CONFIG;
     if (ClientGetDataConfigByChannelId(channelId, type, &dataConfig) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get config failed.");
+        TRANS_LOGE(TRANS_SDK, "get config failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
 
@@ -755,13 +753,13 @@ int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_
 int ReadSessionLinkType(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
     if (valueSize != sizeof(uint32_t)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "value size is %d, not match", valueSize);
+        TRANS_LOGE(TRANS_SDK, "valueSize=%d, not match", valueSize);
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t routeType = INVALID_ROUTE_TYPE;
     if (ClientGetRouteTypeByChannelId(channelId, type, &routeType) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get link type failed.");
+        TRANS_LOGE(TRANS_SDK, "get link type failed.");
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
 
@@ -778,11 +776,11 @@ static const SessionOptionItem g_SessionOptionArr[SESSION_OPTION_BUTT] = {
 int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize)
 {
     if ((option >= SESSION_OPTION_BUTT) || (optionValue == NULL) || (valueSize == 0)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionOption invalid param");
+        TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_SessionOptionArr[option].canRead) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "option %d can not be get", option);
+        TRANS_LOGE(TRANS_SDK, "option=%d can not be get", option);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -790,7 +788,7 @@ int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uin
     int32_t type = CHANNEL_TYPE_BUTT;
     int32_t ret = ClientGetChannelBySessionId(sessionId, &channelId, &type, NULL);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get channel err, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "get channel err, ret=%d.", ret);
         return ret;
     }
 

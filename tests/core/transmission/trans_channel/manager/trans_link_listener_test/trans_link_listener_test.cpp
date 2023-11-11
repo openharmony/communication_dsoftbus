@@ -19,7 +19,6 @@
 #include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "trans_link_listener.h"
 #include "trans_channel_manager.h"

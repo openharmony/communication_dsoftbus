@@ -18,7 +18,7 @@
 #include "session.h"
 #include "session_mock.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -112,7 +112,7 @@ bool SessionImpl::IsServerSide() const
 int SessionImpl::SendBytes(const void *buf, ssize_t len) const
 {
     if (buf == nullptr || len <= 0 || len > MAX_BYTES_LENGTH) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid params");
+        TRANS_LOGW(TRANS_BYTES, "Invalid params");
         return SOFTBUS_ERR;
     }
     return SendBytesInner(sessionId_, buf, len);
