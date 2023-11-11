@@ -21,8 +21,13 @@ ohos_unittest("SoftBusDfxLogTest") {
   module_out_path = module_output_path
   sources = [
     "auth_log_test.cpp",
+    "comm_log_test.cpp",
+    "conn_log_test.cpp",
+    "disc_log_test.cpp",
+    "lnn_log_test.cpp",
     "mock/hilog_mock.cpp",
     "softbus_log_test.cpp",
+    "trans_log_test.cpp",
   ]
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
