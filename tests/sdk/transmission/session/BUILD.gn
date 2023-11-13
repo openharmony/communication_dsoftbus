@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
@@ -29,6 +30,7 @@ ohos_unittest("TransClientSessionManagerTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
@@ -61,6 +63,7 @@ ohos_unittest("TransClientSessionServiceTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
@@ -96,6 +99,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
@@ -134,6 +138,7 @@ ohos_unittest("TransClientMsgServiceTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
@@ -176,6 +181,7 @@ ohos_unittest("TransClientSessionTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",

@@ -29,7 +29,6 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_manager.h"
@@ -37,6 +36,7 @@
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
+#include "trans_log.h"
 
 #define ID_OFFSET (1)
 
@@ -62,7 +62,7 @@ int32_t TransDelConnByReqId(uint32_t reqId)
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
 
@@ -88,7 +88,7 @@ void TransDelConnByConnId(uint32_t connId)
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
 
@@ -96,7 +96,7 @@ void TransDelConnByConnId(uint32_t connId)
         if (removeNode->connId == connId) {
             ListDelete(&(removeNode->node));
             SoftBusFree(removeNode);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del conn=%d item.", connId);
+            TRANS_LOGI(TRANS_CTRL, "del connId=%d item.", connId);
             g_proxyConnectionList->cnt--;
         }
     }
@@ -114,7 +114,7 @@ int32_t TransDecConnRefByConnId(uint32_t connId)
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
 
@@ -126,17 +126,17 @@ int32_t TransDecConnRefByConnId(uint32_t connId)
                 SoftBusFree(removeNode);
                 g_proxyConnectionList->cnt--;
                 (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn=%d ref is 0.", connId);
+                TRANS_LOGI(TRANS_CTRL, "connId=%d ref is 0.", connId);
                 return SOFTBUS_OK;
             } else {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn=%d removeNode->ref %d", connId, removeNode->ref);
+                TRANS_LOGI(TRANS_CTRL, "connId=%d proxyConnRef=%d", connId, removeNode->ref);
                 (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
                 return SOFTBUS_ERR;
             }
         }
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not find conn=%d item", connId);
+    TRANS_LOGW(TRANS_CTRL, "not find connId=%d item", connId);
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     return SOFTBUS_OK;
 }
@@ -150,14 +150,14 @@ int32_t TransAddConnRefByConnId(uint32_t connId)
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (item->connId == connId) {
             item->ref++;
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add conn=%d ref %d.", connId, item->ref);
+            TRANS_LOGI(TRANS_CTRL, "add connId=%d proexyConnRef=%d.", connId, item->ref);
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_OK;
         }
@@ -175,7 +175,7 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
     if (msg == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans loop process msg type %d", msg->what);
+    TRANS_LOGI(TRANS_CTRL, "trans loop process msgType=%d", msg->what);
     switch (msg->what) {
         case LOOP_HANDSHAKE_MSG:
             chanId = *((int32_t *)msg->obj);
@@ -344,11 +344,11 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len
     data.pid = pid;
     data.len = len;
     data.buf = (char *)buf;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "send buf connid %d len %u seq %" PRIu64 " pri %d pid %d", connectionId, len, data.seq, priority, pid);
+    TRANS_LOGI(TRANS_MSG,
+        "send msg connId=%d len=%u seq=%" PRIu64 " priority=%d pid=%d", connectionId, len, data.seq, priority, pid);
     ret = ConnPostBytes(connectionId, &data);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "conn send buf fail %d", ret);
+        TRANS_LOGE(TRANS_MSG, "conn send buf fail ret=%d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -357,14 +357,14 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len
 static void TransProxyOnConnected(uint32_t connId, const ConnectionInfo *connInfo)
 {
     (void)connInfo;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "connect enabled, connId = %u", connId);
+    TRANS_LOGI(TRANS_CTRL, "connect enabled, connId=%u", connId);
     return;
 }
 
 static void TransProxyOnDisConnect(uint32_t connId, const ConnectionInfo *connInfo)
 {
     (void)connInfo;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "connect disabled, id = %u", connId);
+    TRANS_LOGI(TRANS_CTRL, "connect disabled, connId=%u", connId);
     TransProxyDelByConnId(connId);
     TransDelConnByConnId(connId);
     return;
@@ -411,7 +411,7 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
 
@@ -458,18 +458,18 @@ void TransCreateConnByConnId(uint32_t connId)
     }
 
     if (ConnGetConnectionInfo(connId, &info) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateConn get conn info fail %d", connId);
+        TRANS_LOGE(TRANS_CTRL, "CreateConn get conn info fail connId=%d", connId);
         return;
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, tmpNode, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (item->connId == connId) {
             item->ref++;
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "repeat conn ref = %d", item->ref);
+            TRANS_LOGI(TRANS_CTRL, "repeat conn proxyConnRef=%d", item->ref);
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return;
         }
@@ -482,7 +482,7 @@ void TransCreateConnByConnId(uint32_t connId)
     }
     item->ref++;
     item->state = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "create conn ref = %d", item->ref);
+    TRANS_LOGI(TRANS_CTRL, "create conn proxyConnRef=%d", item->ref);
     item->connId = connId;
     TransConnInfoToConnOpt(&info, &item->connInfo);
     ListAdd(&(g_proxyConnectionList->list), &(item->node));
@@ -496,17 +496,17 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
     ProxyConnInfo *item = NULL;
 
     if (g_proxyConnectionList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy connection list not inited!");
+        TRANS_LOGE(TRANS_CTRL, "proxy connection list not inited!");
         return SOFTBUS_ERR;
     }
 
     if (connInfo == NULL || proxyConn == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid para in trans get conn.");
+        TRANS_LOGE(TRANS_CTRL, "invalid para in trans get conn.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
 
@@ -521,7 +521,7 @@ static int32_t TransGetConn(const ConnectOption *connInfo, ProxyConnInfo *proxyC
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not find proxy conn in list.");
+    TRANS_LOGE(TRANS_CTRL, "can not find proxy conn in list.");
     return SOFTBUS_ERR;
 }
 
@@ -534,7 +534,7 @@ void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId, uint32_t state)
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
 
@@ -548,24 +548,24 @@ void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId, uint32_t state)
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-        "can not find proxy conn when set conn state. reqid[%d] connid[%d]", reqId, connId);
+    TRANS_LOGE(TRANS_CTRL,
+        "can not find proxy conn when set conn state. reqId=%d connId=%d", reqId, connId);
     (void)ConnDisconnectDevice(connId);
 }
 
 static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "Connect Successe reqid %d, connectionId %d", requestId, connectionId);
+    TRANS_LOGI(TRANS_CTRL,
+        "Connect Successe reqId=%d, connId=%d", requestId, connectionId);
     TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
     TransProxyChanProcessByReqId((int32_t)requestId, connectionId);
 }
 
 static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Connect fail id %u, reason %d", requestId, reason);
+    TRANS_LOGE(TRANS_CTRL, "Connect fail reqId=%u, reason=%d", requestId, reason);
     if (TransDelConnByReqId(requestId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Connect fail del reqid %u fail", requestId);
+        TRANS_LOGE(TRANS_CTRL, "Connect fail del reqId=%u fail", requestId);
     }
     TransProxyDelChanByReqId((int32_t)requestId, reason);
 }
@@ -573,7 +573,7 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
 int32_t TransProxyCloseConnChannel(uint32_t connectionId)
 {
     if (TransDecConnRefByConnId(connectionId) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "disconnect device connid %d", connectionId);
+        TRANS_LOGI(TRANS_CTRL, "disconnect device connId=%d", connectionId);
         // BR don't disconnect
         (void)ConnDisconnectDevice(connectionId);
     }
@@ -583,7 +583,7 @@ int32_t TransProxyCloseConnChannel(uint32_t connectionId)
 int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect)
 {
     if (TransDecConnRefByConnId(connectionId) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "reset(%d) disconnect device connid %d",
+        TRANS_LOGI(TRANS_CTRL, "reset isDisconnect=%d disconnect device connId=%d",
             isDisconnect, connectionId);
         if (isDisconnect) {
             (void)ConnDisconnectDevice(connectionId);
@@ -595,18 +595,18 @@ int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect
 int32_t TransProxyConnExistProc(ProxyConnInfo *conn, ProxyChannelInfo *chan, int32_t chanNewId)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(chanNewId + ID_OFFSET));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(chanNewId + ID_OFFSET));
+    TRANS_LOGI(TRANS_CTRL,
+        "SoftbusHitraceChainBegin: set hitraceId=%lx.", (uint64_t)(chanNewId + ID_OFFSET));
     chan->type = conn->connInfo.type;
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
         chan->reqId = (int32_t)conn->requestId;
         chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "reuse connection reqId=%d", chan->reqId);
+        TRANS_LOGI(TRANS_CTRL, "reuse connection reqId=%d", chan->reqId);
     } else {
         chan->connId = conn->connId;
         chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
         if (TransAddConnRefByConnId(conn->connId) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransAddConnRefByConnId: %d err", conn->connId);
+            TRANS_LOGE(TRANS_CTRL, "TransAddConnRefByConnId: connId=%d err", conn->connId);
             return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
         }
         TransProxyPostHandshakeMsgToLoop(chanNewId);
@@ -630,8 +630,8 @@ static int32_t TransProxyOpenNewConnChannel(
     ListenerModule moduleId, ProxyChannelInfo *chan, const ConnectOption *connInfo, int32_t channelId)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(channelId + ID_OFFSET));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(channelId + ID_OFFSET));
+    TRANS_LOGI(TRANS_CTRL,
+        "SoftbusHitraceChainBegin: set hitraceId=%lx.", (uint64_t)(channelId + ID_OFFSET));
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     chan->reqId = (int32_t)reqId;
     chan->isServer = 0;
@@ -646,19 +646,19 @@ static int32_t TransProxyOpenNewConnChannel(
     connChan->state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
     connChan->ref = 0;
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "Connect dev reqid %d", reqId);
+    TRANS_LOGI(TRANS_CTRL, "Connect dev reqId=%d", reqId);
     connChan->connInfo = (*connInfo);
     if (connInfo->type == CONNECT_TCP) {
         connChan->connInfo.socketOption.moduleId = moduleId;
     }
     if (TransAddConnItem(connChan) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "conn add repeat");
+        TRANS_LOGE(TRANS_CTRL, "conn add repeat");
         SoftBusFree(connChan);
         return SOFTBUS_TRANS_PROXY_CONN_REPEAT;
     }
     int32_t ret = TransProxyConnectDevice(&connChan->connInfo, reqId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "connect device err");
+        TRANS_LOGE(TRANS_CTRL, "connect device err");
         TransDelConnByReqId(reqId);
         TransProxyDelChanByChanId(channelId);
     }
@@ -672,18 +672,18 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     ProxyConnInfo conn;
     int32_t chanNewId = GenerateChannelId(false);
     if (chanNewId == INVALID_CHANNEL_ID) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "proxy channelId is invalid");
+        TRANS_LOGE(TRANS_CTRL, "proxy channelId is invalid");
         return SOFTBUS_ERR;
     }
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         ReleaseProxyChannelId(chanNewId);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusCalloc fail");
+        TRANS_LOGE(TRANS_CTRL, "SoftBusCalloc fail");
         return SOFTBUS_ERR;
     }
     chan->type = connInfo->type;
     if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransProxyCreateChanInfo err");
+        TRANS_LOGE(TRANS_CTRL, "TransProxyCreateChanInfo err");
         ReleaseProxyChannelId(chanNewId);
         SoftBusFree(chan);
         return SOFTBUS_ERR;
@@ -718,14 +718,14 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg)
     msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msg->msgHead.cipher |= BAD_CIPHER;
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send bad key msg myId:%d, peerId:%d",
+    TRANS_LOGW(TRANS_MSG, "send msg is bad key myChannelId=%d, peerChannelId=%d",
         msg->msgHead.myId, msg->msgHead.peerId);
     
     if (PackPlaintextMessage(&msg->msgHead, &dataInfo) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     if (TransProxyTransSendMsg(msg->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, 0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send bad key buf fail");
+        TRANS_LOGE(TRANS_MSG, "send bad key buf fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -736,10 +736,10 @@ static void TransProxyOnDataReceived(
 {
     ProxyMessage msg;
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "data recv connid :%u, moduleId %d, seq : %" PRId64 " len %d", connectionId, moduleId, seq, len);
+    TRANS_LOGI(TRANS_CTRL,
+        "recv data connId=%u, moduleId=%d, seq=%" PRId64 " len=%d", connectionId, moduleId, seq, len);
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return;
     }
     if (moduleId != MODULE_PROXY_CHANNEL) {
@@ -752,7 +752,7 @@ static void TransProxyOnDataReceived(
     if (((ret == SOFTBUS_AUTH_NOT_FOUND) || (ret == SOFTBUS_DECRYPT_ERR)) &&
         (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE)) {
         if (TransProxySendBadKeyMessage(&msg) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send bad key msg err: %d", ret);
+            TRANS_LOGE(TRANS_CTRL, "send bad key msg ret=%d", ret);
             return;
         }
         char peerBrMac[BT_MAC_LEN] = {0};
@@ -764,11 +764,11 @@ static void TransProxyOnDataReceived(
         }
     }
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parse proxy msg err: %d", ret);
+        TRANS_LOGE(TRANS_CTRL, "parse proxy msg ret=%d", ret);
         return;
     }
     if (msg.msgHead.type != PROXYCHANNEL_MSG_TYPE_NORMAL) {
-        AnonyPacketPrintout(SOFTBUS_LOG_TRAN, "TransProxyonMessageReceived, msg->data: ", msg.data, msg.dateLen);
+        PrintAnonymousPacket(TRANS_CTRL, "TransProxyonMessageReceived, msg->data: ", msg.data);
     }
     TransProxyonMessageReceived(&msg);
     SoftBusFree(msg.data);
@@ -787,15 +787,15 @@ int32_t TransProxyTransInit(void)
 
     g_proxyConnectionList = CreateSoftBusList();
     if (g_proxyConnectionList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create observer list failed");
+        TRANS_LOGE(TRANS_INIT, "create observer list failed");
         return SOFTBUS_ERR;
     }
     if (TransProxyLoopInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create loopInit fail");
+        TRANS_LOGE(TRANS_INIT, "create loopInit fail");
         return SOFTBUS_ERR;
     }
     if (TransProxyPipelineInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init proxy pipeline failed");
+        TRANS_LOGE(TRANS_INIT, "init proxy pipeline failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -804,17 +804,17 @@ int32_t TransProxyTransInit(void)
 int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
 {
     if (connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
 
     if (g_proxyConnectionList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "proxy connect list empty.");
+        TRANS_LOGE(TRANS_CTRL, "proxy connect list empty.");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail.");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail.");
         return SOFTBUS_ERR;
     }
 
@@ -822,7 +822,7 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
     LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (item->connId == connId) {
             if (memcpy_s(connInfo, sizeof(ConnectOption), &(item->connInfo), sizeof(ConnectOption)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "id=%u proxy connoption memcpy failed.", connId);
+                TRANS_LOGE(TRANS_CTRL, "connId=%u proxy connoption memcpy failed.", connId);
                 (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
                 return SOFTBUS_ERR;
             }
@@ -831,7 +831,7 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "id=%u proxy conn node not found.", connId);
+    TRANS_LOGE(TRANS_INIT, "connId=%u proxy conn node not found.", connId);
     return SOFTBUS_ERR;
 }
 

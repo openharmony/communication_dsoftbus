@@ -20,7 +20,6 @@
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 int32_t TransFileSchemaInit(void)

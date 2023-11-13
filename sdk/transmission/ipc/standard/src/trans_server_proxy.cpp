@@ -23,7 +23,7 @@
 #include "iremote_proxy.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 
 using namespace OHOS;
 
@@ -47,12 +47,12 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        TLOGE("Get samgr failed!");
+        TRANS_LOGE(TRANS_SDK, "Get samgr failed!");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        TLOGE("Get GetSystemAbility failed!");
+        TRANS_LOGE(TRANS_SDK, "Get GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -67,12 +67,12 @@ int32_t TransServerProxyInit(void)
 
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+        TRANS_LOGE(TRANS_SDK, "Get remote softbus object failed!");
         return SOFTBUS_ERR;
     }
     g_serverProxy = new (std::nothrow) TransServerProxy(object);
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Create trans server proxy failed!\n");
+        TRANS_LOGE(TRANS_SDK, "Create trans server proxy failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -89,11 +89,11 @@ void TransServerProxyDeInit(void)
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     if ((pkgName == nullptr) || (sessionName == nullptr)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pkgName or sessionName is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "pkgName or sessionName is nullptr!");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->CreateSessionServer(pkgName, sessionName);
@@ -102,11 +102,11 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     if ((pkgName == nullptr) || (sessionName == nullptr)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pkgName or sessionName is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "pkgName or sessionName is nullptr!");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->RemoveSessionServer(pkgName, sessionName);
@@ -115,17 +115,17 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_NO_INIT;
     }
     if ((param->sessionName == nullptr) || (param->peerSessionName == nullptr) ||
         (param->peerDeviceId == nullptr) || (param->groupId == nullptr) || (param->attr == nullptr)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parameter is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "parameter is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     int ret = g_serverProxy->OpenSession(param, info);
     if (ret < SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession failed! ret=%d.\n", ret);
+        TRANS_LOGE(TRANS_SDK, "OpenSession failed! ret=%d.", ret);
         return ret;
     }
     return ret;
@@ -134,16 +134,16 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     if ((sessionName == nullptr) || (addrInfo == nullptr)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parameter is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "parameter is nullptr!");
         return SOFTBUS_ERR;
     }
     int channelId = g_serverProxy->OpenAuthSession(sessionName, addrInfo);
     if (channelId < SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenAuthSession failed!\n");
+        TRANS_LOGE(TRANS_SDK, "OpenAuthSession failed!");
         return SOFTBUS_ERR;
     }
     return channelId;
@@ -157,11 +157,11 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     if (channelId < SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channel Id!\n");
+        TRANS_LOGE(TRANS_SDK, "invalid channel Id!");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->CloseChannel(channelId, channelType);
@@ -170,7 +170,7 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
 
@@ -180,7 +180,7 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
 int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!\n");
+        TRANS_LOGE(TRANS_QOS, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->QosReport(channelId, chanType, appType, quality);
@@ -189,7 +189,7 @@ int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType,
 int32_t ServerIpcStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr");
+        TRANS_LOGE(TRANS_STREAM, "softbus server g_serverProxy is nullptr");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->StreamStats(channelId, channelType, data);
@@ -198,7 +198,7 @@ int32_t ServerIpcStreamStats(int32_t channelId, int32_t channelType, const Strea
 int32_t ServerIpcRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->RippleStats(channelId, channelType, data);
@@ -208,12 +208,12 @@ int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName)
 {
     if (g_serverProxy == nullptr) {
         if (TransServerProxyInit() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "grant permission g_serverProxy is nullptr!");
+            TRANS_LOGE(TRANS_SDK, "grant permission g_serverProxy is nullptr!");
             return SOFTBUS_ERR;
         }
     }
     if (sessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionName is nullptr");
+        TRANS_LOGE(TRANS_SDK, "sessionName is nullptr");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->GrantPermission(uid, pid, sessionName);
@@ -222,11 +222,11 @@ int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName)
 int32_t ServerIpcRemovePermission(const char *sessionName)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus server g_serverProxy is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     if (sessionName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "sessionName is nullptr");
+        TRANS_LOGE(TRANS_SDK, "sessionName is nullptr");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->RemovePermission(sessionName);

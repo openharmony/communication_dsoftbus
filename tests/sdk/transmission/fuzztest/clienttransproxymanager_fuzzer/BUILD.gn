@@ -27,6 +27,7 @@ ohos_fuzztest("ClientTransProxyManagerFuzzTest") {
     "../../../../../adapter/common/include",
     "../../../../../adapter/default_config/spec_config",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../core/connection/interface",
     "../../../../../core/transmission/common/include",
     "../../../../../sdk/transmission/ipc/include",
