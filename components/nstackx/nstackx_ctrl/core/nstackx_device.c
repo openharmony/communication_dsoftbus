@@ -86,10 +86,6 @@ static const NetworkInterfacePrefiexPossible g_interfacePrefixList[NSTACKX_MAX_I
 
 #endif /* END OF (!DFINDER_USE_MINI_NSTACKX) */
 
-#ifdef DFINDER_SAVE_DEVICE_LIST
-static void DeviceListChangeHandle(void);
-#endif
-
 int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
 {
     if (!MatchDeviceFilter(deviceInfo)) {
@@ -103,11 +99,6 @@ int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
     }
     notifyDevice.update = NSTACKX_TRUE;
     NotifyDeviceListChanged(&notifyDevice, 1);
-    /* when unicast reply is determined by the service side, there is no concept of discovery cycle, just notify */
-    if (deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_AUTONET) {
-        NotifyDeviceFound(&notifyDevice, 1);
-        return NSTACKX_EOK;
-    }
     if (CoapDiscoverRequestOngoing()) {
         NotifyDeviceFound(&notifyDevice, 1);
     }
@@ -115,62 +106,6 @@ int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
 }
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
-
-static int32_t DeviceListChangeHandleInner(NSTACKX_DeviceInfo *deviceList, uint32_t *count)
-{
-    GetDeviceList(deviceList, count, true);
-    if (*count == 0) {
-        DFINDER_LOGW(TAG, "count is zero, do not notify");
-        return NSTACKX_EFAILED;
-    }
-    NotifyDeviceListChanged(deviceList, *count);
-    if (CoapDiscoverRequestOngoing()) {
-        NotifyDeviceFound(deviceList, *count);
-    }
-    return NSTACKX_EOK;
-}
-
-static void DeviceListChangeHandleAll(void)
-{
-    size_t deviceListLen = sizeof(NSTACKX_DeviceInfo) * g_maxDeviceNum;
-    NSTACKX_DeviceInfo *deviceList = (NSTACKX_DeviceInfo *)malloc(deviceListLen);
-    if (deviceList == NULL) {
-        DFINDER_LOGE(TAG, "malloc for device list failed");
-        return;
-    }
-    uint32_t count = g_maxDeviceNum;
-    (void)memset_s(deviceList, deviceListLen, 0, deviceListLen);
-    (void)DeviceListChangeHandleInner(deviceList, &count);
-    free(deviceList);
-}
-
-static void DeviceListChangeHandleOneByOne(void)
-{
-    NSTACKX_DeviceInfo *notifyDevice = (NSTACKX_DeviceInfo *)malloc(sizeof(NSTACKX_DeviceInfo));
-    if (notifyDevice == NULL) {
-        DFINDER_LOGE(TAG, "malloc notify device failed when one by one");
-        return;
-    }
-    uint32_t count;
-    for (uint32_t i = 0; i < g_maxDeviceNum; i++) {
-        (void)memset_s(notifyDevice, sizeof(NSTACKX_DeviceInfo), 0, sizeof(NSTACKX_DeviceInfo));
-        count = 1;
-        if (DeviceListChangeHandleInner(notifyDevice, &count) != NSTACKX_EOK) {
-            break;
-        }
-    }
-    free(notifyDevice);
-}
-
-static void DeviceListChangeHandle(void)
-{
-    if (GetIsNotifyPerDevice() == false) {
-        DeviceListChangeHandleAll();
-    } else {
-        DeviceListChangeHandleOneByOne();
-    }
-}
-
 static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const DeviceInfo *deviceInfo,
     uint8_t forceUpdate, uint8_t receiveBcast)
 {
@@ -187,12 +122,14 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
         DFINDER_LOGE(TAG, "update remote node by deviceinfo failed");
         return NSTACKX_EFAILED;
     }
-    if (deviceInfo->businessType == NSTACKX_BUSINESS_TYPE_AUTONET && receiveBcast == NSTACKX_TRUE) {
-        return DeviceInfoNotify(deviceInfo);
+    // each unicast received should be reported, even if the content is the same
+    if (!receiveBcast) {
+        DeviceInfoNotify(deviceInfo);
+        return NSTACKX_EOK;
     }
     if (updated || forceUpdate) {
         DFINDER_LOGD(TAG, "updated is: %hhu, forceUpdate is: %hhu", updated, forceUpdate);
-        DeviceListChangeHandle();
+        DeviceInfoNotify(deviceInfo);
     }
     return NSTACKX_EOK;
 }
