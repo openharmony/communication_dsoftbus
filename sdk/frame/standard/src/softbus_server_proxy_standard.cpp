@@ -15,11 +15,11 @@
 
 #include "softbus_server_proxy_standard.h"
 
+#include "comm_log.h"
 #include "message_parcel.h"
 #include "softbus_client_stub.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log_old.h"
 
 namespace OHOS {
 sptr<IRemoteObject> SoftBusServerProxyFrame::clientCallbackStub_;
@@ -68,26 +68,26 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        COMM_LOGE(COMM_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     sptr<IRemoteObject> clientStub = SoftBusServerProxyFrame::GetRemoteInstance();
     if (clientStub == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client stub is nullptr!");
+        COMM_LOGE(COMM_SDK, "client stub is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write InterfaceToken failed!");
+        COMM_LOGE(COMM_SDK, "SoftbusRegisterService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRemoteObject(clientStub)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write remote object failed!");
+        COMM_LOGE(COMM_SDK, "SoftbusRegisterService write remote object failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(clientPkgName)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService write clientPkgName failed!");
+        COMM_LOGE(COMM_SDK, "SoftbusRegisterService write clientPkgName failed!");
         return SOFTBUS_ERR;
     }
 
@@ -95,12 +95,12 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
     MessageOption option;
     int32_t err = remote->SendRequest(MANAGE_REGISTER_SERVICE, data, reply, option);
     if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService send request failed!");
+        COMM_LOGE(COMM_SDK, "SoftbusRegisterService send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftbusRegisterService read serverRet failed!");
+        COMM_LOGE(COMM_SDK, "SoftbusRegisterService read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;

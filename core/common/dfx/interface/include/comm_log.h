@@ -24,14 +24,26 @@ extern "C" {
 typedef enum {
     COMM_INIT,
     COMM_DFX,
+    COMM_EVENT,
+    COMM_VERIFY,
+    COMM_PERM,
+    COMM_SVC,
+    COMM_UTILS,
+    COMM_SDK,
     COMM_TEST,
 } CommLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {COMM_INIT,  0xd005700,      "CommInit"},
-    { COMM_DFX,  0xd005701,      "CommDfx" },
-    { COMM_TEST, DOMAIN_ID_TEST, "CommTest"},
+    { COMM_INIT,    0xd005700,      "CommInit"       },
+    { COMM_DFX,     0xd005701,      "CommDfx"        },
+    { COMM_EVENT,   0xd005702,      "CommEvent"      },
+    { COMM_VERIFY,  0xd005703,      "CommVerify"     },
+    { COMM_PERM,    0xd005704,      "CommPermission" },
+    { COMM_SVC,     0xd005705,      "CommService"    },
+    { COMM_UTILS,   0xd005706,      "CommUtils"      },
+    { COMM_SDK,     0xd005707,      "CommSdk"        },
+    { COMM_TEST,    DOMAIN_ID_TEST, "CommTest"       },
 };
 
 #define COMM_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, COMM_LABELS[label], ##__VA_ARGS__)

@@ -16,6 +16,7 @@
 #include <ohos_init.h>
 
 #include "bus_center_server_stub.h"
+#include "comm_log.h"
 #include "disc_server_stub.h"
 #include "ipc_skeleton.h"
 #include "iproxy_server.h"
@@ -28,7 +29,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log_old.h"
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "trans_server_stub.h"
@@ -56,7 +56,7 @@ static const char *GetName(Service *service)
 static BOOL Initialize(Service *service, Identity identity)
 {
     if (service == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_SVC, "invalid param");
         return TRUE;
     }
 
@@ -68,7 +68,7 @@ static BOOL Initialize(Service *service, Identity identity)
 static BOOL MessageHandle(Service *service, Request *msg)
 {
     if (service == NULL || msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_SVC, "invalid param");
         return TRUE;
     }
     return FALSE;
@@ -96,13 +96,13 @@ typedef struct DeathCbArg {
 static void ClientDeathCb(void *arg)
 {
     if (arg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name is NULL.");
+        COMM_LOGE(COMM_SVC, "package name is NULL.");
         return;
     }
     DeathCbArg* argStrcut = (DeathCbArg*)arg;
     struct CommonScvId svcId = {0};
     if (SERVER_GetIdentityByPkgName((const char *)argStrcut->pkgName, &svcId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not found client by package name.");
+        COMM_LOGE(COMM_SVC, "not found client by package name.");
         SoftBusFree(argStrcut->pkgName);
         SoftBusFree(argStrcut);
         return;
@@ -120,7 +120,7 @@ static void ClientDeathCb(void *arg)
 
 static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "register service ipc server pop.");
+    COMM_LOGI(COMM_SVC, "register service ipc server pop.");
     size_t len = 0;
     int ret = SOFTBUS_ERR;
     struct CommonScvId svcId = {0};
@@ -129,12 +129,12 @@ static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
     SvcIdentity svc;
     bool value = ReadRemoteObject(req, &svc);
     if (!value || name == NULL || len == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get data fail");
+        COMM_LOGE(COMM_SVC, "get data fail");
         goto EXIT;
     }
     int32_t callingUid = GetCallingUid();
     if (!CheckBusCenterPermission(callingUid, name)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRegisterService no permission.");
+        COMM_LOGE(COMM_SVC, "ServerRegisterService no permission.");
         goto EXIT;
     }
     svcId.handle = svc.handle;
@@ -143,18 +143,18 @@ static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
 
     char *pkgName = (char *)SoftBusMalloc(len + 1);
     if (pkgName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus malloc failed!");
+        COMM_LOGE(COMM_SVC, "softbus malloc failed!");
         goto EXIT;
     }
     if (strcpy_s(pkgName, len + 1, name) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus strcpy_s failed!");
+        COMM_LOGE(COMM_SVC, "softbus strcpy_s failed!");
         SoftBusFree(pkgName);
         goto EXIT;
     }
 
     DeathCbArg *argStrcut = (DeathCbArg*)SoftBusMalloc(sizeof(DeathCbArg));
     if (argStrcut == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus malloc failed!");
+        COMM_LOGE(COMM_SVC, "softbus malloc failed!");
         SoftBusFree(pkgName);
         goto EXIT;
     }
@@ -210,9 +210,9 @@ ServerInvokeCmd g_serverInvokeCmdTbl[] = {
 
 static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RECEIVE FUNCID:%d", funcId);
+    COMM_LOGI(COMM_SVC, "RECEIVE FUNCID:%d", funcId);
     if (GetServerIsInit() == false) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server not init");
+        COMM_LOGE(COMM_SVC, "server not init");
         WriteInt32(reply, SOFTBUS_SERVER_NOT_INIT);
         return SOFTBUS_ERR;
     }
@@ -222,7 +222,7 @@ static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req
             return g_serverInvokeCmdTbl[i].func(req, reply);
         }
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not support func[%d]", funcId);
+    COMM_LOGE(COMM_SVC, "not support func[%d]", funcId);
     return SOFTBUS_ERR;
 }
 
@@ -247,12 +247,12 @@ int ServerStubInit(void)
     HOS_SystemInit();
 
     if (LnnIpcInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Center Ipc init failed.");
+        COMM_LOGE(COMM_SVC, "Center Ipc init failed.");
         return SOFTBUS_ERR;
     }
 
     if (SERVER_InitClient() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client manager init failed.");
+        COMM_LOGE(COMM_SVC, "client manager init failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -263,6 +263,6 @@ static void Init(void)
     sleep(WAIT_FOR_SERVER);
     SAMGR_GetInstance()->RegisterService((Service *)&g_samgrService);
     SAMGR_GetInstance()->RegisterDefaultFeatureApi(SOFTBUS_SERVICE, GET_IUNKNOWN(g_samgrService));
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "Init success %s", SOFTBUS_SERVICE);
+    COMM_LOGI(COMM_SVC, "Init success %s", SOFTBUS_SERVICE);
 }
 SYSEX_SERVICE_INIT(Init);

@@ -85,6 +85,7 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
         return SOFTBUS_ERR;
     }
 
+    DLOGI("send rsp with bType: %u", bType);
     int32_t ret = NSTACKX_SendDiscoveryRsp(settings);
     if (ret != SOFTBUS_OK) {
         DLOGE("disc send response failed, ret=%d", ret);
@@ -434,10 +435,13 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
         DISC_CHECK_AND_RETURN_LOG(SetLocalDeviceInfo() == SOFTBUS_OK, "link status up: set local device info failed");
     }
 
-    DLOGI("link status[%s], register local device info", status == LINK_STATUS_UP ? "up" : "down");
-    if (NSTACKX_RegisterDevice(g_localDeviceInfo) != SOFTBUS_OK) {
-        DLOGE("register local device info to dfinder failed.");
-    }
+    int64_t accountId = 0;
+    int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
+    DISC_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "get local account failed");
+    DLOGI("link status[%s], register local device info %s account", status == LINK_STATUS_UP ? "up" : "down",
+        accountId == 0 ? "without" : "with");
+    ret = NSTACKX_RegisterDeviceAn(g_localDeviceInfo, (uint64_t)accountId);
+    DISC_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "register local device info to dfinder failed");
 }
 
 void DiscCoapUpdateDevName(void)
@@ -449,6 +453,11 @@ void DiscCoapUpdateDevName(void)
     DLOGI("register new local device name: %s", localDevName);
     ret = NSTACKX_RegisterDeviceName(localDevName);
     DISC_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "register local device name failed, ret=%d.", ret);
+}
+
+void DiscCoapUpdateAccount(void)
+{
+    DiscCoapUpdateLocalIp(LINK_STATUS_UP);
 }
 
 static void DeinitLocalInfo(void)
