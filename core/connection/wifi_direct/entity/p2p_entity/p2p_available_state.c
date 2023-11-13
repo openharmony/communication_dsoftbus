@@ -16,7 +16,7 @@
 #include "entity/p2p_entity/p2p_available_state.h"
 #include <string.h>
 #include "securec.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "data/resource_manager.h"
@@ -24,48 +24,47 @@
 #include "utils/wifi_direct_network_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WD] PAvS: "
 #define LINK_ATTR_STR_LEN 64
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
     (void)self;
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     GetP2pEntity()->stopTimer();
 }
 
 static void Exit(struct P2pEntityState *self)
 {
     (void)self;
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "exit");
 }
 
 static void SetLinkAttr(struct WifiDirectConnectParams *params)
 {
     if (strlen(params->remoteMac) == 0) {
-        CLOGI(LOG_LABEL "no need to set link attr");
+        CONN_LOGI(CONN_WIFI_DIRECT, "no need to set link attr");
         return;
     }
 
     char linkAttr[LINK_ATTR_STR_LEN] = {0};
     int32_t ret = sprintf_s(linkAttr, sizeof(linkAttr), "isProxyEnable=%s,mac=%s",
                             params->isProxyEnable ? "1" : "0", params->remoteMac);
-    CONN_CHECK_AND_RETURN_LOG(ret > 0, LOG_LABEL "format link attr string failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret > 0, CONN_WIFI_DIRECT, "format link attr string failed");
 
-    CLOGI(LOG_LABEL "interface=%s isProxyEnable=%s,mac=%s", params->interface, params->isProxyEnable ? "1" : "0",
-          WifiDirectAnonymizeMac(params->remoteMac));
+    CONN_LOGI(CONN_WIFI_DIRECT, "interface=%s isProxyEnable=%s,mac=%s", params->interface,
+        params->isProxyEnable ? "1" : "0", WifiDirectAnonymizeMac(params->remoteMac));
     GetWifiDirectP2pAdapter()->setWifiLinkAttr(params->interface, linkAttr);
 }
 
 static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
     (void)self;
-    CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(params, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "params is null");
     SetLinkAttr(params);
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     int32_t ret = adapter->createGroup(params->freq, params->isWideBandSupported);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "p2p create group failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "p2p create group failed");
 
     GetP2pEntity()->changeState(P2P_ENTITY_STATE_GROUP_CREATING);
     return SOFTBUS_OK;
@@ -74,11 +73,11 @@ static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnec
 static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
     (void)self;
-    CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(params, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "params is null");
     SetLinkAttr(params);
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     int32_t ret = adapter->connectGroup(params->groupConfig, false);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "p2p connect group failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "p2p connect group failed");
 
     GetP2pEntity()->changeState(P2P_ENTITY_STATE_GROUP_CONNECTING);
     return SOFTBUS_OK;
@@ -87,13 +86,13 @@ static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectPara
 static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
     (void)self;
-    CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(params, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "params is null");
     struct P2pEntity *entity = GetP2pEntity();
 
-    CLOGI(LOG_LABEL "shareLinkRemoveGroup Async");
+    CONN_LOGI(CONN_WIFI_DIRECT, "shareLinkRemoveGroup Async");
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     int32_t ret = adapter->shareLinkRemoveGroupAsync(params->interface);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "p2p share link remove group failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "p2p share link remove group failed");
 
     entity->changeState(P2P_ENTITY_STATE_GROUP_REMOVING);
     return SOFTBUS_OK;
@@ -102,12 +101,12 @@ static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectP
 static int32_t DestroyServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
     (void)self;
-    CONN_CHECK_AND_RETURN_RET_LOG(params, SOFTBUS_INVALID_PARAM, LOG_LABEL "params is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(params, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "params is null");
     struct P2pEntity *entity = GetP2pEntity();
 
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
     int32_t ret = adapter->removeGroup(params->interface);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "p2p remove group failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "p2p remove group failed");
 
     entity->changeState(P2P_ENTITY_STATE_GROUP_REMOVING);
     return SOFTBUS_OK;
@@ -118,16 +117,16 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
     (void)self;
     struct P2pEntity *entity = GetP2pEntity();
     if (groupInfo == NULL) {
-        CLOGI(LOG_LABEL "no groupInfo");
+        CONN_LOGI(CONN_WIFI_DIRECT, "no groupInfo");
         entity->clearJoiningClient();
         return;
     }
     if (!groupInfo->isGroupOwner) {
-        CLOGI(LOG_LABEL "not go, ignore");
+        CONN_LOGI(CONN_WIFI_DIRECT, "not go, ignore");
         return;
     }
 
-    CLOGI(LOG_LABEL "remove joining client, clientDeviceSize=%d", groupInfo->clientDeviceSize);
+    CONN_LOGI(CONN_WIFI_DIRECT, "remove joining client, clientDeviceSize=%d", groupInfo->clientDeviceSize);
     for (int32_t i = 0; i < groupInfo->clientDeviceSize; i++) {
         char remoteMac[MAC_ADDR_STR_LEN] = {0};
         GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->clientDevices[i].address, MAC_ADDR_ARRAY_SIZE,
@@ -137,9 +136,9 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, 0);
-    CLOGI(LOG_LABEL "joiningClientCount=%d reuseCount=%d", entity->joiningClientCount, reuseCount);
+    CONN_LOGI(CONN_WIFI_DIRECT, "joiningClientCount=%d reuseCount=%d", entity->joiningClientCount, reuseCount);
     if (groupInfo->clientDeviceSize == 0 && entity->joiningClientCount == 0 && reuseCount > 0) {
-        CLOGI(LOG_LABEL "gc disconnected abnormally");
+        CONN_LOGI(CONN_WIFI_DIRECT, "gc disconnected abnormally");
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(IF_NAME_P2P);
     }
 }
@@ -148,11 +147,11 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
 {
     (void)self;
     if (state == WIFI_DIRECT_P2P_CONNECTED) {
-        CLOGI(LOG_LABEL "connected");
+        CONN_LOGI(CONN_WIFI_DIRECT, "connected");
     } else if (state == WIFI_DIRECT_P2P_CONNECTING) {
-        CLOGI(LOG_LABEL "connecting");
+        CONN_LOGI(CONN_WIFI_DIRECT, "connecting");
     } else if (state == WIFI_DIRECT_P2P_CONNECTION_FAIL) {
-        CLOGI(LOG_LABEL "connect failed");
+        CONN_LOGI(CONN_WIFI_DIRECT, "connect failed");
     }
 }
 

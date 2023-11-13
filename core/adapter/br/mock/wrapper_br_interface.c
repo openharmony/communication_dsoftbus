@@ -20,10 +20,10 @@
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_spp.h"
 #include "securec.h"
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "string.h"
 
 #define IS_BR_ENCRYPT false
@@ -36,7 +36,7 @@ static void Init(const struct tagSppSocketDriver *sppDriver)
 static int32_t OpenSppServer(const char *name, int32_t nameLen, const char *uuid, int32_t isSecure)
 {
     if (name == NULL || nameLen <= 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSppServer invalid param");
+        CONN_LOGW(CONN_BR, "OpenSppServer invalid param");
         return SOFTBUS_ERR;
     }
     (void)isSecure;
@@ -52,7 +52,7 @@ static int32_t OpenSppServer(const char *name, int32_t nameLen, const char *uuid
 
 static void CloseSppServer(int32_t serverFd)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[CloseServer Connect, and serverFd = %d]", serverFd);
+    CONN_LOGI(CONN_BR, "[CloseServer Connect, and serverFd = %d]", serverFd);
     SppServerClose(serverFd);
 }
 
@@ -71,33 +71,33 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac)
     BdAddr bdAddr;
     (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
     if (memcpy_s((char *)bdAddr.addr, OHOS_BD_ADDR_LEN, mac, BT_ADDR_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Connect memcpy_s failed");
+        CONN_LOGE(CONN_BR, "Connect memcpy_s failed");
         return SOFTBUS_ERR;
     }
     int ret = SppConnect(&socketPara, &bdAddr);
     if (ret == BT_SPP_INVALID_ID) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "[BT_SPP_INVALID_ID]");
+        CONN_LOGE(CONN_BR, "[BT_SPP_INVALID_ID]");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SppConnect ok clientId: %d", ret);
+    CONN_LOGI(CONN_BR, "SppConnect ok clientId: %d", ret);
     return ret;
 }
 
 static int32_t DisConnect(int32_t clientFd)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[DisConnect, and clientFd = %d]", clientFd);
+    CONN_LOGI(CONN_BR, "[DisConnect, and clientFd = %d]", clientFd);
     return SppDisconnect(clientFd);
 }
 
 static bool IsConnected(int32_t clientFd)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[get connected state from bt, clientFd = %d]", clientFd);
+    CONN_LOGI(CONN_BR, "[get connected state from bt, clientFd = %d]", clientFd);
     return IsSppConnected(clientFd);
 }
 
 static int32_t Accept(int32_t serverFd)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[Accept remote device to connect, and serverFd = %d]", serverFd);
+    CONN_LOGI(CONN_BR, "[Accept remote device to connect, and serverFd = %d]", serverFd);
     int32_t ret = SppServerAccept(serverFd);
     if (ret == BT_SPP_INVALID_ID) {
         return SOFTBUS_ERR;
@@ -123,12 +123,12 @@ static int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t len)
 
 static int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice *device)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[to get remotedeviceinfo, clientFd = %d]", clientFd);
+    CONN_LOGI(CONN_BR, "[to get remotedeviceinfo, clientFd = %d]", clientFd);
     BdAddr bdAddr;
     (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
     (void)SppGetRemoteAddr(clientFd, &bdAddr);
     if (memcpy_s((char *)device->mac, BT_ADDR_LEN, (char *)bdAddr.addr, OHOS_BD_ADDR_LEN) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetRemoteDeviceInfo memcpy_s failed");
+        CONN_LOGE(CONN_BR, "GetRemoteDeviceInfo memcpy_s failed");
         return SOFTBUS_ERR;
     }
 
@@ -150,13 +150,13 @@ static SppSocketDriver g_sppSocketDriver = {
 
 bool IsAclConnected(const BT_ADDR mac)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "IsAclConnected not implement");
+    CONN_LOGW(CONN_BR, "IsAclConnected not implement");
     return false;
 }
 
 SppSocketDriver *InitSppSocketDriver()
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "[InitSppSocketDriver]");
+    CONN_LOGI(CONN_INIT, "[InitSppSocketDriver]");
     Init(&g_sppSocketDriver);
     return &g_sppSocketDriver;
 }

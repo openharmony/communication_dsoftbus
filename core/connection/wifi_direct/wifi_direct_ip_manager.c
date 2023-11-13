@@ -16,14 +16,12 @@
 #include "wifi_direct_ip_manager.h"
 #include <string.h>
 #include "securec.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "utils/wifi_direct_network_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_p2p_adapter.h"
-
-#define LOG_LABEL "[WD] IpM: "
 
 #define MAX_STATIC_ARP_COUNT 64
 
@@ -48,7 +46,7 @@ static int32_t ApplyIp(struct WifiDirectIpv4Info *remoteArray, int32_t remoteArr
     size_t localIpv4ArraySize = INTERFACE_NUM_MAX;
     struct WifiDirectIpv4Info localIpv4Array[INTERFACE_NUM_MAX];
     int32_t ret = GetWifiDirectNetWorkUtils()->getLocalIpv4InfoArray(localIpv4Array, &localIpv4ArraySize);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "get local ipv4 array failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local ipv4 array failed");
 
     ListNode conflictList;
     ListInit(&conflictList);
@@ -77,13 +75,13 @@ static int32_t ApplyIp(struct WifiDirectIpv4Info *remoteArray, int32_t remoteArr
     FreeIpEntry(&conflictList);
 
     ret = sprintf_s(ipString, sizeof(ipString), "%s1", ipPrefix);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret > 0, SOFTBUS_ERR, LOG_LABEL "format server ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret > 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "format server ip failed");
     ret = WifiDirectIpStringToIpv4(ipString, local);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "server ip to ipv4 failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "server ip to ipv4 failed");
     ret = sprintf_s(ipString, sizeof(ipString), "%s2", ipPrefix);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret > 0, SOFTBUS_ERR, LOG_LABEL "format client ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret > 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "format client ip failed");
     ret = WifiDirectIpStringToIpv4(ipString, remote);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "client ip to ipv4 failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "client ip to ipv4 failed");
 
     return SOFTBUS_OK;
 }
@@ -92,12 +90,12 @@ static int32_t ConfigIp(const char *interface, struct WifiDirectIpv4Info *local,
                         const char *remoteMac)
 {
     if (interface[0] == '\0' || remoteMac[0] == '\0') {
-        CLOGE(LOG_LABEL "invalid interface %s or remote mac %s", interface, remoteMac);
+        CONN_LOGW(CONN_WIFI_DIRECT, "invalid interface %s or remote mac %s", interface, remoteMac);
         return SOFTBUS_ERR;
     }
 
     if (local->address == 0 || remote->address == 0) {
-        CLOGE(LOG_LABEL "invalid ip");
+        CONN_LOGW(CONN_WIFI_DIRECT, "invalid ip");
         return SOFTBUS_ERR;
     }
 
@@ -105,19 +103,19 @@ static int32_t ConfigIp(const char *interface, struct WifiDirectIpv4Info *local,
     char remoteIp[IP_ADDR_STR_LEN] = {0};
     if (WifiDirectIpv4ToString(local, localIp, sizeof(localIp)) != SOFTBUS_OK ||
         WifiDirectIpv4ToString(remote, remoteIp, sizeof(remoteIp)) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "ip struct to string failed");
+        CONN_LOGW(CONN_WIFI_DIRECT, "ip struct to string failed");
         return SOFTBUS_ERR;
     }
 
-    CLOGD(LOG_LABEL "config ip for %s, localIp=%s remoteIp=%s remoteMac=%s", interface,
+    CONN_LOGD(CONN_WIFI_DIRECT, "config ip for %s, localIp=%s remoteIp=%s remoteMac=%s", interface,
           WifiDirectAnonymizeIp(localIp), WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeMac(remoteMac));
     if (!GetWifiDirectP2pAdapter()->addInterfaceMultiIps(interface, localIp, local->prefixLength)) {
-        CLOGE(LOG_LABEL "add ip failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "add ip failed");
         return SOFTBUS_ERR;
     }
 
     if (!GetWifiDirectP2pAdapter()->addInterfaceStaticArp(interface, remoteIp, remoteMac)) {
-        CLOGE(LOG_LABEL "add static arp failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "add static arp failed");
         return SOFTBUS_ERR;
     }
 
@@ -131,24 +129,24 @@ static void ReleaseIp(const char *interface, struct WifiDirectIpv4Info *local, s
     char remoteIp[IP_ADDR_STR_LEN] = {0};
     if (WifiDirectIpv4ToString(local, localIp, sizeof(localIp)) != SOFTBUS_OK ||
         WifiDirectIpv4ToString(remote, remoteIp, sizeof(remoteIp)) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "ipv4 struct to string failed");
+        CONN_LOGW(CONN_WIFI_DIRECT, "ipv4 struct to string failed");
         return;
     }
 
-    CLOGD(LOG_LABEL "release ip for %s, localIp=%s/%hhu remoteIp=%s remoteMac=%s", interface,
+    CONN_LOGD(CONN_WIFI_DIRECT, "release ip for %s, localIp=%s/%hhu remoteIp=%s remoteMac=%s", interface,
           WifiDirectAnonymizeIp(localIp), local->prefixLength,
           WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeMac(remoteMac));
 
     if (interface[0] == '\0' || local->address == 0) {
-        CLOGE(LOG_LABEL "invalid interface or local ip");
+        CONN_LOGW(CONN_WIFI_DIRECT, "invalid interface or local ip");
     } else if (!GetWifiDirectP2pAdapter()->deleteInterfaceMultiIps(interface, localIp, local->prefixLength)) {
-        CLOGE(LOG_LABEL "delete ip failed");
+        CONN_LOGW(CONN_WIFI_DIRECT, "delete ip failed");
     }
 
     if (remoteMac[0] == '\0' || remote->address == 0) {
-        CLOGE(LOG_LABEL "invalid remote ip or mac");
+        CONN_LOGW(CONN_WIFI_DIRECT, "invalid remote ip or mac");
     } else if (!GetWifiDirectP2pAdapter()->deleteInterfaceStaticArp(interface, remoteIp, remoteMac)) {
-        CLOGE(LOG_LABEL "delete static arp failed");
+        CONN_LOGW(CONN_WIFI_DIRECT, "delete static arp failed");
     }
 }
 
@@ -157,7 +155,7 @@ static void ClearAllIps(const char *interface)
     char *allStaticArp[MAX_STATIC_ARP_COUNT];
     int32_t size = MAX_STATIC_ARP_COUNT;
     if (GetWifiDirectP2pAdapter()->getInterfaceStaticArp(interface, allStaticArp, &size) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "get static arp failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "get static arp failed");
         return;
     }
 
@@ -170,7 +168,7 @@ static void ClearAllIps(const char *interface)
         char mac[MAC_ADDR_STR_LEN] = "";
         int ret = sscanf_s(allStaticArp[i], "%s/%s", ip, sizeof(ip), mac, sizeof(mac));
         if (ret < 0) {
-            CLOGE(LOG_LABEL "get ip and mac of %s failed", WifiDirectAnonymizeMac(allStaticArp[i]));
+            CONN_LOGE(CONN_WIFI_DIRECT, "get ip and mac of %s failed", WifiDirectAnonymizeMac(allStaticArp[i]));
         } else {
             GetWifiDirectP2pAdapter()->deleteInterfaceStaticArp(interface, ip, mac);
         }
@@ -180,13 +178,13 @@ static void ClearAllIps(const char *interface)
     size_t localIpv4ArraySize = INTERFACE_NUM_MAX;
     struct WifiDirectIpv4Info localIpv4Array[INTERFACE_NUM_MAX] = {{0, 0}};
     int ret = GetWifiDirectNetWorkUtils()->getLocalIpv4InfoArray(localIpv4Array, &localIpv4ArraySize);
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "no local ip found");
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "no local ip found");
 
     for (size_t i = 0; i < localIpv4ArraySize; i++) {
         char localIp[IP_ADDR_STR_LEN] = "";
         (void)WifiDirectIpv4ToString(&localIpv4Array[i], localIp, IP_ADDR_STR_LEN);
         if (strncmp(localIp, HML_WORKING_IP_NET_PREFIX, strlen(HML_WORKING_IP_NET_PREFIX)) == 0) {
-            CLOGD(LOG_LABEL "local hml IP = %s", WifiDirectAnonymizeIp(localIp));
+            CONN_LOGD(CONN_WIFI_DIRECT, "local hml IP = %s", WifiDirectAnonymizeIp(localIp));
             GetWifiDirectP2pAdapter()->deleteInterfaceMultiIps(interface, localIp, localIpv4Array[i].prefixLength);
         }
     }
@@ -206,7 +204,7 @@ static void FreeIpEntry(struct ListNode *list)
 static void AddEntry(ListNode *list, struct WifiDirectIpv4Info *ipv4)
 {
     struct IpEntry *ipEntry = SoftBusCalloc(sizeof(*ipEntry));
-    CONN_CHECK_AND_RETURN_LOG(ipEntry, LOG_LABEL "malloc ip entry failed");
+    CONN_CHECK_AND_RETURN_LOGE(ipEntry, CONN_WIFI_DIRECT, "malloc ip entry failed");
 
     ListInit(&ipEntry->node);
     ipEntry->ipv4 = *ipv4;
@@ -225,7 +223,7 @@ static void GenerateConflictList(struct WifiDirectIpv4Info *localArray, size_t l
             continue;
         }
         if (!strncmp(ipString, HML_WORKING_IP_NET_PREFIX, prefixLen)) {
-            CLOGD(LOG_LABEL "add %s", WifiDirectAnonymizeIp(ipString));
+            CONN_LOGD(CONN_WIFI_DIRECT, "add %s", WifiDirectAnonymizeIp(ipString));
             AddEntry(list, &localArray[i]);
         }
     }
@@ -236,7 +234,7 @@ static void GenerateConflictList(struct WifiDirectIpv4Info *localArray, size_t l
             continue;
         }
         if (!strncmp(ipString, HML_WORKING_IP_NET_PREFIX, prefixLen)) {
-            CLOGD(LOG_LABEL "add %s", ipString);
+            CONN_LOGD(CONN_WIFI_DIRECT, "add %s", ipString);
             AddEntry(list, &remoteArray[i]);
         }
     }
