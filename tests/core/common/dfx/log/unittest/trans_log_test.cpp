@@ -41,8 +41,8 @@ HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
     EXPECT_EQ(0xd005740, label.domain);
     EXPECT_STREQ("TransInit", label.tag);
 
-    label = TRANS_LABELS[TRANS_CONTROL];
-    EXPECT_EQ(TRANS_CONTROL, label.label);
+    label = TRANS_LABELS[TRANS_CTRL];
+    EXPECT_EQ(TRANS_CTRL, label.label);
     EXPECT_EQ(0xd005741, label.domain);
     EXPECT_STREQ("TransControl", label.tag);
 
@@ -70,6 +70,16 @@ HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
     EXPECT_EQ(TRANS_QOS, label.label);
     EXPECT_EQ(0xd005746, label.domain);
     EXPECT_STREQ("TransQos", label.tag);
+
+    label = TRANS_LABELS[TRANS_SDK];
+    EXPECT_EQ(TRANS_SDK, label.label);
+    EXPECT_EQ(0xd005747, label.domain);
+    EXPECT_STREQ("TransSdk", label.tag);
+
+    label = TRANS_LABELS[TRANS_SVC];
+    EXPECT_EQ(TRANS_SVC, label.label);
+    EXPECT_EQ(0xd005748, label.domain);
+    EXPECT_STREQ("TransSvc", label.tag);
 
     label = TRANS_LABELS[TRANS_TEST];
     EXPECT_EQ(TRANS_TEST, label.label);

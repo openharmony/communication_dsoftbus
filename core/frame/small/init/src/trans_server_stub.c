@@ -21,21 +21,21 @@
 #include "softbus_common.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_permission.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_trans_def.h"
 #include "trans_auth_manager.h"
 #include "trans_channel_manager.h"
+#include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
 
 
 int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create session server ipc server pop");
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size;
@@ -44,7 +44,7 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCreateSessionServer no permission");
+        TRANS_LOGE(TRANS_CTRL, "no permission");
         WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
@@ -55,9 +55,9 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
 
 int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "remove session server ipc server pop");
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size;
@@ -66,7 +66,7 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerRemoveSessionServer no permission");
+        TRANS_LOGE(TRANS_CTRL, "no permission");
         WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
@@ -79,19 +79,19 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
 {
     char pkgName[PKG_NAME_SIZE_MAX];
     if (TransGetPkgNameBySessionName(sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession TransGetPkgNameBySessionName failed");
+        TRANS_LOGE(TRANS_CTRL, "TransGetPkgNameBySessionName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession no permission");
+        TRANS_LOGE(TRANS_CTRL, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
 
     if (CheckTransSecLevel(sessionName, peerSessionName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "OpenSession sec level invalid");
+        TRANS_LOGE(TRANS_CTRL, "sec level invalid");
         return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;
@@ -100,18 +100,18 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
 static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
 {
     if (getAttr == NULL || req == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReadSessionAttrs getAttr is NULL");
+        TRANS_LOGE(TRANS_CTRL, "getAttr is NULL");
         return;
     }
     LinkType *pGetArr = NULL;
 
     if (!ReadInt32(req, &getAttr->dataType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read dataType failed");
+        TRANS_LOGE(TRANS_CTRL, "read dataType failed");
         return;
     }
 
     if (!ReadInt32(req, &getAttr->linkTypeNum)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read linkTypeNum failed");
+        TRANS_LOGE(TRANS_CTRL, "read linkTypeNum failed");
         return;
     }
 
@@ -125,12 +125,12 @@ static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
     }
 
     if (!ReadInt32(req, &getAttr->attr.streamAttr.streamType)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read streamType failed");
+        TRANS_LOGE(TRANS_CTRL, "read streamType failed");
         return;
     }
 
     if (!ReadUint16(req, &getAttr->fastTransDataSize)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "read fastTransDataSize failed");
+        TRANS_LOGE(TRANS_CTRL, "read fastTransDataSize failed");
         return;
     }
 
@@ -141,9 +141,9 @@ static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
 
 int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "open session ipc server pop");
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -186,9 +186,9 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
 
 int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open non encrypt session ipc server pop");
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret;
@@ -197,7 +197,7 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
     const char *sessionName = (const char*)ReadString(req, &size);
     ConnectionAddr *addr = (ConnectionAddr *)ReadRawData(req, sizeof(ConnectionAddr));
     if (!LnnConvertAddrToOption(addr, &connOpt)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "LnnConvertAddrToOption fail");
+        TRANS_LOGE(TRANS_CTRL, "LnnConvertAddrToOption fail");
         WriteInt32(reply, SOFTBUS_ERR);
         return SOFTBUS_ERR;
     }
@@ -213,9 +213,9 @@ int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
 
 int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set auth result server pop");
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = 0;
@@ -228,12 +228,12 @@ int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply)
     char sessionName[SESSION_NAME_SIZE_MAX];
     if (TransAuthGetNameByChanId(channelId, pkgName, sessionName,
         PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get session name fail");
+        TRANS_LOGE(TRANS_CTRL, "get session name fail");
         WriteInt32(reply, SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID);
         return SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID;
     }
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerCloseChannel no permission");
+        TRANS_LOGE(TRANS_CTRL, "ServerCloseChannel no permission");
         WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
         return SOFTBUS_PERMISSION_DENIED;
     }
@@ -245,9 +245,9 @@ int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply)
 
 int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel ipc server pop");
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -268,9 +268,9 @@ int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply)
 
 int32_t ServerSendSessionMsg(IpcIo *req, IpcIo *reply)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server send session msg ipc server pop");
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid param");
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = 0;

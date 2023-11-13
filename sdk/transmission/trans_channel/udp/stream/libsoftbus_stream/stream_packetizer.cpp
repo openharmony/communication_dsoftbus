@@ -56,14 +56,14 @@ std::unique_ptr<char[]> StreamPacketizer::PacketizeStream()
 
     TwoLevelsTlv tlv(originData_->GetExtBuffer(), originData_->GetExtBufferLen());
     if (tlv.Packetize(data.get(), extSize_, hdrSize_) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "packetize tlv failed");
+        TRANS_LOGE(TRANS_STREAM, "packetize tlv failed");
         return nullptr;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "streamPktHeader version = %d, subVersion = %d, extFlag = %d, streamType = %d, marker = %d, flag = %d, "
-        "streamId = %d (%x), timestamp = %u (%x), dataLen = %u (%x), seqNum = %d (%x), subSeqNum = %d (%x), "
-        "dataSize_ = %zd, extSize_ = %zd",
+    TRANS_LOGI(TRANS_STREAM,
+        "streamPktHeader version=%d, subVersion=%d, extFlag=%d, streamType=%d, marker=%d, flag=%d, "
+        "streamId=%d (%x), timestamp=%u (%x), dataLen=%u (%x), seqNum=%d (%x), subSeqNum=%d (%x), "
+        "dataSize=%zd, extSize=%zd",
         streamPktHeader.GetVersion(), streamPktHeader.GetSubVersion(), streamPktHeader.GetExtFlag(),
         streamPktHeader.GetStreamType(), streamPktHeader.GetMarker(), streamPktHeader.GetFlag(),
         streamPktHeader.GetStreamId(), streamPktHeader.GetStreamId(), streamPktHeader.GetTimestamp(),
@@ -71,14 +71,14 @@ std::unique_ptr<char[]> StreamPacketizer::PacketizeStream()
         streamPktHeader.GetSeqNum(), streamPktHeader.GetSeqNum(), streamPktHeader.GetSubSeqNum(),
         streamPktHeader.GetSubSeqNum(), dataSize_, extSize_);
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "TLV version: %d, num = %d, extSize = %zd, extLen = %zd, checksum = %u",
+    TRANS_LOGI(TRANS_STREAM,
+        "TLV version=%d, num=%d, extSize=%zd, extLen=%zd, checksum=%u",
         tlv.GetVersion(), tlv.GetTlvNums(), extSize_, tlv.GetExtLen(), tlv.GetCheckSum());
 
     auto ret = memcpy_s(data.get() + hdrSize_ + extSize_, dataSize_, originData_->GetBuffer().get(),
         originData_->GetBufferLen());
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data!, ret:%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data!, ret=%d", ret);
     }
 
     return data;

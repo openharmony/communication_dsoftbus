@@ -23,8 +23,8 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
+#include "trans_log.h"
 
 #define DEFAULT_KEY_LENGTH 32
 
@@ -62,7 +62,7 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
 
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send dfileId=%d type=%d", dfileId, msgType);
+    TRANS_LOGI(TRANS_FILE, "send dfileId=%d type=%d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         return;
@@ -139,7 +139,7 @@ static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFil
 
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv dfileId=%d type=%d", dfileId, msgType);
+    TRANS_LOGI(TRANS_FILE, "recv dfileId=%d type=%d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         return;
@@ -174,7 +174,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
 int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
 {
     if (channel == NULL || filePort == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t fileSession;
@@ -185,18 +185,18 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
         FileListener fileListener;
         (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
         if (TransGetFileListener(sessionName, &fileListener) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get file listener failed");
+            TRANS_LOGE(TRANS_FILE, "get file listener failed");
             return SOFTBUS_ERR;
         }
         fileSession = StartNStackXDFileServer(channel->myIp, (uint8_t *)channel->sessionKey,
             DEFAULT_KEY_LENGTH, FileReceiveListener, filePort);
         if (fileSession < 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start file channel as server failed");
+            TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
             return SOFTBUS_ERR;
         }
         if (NSTACKX_DFileSetStoragePath(fileSession, fileListener.rootDir) != SOFTBUS_OK) {
             NSTACKX_DFileClose(fileSession);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set storage path[%s] failed", fileListener.rootDir);
+            TRANS_LOGE(TRANS_FILE, "set storage patt rpptDir=%s failed", fileListener.rootDir);
             return SOFTBUS_ERR;
         }
         g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
@@ -204,7 +204,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
             (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, FileSendListener);
         if (fileSession < 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start file channel as client failed");
+            TRANS_LOGE(TRANS_FILE, "start file channel as client failed");
             return SOFTBUS_ERR;
         }
     }
@@ -214,7 +214,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
 static void *TransCloseDFileProcTask(void *args)
 {
     int32_t *dfileId = (int32_t *)args;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "rsync close dfile=%d.", *dfileId);
+    TRANS_LOGI(TRANS_FILE, "rsync close dfileId=%d.", *dfileId);
     NSTACKX_DFileClose(*dfileId);
     SoftBusFree(dfileId);
     return NULL;
@@ -222,24 +222,24 @@ static void *TransCloseDFileProcTask(void *args)
 
 void TransCloseFileChannel(int32_t dfileId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "start close file channel, dfile=%d.", dfileId);
+    TRANS_LOGI(TRANS_FILE, "start close file channel, dfileId=%d.", dfileId);
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "thread attr init failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_FILE, "thread attr init failed, ret=%d.", ret);
         return;
     }
     int32_t *args = (int32_t *)SoftBusCalloc(sizeof(int32_t));
     if (args == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "close dfile %d calloc failed.", dfileId);
+        TRANS_LOGE(TRANS_FILE, "close dfileId=%d calloc failed.", dfileId);
         return;
     }
     *args = dfileId;
     threadAttr.detachState = SOFTBUS_THREAD_DETACH;
     ret = SoftBusThreadCreate(&tid, &threadAttr, TransCloseDFileProcTask, args);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create closedfile thread failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_FILE, "create closedfile thread failed, ret=%d.", ret);
         SoftBusFree(args);
         return;
     }

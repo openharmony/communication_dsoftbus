@@ -21,7 +21,6 @@
 #include "session.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 #define TYPE_SEND_BYTE 15
 #define TYPE_SEND_MESSAGE 16
@@ -48,10 +47,10 @@ static SessionAttribute g_sessionAttr = {
 };
 #define TEST_ASSERT_TRUE(ret)  \
     if (ret) {                 \
-        LOG_INFO("[test][succ]\n");    \
+        TRANS_LOGI(TRANS_TEST, "[test][succ]");    \
         g_succTestCount++;       \
     } else {                   \
-        LOG_INFO("[test][error]\n");    \
+        TRANS_LOGI(TRANS_TEST, "[test][error]");    \
         g_failTestCount++;       \
     }
 
@@ -61,14 +60,14 @@ void Start();
 static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int retCode)
 {
     if (addr == NULL) {
-        LOG_INFO("[test]OnJoinLNNDone error\n");
+        TRANS_LOGI(TRANS_TEST, "[test]OnJoinLNNDone error");
         return;
     }
     if (retCode == 0) {
-        LOG_INFO("[test]OnJoinLNNDone enter networdid = %s, retCode = %d ip = %s port = %d\r\n",
+        TRANS_LOGI(TRANS_TEST, "[test]OnJoinLNNDone enter networdId=%s, retCode=%d ip=%s port=%d",
             networkId, retCode, addr->info.ip.ip, addr->info.ip.port);
     } else {
-        LOG_INFO("[test]OnJoinLNNDone failed! networdid = %s, retCode = %d\r\n", networkId, retCode);
+        TRANS_LOGI(TRANS_TEST, "[test]OnJoinLNNDone failed! networdId=%s, retCode=%d", networkId, retCode);
     }
     Start();
 }
@@ -76,9 +75,9 @@ static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int
 static void OnLeaveLNNDone(const char *networkId, int retCode)
 {
     if (retCode == 0) {
-        LOG_INFO("[test]OnLeaveLNNDone enter networdid = %s, retCode = %d", networkId, retCode);
+        TRANS_LOGI(TRANS_TEST, "[test]OnLeaveLNNDone enter networdId=%s, retCode=%d", networkId, retCode);
     } else {
-        LOG_INFO("[test]OnLeaveLNNDone failed! networdid = %s, retCode = %d", networkId, retCode);
+        TRANS_LOGI(TRANS_TEST, "[test]OnLeaveLNNDone failed! networdId=%s, retCode=%d", networkId, retCode);
     }
 }
 
@@ -101,16 +100,16 @@ static INodeStateCb g_nodeStateCallback = {
 static int JoinNetwork()
 {
     Wait();
-    LOG_INFO("[test]enter JoinNetwork");
+    TRANS_LOGI(TRANS_TEST, "[test]enter JoinNetwork");
     if (RegNodeDeviceStateCb(g_pkgName, &g_nodeStateCallback) != 0) {
-        LOG_INFO("[test]RegNodeDeviceStateCb error!");
+        TRANS_LOGI(TRANS_TEST, "[test]RegNodeDeviceStateCb error!");
         return -1;
     }
     ConnectionAddr addr = {
         .type = CONNECTION_ADDR_ETH,
     };
     if (JoinLNN(g_pkgName, &addr, OnJoinLNNDone) != 0) {
-        LOG_INFO("[test]JoinLNN error!");
+        TRANS_LOGI(TRANS_TEST, "[test]JoinLNN error!");
         return -1;
     }
     g_testCount = 0;
@@ -124,19 +123,19 @@ static int LeaveNetWork()
     NodeBasicInfo info1;
     int ret = GetLocalNodeDeviceInfo(g_pkgName, &info1);
     if (ret != 0) {
-        LOG_INFO("[test]GetLocalNodeDeviceInfo error!");
+        TRANS_LOGI(TRANS_TEST, "[test]GetLocalNodeDeviceInfo error!");
         return -1;
     }
-    LOG_INFO("[test]GetLocalNodeDeviceInfo networkId = %s, typeId = %d, name = %s", info1.networkId, info1.deviceTypeId,
-        info1.deviceName);
+    TRANS_LOGI(TRANS_TEST, "[test]GetLocalNodeDeviceInfo networkId=%s, typeId=%d, name=%s",
+        info1.networkId, info1.deviceTypeId, info1.deviceName);
 
     if (UnregNodeDeviceStateCb(&g_nodeStateCallback) != 0) {
-        LOG_INFO("[test]UnregNodeDeviceStateCb error!");
+        TRANS_LOGI(TRANS_TEST, "[test]UnregNodeDeviceStateCb error!");
         return -1;
     }
 
     if (LeaveLNN(info1.networkId, OnLeaveLNNDone) != 0) {
-        LOG_INFO("[test]LeaveLNN error!");
+        TRANS_LOGI(TRANS_TEST, "[test]LeaveLNN error!");
         return -1;
     }
     return 0;
@@ -144,7 +143,7 @@ static int LeaveNetWork()
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("\n\n\n[test]session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "[test]session opened,sesisonId=%d", sessionId);
     g_sessionId = sessionId;
     TEST_ASSERT_TRUE(g_testCount == 0);
     g_testCount++;
@@ -154,12 +153,12 @@ static int OnSessionOpened(int sessionId, int result)
 
 static void OnSessionClosed(int sessionId)
 {
-    LOG_INFO("[test]session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "[test]session closed, sessionId=%d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("[test]session bytes received, session id = %d data = %s\r\n", sessionId, data);
+    TRANS_LOGI(TRANS_TEST, "[test]session bytes received, sessionId=%d data=%s", sessionId, data);
     TEST_ASSERT_TRUE(g_testCount == 2);
     g_testCount++;
     Start();
@@ -167,7 +166,7 @@ static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("[test]session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "[test]session msg received, sessionId=%d", sessionId);
     Start();
 }
 
@@ -183,13 +182,13 @@ static int CreateSsAndOpenSession()
     int ret;
     Wait();
     g_testCount = 0;
-    LOG_INFO("enter CreateSessionServer");
+    TRANS_LOGI(TRANS_TEST, "enter CreateSessionServer");
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     TEST_ASSERT_TRUE(ret == 0);
     if (ret != 0) {
         return ret;
     }
-    LOG_INFO("OpenSession g_networkId = %s", g_networkId);
+    TRANS_LOGI(TRANS_TEST, "OpenSession g_networkId=%s", g_networkId);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
     TEST_ASSERT_TRUE(ret == 0);
     if (ret != 0) {
@@ -240,11 +239,11 @@ static int DataSend(int size, int type)
 
 void Wait()
 {
-    LOG_INFO("[test]Wait enter");
+    TRANS_LOGI(TRANS_TEST, "[test]Wait enter");
     do {
         sleep(1);
     } while (!g_state);
-    LOG_INFO("[test]Wait end");
+    TRANS_LOGI(TRANS_TEST, "[test]Wait end");
     g_state = false;
 }
 
@@ -255,20 +254,20 @@ void Start()
 
 void SetUpTestCase()
 {
-    LOG_INFO("[Test]SetUp begin\n");
+    TRANS_LOGI(TRANS_TEST, "[Test]SetUp begin");
     int ret;
     ret = JoinNetwork();
     TEST_ASSERT_TRUE(ret == 0);
-    LOG_INFO("[Test]SetUp end\n");
+    TRANS_LOGI(TRANS_TEST, "[Test]SetUp end");
 }
 
 void TearDownTestCase()
 {
-    LOG_INFO("[Test]TearDown begin\n");
+    TRANS_LOGI(TRANS_TEST, "[Test]TearDown begin");
     int ret;
     ret = LeaveNetWork();
     TEST_ASSERT_TRUE(ret == 0);
-    LOG_INFO("[Test]TearDown end\n");
+    TRANS_LOGI(TRANS_TEST, "[Test]TearDown end");
 }
 
 /**
@@ -391,13 +390,13 @@ int main(void)
     if (scanf_s("%s", g_networkId, NETWORKIDSIZE) < 0) {
         return SOFTBUS_ERR;
     }
-    LOG_INFO("g_networkId = %s", g_networkId);
+    TRANS_LOGI(TRANS_TEST, "g_networkId=%s", g_networkId);
     for (int i = 0; i < LOOP_COUNT; i++) {
         TransFuncTest001();
     }
 
-    LOG_INFO("[test]------------------------------------------------------------");
-    LOG_INFO("[test]test number: %d, succ = %d. fail = %d",
+    TRANS_LOGI(TRANS_TEST, "[test]------------------------------------------------------------");
+    TRANS_LOGI(TRANS_TEST, "[test]test number=%d, succ=%d. fail=%d",
         g_failTestCount + g_succTestCount, g_succTestCount, g_failTestCount);
-    LOG_INFO("[test]------------------------------------------------------------");
+    TRANS_LOGI(TRANS_TEST, "[test]------------------------------------------------------------");
 }

@@ -22,9 +22,9 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_session_service.h"
+#include "trans_log.h"
 
 using namespace testing::ext;
 
@@ -65,13 +65,13 @@ void TransSessionTest::TearDownTestCase(void)
 }
 static int OnSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened,sesisonId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {
