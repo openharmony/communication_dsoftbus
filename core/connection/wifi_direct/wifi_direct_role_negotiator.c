@@ -15,18 +15,16 @@
 
 #include "wifi_direct_role_negotiator.h"
 #include <string.h>
+#include "conn_log.h"
 #include "softbus_error_code.h"
-#include "softbus_log_old.h"
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
-
-#define LOG_LABEL "[WD] RNego: "
 
 static enum WifiDirectRole GetFinalRoleAsGo(enum WifiDirectRole peerRole, enum WifiDirectRole expectedRole,
                                             const char *localGoMac, const char *remoteGoMac)
 {
     if (peerRole == WIFI_DIRECT_ROLE_GO) {
-        CLOGE(LOG_LABEL "ERROR_P2P_BOTH_GO");
+        CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_P2P_BOTH_GO");
         return ERROR_P2P_BOTH_GO;
     }
     if (peerRole == WIFI_DIRECT_ROLE_GC) {
@@ -35,20 +33,20 @@ static enum WifiDirectRole GetFinalRoleAsGo(enum WifiDirectRole peerRole, enum W
             return ERROR_P2P_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE;
         }
         if (expectedRole == WIFI_DIRECT_ROLE_GO) {
-            CLOGE(LOG_LABEL "mismatched role, remote expect GO");
+            CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, remote expect GO");
             return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
         }
         return WIFI_DIRECT_ROLE_GO;
     }
     if (peerRole == WIFI_DIRECT_ROLE_NONE) {
         if (expectedRole == WIFI_DIRECT_ROLE_GO) {
-            CLOGE(LOG_LABEL "mismatched role, remote expect GO");
+            CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, remote expect GO");
             return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
         }
         return WIFI_DIRECT_ROLE_GO;
     }
 
-    CLOGE(LOG_LABEL "peeRole=%d invalid", peerRole);
+    CONN_LOGE(CONN_WIFI_DIRECT, "peeRole=%d invalid", peerRole);
     return ERROR_INVALID_INPUT_PARAMETERS;
 }
 
@@ -60,14 +58,14 @@ static enum WifiDirectRole GetFinalRoleAsGc(enum WifiDirectRole peerRole, enum W
             GetWifiDirectUtils()->strCompareIgnoreCase(localGoMac, remoteGoMac) == 0) {
             return WIFI_DIRECT_ROLE_GC;
         }
-        CLOGE(LOG_LABEL "ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE");
+        CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE");
         return ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE;
     }
     if (peerRole == WIFI_DIRECT_ROLE_NONE) {
-        CLOGE(LOG_LABEL "ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE");
+        CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE");
         return ERROR_WIFI_DIRECT_NO_AVAILABLE_INTERFACE;
     }
-    CLOGE(LOG_LABEL "ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE");
+    CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE");
     return ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE;
 }
 
@@ -75,14 +73,14 @@ static enum WifiDirectRole GetFinalRoleAsNone(enum WifiDirectRole peerRole, enum
 {
     if (peerRole == WIFI_DIRECT_ROLE_GO) {
         if (expectedRole == WIFI_DIRECT_ROLE_GC) {
-            CLOGE(LOG_LABEL "mismatched role, peerRole=%d expectRole=", peerRole, expectedRole);
+            CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, peerRole=%d expectRole=", peerRole, expectedRole);
             return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
         }
         return WIFI_DIRECT_ROLE_GC;
     }
     if (peerRole == WIFI_DIRECT_ROLE_GC) {
         if (expectedRole == WIFI_DIRECT_ROLE_GO) {
-            CLOGE(LOG_LABEL "mismatched role, remote expect GO");
+            CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, remote expect GO");
             return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
         }
         return ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE;
@@ -94,7 +92,7 @@ static enum WifiDirectRole GetFinalRoleAsNone(enum WifiDirectRole peerRole, enum
         return WIFI_DIRECT_ROLE_GC;
     }
 
-    CLOGE(LOG_LABEL "peeRole=%d invalid", peerRole);
+    CONN_LOGE(CONN_WIFI_DIRECT, "peeRole=%d invalid", peerRole);
     return SOFTBUS_INVALID_PARAM;
 }
 
@@ -102,7 +100,7 @@ static enum WifiDirectRole GetFinalRoleWithPeerExpectedRole(enum WifiDirectRole 
                                                             enum WifiDirectRole expectedRole, const char *localGoMac,
                                                             const char *remoteGoMac)
 {
-    CLOGI(LOG_LABEL "myRole=%d peerRole=%d expectedRole=%d localGoMac=%s remoteGoMac=%s",
+    CONN_LOGI(CONN_WIFI_DIRECT, "myRole=%d peerRole=%d expectedRole=%d localGoMac=%s remoteGoMac=%s",
           myRole, peerRole, expectedRole, WifiDirectAnonymizeMac(localGoMac), WifiDirectAnonymizeMac(remoteGoMac));
     if (myRole == WIFI_DIRECT_ROLE_GO) {
         return GetFinalRoleAsGo(peerRole, expectedRole, localGoMac, remoteGoMac);
@@ -111,7 +109,7 @@ static enum WifiDirectRole GetFinalRoleWithPeerExpectedRole(enum WifiDirectRole 
     } else if (myRole == WIFI_DIRECT_ROLE_NONE) {
         return GetFinalRoleAsNone(peerRole, expectedRole);
     } else {
-        CLOGE(LOG_LABEL "myRole=%d invalid", myRole);
+        CONN_LOGE(CONN_WIFI_DIRECT, "myRole=%d invalid", myRole);
         return SOFTBUS_INVALID_PARAM;
     }
 }

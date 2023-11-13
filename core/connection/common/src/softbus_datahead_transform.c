@@ -14,7 +14,7 @@
  */
 #include "softbus_datahead_transform.h"
 #include <sys/types.h>
-#include "softbus_log_old.h"
+#include "softbus_log.h"
 #include "softbus_adapter_socket.h"
 
 void PackConnPktHead(ConnPktHead *data)

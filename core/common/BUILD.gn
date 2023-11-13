@@ -109,7 +109,10 @@ if (defined(ohos_lite)) {
       defines += [ "__STDC_FORMAT_MACROS" ]
       defines += [ "SOFTBUS_SMALL_SYSTEM" ]
     }
-    deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+    deps = [
+      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+    ]
     deps += diff_deps
     public_configs = [ ":dsoftbus_utils_interface" ]
   }
@@ -178,6 +181,7 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
+      "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "//third_party/cJSON:cjson",
       "//third_party/sqlite:sqlite",
