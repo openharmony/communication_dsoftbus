@@ -89,6 +89,45 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
+static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
+    SessionListenerAdapter *sessionCallback)
+{
+    if ((channelId < 0) || (sessionId == NULL) || (sessionCallback == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId [%d]", channelId);
+        return SOFTBUS_ERR;
+    }
+    ret = ClientGetSessionCallbackAdapterById(*sessionId, sessionCallback);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socket callback failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListenerAdapt *socketCallback, bool isServer)
+{
+    if (!isServer) {
+        return SOFTBUS_OK;
+    }
+
+    PeerSocketInfo info;
+    int32_t ret = ClientGetPeerSocketInfoById(sessionId, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get peer socket info failed");
+        return SOFTBUS_ERR;
+    }
+
+    (void)socketCallback->OnBind(sessionId, info);
+    TRANS_LOGI(TRANS_SDK, "OnBind success, client socket:%d", sessionId);
+    return SOFTBUS_OK;
+}
+
 int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
     if ((sessionName == NULL) || (channel == NULL)) {
@@ -102,8 +141,9 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
         tmpName, flag, channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
 
-    ISessionListener listener = {0};
-    int32_t ret = ClientGetSessionCallbackByName(sessionName, &listener);
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = ClientGetSessionCallbackAdapterByName(sessionName, &sessionCallback);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get session listener failed");
         return SOFTBUS_ERR;
@@ -121,7 +161,12 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
         return SOFTBUS_ERR;
     }
 
-    if ((listener.OnSessionOpened == NULL) || (listener.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK)) {
+    if (sessionCallback.socket.OnBind != NULL) {
+        return TransOnBindSuccess(sessionId, &sessionCallback.socket, channel->isServer);
+    }
+
+    if ((sessionCallback.session.OnSessionOpened == NULL) ||
+        (sessionCallback.session.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_SDK, "OnSessionOpened failed");
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_ERR;
@@ -134,29 +179,40 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
-    ISessionListener listener = {0};
-    (void)GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback);
 
-    if (listener.OnSessionOpened != NULL) {
-        (void)listener.OnSessionOpened(sessionId, errCode);
+    if (sessionCallback.session.OnSessionOpened != NULL) {
+        (void)sessionCallback.session.OnSessionOpened(sessionId, errCode);
+        (void)ClientDeleteSession(sessionId);
     }
-
-    (void)ClientDeleteSession(sessionId);
     TRANS_LOGD(TRANS_SDK, "ok");
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
+int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d",
         channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
-    ISessionListener listener = {0};
     int32_t ret;
-    (void)GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback);
 
-    if (listener.OnSessionClosed != NULL) {
-        listener.OnSessionClosed(sessionId);
+    if (sessionCallback.socket.OnShutdown != NULL) {
+        sessionCallback.socket.OnShutdown(sessionId, reason);
+        TRANS_LOGE(TRANS_SDK, "TransOnSessionClosed ok");
+        return SOFTBUS_OK;
+    }
+
+    if (sessionCallback.session.OnSessionClosed != NULL) {
+        sessionCallback.session.OnSessionClosed(sessionId);
+    }
+
+    if (sessionCallback.session.OnSessionClosed != NULL) {
+        sessionCallback.session.OnSessionClosed(sessionId);
     }
 
     ret = ClientDeleteSession(sessionId);
@@ -185,12 +241,13 @@ static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, con
     return SOFTBUS_OK;
 }
 
-int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
-    const void *data, uint32_t len, SessionPktType type)
+int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *data, uint32_t len, SessionPktType type)
 {
     int32_t sessionId;
-    ISessionListener listener = {0};
-    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback);
+
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get session callback failed");
         return ret;
@@ -198,13 +255,17 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
 
     switch (type) {
         case TRANS_SESSION_BYTES:
-            if (listener.OnBytesReceived != NULL) {
-                listener.OnBytesReceived(sessionId, data, len);
+            if (sessionCallback.socket.OnBytes != NULL) {
+                sessionCallback.socket.OnBytes(sessionId, data, len);
+            } else if (sessionCallback.session.OnBytesReceived != NULL) {
+                sessionCallback.session.OnBytesReceived(sessionId, data, len);
             }
             break;
         case TRANS_SESSION_MESSAGE:
-            if (listener.OnMessageReceived != NULL) {
-                listener.OnMessageReceived(sessionId, data, len);
+            if (sessionCallback.socket.OnMessage != NULL) {
+                sessionCallback.socket.OnMessage(sessionId, data, len);
+            } else if (sessionCallback.session.OnMessageReceived != NULL) {
+                sessionCallback.session.OnMessageReceived(sessionId, data, len);
             }
             break;
         case TRANS_SESSION_FILE_FIRST_FRAME:
@@ -217,7 +278,7 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
         case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
             if (channelType == CHANNEL_TYPE_PROXY) {
-                return ProcessReceivedFileData(sessionId, channelId, (char*)data, len, type);
+                return ProcessReceivedFileData(sessionId, channelId, (char *)data, len, type);
             }
             break;
         default:
@@ -232,17 +293,25 @@ int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     int32_t sessionId;
-    ISessionListener listener = {0};
-    int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "get session callback failed");
         return ret;
     }
-    if (listener.OnStreamReceived == NULL) {
+
+    if (sessionCallback.socket.OnStream != NULL) {
+        sessionCallback.socket.OnStream(sessionId, (const StreamDataAdapt*)data, (const StreamDataAdapt*)ext, param);
+        return SOFTBUS_OK;
+    }
+
+    if (sessionCallback.session.OnStreamReceived == NULL) {
         TRANS_LOGE(TRANS_STREAM, "listener OnStreamReceived is NULL");
         return SOFTBUS_ERR;
     }
-    listener.OnStreamReceived(sessionId, data, ext, param);
+
+    sessionCallback.session.OnStreamReceived(sessionId, data, ext, param);
     return SOFTBUS_OK;
 }
 

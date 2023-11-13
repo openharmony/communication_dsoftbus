@@ -79,7 +79,7 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
             TRANS_LOGE(TRANS_SDK, "client channelId=%d process data fail,", channelId);
             TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
-            ClientTransTdcOnSessionClosed(channelId);
+            ClientTransTdcOnSessionClosed(channelId, SHUTDOWN_REASON_RECV_DATA_ERR);
             return SOFTBUS_ERR;
         }
     }

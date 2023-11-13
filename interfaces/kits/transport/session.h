@@ -45,6 +45,8 @@
 
 #include <stdint.h>
 
+#include "trans_type.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -96,8 +98,6 @@ typedef enum  {
     LINK_TYPE_MAX = 9,
 } LinkType;
 
-#define MAX_MAC_LEN 18
-
 /**
  * @brief Defines the session attributes.
  *
@@ -128,46 +128,6 @@ typedef struct {
     uint8_t *fastTransData;
     uint16_t fastTransDataSize;
 } SessionAttribute;
-
-/**
- * @brief Defines the stream data.
- *
- * @since 1.0
- * @version 1.0
- */
-typedef struct {
-    char *buf;  /**< Pointer to the buffer for storing the stream data */
-    int bufLen; /**< Length of the buffer */
-} StreamData;
-
-/**
- * @brief Defines the extended stream data.
- *
- * @since 1.0
- * @version 1.0
- */
-typedef struct {
-    int type;       /**< Extended data type {@link TransEnumEventType} */
-    int64_t value;  /**< Value of the extended data */
-} TV;
-
-/**
- * @brief Defines the frame information for stream transmission.
- *
- * @since 1.0
- * @version 1.0
- */
-typedef struct {
-    int frameType;      /**< Frame type, which can be I-frame or P-frame. */
-    int64_t timeStamp;  /**< Timestamp. */
-    int seqNum;         /**< Sequence number. */
-    int seqSubNum;      /**< Sequence number of the slice. */
-    int level;          /**< Scalable video coding level. <b>0</b> stands for the base level,
-                             <b>1</b> for level 1, and <b>2</b> for level 2. */
-    int bitMap;         /**< Bitmap, which indicates the start or end slice of a frame. */
-    int tvCount;        /**< Number of scalable tag-values (TVs). */
-    TV *tvList;         /**< Pointer to the TV list. */
-} StreamFrameInfo;
 
 /**
  * @brief Enumerates the quality of service (QoS) types.

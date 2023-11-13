@@ -294,12 +294,12 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
 
 int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId);
 
-int32_t ClientTransProxyOnChannelClosed(int32_t channelId)
+int32_t ClientTransProxyOnChannelClosed(int32_t channelId, ShutdownReason reason)
 {
     (void)ClientTransProxyDelChannelInfo(channelId);
     (void)TransProxyDelSliceProcessorByChannelId(channelId);
 
-    int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY);
+    int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "notify session closed errCode=%d, channelId=%d.", ret, channelId);
         return ret;
