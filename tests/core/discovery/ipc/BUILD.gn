@@ -24,6 +24,7 @@ ohos_unittest("DiscClientProxyTest") {
   sources = [
     "$dsoftbus_core_path/discovery/ipc/standard/src/disc_client_proxy.cpp",
     "$dsoftbus_core_path/discovery/ipc/standard/src/disc_client_proxy_standard.cpp",
+    "$dsoftbus_root_path/core/common/dfx/log/src/softbus_log.c",
     "$dsoftbus_root_path/sdk/frame/standard/src/if_softbus_client.cpp",
     "client_info_manager_mock.cpp",
     "disc_client_proxy_test.cpp",
@@ -38,6 +39,7 @@ ohos_unittest("DiscClientProxyTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/sdk/frame/standard/include/",
     "$dsoftbus_core_path/common/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_core_path/frame/standard/client_manager/include",
     "$softbus_adapter_common/include",
   ]

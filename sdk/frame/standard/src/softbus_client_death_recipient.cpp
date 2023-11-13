@@ -15,13 +15,13 @@
 
 #include "softbus_client_death_recipient.h"
 
-#include "softbus_log_old.h"
+#include "comm_log.h"
 #include "softbus_server_proxy_frame.h"
 
 namespace OHOS {
 void SoftBusClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "server died, try to publish again");
+    COMM_LOGI(COMM_SDK, "server died, try to publish again");
     ClientDeathProcTask();
 }
 }  // namespace OHOS
