@@ -17,6 +17,7 @@
 
 #include <mutex>
 #include "client_trans_session_manager.h"
+#include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -29,7 +30,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log_old.h"
 #include "softbus_server_proxy_standard.h"
 
 using namespace OHOS;
@@ -46,18 +46,18 @@ const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 static int InnerRegisterService(void)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "g_serverProxy is nullptr!");
+        COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(g_serverProxy);
     if (serverProxyFrame == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "serverProxyFrame is nullptr!");
+        COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     char *clientName[SOFTBUS_PKGNAME_MAX_NUM] = {0};
     uint32_t clientNameNum = GetSoftBusClientNameList(clientName, SOFTBUS_PKGNAME_MAX_NUM);
     if (clientNameNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name failed");
+        COMM_LOGE(COMM_SDK, "get client name failed");
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < clientNameNum; i++) {
@@ -68,10 +68,10 @@ static int InnerRegisterService(void)
     }
     int32_t ret = ReCreateSessionServerToServer();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ReCreateSessionServerToServer failed!\n");
+        COMM_LOGE(COMM_SDK, "ReCreateSessionServerToServer failed!\n");
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus server register service success!\n");
+    COMM_LOGI(COMM_SDK, "softbus server register service success!\n");
     return SOFTBUS_OK;
 }
 
@@ -88,12 +88,12 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        MLOGE("Get samgr failed!");
+        COMM_LOGE(COMM_EVENT, "Get samgr failed!");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        MLOGE("Get GetSystemAbility failed!");
+        COMM_LOGE(COMM_EVENT, "Get GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -105,16 +105,16 @@ static int32_t ServerProxyInit(void)
     if (g_serverProxy == nullptr) {
         g_serverProxy = GetSystemAbility();
         if (g_serverProxy == nullptr) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+            COMM_LOGE(COMM_SDK, "Get remote softbus object failed!\n");
             return SOFTBUS_ERR;
         }
         g_clientDeath = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeathRecipient object is nullptr\n");
+            COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr\n");
             return SOFTBUS_ERR;
         }
         if (!g_serverProxy->AddDeathRecipient(g_clientDeath)) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddDeathRecipient failed\n");
+            COMM_LOGE(COMM_SDK, "AddDeathRecipient failed\n");
             return SOFTBUS_ERR;
         }
     }
@@ -145,7 +145,7 @@ void ClientDeathProcTask(void)
 int32_t ClientStubInit(void)
 {
     if (ServerProxyInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerProxyInit failed\n");
+        COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -154,18 +154,18 @@ int32_t ClientStubInit(void)
 int ClientRegisterService(const char *pkgName)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "g_serverProxy is nullptr!");
+        COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(g_serverProxy);
     if (serverProxyFrame == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "serverProxyFrame is nullptr!");
+        COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
     while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) != SOFTBUS_OK) {
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
     }
 
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%s softbus server register service success!\n", pkgName);
+    COMM_LOGI(COMM_SDK, "%s softbus server register service success!\n", pkgName);
     return SOFTBUS_OK;
 }
