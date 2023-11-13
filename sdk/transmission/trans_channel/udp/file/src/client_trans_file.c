@@ -237,6 +237,7 @@ void TransCloseFileChannel(int32_t dfileId)
     }
     *args = dfileId;
     threadAttr.detachState = SOFTBUS_THREAD_DETACH;
+    threadAttr.taskName = "OS_clsFileTsk";
     ret = SoftBusThreadCreate(&tid, &threadAttr, TransCloseDFileProcTask, args);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "create closedfile thread failed, ret=%d.", ret);
