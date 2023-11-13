@@ -18,7 +18,7 @@
 
 #include "discovery_service.h"
 #include "disc_client_proxy.h"
-#include "softbus_log_old.h"
+#include "disc_log.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "remote_object_mock.h"
@@ -49,7 +49,7 @@ public:
 */
 HWTEST_F(DiscClientProxyTest, OnDeviceFound001, TestSize.Level1)
 {
-    DLOGI("OnDeviceFound001 begin ----");
+    DISC_LOGI(DISC_TEST, "OnDeviceFound001 begin ----");
     const DeviceInfo device {};
     const InnerDeviceInfoAddtions addition{};
 
@@ -75,7 +75,7 @@ HWTEST_F(DiscClientProxyTest, OnDeviceFound001, TestSize.Level1)
     }
 
     RemoteObjectMock::Destroy();
-    DLOGI("OnDeviceFound001 end ----");
+    DISC_LOGI(DISC_TEST, "OnDeviceFound001 end ----");
 }
 
 /*
@@ -86,7 +86,7 @@ HWTEST_F(DiscClientProxyTest, OnDeviceFound001, TestSize.Level1)
 */
 HWTEST_F(DiscClientProxyTest, OnDiscoverFailed001, TestSize.Level1)
 {
-    DLOGI("OnDiscoverFailed001 begin ----");
+    DISC_LOGI(DISC_TEST, "OnDiscoverFailed001 begin ----");
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
@@ -112,7 +112,7 @@ HWTEST_F(DiscClientProxyTest, OnDiscoverFailed001, TestSize.Level1)
     }
 
     RemoteObjectMock::Destroy();
-    DLOGI("OnDiscoverFailed001 end ----");
+    DISC_LOGI(DISC_TEST, "OnDiscoverFailed001 end ----");
 }
 
 /*
@@ -123,7 +123,7 @@ HWTEST_F(DiscClientProxyTest, OnDiscoverFailed001, TestSize.Level1)
 */
 HWTEST_F(DiscClientProxyTest, DiscoverySuccess001, TestSize.Level1)
 {
-    DLOGI("DiscoverySuccess001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscoverySuccess001 begin ----");
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
@@ -146,7 +146,7 @@ HWTEST_F(DiscClientProxyTest, DiscoverySuccess001, TestSize.Level1)
     }
 
     RemoteObjectMock::Destroy();
-    DLOGI("DiscoverySuccess001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscoverySuccess001 end ----");
 }
 
 /*
@@ -157,7 +157,7 @@ HWTEST_F(DiscClientProxyTest, DiscoverySuccess001, TestSize.Level1)
 */
 HWTEST_F(DiscClientProxyTest, OnPublishSuccess001, TestSize.Level1)
 {
-    DLOGI("DiscoverySuccess001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscoverySuccess001 begin ----");
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
@@ -180,7 +180,7 @@ HWTEST_F(DiscClientProxyTest, OnPublishSuccess001, TestSize.Level1)
     }
 
     RemoteObjectMock::Destroy();
-    DLOGI("OnPublishSuccess001 end ----");
+    DISC_LOGI(DISC_TEST, "OnPublishSuccess001 end ----");
 }
 
 /*
@@ -191,7 +191,7 @@ HWTEST_F(DiscClientProxyTest, OnPublishSuccess001, TestSize.Level1)
 */
 HWTEST_F(DiscClientProxyTest, OnPublishFail001, TestSize.Level1)
 {
-    DLOGI("OnPublishFail001 begin ----");
+    DISC_LOGI(DISC_TEST, "OnPublishFail001 begin ----");
     {
         sptr<RemoteObjectMock> objectMock = new (std::nothrow) RemoteObjectMock();
         RemoteObjectMock::SetupStub(objectMock);
@@ -217,6 +217,6 @@ HWTEST_F(DiscClientProxyTest, OnPublishFail001, TestSize.Level1)
     }
 
     RemoteObjectMock::Destroy();
-    DLOGI("OnPublishFail001 end ----");
+    DISC_LOGI(DISC_TEST, "OnPublishFail001 end ----");
 }
 }

@@ -14,6 +14,7 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
+import("../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../dsoftbus.gni")
 import("../../../utils/utils.gni")
 
@@ -46,6 +47,7 @@ ohos_unittest("DiscClientProxyTest") {
   include_dirs += test_utils_inc
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]

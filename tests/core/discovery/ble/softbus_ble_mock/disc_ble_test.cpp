@@ -20,10 +20,10 @@
 
 #include "disc_ble.h"
 #include "disc_ble_utils.h"
+#include "disc_log.h"
 #include "bus_center_mock.h"
 #include "ble_mock.h"
 #include "message_handler.h"
-#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "securec.h"
 #include "exception_branch_checker.h"
@@ -57,7 +57,7 @@ public:
 
 static void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
-    DLOGI("OnDeviceFound: %s", device->devId);
+    DISC_LOGI(DISC_TEST, "OnDeviceFound: %s", device->devId);
     DiscBleTest::g_foundDeviceInfo = *device;
 }
 
@@ -112,7 +112,7 @@ static SubscribeOption GetSubscribeOptionForOsd()
 */
 HWTEST_F(DiscBleTest, DiscBleInit001, TestSize.Level1)
 {
-    DLOGI("DiscBleInit001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscBleInit001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -123,7 +123,7 @@ HWTEST_F(DiscBleTest, DiscBleInit001, TestSize.Level1)
     callback.OnDeviceFound = nullptr;
     EXPECT_EQ(DiscSoftBusBleInit(&callback), nullptr);
     EXPECT_EQ(checker.GetResult(), true);
-    DLOGI("DiscBleInit001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscBleInit001 end ----");
 }
 
 /*
@@ -134,7 +134,7 @@ HWTEST_F(DiscBleTest, DiscBleInit001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
 {
-    DLOGI("DiscBleInit002 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscBleInit002 begin ----");
     {
         BleMock bleMock;
         bleMock.SetupSuccessStub();
@@ -170,7 +170,7 @@ HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
 
         EXPECT_NE(DiscSoftBusBleInit(&g_discInnerCallback), nullptr);
     }
-    DLOGI("DiscBleInit002 end ----");
+    DISC_LOGI(DISC_TEST, "DiscBleInit002 end ----");
 }
 
 /*
@@ -181,13 +181,13 @@ HWTEST_F(DiscBleTest, DiscBleInit002, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, DiscBleInit003, TestSize.Level1)
 {
-    DLOGI("DiscBleInit003 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscBleInit003 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
     g_interface = DiscSoftBusBleInit(&g_discInnerCallback);
     EXPECT_NE(g_interface, nullptr);
-    DLOGI("DiscBleInit003 end ----");
+    DISC_LOGI(DISC_TEST, "DiscBleInit003 end ----");
 }
 
 /*
@@ -198,7 +198,7 @@ HWTEST_F(DiscBleTest, DiscBleInit003, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StartActiveDiscovery001, TestSize.Level1)
 {
-    DLOGI("StartActiveDiscovery001 begin ----");
+    DISC_LOGI(DISC_TEST, "StartActiveDiscovery001 begin ----");
     NiceMock<BleMock> bleMock;
     bleMock.SetupSuccessStub();
     EXPECT_CALL(bleMock, SoftBusSetAdvData(_, NotNull())).WillRepeatedly(BleMock::ActionOfSetAdvDataForActiveDiscovery);
@@ -217,7 +217,7 @@ HWTEST_F(DiscBleTest, StartActiveDiscovery001, TestSize.Level1)
     BleMock::TurnOnBt();
     EXPECT_EQ(bleMock.IsScanning(), true);
 
-    DLOGI("StartActiveDiscovery001 end ----");
+    DISC_LOGI(DISC_TEST, "StartActiveDiscovery001 end ----");
 }
 
 /*
@@ -228,7 +228,7 @@ HWTEST_F(DiscBleTest, StartActiveDiscovery001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StartActiveDiscovery002, TestSize.Level1)
 {
-    DLOGI("StartActiveDiscovery002 begin ----");
+    DISC_LOGI(DISC_TEST, "StartActiveDiscovery002 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
     EXPECT_CALL(bleMock, SoftBusUpdateAdv(_, NotNull(), NotNull()))
@@ -241,7 +241,7 @@ HWTEST_F(DiscBleTest, StartActiveDiscovery002, TestSize.Level1)
     EXPECT_EQ(g_interface->mediumInterface->StartAdvertise(&option), SOFTBUS_OK);
     EXPECT_EQ(bleMock.GetAsyncAdvertiseResult(), true);
 
-    DLOGI("StartActiveDiscovery002 end ----");
+    DISC_LOGI(DISC_TEST, "StartActiveDiscovery002 end ----");
 }
 
 /*
@@ -252,7 +252,7 @@ HWTEST_F(DiscBleTest, StartActiveDiscovery002, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, UpdateLocalDeviceInfo001, TestSize.Level1)
 {
-    DLOGI("UpdateLocalDeviceInfo001 begin ----");
+    DISC_LOGI(DISC_TEST, "UpdateLocalDeviceInfo001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
     EXPECT_CALL(bleMock, SoftBusUpdateAdv(_, NotNull(), NotNull()))
@@ -265,7 +265,7 @@ HWTEST_F(DiscBleTest, UpdateLocalDeviceInfo001, TestSize.Level1)
     g_interface->mediumInterface->UpdateLocalDeviceInfo(TYPE_LOCAL_DEVICE_NAME);
     EXPECT_EQ(checker.GetResult(), true);
 
-    DLOGI("UpdateLocalDeviceInfo001 end ----");
+    DISC_LOGI(DISC_TEST, "UpdateLocalDeviceInfo001 end ----");
 }
 
 /*
@@ -276,7 +276,7 @@ HWTEST_F(DiscBleTest, UpdateLocalDeviceInfo001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, ReceivePassivePublishPacket001, TestSize.Level1)
 {
-    DLOGI("ReceivePassivePublishPacket001 begin ----");
+    DISC_LOGI(DISC_TEST, "ReceivePassivePublishPacket001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -288,7 +288,7 @@ HWTEST_F(DiscBleTest, ReceivePassivePublishPacket001, TestSize.Level1)
     EXPECT_EQ(strcmp(g_foundDeviceInfo.devId, FOUND_DEVICE_ID), 0);
     EXPECT_EQ(g_foundDeviceInfo.capabilityBitmap[0], 1 << CASTPLUS_CAPABILITY_BITMAP);
     (void)memset_s(&g_foundDeviceInfo, sizeof(g_foundDeviceInfo), 0, sizeof(DeviceInfo));
-    DLOGI("ReceivePassivePublishPacket001 end ----");
+    DISC_LOGI(DISC_TEST, "ReceivePassivePublishPacket001 end ----");
 }
 
 /*
@@ -299,7 +299,7 @@ HWTEST_F(DiscBleTest, ReceivePassivePublishPacket001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StopActiveDiscovery001, TestSize.Level1)
 {
-    DLOGI("StopActiveDiscovery001 begin ----");
+    DISC_LOGI(DISC_TEST, "StopActiveDiscovery001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -312,7 +312,7 @@ HWTEST_F(DiscBleTest, StopActiveDiscovery001, TestSize.Level1)
     EXPECT_EQ(g_interface->mediumInterface->StopAdvertise(&option), SOFTBUS_OK);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    DLOGI("StopActiveDiscovery001 end ----");
+    DISC_LOGI(DISC_TEST, "StopActiveDiscovery001 end ----");
 }
 
 /*
@@ -323,7 +323,7 @@ HWTEST_F(DiscBleTest, StopActiveDiscovery001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StartPassiveDiscovery001, TestSize.Level1)
 {
-    DLOGI("StartPassiveDiscovery001 begin ----");
+    DISC_LOGI(DISC_TEST, "StartPassiveDiscovery001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -340,7 +340,7 @@ HWTEST_F(DiscBleTest, StartPassiveDiscovery001, TestSize.Level1)
     EXPECT_EQ(strcmp(g_foundDeviceInfo.devId, FOUND_DEVICE_ID), 0);
     EXPECT_EQ(g_foundDeviceInfo.capabilityBitmap[0], 1 << CASTPLUS_CAPABILITY_BITMAP);
     (void)memset_s(&g_foundDeviceInfo, sizeof(g_foundDeviceInfo), 0, sizeof(DeviceInfo));
-    DLOGI("StartPassiveDiscovery001 end ----");
+    DISC_LOGI(DISC_TEST, "StartPassiveDiscovery001 end ----");
 }
 
 /*
@@ -351,7 +351,7 @@ HWTEST_F(DiscBleTest, StartPassiveDiscovery001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StopPassiveDiscovery001, TestSize.Level1)
 {
-    DLOGI("StopPassiveDiscovery001 begin ----");
+    DISC_LOGI(DISC_TEST, "StopPassiveDiscovery001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -365,7 +365,7 @@ HWTEST_F(DiscBleTest, StopPassiveDiscovery001, TestSize.Level1)
     EXPECT_EQ(g_interface->mediumInterface->Unsubscribe(&option), SOFTBUS_OK);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    DLOGI("StopPassiveDiscovery001 end ----");
+    DISC_LOGI(DISC_TEST, "StopPassiveDiscovery001 end ----");
 }
 
 /*
@@ -376,7 +376,7 @@ HWTEST_F(DiscBleTest, StopPassiveDiscovery001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StartActivePublish001, TestSize.Level1)
 {
-    DLOGI("StartActivePublish001 begin ----");
+    DISC_LOGI(DISC_TEST, "StartActivePublish001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
     EXPECT_CALL(bleMock, SoftBusSetAdvData(_, NotNull())).WillRepeatedly(BleMock::ActionOfSetAdvDataForActivePublish);
@@ -388,7 +388,7 @@ HWTEST_F(DiscBleTest, StartActivePublish001, TestSize.Level1)
     EXPECT_EQ(g_interface->mediumInterface->Publish(&option), SOFTBUS_OK);
     EXPECT_EQ(bleMock.GetAsyncAdvertiseResult(), true);
 
-    DLOGI("StartActivePublish001 end ----");
+    DISC_LOGI(DISC_TEST, "StartActivePublish001 end ----");
 }
 
 /*
@@ -399,7 +399,7 @@ HWTEST_F(DiscBleTest, StartActivePublish001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StopActivePublish001, TestSize.Level1)
 {
-    DLOGI("StopActivePublish001 begin ----");
+    DISC_LOGI(DISC_TEST, "StopActivePublish001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -410,7 +410,7 @@ HWTEST_F(DiscBleTest, StopActivePublish001, TestSize.Level1)
     EXPECT_EQ(g_interface->mediumInterface->Unpublish(&option), SOFTBUS_OK);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    DLOGI("StopActivePublish001 end ----");
+    DISC_LOGI(DISC_TEST, "StopActivePublish001 end ----");
 }
 
 /*
@@ -421,7 +421,7 @@ HWTEST_F(DiscBleTest, StopActivePublish001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StartPassivePublish001, TestSize.Level1)
 {
-    DLOGI("StartPassivePublish001 begin ----");
+    DISC_LOGI(DISC_TEST, "StartPassivePublish001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -432,7 +432,7 @@ HWTEST_F(DiscBleTest, StartPassivePublish001, TestSize.Level1)
     EXPECT_EQ(g_interface->mediumInterface->StartScan(&option), SOFTBUS_OK);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    DLOGI("StartPassivePublish001 end ----");
+    DISC_LOGI(DISC_TEST, "StartPassivePublish001 end ----");
 }
 
 /*
@@ -443,7 +443,7 @@ HWTEST_F(DiscBleTest, StartPassivePublish001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
 {
-    DLOGI("ReceiveActiveDiscoveryPacket001 begin ----");
+    DISC_LOGI(DISC_TEST, "ReceiveActiveDiscoveryPacket001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
     EXPECT_CALL(bleMock, SoftBusSetAdvData(_, NotNull()))
@@ -456,7 +456,7 @@ HWTEST_F(DiscBleTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
     EXPECT_EQ(bleMock.GetAsyncAdvertiseResult(), true);
 
     BleMock::InjectActiveConPacket();
-    DLOGI("ReceiveActiveDiscoveryPacket001 end ----");
+    DISC_LOGI(DISC_TEST, "ReceiveActiveDiscoveryPacket001 end ----");
 }
 
 /*
@@ -467,7 +467,7 @@ HWTEST_F(DiscBleTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, StopPassivePublish001, TestSize.Level1)
 {
-    DLOGI("StopPassivePublish001 begin ----");
+    DISC_LOGI(DISC_TEST, "StopPassivePublish001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -478,7 +478,7 @@ HWTEST_F(DiscBleTest, StopPassivePublish001, TestSize.Level1)
     EXPECT_EQ(g_interface->mediumInterface->StopScan(&option), SOFTBUS_OK);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    DLOGI("StopPassivePublish001 end ----");
+    DISC_LOGI(DISC_TEST, "StopPassivePublish001 end ----");
 }
 
 /*
@@ -489,7 +489,7 @@ HWTEST_F(DiscBleTest, StopPassivePublish001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, IsConcernCapability001, TestSize.Level1)
 {
-    DLOGI("IsConcernCapability001 begin ----");
+    DISC_LOGI(DISC_TEST, "IsConcernCapability001 begin ----");
     uint32_t capability = 0;
     SetCapBitMapPos(1, &capability, CASTPLUS_CAPABILITY_BITMAP);
     EXPECT_EQ(g_interface->IsConcern(capability), true);
@@ -502,7 +502,7 @@ HWTEST_F(DiscBleTest, IsConcernCapability001, TestSize.Level1)
     capability = 0;
     SetCapBitMapPos(1, &capability, SHARE_CAPABILITY_BITMAP);
     EXPECT_EQ(g_interface->IsConcern(capability), false);
-    DLOGI("IsConcernCapability001 end ----");
+    DISC_LOGI(DISC_TEST, "IsConcernCapability001 end ----");
 }
 
 /*
@@ -513,7 +513,7 @@ HWTEST_F(DiscBleTest, IsConcernCapability001, TestSize.Level1)
 */
 HWTEST_F(DiscBleTest, DiscBleDeInit001, TestSize.Level1)
 {
-    DLOGI("DiscBleDeInit001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscBleDeInit001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
 
@@ -523,6 +523,6 @@ HWTEST_F(DiscBleTest, DiscBleDeInit001, TestSize.Level1)
     BleMock::WaitRecvMessageObsolete();
     DiscSoftBusBleDeinit();
     EXPECT_EQ(BleMock::IsDeInitSuccess(), true);
-    DLOGI("DiscBleDeInit001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscBleDeInit001 end ----");
 }
 }
