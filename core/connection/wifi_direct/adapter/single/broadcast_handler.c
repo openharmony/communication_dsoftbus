@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 #include "broadcast_handler.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
-#include "softbus_log_old.h"
 #include "p2p_entity_broadcast_handler.h"
 #include "link_manager_broadcast_handler.h"
 #include "resource_manager_broadcast_handler.h"
 
-#define LOG_LABEL "[WD] BrH: "
-
 int32_t BroadcastHandlerInit(void)
 {
+    CONN_LOGI(CONN_INIT, "init enter");
     P2pEntityBroadcastHandlerInit();
     ResourceManagerBroadcastHandlerInit();
     LinkManagerBroadcastHandlerInit();

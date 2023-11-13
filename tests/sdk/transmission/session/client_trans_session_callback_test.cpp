@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_trans_def.h"
 #include "softbus_app_info.h"
 #include "softbus_server_frame.h"
@@ -28,6 +27,7 @@
 #include "client_trans_session_callback.h"
 #include "client_trans_session_callback.c"
 #include "softbus_config_type.h"
+#include "trans_log.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_PID 0
@@ -83,33 +83,33 @@ void TransClientSessionCallbackTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session bytes received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
 }
 
 static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
-    LOG_INFO("session stream received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session stream received, sessionId=%d", sessionId);
 }
 
 static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
 {
-    LOG_INFO("session Qos event emit, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session Qos event emit, sessionId=%d", sessionId);
 }
 static ISessionListener g_sessionlistener = {
     .OnSessionOpened = OnSessionOpened,
@@ -368,9 +368,9 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
     ASSERT_TRUE(session != NULL);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TransOnSessionClosed(INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT);
+    ret = TransOnSessionClosed(INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = TransOnSessionClosed(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT);
+    ret = TransOnSessionClosed(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);

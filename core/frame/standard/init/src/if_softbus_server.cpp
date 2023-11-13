@@ -15,8 +15,8 @@
 
 #include "if_softbus_server.h"
 
+#include "comm_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 namespace OHOS {
 int32_t ISoftBusServer::GrantPermission(int uid, int pid, const char *sessionName)
@@ -24,14 +24,14 @@ int32_t ISoftBusServer::GrantPermission(int uid, int pid, const char *sessionNam
     (void)uid;
     (void)pid;
     (void)sessionName;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GrantPermission ipc default impl");
+    COMM_LOGI(COMM_SVC, "GrantPermission ipc default impl");
     return SOFTBUS_ERR;
 }
 
 int32_t ISoftBusServer::RemovePermission(const char *sessionName)
 {
     (void)sessionName;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RemovePermission ipc default impl");
+    COMM_LOGI(COMM_SVC, "RemovePermission ipc default impl");
     return SOFTBUS_ERR;
 }
 
@@ -39,7 +39,7 @@ int32_t ISoftBusServer::PublishLNN(const char *pkgName, const PublishInfo *info)
 {
     (void)pkgName;
     (void)info;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "PublishLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "PublishLNN ipc default impl");
     return SOFTBUS_ERR;
 }
 
@@ -47,7 +47,7 @@ int32_t ISoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
 {
     (void)pkgName;
     (void)publishId;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "StopPublishLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "StopPublishLNN ipc default impl");
     return SOFTBUS_ERR;
 }
 
@@ -55,7 +55,7 @@ int32_t ISoftBusServer::RefreshLNN(const char *pkgName, const SubscribeInfo *inf
 {
     (void)pkgName;
     (void)info;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "RefreshLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "RefreshLNN ipc default impl");
     return SOFTBUS_ERR;
 }
 
@@ -63,7 +63,7 @@ int32_t ISoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     (void)pkgName;
     (void)refreshId;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "StopRefreshLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "StopRefreshLNN ipc default impl");
     return SOFTBUS_ERR;
 }
 
@@ -71,14 +71,14 @@ int32_t ISoftBusServer::ActiveMetaNode(const MetaNodeConfigInfo *info, char *met
 {
     (void)info;
     (void)metaNodeId;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ActiveMetaNode ipc default impl");
+    COMM_LOGE(COMM_SVC, "ActiveMetaNode ipc default impl");
     return SOFTBUS_ERR;
 }
 
 int32_t ISoftBusServer::DeactiveMetaNode(const char *metaNodeId)
 {
     (void)metaNodeId;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeactiveMetaNode ipc default impl");
+    COMM_LOGE(COMM_SVC, "DeactiveMetaNode ipc default impl");
     return SOFTBUS_ERR;
 }
 
@@ -86,7 +86,7 @@ int32_t ISoftBusServer::GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum)
 {
     (void)info;
     (void)infoNum;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetAllMetaNodeInfo ipc default impl");
+    COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo ipc default impl");
     return SOFTBUS_ERR;
 }
 
@@ -97,19 +97,19 @@ int32_t ISoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, 
     (void)callerId;
     (void)targetNetworkId;
     (void)mode;
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ShiftLNNGear ipc default impl");
+    COMM_LOGE(COMM_SVC, "ShiftLNNGear ipc default impl");
     return SOFTBUS_ERR;
 }
 
 int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject ipc default impl");
+    COMM_LOGE(COMM_SVC, "GetSoftbusSpecObject ipc default impl");
     return SOFTBUS_ERR;
 }
 
 int32_t ISoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetBusCenterExObj ipc default impl");
+    COMM_LOGE(COMM_SVC, "GetBusCenterExObj ipc default impl");
     return SOFTBUS_ERR;
 }
 } // namespace OHOS

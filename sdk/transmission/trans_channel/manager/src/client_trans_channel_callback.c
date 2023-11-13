@@ -24,12 +24,12 @@
 #include "client_trans_udp_manager.h"
 #include "session.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 
 int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client] TransOnChannelOpened invalid param.");
+        TRANS_LOGW(TRANS_SDK, "[client] invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -49,7 +49,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
             ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[client] TransOnChannelOpened invalid type.");
+            TRANS_LOGE(TRANS_SDK, "[client] invalid type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
 
@@ -62,8 +62,8 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
 
 int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "[client] TransOnChannelOpenFailed: channelId=%d, channelType=%d, errCode=%d.",
+    TRANS_LOGE(TRANS_SDK,
+        "[client]: channelId=%d, channelType=%d, errCode=%d.",
         channelId, channelType, errCode);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
@@ -82,7 +82,7 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t
 int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
 {
     if (networkId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "[client] network id is null.");
+        TRANS_LOGE(TRANS_SDK, "[client] network id is null.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -90,19 +90,19 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
     return SOFTBUS_OK;
 }
 
-int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "[client] TransOnChannelClosed: channelId=%d, channelType=%d.", channelId, channelType);
+    TRANS_LOGI(TRANS_SDK,
+        "[client]: channelId=%d, channelType=%d.", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
-            return ClientTransAuthOnChannelClosed(channelId);
+            return ClientTransAuthOnChannelClosed(channelId, reason);
         case CHANNEL_TYPE_PROXY:
-            return ClientTransProxyOnChannelClosed(channelId);
+            return ClientTransProxyOnChannelClosed(channelId, reason);
         case CHANNEL_TYPE_UDP:
-            return TransOnUdpChannelClosed(channelId);
+            return TransOnUdpChannelClosed(channelId, reason);
         case CHANNEL_TYPE_TCP_DIRECT:
-            return ClientTransTdcOnSessionClosed(channelId);
+            return ClientTransTdcOnSessionClosed(channelId, reason);
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
@@ -111,8 +111,8 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *data, unsigned int len, SessionPktType type)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "[client] TransOnChannelMsgReceived: channelId=%d, channelType=%d.", channelId, channelType);
+    TRANS_LOGI(TRANS_MSG,
+        "[client]: channelId=%d, channelType=%d.", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnDataReceived(channelId, data, len, type);
@@ -128,7 +128,7 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
 int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
     int32_t tvCount, const QosTv *tvList)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
+    TRANS_LOGI(TRANS_QOS,
         "[client] TransOnQosEvent: channelId=%d, channelType=%d eventId=%d.", channelId, channelType, eventId);
     switch (channelType) {
         case CHANNEL_TYPE_UDP:

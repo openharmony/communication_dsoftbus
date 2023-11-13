@@ -17,8 +17,8 @@
 #include <string>
 #include <sstream>
 #include <thread>
+#include "disc_log.h"
 #include "securec.h"
-#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 
 using testing::_;
@@ -158,7 +158,7 @@ int32_t BleMock::ActionOfDeregisterScanCallbacks(int scannerId)
 
 int32_t BleMock::ActionOfSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize)
 {
-    DLOGI("listenerId=%d filterSize=%d", listenerId, filterSize);
+    DISC_LOGI(DISC_TEST, "listenerId=%d filterSize=%d", listenerId, filterSize);
     return SOFTBUS_OK;
 }
 
@@ -206,7 +206,7 @@ int32_t BleMock::ActionOfStopScan(int listenerId, int scannerId)
 int32_t BleMock::ActionOfStartAdv(int channel, const SoftBusBleAdvParams *param)
 {
     if (isAdvertising) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "already in advertising");
+        DISC_LOGE(DISC_TEST, "already in advertising");
         return SOFTBUS_ERR;
     }
     isAdvertising = !isAdvertising;
@@ -219,7 +219,7 @@ int32_t BleMock::ActionOfStartAdv(int channel, const SoftBusBleAdvParams *param)
 int32_t BleMock::ActionOfStopAdv(int channel)
 {
     if (!isAdvertising) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "already has stopped");
+        DISC_LOGE(DISC_TEST, "already has stopped");
         return SOFTBUS_ERR;
     }
     if (advCallback) {
@@ -236,15 +236,15 @@ void BleMock::HexDump(const uint8_t *data, uint32_t len)
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(BYTE_DUMP_LEN)
             << static_cast<uint32_t>(data[i]) << " ";
     }
-    DLOGI("%s", ss.str().c_str());
+    DISC_LOGI(DISC_TEST, "%s", ss.str().c_str());
 }
 
 void BleMock::ShowAdvData(int channel, const SoftBusBleAdvData *data)
 {
-    DLOGI("channel=%d advLen=%d rspLen=%d", channel, data->advLength, data->scanRspLength);
-    DLOGI("adv data:");
+    DISC_LOGI(DISC_TEST, "channel=%d advLen=%d rspLen=%d", channel, data->advLength, data->scanRspLength);
+    DISC_LOGI(DISC_TEST, "adv data:");
     HexDump(reinterpret_cast<const uint8_t *>(data->advData), data->advLength);
-    DLOGI("rsp data:");
+    DISC_LOGI(DISC_TEST, "rsp data:");
     HexDump(reinterpret_cast<const uint8_t *>(data->scanRspData), data->scanRspLength);
 }
 
@@ -428,7 +428,7 @@ void BleMock::InjectActiveConPacket()
 
 void BleMock::TurnOnBt()
 {
-    DLOGI("enter");
+    DISC_LOGI(DISC_TEST, "enter");
     btState = true;
     if (btStateListener) {
         btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_ON);
@@ -437,7 +437,7 @@ void BleMock::TurnOnBt()
 
 void BleMock::TurnOffBt()
 {
-    DLOGI("enter");
+    DISC_LOGI(DISC_TEST, "enter");
     btState = false;
     if (btStateListener) {
         btStateListener->OnBtStateChanged(BT_STATE_LISTENER_ID, SOFTBUS_BT_STATE_TURN_OFF);
@@ -496,7 +496,7 @@ bool BleMock::GetAsyncAdvertiseResult()
 {
     std::unique_lock lock(mutex_);
     if (cv_.wait_for(lock, std::chrono::seconds(WAIT_ASYNC_TIMEOUT)) == std::cv_status::timeout) {
-        DLOGE("time out");
+        DISC_LOGE(DISC_TEST, "time out");
         return false;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOOPER_DONE_MS));

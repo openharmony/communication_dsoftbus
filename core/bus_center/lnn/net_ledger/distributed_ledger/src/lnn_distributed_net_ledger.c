@@ -2533,33 +2533,9 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
     return NULL;
 }
 
-static void RefreshDeviceInfoByDevId(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
-{
-    if (addtions->medium != COAP) {
-        LNN_LOGE(LNN_LEDGER, "parameter error");
-        return;
-    }
-    unsigned char shortUdidHash[SHORT_UDID_HASH_LEN + 1] = {0};
-    if (GenerateStrHashAndConvertToHexString((const unsigned char *)device->devId,
-        SHORT_UDID_HASH_LEN, shortUdidHash, SHORT_UDID_HASH_LEN + 1) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "refresh device info get short udid hash fail");
-        return;
-    }
-    if (memset_s(device->devId, DISC_MAX_DEVICE_ID_LEN, 0, DISC_MAX_DEVICE_ID_LEN) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "refresh device info memset_s fail");
-        return;
-    }
-    if (memcpy_s(device->devId, DISC_MAX_DEVICE_ID_LEN, shortUdidHash, SHORT_UDID_HASH_LEN) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy_s device short udid hash fail");
-    }
-}
-
 static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
-    if (addtions->medium == COAP) {
-        device->isOnline = LnnGetOnlineStateById(device->devId, CATEGORY_UDID);
-    }
-    if (addtions->medium == BLE) {
+    if (addtions->medium == COAP || addtions->medium == BLE) {
         device->isOnline = ((LnnGetOnlineNodeByUdidHash(device->devId)) != NULL) ? true : false;
     }
 }
@@ -2569,10 +2545,8 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 {
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
-    RefreshDeviceInfoByDevId(device, addtions);
-    char *anonyUdid = NULL;
-    Anonymize(device->devId, &anonyUdid);
+    // udid hash hex strLen report to ohter service is 8, same as ble
+    device->devId[SHORT_UDID_HASH_LEN] = '\0';
     LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
-        addtions->medium, anonyUdid, device->isOnline);
-    AnonymizeFree(anonyUdid);
+        addtions->medium, device->devId, device->isOnline);
 }

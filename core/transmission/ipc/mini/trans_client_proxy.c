@@ -51,7 +51,7 @@ int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t
 {
     (void)pkgName;
     (void)pid;
-    return TransOnChannelClosed(channelId, channelType);
+    return TransOnChannelClosed(channelId, channelType, SHUTDOWN_REASON_UNKNOWN);
 }
 
 int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,

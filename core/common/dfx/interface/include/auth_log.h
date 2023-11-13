@@ -40,11 +40,11 @@ static const SoftBusLogLabel AUTH_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { AUTH_TEST,    DOMAIN_ID_TEST, "AuthTest"   },
 };
 
-#define AUTH_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_ERROR, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_WARN, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_INFO, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_DEBUG, AUTH_LABELS[label], ##__VA_ARGS__)
+#define AUTH_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, AUTH_LABELS[label], ##__VA_ARGS__)
+#define AUTH_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_ERROR, AUTH_LABELS[label], ##__VA_ARGS__)
+#define AUTH_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_WARN, AUTH_LABELS[label], ##__VA_ARGS__)
+#define AUTH_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_INFO, AUTH_LABELS[label], ##__VA_ARGS__)
+#define AUTH_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_DEBUG, AUTH_LABELS[label], ##__VA_ARGS__)
 
 #define AUTH_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, AUTH_LOGW, label, fmt, ##__VA_ARGS__)

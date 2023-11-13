@@ -15,12 +15,12 @@
 
 #include "lnn_discovery_manager.h"
 
+#include "disc_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t LnnInitDiscoveryManager(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual discovery manager");
+    DISC_LOGI(DISC_LNN, "init virtual discovery manager");
     return SOFTBUS_OK;
 }
 

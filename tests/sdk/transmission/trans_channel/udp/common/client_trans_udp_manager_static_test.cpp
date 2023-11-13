@@ -74,7 +74,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     OnUdpChannelOpened(TEST_CHANNELID);
-    OnUdpChannelClosed(TEST_CHANNELID);
+    OnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
     OnQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
 
     ret = TransDeleteUdpChannel(TEST_CHANNELID);
@@ -118,7 +118,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, Te
     ret = ClientTransUdpMgrInit(cb);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    OnUdpChannelClosed(TEST_CHANNELID);
+    OnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     OnStreamReceived(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);

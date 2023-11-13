@@ -16,15 +16,13 @@
 #include "wifi_config_info.h"
 #include <securec.h>
 #include <string.h>
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "data/interface_info.h"
 #include "protocol/wifi_direct_protocol.h"
 #include "protocol/wifi_direct_protocol_factory.h"
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_network_utils.h"
-
-#define LOG_LABEL "[WD] WCI: "
 
 #define WC_TAG_INVALID 0
 #define WC_TAG_VERSION 1
@@ -103,7 +101,8 @@ static bool Unmarshalling(struct WifiConfigInfo *self, struct WifiDirectProtocol
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = false;
         enum WifiConfigInfoKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOG(key < WC_KEY_MAX, false, LOG_LABEL "key out of range, tag=%d", keyProperty.tag);
+        CONN_CHECK_AND_RETURN_RET_LOGW(key < WC_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+            keyProperty.tag);
         if (!data || !size) {
             continue;
         }
@@ -128,7 +127,7 @@ static bool Unmarshalling(struct WifiConfigInfo *self, struct WifiDirectProtocol
                     char macString[MAC_ADDR_STR_LEN] = {0};
                     if (GetWifiDirectNetWorkUtils()->macArrayToString(data, size, macString, sizeof(macString))
                         != SOFTBUS_OK) {
-                        CLOGE(LOG_LABEL "mac array to string failed");
+                        CONN_LOGW(CONN_WIFI_DIRECT, "mac array to string failed");
                         ret = false;
                     } else {
                         self->putString(self, key, macString);
@@ -136,9 +135,9 @@ static bool Unmarshalling(struct WifiConfigInfo *self, struct WifiDirectProtocol
                     }
                 } else {
                     char *string = SoftBusCalloc(size + 1);
-                    CONN_CHECK_AND_RETURN_RET_LOG(string, false, LOG_LABEL "alloc failed");
+                    CONN_CHECK_AND_RETURN_RET_LOGE(string, false, CONN_WIFI_DIRECT, "alloc failed");
                     if (memcpy_s(string, size + 1, data, size) != EOK) {
-                        CLOGE("string memcpy fail");
+                        CONN_LOGW(CONN_WIFI_DIRECT, "string memcpy fail");
                         SoftBusFree(string);
                         return false;
                     }
@@ -154,7 +153,7 @@ static bool Unmarshalling(struct WifiConfigInfo *self, struct WifiDirectProtocol
                 continue;
         }
 
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
     }
 
     return true;
@@ -183,13 +182,13 @@ static bool UnmarshallingInterfaceInfoArray(struct WifiConfigInfo *self, struct 
     struct InterfaceInfo *currentInterfaceArray = self->getContainerArray(self, key, &currentInterfaceArraySize);
     size_t newInterfaceArraySize = currentInterfaceArraySize + 1;
     struct InterfaceInfo *newInterfaceArray = InterfaceInfoNewArray(newInterfaceArraySize);
-    CONN_CHECK_AND_RETURN_RET_LOG(newInterfaceArray, false, LOG_LABEL "new interface array failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(newInterfaceArray, false, CONN_WIFI_DIRECT, "new interface array failed");
     for (size_t i = 0; i < currentInterfaceArraySize; i++) {
         newInterfaceArray[i].deepCopy(&newInterfaceArray[i], &currentInterfaceArray[i]);
     }
 
     struct WifiDirectProtocol *subProtocol = GetWifiDirectProtocolFactory()->createProtocol(protocol->getType());
-    CONN_CHECK_AND_RETURN_RET_LOG(subProtocol, false, LOG_LABEL "create sub protocol failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(subProtocol, false, CONN_WIFI_DIRECT, "create sub protocol failed");
 
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE1 };
     subProtocol->setFormat(subProtocol, &format);
@@ -215,14 +214,14 @@ int32_t WifiConfigInfoConstruct(struct WifiConfigInfo *self, uint8_t *cfg, size_
     self->destructor = WifiConfigInfoDestruct;
 
     struct WifiDirectProtocol *protocol = GetWifiDirectProtocolFactory()->createProtocol(WIFI_DIRECT_PROTOCOL_TLV);
-    CONN_CHECK_AND_RETURN_RET_LOG(protocol, SOFTBUS_MALLOC_ERR, "create tlv protocol failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(protocol, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "create tlv protocol failed");
 
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE1 };
     protocol->setFormat(protocol, &format);
     protocol->setDataSource(protocol, cfg, size);
 
     if (!protocol->unpack(protocol, (struct InfoContainer *)self)) {
-        CLOGE(LOG_LABEL "unmarshalling failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "unmarshalling failed");
         GetWifiDirectProtocolFactory()->destroyProtocol(protocol);
         return SOFTBUS_ERR;
     }

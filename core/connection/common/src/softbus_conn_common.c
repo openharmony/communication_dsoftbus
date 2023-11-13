@@ -16,12 +16,11 @@
 #include "softbus_conn_common.h"
 
 #include "securec.h"
-
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_log_old.h"
 #include "softbus_type_def.h"
 
 #define HIGH_PRIORITY_DEFAULT_LIMIT   32
@@ -108,7 +107,7 @@ void ConvertAnonymizeSensitiveString(char *outAnomize, uint32_t anomizeLen, cons
 
 static void ConnFreeMessage(SoftBusMessage *msg)
 {
-    CONN_CHECK_AND_RETURN_LOG(msg != NULL, "ATTENTION UNEXPECTED ERROR, try to free a null msg");
+    CONN_CHECK_AND_RETURN_LOGW(msg != NULL, CONN_COMMON, "ATTENTION UNEXPECTED ERROR, try to free a null msg");
     if (msg->obj != NULL) {
         SoftBusFree(msg->obj);
         msg->obj = NULL;
@@ -120,8 +119,8 @@ int32_t ConnPostMsgToLooper(
     SoftBusHandlerWrapper *wrapper, int32_t what, uint64_t arg1, uint64_t arg2, void *obj, uint64_t delayMillis)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        msg != NULL, SOFTBUS_MEM_ERR, "ATTENTION, calloc message object failed: what=%d", what);
+    CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_MEM_ERR, CONN_COMMON,
+        "ATTENTION, calloc message object failed: what=%d", what);
     msg->what = what;
     msg->arg1 = arg1;
     msg->arg2 = arg2;
@@ -183,7 +182,7 @@ static int32_t ConnectSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, ui
     }
     SoftBusSysTime now;
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
-        CLOGE("BrSoftBusCondWait SoftBusGetTime failed");
+        CONN_LOGE(CONN_COMMON, "BrSoftBusCondWait SoftBusGetTime failed");
         return SOFTBUS_ERR;
     }
     now.sec += (now.usec + (timeMillis * USECTONSEC)) / MICROSECONDS;
@@ -199,16 +198,16 @@ int32_t WaitQueueLength(
     uint32_t queueCount = 0;
     while (true) {
         if (QueueCountGet(lockFreeQueue, &queueCount) != 0) {
-            CLOGE("wait get queue count fail");
+            CONN_LOGE(CONN_COMMON, "wait get queue count fail");
             break;
         }
-        CLOGI("queue count=%d", queueCount);
+        CONN_LOGI(CONN_COMMON, "queue count=%d", queueCount);
         if (queueCount < (maxLen - diffLen)) {
             break;
         }
         int32_t status = ConnectSoftBusCondWait(cond, mutex, WAIT_QUEUE_DELAY);
         if (status != SOFTBUS_OK && status != SOFTBUS_TIMOUT) {
-            CLOGE("wait queue length cond wait fail");
+            CONN_LOGE(CONN_COMMON, "wait queue length cond wait fail");
             return SOFTBUS_ERR;
         }
     }
@@ -220,7 +219,7 @@ int32_t GetMsg(ConnectionQueue *queue, void **msg, bool *isFull, QueuePriority l
     uint32_t queueCount;
     for (uint32_t i = 0; i <= leastPriority; i++) {
         if (QueueCountGet(queue->queue[i], &queueCount) != 0) {
-            CLOGE("get queue count fail");
+            CONN_LOGW(CONN_COMMON, "get queue count fail");
             continue;
         }
         if ((int32_t)queueCount >= (QUEUE_LIMIT[i] - WAIT_QUEUE_BUFFER_PERIOD_LEN)) {
@@ -239,7 +238,7 @@ int32_t GetMsg(ConnectionQueue *queue, void **msg, bool *isFull, QueuePriority l
 uint32_t GetQueueLimit(int32_t index)
 {
     if (index >= QUEUE_NUM_PER_PID || index < 0) {
-        CLOGE("invalid parameter");
+        CONN_LOGE(CONN_COMMON, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     return QUEUE_LIMIT[index];

@@ -16,11 +16,11 @@
 #include "disc_ble_dispatcher.h"
 #include "disc_approach_ble.h"
 #include "disc_ble.h"
+#include "disc_log.h"
 #include "disc_manager.h"
 #include "disc_share_ble.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 #define DISPATCHER_SIZE 3
 
@@ -43,10 +43,11 @@ static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
 static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_ERR, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        DLOGE("dispatch publish action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
+        DISC_LOGE(DISC_BLE, "dispatch publish action failed: no implement support capability '%u'",
+            option->capabilityBitmap[0]);
         return SOFTBUS_ERR;
     }
     switch (type) {
@@ -55,7 +56,7 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
         case UNPUBLISH_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
-            DLOGE("dispatch publish action failed: unsupport type '%d', capability '%u'", type,
+            DISC_LOGW(DISC_BLE, "dispatch publish action failed: unsupport type '%d', capability '%u'", type,
                 option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
@@ -64,10 +65,11 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
 static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_ERR, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        DLOGE("dispatch subcribe action failed: no implement support capability '%u'", option->capabilityBitmap[0]);
+        DISC_LOGE(DISC_BLE, "dispatch subcribe action failed: no implement support capability '%u'",
+            option->capabilityBitmap[0]);
         return SOFTBUS_ERR;
     }
     switch (type) {
@@ -76,7 +78,7 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
-            DLOGE("dispatch subcribe action failed: unsupport type '%d', capability '%u'", type,
+            DISC_LOGW(DISC_BLE, "dispatch subcribe action failed: unsupport type '%d', capability '%u'", type,
                 option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
@@ -158,28 +160,28 @@ static DiscoveryFuncInterface g_discBleFrameFuncInterface = {
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
-        DLOGE("discInnerCb err");
+        DISC_LOGW(DISC_INIT, "discInnerCb err");
         return NULL;
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleFrameInit");
+    DISC_LOGI(DISC_INIT, "DiscBleFrameInit");
     g_dispatcherSize = 0;
     DiscoveryBleDispatcherInterface *softbusInterface = DiscSoftBusBleInit(discInnerCb);
     if (softbusInterface == NULL) {
-        DLOGE("DiscSoftBusBleInit err");
+        DISC_LOGE(DISC_INIT, "DiscSoftBusBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = softbusInterface;
 
     DiscoveryBleDispatcherInterface *shareInterface = DiscShareBleInit(discInnerCb);
     if (shareInterface == NULL) {
-        DLOGE("DiscShareBleInit err");
+        DISC_LOGE(DISC_INIT, "DiscShareBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = shareInterface;
 
     DiscoveryBleDispatcherInterface *approachInterface = DiscApproachBleInit(discInnerCb);
     if (approachInterface == NULL) {
-        DLOGE("DiscShareBleInit err");
+        DISC_LOGE(DISC_INIT, "DiscShareBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = approachInterface;
@@ -198,7 +200,7 @@ DiscoveryFuncInterface *DiscBleInitForTest(DiscoveryBleDispatcherInterface *inte
 
 void DiscBleDeinit(void)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "deinit DiscBleFrameDeinit");
+    DISC_LOGI(DISC_BLE, "deinit DiscBleFrameDeinit");
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         g_dispatchers[i] = NULL;
     }

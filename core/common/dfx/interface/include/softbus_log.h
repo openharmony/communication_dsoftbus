@@ -41,12 +41,12 @@ extern "C" {
     SoftBusLogInnerImpl(Level, Label, FILE_NAME, __LINE__, __FUNCTION__, Fmt, ##Args)
 
 typedef enum {
-    SOFTBUS_LOG_DEBUG = 3,
-    SOFTBUS_LOG_INFO = 4,
-    SOFTBUS_LOG_WARN = 5,
-    SOFTBUS_LOG_ERROR = 6,
-    SOFTBUS_LOG_FATAL = 7,
-} SoftBusLogLevel;
+    SOFTBUS_DFX_LOG_DEBUG = 3,
+    SOFTBUS_DFX_LOG_INFO = 4,
+    SOFTBUS_DFX_LOG_WARN = 5,
+    SOFTBUS_DFX_LOG_ERROR = 6,
+    SOFTBUS_DFX_LOG_FATAL = 7,
+} SoftBusDfxLogLevel;
 
 typedef struct {
     int32_t label;
@@ -54,7 +54,7 @@ typedef struct {
     char tag[LOG_TAG_MAX_LEN];
 } SoftBusLogLabel;
 
-void SoftBusLogInnerImpl(SoftBusLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
+void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
     const char *funName, const char *fmt, ...);
 
 #define CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, log, label, fmt, ...) \

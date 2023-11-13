@@ -14,11 +14,9 @@
  */
 
 #include "wifi_direct_command_manager.h"
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "channel/wifi_direct_negotiate_channel.h"
-
-#define LOG_LABEL "[WD] CM: "
 
 static void EnqueueCommand(struct WifiDirectCommand *command)
 {
@@ -55,12 +53,13 @@ struct WifiDirectCommandManager* GetWifiDirectCommandManager(void)
 
 int32_t WifiDirectCommandManagerInit(void)
 {
+    CONN_LOGI(CONN_INIT, "init enter");
     ListInit(&g_manager.commands);
     SoftBusMutexAttr attr;
     int32_t ret = SoftBusMutexAttrInit(&attr);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "init mutex attr failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_INIT, "init mutex attr failed");
     attr.type = SOFTBUS_MUTEX_RECURSIVE;
     ret = SoftBusMutexInit(&g_manager.mutex, &attr);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, "init mutex ailed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_INIT, "init mutex ailed");
     return SOFTBUS_OK;
 }

@@ -19,6 +19,7 @@
 #include "session.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
+#include "client_trans_session_adapter.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +35,13 @@ typedef struct {
     int flag; // TYPE_MESSAGE & TYPE_BYTES & TYPE_FILE
 } SessionTag;
 
+typedef enum {
+    SESSION_ROLE_INIT,
+    SESSION_ROLE_CLIENT,
+    SESSION_ROLE_SERVER,
+    SESSION_ROLE_BUTT,
+} SessionRole;
+
 typedef struct {
     ListNode node;
     uint16_t timeout;
@@ -42,6 +50,7 @@ typedef struct {
     ChannelType channelType;
     SessionTag info;
     bool isServer;
+    SessionRole role;
     bool isEnable;
     int32_t peerUid;
     int32_t peerPid;
@@ -56,13 +65,16 @@ typedef struct {
 } SessionInfo;
 
 typedef struct {
+    ISessionListener session;
+    ISocketListenerAdapt socket;
+} SessionListenerAdapter;
+
+typedef struct {
     ListNode node;
     SoftBusSecType type;
     char sessionName[SESSION_NAME_SIZE_MAX];
     char pkgName[PKG_NAME_SIZE_MAX];
-    union {
-        ISessionListener session;
-    } listener;
+    SessionListenerAdapter listener;
     ListNode sessionList;
     bool permissionState;
 } ClientSessionServer;
@@ -140,6 +152,23 @@ int32_t CheckPermissionState(int32_t sessionId);
 
 void PermissionStateChange(const char *pkgName, int32_t state);
 
+int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName);
+
+int32_t ClientDeleteSocketSession(int32_t sessionId);
+
+int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled);
+
+int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListenerAdapt *listener);
+
+int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo);
+
+int32_t ClientSetSocketState(int32_t socket, SessionRole role);
+
+int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionListenerAdapter *callbackAdapter);
+
+int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter);
+
+int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
 #ifdef __cplusplus
 }
 #endif

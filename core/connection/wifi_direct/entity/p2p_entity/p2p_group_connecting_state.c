@@ -15,17 +15,15 @@
 
 #include "entity/p2p_entity/p2p_group_connecting_state.h"
 #include <string.h>
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-
-#define LOG_LABEL "[WD] PGCoS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
     (void)self;
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     GetP2pEntity()->stopTimer();
     int64_t timeout = TIMEOUT_CONNECT_GROUP_MS;
     if (GetP2pEntity()->isNeedDhcp) {
@@ -37,7 +35,7 @@ static void Enter(struct P2pEntityState *self)
 static void Exit(struct P2pEntityState *self)
 {
     (void)self;
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "exit");
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
@@ -45,11 +43,11 @@ static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEven
     (void)self;
     struct P2pEntity *entity = GetP2pEntity();
     if (event != P2P_ENTITY_TIMEOUT_CONNECT_SERVER) {
-        CLOGE(LOG_LABEL "mismatch timeout events");
+        CONN_LOGW(CONN_WIFI_DIRECT, "mismatch timeout events");
         return;
     }
 
-    CLOGE(LOG_LABEL "connect group timeout");
+    CONN_LOGE(CONN_WIFI_DIRECT, "connect group timeout");
     GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);
     entity->notifyOperationComplete(ERROR_P2P_CONNECT_GROUP_FAILED);
     entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
@@ -61,14 +59,14 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
     struct P2pEntity *entity = GetP2pEntity();
 
     if (groupInfo == NULL) {
-        CLOGI(LOG_LABEL "connect group failed");
+        CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed");
         entity->clearJoiningClient();
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(ERROR_P2P_CONNECT_GROUP_FAILED);
     }
 
     if (entity->isNeedDhcp) {
-        CLOGI(LOG_LABEL "connect group complete in DHCP mode");
+        CONN_LOGI(CONN_WIFI_DIRECT, "connect group complete in DHCP mode");
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(ENTITY_EVENT_P2P_CONNECT_COMPLETE);
     }
@@ -80,26 +78,26 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
     struct P2pEntity *entity = GetP2pEntity();
 
     if (state == WIFI_DIRECT_P2P_CONNECTING) {
-        CLOGI(LOG_LABEL "p2p connecting");
+        CONN_LOGI(CONN_WIFI_DIRECT, "p2p connecting");
     } else if (state == WIFI_DIRECT_P2P_CONNECTED) {
-        CLOGI(LOG_LABEL "p2p connected");
+        CONN_LOGI(CONN_WIFI_DIRECT, "p2p connected");
         if (entity->isNeedDhcp) {
-            CLOGI(LOG_LABEL "wait connection change event in DHCP mode");
+            CONN_LOGI(CONN_WIFI_DIRECT, "wait connection change event in DHCP mode");
             return;
         }
 
         struct WifiDirectP2pGroupInfo *groupInfo = NULL;
         int32_t ret = GetWifiDirectP2pAdapter()->getGroupInfo(&groupInfo);
-        CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "get groupInfo failed");
+        CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get groupInfo failed");
 
         entity->configIp(groupInfo->interface);
         SoftBusFree(groupInfo);
 
-        CLOGI(LOG_LABEL "connect group complete");
+        CONN_LOGI(CONN_WIFI_DIRECT, "connect group complete");
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(ENTITY_EVENT_P2P_CONNECT_COMPLETE);
     } else {
-        CLOGI(LOG_LABEL "p2p connect failed");
+        CONN_LOGI(CONN_WIFI_DIRECT, "p2p connect failed");
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(entity->interface);
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
         entity->notifyOperationComplete(ERROR_P2P_CONNECT_GROUP_FAILED);
