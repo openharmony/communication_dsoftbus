@@ -69,10 +69,10 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
             TransTdcCloseChannel(channelId);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = ClientTransCloseUdpChannel(channelId);
+            ret = ClientTransCloseUdpChannel(channelId, SHUTDOWN_REASON_LOCAL);
             break;
         case CHANNEL_TYPE_AUTH:
-            ClientTransAuthCloseChannel(channelId);
+            ClientTransAuthCloseChannel(channelId, SHUTDOWN_REASON_LOCAL);
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "Invalid type");

@@ -161,8 +161,10 @@
     ]
   },
   {
-    "SESSION_NAME": "device.security.level",
+    "SESSION_NAME": "device.security.level*",
+    "REGEXP": "true",
     "DEVID": "UDID",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "native_app",

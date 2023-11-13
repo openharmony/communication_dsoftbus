@@ -200,7 +200,7 @@ int32_t SoftBusClientStub::OnChannelLinkDown(const char *networkId, int32_t rout
 
 int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelType)
 {
-    return TransOnChannelClosed(channelId, channelType);
+    return TransOnChannelClosed(channelId, channelType, SHUTDOWN_REASON_PEER);
 }
 
 int32_t SoftBusClientStub::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,

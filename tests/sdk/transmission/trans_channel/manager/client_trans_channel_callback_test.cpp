@@ -38,7 +38,7 @@ int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, Ses
 {
     return SOFTBUS_OK;
 }
-int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     return SOFTBUS_OK;
 }
@@ -190,16 +190,16 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.Level0)
 {
     int channelId = 1;
-    int ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH);
+    int ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY);
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP);
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT);
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

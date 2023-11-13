@@ -47,9 +47,9 @@ int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInf
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
+int32_t ClientTransAuthOnChannelClosed(int32_t channelId, ShutdownReason reason)
 {
-    int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_AUTH);
+    int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_AUTH, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "notify session openfail ret=%d, channelId=%d.", ret, channelId);
         return ret;
@@ -83,13 +83,13 @@ int32_t ClientTransAuthOnDataReceived(int32_t channelId,
     return SOFTBUS_OK;
 }
 
-void ClientTransAuthCloseChannel(int32_t channelId)
+void ClientTransAuthCloseChannel(int32_t channelId, ShutdownReason reason)
 {
     TRANS_LOGI(TRANS_SDK, "TransCloseAuthChannel, channelId=%d", channelId);
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_AUTH) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "server ipc close channelId=%d err.", channelId);
     }
-    if (ClientTransAuthOnChannelClosed(channelId) != SOFTBUS_OK) {
+    if (ClientTransAuthOnChannelClosed(channelId, reason) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "server auth close channelId=%d err.", channelId);
     }
 }

@@ -99,7 +99,7 @@ static int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *chann
     return SOFTBUS_OK;
 }
 
-static int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+static int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     TRANS_LOGI(TRANS_TEST, "session closed, channelId=%d", channelId);
     return SOFTBUS_OK;
@@ -460,7 +460,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionClosedTest0011, TestSize.
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
     int32_t ret = ClientTransTdcSetCallBack(&g_sessionCb);
-    ret = ClientTransTdcOnSessionClosed(channelId);
+    ret = ClientTransTdcOnSessionClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = ClientTransTdcOnSessionOpenFailed(channelId, errCode);
