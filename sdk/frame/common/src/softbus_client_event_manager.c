@@ -15,12 +15,12 @@
 
 #include "softbus_client_event_manager.h"
 
+#include "comm_log.h"
 #include "softbus.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define MAX_OBSERVER_CNT 128
@@ -46,7 +46,7 @@ int EventClientInit(void)
     }
     g_observerList = CreateSoftBusList();
     if (g_observerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "create observer list failed");
+        COMM_LOGE(COMM_SDK, "create observer list failed");
         return SOFTBUS_ERR;
     }
 
@@ -57,7 +57,7 @@ int EventClientInit(void)
 void EventClientDeinit(void)
 {
     if (!g_isInited) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "event client not init");
+        COMM_LOGE(COMM_SDK, "event client not init");
         return;
     }
     if (g_observerList != NULL) {
@@ -79,29 +79,29 @@ static bool IsEventValid(enum SoftBusEvent event)
 int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userData)
 {
     if (!IsEventValid(event) || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_SDK, "invalid param");
         return SOFTBUS_ERR;
     }
 
     if (g_isInited != true) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "event manager not init");
+        COMM_LOGE(COMM_SDK, "event manager not init");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&g_observerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SDK, "lock failed");
         return SOFTBUS_ERR;
     }
 
     if (g_observerList->cnt >= MAX_OBSERVER_CNT) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "observer count over limit");
+        COMM_LOGE(COMM_SDK, "observer count over limit");
         (void)SoftBusMutexUnlock(&g_observerList->lock);
         return SOFTBUS_ERR;
     }
 
     Observer *observer = SoftBusCalloc(sizeof(Observer));
     if (observer == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc observer failed");
+        COMM_LOGE(COMM_SDK, "malloc observer failed");
         (void)SoftBusMutexUnlock(&g_observerList->lock);
         return SOFTBUS_ERR;
     }
@@ -120,18 +120,18 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
 void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argLen)
 {
     if (!IsEventValid(event)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid event [%d]", event);
+        COMM_LOGE(COMM_SDK, "invalid event [%d]", event);
         return;
     }
 
     if (g_isInited != true) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "event manager not init");
+        COMM_LOGE(COMM_SDK, "event manager not init");
         return;
     }
 
     Observer *observer = NULL;
     if (SoftBusMutexLock(&g_observerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SDK, "lock failed");
         return;
     }
 
@@ -139,7 +139,7 @@ void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argL
         if ((observer->event == event) &&
             (observer->callback != NULL) &&
             (observer->callback(arg, argLen, observer->userData) != SOFTBUS_OK)) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "execute callback failed [%d]", event);
+            COMM_LOGE(COMM_SDK, "execute callback failed [%d]", event);
         }
     }
 

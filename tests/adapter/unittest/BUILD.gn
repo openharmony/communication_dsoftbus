@@ -392,6 +392,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/common/dfx/interface/include",
     ]
     deps = [
       "//third_party/googletest:gmock",
