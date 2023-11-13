@@ -28,9 +28,6 @@ typedef enum {
     CONN_BR,
     CONN_COMMON,
     CONN_WIFI_DIRECT,
-    CONN_WD_V1,
-    CONN_WD_V2,
-    // CONN_WD_HML,
     CONN_TEST,
 } ConnLogLabelEnum;
 
@@ -41,9 +38,7 @@ static const SoftBusLogLabel CONN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     {CONN_BR,           0xd005762,      "ConnBr"},
     {CONN_COMMON,       0xd005763,      "ConnCommon"},
     {CONN_WIFI_DIRECT,  0xd005764,      "ConnWD"},
-    {CONN_WD_V1,        0xd005765,      "ConnWDV1"},
-    {CONN_WD_V2,        0xd005766,      "ConnWDV2"},
-    {CONN_TEST, DOMAIN_ID_TEST, "ConnTest"},
+    {CONN_TEST,    DOMAIN_ID_TEST,      "ConnTest"},
 };
 
 #define CONN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, CONN_LABELS[label], ##__VA_ARGS__)

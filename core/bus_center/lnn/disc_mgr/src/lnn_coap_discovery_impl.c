@@ -41,51 +41,21 @@ static DiscInnerCallback g_discCb = {
     .OnDeviceFound = DeviceFound,
 };
 
-static void ConvertDeviceInfo(const DeviceInfo *fromDevice, DeviceInfo *toDevice)
-{
-    uint8_t hashResult[SHA_256_HASH_LEN] = {0};
-
-    if (memcpy_s(toDevice, sizeof(DeviceInfo), fromDevice, sizeof(DeviceInfo)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy_s deviceInfo fail");
-        return;
-    }
-    if (SoftBusGenerateStrHash((const unsigned char *)fromDevice->devId,
-        strlen(fromDevice->devId), hashResult) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate devId hash fail");
-        return;
-    }
-    (void)memset_s(toDevice->devId, sizeof(toDevice->devId), 0, sizeof(toDevice->devId));
-    if (ConvertBytesToHexString(toDevice->devId, LNN_SHORT_HASH_HEX_LEN + 1,
-        (const unsigned char *)hashResult, LNN_SHORT_HASH_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert hex devId string fail");
-        return;
-    }
-    (void)memset_s(toDevice->accountHash, sizeof(toDevice->accountHash), 0, sizeof(toDevice->accountHash));
-    if (SoftBusGenerateStrHash((const unsigned char *)fromDevice->accountHash,
-        strlen(fromDevice->accountHash), (unsigned char *)toDevice->accountHash) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate account hash fail");
-    }
-}
-
 static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     ConnectionAddr addr;
-    DeviceInfo tmpInfo;
     (void) addtions;
 
     if (device == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device para is null");
         return;
     }
-    (void)memset_s(&tmpInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-    char *anoyUdid = NULL;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DeviceFound devName: %s, devId: %s",
-        device->devName, ToSecureStrDeviceID(device->devId, &anoyUdid));
-    SoftBusFree(anoyUdid);
-    ConvertDeviceInfo(device, &tmpInfo);
-    if (!AuthIsPotentialTrusted(&tmpInfo)) {
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    // devId format is hex hash string here
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "DeviceFound devName:%s, devId:%s", device->devName, device->devId);
+    if (!AuthIsPotentialTrusted(device)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "discovery device is not potential trusted, devId:%s, "
-            "accountHash:%02X%02X", AnonymizesUDID(tmpInfo.devId), tmpInfo.accountHash[0], tmpInfo.accountHash[1]);
+            "accountHash:%02X%02X", device->devId, device->accountHash[0], device->accountHash[1]);
         return;
     }
     if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
