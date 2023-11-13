@@ -16,15 +16,15 @@
 #include "disc_client_proxy.h"
 
 #include "client_disc_manager.h"
+#include "disc_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     (void)pkgName;
     (void)addtions;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ondevice found ipc server push.");
+    DISC_LOGI(DISC_CONTROL, "ondevice found ipc server push.");
     DiscClientOnDeviceFound(device);
     return SOFTBUS_OK;
 }
@@ -32,7 +32,7 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, co
 int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int failReason)
 {
     (void)pkgName;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "on discovery failed callback ipc server push.");
+    DISC_LOGI(DISC_CONTROL, "on discovery failed callback ipc server push.");
     DiscClientOnDiscoverFailed(subscribeId, (DiscoveryFailReason)failReason);
     return SOFTBUS_OK;
 }
@@ -40,7 +40,7 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
 int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
 {
     (void)pkgName;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "on discovery success callback ipc server push.");
+    DISC_LOGI(DISC_CONTROL, "on discovery success callback ipc server push.");
     DiscClientOnDiscoverySuccess(subscribeId);
     return SOFTBUS_OK;
 }
@@ -48,7 +48,7 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
 int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
 {
     (void)pkgName;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "on publish success callback ipc server push.");
+    DISC_LOGI(DISC_CONTROL, "on publish success callback ipc server push.");
     DiscClientOnPublishSuccess(publishId);
     return SOFTBUS_OK;
 }
@@ -56,7 +56,7 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
 int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
 {
     (void)pkgName;
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "on publish failed ipc server push.");
+    DISC_LOGI(DISC_CONTROL, "on publish failed ipc server push.");
     DiscClientOnPublishFail(publishId, (PublishFailReason)reason);
     return SOFTBUS_OK;
 }
