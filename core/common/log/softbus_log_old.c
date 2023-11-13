@@ -65,12 +65,12 @@ typedef enum {
 } AnonymizeMode;
 
 static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
-    {SOFTBUS_LOG_AUTH, "SoftBusAuth"},
-    {SOFTBUS_LOG_TRAN, "SoftBusTran"},
-    {SOFTBUS_LOG_CONN, "SoftBusConn"},
-    {SOFTBUS_LOG_LNN, "SoftBusLnn"},
-    {SOFTBUS_LOG_DISC, "SoftBusDisc"},
-    {SOFTBUS_LOG_COMM, "SoftBusComm"},
+    {SOFTBUS_LOG_AUTH, "Auth"},
+    {SOFTBUS_LOG_TRAN, "Tran"},
+    {SOFTBUS_LOG_CONN, "Conn"},
+    {SOFTBUS_LOG_LNN, "Lnn"},
+    {SOFTBUS_LOG_DISC, "Disc"},
+    {SOFTBUS_LOG_COMM, "Comm"},
 };
 
 void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...)
