@@ -16,7 +16,7 @@
 #include "client_trans_auth_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 #include "trans_server_proxy.h"
 
 static IClientSessionCallBack g_sessionCb;
@@ -24,7 +24,7 @@ static IClientSessionCallBack g_sessionCb;
 int32_t ClientTransAuthInit(const IClientSessionCallBack *cb)
 {
     if (cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransAuthInit cb is null.");
+        TRANS_LOGE(TRANS_SDK, "cb is null.");
         return SOFTBUS_INVALID_PARAM;
     }
     g_sessionCb = *cb;
@@ -34,13 +34,13 @@ int32_t ClientTransAuthInit(const IClientSessionCallBack *cb)
 int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     if (sessionName == NULL || channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientTransAuthOnChannelOpened param invalid.");
+        TRANS_LOGE(TRANS_SDK, "param invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret = g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_MESSAGE);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session open fail, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "notify session open fail, ret=%d.", ret);
         return ret;
     }
 
@@ -51,7 +51,7 @@ int32_t ClientTransAuthOnChannelClosed(int32_t channelId)
 {
     int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_AUTH);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify session openfail err[%d]. cid[%d].", ret, channelId);
+        TRANS_LOGE(TRANS_SDK, "notify session openfail ret=%d, channelId=%d.", ret, channelId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -61,8 +61,8 @@ int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_AUTH, errCode);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "notify session openfail ret[%d] err[%d], cid[%d].", ret, errCode, channelId);
+        TRANS_LOGE(TRANS_SDK,
+            "notify session openfail ret=%d, errCode=%d, channelId=%d.", ret, errCode, channelId);
         return ret;
     }
 
@@ -77,7 +77,7 @@ int32_t ClientTransAuthOnDataReceived(int32_t channelId,
     }
     int ret = g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_AUTH, data, len, type);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify data recv err, ret[%d], cId[%d].", ret, channelId);
+        TRANS_LOGE(TRANS_SDK, "notify data recv err, ret=%d, channelId%d.", ret, channelId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -85,25 +85,25 @@ int32_t ClientTransAuthOnDataReceived(int32_t channelId,
 
 void ClientTransAuthCloseChannel(int32_t channelId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransCloseAuthChannel, channelId [%d]", channelId);
+    TRANS_LOGI(TRANS_SDK, "TransCloseAuthChannel, channelId=%d", channelId);
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_AUTH) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server ipc close channel[%d] err.", channelId);
+        TRANS_LOGE(TRANS_SDK, "server ipc close channelId=%d err.", channelId);
     }
     if (ClientTransAuthOnChannelClosed(channelId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "server auth close channel[%d] err.", channelId);
+        TRANS_LOGE(TRANS_SDK, "server auth close channelId=%d err.", channelId);
     }
 }
 
 int32_t TransAuthChannelSendBytes(int32_t channelId, const void *data, uint32_t len)
 {
     int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_AUTH, data, len, TRANS_SESSION_BYTES);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send bytes: channelId=%d, ret=%d", channelId, ret);
+    TRANS_LOGI(TRANS_BYTES, "send bytes: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }
 
 int32_t TransAuthChannelSendMessage(int32_t channelId, const void *data, uint32_t len)
 {
     int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_AUTH, data, len, TRANS_SESSION_BYTES);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: channelId=%d, ret=%d", channelId, ret);
+    TRANS_LOGI(TRANS_MSG, "send msg: channelId=%d, ret=%d", channelId, ret);
     return ret;
 }

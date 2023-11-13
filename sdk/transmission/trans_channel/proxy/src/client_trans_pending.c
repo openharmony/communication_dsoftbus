@@ -25,8 +25,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_type_def.h"
+#include "trans_log.h"
 
 typedef struct {
     ListNode node;
@@ -60,13 +60,13 @@ void DestroyPendingPacket(void)
 static int32_t CheckPendingPacketExisted(uint32_t id, uint64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Check pending packet is exist, lock error.");
+        TRANS_LOGE(TRANS_SDK, "Check pending packet is exist, lock error.");
         return SOFTBUS_LOCK_ERR;
     }
     PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket existed. id: %u, seq: %" PRIu64, id, seq);
+            TRANS_LOGE(TRANS_SDK, "PendingPacket existed. pendingId=%u, pendingSeq=%" PRIu64, id, seq);
             (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_ALREADY_EXISTED;
         }
@@ -79,13 +79,13 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
 {
     int32_t ret = CheckPendingPacketExisted(id, seq);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Check pending packet is exist, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "Check pending packet is exist, ret=%d.", ret);
         return ret;
     }
 
     PendingPacket *pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
     if (pending == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket SoftBusCalloc fail");
+        TRANS_LOGE(TRANS_SDK, "SoftBusCalloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&pending->node);
@@ -96,15 +96,15 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
     pending->finded = false;
     if (SoftBusMutexInit(&pending->lock, NULL) != SOFTBUS_OK) {
         SoftBusFree(pending);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket init lock fail");
+        TRANS_LOGE(TRANS_SDK, "init lock fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusCondInit(&pending->cond) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket condInit fail");
+        TRANS_LOGE(TRANS_SDK, "condInit fail");
         goto EXIT;
     }
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatePendingPacket lock fail");
+        TRANS_LOGE(TRANS_SDK, "lock fail");
         goto EXIT;
     }
     ListTailInsert(&g_pendingList, &(pending->node));
@@ -209,7 +209,7 @@ EXIT:
 int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *data)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetBrPendingPacket lock fail");
+        TRANS_LOGE(TRANS_SDK, "SetBrPendingPacket lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     PendingPacket *item = NULL;

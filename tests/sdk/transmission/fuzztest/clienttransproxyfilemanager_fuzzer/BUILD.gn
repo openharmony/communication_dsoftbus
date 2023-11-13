@@ -26,6 +26,7 @@ ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
   include_dirs = [
     "../../../../../adapter/common/include",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../core/connection/interface",
     "../../../../../core/transmission/common/include",
     "../../../../../sdk/transmission/ipc/include",
