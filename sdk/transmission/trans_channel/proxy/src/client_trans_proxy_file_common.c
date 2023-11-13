@@ -28,8 +28,8 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_type_def.h"
+#include "trans_log.h"
 
 #pragma pack(push, 1)
 struct FileListItem {
@@ -42,16 +42,16 @@ struct FileListItem {
 bool IsPathValid(char *filePath)
 {
     if (filePath == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is null");
+        TRANS_LOGE(TRANS_FILE, "filePath is null");
         return false;
     }
     if ((strlen(filePath) == 0) || (strlen(filePath) > (MAX_FILE_PATH_NAME_LEN - 1))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath size[%d] is wrong", (int32_t)strlen(filePath));
+        TRANS_LOGE(TRANS_FILE, "filePathSize=%d is wrong", (int32_t)strlen(filePath));
         return false;
     }
 
     if (filePath[strlen(filePath) - 1] == PATH_SEPARATOR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "filePath is end with '/' ");
+        TRANS_LOGE(TRANS_FILE, "filePath is end with '/' ");
         return false;
     }
     return true;
@@ -60,18 +60,18 @@ bool IsPathValid(char *filePath)
 int32_t GetAndCheckRealPath(const char *filePath, char *absPath)
 {
     if ((filePath == NULL) || (absPath == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "input invalid");
+        TRANS_LOGE(TRANS_FILE, "input invalid");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusRealPath(filePath, absPath) == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "softbus realpath failed");
+        TRANS_LOGE(TRANS_FILE, "softbus realpath failed");
         return SOFTBUS_ERR;
     }
 
     int32_t pathLength = strlen(absPath);
     if (pathLength > (MAX_FILE_PATH_NAME_LEN - 1)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pathLength[%d] is too large", pathLength);
+        TRANS_LOGE(TRANS_FILE, "pathLength=%d is too large", pathLength);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -80,17 +80,17 @@ int32_t GetAndCheckRealPath(const char *filePath, char *absPath)
 bool CheckDestFilePathValid(const char *destFile)
 {
     if (destFile == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile is null");
+        TRANS_LOGE(TRANS_FILE, "destFile is null");
         return false;
     }
     int32_t len = strlen(destFile);
     if ((len == 0) || (len > MAX_FILE_PATH_NAME_LEN) || (destFile[0] == PATH_SEPARATOR)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "destFile first char is '/'");
+        TRANS_LOGE(TRANS_FILE, "destFile first char is '/'");
         return false;
     }
 
     if (strstr(destFile, "..") != NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "dest path is not canonical form");
+        TRANS_LOGE(TRANS_FILE, "dest path is not canonical form");
         return false;
     }
     return true;
@@ -169,16 +169,16 @@ uint16_t RTU_CRC(const unsigned char *puchMsg, uint16_t usDataLen)
 const char *TransGetFileName(const char *path)
 {
     if (path == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input is NULL!", __func__);
+        TRANS_LOGE(TRANS_FILE, "input is NULL!");
         return NULL;
     }
     size_t pathLength = strlen(path);
     if (pathLength == 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input length is 0!", __func__);
+        TRANS_LOGE(TRANS_FILE, "input length is 0!");
         return NULL;
     }
     if (path[pathLength - 1] == SOFTBUS_PATH_SEPRATOR) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:input is dir path!", __func__);
+        TRANS_LOGE(TRANS_FILE, "input is dir path!");
         return NULL;
     }
 
@@ -198,7 +198,7 @@ const char *TransGetFileName(const char *path)
 int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo)
 {
     if (destFile == NULL || outbufferInfo == NULL || fileCnt == 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:bad input", __func__);
+        TRANS_LOGE(TRANS_FILE, "bad input");
         return SOFTBUS_ERR;
     }
     int32_t errCode = SOFTBUS_OK;
@@ -207,7 +207,7 @@ int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer
     for (uint32_t i = 0; i < fileCnt; i++) {
         size_t fileNameLength = strlen(destFile[i]);
         if (fileNameLength == 0 || fileNameLength > MAX_FILE_PATH_NAME_LEN) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "bad file name at index %" PRIu32, i);
+            TRANS_LOGE(TRANS_FILE, "bad file name at index=%" PRIu32, i);
             return SOFTBUS_INVALID_PARAM;
         } else {
             totalLength += fileNameLength;
@@ -217,7 +217,7 @@ int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer
     size_t bufferSize = totalLength + (sizeof(struct FileListItem) * fileCnt);
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(bufferSize);
     if (buffer == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "calloc filelist failed");
+        TRANS_LOGE(TRANS_FILE, "calloc filelist failed");
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -230,7 +230,7 @@ int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer
 
         // note: no \0 here
         if (memcpy_s(fileItem->fileName, bufferSize - offset, destFile[index], fileNameSize) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:copy file name failed!", __func__);
+            TRANS_LOGE(TRANS_FILE, "copy file name failed!");
             errCode = SOFTBUS_ERR;
             break;
         }
@@ -251,12 +251,12 @@ int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer
 char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount)
 {
     if ((buffer == NULL) || (fileCount == NULL) || bufferSize < sizeof(struct FileListItem)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s: input invalid", __func__);
+        TRANS_LOGE(TRANS_FILE, "input invalid");
         return NULL;
     }
     char *firstFile = (char *)SoftBusCalloc(MAX_FILE_PATH_NAME_LEN + 1);
     if (firstFile == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s: calloc fail", __func__);
+        TRANS_LOGE(TRANS_FILE, "calloc fail");
         return NULL;
     }
     uint32_t offset = 0;
@@ -267,7 +267,7 @@ char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount)
 
         uint32_t fileNameLength = ntohl(fileListItem->fileNameLength);
         if (fileNameLength > bufferSize - offset || fileNameLength > MAX_FILE_PATH_NAME_LEN) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s: invalid fileLength", __func__);
+            TRANS_LOGE(TRANS_FILE, "invalid fileLength");
             SoftBusFree(firstFile);
             return NULL;
         }
@@ -290,7 +290,7 @@ char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount)
 int32_t FileLock(int32_t fd, int32_t type, bool isBlock)
 {
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[FileLock] invalid file handle");
+        TRANS_LOGE(TRANS_FILE, "[FileLock] invalid file handle");
         return SOFTBUS_ERR;
     }
     struct flock fl = {0};
@@ -300,10 +300,10 @@ int32_t FileLock(int32_t fd, int32_t type, bool isBlock)
     fl.l_len = 0;
     int32_t ret = fcntl(fd, isBlock ? F_SETLKW : F_SETLK, &fl);
     if (ret != 0 && !isBlock) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "lock file is blocked, file busy errno: %d", errno);
+        TRANS_LOGE(TRANS_FILE, "lock file is blocked, file busy errno=%d", errno);
         return SOFTBUS_FILE_BUSY;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "file locked! ret: %d, errno: %d", ret, errno);
+    TRANS_LOGE(TRANS_FILE, "file locked! ret=%d, errno=%d", ret, errno);
     return SOFTBUS_OK;
 }
 
@@ -329,7 +329,7 @@ int32_t TryFileLock(int32_t fd, int32_t type, int32_t retryTimes)
 int32_t FileUnLock(int32_t fd)
 {
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "[FileUnLock] invalid file handle");
+        TRANS_LOGE(TRANS_FILE, "[FileUnLock] invalid file handle");
         return SOFTBUS_OK;
     }
     struct flock fl = {0};
@@ -338,9 +338,9 @@ int32_t FileUnLock(int32_t fd)
     fl.l_start = 0;
     fl.l_len = 0;
     if (fcntl(fd, F_SETLK, &fl) < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unLock file failed, errno: %d", errno);
+        TRANS_LOGE(TRANS_FILE, "unLock file failed, errno=%d", errno);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "unLock file success");
+    TRANS_LOGE(TRANS_FILE, "unLock file success");
     return SOFTBUS_OK;
 }

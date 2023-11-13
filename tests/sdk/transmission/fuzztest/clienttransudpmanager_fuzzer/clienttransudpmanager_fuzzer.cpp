@@ -51,7 +51,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        TransOnUdpChannelClosed((int32_t)size);
+        TransOnUdpChannelClosed((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
     }
 
     void TransOnUdpChannelQosEventTest(const uint8_t* data, size_t size)
@@ -68,7 +68,7 @@ namespace OHOS {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
-        ClientTransCloseUdpChannel((int32_t)size);
+        ClientTransCloseUdpChannel((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
     }
 
     void TransUdpChannelSendStreamTest(const uint8_t* data, size_t size)

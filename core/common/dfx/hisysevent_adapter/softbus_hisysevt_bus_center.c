@@ -15,13 +15,13 @@
 
 #include "softbus_hisysevt_bus_center.h"
 
+#include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_hisysevent.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_hisysevt_common.h"
-#include "softbus_log_old.h"
 
 #define BUS_CENTER_PARAM_TOTAL_TIME "TOTAL_TIME"
 #define BUS_CENTER_PARAM_TOTAL_COUNT "TOTAL_COUNT"
@@ -297,16 +297,16 @@ int64_t LnnUpTimeMs(void)
 static int32_t AddUdidInfoNodeToList(OnlineDeviceInfo *info, const char *udid)
 {
     if (udid == NULL || info == NULL) {
-        MLOGE("invalid param");
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_ERR;
     }
     DevUdidNode *udidNode = SoftBusCalloc(sizeof(DevUdidNode));
     if (udidNode == NULL) {
-        MLOGE("malloc udid info node fail");
+        COMM_LOGE(COMM_EVENT, "malloc udid info node fail");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(udidNode->udid, UDID_BUF_LEN, udid) != EOK) {
-        MLOGE("strcpy_s udid fail");
+        COMM_LOGE(COMM_EVENT, "strcpy_s udid fail");
         SoftBusFree(udidNode);
         return SOFTBUS_ERR;
     }
@@ -315,7 +315,7 @@ static int32_t AddUdidInfoNodeToList(OnlineDeviceInfo *info, const char *udid)
     udidNode->wifiOnlineDevNum = info->wifiOnlineDevNum;
     if (SoftBusMutexLock(&g_devUdidLock) != SOFTBUS_OK) {
         SoftBusFree(udidNode);
-        MLOGE("device udid list lock fail");
+        COMM_LOGE(COMM_EVENT, "device udid list lock fail");
         return false;
     }
     ListTailInsert(&g_devUdidList, &udidNode->node);
@@ -326,13 +326,13 @@ static int32_t AddUdidInfoNodeToList(OnlineDeviceInfo *info, const char *udid)
 static void ReleaseDevUdidInfoNode(void)
 {
     if (SoftBusMutexLock(&g_devUdidLock) != SOFTBUS_OK) {
-        MLOGE("device udid list lock fail");
+        COMM_LOGE(COMM_EVENT, "device udid list lock fail");
         return;
     }
     DevUdidNode *item = NULL;
     DevUdidNode *nextItem = NULL;
     if (g_devUdidList.prev == NULL && g_devUdidList.next == NULL) {
-        MLOGE("g_devUdidList is NULL");
+        COMM_LOGE(COMM_EVENT, "g_devUdidList is NULL");
         ListInit(&g_devUdidList);
         (void)SoftBusMutexUnlock(&g_devUdidLock);
         return;
@@ -348,7 +348,7 @@ static void ReleaseDevUdidInfoNode(void)
 static bool IsUdidAlreadyReported(OnlineDeviceInfo *info, const char *udid)
 {
     if (SoftBusMutexLock(&g_devUdidLock) != SOFTBUS_OK) {
-        MLOGE("device udid list lock fail");
+        COMM_LOGE(COMM_EVENT, "device udid list lock fail");
         return false;
     }
     DevUdidNode *item = NULL;
@@ -367,7 +367,7 @@ static int32_t InitDevDiscoveryEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
     if (SoftBusMutexInit(&(g_devDiscoveryRecord.lock), &mutexAttr) != SOFTBUS_OK) {
-        MLOGE("mutex init fail");
+        COMM_LOGE(COMM_EVENT, "mutex init fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -376,7 +376,7 @@ static int32_t InitDevDiscoveryEvtMutexLock(void)
 static void CleanDevDiscoveryRecord(void)
 {
     if (SoftBusMutexLock(&(g_devDiscoveryRecord.lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return;
     }
     g_devDiscoveryRecord.startDiscoveryCnt = 0;
@@ -394,7 +394,7 @@ static int32_t SetDevDiscStaticMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_devDiscoveryStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_devDiscoveryStaticParam[i].paramName) != EOK) {
-            MLOGE("copy param %s fail", g_devDiscoveryStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "copy param %s fail", g_devDiscoveryStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -410,17 +410,17 @@ static int32_t SetDevDiscStaticMsgParamValve(SoftBusEvtReportMsg *msg, DevDiscov
     msg->paramArray[SOFTBUS_EVT_PARAM_FOUR].paramValue.u64v = record->businessDiscoveryCnt;
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_FIVE].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_discoveryDetail) != EOK) {
-        MLOGE("copy discoveryDetail fail");
+        COMM_LOGE(COMM_EVENT, "copy discoveryDetail fail");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_SIX].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_softbusVersion) != EOK) {
-        MLOGE("copy softbus version fail");
+        COMM_LOGE(COMM_EVENT, "copy softbus version fail");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_SEVEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_packageVersion) != EOK) {
-        MLOGE("copy package ver fail");
+        COMM_LOGE(COMM_EVENT, "copy package ver fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -429,22 +429,22 @@ static int32_t SetDevDiscStaticMsgParamValve(SoftBusEvtReportMsg *msg, DevDiscov
 static int32_t SoftBusCreateDevDiscStaticMsg(SoftBusEvtReportMsg *msg)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DEVICE_DISCOVERY) != EOK) {
-        MLOGE("strcpy evtname %s fail", STATISTIC_EVT_DEVICE_DISCOVERY);
+        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_DEVICE_DISCOVERY);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = DEV_DISCOVERY_STATISTIC_PARAM_NUM;
 
     if (SetDevDiscStaticMsgParamName(msg) != SOFTBUS_OK) {
-        MLOGE("device discovery statistic msg set param name fail");
+        COMM_LOGE(COMM_EVENT, "device discovery statistic msg set param name fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_devDiscoveryRecord.lock)) != SOFTBUS_OK) {
-        MLOGE("create device disc static msg lock fail");
+        COMM_LOGE(COMM_EVENT, "create device disc static msg lock fail");
         return SOFTBUS_ERR;
     }
     if (SetDevDiscStaticMsgParamValve(msg, &g_devDiscoveryRecord) != SOFTBUS_OK) {
-        MLOGE("device discovery statistic msg set param valve fail");
+        COMM_LOGE(COMM_EVENT, "device discovery statistic msg set param valve fail");
         (void)SoftBusMutexUnlock(&(g_devDiscoveryRecord.lock));
         return SOFTBUS_ERR;
     }
@@ -456,7 +456,7 @@ static bool IsNeedReportDevDiscoveryRecordEvt(void)
 {
     DevDiscoveryRecord *record = &g_devDiscoveryRecord;
     if (SoftBusMutexLock(&(record->lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return false;
     }
     if ((record->businessDiscoveryCnt == 0) && (record->devFoundCnt == 0) && (record->recvBroadCastCnt == 0)
@@ -470,26 +470,26 @@ static bool IsNeedReportDevDiscoveryRecordEvt(void)
 
 static int32_t ReportDevDiscoveryRecordEvt(void)
 {
-    MLOGD("report device discovery record evt enter");
+    COMM_LOGD(COMM_EVENT, "report device discovery record evt enter");
     if (!IsNeedReportDevDiscoveryRecordEvt()) {
-        MLOGD("this time do not need report device discovery record evt");
+        COMM_LOGD(COMM_EVENT, "this time do not need report device discovery record evt");
         return SOFTBUS_OK;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(DEV_DISCOVERY_STATISTIC_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("create discovery statistic report msg fail");
+        COMM_LOGE(COMM_EVENT, "create discovery statistic report msg fail");
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
     do {
         if (SoftBusCreateDevDiscStaticMsg(msg) != SOFTBUS_OK) {
             ret = SOFTBUS_ERR;
-            MLOGE("create device discovery statistic report msg fail");
+            COMM_LOGE(COMM_EVENT, "create device discovery statistic report msg fail");
             break;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             ret = SOFTBUS_ERR;
-            MLOGE("write device discovery statistic hisevt fail");
+            COMM_LOGE(COMM_EVENT, "write device discovery statistic hisevt fail");
             break;
         }
     } while (false);
@@ -501,13 +501,13 @@ static int32_t ReportDevDiscoveryRecordEvt(void)
 static void ReleaseAppDiscInfoNode(void)
 {
     if (SoftBusMutexLock(&g_appDiscLock) != SOFTBUS_OK) {
-        MLOGE("release app disc info node lock fail");
+        COMM_LOGE(COMM_EVENT, "release app disc info node lock fail");
         return;
     }
     AppDiscNode *item = NULL;
     AppDiscNode *nextItem = NULL;
     if (g_appDiscList.prev == NULL && g_appDiscList.next == NULL) {
-        MLOGE("g_appDiscList is NULL");
+        COMM_LOGE(COMM_EVENT, "g_appDiscList is NULL");
         ListInit(&g_appDiscList);
         (void)SoftBusMutexUnlock(&g_appDiscLock);
         return;
@@ -523,23 +523,23 @@ static void ReleaseAppDiscInfoNode(void)
 static int32_t AddAppDiscInfoNodeToList(AppDiscNode *discNode)
 {
     if (discNode == NULL) {
-        MLOGE("invalid param");
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_ERR;
     }
     AppDiscNode *newDiscNode = SoftBusCalloc(sizeof(AppDiscNode));
     if (newDiscNode == NULL) {
-        MLOGE("malloc AppDiscNode fail");
+        COMM_LOGE(COMM_EVENT, "malloc AppDiscNode fail");
         return SOFTBUS_ERR;
     }
     newDiscNode->appDiscCnt = discNode->appDiscCnt;
     if (strcpy_s(newDiscNode->appName, SOFTBUS_HISYSEVT_NAME_LEN, discNode->appName) != EOK) {
-        MLOGE("copy app name fail");
+        COMM_LOGE(COMM_EVENT, "copy app name fail");
         SoftBusFree(newDiscNode);
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_appDiscLock) != SOFTBUS_OK) {
         SoftBusFree(newDiscNode);
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_appDiscList, &newDiscNode->node);
@@ -554,7 +554,7 @@ static int32_t SetAppDiscStaticMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_appDiscoveryStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_appDiscoveryStaticParam[i].paramName) != EOK) {
-            MLOGE("strcpy_s param name %s fail", g_appDiscoveryStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_appDiscoveryStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -565,7 +565,7 @@ static int32_t SetAppDiscStaticMsgParamValve(SoftBusEvtReportMsg *msg, AppDiscNo
 {
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         discNode->appName) != EOK) {
-        MLOGE("copy app name fail");
+        COMM_LOGE(COMM_EVENT, "copy app name fail");
         return SOFTBUS_ERR;
     }
     msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramValue.i32v = discNode->appDiscCnt;
@@ -575,22 +575,22 @@ static int32_t SetAppDiscStaticMsgParamValve(SoftBusEvtReportMsg *msg, AppDiscNo
 static int32_t SoftBusCreateAppDiscStaticMsg(SoftBusEvtReportMsg *msg, AppDiscNode *discNode)
 {
     if (msg == NULL || discNode == NULL) {
-        MLOGE("invalid param");
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_APP_DISCOVERY) != EOK) {
-        MLOGE("strcpy evt name %s fail", STATISTIC_EVT_APP_DISCOVERY);
+        COMM_LOGE(COMM_EVENT, "strcpy evt name %s fail", STATISTIC_EVT_APP_DISCOVERY);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = APP_DISCOVERY_STATISTIC_PARAM_NUM;
 
     if (SetAppDiscStaticMsgParamName(msg) != SOFTBUS_OK) {
-        MLOGE("app discovery statistic msg set param name fail");
+        COMM_LOGE(COMM_EVENT, "app discovery statistic msg set param name fail");
         return SOFTBUS_ERR;
     }
     if (SetAppDiscStaticMsgParamValve(msg, discNode) != SOFTBUS_OK) {
-        MLOGE("app discovery statistic msg set param valve fail");
+        COMM_LOGE(COMM_EVENT, "app discovery statistic msg set param valve fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -598,13 +598,13 @@ static int32_t SoftBusCreateAppDiscStaticMsg(SoftBusEvtReportMsg *msg, AppDiscNo
 
 static int32_t ReportAppDiscoveryRecordEvt(void)
 {
-    MLOGD("report app discovery record evt enter");
+    COMM_LOGD(COMM_EVENT, "report app discovery record evt enter");
     if (SoftBusMutexLock(&g_appDiscLock) != SOFTBUS_OK) {
-        MLOGE("app disc list lock fail");
+        COMM_LOGE(COMM_EVENT, "app disc list lock fail");
         return SOFTBUS_ERR;
     }
     if (IsListEmpty(&g_appDiscList)) {
-        MLOGE("app disc list count=0");
+        COMM_LOGE(COMM_EVENT, "app disc list count=0");
         (void)SoftBusMutexUnlock(&g_appDiscLock);
         return SOFTBUS_OK;
     }
@@ -613,19 +613,19 @@ static int32_t ReportAppDiscoveryRecordEvt(void)
     LIST_FOR_EACH_ENTRY(item, &g_appDiscList, AppDiscNode, node) {
         SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(APP_DISCOVERY_STATISTIC_PARAM_NUM);
         if (msg == NULL) {
-            MLOGE("create app discovery statistic report msg fail");
+            COMM_LOGE(COMM_EVENT, "create app discovery statistic report msg fail");
             (void)SoftBusMutexUnlock(&g_appDiscLock);
             return SOFTBUS_ERR;
         }
         do {
             if (SoftBusCreateAppDiscStaticMsg(msg, item) != SOFTBUS_OK) {
                 ret = SOFTBUS_ERR;
-                MLOGE("create app discovery statistic report msg fail");
+                COMM_LOGE(COMM_EVENT, "create app discovery statistic report msg fail");
                 break;
             }
             if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
                 ret = SOFTBUS_ERR;
-                MLOGE("write app discovery statistic hisevt fail");
+                COMM_LOGE(COMM_EVENT, "write app discovery statistic hisevt fail");
                 break;
             }
         } while (false);
@@ -643,11 +643,11 @@ static int32_t ReportAppDiscoveryRecordEvt(void)
 int32_t SoftBusRecordDiscoveryResult(DiscoveryStage stage, AppDiscNode *discNode)
 {
     if (stage < START_DISCOVERY || stage > BUSINESS_DISCOVERY) {
-        MLOGE("record discovery result param is invalid");
+        COMM_LOGE(COMM_EVENT, "record discovery result param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_devDiscoveryRecord.lock)) != SOFTBUS_OK) {
-        MLOGE("device discovery result record lock fail");
+        COMM_LOGE(COMM_EVENT, "device discovery result record lock fail");
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
@@ -686,7 +686,7 @@ static int32_t SetBusCenterFaultMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_softBusFailEvtParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_softBusFailEvtParam[i].paramName) != EOK) {
-            MLOGE("strcpy_s param name %s fail", g_softBusFailEvtParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_softBusFailEvtParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -714,27 +714,27 @@ static int32_t SetBusCenterFaultMsgParamValve(SoftBusEvtReportMsg *msg, SoftBusF
     do {
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_SIXTEEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_busuninessName) != EOK) {
-            MLOGE("strcpy business name fail");
+            COMM_LOGE(COMM_EVENT, "strcpy business name fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_SEVENTEEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_callerPkgName) != EOK) {
-            MLOGE("strcpy caller pack name fail");
+            COMM_LOGE(COMM_EVENT, "strcpy caller pack name fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_EIGHTEEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_remoteBizUuid) != EOK) {
-            MLOGE("strcpy remote biz uuid fail");
+            COMM_LOGE(COMM_EVENT, "strcpy remote biz uuid fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_NINETEEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_softbusVersion) != EOK) {
-            MLOGE("strcpy softbus version fail");
+            COMM_LOGE(COMM_EVENT, "strcpy softbus version fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_TWENTY].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_packageVersion) != EOK) {
-            MLOGE("strcpy package version fail");
+            COMM_LOGE(COMM_EVENT, "strcpy package version fail");
             break;
         }
         return SOFTBUS_OK;
@@ -745,17 +745,17 @@ static int32_t SetBusCenterFaultMsgParamValve(SoftBusEvtReportMsg *msg, SoftBusF
 static int32_t SoftBusCreateBusCenterFaultMsg(SoftBusEvtReportMsg *msg, SoftBusFaultEvtInfo *info)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, FAULT_EVT_BUS_CENTER) != EOK) {
-        MLOGE("strcpy_s evt name %s fail", FAULT_EVT_BUS_CENTER);
+        COMM_LOGE(COMM_EVENT, "strcpy_s evt name %s fail", FAULT_EVT_BUS_CENTER);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_FAULT;
     msg->paramNum = SOFTBUS_FAULT_EVT_PARAM_NUM;
     if (SetBusCenterFaultMsgParamName(msg) != SOFTBUS_OK) {
-        MLOGE("set param name fail");
+        COMM_LOGE(COMM_EVENT, "set param name fail");
         return SOFTBUS_ERR;
     }
     if (SetBusCenterFaultMsgParamValve(msg, info) != SOFTBUS_OK) {
-        MLOGE("set param valve fail");
+        COMM_LOGE(COMM_EVENT, "set param valve fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -764,12 +764,12 @@ static int32_t SoftBusCreateBusCenterFaultMsg(SoftBusEvtReportMsg *msg, SoftBusF
 int32_t SoftBusReportBusCenterFaultEvt(SoftBusFaultEvtInfo *info)
 {
     if (info == NULL) {
-        MLOGE("invalid param");
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_ERR;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(SOFTBUS_FAULT_EVT_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("alloc bus center fault evt report msg fail");
+        COMM_LOGE(COMM_EVENT, "alloc bus center fault evt report msg fail");
         return SOFTBUS_ERR;
     }
     info->errorCode = GetErrorCodeEx(info->errorCode, SOFTBUS_MOD_LNN);
@@ -777,7 +777,7 @@ int32_t SoftBusReportBusCenterFaultEvt(SoftBusFaultEvtInfo *info)
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);
     if (ret != SOFTBUS_OK) {
-        MLOGE("sys evt write buscenter fault msg fail");
+        COMM_LOGE(COMM_EVENT, "sys evt write buscenter fault msg fail");
     }
     return ret;
 }
@@ -785,7 +785,7 @@ int32_t SoftBusReportBusCenterFaultEvt(SoftBusFaultEvtInfo *info)
 static int32_t InitAuthItemMutexLock(SoftBusLinkType linkType, SoftBusMutexAttr *mutexAttr)
 {
     if (SoftBusMutexInit(&(g_authResultRecord[linkType].lock), mutexAttr) != SOFTBUS_OK) {
-        MLOGE("mutex init fail");
+        COMM_LOGE(COMM_EVENT, "mutex init fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -799,7 +799,7 @@ static int32_t InitAuthEvtMutexLock(void)
         linkType++) {
         ret = InitAuthItemMutexLock(linkType, &mutexAttr);
         if (ret != SOFTBUS_OK) {
-            MLOGE("lock fail");
+            COMM_LOGE(COMM_EVENT, "lock fail");
             break;
         }
     }
@@ -817,7 +817,7 @@ static void DeinitAuthEvtMutexLock(void)
 static int32_t InitBusCenterItemMutexLock(SoftBusLinkType linkType, SoftBusMutexAttr *mutexAttr)
 {
     if (SoftBusMutexInit(&(g_busCenterRecord[linkType].lock), mutexAttr) != SOFTBUS_OK) {
-        MLOGE("mutex init fail");
+        COMM_LOGE(COMM_EVENT, "mutex init fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -831,7 +831,7 @@ static int32_t InitBusCenterEvtMutexLock(void)
         linkType++) {
         ret = InitBusCenterItemMutexLock(linkType, &mutexAttr);
         if (ret != SOFTBUS_OK) {
-            MLOGE("lock fail");
+            COMM_LOGE(COMM_EVENT, "lock fail");
             break;
         }
     }
@@ -850,7 +850,7 @@ static int32_t InitDevOnlineDurEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
     if (SoftBusMutexInit(&(g_devOnlineDurRecord.lock), &mutexAttr) != SOFTBUS_OK) {
-        MLOGE("mutex init fail");
+        COMM_LOGE(COMM_EVENT, "mutex init fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -863,7 +863,7 @@ static int32_t SetOnlineInfoMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_onlineInfoStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_onlineInfoStaticParam[i].paramName) != EOK) {
-            MLOGE("strcpy_s param name %s fail", g_onlineInfoStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_onlineInfoStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -880,27 +880,27 @@ static int32_t SetOnlineInfoMsgParamValve(SoftBusEvtReportMsg *msg, OnlineDevice
     do {
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_FIVE].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_softbusVersion) != EOK) {
-            MLOGE("strcpy_s peer softbus version fail");
+            COMM_LOGE(COMM_EVENT, "strcpy_s peer softbus version fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_SIX].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_deviceName) != EOK) {
-            MLOGE("strcpy_s peer device name fail");
+            COMM_LOGE(COMM_EVENT, "strcpy_s peer device name fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_SEVEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_softbusVersion) != EOK) {
-            MLOGE("strcpy_s local softbus verion fail");
+            COMM_LOGE(COMM_EVENT, "strcpy_s local softbus verion fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_EIGHT].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_packageVersion) != EOK) {
-            MLOGE("strcpy_s peer package version fail");
+            COMM_LOGE(COMM_EVENT, "strcpy_s peer package version fail");
             break;
         }
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_NINE].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
             g_packageVersion) != EOK) {
-            MLOGE("strcpy_s local package version fail");
+            COMM_LOGE(COMM_EVENT, "strcpy_s local package version fail");
             break;
         }
         return SOFTBUS_OK;
@@ -911,17 +911,17 @@ static int32_t SetOnlineInfoMsgParamValve(SoftBusEvtReportMsg *msg, OnlineDevice
 static int32_t SoftBusCreateEvtMsgByInfo(SoftBusEvtReportMsg *msg, OnlineDeviceInfo *info)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DEVICE_ONLINE) != EOK) {
-        MLOGE("strcpy_s evtname %s fail", STATISTIC_EVT_DEVICE_ONLINE);
+        COMM_LOGE(COMM_EVENT, "strcpy_s evtname %s fail", STATISTIC_EVT_DEVICE_ONLINE);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = ONLINE_INFO_STATISTIC_PARAM_NUM;
     if (SetOnlineInfoMsgParamName(msg) != SOFTBUS_OK) {
-        MLOGE("set online info msg param name fail");
+        COMM_LOGE(COMM_EVENT, "set online info msg param name fail");
         return SOFTBUS_ERR;
     }
     if (SetOnlineInfoMsgParamValve(msg, info) != SOFTBUS_OK) {
-        MLOGE("set online info msg param valve fail");
+        COMM_LOGE(COMM_EVENT, "set online info msg param valve fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -930,27 +930,27 @@ static int32_t SoftBusCreateEvtMsgByInfo(SoftBusEvtReportMsg *msg, OnlineDeviceI
 int32_t SoftBusReportDevOnlineEvt(OnlineDeviceInfo *info, const char *udid)
 {
     if (info == NULL || udid == NULL) {
-        MLOGE("invalid param");
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_ERR;
     }
     if (IsUdidAlreadyReported(info, udid)) {
-        MLOGE("device has already been reported");
+        COMM_LOGE(COMM_EVENT, "device has already been reported");
         return SOFTBUS_OK;
     }
     if (AddUdidInfoNodeToList(info, udid) != SOFTBUS_OK) {
-        MLOGE("add online device info to list fail");
+        COMM_LOGE(COMM_EVENT, "add online device info to list fail");
         return SOFTBUS_ERR;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(ONLINE_INFO_STATISTIC_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("alloc device online evt report msg fail");
+        COMM_LOGE(COMM_EVENT, "alloc device online evt report msg fail");
         return SOFTBUS_ERR;
     }
     SoftBusCreateEvtMsgByInfo(msg, info);
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);
     if (ret != SOFTBUS_OK) {
-        MLOGE("sysevt write online device info msg fail");
+        COMM_LOGE(COMM_EVENT, "sysevt write online device info msg fail");
     }
     return ret;
 }
@@ -960,7 +960,7 @@ static void CleanAuthResultRecord(void)
     for (SoftBusLinkType linkType = SOFTBUS_HISYSEVT_LINK_TYPE_BR; linkType < SOFTBUS_HISYSEVT_LINK_TYPE_BUTT;
         linkType++) {
         if (SoftBusMutexLock(&(g_authResultRecord[linkType].lock)) != SOFTBUS_OK) {
-            MLOGE("lock fail");
+            COMM_LOGE(COMM_EVENT, "lock fail");
             return;
         }
         g_authResultRecord[linkType].linkType = linkType;
@@ -987,7 +987,7 @@ static int32_t SetAuthResultMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_authResultParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_authResultParam[i].paramName) != EOK) {
-            MLOGE("strcpy_s param name %s fail", g_authResultParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_authResultParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -1011,12 +1011,12 @@ static int32_t SetAuthResultMsgParamValve(SoftBusEvtReportMsg *msg, AuthResultRe
     msg->paramArray[SOFTBUS_EVT_PARAM_TWELVE].paramValue.u32v = record->exchangeFailTotalCount;
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_THIRTEEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_softbusVersion) != EOK) {
-        MLOGE("copy softbus version fail");
+        COMM_LOGE(COMM_EVENT, "copy softbus version fail");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_FOURTEEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_packageVersion) != EOK) {
-        MLOGE("copy package name fail");
+        COMM_LOGE(COMM_EVENT, "copy package name fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1025,22 +1025,22 @@ static int32_t SetAuthResultMsgParamValve(SoftBusEvtReportMsg *msg, AuthResultRe
 static int32_t SoftBusCreateAuthResultMsg(SoftBusEvtReportMsg *msg, SoftBusLinkType linkType)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_AUTH_KPI) != EOK) {
-        MLOGE("strcpy evtname %s fail", STATISTIC_EVT_AUTH_KPI);
+        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_AUTH_KPI);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = AUTH_RESULT_STATISTIC_PARAM_NUM;
 
     if (SetAuthResultMsgParamName(msg) != SOFTBUS_OK) {
-        MLOGE("set param name fail");
+        COMM_LOGE(COMM_EVENT, "set param name fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_authResultRecord[linkType].lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return SOFTBUS_ERR;
     }
     if (SetAuthResultMsgParamValve(msg, &g_authResultRecord[linkType]) != SOFTBUS_OK) {
-        MLOGE("set param valve fail");
+        COMM_LOGE(COMM_EVENT, "set param valve fail");
         (void)SoftBusMutexUnlock(&(g_authResultRecord[linkType].lock));
         return SOFTBUS_ERR;
     }
@@ -1051,7 +1051,7 @@ static int32_t SoftBusCreateAuthResultMsg(SoftBusEvtReportMsg *msg, SoftBusLinkT
 static void CleanDevOnlineDurRecord(void)
 {
     if (SoftBusMutexLock(&(g_devOnlineDurRecord.lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return;
     }
     g_devOnlineDurRecord.totalTime = 0;
@@ -1071,7 +1071,7 @@ static int32_t SetOnlineDurMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_busCenterDurStaticParam[i + 1].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_busCenterDurStaticParam[i + 1].paramName) != EOK) {
-            MLOGE("copy param name %s fail", g_busCenterDurStaticParam[i + 1].paramName);
+            COMM_LOGE(COMM_EVENT, "copy param name %s fail", g_busCenterDurStaticParam[i + 1].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -1089,12 +1089,12 @@ static int32_t SetOnlineDurMsgParamValve(SoftBusEvtReportMsg *msg, DevOnlineDurR
     msg->paramArray[SOFTBUS_EVT_PARAM_SIX].paramValue.u32v = record->count5;
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_SEVEN].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_softbusVersion) != EOK) {
-        MLOGE("copy softbus version fail");
+        COMM_LOGE(COMM_EVENT, "copy softbus version fail");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_EIGHT].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_packageVersion) != EOK) {
-        MLOGE("copy package name fail");
+        COMM_LOGE(COMM_EVENT, "copy package name fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1103,22 +1103,22 @@ static int32_t SetOnlineDurMsgParamValve(SoftBusEvtReportMsg *msg, DevOnlineDurR
 static int32_t SoftBusCreateOnlineDurMsg(SoftBusEvtReportMsg *msg)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_ONLINE_DURATION) != EOK) {
-        MLOGE("strcpy evtname %s fail", STATISTIC_EVT_ONLINE_DURATION);
+        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_ONLINE_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = ONLINE_DURATION_STATISTIC_PARAM_NUM;
 
     if (SetOnlineDurMsgParamName(msg) != SOFTBUS_OK) {
-        MLOGE("online duration stastic msg set param name fail");
+        COMM_LOGE(COMM_EVENT, "online duration stastic msg set param name fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_devOnlineDurRecord.lock)) != SOFTBUS_OK) {
-        MLOGE("add online duration record lock fail");
+        COMM_LOGE(COMM_EVENT, "add online duration record lock fail");
         return SOFTBUS_ERR;
     }
     if (SetOnlineDurMsgParamValve(msg, &g_devOnlineDurRecord) != SOFTBUS_OK) {
-        MLOGE("online duration stastic msg set param valve fail");
+        COMM_LOGE(COMM_EVENT, "online duration stastic msg set param valve fail");
         (void)SoftBusMutexUnlock(&(g_devOnlineDurRecord.lock));
         return SOFTBUS_ERR;
     }
@@ -1131,7 +1131,7 @@ static void CleanBusCenterRecord(void)
     for (SoftBusLinkType linkType = SOFTBUS_HISYSEVT_LINK_TYPE_BR; linkType < SOFTBUS_HISYSEVT_LINK_TYPE_BUTT;
         linkType++) {
         if (SoftBusMutexLock(&(g_busCenterRecord[linkType].lock)) != SOFTBUS_OK) {
-            MLOGE("lock fail");
+            COMM_LOGE(COMM_EVENT, "lock fail");
             return;
         }
         g_busCenterRecord[linkType].linkType = linkType;
@@ -1153,7 +1153,7 @@ static int32_t SetBusCenterDurMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_busCenterDurStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_busCenterDurStaticParam[i].paramName) != EOK) {
-            MLOGE("copy param name %s fail", g_busCenterDurStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "copy param name %s fail", g_busCenterDurStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -1172,12 +1172,12 @@ static int32_t SetBusCenterDurMsgParamValve(SoftBusEvtReportMsg *msg, BusCenterD
     msg->paramArray[SOFTBUS_EVT_PARAM_SEVEN].paramValue.u32v = record->count5;
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_EIGHT].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_softbusVersion) != EOK) {
-        MLOGE("copy softbus version fail");
+        COMM_LOGE(COMM_EVENT, "copy softbus version fail");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_NINE].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
         g_packageVersion) != EOK) {
-        MLOGE("copy package name fail");
+        COMM_LOGE(COMM_EVENT, "copy package name fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1186,22 +1186,22 @@ static int32_t SetBusCenterDurMsgParamValve(SoftBusEvtReportMsg *msg, BusCenterD
 static int32_t CreateBusCenterDurStasticMsg(SoftBusEvtReportMsg *msg, SoftBusLinkType linkType)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_LNN_DURATION) != EOK) {
-        MLOGE("strcpy evtname %s fail", STATISTIC_EVT_LNN_DURATION);
+        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_LNN_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = BUS_CENTER_DURATION_PARAM_NUM;
 
     if (SetBusCenterDurMsgParamName(msg) != SOFTBUS_OK) {
-        MLOGE("set param name fail");
+        COMM_LOGE(COMM_EVENT, "set param name fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_busCenterRecord[linkType].lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return SOFTBUS_ERR;
     }
     if (SetBusCenterDurMsgParamValve(msg, &g_busCenterRecord[linkType]) != SOFTBUS_OK) {
-        MLOGE("set param valve fail");
+        COMM_LOGE(COMM_EVENT, "set param valve fail");
         (void)SoftBusMutexUnlock(&(g_busCenterRecord[linkType].lock));
         return SOFTBUS_ERR;
     }
@@ -1213,7 +1213,7 @@ static bool IsNeedReportOnlineDurRecordEvt(void)
 {
     DevOnlineDurRecord *record = &g_devOnlineDurRecord;
     if (SoftBusMutexLock(&(record->lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return false;
     }
     if ((record->count1 == 0) && (record->count2 == 0) && (record->count3 == 0) && (record->count4 == 0)
@@ -1227,26 +1227,26 @@ static bool IsNeedReportOnlineDurRecordEvt(void)
 
 static int32_t ReportOnlineDurRecordEvt(void)
 {
-    MLOGD("report online duration record evt enter");
+    COMM_LOGD(COMM_EVENT, "report online duration record evt enter");
     if (!IsNeedReportOnlineDurRecordEvt()) {
-        MLOGD("this time do not need report online duration record evt");
+        COMM_LOGD(COMM_EVENT, "this time do not need report online duration record evt");
         return SOFTBUS_OK;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(ONLINE_DURATION_STATISTIC_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("create online duration report msg fail");
+        COMM_LOGE(COMM_EVENT, "create online duration report msg fail");
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
     do {
         if (SoftBusCreateOnlineDurMsg(msg) != SOFTBUS_OK) {
             ret = SOFTBUS_ERR;
-            MLOGE("create device online duration report msg fail");
+            COMM_LOGE(COMM_EVENT, "create device online duration report msg fail");
             break;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             ret = SOFTBUS_ERR;
-            MLOGE("write device online duration hisevt fail");
+            COMM_LOGE(COMM_EVENT, "write device online duration hisevt fail");
             break;
         }
     } while (false);
@@ -1259,7 +1259,7 @@ static bool IsNeedReportLnnDurRecordItem(SoftBusLinkType linkType)
 {
     BusCenterDuraRecord *record = &g_busCenterRecord[linkType];
     if (SoftBusMutexLock(&(record->lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return false;
     }
     if ((record->totalTime == 0) && (record->totalCount == 0) && (record->count1 == 0) && (record->count2 == 0)
@@ -1284,15 +1284,15 @@ static bool IsNeedReportLnnDurRecordEvt(void)
 
 static int32_t ReportBusCenterRecordEvt(void)
 {
-    MLOGD("report buscenter record evt enter");
+    COMM_LOGD(COMM_EVENT, "report buscenter record evt enter");
     ReleaseDevUdidInfoNode();
     if (!IsNeedReportLnnDurRecordEvt()) {
-        MLOGD("this time do not need report buscenter record evt");
+        COMM_LOGD(COMM_EVENT, "this time do not need report buscenter record evt");
         return SOFTBUS_OK;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(BUS_CENTER_DURATION_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("create buscenter record msg fail");
+        COMM_LOGE(COMM_EVENT, "create buscenter record msg fail");
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
@@ -1304,12 +1304,12 @@ static int32_t ReportBusCenterRecordEvt(void)
             }
             if (CreateBusCenterDurStasticMsg(msg, linkType) != SOFTBUS_OK) {
                 ret = SOFTBUS_ERR;
-                MLOGE("create lnn time report msg fail");
+                COMM_LOGE(COMM_EVENT, "create lnn time report msg fail");
                 break;
             }
             if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
                 ret = SOFTBUS_ERR;
-                MLOGE("write lnn time hisevt fail");
+                COMM_LOGE(COMM_EVENT, "write lnn time hisevt fail");
                 break;
             }
         } while (false);
@@ -1326,7 +1326,7 @@ static bool IsNeedReportAuthResultRecordItem(SoftBusLinkType linkType)
 {
     AuthResultRecord *record = &g_authResultRecord[linkType];
     if (SoftBusMutexLock(&(record->lock)) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return false;
     }
     if ((record->exchangeFailTotalCount == 0) && (record->authTotalTime == 0) && (record->authTotalCount == 0)
@@ -1353,14 +1353,14 @@ static bool IsNeedReportAuthResultRecordEvt(void)
 
 static int32_t ReportAuthResultRecordEvt(void)
 {
-    MLOGD("report auth result record evt enter");
+    COMM_LOGD(COMM_EVENT, "report auth result record evt enter");
     if (!IsNeedReportAuthResultRecordEvt()) {
-        MLOGD("this time do not need report auth result record evt");
+        COMM_LOGD(COMM_EVENT, "this time do not need report auth result record evt");
         return SOFTBUS_OK;
     }
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(AUTH_RESULT_STATISTIC_PARAM_NUM);
     if (msg == NULL) {
-        MLOGE("create auth result report msg fail");
+        COMM_LOGE(COMM_EVENT, "create auth result report msg fail");
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;
@@ -1372,12 +1372,12 @@ static int32_t ReportAuthResultRecordEvt(void)
             }
             if (SoftBusCreateAuthResultMsg(msg, linkType) != SOFTBUS_OK) {
                 ret = SOFTBUS_ERR;
-                MLOGE("create auth result report msg fail");
+                COMM_LOGE(COMM_EVENT, "create auth result report msg fail");
                 break;
             }
             if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
                 ret = SOFTBUS_ERR;
-                MLOGE("write auth result hisevt fail");
+                COMM_LOGE(COMM_EVENT, "write auth result hisevt fail");
                 break;
             }
         } while (false);
@@ -1393,12 +1393,12 @@ static int32_t ReportAuthResultRecordEvt(void)
 int32_t SoftBusRecordDevOnlineDurResult(uint64_t constTime)
 {
     if (constTime < 0) {
-        MLOGE("param is invalid");
+        COMM_LOGE(COMM_EVENT, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     DevOnlineDurRecord *reCord = &g_devOnlineDurRecord;
     if (SoftBusMutexLock(&reCord->lock) != SOFTBUS_OK) {
-        MLOGE("lock fail");
+        COMM_LOGE(COMM_EVENT, "lock fail");
         return SOFTBUS_ERR;
     }
     reCord->totalTime += constTime;
@@ -1425,13 +1425,13 @@ int32_t SoftBusRecordDevOnlineDurResult(uint64_t constTime)
 int32_t SoftBusRecordBusCenterResult(SoftBusLinkType linkType, uint64_t constTime)
 {
     if (linkType >= SOFTBUS_HISYSEVT_LINK_TYPE_BUTT || constTime < 0) {
-        MLOGE("param is invalid");
+        COMM_LOGE(COMM_EVENT, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     BusCenterDuraRecord *reCord = &g_busCenterRecord[linkType];
     if (SoftBusMutexLock(&reCord->lock) != SOFTBUS_OK) {
-        MLOGE("lnn result record lock fail");
+        COMM_LOGE(COMM_EVENT, "lnn result record lock fail");
         return SOFTBUS_ERR;
     }
     reCord->totalTime += constTime;
@@ -1458,12 +1458,12 @@ int32_t SoftBusRecordBusCenterResult(SoftBusLinkType linkType, uint64_t constTim
 int32_t SoftBusRecordAuthResult(SoftBusLinkType linkType, int32_t ret, uint64_t constTime, AuthFailStage stage)
 {
     if (linkType >= SOFTBUS_HISYSEVT_LINK_TYPE_BUTT || constTime < 0) {
-        MLOGE("param is invalid");
+        COMM_LOGE(COMM_EVENT, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthResultRecord *reCord = &g_authResultRecord[linkType];
     if (SoftBusMutexLock(&reCord->lock) != SOFTBUS_OK) {
-        MLOGE("auth result record lock fail");
+        COMM_LOGE(COMM_EVENT, "auth result record lock fail");
         return SOFTBUS_ERR;
     }
     reCord->authTotalTime += constTime;
@@ -1510,7 +1510,7 @@ int32_t InitBusCenterDfx(void)
         return SOFTBUS_OK;
     }
     if (SoftBusMutexInit(&g_devUdidLock, NULL) != SOFTBUS_OK || SoftBusMutexInit(&g_appDiscLock, NULL) != SOFTBUS_OK) {
-        MLOGE("init buscenter dfx lock init fail");
+        COMM_LOGE(COMM_EVENT, "init buscenter dfx lock init fail");
         return SOFTBUS_ERR;
     }
     if (InitBusCenterEvtMutexLock() != SOFTBUS_OK || InitDevOnlineDurEvtMutexLock() != SOFTBUS_OK ||
@@ -1525,24 +1525,24 @@ int32_t InitBusCenterDfx(void)
     CleanDevDiscoveryRecord();
     do {
         if (SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_LNN_DURATION, ReportBusCenterRecordEvt) != SOFTBUS_OK) {
-            MLOGE("set report buscenter record evt function fail");
+            COMM_LOGE(COMM_EVENT, "set report buscenter record evt function fail");
             break;
         }
         if (SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_ONLINE_DURATION,
             ReportOnlineDurRecordEvt) != SOFTBUS_OK) {
-            MLOGE("set report online duration record evt function fail");
+            COMM_LOGE(COMM_EVENT, "set report online duration record evt function fail");
             break;
         }
         if (SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_AUTH_KPI, ReportAuthResultRecordEvt) != SOFTBUS_OK) {
-            MLOGE("set report auth result record evt function fail");
+            COMM_LOGE(COMM_EVENT, "set report auth result record evt function fail");
             break;
         }
         if (SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_DEV_DISCOVERY, ReportDevDiscoveryRecordEvt) != SOFTBUS_OK) {
-            MLOGE("set report device discovery record evt function fail");
+            COMM_LOGE(COMM_EVENT, "set report device discovery record evt function fail");
             break;
         }
         if (SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_APP_DISCOVERY, ReportAppDiscoveryRecordEvt) != SOFTBUS_OK) {
-            MLOGE("set report app discovery record evt function fail");
+            COMM_LOGE(COMM_EVENT, "set report app discovery record evt function fail");
             break;
         }
         g_isBusCenterDfxInit = true;

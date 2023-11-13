@@ -19,12 +19,12 @@
 #include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "auth_interface.h"
 #include "softbus_proxychannel_control.c"
 #include "softbus_proxychannel_manager.c"
 #include "trans_channel_manager.h"
+#include "trans_log.h"
 
 using namespace testing::ext;
 
@@ -66,7 +66,7 @@ int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessio
     (void)sessionName;
     (void)channel;
     (void)pid;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelOpened enter.");
+    TRANS_LOGI(TRANS_TEST, "TestOnChannelOpened enter.");
     return SOFTBUS_OK;
 }
 
@@ -76,7 +76,7 @@ int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId,
     (void)pid;
     (void)channelId;
     (void)channelType;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelClosed enter.");
+    TRANS_LOGI(TRANS_TEST, "TestOnChannelClosed enter.");
     return SOFTBUS_OK;
 }
 
@@ -88,7 +88,7 @@ int32_t TestOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channe
     (void)channelId;
     (void)channelType;
     (void)errCode;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnChannelOpenFailed enter.");
+    TRANS_LOGI(TRANS_TEST, "TestOnChannelOpenFailed enter.");
     return SOFTBUS_OK;
 }
 
@@ -96,7 +96,7 @@ int32_t TestOnQosEvent(const char *pkgName, const QosParam *param)
 {
     (void)pkgName;
     (void)param;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestOnQosEvent enter.");
+    TRANS_LOGI(TRANS_TEST, "TestOnQosEvent enter.");
     return SOFTBUS_OK;
 }
 
@@ -105,7 +105,7 @@ int32_t TestGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int
     (void)sessionName;
     (void)uid;
     (void)pid;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TestGetUidAndPidBySessionName enter.");
+    TRANS_LOGI(TRANS_TEST, "TestGetUidAndPidBySessionName enter.");
     return SOFTBUS_OK;
 }
 
@@ -124,7 +124,7 @@ void TestAddTestProxyChannel(int32_t authId = AUTH_INVALID_ID)
     m_testProxyChannelId = 1;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "test proxy calloc channel fail");
+        TRANS_LOGE(TRANS_TEST, "test proxy calloc channel fail");
         return;
     }
     chan->myId = m_testProxyChannelId;
@@ -133,7 +133,7 @@ void TestAddTestProxyChannel(int32_t authId = AUTH_INVALID_ID)
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
     if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "test proxy add channel fail");
+        TRANS_LOGE(TRANS_TEST, "test proxy add channel fail");
         SoftBusFree(chan);
     }
 }

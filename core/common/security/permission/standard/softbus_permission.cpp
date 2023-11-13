@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
+#include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
@@ -60,7 +61,7 @@ int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
 {
     using namespace AccessToken;
     if (callingUid == (pid_t)getuid() && callingPid == getpid()) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "self app");
+        COMM_LOGI(COMM_PERM, "self app");
         return SELF_APP;
     }
 
@@ -159,7 +160,7 @@ int32_t CheckDynamicPermission(void)
 
     auto tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(callingToken);
     if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not native call");
+        COMM_LOGE(COMM_PERM, "not native call");
         return SOFTBUS_ERR;
     }
     AccessToken::NativeTokenInfo nativeTokenInfo;
@@ -167,7 +168,7 @@ int32_t CheckDynamicPermission(void)
     if (result == SOFTBUS_OK && nativeTokenInfo.processName == SAMGR_PROCESS_NAME) {
         return SOFTBUS_OK;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+    COMM_LOGE(COMM_PERM,
         "check dynamic permission failed, processName:%{private}s", nativeTokenInfo.processName.c_str());
     return SOFTBUS_ERR;
 }

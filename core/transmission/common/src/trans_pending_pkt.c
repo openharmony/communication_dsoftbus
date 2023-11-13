@@ -18,8 +18,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
+#include "trans_log.h"
 
 #define TIME_OUT 20
 
@@ -63,7 +63,7 @@ void PendingDeinit(int type)
         DestroySoftBusList(g_pendingList[type]);
         g_pendingList[type] = NULL;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "PendigPackManagerDeinit init ok");
+    TRANS_LOGI(TRANS_INIT, "PendigPackManagerDeinit init ok");
 }
 
 static inline bool TimeBefore(const SoftBusSysTime *inputTime)
@@ -107,7 +107,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     PendingPktInfo *item = NULL;
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pending[%d] list not inited.", type);
+        TRANS_LOGE(TRANS_INIT, "pending type=%d list not inited.", type);
         return SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND;
     }
 
@@ -115,7 +115,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     LIST_FOR_EACH_ENTRY(item, &pendingList->list, PendingPktInfo, node)
     {
         if (item->seq == seqNum && item->channelId == channelId) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "PendingPacket already Created");
+            TRANS_LOGW(TRANS_SVC, "PendingPacket already Created");
             SoftBusMutexUnlock(&pendingList->lock);
             return SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_PENDING;
         }
@@ -157,17 +157,17 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "type[%d] illegal.", type);
+        TRANS_LOGE(TRANS_SVC, "type=%d illegal.", type);
         return SOFTBUS_ERR;
     }
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "pendind list not exist");
+        TRANS_LOGE(TRANS_SVC, "pendind list not exist");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set pendind lock failed.");
+        TRANS_LOGE(TRANS_SVC, "set pendind lock failed.");
         return SOFTBUS_ERR;
     }
     PendingPktInfo *item = NULL;
@@ -194,7 +194,7 @@ int32_t DelPendingPacket(int32_t channelId, int type)
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "del pendind lock failed.");
+        TRANS_LOGE(TRANS_SVC, "del pendind lock failed.");
         return SOFTBUS_ERR;
     }
     PendingPktInfo *item = NULL;

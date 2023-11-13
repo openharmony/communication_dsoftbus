@@ -21,8 +21,6 @@
 #include "protocol/wifi_direct_protocol_factory.h"
 #include "processor/wifi_direct_processor_factory.h"
 
-#define LOG_LABEL "[WD] DC: "
-
 static struct WifiDirectProtocol* GetProtocol(struct WifiDirectNegotiateChannel *channel)
 {
     (void)channel;

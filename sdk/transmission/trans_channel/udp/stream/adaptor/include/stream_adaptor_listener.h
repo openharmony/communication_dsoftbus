@@ -19,7 +19,7 @@
 #include "i_stream.h"
 #include "i_stream_manager.h"
 #include "softbus_def.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 
 using Communication::SoftBus::IStreamManagerListener;
 using Communication::SoftBus::IStream;
@@ -65,8 +65,7 @@ public:
         } else if (streamType == StreamType::RAW_STREAM) {
             int32_t plainDataLength = buflen - adaptor_->GetEncryptOverhead();
             if (plainDataLength < 0) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                    "StreamAdaptorListener:OnStreamReceived:buflen:%d < GetEncryptOverhead:%zd",
+                TRANS_LOGE(TRANS_STREAM, "bufLen=%d < GetEncryptOverhead=%zd",
                     buflen, adaptor_->GetEncryptOverhead());
                 return;
             }
@@ -74,14 +73,14 @@ public:
             ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(),
                 plainDataLength, adaptor_->GetSessionKey());
             if (decLen != plainDataLength) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                    "Decrypt failed, dataLength = %d, decryptedLen = %zd", plainDataLength, decLen);
+                TRANS_LOGE(TRANS_STREAM,
+                    "Decrypt failed, dataLen=%d, decLen=%zd", plainDataLength, decLen);
                 return;
             }
             retStreamData.buf = plainData.get();
             retStreamData.bufLen = plainDataLength;
         } else {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Do not support, streamType = %d", streamType);
+            TRANS_LOGE(TRANS_STREAM, "Do not support, streamType=%d", streamType);
             return;
         }
         StreamData extStreamData = {
@@ -94,10 +93,10 @@ public:
 
     void OnStreamStatus(int status) override
     {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnStreamStatus(%d) in.", status);
+        TRANS_LOGI(TRANS_STREAM, "status=%d in.", status);
 
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnStatusChange != nullptr) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG, "OnStreamStatus OnStatusChange :%d", status);
+            TRANS_LOGE(TRANS_STREAM, "OnStatusChange status=%d", status);
             adaptor_->GetListenerCallback()->OnStatusChange(adaptor_->GetChannelId(), status);
         }
     }
@@ -105,36 +104,33 @@ public:
     void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StreamAdaptorListener: OnQosEvent for channelId = %" PRId64,
-                adaptor_->GetChannelId());
+            TRANS_LOGI(TRANS_QOS, "channelId=%" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnQosEvent(adaptor_->GetChannelId(), eventId, tvCount, tvList);
         } else {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "Get ListenerCallback by StreamAdaptor is failed, channelId = %" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGE(TRANS_QOS,
+                "Get ListenerCallback by StreamAdaptor is failed, channelId=%" PRId64, adaptor_->GetChannelId());
         }
     }
 
     void OnFrameStats(const StreamSendStats *data) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnFrameStats != nullptr) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "StreamAdaptorListener: OnFrameStats for channelId = %" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGI(TRANS_STREAM, "channelId=%" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnFrameStats(adaptor_->GetChannelId(), data);
         } else {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "Get ListenerCallback by StreamAdaptor is failed, channelId = %" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGE(TRANS_STREAM,
+                "Get ListenerCallback by StreamAdaptor is failed, channelId=%" PRId64, adaptor_->GetChannelId());
         }
     }
 
     void OnRippleStats(const TrafficStats *data) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnRippleStats != nullptr) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "StreamAdaptorListener: OnRippleStats for channelId = %" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGI(TRANS_STREAM, "channelId=%" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnRippleStats(adaptor_->GetChannelId(), data);
         } else {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "Get ListenerCallback by StreamAdaptor is failed, channelId = %" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGE(TRANS_STREAM,
+                "Get ListenerCallback by StreamAdaptor is failed, channelId=%" PRId64, adaptor_->GetChannelId());
         }
     }
 

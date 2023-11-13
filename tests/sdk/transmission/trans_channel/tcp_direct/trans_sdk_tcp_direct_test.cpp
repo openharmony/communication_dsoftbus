@@ -28,10 +28,10 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 #include "softbus_access_token_test.h"
-#include "trans_server_proxy.h"
 #include "softbus_base_listener.h"
+#include "trans_log.h"
+#include "trans_server_proxy.h"
 
 using namespace testing::ext;
 
@@ -66,23 +66,23 @@ public:
 
 static int OnServerSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened,sesison id = %d\r\n", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnServerSessionClosed(int sessionId)
 {
-    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, session id = %d\r\n", sessionId);
 }
 
 static void OnServerBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session bytes received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, session id = %d\r\n", sessionId);
 }
 
 static void OnServerMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, session id = %d\r\n", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {
@@ -95,26 +95,26 @@ static ISessionListener g_sessionlistener = {
 
 static int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
-    LOG_INFO("session opened,sesison id = %s\r\n", sessionName);
+    TRANS_LOGI(TRANS_TEST, "session opened,sesisonName=%s", sessionName);
     return SOFTBUS_OK;
 }
 
-static int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+static int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
-    LOG_INFO("session closed, session id = %d\r\n", channelId);
+    TRANS_LOGI(TRANS_TEST, "session closed, channelId=%d", channelId);
     return SOFTBUS_OK;
 }
 
 static int32_t OnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    LOG_INFO("session bytes received, session id = %d\r\n", channelId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, channelId=%d", channelId);
     return SOFTBUS_OK;
 }
 
 static int32_t OnDataReceived(int32_t channelId, int32_t channelType,
                               const void *data, uint32_t len, SessionPktType type)
 {
-    LOG_INFO("session msg received, session id = %d\r\n", channelId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, channelId=%d", channelId);
     return SOFTBUS_OK;
 }
 static IClientSessionCallBack g_sessionCb = {
@@ -460,7 +460,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionClosedTest0011, TestSize.
     int32_t channelId = 1;
     int32_t errCode = SOFTBUS_OK;
     int32_t ret = ClientTransTdcSetCallBack(&g_sessionCb);
-    ret = ClientTransTdcOnSessionClosed(channelId);
+    ret = ClientTransTdcOnSessionClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = ClientTransTdcOnSessionOpenFailed(channelId, errCode);

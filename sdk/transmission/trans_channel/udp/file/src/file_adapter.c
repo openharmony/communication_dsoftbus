@@ -22,14 +22,14 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_socket.h"
+#include "trans_log.h"
 
 static int SetReuseAddr(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, sizeof(on));
     if (rc != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd=%d set SO_REUSEADDR error", fd);
+        TRANS_LOGE(TRANS_FILE, "fd=%d set SO_REUSEADDR error", fd);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -39,7 +39,7 @@ static int SetReusePort(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEPORT, &on, sizeof(on));
     if (rc != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "fd=%d set SO_REUSEPORT error", fd);
+        TRANS_LOGE(TRANS_FILE, "fd=%d set SO_REUSEPORT error", fd);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -51,7 +51,7 @@ static int OpenTcpServer(const char *ip, int port)
     (void)memset_s(&addr, sizeof(addr), 0, sizeof(addr));
     int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, ip, &addr.sinAddr);
     if (rc != SOFTBUS_ADAPTER_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rc=%d", rc);
+        TRANS_LOGE(TRANS_FILE, "rc=%d", rc);
         return SOFTBUS_ERR;
     }
     addr.sinFamily = SOFTBUS_AF_INET;
@@ -60,7 +60,7 @@ static int OpenTcpServer(const char *ip, int port)
     int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
         SOFTBUS_SOCK_CLOEXEC, 0, &fd);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Create error, ret=%d.", ret);
+        TRANS_LOGE(TRANS_FILE, "OpenTcpServer Create error, ret=%d.", ret);
         return SOFTBUS_ERR;
     }
 
@@ -68,7 +68,7 @@ static int OpenTcpServer(const char *ip, int port)
     (void)SetReusePort(fd, 1);
     rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpServer Bind error, rc=%d.", rc);
+        TRANS_LOGE(TRANS_FILE, "OpenTcpServer Bind error, rc=%d.", rc);
         ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
     }
@@ -79,23 +79,23 @@ int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort)
 {
     if (myIp == NULL || filePort == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int fd = OpenTcpServer(myIp, 0);
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to start tcp server for getting port");
+        TRANS_LOGE(TRANS_FILE, "failed to start tcp server for getting port");
         return SOFTBUS_ERR;
     }
     const SocketInterface *ip = GetSocketInterface(LNN_PROTOCOL_IP);
     if (ip == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "no ip supportted");
+        TRANS_LOGE(TRANS_FILE, "no ip supportted");
         ConnShutdownSocket(fd);
         return SOFTBUS_NOT_FIND;
     }
     int port = ip->GetSockPort(fd);
     if (port < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to get port from tcp socket");
+        TRANS_LOGE(TRANS_FILE, "failed to get port from tcp socket");
         ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
     }
@@ -110,7 +110,7 @@ int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
     int sessionId = NSTACKX_DFileServer(&localAddr, addrLen, key, keyLen, msgReceiver);
     ConnShutdownSocket(fd);
     if (sessionId < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to start dfile server.");
+        TRANS_LOGE(TRANS_FILE, "failed to start dfile server.");
         return SOFTBUS_ERR;
     }
     return sessionId;
@@ -120,7 +120,7 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
     uint32_t keyLen, DFileMsgReceiver msgReceiver)
 {
     if (peerIp == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -133,7 +133,7 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
 
     int32_t sessionId = NSTACKX_DFileClient(&localAddr, addrLen, key, keyLen, msgReceiver);
     if (sessionId < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to start dfile client");
+        TRANS_LOGE(TRANS_FILE, "failed to start dfile client");
         return SOFTBUS_ERR;
     }
     return sessionId;

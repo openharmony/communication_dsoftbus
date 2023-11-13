@@ -20,7 +20,7 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_p2p.h"
 #include "wifi_direct_manager.h"
@@ -32,12 +32,12 @@
 
 static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid)
 {
-    TRAN_CHECK_AND_RETURN_LOG(peerUuid, "peer uuid is null");
+    TRANS_CHECK_AND_RETURN_LOGW(peerUuid, TRANS_SVC, "peer uuid is null");
 
     NodeInfo nodeInfo;
     memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
-    TRAN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "LnnGetRemoteNodeInfoById failed");
+    TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
 
     char myIp[IP_LEN] = {0};
     if (GetWifiDirectManager()->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) == SOFTBUS_OK) {
@@ -45,26 +45,26 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
             ListenerModule type = GetMoudleByHmlIp(myIp);
             if (type != UNUSE_BUTT) {
                 StopHmlListener(type);
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StopHmlListener succ");
+                TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
             }
         }
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "WifiDirectDeviceOffLine do not get localip");
+        TRANS_LOGI(TRANS_SVC, "WifiDirectDeviceOffLine do not get localip");
     }
 
     TransOnLinkDown(nodeInfo.networkId, nodeInfo.uuid, nodeInfo.masterUdid, peerIp, WIFI_P2P);
-    TLOGI("Notify Degrade MigrateEvents start");
+    TRANS_LOGI(TRANS_SVC, "Notify Degrade MigrateEvents start");
     ret = NotifyNearByOnMigrateEvents(nodeInfo.networkId, WIFI_P2P, false);
     if (ret != SOFTBUS_OK) {
-        TLOGE("Notify Degrade MigrateEvents fail");
+        TRANS_LOGE(TRANS_SVC, "Notify Degrade MigrateEvents fail");
     }
-    TLOGI("Notify Degrade MigrateEvents success");
+    TRANS_LOGI(TRANS_SVC, "Notify Degrade MigrateEvents success");
 }
 
 static void OnWifiDirectRoleChange(enum WifiDirectRole myRole)
 {
     if (myRole == WIFI_DIRECT_ROLE_NONE) {
-        TLOGI("my role change to NONE");
+        TRANS_LOGI(TRANS_SVC, "my role change to NONE");
         StopP2pSessionListener();
         for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
             StopHmlListener(i);
@@ -74,17 +74,17 @@ static void OnWifiDirectRoleChange(enum WifiDirectRole myRole)
 
 static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid)
 {
-    TRAN_CHECK_AND_RETURN_LOG(peerMac, "peer mac is null");
+    TRANS_CHECK_AND_RETURN_LOGW(peerMac, TRANS_SVC, "peer mac is null");
     NodeInfo nodeInfo;
     memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
-    TRAN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "LnnGetRemoteNodeInfoById failed");
-    TLOGI("Notify Upgrade MigrateEvents start");
+    TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
+    TRANS_LOGI(TRANS_SVC, "Notify Upgrade MigrateEvents start");
     ret = NotifyNearByOnMigrateEvents(nodeInfo.networkId, WIFI_P2P, true);
     if (ret != SOFTBUS_OK) {
-        TLOGE("Notify Upgrade MigrateEvents fail");
+        TRANS_LOGE(TRANS_SVC, "Notify Upgrade MigrateEvents fail");
     }
-    TLOGI("Notify Upgrade MigrateEvents success");
+    TRANS_LOGI(TRANS_SVC, "Notify Upgrade MigrateEvents success");
 }
 
 void ReqLinkListener(void)

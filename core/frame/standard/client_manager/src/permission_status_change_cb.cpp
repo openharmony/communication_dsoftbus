@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "permission_status_change_cb.h"
 #include "trans_client_proxy.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "message_parcel.h"
 
 namespace OHOS {
 void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& result)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "%{public}s changed.", result.permissionName.c_str());
+    COMM_LOGI(COMM_PERM, "%{public}s changed.", result.permissionName.c_str());
     if (InformPermissionChange(result.permStateChangeType, this->pkgName.c_str(), pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "InformPermissionChange fail");
+        COMM_LOGE(COMM_PERM, "InformPermissionChange fail");
     }
 }
 
@@ -38,9 +38,9 @@ void RegisterDataSyncPermission(const uint32_t& callingTokenId,
     scopeInfo.tokenIDs = {callingTokenId};
     std::shared_ptr<PermissionStatusChangeCb> callbackPtr_ =
         std::make_shared<PermissionStatusChangeCb>(scopeInfo, pkgName, pid);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "after tokenId:%{public}d register", callingTokenId);
+    COMM_LOGI(COMM_PERM, "after tokenId:%{public}d register", callingTokenId);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RegisterPermStateChangeCallback failed.");
+        COMM_LOGE(COMM_PERM, "RegisterPermStateChangeCallback failed.");
     }
 }
 } // namespace OHOS
