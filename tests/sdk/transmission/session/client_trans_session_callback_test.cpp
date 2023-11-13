@@ -368,9 +368,9 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
     ASSERT_TRUE(session != NULL);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TransOnSessionClosed(INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT);
+    ret = TransOnSessionClosed(INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = TransOnSessionClosed(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT);
+    ret = TransOnSessionClosed(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);

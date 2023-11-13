@@ -159,6 +159,50 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
     return SOFTBUS_OK;
 }
 
+int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFunc fileCallback)
+{
+    if (sessionName == NULL || fileCallback == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[client]%s invalid param.", __func__);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "file delete lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    FileListener *fileNode = NULL;
+    bool exist = false;
+    LIST_FOR_EACH_ENTRY(fileNode, &(g_fileListener->list), FileListener, node) {
+        if (strcmp(fileNode->mySessionName, sessionName) == 0) {
+            exist = true;
+            break;
+        }
+    }
+    if (exist) {
+        fileNode->fileCallback = fileCallback;
+        (void)SoftBusMutexUnlock(&(g_fileListener->lock));
+        TRANS_LOGI(TRANS_SDK, "update file callback of socket");
+        return SOFTBUS_OK;
+    }
+    fileNode = (FileListener *)SoftBusCalloc(sizeof(FileListener));
+    if (fileNode == NULL) {
+        (void)SoftBusMutexUnlock(&(g_fileListener->lock));
+        TRANS_LOGE(TRANS_SDK, "file send listener calloc failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (strcpy_s(fileNode->mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "file node copy failed.");
+        SoftBusFree(fileNode);
+        (void)SoftBusMutexUnlock(&(g_fileListener->lock));
+        return SOFTBUS_ERR;
+    }
+    fileNode->fileCallback = fileCallback;
+    ListAdd(&(g_fileListener->list), &(fileNode->node));
+    (void)SoftBusMutexUnlock(&(g_fileListener->lock));
+    TRANS_LOGI(TRANS_SDK, "send socket file listener ok:%s", sessionName);
+    return SOFTBUS_OK;
+}
+
 int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener)
 {
     if (g_fileListener == NULL) {

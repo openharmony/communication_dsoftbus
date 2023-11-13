@@ -42,6 +42,13 @@
 #include "trans_server_proxy.h"
 
 typedef struct {
+    const char **files;
+    uint32_t fileCnt;
+    uint64_t bytesProcessed;
+    uint64_t bytesTotal;
+} FilesInfo;
+
+typedef struct {
     uint32_t seq;
     int32_t fileFd;
     int32_t fileStatus; /* 0: idle 1:busy */
@@ -86,6 +93,7 @@ typedef struct {
     int32_t result;
     uint64_t checkSumCRC;
     FileListener fileListener;
+    FilesInfo totalInfo;
 } SendListenerInfo;
 
 static TransFileInfoLock g_sendFileInfoLock = {
@@ -166,7 +174,11 @@ static void ClearRecipientResources(FileRecipientInfo *info)
         if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
             (void)SendFileTransResult(info->channelId, info->recvFileInfo.seq, SOFTBUS_ERR, IS_RECV_RESULT);
         }
-        if (info->fileListener.recvListener.OnFileTransError != NULL) {
+
+        if (info->fileListener.fileCallback != NULL) {
+            FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+            info->fileListener.fileCallback(info->sessionId, &event);
+        } else if (info->fileListener.recvListener.OnFileTransError != NULL) {
             info->fileListener.recvListener.OnFileTransError(info->sessionId);
         }
     }
@@ -1060,7 +1072,18 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
             TRANS_LOGE(TRANS_FILE, "send one frame failed");
             goto EXIT_ERR;
         }
-        if (sendInfo->fileListener.sendListener.OnSendFileProcess != NULL) {
+        sendInfo->totalInfo.bytesProcessed += fileOffset;
+        if (sendInfo->fileListener.fileCallback != NULL) {
+            FileEvent event = {
+                .type = FILE_EVENT_SEND_PROCESS,
+                .files = sendInfo->totalInfo.files,
+                .fileCnt = sendInfo->totalInfo.fileCnt,
+                .bytesProcessed = sendInfo->totalInfo.bytesProcessed,
+                .bytesTotal = sendInfo->totalInfo.bytesTotal,
+                .UpdateRecvPath = NULL,
+            };
+            sendInfo->fileListener.fileCallback(sendInfo->sessionId, &event);
+        } else if (sendInfo->fileListener.sendListener.OnSendFileProcess != NULL) {
             sendInfo->fileListener.sendListener.OnSendFileProcess(sendInfo->channelId, fileOffset, fileSize);
         }
         (void)memset_s(fileFrame.data, PROXY_MAX_PACKET_SIZE, 0, PROXY_MAX_PACKET_SIZE);
@@ -1194,10 +1217,61 @@ static bool IsValidFileString(const char *str[], uint32_t fileNum, uint32_t maxL
     return true;
 }
 
+static int32_t GetFileSize(const char *filePath, uint64_t *fileSize)
+{
+    if (CheckDestFilePathValid(filePath) == false) {
+        TRANS_LOGE(TRANS_SDK, "dest path is wrong");
+        return SOFTBUS_ERR;
+    }
+
+    char *absPath = (char *)SoftBusCalloc(PATH_MAX + 1);
+    if (absPath == NULL) {
+        TRANS_LOGE(TRANS_SDK, "calloc absFullDir fail");
+        return SOFTBUS_ERR;
+    }
+
+    if (GetAndCheckRealPath(filePath, absPath) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get src abs file fail");
+        SoftBusFree(absPath);
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusGetFileSize(absPath, fileSize) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get file size fail");
+        SoftBusFree(absPath);
+        return SOFTBUS_FILE_ERR;
+    }
+
+    SoftBusFree(absPath);
+    return SOFTBUS_OK;
+}
+
+static int32_t CalcAllFilesInfo(FilesInfo *totalInfo, const char *fileList[], uint32_t fileCnt)
+{
+    totalInfo->files = fileList;
+    totalInfo->fileCnt = fileCnt;
+    totalInfo->bytesProcessed = 0;
+
+    uint64_t curFileSize = 0;
+    for (uint32_t i = 0; i < fileCnt; i++) {
+        if (GetFileSize(fileList[i], &curFileSize) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get file size failed, path:%s", fileList[i]);
+            return SOFTBUS_ERR;
+        }
+        totalInfo->bytesTotal += curFileSize;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
     int32_t ret;
+    if (CalcAllFilesInfo((FilesInfo *)&sendInfo->totalInfo, sFileList, fileCnt)) {
+        TRANS_LOGE(TRANS_SDK, "calculate all files information failed");
+        return SOFTBUS_ERR;
+    }
+
     for (uint32_t index = 0; index < fileCnt; index++) {
         ret = SendSingleFile(sendInfo, sFileList[index], dFileList[index]);
         if (ret != SOFTBUS_OK) {
@@ -1215,7 +1289,17 @@ static int32_t ProxyStartSendFile(const SendListenerInfo *sendInfo, const char *
             sendInfo->channelId, sendInfo->result);
         return SOFTBUS_ERR;
     }
-    if (sendInfo->fileListener.sendListener.OnSendFileFinished != NULL) {
+    if (sendInfo->fileListener.fileCallback != NULL) {
+        FileEvent event = {
+            .type = FILE_EVENT_SEND_FINISH,
+            .files =  sendInfo->totalInfo.files,
+            .fileCnt = sendInfo->totalInfo.fileCnt,
+            .bytesProcessed = sendInfo->totalInfo.bytesProcessed,
+            .bytesTotal = sendInfo->totalInfo.bytesTotal,
+            .UpdateRecvPath = NULL,
+        };
+        sendInfo->fileListener.fileCallback(sendInfo->sessionId, &event);
+    } else if (sendInfo->fileListener.sendListener.OnSendFileFinished != NULL) {
         sendInfo->fileListener.sendListener.OnSendFileFinished(sendInfo->sessionId, dFileList[0]);
     }
     return SOFTBUS_OK;
@@ -1337,7 +1421,16 @@ int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[],
 
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "proxy send file trans error");
-        if (sendInfo != NULL && sendInfo->fileListener.sendListener.OnFileTransError != NULL) {
+        if (sendInfo != NULL && sendInfo->fileListener.fileCallback != NULL) {
+            FileEvent event = {
+                .type = FILE_EVENT_SEND_ERROR,
+                .files = sendInfo->totalInfo.files,
+                .fileCnt = sendInfo->totalInfo.fileCnt,
+                .bytesProcessed = 0,
+                .bytesTotal = 0,
+            };
+            sendInfo->fileListener.fileCallback(sendInfo->sessionId, &event);
+        } else if (sendInfo != NULL && sendInfo->fileListener.sendListener.OnFileTransError != NULL) {
             sendInfo->fileListener.sendListener.OnFileTransError(sendInfo->sessionId);
         }
     }
@@ -1623,7 +1716,17 @@ static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const F
         TRANS_LOGE(TRANS_FILE, "put sessionId=%u failed", recipient->sessionId);
         goto EXIT_ERR;
     }
-    if (recipient->fileListener.recvListener.OnReceiveFileStarted != NULL) {
+    if (recipient->fileListener.fileCallback != NULL) {
+        FileEvent event = {
+            .type = FILE_EVENT_RECV_START,
+            .files = (const char**)&file->filePath,
+            .fileCnt = 1,
+            .bytesProcessed = file->fileSize,
+            .bytesTotal = file->fileSize,
+            .UpdateRecvPath = NULL,
+        };
+        recipient->fileListener.fileCallback(sessionId, &event);
+    } else if (recipient->fileListener.recvListener.OnReceiveFileStarted != NULL) {
         recipient->fileListener.recvListener.OnReceiveFileStarted(sessionId, file->filePath, 1);
     }
     ReleaseRecipientRef(recipient);
@@ -1637,7 +1740,10 @@ EXIT_ERR:
     if (recipient->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         (void)SendFileTransResult(channelId, 0, result, IS_RECV_RESULT);
     }
-    if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
+    if (recipient->fileListener.fileCallback != NULL) {
+        FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+        recipient->fileListener.fileCallback(sessionId, &event);
+    } else if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
         recipient->fileListener.recvListener.OnFileTransError(sessionId);
     }
     ReleaseRecipientRef(recipient);
@@ -1808,7 +1914,17 @@ static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
         goto EXIT_ERR;
     }
     fileInfo->timeOut = 0;
-    if (recipient->fileListener.recvListener.OnReceiveFileProcess != NULL) {
+    if (recipient->fileListener.fileCallback != NULL) {
+        FileEvent event = {
+            .type = FILE_EVENT_RECV_PROCESS,
+            .files = (const char **)&fileInfo->filePath,
+            .fileCnt = 1,
+            .bytesProcessed = fileInfo->fileOffset,
+            .bytesTotal = fileInfo->fileSize,
+            .UpdateRecvPath = NULL,
+        };
+        recipient->fileListener.fileCallback(sessionId, &event);
+    } else if (recipient->fileListener.recvListener.OnReceiveFileProcess != NULL) {
         recipient->fileListener.recvListener.OnReceiveFileProcess(sessionId, fileInfo->filePath,
             fileInfo->fileOffset, fileInfo->fileSize);
     }
@@ -1831,7 +1947,10 @@ EXIT_ERR:
         (void)SendFileTransResult(recipient->channelId, 0, result, IS_RECV_RESULT);
     }
     SetRecipientRecvState(recipient, TRANS_FILE_RECV_ERR_STATE);
-    if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
+    if (recipient->fileListener.fileCallback != NULL) {
+        FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+        recipient->fileListener.fileCallback(sessionId, &event);
+    } else if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
         recipient->fileListener.recvListener.OnFileTransError(sessionId);
     }
     ReleaseRecipientRef(recipient);
@@ -1874,7 +1993,16 @@ static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
         goto EXIT_ERR;
     }
     SetRecipientRecvState(recipient, TRANS_FILE_RECV_IDLE_STATE);
-    if (recipient->fileListener.recvListener.OnReceiveFileFinished != NULL) {
+    if (recipient->fileListener.fileCallback != NULL) {
+        FileEvent event = {
+            .type = FILE_EVENT_RECV_FINISH,
+            .files = (const char **)&absRecvPath,
+            .fileCnt = 1,
+            .bytesProcessed = 0,
+            .bytesTotal = 0,
+        };
+        recipient->fileListener.fileCallback(sessionId, &event);
+    } else if (recipient->fileListener.recvListener.OnReceiveFileFinished != NULL) {
         recipient->fileListener.recvListener.OnReceiveFileFinished(sessionId, absRecvPath, fileCount);
     }
     SoftBusFree(fullRecvPath);
@@ -1882,7 +2010,10 @@ static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
     ret = SOFTBUS_OK;
 EXIT_ERR:
     if (ret != SOFTBUS_OK) {
-        if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
+        if (recipient->fileListener.fileCallback != NULL) {
+            FileEvent event = {.type = FILE_EVENT_RECV_ERROR};
+            recipient->fileListener.fileCallback(sessionId, &event);
+        } else if (recipient->fileListener.recvListener.OnFileTransError != NULL) {
             recipient->fileListener.recvListener.OnFileTransError(sessionId);
         }
         SetRecipientRecvState(recipient, TRANS_FILE_RECV_ERR_STATE);

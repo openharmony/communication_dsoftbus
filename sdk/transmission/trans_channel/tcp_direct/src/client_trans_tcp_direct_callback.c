@@ -41,11 +41,11 @@ int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo
     return g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_BYTES);
 }
 
-int32_t ClientTransTdcOnSessionClosed(int32_t channelId)
+int32_t ClientTransTdcOnSessionClosed(int32_t channelId, ShutdownReason reason)
 {
     (void)TransDelDataBufNode(channelId);
     (void)TransTdcCloseChannel(channelId);
-    return g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT);
+    return g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, reason);
 }
 
 int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode)

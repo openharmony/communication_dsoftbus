@@ -24,6 +24,7 @@
 #include "client_qos_manager.h"
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"
+#include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
 #include "dfs_session.h"
 #include "inner_session.h"
@@ -793,4 +794,215 @@ int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uin
     }
 
     return g_SessionOptionArr[option].readFunc(channelId, type, optionValue, valueSize);
+}
+
+int CreateSocket(const char *pkgName, const char *sessionName)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
+        TRANS_LOGE(TRANS_SDK, "invalid pkgName or sessionName");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "init softbus err");
+        return SOFTBUS_TRANS_SESSION_ADDPKG_FAILED;
+    }
+
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "invalid pkg name");
+        return SOFTBUS_INVALID_PKGNAME;
+    }
+
+    int ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName);
+    if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
+        TRANS_LOGI(TRANS_SDK, "SessionServer is already created in client");
+    } else if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "add session server err, ret=%d.", ret);
+        return ret;
+    }
+
+    ret = ServerIpcCreateSessionServer(pkgName, sessionName);
+    if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
+        TRANS_LOGI(TRANS_SDK, "SessionServer is already created in server");
+        ret = SOFTBUS_OK;
+    } else if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Server createSessionServer failed");
+        (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
+    }
+    TRANS_LOGI(TRANS_SDK, "CreateSocket ok: ret=%d", ret);
+    return ret;
+}
+
+static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info)
+{
+    SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
+    if (tmpAttr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
+        return NULL;
+    }
+
+    tmpAttr->fastTransData = NULL;
+    tmpAttr->fastTransDataSize = 0;
+    switch (info->dataType) {
+        case DATA_TYPE_MESSAGE:
+            tmpAttr->dataType = TYPE_MESSAGE;
+            break;
+        case DATA_TYPE_BYTES:
+            tmpAttr->dataType = TYPE_BYTES;
+            break;
+        case DATA_TYPE_FILE:
+            tmpAttr->dataType = TYPE_FILE;
+            break;
+        case DATA_TYPE_RAW_STREAM:
+            tmpAttr->dataType = TYPE_STREAM;
+            tmpAttr->attr.streamAttr.streamType = RAW_STREAM;
+            break;
+        case DATA_TYPE_VIDEO_STREAM:
+            tmpAttr->dataType = TYPE_STREAM;
+            tmpAttr->attr.streamAttr.streamType = COMMON_VIDEO_STREAM;
+            break;
+        case DATA_TYPE_AUDIO_STREAM:
+            tmpAttr->dataType = TYPE_STREAM;
+            tmpAttr->attr.streamAttr.streamType = COMMON_AUDIO_STREAM;
+            break;
+        case DATA_TYPE_SLICE_STREAM:
+            tmpAttr->dataType = TYPE_STREAM;
+            tmpAttr->attr.streamAttr.streamType = VIDEO_SLICE_STREAM;
+            break;
+        default:
+            SoftBusFree(tmpAttr);
+            tmpAttr = NULL;
+            TRANS_LOGE(TRANS_SDK, "invalid dataType:%d", info->dataType);
+            break;
+    }
+    return tmpAttr;
+}
+
+int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
+{
+    if (info == NULL || sessionId == NULL) {
+        TRANS_LOGE(TRANS_SDK, "ClientAddSocket invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info);
+    if (tmpAttr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Create SessionAttribute failed");
+        return SOFTBUS_ERR;
+    }
+
+    SessionParam param = {
+        .sessionName = info->name,
+        .peerSessionName = info->peerName,
+        .peerDeviceId = info->peerNetworkId,
+        .groupId = "reserved",
+        .attr = tmpAttr,
+    };
+
+    bool isEnabled = false;
+    int32_t ret = ClientAddSocketSession(&param, sessionId, &isEnabled);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(tmpAttr);
+        if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
+            TRANS_LOGI(TRANS_SDK, "session already opened");
+            return OpenSessionWithExistSession(*sessionId, isEnabled);
+        }
+        TRANS_LOGE(TRANS_SDK, "add session err: ret=%d", ret);
+        return ret;
+    }
+    SoftBusFree(tmpAttr);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListenerAdapt *listener)
+{
+    if (listener == NULL) {
+        TRANS_LOGI(TRANS_SDK, "ClientBind invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = ClientSetListenerBySessionId(socket, listener);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "ClientBind set listener failed: %d", ret);
+        return ret;
+    }
+
+    TransInfo transInfo;
+    ret = ClientIpcOpenSession(socket, (QosTV *)qos, len, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "ClientBind open session failed: %d", ret);
+        return ret;
+    }
+
+    ret = ClientSetChannelBySessionId(socket, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "set channel failed");
+        return SOFTBUS_ERR;
+    }
+
+    ret = CheckSessionIsOpened(socket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err: ret=%d", ret);
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+
+    ret = ClientSetSocketState(socket, SESSION_ROLE_CLIENT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "set session role failed: %d", ret);
+        return SOFTBUS_ERR;
+    }
+
+    TRANS_LOGI(TRANS_SDK, "ClientBind ok: socket=%d, channelId=%d, channelType = %d", socket,
+        transInfo.channelId, transInfo.channelType);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListenerAdapt *listener)
+{
+    if (listener == NULL) {
+        TRANS_LOGI(TRANS_SDK, "ClientBind invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = ClientSetListenerBySessionId(socket, listener);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "ClientBind set listener failed: %d", ret);
+        return ret;
+    }
+
+    ret = ClientSetSocketState(socket, SESSION_ROLE_SERVER);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "set session role failed: %d", ret);
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+void ClientShutdown(int32_t socket)
+{
+    if (!IsValidSessionId(socket)) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t type = CHANNEL_TYPE_BUTT;
+    int32_t ret = ClientGetChannelBySessionId(socket, &channelId, &type, NULL);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get channel err: ret=%d", ret);
+        return;
+    }
+
+    ret = ClientTransCloseChannel(channelId, type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "close channel err: ret=%d, channelId=%d, channeType=%d", ret,
+            channelId, type);
+    }
+
+    ret = ClientDeleteSocketSession(socket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ClientShutdown delete socket session server: ret=%d", ret);
+    }
+    TRANS_LOGI(TRANS_SDK, "ClientShutdown ok: socket=%d", socket);
 }
