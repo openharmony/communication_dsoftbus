@@ -59,7 +59,7 @@ typedef enum {
     PRIORITY_BOUNDARY,
 } QueuePriority;
 
-int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *));
+int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *taskName);
 void ConvertAnonymizeMacAddress(char *outAnomize, uint32_t anomizeLen, const char *mac, uint32_t macLen);
 void ConvertAnonymizeSensitiveString(char *outAnomize, uint32_t anomizeLen, const char *origin);
 void ConvertAnonymizeIpAddress(char *outAnomize, uint32_t anomizeLen, const char *ip, uint32_t ipLen);

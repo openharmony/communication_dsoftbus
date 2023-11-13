@@ -208,7 +208,9 @@ void VtpInstance::DestroyVtp(const std::string &pkgName)
     if (socketStreamCount_) {
         // 起线程等待30s，调用FtDestroyNonblock()
         TRANS_LOGW(TRANS_STREAM, "some socket is not destroyed, wait 30s and destroy vtp.");
+        const std::string threadName = "OS_dstyNonblk";
         std::thread delay(WaitForDestroy, DESTROY_TIMEOUT_SECOND);
+        pthread_setname_np(delay.native_handle(), threadName.c_str());
         delay.detach();
         return;
     }
