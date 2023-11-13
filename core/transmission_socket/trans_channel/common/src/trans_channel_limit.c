@@ -18,7 +18,7 @@
 #include <securec.h>
 
 #include "softbus_def.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 
 
 #define AUTH_SESSION_WHITE_LIST_NUM (9)
@@ -53,8 +53,10 @@ bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
             return true;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "auth channel sessionname[%s] invalid.", sessionName);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_CTRL, "auth channel sessionName=%s invalid.", tmpName);
+    AnonymizeFree(tmpName);
     return false;
 }
 

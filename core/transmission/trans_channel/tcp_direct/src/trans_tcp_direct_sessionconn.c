@@ -23,8 +23,8 @@
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "trans_channel_manager.h"
+#include "trans_log.h"
 
 #define TRANS_SEQ_STEP 2
 
@@ -33,7 +33,7 @@ static SoftBusList *g_sessionConnList = NULL;
 uint64_t TransTdcGetNewSeqId(void)
 {
     if (GetSessionConnLock() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcGetNewSeqId GetLock fail");
+        TRANS_LOGE(TRANS_CTRL, "GetLock fail");
         return INVALID_SEQ_ID;
     }
 
@@ -52,7 +52,7 @@ int32_t CreatSessionConnList(void)
     if (g_sessionConnList == NULL) {
         g_sessionConnList = CreateSoftBusList();
         if (g_sessionConnList == NULL) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSoftBusList fail");
+            TRANS_LOGE(TRANS_CTRL, "CreateSoftBusList fail");
             return SOFTBUS_MALLOC_ERR;
         }
     }
@@ -98,7 +98,7 @@ SessionConn *GetSessionConnByRequestId(uint32_t requestId)
             return item;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionConnByReqId fail: reqId=%u", requestId);
+    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%u", requestId);
     return NULL;
 }
 
@@ -114,7 +114,7 @@ SessionConn *GetSessionConnByReq(int64_t req)
             return item;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSessionConnByReqId fail: reqId=%" PRIu64, req);
+    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%" PRIu64, req);
     return NULL;
 }
 
@@ -127,7 +127,7 @@ SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
     conn->serverSide = isServerSid;
     conn->channelId = GenerateChannelId(true);
     if (conn->channelId == INVALID_CHANNEL_ID) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "generate tdc channel id failed.");
+        TRANS_LOGE(TRANS_CTRL, "generate tdc channel id failed.");
         return NULL;
     }
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
@@ -176,7 +176,7 @@ SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
     }
     ReleaseSessonConnLock();
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get srv session conn info.");
+    TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
     return NULL;
 }
 
@@ -194,7 +194,7 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
         }
     }
     ReleaseSessonConnLock();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get srv session conn info.");
+    TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
     return SOFTBUS_ERR;
 }
 
@@ -212,7 +212,7 @@ int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
         }
     }
     ReleaseSessonConnLock();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "can not get srv session conn info.");
+    TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
     return SOFTBUS_ERR;
 }
 
@@ -253,7 +253,7 @@ int64_t GetAuthIdByChanId(int32_t channelId)
 
 void TransDelSessionConnById(int32_t channelId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransDelSessionConnById: channelId=%d", channelId);
+    TRANS_LOGW(TRANS_CTRL, "channelId=%d", channelId);
     SessionConn *item = NULL;
     SessionConn *next = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -309,7 +309,7 @@ void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLe
     }
     if (isFind && conn != NULL) {
         if (memcpy_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), sessionKey, keyLen) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetSessionKeyByChanId memcpy fail");
+            TRANS_LOGE(TRANS_CTRL, "memcpy fail");
             ReleaseSessonConnLock();
             return;
         }
@@ -331,7 +331,7 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
         }
     }
     ReleaseSessonConnLock();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SetSessionConnStatusById not find: channelId=%d", channelId);
+    TRANS_LOGE(TRANS_CTRL, "not find: channelId=%d", channelId);
     return SOFTBUS_NOT_FIND;
 }
 
@@ -349,6 +349,6 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
         }
     }
     ReleaseSessonConnLock();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TcpTranGetAppInfobyChannelId not find: channelId=%d", channelId);
+    TRANS_LOGE(TRANS_CTRL, "not find: channelId=%d", channelId);
     return SOFTBUS_NOT_FIND;
 }

@@ -20,11 +20,11 @@
 #include "softbus_trans_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log_old.h"
 #include "softbus_protocol_def.h"
 #include "softbus_adapter_mem.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_manager.c"
+#include "trans_log.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -180,7 +180,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
 {
     int32_t channelId = 12;
     int32_t channelType = 22;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransLaneMgrDelLane001 start");
+    TRANS_LOGI(TRANS_TEST, "TransLaneMgrDelLane001 start");
     TransLaneMgrDeinit();
     int32_t ret = TransLaneMgrDelLane(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -192,7 +192,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     channelType = 9999999;
     ret = TransLaneMgrDelLane(channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransLaneMgrDelLane001 end");
+    TRANS_LOGI(TRANS_TEST, "TransLaneMgrDelLane001 end");
 }
 
 /**

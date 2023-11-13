@@ -25,9 +25,9 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "stream_adaptor_listener.h"
 #include "stream_common.h"
+#include "trans_log.h"
 
 using namespace OHOS;
 
@@ -85,7 +85,7 @@ void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
         sessionKey_.first = new uint8_t[param->keyLen];
     }
     if (memcpy_s(sessionKey_.first, param->keyLen, param->sessionKey, param->keyLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
         return;
     }
 
@@ -113,20 +113,20 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
     AesGcmCipherKey cipherKey = {0};
 
     if (inLen - OVERHEAD_LEN > outLen) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Encrypt invalid para.");
+        TRANS_LOGE(TRANS_STREAM, "Encrypt invalid para.");
         return SOFTBUS_ERR;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.first, sessionKey.second) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
         return SOFTBUS_ERR;
     }
 
     int ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || outLen != inLen + OVERHEAD_LEN) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Encrypt Data fail. %d", ret);
+        TRANS_LOGE(TRANS_STREAM, "Encrypt Data fail. ret=%d", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
 
@@ -139,19 +139,19 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
     AesGcmCipherKey cipherKey = {0};
 
     if (inLen - OVERHEAD_LEN > outLen) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt invalid para.");
+        TRANS_LOGE(TRANS_STREAM, "Decrypt invalid para.");
         return SOFTBUS_ERR;
     }
 
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.first, sessionKey.second) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy key error.");
+        TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
         return SOFTBUS_ERR;
     }
     int ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Decrypt Data fail. %d ", ret);
+        TRANS_LOGE(TRANS_STREAM, "Decrypt Data fail. ret=%d ", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
 

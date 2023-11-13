@@ -22,8 +22,8 @@
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_socket.h"
+#include "trans_log.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_p2p.h"
@@ -38,7 +38,7 @@ static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, Sessio
 {
     if (TransSrvAddDataBufNode(newchannelId, fd) != SOFTBUS_OK) {
         SoftBusFree(newConn);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel create databuf fail");
+        TRANS_LOGE(TRANS_CTRL, "OpenTcpDirectChannel create databuf fail");
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -48,7 +48,7 @@ static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, Sessio
         return SOFTBUS_ERR;
     }
     if (AddTrigger(module, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel add trigger fail");
+        TRANS_LOGE(TRANS_CTRL, "OpenTcpDirectChannel add trigger fail");
         TransDelSessionConnById(newConn->channelId);
         TransSrvDelDataBufNode(newchannelId);
         return SOFTBUS_ERR;
@@ -62,7 +62,7 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
     if (type == CONNECT_P2P_REUSE) {
         char myIp[IP_LEN] = {0};
         if (GetWifiDirectManager()->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetMoudleType get p2p ip fail.");
+            TRANS_LOGE(TRANS_CTRL, "get p2p ip fail.");
             return module;
         }
         if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
@@ -79,13 +79,13 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
 int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo,
     int32_t *channelId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel");
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
     ListenerModule module = GetMoudleType(connInfo->type, connInfo->socketOption.addr);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s:get listener module %d!", __func__, module);
+    TRANS_LOGI(TRANS_CTRL, "get listener module=%d!", module);
     if (module == DIRECT_CHANNEL_SERVER_WIFI) {
         module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
     }
@@ -98,8 +98,8 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return SOFTBUS_MALLOC_ERR;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(newConn->channelId + ID_OFFSET));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "SoftbusHitraceChainBegin: set chainId=[%lx].", (uint64_t)(newConn->channelId + ID_OFFSET));
+    TRANS_LOGI(TRANS_CTRL,
+        "SoftbusHitraceChainBegin: set HitraceId=%lx.", (uint64_t)(newConn->channelId + ID_OFFSET));
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
@@ -110,14 +110,14 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 
     if (newConn->authId == AUTH_INVALID_ID) {
         SoftBusFree(newConn);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel get authId fail");
+        TRANS_LOGE(TRANS_CTRL, "get authId fail");
         return SOFTBUS_ERR;
     }
 
     int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, true);
     if (fd < 0) {
         SoftBusFree(newConn);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenTcpDirectChannel connect fail");
+        TRANS_LOGE(TRANS_CTRL, "connect fail");
         return SOFTBUS_CONN_FAIL;
     }
     newConn->appInfo.fd = fd;
@@ -127,6 +127,6 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return ret;
     }
     *channelId = newchannelId;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OpenTcpDirectChannel end: channelId=%d", newchannelId);
+    TRANS_LOGI(TRANS_CTRL, "ok: channelId=%d", newchannelId);
     return SOFTBUS_OK;
 }

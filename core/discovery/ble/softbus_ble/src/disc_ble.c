@@ -420,7 +420,7 @@ static int32_t ConvertBleAddr(DeviceInfo *foundInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
+static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
 {
     int32_t range = -1;
     if (power != SOFTBUS_ILLEGAL_BLE_POWER) {
@@ -430,7 +430,7 @@ static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
             .identity = {0}
         };
 
-        if (memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN, foundInfo->devId, DISC_MAX_DEVICE_ID_LEN) != EOK) {
+        if (memcpy_s(param.identity, SOFTBUS_DEV_IDENTITY_LEN, device->addr[0].info.ble.bleMac, BT_MAC_LEN) != EOK) {
             DISC_LOGE(DISC_BLE, "memcpy failed");
             return SOFTBUS_MEM_ERR;
         }
@@ -442,7 +442,7 @@ static int32_t RangeDevice(DeviceInfo *foundInfo, char rssi, int8_t power)
             // range failed should report device continually
         }
     }
-    foundInfo->range = range;
+    device->range = range;
     return SOFTBUS_OK;
 }
 
@@ -468,13 +468,13 @@ static void ProcessDisNonPacket(const uint8_t *advData, uint32_t advLen, char rs
     foundInfo->capabilityBitmap[0] = subscribeCap & foundInfo->capabilityBitmap[0];
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
 
-    if (RangeDevice(foundInfo, rssi, device.power) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "range device failed");
+    if (ConvertBleAddr(foundInfo) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "convert ble address failed");
         return;
     }
 
-    if (ConvertBleAddr(foundInfo) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "convert ble address failed");
+    if (RangeDevice(foundInfo, rssi, device.power) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "range device failed");
         return;
     }
 
