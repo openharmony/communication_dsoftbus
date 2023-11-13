@@ -125,7 +125,8 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
     TRANS_LOGI(TRANS_CTRL, "trans server opensession.");
     if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX)) {
+        !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX) ||
+        param->qosCount > QOS_TYPE_BUTT) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (param->groupId == NULL || strlen(param->groupId) >= GROUP_ID_SIZE_MAX) {

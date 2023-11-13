@@ -213,6 +213,23 @@ static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel 
     return true;
 }
 
+static bool WriteQosInfo(const SessionParam *param, MessageParcel &data)
+{
+    if (!data.WriteUint32(param->qosCount)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write count of qos failed!");
+        return false;
+    }
+
+    if (param->qosCount > 0) {
+        if (!data.WriteBuffer(param->qos, sizeof(QosTV) * param->qosCount)) {
+            TRANS_LOGE(TRANS_SDK, "OpenSession write qos info failed!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
     if (param->sessionName == nullptr || param->peerSessionName == nullptr ||
@@ -250,6 +267,11 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     if (!TransWriteSessionAttrs(param->attr, data)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+
+    if (!WriteQosInfo(param, data)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write qos failed!");
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
 
     MessageParcel reply;

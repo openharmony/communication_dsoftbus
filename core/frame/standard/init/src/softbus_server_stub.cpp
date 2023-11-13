@@ -536,6 +536,19 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
     }
 }
 
+static void ReadQosInfo(MessageParcel& data, SessionParam &param)
+{
+    param.qosCount = data.ReadUint32();
+    QosTV *qosInfo = nullptr;
+    if (param.qosCount > 0) {
+        qosInfo = (QosTV*)data.ReadBuffer(sizeof(QosTV) * param.qosCount);
+    }
+
+    if (param.qosCount <= QOS_TYPE_BUTT && qosInfo != nullptr) {
+        (void)memcpy_s(param.qos, sizeof(QosTV) * QOS_TYPE_BUTT, qosInfo, sizeof(QosTV) * param.qosCount);
+    }
+}
+
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t retReply;
@@ -554,6 +567,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     param.groupId = data.ReadCString();
     ReadSessionAttrs(data, &getAttr);
     param.attr = &getAttr;
+    ReadQosInfo(data, param);
 
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
         param.groupId == nullptr) {

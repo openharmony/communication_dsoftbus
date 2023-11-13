@@ -362,6 +362,25 @@
         "OpenAuthMetaSocket";
         "CloseAuthMetaSocket";
         "SendMetaData";
+        "Socket";
+        "Bind";
+        "Listen";
+        "Shutdown";
+        "CreateSocket";
+        "ClientAddSocket";
+        "ClientListen";
+        "ClientBind";
+        "ClientShutdown";
+        "ClientAddSocketServer";
+        "ClientDeleteSocketSession";
+        "ClientAddSocketSession";
+        "ClientSetListenerBySessionId";
+        "ClientIpcOpenSession";
+        "ClientSetSocketState";
+        "ClientGetSessionCallbackAdapterByName";
+        "ClientGetSessionCallbackAdapterById";
+        "ClientGetPeerSocketInfoById";
+        "TransSetSocketFileListener";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

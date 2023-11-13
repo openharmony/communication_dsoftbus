@@ -315,7 +315,7 @@ static int32_t ClosePeerUdpChannel(int32_t channelId)
     return ServerIpcCloseChannel(channelId, CHANNEL_TYPE_UDP);
 }
 
-static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
+static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason reason)
 {
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -339,14 +339,14 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive)
     }
 
     if (!isActive && (g_sessionCb != NULL) && (g_sessionCb->OnSessionClosed != NULL)) {
-        g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP);
+        g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP, reason);
     }
     return SOFTBUS_OK;
 }
 
-int32_t TransOnUdpChannelClosed(int32_t channelId)
+int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
-    return CloseUdpChannel(channelId, false);
+    return CloseUdpChannel(channelId, false, reason);
 }
 
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount,
@@ -364,9 +364,9 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransCloseUdpChannel(int32_t channelId)
+int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
-    return CloseUdpChannel(channelId, true);
+    return CloseUdpChannel(channelId, true, reason);
 }
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
@@ -385,12 +385,12 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
     return TransSendStream(channelId, data, ext, param);
 }
 
-static void OnUdpChannelClosed(int32_t channelId)
+static void OnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
     if ((g_sessionCb == NULL) || (g_sessionCb->OnSessionClosed == NULL)) {
         return;
     }
-    g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP);
+    g_sessionCb->OnSessionClosed(channelId, CHANNEL_TYPE_UDP, reason);
     if (TransDeleteUdpChannel(channelId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "trans delete udp channelId=%d failed.", channelId);
     }

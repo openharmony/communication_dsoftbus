@@ -62,7 +62,7 @@ static int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *chann
     return SOFTBUS_OK;
 }
 
-static int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+static int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     return SOFTBUS_OK;
 }
@@ -150,7 +150,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnUdpChannelClosed(channel.channelId);
+    ret = TransOnUdpChannelClosed(channel.channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     channel.businessType = BUSINESS_TYPE_FILE;
@@ -237,7 +237,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenFailedTest001, TestSize
 HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest001, TestSize.Level0)
 {
     int32_t ret;
-    ret = TransOnUdpChannelClosed(TEST_CHANNELID);
+    ret = TransOnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
@@ -264,7 +264,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelQosEventTest001, TestSize.L
 HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.Level0)
 {
     int32_t ret;
-    ret = ClientTransCloseUdpChannel(TEST_CHANNELID);
+    ret = ClientTransCloseUdpChannel(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 

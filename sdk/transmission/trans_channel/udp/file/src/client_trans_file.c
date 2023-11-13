@@ -60,6 +60,32 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
     }
 }
 
+static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const DFileMsg *msgData,
+    const FileListener *listener)
+{
+    FileEvent event;
+    switch (msgType) {
+        case DFILE_ON_TRANS_IN_PROGRESS:
+            event.type = FILE_EVENT_SEND_PROCESS;
+            break;
+        case DFILE_ON_FILE_SEND_SUCCESS:
+            event.type = FILE_EVENT_SEND_FINISH;
+            break;
+        case DFILE_ON_FILE_SEND_FAIL:
+            event.type = FILE_EVENT_SEND_ERROR;
+            break;
+        default:
+            return;
+    }
+
+    event.files = msgData->fileList.files;
+    event.fileCnt = msgData->fileList.fileNum;
+    event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
+    event.bytesTotal = msgData->transferUpdate.totalBytes;
+    event.UpdateRecvPath = NULL;
+    listener->fileCallback(socket, &event);
+}
+
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
     TRANS_LOGI(TRANS_FILE, "send dfileId=%d type=%d", dfileId, msgType);
@@ -89,14 +115,23 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     }
 
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        if (fileListener.sendListener.OnFileTransError != NULL) {
-                fileListener.sendListener.OnFileTransError(sessionId);
-            }
-        TransOnUdpChannelClosed(udpChannel.channelId);
+        if (fileListener.fileCallback != NULL) {
+            FileEvent event;
+            (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
+            event.type = FILE_EVENT_SEND_ERROR;
+            fileListener.fileCallback(sessionId, &event);
+        } else if (fileListener.sendListener.OnFileTransError != NULL) {
+            fileListener.sendListener.OnFileTransError(sessionId);
+        }
+        TRANS_LOGI(TRANS_SDK, "OnFile error: %d", msgType);
+        TransOnUdpChannelClosed(udpChannel.channelId, SHUTDOWN_REASON_SEND_FILE_ERR);
         return;
     }
-
-    NotifySendResult(sessionId, msgType, msgData, &fileListener);
+    if (fileListener.fileCallback != NULL) {
+        NotifySocketSendResult(sessionId, msgType, msgData, &fileListener);
+    } else {
+        NotifySendResult(sessionId, msgType, msgData, &fileListener);
+    }
     return;
 }
 
@@ -137,6 +172,35 @@ static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFil
     }
 }
 
+static void NotifySocketRecvResult(int32_t socket, DFileMsgType msgType, const DFileMsg *msgData,
+    const FileListener *listener)
+{
+    FileEvent event;
+    switch (msgType) {
+        case DFILE_ON_FILE_LIST_RECEIVED:
+            event.type = FILE_EVENT_RECV_START;
+            break;
+        case DFILE_ON_TRANS_IN_PROGRESS:
+            event.type = FILE_EVENT_RECV_PROCESS;
+            break;
+        case DFILE_ON_FILE_RECEIVE_SUCCESS:
+            event.type = FILE_EVENT_RECV_FINISH;
+            break;
+        case DFILE_ON_FILE_RECEIVE_FAIL:
+            event.type = FILE_EVENT_RECV_ERROR;
+            break;
+        default:
+            return;
+    }
+
+    event.files = msgData->fileList.files;
+    event.fileCnt = msgData->fileList.fileNum;
+    event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
+    event.bytesTotal = msgData->transferUpdate.totalBytes;
+    event.UpdateRecvPath = NULL;
+    listener->fileCallback(socket, &event);
+}
+
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
     TRANS_LOGI(TRANS_FILE, "recv dfileId=%d type=%d", dfileId, msgType);
@@ -160,15 +224,55 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         return;
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        if (fileListener.recvListener.OnFileTransError != NULL) {
-                fileListener.recvListener.OnFileTransError(sessionId);
-            }
-        TransOnUdpChannelClosed(udpChannel.channelId);
+        if (fileListener.fileCallback != NULL) {
+            FileEvent event;
+            (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
+            event.type = FILE_EVENT_RECV_ERROR;
+            fileListener.fileCallback(sessionId, &event);
+        } else if (fileListener.recvListener.OnFileTransError != NULL) {
+            fileListener.recvListener.OnFileTransError(sessionId);
+        }
+        TransOnUdpChannelClosed(udpChannel.channelId, SHUTDOWN_REASON_RECV_FILE_ERR);
         return;
     }
 
-    NotifyRecvResult(sessionId, msgType, msgData, &fileListener);
-    return;
+    if (fileListener.fileCallback != NULL) {
+        NotifySocketRecvResult(sessionId, msgType, msgData, &fileListener);
+    } else {
+        NotifyRecvResult(sessionId, msgType, msgData, &fileListener);
+    }
+}
+
+static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener, int32_t fileSession)
+{
+    int32_t sessionId = -1;
+    if (g_udpChannelMgrCb->OnFileGetSessionId(channelId, &sessionId) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId by channelId failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (fileListener->fileCallback != NULL) {
+        FileEvent event;
+        (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
+        event.type = FILE_EVENT_RECV_UPDATE_PATH;
+        fileListener->fileCallback(sessionId, &event);
+        if (event.UpdateRecvPath == NULL) {
+            TRANS_LOGE(TRANS_SDK, "UpdateRecvPath is null");
+            return SOFTBUS_ERR;
+        }
+
+        if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, event.UpdateRecvPath()) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "strcpy rootDir failed");
+            return SOFTBUS_ERR;
+        }
+    }
+
+    if (NSTACKX_DFileSetStoragePath(fileSession, fileListener->rootDir) != SOFTBUS_OK) {
+        NSTACKX_DFileClose(fileSession);
+        TRANS_LOGE(TRANS_SDK, "set storage path[%s] failed", fileListener->rootDir);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
@@ -194,12 +298,11 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
             return SOFTBUS_ERR;
         }
-        if (NSTACKX_DFileSetStoragePath(fileSession, fileListener.rootDir) != SOFTBUS_OK) {
-            NSTACKX_DFileClose(fileSession);
-            TRANS_LOGE(TRANS_FILE, "set storage patt rpptDir=%s failed", fileListener.rootDir);
+        g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        if (UpdateFileRecvPath(channel->channelId, &fileListener, fileSession)) {
+            TRANS_LOGE(TRANS_FILE, "update receive file path failed");
             return SOFTBUS_ERR;
         }
-        g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
     } else {
         fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort,
             (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, FileSendListener);

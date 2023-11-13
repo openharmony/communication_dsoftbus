@@ -90,19 +90,19 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
     return SOFTBUS_OK;
 }
 
-int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     TRANS_LOGI(TRANS_SDK,
         "[client]: channelId=%d, channelType=%d.", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
-            return ClientTransAuthOnChannelClosed(channelId);
+            return ClientTransAuthOnChannelClosed(channelId, reason);
         case CHANNEL_TYPE_PROXY:
-            return ClientTransProxyOnChannelClosed(channelId);
+            return ClientTransProxyOnChannelClosed(channelId, reason);
         case CHANNEL_TYPE_UDP:
-            return TransOnUdpChannelClosed(channelId);
+            return TransOnUdpChannelClosed(channelId, reason);
         case CHANNEL_TYPE_TCP_DIRECT:
-            return ClientTransTdcOnSessionClosed(channelId);
+            return ClientTransTdcOnSessionClosed(channelId, reason);
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }

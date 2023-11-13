@@ -71,7 +71,7 @@ int32_t ClientTransProxyDelChannelInfo(int32_t channelId);
 
 int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
 
-int32_t ClientTransProxyOnChannelClosed(int32_t channelId);
+int32_t ClientTransProxyOnChannelClosed(int32_t channelId, ShutdownReason reason);
 
 int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId, int32_t errCode);
 
