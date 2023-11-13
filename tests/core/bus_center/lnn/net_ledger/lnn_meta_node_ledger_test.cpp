@@ -21,10 +21,10 @@
 
 #include "lnn_meta_node_ledger.h"
 #include "lnn_network_id.h"
+#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 typedef struct {
@@ -59,13 +59,13 @@ void LNNMetaNodeLedgerTest::TearDownTestCase()
 
 void LNNMetaNodeLedgerTest::SetUp()
 {
-    LOG_INFO("LNNMetaNodeLedgerTest start.");
+    LNN_LOGI(LNN_TEST, "LNNMetaNodeLedgerTest start");
     LnnInitMetaNodeLedger();
 }
 
 void LNNMetaNodeLedgerTest::TearDown()
 {
-    LOG_INFO("LNNMetaNodeLedgerTest finish.");
+    LNN_LOGI(LNN_TEST, "LNNMetaNodeLedgerTest finish");
     LnnDeinitMetaNodeLedger();
 }
 
