@@ -1123,7 +1123,7 @@ int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnFsmStart(&hbFsm->fsm, g_hbState + STATE_HB_NONE_INDEX) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "start fsmId=%u= failed", hbFsm->id);
+        LNN_LOGE(LNN_HEART_BEAT, "start fsmId=%u failed", hbFsm->id);
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_HEART_BEAT, "fsmId(%u) is starting", hbFsm->id);
