@@ -701,7 +701,7 @@ static void InitiateNewNetworkOnline(ConnectionAddrType addrType, const char *ne
         }
         rc = LnnSendNewNetworkOnlineToConnFsm(item);
         LNN_LOGI(LNN_INIT,
-            "initiate new network online to connection fsmId=, rc=%d", item->id, rc);
+            "initiate new network online to connection fsmId=%u, rc=%d", item->id, rc);
     }
 }
 
@@ -711,7 +711,7 @@ static void TryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
     LnnInvalidCleanInfo *cleanInfo = connFsm->connInfo.cleanInfo;
 
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) == 0) {
-        LNN_LOGI(LNN_INIT, "fsmId=no need initiate new network online", connFsm->id);
+        LNN_LOGI(LNN_INIT, "fsmId=%u no need initiate new network online", connFsm->id);
         return;
     }
     // let last invalid connfsm notify new network online after it clean
@@ -722,7 +722,7 @@ static void TryInitiateNewNetworkOnline(const LnnConnectionFsm *connFsm)
         if ((item->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) == 0) {
             continue;
         }
-        LNN_LOGI(LNN_INIT, "fsmId=wait last connfsm clean, then initiate new network online",
+        LNN_LOGI(LNN_INIT, "fsmId=%u wait last connfsm clean, then initiate new network online",
             connFsm->id);
         return;
     }
@@ -755,7 +755,7 @@ static void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
             }
         }
     }
-    LNN_LOGI(LNN_BUILDER, "fsmId=disconnect all connection for type=%d",
+    LNN_LOGI(LNN_BUILDER, "fsmId=%u disconnect all connection for type=%d",
         connFsm->id, addr1->type);
     if (LnnConvertAddrToOption(addr1, &option)) {
         ConnDisconnectDeviceAllConn(&option);
@@ -774,7 +774,7 @@ static void TryNotifyAllTypeOffline(const LnnConnectionFsm *connFsm)
             return;
         }
     }
-    LNN_LOGI(LNN_BUILDER, "fsmId=notify all connection offline for type=%d",
+    LNN_LOGI(LNN_BUILDER, "fsmId=%u notify all connection offline for type=%d",
         connFsm->id, addr1->type);
     (void)LnnNotifyAllTypeOffline(addr1->type);
 }
@@ -785,7 +785,7 @@ static void CleanConnectionFsm(LnnConnectionFsm *connFsm)
         LNN_LOGE(LNN_BUILDER, "connection fsm is null");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "connection fsmId= is cleaned", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "connection fsmId=%u is cleaned", connFsm->id);
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -851,7 +851,7 @@ static int32_t ProcessVerifyResult(const void *para)
             rc = SOFTBUS_ERR;
             break;
         }
-        LNN_LOGI(LNN_BUILDER, "fsmId=%uconnection fsm auth done: authId=%" PRId64 ", retCode=%d",
+        LNN_LOGI(LNN_BUILDER, "fsmId=%u connection fsm auth done: authId=%" PRId64 ", retCode=%d",
             connFsm->id, msgPara->authId, msgPara->retCode);
         if (msgPara->retCode == SOFTBUS_OK) {
             connFsm->connInfo.authId = msgPara->authId;
@@ -887,12 +887,12 @@ static int32_t CreatePassiveConnectionFsm(const DeviceVerifyPassMsgPara *msgPara
     connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
     connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     LNN_LOGI(LNN_BUILDER,
-        "fsmId=start a passive connection fsm, authId=%" PRId64, connFsm->id, msgPara->authId);
+        "fsmId=%u start a passive connection fsm, authId=%" PRId64, connFsm->id, msgPara->authId);
     if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
         connFsm->connInfo.nodeInfo = NULL;
         StopConnectionFsm(connFsm);
         LNN_LOGE(LNN_BUILDER,
-            "fsmId=post auth result to connection fsm fail=%" PRId64, connFsm->id, msgPara->authId);
+            "fsmId=%u post auth result to connection fsm fail=%" PRId64, connFsm->id, msgPara->authId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -922,7 +922,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         }
         if (strcmp(connFsm->connInfo.peerNetworkId, msgPara->nodeInfo->networkId) != 0) {
             LNN_LOGI(LNN_BUILDER,
-                "fsmId=networkId changed=%" PRId64, connFsm->id, msgPara->authId);
+                "fsmId=%u networkId changed=%" PRId64, connFsm->id, msgPara->authId);
             rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
@@ -931,7 +931,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
             LNN_LOGE(LNN_BUILDER, "LnnUpdateNodeInfo failed");
         }
         LNN_LOGI(LNN_BUILDER,
-            "fsmId=connection fsm exist, ignore VerifyPass event=%" PRId64, connFsm->id, msgPara->authId);
+            "fsmId=%u connection fsm exist, ignore VerifyPass event=%" PRId64, connFsm->id, msgPara->authId);
         rc = SOFTBUS_ERR;
     } while (false);
 
@@ -962,10 +962,10 @@ static int32_t ProcessDeviceDisconnect(const void *para)
             break;
         }
         LNN_LOGI(LNN_BUILDER,
-            "fsmId=device disconnect, authId=%" PRId64, connFsm->id, *authId);
+            "fsmId=%u device disconnect, authId=%" PRId64, connFsm->id, *authId);
         if (LnnSendDisconnectMsgToConnFsm(connFsm) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER,
-                "send disconnect to connection fsmId= failed", connFsm->id);
+                "send disconnect to connection fsmId=%u failed", connFsm->id);
             rc = SOFTBUS_ERR;
             break;
         }
@@ -1000,7 +1000,7 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
             }
             rc = LnnSendNotTrustedToConnFsm(item);
             LNN_LOGI(LNN_BUILDER,
-                "fsmId=send not trusted msg to connection fsm result=%d", item->id, rc);
+                "fsmId=%u send not trusted msg to connection fsm result=%d", item->id, rc);
         }
     } while (false);
     SoftBusFree((void *)peerUdid);
@@ -1023,12 +1023,12 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
             continue;
         }
         if (LnnSendLeaveRequestToConnFsm(item) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "send leave LNN msg to connection fsmId= failed",
+            LNN_LOGE(LNN_BUILDER, "send leave LNN msg to connection fsmId=%u failed",
                 item->id);
         } else {
             rc = SOFTBUS_OK;
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_REQUEST;
-            LNN_LOGI(LNN_BUILDER, "send leave LNN msg to connection fsmId= success",
+            LNN_LOGI(LNN_BUILDER, "send leave LNN msg to connection fsmId=%u success",
                 item->id);
         }
     }
@@ -1094,7 +1094,7 @@ static int32_t ProcessSyncOfflineFinish(const void *para)
             continue;
         }
         rc = LnnSendSyncOfflineFinishToConnFsm(item);
-        LNN_LOGI(LNN_BUILDER, "send sync offline msg to connection fsmId= result=%d",
+        LNN_LOGI(LNN_BUILDER, "send sync offline msg to connection fsmId=%u result=%d",
             item->id, rc);
     }
     SoftBusFree((void *)networkId);
@@ -1107,20 +1107,20 @@ static bool IsInvalidConnectionFsm(const LnnConnectionFsm *connFsm, const LeaveI
         return false;
     }
     if (connFsm->isDead) {
-        LNN_LOGI(LNN_BUILDER, "fsmId=connection is dead", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%u connection is dead", connFsm->id);
         return false;
     }
     if (msgPara->addrType != CONNECTION_ADDR_MAX && msgPara->addrType != connFsm->connInfo.addr.type) {
-        LNN_LOGI(LNN_BUILDER, "fsmId=connection type not match %d,%d",
+        LNN_LOGI(LNN_BUILDER, "fsmId=%u connection type not match %d,%d",
             connFsm->id, msgPara->addrType, connFsm->connInfo.addr.type);
         return false;
     }
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) == 0) {
-        LNN_LOGI(LNN_BUILDER, "fsmId=connection is not online", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%u connection is not online", connFsm->id);
         return false;
     }
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_INITIATE_ONLINE) != 0) {
-        LNN_LOGI(LNN_BUILDER, "fsmId=connection is already in leaving", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%u connection is already in leaving", connFsm->id);
         return false;
     }
     return true;
@@ -1145,13 +1145,13 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
         ++count;
         item->connInfo.cleanInfo = (LnnInvalidCleanInfo *)SoftBusMalloc(sizeof(LnnInvalidCleanInfo));
         if (item->connInfo.cleanInfo == NULL) {
-            LNN_LOGI(LNN_BUILDER, "fsmId=malloc invalid clean info failed", item->id);
+            LNN_LOGI(LNN_BUILDER, "fsmId=%u malloc invalid clean info failed", item->id);
             continue;
         }
         item->connInfo.cleanInfo->addrType = msgPara->addrType;
         if (strncpy_s(item->connInfo.cleanInfo->networkId, NETWORK_ID_BUF_LEN,
             msgPara->newNetworkId, strlen(msgPara->newNetworkId)) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fsmId=copy new networkId failed", item->id);
+            LNN_LOGE(LNN_BUILDER, "fsmId=%u copy new networkId failed", item->id);
             rc = SOFTBUS_ERR;
             SoftBusFree(item->connInfo.cleanInfo);
             item->connInfo.cleanInfo = NULL;
@@ -1166,7 +1166,7 @@ static int32_t ProcessLeaveInvalidConn(const void *para)
             item->connInfo.cleanInfo = NULL;
         }
         LNN_LOGI(LNN_BUILDER,
-            "send leave LNN msg to invalid connection fsmId= result=%d", item->id, rc);
+            "send leave LNN msg to invalid connection fsmId=%u result=%d", item->id, rc);
     }
     if (count == 0) {
         InitiateNewNetworkOnline(msgPara->addrType, msgPara->newNetworkId);
@@ -1298,7 +1298,7 @@ static int32_t ProcessNodeStateChanged(const void *para)
         isOnline = IsNodeOnline(connFsm->connInfo.peerNetworkId);
         TryElectAsMasterState(connFsm->connInfo.peerNetworkId, isOnline);
         if (!IsSupportMasterNodeElect(connFsm->connInfo.version)) {
-            LNN_LOGI(LNN_BUILDER, "fsmId=peer not support master node elect", connFsm->id);
+            LNN_LOGI(LNN_BUILDER, "fsmId=%u peer not support master node elect", connFsm->id);
             rc = SOFTBUS_OK;
             break;
         }
@@ -1341,7 +1341,7 @@ static int32_t ProcessMasterElect(const void *para)
         }
         compareRet = LnnCompareNodeWeight(localMasterWeight, localMasterUdid,
             msgPara->masterWeight, msgPara->masterUdid);
-        LNN_LOGI(LNN_BUILDER, "fsmId=weight compare result=%d", connFsm->id, compareRet);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%u weight compare result=%d", connFsm->id, compareRet);
         if (compareRet != 0) {
             if (compareRet < 0) {
                 UpdateLocalMasterNode(false, msgPara->masterUdid, msgPara->masterWeight);
@@ -1381,7 +1381,7 @@ static int32_t ProcessLeaveByAddrType(const void *para)
             continue;
         }
         rc = LnnSendLeaveRequestToConnFsm(item);
-        LNN_LOGI(LNN_BUILDER, "leave conn fsmId= by addr type=%d rc=%d", item->id, item->connInfo.addr.type, rc);
+        LNN_LOGI(LNN_BUILDER, "leave conn fsmId=%u by addr type=%d rc=%d", item->id, item->connInfo.addr.type, rc);
         if (rc == SOFTBUS_OK) {
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
         }
@@ -1420,7 +1420,7 @@ static int32_t ProcessLeaveSpecific(const void *para)
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;
         }
         LNN_LOGI(LNN_BUILDER,
-            "send leave LNN msg to connection fsmId= result=%d", item->id, rc);
+            "send leave LNN msg to connection fsmId=%u result=%d", item->id, rc);
     }
 
     if (deviceLeave) {
@@ -1949,13 +1949,13 @@ static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeI
         connFsm->connInfo.nodeInfo = DupNodeInfo(info);
         connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_AUTO;
         LNN_LOGI(LNN_BUILDER,
-            "fsmId=start a connection fsm, authId=%" PRId64, connFsm->id, authId);
+            "fsmId=%u start a connection fsm, authId=%" PRId64, connFsm->id, authId);
         if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
             connFsm->connInfo.nodeInfo = NULL;
             StopConnectionFsm(connFsm);
             SoftBusFree(connFsm->connInfo.nodeInfo);
             LNN_LOGE(LNN_BUILDER,
-                "fsmId=post auth result to connection fsm fail=%" PRId64, connFsm->id, authId);
+                "fsmId=%u post auth result to connection fsm fail=%" PRId64, connFsm->id, authId);
         }
     }
 }
@@ -2713,7 +2713,7 @@ int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId)
         }
         if (item->connInfo.authId == authId) {
             LNN_LOGI(LNN_BUILDER,
-                "fsmId=connection fsm already use authId=%" PRId64, item->id, authId);
+                "fsmId=%u connection fsm already use authId=%" PRId64, item->id, authId);
             return SOFTBUS_OK;
         }
     }
