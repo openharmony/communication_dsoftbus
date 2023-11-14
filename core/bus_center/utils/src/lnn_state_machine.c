@@ -19,10 +19,10 @@
 
 #include <securec.h>
 
+#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 static bool IsDuplicateState(FsmStateMachine *fsm, FsmState *state)
 {
@@ -99,7 +99,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState != NULL || (fsm->flag & FSM_FLAG_RUNNING) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in start msg process");
+        LNN_LOGE(LNN_STATE, "unexpected state in start msg process");
         return;
     }
     if (IsDuplicateState(fsm, state) == true) {
@@ -124,7 +124,7 @@ static void ProcessDataMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in data msg(%d) process, flag=0x%x",
+        LNN_LOGE(LNN_STATE, "unexpected state in data msg(%d) process, flag=0x%x",
             (int32_t)msg->arg1, fsm->flag);
         return;
     }
@@ -146,7 +146,7 @@ static void ProcessStopMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in stop msg process");
+        LNN_LOGE(LNN_STATE, "unexpected state in stop msg process");
         return;
     }
     fsm->curState = NULL;
@@ -189,7 +189,7 @@ static void FsmStateMsgHandler(SoftBusMessage *msg)
     }
 
     if (msg->what != FSM_CTRL_MSG_DATA) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "process fsm ctrl msg: %d", msg->what);
+        LNN_LOGI(LNN_STATE, "process fsm ctrl msgType=%d", msg->what);
     }
     switch (msg->what) {
         case FSM_CTRL_MSG_START:
@@ -216,7 +216,7 @@ static int32_t PostMessageToFsm(FsmStateMachine *fsm, int32_t what, uint64_t arg
 
     msg = CreateFsmHandleMsg(fsm, what, arg1, arg2, obj);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create fsm handle msg fail");
+        LNN_LOGE(LNN_STATE, "create fsm handle msg fail");
         return SOFTBUS_ERR;
     }
     fsm->looper->PostMessage(fsm->looper, msg);
@@ -233,7 +233,7 @@ static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
     }
     msgType = (int32_t)(intptr_t)para;
     if (msg->what == FSM_CTRL_MSG_DATA && (int32_t)msg->arg1 == msgType) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "remove fsm data message: %d", msgType);
+        LNN_LOGI(LNN_STATE, "remove fsm data msgType=%d", msgType);
         FreeFsmHandleMsgObj((FsmCtrlMsgObj *)msg->obj);
         return 0;
     }
@@ -250,7 +250,7 @@ int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *looper, char *name, FsmD
     ListInit(&fsm->stateList);
     fsm->looper = looper == NULL ? GetLooper(LOOP_TYPE_DEFAULT) : looper;
     if (fsm->looper == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get looper fail");
+        LNN_LOGE(LNN_STATE, "get looper fail");
         return SOFTBUS_ERR;
     }
     fsm->handler.name = name;
@@ -275,7 +275,7 @@ int32_t LnnFsmAddState(FsmStateMachine *fsm, FsmState *state)
     }
 
     if (IsDuplicateState(fsm, state)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "already exist state");
+        LNN_LOGE(LNN_STATE, "already exist state");
         return SOFTBUS_ERR;
     }
     ListInit(&state->list);
@@ -317,7 +317,7 @@ int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType,
     }
     msg = CreateFsmHandleMsg(fsm, FSM_CTRL_MSG_DATA, msgType, 0, data);
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create fsm handle msg fail");
+        LNN_LOGE(LNN_STATE, "create fsm handle msg fail");
         return SOFTBUS_ERR;
     }
     fsm->looper->PostMessageDelay(fsm->looper, msg, delayMillis);
@@ -353,7 +353,7 @@ int32_t LnnFsmTransactState(FsmStateMachine *fsm, FsmState *state)
     }
 
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected state in change state process");
+        LNN_LOGE(LNN_STATE, "unexpected state in change state process");
         return SOFTBUS_ERR;
     }
 

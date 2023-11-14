@@ -26,7 +26,6 @@
 #include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "softbus_bus_center.h"
 #include "bus_center_event.h"

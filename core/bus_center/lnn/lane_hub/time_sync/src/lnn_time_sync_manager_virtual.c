@@ -15,8 +15,8 @@
 
 #include "lnn_time_sync_manager.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
     TimeSyncAccuracy accuracy, TimeSyncPeriod period)
@@ -38,7 +38,7 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
 
 int32_t LnnInitTimeSync(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "time sync virtual init success");
+    LNN_LOGI(LNN_INIT, "time sync virtual init success");
     return SOFTBUS_OK;
 }
 
