@@ -15,12 +15,12 @@
 
 #include "lnn_event_monitor.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t LnnInitEventMonitor(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual event monitor");
+    LNN_LOGI(LNN_INIT, "init virtual event monitor");
     return SOFTBUS_OK;
 }
 
