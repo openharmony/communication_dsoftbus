@@ -15,14 +15,14 @@
 
 #include "lnn_decision_db.h"
 
-#include "lnn_log.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
 {
     (void)udid;
 
-    LNN_LOGE(LNN_LEDGER, "insert trusted dev info not implemented");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "insert trusted dev info not implemented.");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -30,7 +30,7 @@ int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
     (void)udid;
 
-    LNN_LOGE(LNN_LEDGER, "remove trusted dev info not implemented");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remove trusted dev info not implemented.");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -39,7 +39,7 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     (void)udidArray;
     (void)num;
 
-    LNN_LOGE(LNN_LEDGER, "get trusted dev info not implemented");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get trusted dev info not implemented.");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -47,12 +47,12 @@ bool LnnIsPotentialHomeGroup(const char *udid)
 {
     (void)udid;
 
-    LNN_LOGE(LNN_LEDGER, "check is potential home group not implemented");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check is potential home group not implemented.");
     return false;
 }
 
 int32_t LnnInitDecisionDbDelay(void)
 {
-    LNN_LOGE(LNN_INIT, "init decision db not implemented");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init decision db not implemented.");
     return SOFTBUS_OK;
 }

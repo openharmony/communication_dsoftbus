@@ -18,13 +18,13 @@
 #include <securec.h>
 
 #include "auth_common.h"
-#include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_session_fsm.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 #define SESSION_KEY_MAX_NUM 10
 #define LAST_USE_THRESHOLD_MS (30 * 1000L) /* 30s */
@@ -48,7 +48,8 @@ static void RemoveOldKey(SessionKeyList *list)
     }
     item = LIST_ENTRY(GET_LIST_HEAD(list), SessionKeyItem, node);
     ListDelete(&item->node);
-    AUTH_LOGI(AUTH_FSM, "session key num reach max, remove the oldest, index=%d", item->index);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "session key num reach max, remove the oldest, index=%d", item->index);
     (void)memset_s(&item->key, sizeof(SessionKey), 0, sizeof(SessionKey));
     SoftBusFree(item);
 }
@@ -98,16 +99,16 @@ int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key
 {
     CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
-    AUTH_LOGD(AUTH_FSM, "keyLen=%d", key->len);
+    ALOGD("keyLen:%d", key->len);
     SessionKeyItem *item = (SessionKeyItem *)SoftBusMalloc(sizeof(SessionKeyItem));
     if (item == NULL) {
-        AUTH_LOGE(AUTH_FSM, "malloc SessionKeyItem fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc SessionKeyItem fail.");
         return SOFTBUS_MALLOC_ERR;
     }
     item->index = index;
     item->lastUseTime = GetCurrentTimeMs();
     if (memcpy_s(&item->key, sizeof(item->key), key, sizeof(SessionKey)) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "add session key fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "add session key fail.");
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
@@ -122,21 +123,21 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
     CHECK_NULL_PTR_RETURN_VALUE(index, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(key, SOFTBUS_INVALID_PARAM);
     if (IsListEmpty((const ListNode *)list)) {
-        AUTH_LOGE(AUTH_FSM, "session key list is empty");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "session key list is empty.");
         return SOFTBUS_ERR;
     }
     SessionKeyItem *item = LIST_ENTRY(GET_LIST_TAIL((const ListNode *)list), SessionKeyItem, node);
     if (item == NULL) {
-        AUTH_LOGE(AUTH_FSM, "invalid session key item");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid session key item.");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(key, sizeof(SessionKey), &item->key, sizeof(item->key)) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "copy session key fail.");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "copy session key fail.");
         return SOFTBUS_MEM_ERR;
     }
     item->lastUseTime = GetCurrentTimeMs();
     *index = item->index;
-    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%d.", item->index);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "get session key succ, index=%d.", item->index);
     return SOFTBUS_OK;
 }
 
@@ -150,14 +151,14 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionK
             continue;
         }
         if (memcpy_s(key, sizeof(SessionKey), &item->key, sizeof(item->key)) != EOK) {
-            AUTH_LOGE(AUTH_FSM, "get session key fail, index=%d", index);
+            SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get session key fail, index=%d.", index);
             return SOFTBUS_MEM_ERR;
         }
         item->lastUseTime = GetCurrentTimeMs();
-        AUTH_LOGI(AUTH_FSM, "get session key succ, index=%d", index);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "get session key succ, index=%d.", index);
         return SOFTBUS_OK;
     }
-    AUTH_LOGE(AUTH_FSM, "session key not found, index=%d", index);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "session key not found, index=%d.", index);
     return SOFTBUS_ERR;
 }
 
@@ -176,7 +177,7 @@ void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index)
         ListDelete(&item->node);
         SoftBusFree(item);
     } else {
-        AUTH_LOGE(AUTH_FSM, "Remove Session key not found, index=%d", index);
+        ALOGE("Remove Session key not found, index=%d.", index);
     }
 }
 
@@ -185,21 +186,21 @@ int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
 {
     if (list == NULL || inData == NULL || inLen == 0 || outData == NULL ||
         *outLen < (inLen + ENCRYPT_OVER_HEAD_LEN)) {
-        AUTH_LOGE(AUTH_FSM, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t index = 0;
     SessionKey sessionKey;
     if (GetLatestSessionKey(list, &index, &sessionKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get key fail");
-        AUTH_LOGD(AUTH_FSM, "keyLen=%d", sessionKey.len);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get key fail.");
+        ALOGD("keyLen:%d", sessionKey.len);
         return SOFTBUS_ENCRYPT_ERR;
     }
     /* pack key index */
     *(uint32_t *)outData = SoftBusHtoLl((uint32_t)index);
     AesGcmCipherKey cipherKey = {.keyLen = sessionKey.len};
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.value, sessionKey.len) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "set key fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set key fail.");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return SOFTBUS_MEM_ERR;
     }
@@ -207,7 +208,7 @@ int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
     int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, inData, inLen, outData + ENCRYPT_INDEX_LEN, outLen, index);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "SoftBusEncryptDataWithSeq fail=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusEncryptDataWithSeq fail(=%d).", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
     *outLen += ENCRYPT_INDEX_LEN;
@@ -219,19 +220,19 @@ int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
 {
     if (list == NULL || inData == NULL || outData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN ||
         *outLen < (inLen - ENCRYPT_OVER_HEAD_LEN)) {
-        AUTH_LOGE(AUTH_FSM, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     /* unpack key index */
     int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)inData);
     SessionKey sessionKey;
     if (GetSessionKeyByIndex(list, index, &sessionKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get key fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "get key fail.");
         return SOFTBUS_DECRYPT_ERR;
     }
     AesGcmCipherKey cipherKey = {.keyLen = sessionKey.len};
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.value, sessionKey.len) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "set key fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "set key fail.");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return SOFTBUS_MEM_ERR;
     }
@@ -240,7 +241,7 @@ int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
         outData, outLen, index);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "SoftBusDecryptDataWithSeq fail=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "SoftBusDecryptDataWithSeq fail(=%d).", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -250,17 +251,17 @@ int32_t EncryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t
     uint8_t **outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || inLen == 0 || outData == NULL || outLen == NULL) {
-        AUTH_LOGE(AUTH_FSM, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t encDataLen = inLen + ENCRYPT_OVER_HEAD_LEN;
     uint8_t *encData = (uint8_t *)SoftBusCalloc(encDataLen);
     if (encData == NULL) {
-        AUTH_LOGE(AUTH_FSM, "malloc encrypt data fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc encrypt data fail.");
         return SOFTBUS_MALLOC_ERR;
     }
     if (EncryptData(list, inData, inLen, encData, &encDataLen) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "encrypt data fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "encrypt data fail.");
         SoftBusFree(encData);
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -273,17 +274,17 @@ int32_t DecryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t
     uint8_t **outData, uint32_t *outLen)
 {
     if (list == NULL || inData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN || outData == NULL || outLen == NULL) {
-        AUTH_LOGE(AUTH_FSM, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t decDataLen = inLen - ENCRYPT_OVER_HEAD_LEN + 1; /* for '\0' */
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
     if (decData == NULL) {
-        AUTH_LOGE(AUTH_FSM, "malloc decrypt data fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc decrypt data fail.");
         return SOFTBUS_MALLOC_ERR;
     }
     if (DecryptData(list, inData, inLen, decData, &decDataLen) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "decrypt data fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "decrypt data fail.");
         SoftBusFree(decData);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -299,25 +300,28 @@ void DumpSessionkeyList(const SessionKeyList *list)
     uint32_t keyNum = 0;
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
-        AUTH_LOGD(AUTH_FSM, "[Dump]SessionKey[%d]={index=%d, key: {len=%u, key=XX}, lastUseTime=%" PRIu64 "}",
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG,
+            "[Dump] SessionKey[%d]: {index=%d, key: {len=%u, key=XX}, lastUseTime=%" PRIu64 "}",
             keyNum, item->index, item->key.len, item->lastUseTime);
         keyNum++;
     }
-    AUTH_LOGD(AUTH_FSM, "[Dump] SessionKey total num=%u", keyNum);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "[Dump] SessionKey total num: %u", keyNum);
 }
 
 static void HandleUpdateSessionKeyEvent(const void *obj)
 {
     CHECK_NULL_PTR_RETURN_VOID(obj);
     int64_t authId = *(int64_t *)(obj);
-    AUTH_LOGI(AUTH_FSM, "update session key begin, authId=%" PRId64, authId);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+        "update session key begin, authId=%" PRId64, authId);
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth == NULL) {
         return;
     }
     if (AuthSessionStartAuth(GenSeq(false), AuthGenRequestId(),
         auth->connId, &auth->connInfo, false, false) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%" PRId64, authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR,
+            "start auth session to update session key fail, authId=%" PRId64, authId);
     }
     DelAuthManager(auth, false);
 }
@@ -328,7 +332,8 @@ static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
     CHECK_NULL_PTR_RETURN_VALUE(para, SOFTBUS_ERR);
     int64_t authId = *(int64_t *)(obj);
     if (authId == *(int64_t *)(para)) {
-        AUTH_LOGI(AUTH_FSM, "remove update session key event, authId=%" PRId64, authId);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO,
+            "remove update session key event, authId=%" PRId64, authId);
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;

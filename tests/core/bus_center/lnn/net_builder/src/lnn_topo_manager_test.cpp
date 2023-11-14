@@ -27,6 +27,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 #define LNN_RELATION_JOIN_THREAD 1
 #define LNN_RELATION_ERROR 0

@@ -14,13 +14,13 @@
  */
 
 #include "auth_interface.h"
-#include "auth_log.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
 {
     (void)listener;
-    AUTH_LOGW(AUTH_INIT, "not implement");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
     return SOFTBUS_OK;
 }
 
@@ -40,7 +40,7 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     (void)connInfo;
     (void)requestId;
     (void)callback;
-    AUTH_LOGW(AUTH_CONN, "not implement");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -221,7 +221,7 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
 
 int32_t AuthInit(void)
 {
-    AUTH_LOGW(AUTH_FSM, "not implement");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "%s not implement.", __func__);
     return SOFTBUS_OK;
 }
 

@@ -23,13 +23,13 @@
 
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
-#include "lnn_log.h"
 #include "lnn_map.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
@@ -84,7 +84,7 @@ void LNNDisctributedLedgerTest::TearDownTestCase()
 
 void LNNDisctributedLedgerTest::SetUp()
 {
-    LNN_LOGI(LNN_TEST, "LocalLedgerTest start");
+    LOG_INFO("LocalLedgerTest start.");
     int32_t ret = LnnInitDistributedLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     NodeInfo info;
@@ -101,7 +101,7 @@ void LNNDisctributedLedgerTest::SetUp()
 
 void LNNDisctributedLedgerTest::TearDown()
 {
-    LNN_LOGI(LNN_TEST, "LocalLedgerTest end");
+    LOG_INFO("LocalLedgerTest end.");
     LnnDeinitDistributedLedger();
 }
 

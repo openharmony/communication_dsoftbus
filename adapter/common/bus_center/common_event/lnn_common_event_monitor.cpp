@@ -24,13 +24,13 @@
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "lnn_heartbeat_strategy.h"
 #include "want.h"
 
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
@@ -52,12 +52,12 @@ CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscribe
 void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    LNN_LOGI(LNN_EVENT, "notify common event=%s", action.c_str());
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify common event %s", action.c_str());
 
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
         LnnUpdateOhosAccount();
         if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
-            LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "not trusted releation, heartbeat(HB) process start later");
             return;
         }
         LnnStartHeartbeat(0);
@@ -90,7 +90,7 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriber_)) {
-        LNN_LOGE(LNN_EVENT, "subscribe common event err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SubscribeCommonEvent: subscribe common event err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -103,22 +103,22 @@ static void LnnSubscribeCommonEvent(void *para)
     (void)para;
     static int32_t retry = 0;
     if (retry > RETRY_MAX) {
-        LNN_LOGE(LNN_EVENT, "try subscribe common event max times");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try subscribe common event max times");
         return;
     }
     OHOS::EventFwk::SubscribeEvent *subscriberPtr = new OHOS::EventFwk::SubscribeEvent();
     if (subscriberPtr == nullptr) {
-        LNN_LOGE(LNN_EVENT, "SubscribeEvent init fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SubscribeEvent init fail");
         return;
     }
     if (subscriberPtr->SubscribeCommonEvent() == SOFTBUS_OK) {
-        LNN_LOGI(LNN_EVENT, "subscribe common event success");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "subscribe common event success");
     } else {
-        LNN_LOGE(LNN_EVENT, "subscribe common event fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe common event fail");
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
         if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeCommonEvent, NULL, DELAY_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "async call subscribe screen state fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "async call subscribe screen state fail");
         }
     }
     delete subscriberPtr;
@@ -129,7 +129,7 @@ int32_t LnnInitCommonEventMonitorImpl(void)
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeCommonEvent, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init common event monitor LnnAsyncCallbackDelayHelper fail");
     }
     return ret;
 }

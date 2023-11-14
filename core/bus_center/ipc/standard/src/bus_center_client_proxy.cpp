@@ -16,11 +16,11 @@
 #include "bus_center_client_proxy.h"
 
 #include "bus_center_client_proxy_standard.h"
-#include "lnn_log.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_permission.h"
 
 using namespace OHOS;
@@ -36,12 +36,12 @@ int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addr
     const char *networkId, int32_t retCode)
 {
     if (info == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->pkgName, info->pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, retCode);
@@ -51,12 +51,12 @@ int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t
     MetaBasicInfo *metaInfo, int32_t retCode)
 {
     if (info == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->pkgName, info->pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, sizeof(MetaBasicInfo), retCode);
@@ -66,12 +66,12 @@ int32_t ClientOnLeaveLNNResult(
     const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return clientProxy->OnLeaveLNNResult(networkId, retCode);
@@ -81,12 +81,12 @@ int32_t ClientOnLeaveMetaNodeResult(
     const char *pkgName, int32_t pid, const char *networkId, int32_t retCode)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!\n");
         return SOFTBUS_ERR;
     }
     return clientProxy->OnLeaveMetaNodeResult(networkId, retCode);
@@ -118,12 +118,12 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     uint32_t infoTypeLen, int32_t retCode)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
     return clientProxy->OnTimeSyncResult(info, infoTypeLen, retCode);
@@ -133,12 +133,12 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     int32_t reason)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
     clientProxy->OnPublishLNNResult(publishId, reason);
@@ -149,12 +149,12 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     int32_t reason)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
     clientProxy->OnRefreshLNNResult(refreshId, reason);
@@ -165,12 +165,12 @@ int32_t ClientOnRefreshDeviceFound(
     const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen)
 {
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is null");
         return SOFTBUS_ERR;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
-        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
     clientProxy->OnRefreshDeviceFound(device, deviceLen);

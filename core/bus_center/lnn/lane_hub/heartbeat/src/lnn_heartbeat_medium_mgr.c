@@ -18,7 +18,6 @@
 #include <securec.h>
 #include <string.h>
 
-#include "anonymizer.h"
 #include "auth_interface.h"
 #include "auth_device_common_key.h"
 #include "bus_center_manager.h"
@@ -34,7 +33,6 @@
 #include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_ohos_account.h"
@@ -44,6 +42,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define HB_RECV_INFO_SAVE_LEN (60 * 60 * HB_TIME_FACTOR)
@@ -80,17 +79,17 @@ static int32_t HbFirstSaveRecvTime(LnnHeartbeatRecvInfo *storedInfo, DeviceInfo 
 
     recvInfo = (LnnHeartbeatRecvInfo *)SoftBusMalloc(sizeof(LnnHeartbeatRecvInfo));
     if (recvInfo == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "medium mgr malloc recvInfo err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium mgr malloc recvInfo err");
         return SOFTBUS_MALLOC_ERR;
     }
     recvInfo->device = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     if (recvInfo->device == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "medium mgr deviceInfo calloc err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB medium mgr deviceInfo calloc err");
         SoftBusFree(recvInfo);
         return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s(recvInfo->device, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
-        LNN_LOGE(LNN_HEART_BEAT, "memcpy_s deviceInfo err");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB memcpy_s deviceInfo err");
         SoftBusFree(recvInfo->device);
         SoftBusFree(recvInfo);
         return SOFTBUS_MEM_ERR;
@@ -132,13 +131,13 @@ static uint64_t HbGetRepeatThresholdByType(LnnHeartbeatType hbType)
 static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbResp)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
-        LNN_LOGD(LNN_HEART_BEAT, "isn't ble directly online, ignore");
+        LLOGD("isn't ble directly online, ignore");
         return;
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGD(LNN_HEART_BEAT, "get nodeInfo fail");
+        LLOGD("get nodeInfo fail");
         return;
     }
     uint32_t oldNetCapa = nodeInfo.netCapacity;
@@ -151,11 +150,11 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
     (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BLE);
     (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BR);
     if (oldNetCapa == nodeInfo.netCapacity) {
-        LNN_LOGD(LNN_HEART_BEAT, "capa not change, don't update devInfo");
+        LLOGD("capa not change, don't update devInfo");
         return;
     }
     if (LnnSetDLConnCapability(networkId, nodeInfo.netCapacity) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "update net capability fail");
+        LLOGE("update net capability fail");
         return;
     }
 }
@@ -168,11 +167,11 @@ static int32_t HbGetOnlineNodeByRecvInfo(const char *recvUdidHash,
     char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
 
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get all online node info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get all online node info fail");
         return SOFTBUS_ERR;
     }
     if (info == NULL || infoNum == 0) {
-        LNN_LOGD(LNN_HEART_BEAT, "none online node");
+        LLOGD("HB none online node");
         return SOFTBUS_ERR;
     }
     DiscoveryType discType = LnnConvAddrTypeToDiscType(recvAddrType);
@@ -181,15 +180,11 @@ static int32_t HbGetOnlineNodeByRecvInfo(const char *recvUdidHash,
             continue;
         }
         if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, nodeInfo) != SOFTBUS_OK) {
-            LNN_LOGD(LNN_HEART_BEAT, "get nodeInfo fail");
+            LLOGD("HB get nodeInfo fail");
             continue;
         }
         if (!LnnHasDiscoveryType(nodeInfo, discType)) {
-            char *anonyNetworkId = NULL;
-            Anonymize(info[i].networkId, &anonyNetworkId);
-            LNN_LOGD(LNN_HEART_BEAT, "node online networkId=%s not have discType=%d",
-                anonyNetworkId, discType);
-            AnonymizeFree(anonyNetworkId);
+            LLOGD("HB node online networkId:%s not have discType:%d", AnonymizesNetworkID(info[i].networkId), discType);
             continue;
         }
         if (LnnGenerateHexStringHash((const unsigned char *)nodeInfo->deviceInfo.deviceUdid, udidHash,
@@ -197,13 +192,8 @@ static int32_t HbGetOnlineNodeByRecvInfo(const char *recvUdidHash,
             continue;
         }
         if (strncmp(udidHash, recvUdidHash, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
-            char *anonyNetworkId = NULL;
-            char *anonyUdid = NULL;
-            Anonymize(udidHash, &anonyUdid);
-            Anonymize(info[i].networkId, &anonyNetworkId);
-            LNN_LOGD(LNN_HEART_BEAT, "node udidHash=%s networkId=%s is online", anonyUdid, anonyNetworkId);
-            AnonymizeFree(anonyNetworkId);
-            AnonymizeFree(anonyUdid);
+            LLOGD("HB node udidHash:%s networkId:%s is online", AnonymizesUDID(udidHash),
+                AnonymizesNetworkID(info[i].networkId));
             UpdateOnlineInfoNoConnection(info[i].networkId, hbResp);
             SoftBusFree(info);
             return SOFTBUS_OK;
@@ -217,38 +207,28 @@ static int32_t HbUpdateOfflineTimingByRecvInfo(const char *networkId, Connection
     uint64_t updateTime)
 {
     uint64_t oldTimeStamp;
-    char *anonyNetworkId = NULL;
     if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimeStamp) != SOFTBUS_OK) {
-        Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT, "get timeStamp err, networkId=%s", anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
+        LLOGE("HB get timeStamp err, networkId:%s", AnonymizesNetworkID(networkId));
         return SOFTBUS_ERR;
     }
     if (LnnSetDLHeartbeatTimestamp(networkId, updateTime) != SOFTBUS_OK) {
-        Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT, "update timeStamp err, networkId=%s", anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
+        LLOGE("HB update timeStamp err, networkId:%s", AnonymizesNetworkID(networkId));
         return SOFTBUS_ERR;
     }
-    Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "recv to update timeStamp, networkId=%s, update timeStamp from %" PRIu64 " to %" PRIu64,
-        anonyNetworkId, oldTimeStamp, updateTime);
+    LLOGI("HB recv to update timeStamp, networkId:%s, update timeStamp from:%" PRIu64 " to:%" PRIu64,
+        AnonymizesNetworkID(networkId), oldTimeStamp, updateTime);
     if (hbType != HEARTBEAT_TYPE_BLE_V1 && hbType != HEARTBEAT_TYPE_BLE_V0) {
-        LNN_LOGD(LNN_HEART_BEAT, "only BLE_V1 and BLE_V0 support offline timing");
-        AnonymizeFree(anonyNetworkId);
+        LLOGD("HB only BLE_V1 and BLE_V0 support offline timing");
         return SOFTBUS_ERR;
     }
     if (LnnStopOfflineTimingStrategy(networkId, type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "remove offline check err, networkId=%s", anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
+        LLOGE("HB remove offline check err, networkId:%s", AnonymizesNetworkID(networkId));
         return SOFTBUS_ERR;
     }
     if (LnnStartOfflineTimingStrategy(networkId, type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "set new offline check err, networkId=%s", anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
+        LLOGE("HB set new offline check err, networkId:%s", AnonymizesNetworkID(networkId));
         return SOFTBUS_ERR;
     }
-    AnonymizeFree(anonyNetworkId);
     return SOFTBUS_OK;
 }
 
@@ -294,33 +274,26 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
 
 static bool HbIsNeedReAuth(const NodeInfo *nodeInfo, const char *newAccountHash)
 {
-    char *anonyNetworkId = NULL;
-    Anonymize(nodeInfo->networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "peer networkId=%s accountHash [%02X%02X -> %02X%02X]",
-        anonyNetworkId, nodeInfo->accountHash[0], nodeInfo->accountHash[1],
-        newAccountHash[0], newAccountHash[1]);
-    AnonymizeFree(anonyNetworkId);
+    LLOGI("HB peer networkId:%s accountHash [%02X%02X -> %02X%02X]", AnonymizesNetworkID(nodeInfo->networkId),
+        nodeInfo->accountHash[0], nodeInfo->accountHash[1], newAccountHash[0], newAccountHash[1]);
     return memcmp(nodeInfo->accountHash, newAccountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
 }
 
 static void HbDumpRecvDeviceInfo(const DeviceInfo *device, int32_t weight, int32_t masterWeight,
     LnnHeartbeatType hbType, uint64_t nowTime)
 {
-    char *anonyUdid = NULL;
     const char *devTypeStr = LnnConvertIdToDeviceType((uint16_t)device->devType);
-    Anonymize(device->devId, &anonyUdid);
-    LNN_LOGI(LNN_HEART_BEAT, ">> heartbeat(HB) OnTock [udidHash=%s, accountHash=%02X%02X, hbType=%d, devTypeStr=%s,"
-        "peerWeight=%d, masterWeight=%d, devTypeHex=%02X, ConnectionAddrType=%d, nowTime=%" PRIu64 "]",
-        anonyUdid, device->accountHash[0], device->accountHash[1], hbType,
+    LLOGI(">> heartbeat(HB) OnTock [udidHash:%s, accountHash:%02X%02X, hbType:%d, devTypeStr:%s, "
+        "peerWeight:%d, masterWeight:%d, devTypeHex:%02X, ConnectionAddrType:%d, nowTime:%" PRIu64 "]",
+        AnonymizesUDID(device->devId), device->accountHash[0], device->accountHash[1], hbType,
         devTypeStr != NULL ? devTypeStr : "", weight, masterWeight, device->devType, device->addr[0].type, nowTime);
-    AnonymizeFree(anonyUdid);
 }
 
 static bool IsLocalSupportBleDirectOnline()
 {
     uint64_t localFeatureCap = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeatureCap) != SOFTBUS_OK) {
-        LNN_LOGW(LNN_HEART_BEAT, "build ble broadcast, get local feature cap failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB build ble broadcast, get local feature cap failed");
         return false;
     }
     if ((localFeatureCap & (1 << BIT_BLE_DIRECT_ONLINE)) == 0) {
@@ -332,7 +305,7 @@ static bool IsLocalSupportBleDirectOnline()
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because resp data");
+        LLOGI("don't support ble direct online because resp data");
         return true;
     }
     int32_t ret;
@@ -340,28 +313,28 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (!IsLocalSupportBleDirectOnline()) {
-        LNN_LOGI(LNN_HEART_BEAT, "ble don't support ble direct online");
+        LLOGI("ble don't support ble direct online");
         return true;
     }
     if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because peer state version change, ver:%d->%d",
+        LLOGI("don't support ble direct online because peer state version change, ver:%d->%d",
             deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
         return true;
     }
     if (LnnGetLocalNumInfo(NUM_KEY_STATE_VERSION, &stateVersion) == SOFTBUS_OK &&
         stateVersion != deviceInfo.localStateVersion) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because local state version change, ver:%d->%d",
+        LLOGI("don't support ble direct online because local state version change, ver:%d->%d",
             deviceInfo.localStateVersion, stateVersion);
         return true;
     }
     if ((int32_t)hbResp->stateVersion != deviceInfo.stateVersion) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because state version change");
+        LLOGI("don't support ble direct online because state version change");
         return true;
     }
     AuthDeviceKeyInfo keyInfo = {0};
-    LNN_LOGI(LNN_HEART_BEAT, "AuthFindDeviceKey=%s", device->devId);
+    LLOGI("AuthFindDeviceKey = %s", device->devId);
     if (AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
+        LLOGI("don't support ble direct online because key not exist");
         return true;
     }
 
@@ -375,14 +348,14 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BR);
     (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BLE);
     if ((ret = LnnSaveRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret:%d", ret);
+        LLOGE("don't support ble direct online because update device info fail ret = %d", ret);
         return true;
     }
     if (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid)) {
-        LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
+        LLOGE("don't support ble direct online because broadcast key");
         return true;
     }
-    LNN_LOGI(LNN_HEART_BEAT, "support ble direct online");
+    LLOGI("support ble direct online");
     return false;
 }
 
@@ -402,12 +375,11 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
     int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
     uint64_t nowTime;
-    char *anonyUdid = NULL;
     SoftBusSysTime times = {0};
     SoftBusGetTime(&times);
     nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr lock recv info list fail");
+        LLOGE("HB mgr lock recv info list fail");
         return SOFTBUS_LOCK_ERR;
     }
     LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(device->devId, device->addr[0].type, nowTime);
@@ -416,9 +388,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     if (HbSaveRecvTimeToRemoveRepeat(storedInfo, device, weight, masterWeight, nowTime) != SOFTBUS_OK) {
-        Anonymize(device->devId, &anonyUdid);
-        LNN_LOGE(LNN_HEART_BEAT, "save recv time fail, udidHash=%s", anonyUdid);
-        AnonymizeFree(anonyUdid);
+        LLOGE("HB save recv time fail, udidHash:%s", AnonymizesUDID(device->devId));
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_ERR;
     }
@@ -436,7 +406,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
         if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
-            LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
+            LLOGE("reauth request repeated");
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
         }
@@ -444,7 +414,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         uint32_t requestId = AuthGenRequestId();
         (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
         if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
-            LNN_LOGI(LNN_HEART_BEAT, "AuthStartVerify error");
+            LLOGI("AuthStartVerify error");
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return SOFTBUS_ERR;
         }
@@ -452,21 +422,17 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         return SOFTBUS_OK;
     }
     if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
-        Anonymize(device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%s, isNeedOnline=%d",
-            anonyUdid, device->isOnline);
-            AnonymizeFree(anonyUdid);
+        LLOGD("HB recv but ignore repeated join lnn request, udidHash:%s, isNeedOnline:%d",
+            AnonymizesUDID(device->devId), device->isOnline);
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     bool isConnect = IsNeedConnectOnLine(device, hbResp);
-    Anonymize(device->devId, &anonyUdid);
-    LNN_LOGI(LNN_HEART_BEAT, "heartbeat(HB) find device, udidHash=%s, ConnectionAddrType=%02X, isConnect=%d",
-        anonyUdid, device->addr[0].type, isConnect);
-    AnonymizeFree(anonyUdid);
+    LLOGI("heartbeat(HB) find device, udidHash:%s, ConnectionAddrType:%02X, isConnect = %d",
+        AnonymizesUDID(device->devId), device->addr[0].type, isConnect);
     if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
+        LLOGE("HB mgr recv process notify device found fail");
         return SOFTBUS_ERR;
     }
     if (isConnect) {
@@ -480,15 +446,12 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight,
     int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
     if (device == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr recv process get invalid param");
+        LLOGE("HB mgr recv process get invalid param");
         return SOFTBUS_ERR;
     }
     if (!AuthIsPotentialTrusted(device)) {
-        char *anonyUdid = NULL;
-        Anonymize(device->devId, &anonyUdid);
-        LNN_LOGW(LNN_HEART_BEAT, ">> heartbeat(HB) OnTock is not potential trusted, udidHash=%s, accountHash=%02X%02X",
-            anonyUdid, device->accountHash[0], device->accountHash[1]);
-        AnonymizeFree(anonyUdid);
+        LLOGW(">> heartbeat(HB) OnTock is not potential trusted, udidHash:%s, accountHash:%02X%02X",
+            AnonymizesUDID(device->devId), device->accountHash[0], device->accountHash[1]);
         return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
     }
     return HbNotifyReceiveDevice(device, weight, masterWeight, hbType, isOnlineDirectly, hbResp);
@@ -502,36 +465,29 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
     bool isFromMaster = false;
 
     if (udidHash == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr recv higher weight get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr recv higher weight get invalid param");
         return SOFTBUS_ERR;
     }
     (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     if (HbGetOnlineNodeByRecvInfo(udidHash, type, &nodeInfo, NULL) != SOFTBUS_OK) {
-        char *anonyUdid = NULL;
-        Anonymize(udidHash, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv higher weight udidhash:%s is not online yet", anonyUdid);
-        AnonymizeFree(anonyUdid);
+        LLOGD("HB recv higher weight udidhash:%s is not online yet", AnonymizesUDID(udidHash));
         return SOFTBUS_OK;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, masterUdid, sizeof(masterUdid)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get local master udid fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get local master udid fail");
         return SOFTBUS_ERR;
     }
     isFromMaster = strcmp(masterUdid, nodeInfo.deviceInfo.deviceUdid) == 0 ? true : false;
     if (isReElect && !isFromMaster &&
         LnnNotifyMasterElect(nodeInfo.networkId, nodeInfo.deviceInfo.deviceUdid, weight) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "notify master elect fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB notify master elect fail");
         return SOFTBUS_ERR;
     }
     if (isFromMaster) {
         LnnSetHbAsMasterNodeState(false);
     }
-    char *anonyUdid = NULL;
-    Anonymize(udidHash, &anonyUdid);
-    char *anonyMasterUdid = NULL;
-    Anonymize(masterUdid, &anonyMasterUdid);
-    LNN_LOGI(LNN_HEART_BEAT, "recv higher weight udidHash=%s, weight=%d, masterUdid=%s",
-        masterUdid, weight, anonyMasterUdid);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB recv higher weight udidHash:%s, weight:%d, masterUdid:%s",
+        AnonymizesUDID(udidHash), weight, AnonymizesUDID(masterUdid));
     return SOFTBUS_OK;
 }
 
@@ -541,15 +497,12 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
     (void)type;
 
     if (udidHash == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr relay get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay get invalid param");
         return;
     }
-    char *anonyUdid = NULL;
-    Anonymize(udidHash, &anonyUdid);
-    LNN_LOGD(LNN_HEART_BEAT, "mgr relay process, udidhash=%s, hbType=%d", anonyUdid, hbType);
-    AnonymizeFree(anonyUdid);
+    LLOGD("HB mgr relay process, udidhash:%s, hbType:%d", AnonymizesUDID(udidHash), hbType);
     if (LnnStartHbByTypeAndStrategy(hbType, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr relay process fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB mgr relay process fail");
         return;
     }
 }
@@ -561,7 +514,7 @@ static int32_t HbInitRecvList(void)
     }
     g_hbRecvList = CreateSoftBusList();
     if (g_hbRecvList == NULL) {
-        LNN_LOGE(LNN_INIT, "create recv list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB create recv list fail");
         return SOFTBUS_ERR;
     }
     g_hbRecvList->cnt = 0;
@@ -577,7 +530,7 @@ static void HbDeinitRecvList(void)
         return;
     }
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        LNN_LOGE(LNN_INIT, "deinit recv list lock recv info list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB deinit recv list lock recv info list fail");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hbRecvList->list, LnnHeartbeatRecvInfo, node) {
@@ -599,7 +552,7 @@ void LnnHbClearRecvList(void)
         return;
     }
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "deinit recv list lock recv info list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB deinit recv list lock recv info list fail");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hbRecvList->list, LnnHeartbeatRecvInfo, node) {
@@ -618,33 +571,29 @@ void LnnDumpHbMgrRecvList(void)
     LnnHeartbeatRecvInfo *item = NULL;
 
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "dump recv list lock recv info list fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB dump recv list lock recv info list fail");
         return;
     }
     if (IsListEmpty(&g_hbRecvList->list)) {
-        LNN_LOGD(LNN_HEART_BEAT, "DumpHbMgrRecvList count=0");
+        LLOGD("DumpHbMgrRecvList count=0");
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &g_hbRecvList->list, LnnHeartbeatRecvInfo, node) {
-        char *anonyUdid = NULL;
         dumpCount++;
         if (dumpCount > HB_DUMP_UPDATE_INFO_MAX_NUM) {
             break;
         }
         deviceType = LnnConvertIdToDeviceType((uint16_t)item->device->devType);
         if (deviceType == NULL) {
-            Anonymize(item->device->devId, &anonyUdid);
-            LNN_LOGE(LNN_HEART_BEAT, "get deviceType fail, udidHash=%s", anonyUdid);
-            AnonymizeFree(anonyUdid);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get deviceType fail, udidHash:%s",
+                AnonymizesUDID(item->device->devId));
             continue;
         }
-        Anonymize(item->device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "DumpRecvList count=%d [i=%d, udidHash=%s, deviceType=%s,"
-            "ConnectionAddrType=%02X, weight=%d, masterWeight=%d, lastRecvTime=%" PRIu64 "]",
-            g_hbRecvList->cnt, dumpCount, anonyUdid, deviceType,
-            item->device->addr[0].type, item->weight, item->masterWeight, item->lastRecvTime);
-        AnonymizeFree(anonyUdid);
+        LLOGD("DumpRecvList count:%d [i:%d, udidHash:%s, deviceType:%s, ConnectionAddrType:%02X, weight:%d, "
+            "masterWeight:%d, lastRecvTime:%" PRIu64 "]", g_hbRecvList->cnt, dumpCount,
+            AnonymizesUDID(item->device->devId), deviceType, item->device->addr[0].type, item->weight,
+            item->masterWeight, item->lastRecvTime);
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
 }
@@ -657,11 +606,11 @@ void LnnDumpHbOnlineNodeList(void)
     NodeBasicInfo *info = NULL;
 
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get node info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get node info fail");
         return;
     }
     if (info == NULL || infoNum == 0) {
-        LNN_LOGD(LNN_HEART_BEAT, "DumpHbOnlineNodeList count=0");
+        LLOGD("DumpHbOnlineNodeList count=0");
         return;
     }
     NodeInfo nodeInfo;
@@ -674,14 +623,14 @@ void LnnDumpHbOnlineNodeList(void)
             continue;
         }
         if (LnnGetDLHeartbeatTimestamp(info[i].networkId, &oldTimeStamp) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "get timeStamp err, nodeInfo i=%d", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get timeStamp err, nodeInfo i=%d", i);
             continue;
         }
         char *deviceTypeStr = LnnConvertIdToDeviceType(nodeInfo.deviceInfo.deviceTypeId);
-        LNN_LOGD(LNN_HEART_BEAT, "DumpOnlineNodeList count:%d [i:%d, deviceName:%s, deviceTypeId:%d,"
-            "deviceTypeStr:%s, masterWeight:%d, discoveryType:%d, oldTimeStamp:%" PRIu64 "]",
-            infoNum, i + 1, nodeInfo.deviceInfo.deviceName, nodeInfo.deviceInfo.deviceTypeId,
-            deviceTypeStr != NULL ? deviceTypeStr : "", nodeInfo.masterWeight, nodeInfo.discoveryType, oldTimeStamp);
+        LLOGD("DumpOnlineNodeList count:%d [i:%d, deviceName:%s, deviceTypeId:%d, deviceTypeStr:%s, masterWeight:%d, "
+            "discoveryType:%d, oldTimeStamp:%" PRIu64 "]", infoNum, i + 1, nodeInfo.deviceInfo.deviceName,
+            nodeInfo.deviceInfo.deviceTypeId, deviceTypeStr != NULL ? deviceTypeStr : "",
+            nodeInfo.masterWeight, nodeInfo.discoveryType, oldTimeStamp);
     }
     SoftBusFree(info);
 }
@@ -689,11 +638,11 @@ void LnnDumpHbOnlineNodeList(void)
 int32_t LnnHbMediumMgrInit(void)
 {
     if (LnnRegistBleHeartbeatMediumMgr() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "regist ble heartbeat manager fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist ble heartbeat manager fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegisterBleLpDeviceMediumMgr() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "SH regist LpDevice manager fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SH regist LpDevice manager fail");
         return SOFTBUS_ERR;
     }
     return HbInitRecvList();
@@ -707,27 +656,27 @@ static bool VisitHbMediumMgrSendBegin(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
     LnnHeartbeatSendBeginData *custData = NULL;
 
     if (data == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "manager send once begin get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send once begin get invalid param");
         return false;
     }
     custData = (LnnHeartbeatSendBeginData *)data;
     custData->hbType = eachType;
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
-        LNN_LOGE(LNN_HEART_BEAT, "manager send once begin convert type fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send once begin convert type fail");
         return false;
     }
     if (g_hbMeidumMgr[id] == NULL || (eachType & g_hbMeidumMgr[id]->supportType) == 0) {
-        LNN_LOGW(LNN_HEART_BEAT, "not support heartbeat type=%d", eachType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat type(%d)", eachType);
         return true;
     }
     if (g_hbMeidumMgr[id]->onSendOneHbBegin == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "manager send once begin cb is NULL, type=%d", eachType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB manager send once begin cb is NULL, type(%d)", eachType);
         return true;
     }
     ret = g_hbMeidumMgr[id]->onSendOneHbBegin(custData);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "send once begin type=%d fail, ret=%d", eachType, ret);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin type(%d) fail, ret=%d", eachType, ret);
         return false;
     }
     return true;
@@ -739,7 +688,7 @@ int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnVisitHbTypeSet(VisitHbMediumMgrSendBegin, &custData->hbType, custData)) {
-        LNN_LOGE(LNN_HEART_BEAT, "manager send begin hbType=%d fail", custData->hbType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send begin hbType(%d) fail", custData->hbType);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -754,31 +703,31 @@ static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet, LnnHeartbeatType 
     LnnHeartbeatSendEndData *custData = NULL;
 
     if (data == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "manager send once end get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send once end get invalid param");
         return false;
     }
     if (eachType == HEARTBEAT_TYPE_BLE_V3) {
-        LNN_LOGI(LNN_HEART_BEAT, "V3 don't stop");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "V3 don't stop");
         return true;
     }
     custData = (LnnHeartbeatSendEndData *)data;
     custData->hbType = eachType;
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
-        LNN_LOGE(LNN_HEART_BEAT, "manager stop one cycle convert type fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager stop one cycle convert type fail");
         return false;
     }
     if (g_hbMeidumMgr[id] == NULL || (eachType & g_hbMeidumMgr[id]->supportType) == 0) {
-        LNN_LOGW(LNN_HEART_BEAT, "not support heartbeat type=%d", eachType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat type(%d)", eachType);
         return true;
     }
     if (g_hbMeidumMgr[id]->onSendOneHbEnd == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "manager send once end cb is NULL, type=%d", eachType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB manager send once end cb is NULL, type(%d)", eachType);
         return true;
     }
     ret = g_hbMeidumMgr[id]->onSendOneHbEnd(custData);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "stop one cycle type=%d fail, ret=%d", eachType, ret);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop one cycle type(%d) fail, ret=%d", eachType, ret);
         return false;
     }
     return true;
@@ -787,7 +736,7 @@ static bool VisitHbMediumMgrSendEnd(LnnHeartbeatType *typeSet, LnnHeartbeatType 
 int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custData)
 {
     if (!LnnVisitHbTypeSet(VisitHbMediumMgrSendEnd, &custData->hbType, custData)) {
-        LNN_LOGE(LNN_HEART_BEAT, "manager send end hbType=%d fail", custData->hbType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager send end hbType(%d) fail", custData->hbType);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -801,20 +750,20 @@ static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eac
 
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
-        LNN_LOGE(LNN_HEART_BEAT, "stop heartbeat convert type fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat convert type fail");
         return false;
     }
     if (g_hbMeidumMgr[id] == NULL || (eachType & g_hbMeidumMgr[id]->supportType) == 0) {
-        LNN_LOGW(LNN_HEART_BEAT, "not support heartbeat type=%d", eachType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat type(%d)", eachType);
         return true;
     }
     if (g_hbMeidumMgr[id]->onStopHbByType == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "manager stop cb is NULL, type=%d", eachType);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB manager stop cb is NULL, type(%d)", eachType);
         return true;
     }
     ret = g_hbMeidumMgr[id]->onStopHbByType();
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "stop heartbeat type=%d fail, ret=%d", eachType, ret);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat type(%d) fail, ret=%d", eachType, ret);
         return false;
     }
     return true;
@@ -823,7 +772,7 @@ static bool VisitHbMediumMgrStop(LnnHeartbeatType *typeSet, LnnHeartbeatType eac
 int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type)
 {
     if (!LnnVisitHbTypeSet(VisitHbMediumMgrStop, type, NULL)) {
-        LNN_LOGE(LNN_HEART_BEAT, "manager stop hbType=%d fail", *type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager stop hbType(%d) fail", *type);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -852,21 +801,21 @@ int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
     int32_t id, ret;
 
     if (param == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "set medium param get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     id = LnnConvertHbTypeToId(param->type);
     if (id == HB_INVALID_TYPE_ID) {
-        LNN_LOGE(LNN_HEART_BEAT, "set medium param convert type fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param convert type fail");
         return SOFTBUS_ERR;
     }
     if (g_hbMeidumMgr[id] == NULL || g_hbMeidumMgr[id]->onSetMediumParam == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "not support heartbeat type(%d)", param->type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB not support heartbeat type(%d)", param->type);
         return SOFTBUS_NOT_IMPLEMENT;
     }
     ret = g_hbMeidumMgr[id]->onSetMediumParam(param);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "set medium param fail, type=%d, ret=%d", param->type, ret);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param fail, type=%d, ret=%d", param->type, ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -885,7 +834,7 @@ int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type)
             continue;
         }
         if (g_hbMeidumMgr[i]->onUpdateSendInfo(type) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "manager update send info fail, i=%d", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB manager update send info fail, i=%d", i);
             return SOFTBUS_ERR;
         }
     }
@@ -900,10 +849,10 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
 
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
-        LNN_LOGE(LNN_HEART_BEAT, "regist manager convert type fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist manager convert type fail");
         return false;
     }
-    LNN_LOGD(LNN_HEART_BEAT, "Regeist medium manager id=%d", id);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB Regeist medium manager id=%d", id);
     g_hbMeidumMgr[id] = mgr;
     return true;
 }
@@ -912,11 +861,11 @@ int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
     // TODO: One-to-one correspondence between LnnHeartbeatMediumMgr and implementation.
     if (mgr == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "regist manager get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist manager get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnVisitHbTypeSet(VisitRegistHeartbeatMediumMgr, &mgr->supportType, (void *)mgr)) {
-        LNN_LOGE(LNN_HEART_BEAT, "regist manager fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist manager fail");
         return SOFTBUS_ERR;
     }
     if (mgr->init != NULL) {
@@ -933,7 +882,7 @@ static bool VisitUnRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartb
 
     id = LnnConvertHbTypeToId(eachType);
     if (id == HB_INVALID_TYPE_ID) {
-        LNN_LOGE(LNN_HEART_BEAT, "unregist manager convert type fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unregist manager convert type fail");
         return false;
     }
     g_hbMeidumMgr[id] = NULL;
@@ -943,11 +892,11 @@ static bool VisitUnRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartb
 int32_t LnnUnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
     if (mgr == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "unregist manager get invalid param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unregist manager get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnVisitHbTypeSet(VisitUnRegistHeartbeatMediumMgr, &mgr->supportType, (void *)mgr)) {
-        LNN_LOGE(LNN_HEART_BEAT, "unregist manager fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unregist manager fail");
         return SOFTBUS_ERR;
     }
     if (mgr->deinit != NULL) {

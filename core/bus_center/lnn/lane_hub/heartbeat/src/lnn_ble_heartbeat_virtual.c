@@ -15,15 +15,15 @@
 
 #include "lnn_ble_heartbeat.h"
 
-#include "lnn_log.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 static int32_t InitBleHeartbeat(const LnnHeartbeatMediumMgrCb *callback)
 {
     (void)callback;
 
-    LNN_LOGI(LNN_INIT, "ble heartbeat stub impl init");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl init");
     return SOFTBUS_OK;
 }
 
@@ -31,7 +31,7 @@ static int32_t BleHeartbeatOnceBegin(const LnnHeartbeatSendBeginData *custData)
 {
     (void)custData;
 
-    LNN_LOGI(LNN_HEART_BEAT, "ble heartbeat stub impl beat once");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat once");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -39,7 +39,7 @@ static int32_t BleHeartbeatOnceEnd(const LnnHeartbeatSendEndData *custData)
 {
     (void)custData;
 
-    LNN_LOGI(LNN_HEART_BEAT, "ble heartbeat stub impl beat end");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat end");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -47,7 +47,7 @@ static int32_t SetBleMediumParam(const LnnHeartbeatMediumParam *param)
 {
     (void)param;
 
-    LNN_LOGI(LNN_HEART_BEAT, "ble heartbeat stub impl set medium param");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl set medium param");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -55,19 +55,19 @@ static int32_t UpdateBleSendInfo(LnnHeartbeatUpdateInfoType type)
 {
     (void)type;
 
-    LNN_LOGI(LNN_HEART_BEAT, "ble heartbeat stub impl update send info");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl update send info");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t StopBleHeartbeat(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "ble heartbeat stub impl beat stop");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl beat stop");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static void DeinitBleHeartbeat(void)
 {
-    LNN_LOGI(LNN_INIT, "ble heartbeat stub impl deinit");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ble heartbeat stub impl deinit");
     return;
 }
 

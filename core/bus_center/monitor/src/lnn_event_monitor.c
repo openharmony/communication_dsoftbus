@@ -18,10 +18,10 @@
 #include "bus_center_event.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_devicename_info.h"
-#include "lnn_log.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 
 typedef enum {
@@ -60,7 +60,7 @@ int32_t LnnInitEventMonitor(void)
             continue;
         }
         if (g_monitorImplInit[i]() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_INIT, "init event monitor impl(%u) failed", i);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor impl(%u) failed", i);
             return SOFTBUS_ERR;
         }
     }
