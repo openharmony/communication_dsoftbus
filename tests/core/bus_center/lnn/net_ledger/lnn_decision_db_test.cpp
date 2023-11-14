@@ -21,10 +21,10 @@
 
 #include "lnn_decision_db_deps_mock.h"
 #include "lnn_decision_db.h"
-#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -48,12 +48,12 @@ void LNNDbMockTest::TearDownTestCase()
 
 void LNNDbMockTest::SetUp()
 {
-    LNN_LOGI(LNN_TEST, "LNNDbMockTest start");
+    LOG_INFO("LNNDbMockTest start.");
 }
 
 void LNNDbMockTest::TearDown()
 {
-    LNN_LOGI(LNN_TEST, "LNNDbMockTest finish");
+    LOG_INFO("LNNDbMockTest finish.");
 }
 
 /*

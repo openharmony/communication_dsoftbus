@@ -18,12 +18,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lnn_log.h"
 #include "lnn_async_callback_utils.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "v1_1/iwlan_interface.h"
 
 #define WLAN_SERVICE_NAME "wlan_interface_service"
@@ -39,7 +39,7 @@ static void GetOneChannelMeasResult(void *para);
 int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
 {
     if (cb == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameter.");
         return SOFTBUS_INVALID_PARAM;
     }
     g_wlanChannelInfoCb = cb;
@@ -49,12 +49,12 @@ int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb)
 static int32_t GetHdiInstance(void)
 {
     if (g_wlanObj != NULL) {
-        LNN_LOGE(LNN_STATE, "hdi instance already exists");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "hdi instance already exists.");
         return SOFTBUS_OK;
     }
     g_wlanObj = IWlanInterfaceGetInstance(WLAN_SERVICE_NAME, false);
     if (g_wlanObj == NULL) {
-        LNN_LOGE(LNN_STATE, "wlan interface get instance fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wlan interface get instance fail.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -93,13 +93,13 @@ static void ExcuteChannelMeas(void)
             g_wlanChannelInfoCb->onFail(rc);
         }
         ReleaseMeasResources();
-        LNN_LOGE(LNN_STATE, "softbus StartChannelMeas fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus StartChannelMeas fail.");
         return;
     }
     g_channelList.measNum++;
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), GetOneChannelMeasResult, NULL,
         GET_MEAS_RESULT_DELAY_MS) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "LnnAsyncCallbackDelayHelper get result delay fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnAsyncCallbackDelayHelper get result delay fail.");
         return;
     }
 }
@@ -107,27 +107,27 @@ static void ExcuteChannelMeas(void)
 int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
 {
     if (channelId == NULL || num == 0) {
-        LNN_LOGE(LNN_STATE, "invalid parameter");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameter.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (GetHdiInstance() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "softbus get hdi instance fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus get hdi instance fail.");
         return SOFTBUS_ERR;
     }
     if (g_channelList.buff != NULL || g_channelInfoList.buff != NULL) {
-        LNN_LOGI(LNN_STATE, "measuring channel");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "measuring channel.");
         return SOFTBUS_OK;
     }
     
     g_channelList.buff = (int32_t *)SoftBusCalloc(sizeof(int32_t) * num);
     if (g_channelList.buff == NULL) {
-        LNN_LOGE(LNN_STATE, " SoftBusCalloc channelId fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, " SoftBusCalloc channelId fail.");
         return SOFTBUS_ERR;
     }
     g_channelList.num = num;
     g_channelList.measNum = 0;
     if (memcpy_s(g_channelList.buff, sizeof(int32_t) * num, channelId, sizeof(int32_t) * num) != EOK) {
-        LNN_LOGE(LNN_STATE, "net hdi memcpy fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "net hdi memcpy fail.");
         SoftBusFree(g_channelList.buff);
         g_channelList.buff = NULL;
         return SOFTBUS_ERR;
@@ -135,7 +135,7 @@ int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
 
     g_channelInfoList.buff = (WlanChannelInfo *)SoftBusCalloc(sizeof(WlanChannelInfo) * num);
     if (g_channelInfoList.buff == NULL) {
-        LNN_LOGE(LNN_STATE, "SoftBusCalloc WlanChannelInfo fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftBusCalloc WlanChannelInfo fail.");
         SoftBusFree(g_channelList.buff);
         g_channelList.buff = NULL;
         return SOFTBUS_ERR;
@@ -162,7 +162,7 @@ static void GetOneChannelMeasResult(void *para)
             g_wlanChannelInfoCb->onFail(rc);
         }
         ReleaseMeasResources();
-        LNN_LOGE(LNN_STATE, "softbus GetChannelMeasResult failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus GetChannelMeasResult failed.");
         return;
     }
     (g_channelInfoList.buff + g_channelList.measNum-1)->channelId = measChannelResult.channelId;

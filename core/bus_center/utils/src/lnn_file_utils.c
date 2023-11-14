@@ -17,11 +17,11 @@
 
 #include <securec.h>
 
-#include "lnn_log.h"
 #include "softbus_adapter_file.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_log_old.h"
 
 #define DEFAULT_STORAGE_PATH "/data/service/el1/public"
 
@@ -45,10 +45,10 @@ static int32_t InitStorageConfigPath(void)
 {
     if (SoftbusGetConfig(SOFTBUS_STR_STORAGE_DIRECTORY, (uint8_t *)g_storagePath,
         SOFTBUS_MAX_PATH_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "read storage path fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read storage path fail");
         if (strncpy_s(g_storagePath, SOFTBUS_MAX_PATH_LEN, DEFAULT_STORAGE_PATH,
             strlen(DEFAULT_STORAGE_PATH)) != EOK) {
-            LNN_LOGE(LNN_STATE, "copy default storage path fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy default storage path fail");
             g_storagePath[0] = '\0';
             return SOFTBUS_ERR;
         }
@@ -59,20 +59,20 @@ static int32_t InitStorageConfigPath(void)
 int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
 {
     if (path == NULL) {
-        LNN_LOGE(LNN_STATE, "path is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: path is null", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
     if (strlen(g_storagePath) == 0) {
         if (InitStorageConfigPath() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "init storage config path fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init storage config path fail");
             return SOFTBUS_ERR;
         }
     }
     if (strncpy_s(path, len, g_storagePath, strlen(g_storagePath)) != EOK ||
         strncat_s(path, len, g_filePath[id].filePath, strlen(g_filePath[id].filePath)) != EOK) {
-        LNN_LOGE(LNN_STATE, "splice full path for %d fail", id);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "splice full path for %d fail", id);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "full path for %d is %s", id, path);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "full path for %d is %s", id, path);
     return SOFTBUS_OK;
 }

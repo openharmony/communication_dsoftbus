@@ -19,7 +19,6 @@
 #include "bus_center_event.h"
 #include "lnn_devicename_info.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_info.c"
 #include "lnn_network_info.h"
@@ -30,6 +29,7 @@
 #include "message_handler.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_common.h"
 
 static NodeInfo info;
@@ -55,10 +55,10 @@ void LNNNetworkInfoTest::SetUpTestCase()
     LooperInit();
     NiceMock<LnnTransInterfaceMock> transMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    LNN_LOGI(LNN_TEST, "ActionOfTransRegister enter1");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfTransRegister enter1");
     EXPECT_CALL(transMock, TransRegisterNetworkingChannelListener(NotNull())).WillRepeatedly(
         LnnTransInterfaceMock::ActionOfTransRegister);
-    LNN_LOGI(LNN_TEST, "ActionOfTransRegister enter2");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ActionOfTransRegister enter2");
     EXPECT_EQ(LnnInitSyncInfoManager(), SOFTBUS_OK);
 }
 
@@ -135,7 +135,7 @@ HWTEST_F(LNNNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level
     char msg[LEN] = {0};
     *(int32_t *)msg = LNN_INFO_TYPE_CAPABILITY;
     if (memcpy_s(msg + sizeof(int32_t), LEN - sizeof(int32_t), "abc", strlen("abc") + 1) != EOK) {
-        LNN_LOGE(LNN_TEST, "copy sync info msg fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy sync info msg fail");
     }
     LnnTransInterfaceMock::g_networkListener->onChannelOpened(CHANNELID, UUID, true);
     LnnTransInterfaceMock::g_networkListener->onMessageReceived(CHANNELID, msg, LEN);

@@ -17,7 +17,6 @@
 #include "auth_common_mock.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
-#include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
@@ -30,6 +29,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_log_old.h"
 #include <cinttypes>
 #include <gtest/gtest.h>
 #include <securec.h>
@@ -80,7 +80,7 @@ void AuthEnhanceMockTest::TearDownTestCase()
 
 void AuthEnhanceMockTest::SetUp()
 {
-    AUTH_LOGI(AUTH_TEST, "AuthTest start.");
+    LOG_INFO("AuthTest start.");
 }
 
 void AuthEnhanceMockTest::TearDown() {}

@@ -15,19 +15,19 @@
 
 #include "lnn_lane_hub.h"
 
-#include "lnn_log.h"
 #include "bus_center_manager.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInitLaneHub(void)
 {
-    LNN_LOGI(LNN_INIT, "init virtual lane hub");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lane hub");
     return SOFTBUS_OK;
 }
 
 int32_t LnnInitLaneHubDelay(void)
 {
-    LNN_LOGI(LNN_INIT, "init virtual lane hub delay");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lane hub delay");
     return SOFTBUS_OK;
 }
 

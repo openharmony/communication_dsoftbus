@@ -15,10 +15,10 @@
 
 #include "bus_center_client_proxy_standard.h"
 
-#include "lnn_log.h"
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 int32_t BusCenterClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *info)
@@ -77,38 +77,38 @@ int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, 
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     if (addr == nullptr || (retCode == 0 && networkId == nullptr)) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(addrTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write addr type length failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(addr, addrTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write addr failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(retCode)) {
-        LNN_LOGE(LNN_EVENT, "write retCode failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
         return SOFTBUS_ERR;
     }
     if (retCode == 0 && !data.WriteCString(networkId)) {
-        LNN_LOGE(LNN_EVENT, "write networkId failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_JOIN_RESULT, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinLNNResult send request failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -119,45 +119,45 @@ int32_t BusCenterClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrType
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr || metaInfo == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (addr != nullptr) {
         if (!data.WriteUint32(addrTypeLen)) {
-            LNN_LOGE(LNN_EVENT, "write addr type length failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
             return SOFTBUS_ERR;
         }
         if (!data.WriteRawData(addr, addrTypeLen)) {
-            LNN_LOGE(LNN_EVENT, "write addr failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr failed");
             return SOFTBUS_ERR;
         }
     } else {
         if (!data.WriteUint32(0)) {
-            LNN_LOGE(LNN_EVENT, "write addr type length failed");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write addr type length failed");
             return SOFTBUS_ERR;
         }
     }
     if (!data.WriteUint32(infoLen)) {
-        LNN_LOGE(LNN_EVENT, "write infoLen failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write infoLen failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(metaInfo, infoLen)) {
-        LNN_LOGE(LNN_EVENT, "write metaInfo failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write metaInfo failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(retCode)) {
-        LNN_LOGE(LNN_EVENT, "write retCode failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_JOIN_METANODE_RESULT, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "OnJoinMetaNodeResult send request failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinMetaNodeResult send request failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -167,30 +167,30 @@ int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCod
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     if (networkId == nullptr) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(networkId)) {
-        LNN_LOGE(LNN_EVENT, "write networkId failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(retCode)) {
-        LNN_LOGE(LNN_EVENT, "write retCode failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_LEAVE_RESULT, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult send request failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -200,30 +200,30 @@ int32_t BusCenterClientProxy::OnLeaveMetaNodeResult(const char *networkId, int r
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     if (networkId == nullptr) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(networkId)) {
-        LNN_LOGE(LNN_EVENT, "write networkId failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write networkId failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(retCode)) {
-        LNN_LOGE(LNN_EVENT, "write retCode failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     if (remote->SendRequest(CLIENT_ON_LEAVE_METANODE_RESULT, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveMetaNodeResult send request failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -234,48 +234,47 @@ int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(const char *pkgName, bool
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is nullptr");
         return SOFTBUS_ERR;
     }
     if (info == nullptr) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(pkgName)) {
-        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write pkgName failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteBool(isOnline)) {
-        LNN_LOGE(LNN_EVENT, "write online state failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write online state failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(infoTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write info type length failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write info type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(info, infoTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write node info failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write node info failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_NODE_ONLINE_STATE_CHANGED, data, reply, option);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+    if (remote->SendRequest(CLIENT_ON_NODE_ONLINE_STATE_CHANGED, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChanged send request failed");
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
-        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeOnlineStateChanged read serverRet failed");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -286,49 +285,48 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     if (pkgName == nullptr) {
-        LNN_LOGE(LNN_EVENT, "pkgName is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "pkgName is nullptr");
         return SOFTBUS_ERR;
     }
     if (info == nullptr) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    LNN_LOGI(LNN_EVENT, "type: %d", type);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnNodeBasicInfoChanged type: %d", type);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(pkgName)) {
-        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write pkgName failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(type)) {
-        LNN_LOGE(LNN_EVENT, "write type failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write type failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(infoTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write info type length failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write info type length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(info, infoTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write node info failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write node info failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_NODE_BASIC_INFO_CHANGED, data, reply, option);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+    if (remote->SendRequest(CLIENT_ON_NODE_BASIC_INFO_CHANGED, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged send request failed");
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
-        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged read serverRet failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -338,40 +336,39 @@ int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTy
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return SOFTBUS_ERR;
     }
     if (info == nullptr) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(infoTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write info length failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write info length failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(info, infoTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write info failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write info failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(retCode)) {
-        LNN_LOGE(LNN_EVENT, "write retCode failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write retCode failed");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_TIME_SYNC_RESULT, data, reply, option);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed=%d", ret);
+    if (remote->SendRequest(CLIENT_ON_TIME_SYNC_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnTimeSyncResult send request failed");
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
     if (!reply.ReadInt32(serverRet)) {
-        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnTimeSyncResult read serverRet failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -381,27 +378,26 @@ void BusCenterClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return;
     }
     if (!data.WriteInt32(publishId)) {
-        LNN_LOGE(LNN_EVENT, "write publishId failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write publishId failed");
         return;
     }
     if (!data.WriteInt32(reason)) {
-        LNN_LOGE(LNN_EVENT, "write reason failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write reason failed");
         return;
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_PUBLISH_LNN_RESULT, data, reply, option);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+    if (remote->SendRequest(CLIENT_ON_PUBLISH_LNN_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnPublishLNNResult send request failed");
     }
 }
 
@@ -409,27 +405,26 @@ void BusCenterClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return;
     }
     if (!data.WriteInt32(refreshId)) {
-        LNN_LOGE(LNN_EVENT, "write refreshId failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write refreshId failed");
         return;
     }
     if (!data.WriteInt32(reason)) {
-        LNN_LOGE(LNN_EVENT, "write reason failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write reason failed");
         return;
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_REFRESH_LNN_RESULT, data, reply, option);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+    if (remote->SendRequest(CLIENT_ON_REFRESH_LNN_RESULT, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnRefreshLNNResult send request failed");
     }
 }
 
@@ -437,27 +432,26 @@ void BusCenterClientProxy::OnRefreshDeviceFound(const void *device, uint32_t dev
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote is nullptr");
         return;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write InterfaceToken failed!");
         return;
     }
     if (!data.WriteUint32(deviceLen)) {
-        LNN_LOGE(LNN_EVENT, "write device length failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write device length failed");
         return;
     }
     if (!data.WriteRawData(device, deviceLen)) {
-        LNN_LOGE(LNN_EVENT, "write device failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write device failed");
         return;
     }
     MessageParcel reply;
     MessageOption option;
-    int ret = remote->SendRequest(CLIENT_ON_REFRESH_DEVICE_FOUND, data, reply, option);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+    if (remote->SendRequest(CLIENT_ON_REFRESH_DEVICE_FOUND, data, reply, option) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnRefreshDeviceFound send request failed");
     }
 }
 } // namespace OHOS

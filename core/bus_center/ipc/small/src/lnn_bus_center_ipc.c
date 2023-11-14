@@ -24,12 +24,12 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 typedef struct {
@@ -57,7 +57,7 @@ int32_t LnnIpcInit (void)
     g_lnnRequestInfo.joinLNNRequestInfo = NULL;
     g_lnnRequestInfo.leaveLNNRequestInfo = NULL;
     if (SoftBusMutexInit(&g_lnnRequestInfo.lock, NULL) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "lock init fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "g_lnnRequestInfo.lock init fail");
         return SOFTBUS_ERR;
     }
 
@@ -118,12 +118,12 @@ static int32_t AddJoinLNNInfo(const char *pkgName, const ConnectionAddr *addr)
     SoftBusList *list = g_lnnRequestInfo.joinLNNRequestInfo;
     JoinLnnRequestInfo *info = (JoinLnnRequestInfo *)SoftBusMalloc(sizeof(JoinLnnRequestInfo));
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "request info malloc fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc join LNN JoinLnnRequestInfo");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&info->node);
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy pkgName fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         SoftBusFree(info);
         return SOFTBUS_MEM_ERR;
     }
@@ -153,17 +153,17 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
     SoftBusList *list = g_lnnRequestInfo.leaveLNNRequestInfo;
     LeaveLnnRequestInfo *info = (LeaveLnnRequestInfo *)SoftBusMalloc(sizeof(LeaveLnnRequestInfo));
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "malloc request info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc leave LNN LeaveLnnRequestInfo");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&info->node);
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy pkgName fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy pkgName fail");
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
     if (strncpy_s(info->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy networkId fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
@@ -177,7 +177,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
 {
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy new device info error");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy new device info error");
         return SOFTBUS_ERR;
     }
     LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
@@ -190,26 +190,26 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
     ConnectionAddr *connAddr = (ConnectionAddr *)addr;
 
     if (pkgName == NULL || connAddr == NULL) {
-        LNN_LOGE(LNN_EVENT, "parameter is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
         return SOFTBUS_INVALID_PARAM;
     }
     if (addrTypeLen != sizeof(ConnectionAddr)) {
-        LNN_LOGE(LNN_EVENT, "addr is invalid");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "get lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcServerJoin get lock");
     }
     if (g_lnnRequestInfo.joinLNNRequestInfo == NULL) {
         g_lnnRequestInfo.joinLNNRequestInfo = CreateSoftBusList();
         if (g_lnnRequestInfo.joinLNNRequestInfo == NULL) {
-            LNN_LOGE(LNN_EVENT, "lnn request Info is null");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init fail : joinLNNRequestInfo = null!");
             (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
             return SOFTBUS_MALLOC_ERR;
         }
     }
     if (IsRepeatJoinLNNRequest(pkgName, connAddr)) {
-        LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat join lnn request from: %s", pkgName);
         (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ALREADY_EXISTED;
     }
@@ -218,7 +218,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
         ret = AddJoinLNNInfo(pkgName, connAddr);
     }
     if (SoftBusMutexUnlock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "release lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcServerJoin release lock");
     }
     return ret;
 }
@@ -227,22 +227,22 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
 {
     (void)callingPid;
     if (pkgName == NULL || networkId == NULL) {
-        LNN_LOGE(LNN_EVENT, "parameter is NULL");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!\n");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "get lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcServerLeave get lock");
     }
     if (g_lnnRequestInfo.leaveLNNRequestInfo == NULL) {
         g_lnnRequestInfo.leaveLNNRequestInfo = CreateSoftBusList();
         if (g_lnnRequestInfo.leaveLNNRequestInfo == NULL) {
-            LNN_LOGE(LNN_EVENT, "request info is null");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init fail : leaveLNNRequestInfo = null!");
             (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
             return SOFTBUS_INVALID_PARAM;
         }
     }
     if (IsRepeatLeaveLNNRequest(pkgName, networkId)) {
-        LNN_LOGE(LNN_EVENT, "repeat leave lnn request pkgName=%s", pkgName);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "repeat leave lnn request from: %s", pkgName);
         (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ALREADY_EXISTED;
     }
@@ -251,7 +251,7 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
         ret = AddLeaveLNNInfo(pkgName, networkId);
     }
     if (SoftBusMutexUnlock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "release lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcServerLeave release lock");
     }
     return ret;
 }
@@ -261,7 +261,7 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
 {
     (void)pkgName;
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
-        LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%d", infoTypeLen);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "infoTypeLen is invalid, infoTypeLen = %d", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnGetAllOnlineNodeInfo((NodeBasicInfo **)info, infoNum);
@@ -360,11 +360,11 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     JoinLnnRequestInfo *info = NULL;
     SoftBusList *list = g_lnnRequestInfo.joinLNNRequestInfo;
     if (list == NULL) {
-        LNN_LOGE(LNN_EVENT, "request info is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "joinLNNRequestInfo = null!");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "get lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcNotifyJoinResult get lock");
     }
     while ((info = FindJoinLNNRequest(connAddr)) != NULL) {
         ListDelete(&info->node);
@@ -373,7 +373,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
         SoftBusFree(info);
     }
     if (SoftBusMutexUnlock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "release lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcNotifyJoinResult release lock");
     }
     return SOFTBUS_OK;
 }
@@ -395,11 +395,11 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
     LeaveLnnRequestInfo *info = NULL;
     SoftBusList *list = g_lnnRequestInfo.leaveLNNRequestInfo;
     if (list == NULL) {
-        LNN_LOGE(LNN_EVENT, "request info is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "leaveLNNRequestInfo = null!");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "get lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcNotifyLeaveResult get lock");
     }
 
     while ((info = FindLeaveLNNRequest(networkId)) != NULL) {
@@ -409,7 +409,7 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
         SoftBusFree(info);
     }
     if (SoftBusMutexUnlock(&g_lnnRequestInfo.lock) != 0) {
-        LNN_LOGE(LNN_EVENT, "release lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: LnnIpcNotifyLeaveResult release lock");
     }
     return SOFTBUS_OK;
 }

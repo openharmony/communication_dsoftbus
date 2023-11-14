@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "auth_log.h"
 #include "auth_meta_manager.h"
 #include "auth_common.h"
 
@@ -26,14 +25,14 @@ int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t 
     (void)requestId;
     (void)callingPid;
     (void)callBack;
-    AUTH_LOGI(AUTH_INIT, "auth meta start verify");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta start verify");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void AuthMetaReleaseVerify(int64_t authId)
 {
     (void)authId;
-    AUTH_LOGI(AUTH_INIT, "auth meta release verify");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta release verify");
 }
 
 int32_t AuthMetaEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
@@ -43,7 +42,7 @@ int32_t AuthMetaEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, u
     (void)inLen;
     (void)outData;
     (void)outLen;
-    AUTH_LOGI(AUTH_CONN, "auth meta encrypt data");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta encrypt data");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -54,7 +53,7 @@ int32_t AuthMetaDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, u
     (void)inLen;
     (void)outData;
     (void)outLen;
-    AUTH_LOGI(AUTH_CONN, "auth meta decrypt data");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta decrypt data");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -62,7 +61,7 @@ int32_t AuthMetaGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     (void)uuid;
     (void)connInfo;
-    AUTH_LOGI(AUTH_CONN, "auth meta get prefer conninfo");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get prefer conninfo");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -71,21 +70,21 @@ int32_t AuthMetaOpenConn(const AuthConnInfo *info, uint32_t requestId, const Aut
     (void)info;
     (void)requestId;
     (void)callback;
-    AUTH_LOGI(AUTH_CONN, "auth meta open connection");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta open connection");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void AuthMetaCloseConn(int64_t authId)
 {
     (void)authId;
-    AUTH_LOGI(AUTH_CONN, "auth meta close connection");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta close connection");
 }
 
 int32_t AuthMetaPostTransData(int64_t authId, const AuthTransData *dataInfo)
 {
     (void)authId;
     (void)dataInfo;
-    AUTH_LOGI(AUTH_CONN, "auth meta start post transdata");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta start post transdata");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -93,7 +92,7 @@ int64_t AuthMetaGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
 {
     (void)connInfo;
     (void)isServer;
-    AUTH_LOGI(AUTH_CONN, "auth meta get auth id by connection info");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get auth id by connection info");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -102,7 +101,7 @@ int64_t AuthMetaGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer)
     (void)uuid;
     (void)type;
     (void)isServer;
-    AUTH_LOGI(AUTH_CONN, "auth meta get auth id by uuid");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get auth id by uuid");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -110,7 +109,7 @@ int32_t AuthMetaSetP2pMac(int64_t authId, const char *p2pMac)
 {
     (void)authId;
     (void)p2pMac;
-    AUTH_LOGI(AUTH_CONN, "auth meta set p2p mac info by auth id");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta set p2p mac info by auth id");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -118,7 +117,7 @@ int32_t AuthMetaGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
 {
     (void)authId;
     (void)connInfo;
-    AUTH_LOGI(AUTH_CONN, "auth meta get connection info by auth id");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get connection info by auth id");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -126,7 +125,7 @@ int32_t AuthMetaGetServerSide(int64_t authId, bool *isServer)
 {
     (void)authId;
     (void)isServer;
-    AUTH_LOGI(AUTH_CONN, "auth meta get server side");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get server side");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -135,7 +134,7 @@ int32_t AuthMetaGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     (void)authId;
     (void)uuid;
     (void)size;
-    AUTH_LOGI(AUTH_CONN, "auth meta get device uuid by auth id");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get device uuid by auth id");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -143,20 +142,20 @@ int32_t AuthMetaGetVersion(int64_t authId, SoftBusVersion *version)
 {
     (void)authId;
     (void)version;
-    AUTH_LOGI(AUTH_CONN, "auth meta get version by auth id");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta get version by auth id");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t AuthMetaInit(const AuthTransCallback *callback)
 {
     (void)callback;
-    AUTH_LOGI(AUTH_INIT, "auth meta init");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta init");
     return SOFTBUS_OK;
 }
 
 void AuthMetaDeinit(void)
 {
-    AUTH_LOGI(AUTH_INIT, "auth meta deinit");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "auth meta deinit");
     return;
 }
 

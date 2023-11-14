@@ -18,7 +18,6 @@
 #include <string.h>
 #include <securec.h>
 
-#include "anonymizer.h"
 #include "auth_device_common_key.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
@@ -26,35 +25,35 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_meta_node_interface.h"
 #include "lnn_device_info_recovery.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 int32_t LnnInitNetLedger(void)
 {
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init local net ledger fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local net ledger fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitDistributedLedger() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init distributed net ledger fail!");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init distributed net ledger fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitMetaNodeLedger() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init meta node ledger fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init meta node ledger fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitHuksInterface() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init huks interface fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init huks interface fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitMetaNodeExtLedger() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init meta node ext ledger fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init meta node ext ledger fail!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -62,53 +61,50 @@ int32_t LnnInitNetLedger(void)
 
 static void LnnRestoreLocalDeviceInfo()
 {
-    LNN_LOGI(LNN_LEDGER, "restore local device info enter");
+    LLOGI("restore local device info enter.");
     if (LnnLoadLocalDeviceInfo() != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LEDGER, "get local device info fail");
+        LLOGI("get local device info fail");
         const NodeInfo *temp = LnnGetLocalNodeInfo();
         if (LnnSaveLocalDeviceInfo(temp) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "save local device info fail");
+            LLOGE("save local device info fail");
         }
-        LNN_LOGI(LNN_LEDGER, "save local device info success");
+        LLOGI("save local device info success.");
     } else {
         NodeInfo info;
         (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         (void)LnnGetLocalDevInfo(&info);
-        char *anonyNetworkId = NULL;
-        Anonymize(info.networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%s", anonyNetworkId);
+        LLOGI("load local deviceInfo success, networkId:%s", AnonymizesNetworkID(info.networkId));
         int64_t accountId = 0;
-        AnonymizeFree(anonyNetworkId);
         if (LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) {
             if (accountId != info.accountId) {
                 info.stateVersion++;
             }
         }
-        LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%d", info.stateVersion);
+        LLOGI("load local deviceInfo stateVersion=%d", info.stateVersion);
         if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set state version fail");
+            LLOGE("set state version fail");
         }
         if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set networkId fail");
+            LLOGE("set networkId fail");
         }
     }
     AuthLoadDeviceKey();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "load remote deviceInfo fail");
+        LLOGE("load remote deviceInfo fail");
         return;
     }
     LoadBleBroadcastKey();
-    LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
+    LLOGI("load remote deviceInfo devicekey success");
 }
 
 int32_t LnnInitNetLedgerDelay(void)
 {
     if (LnnInitLocalLedgerDelay() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "delay init local ledger fail!");
         return SOFTBUS_ERR;
     }
     if (LnnInitDecisionDbDelay() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "delay init decision db fail!");
         return SOFTBUS_ERR;
     }
     LnnRestoreLocalDeviceInfo();
@@ -127,7 +123,7 @@ void LnnDeinitNetLedger(void)
 static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
 {
     if (networkId == NULL || info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "params are null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
         return SOFTBUS_ERR;
     }
     switch (key) {
@@ -154,7 +150,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
         case NODE_KEY_NODE_ADDRESS:
             return LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         default:
-            LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
     }
 }
@@ -162,7 +158,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
 static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *info, uint32_t infoLen)
 {
     if (networkId == NULL || info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "params are null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
         return SOFTBUS_ERR;
     }
     switch (key) {
@@ -187,7 +183,7 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
         case NODE_KEY_NODE_ADDRESS:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         default:
-            LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
     }
 }
@@ -197,11 +193,11 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
     bool isLocalNetworkId = false;
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
     if (networkId == NULL || info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "params are null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
         return SOFTBUS_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get local network id fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local network id fail");
         return SOFTBUS_ERR;
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
@@ -219,11 +215,11 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     bool isLocalNetworkId = false;
     char localNetworkId[NETWORK_ID_BUF_LEN] = {0};
     if (networkId == NULL) {
-        LNN_LOGE(LNN_LEDGER, "params are null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "params are null");
         return SOFTBUS_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get local network id fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local network id fail");
         return SOFTBUS_ERR;
     }
     if (strncmp(localNetworkId, networkId, NETWORK_ID_BUF_LEN) == 0) {
@@ -232,7 +228,7 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     if (isLocalNetworkId) {
         return LnnSetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, dataChangeFlag);
     }
-    LNN_LOGE(LNN_LEDGER, "remote networkId");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "remote networkId");
     return SOFTBUS_ERR;
 }
 
@@ -260,7 +256,7 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
         case NODE_KEY_NODE_ADDRESS:
             return SHORT_ADDRESS_MAX_LEN;
         default:
-            LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid node key type: %d", key);
             return SOFTBUS_ERR;
     }
 }
@@ -273,7 +269,7 @@ int32_t SoftbusDumpPrintUdid(int fd, NodeBasicInfo *nodeInfo)
     char newUdid[UDID_BUF_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, udid, UDID_BUF_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Udid failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo Udid failed!");
         return SOFTBUS_ERR;
     }
     DataMasking((char *)udid, UDID_BUF_LEN, ID_DELIMITER, newUdid);
@@ -289,7 +285,7 @@ int32_t SoftbusDumpPrintUuid(int fd, NodeBasicInfo *nodeInfo)
     char newUuid[UUID_BUF_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, uuid, UUID_BUF_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo Uuid failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo Uuid failed!");
         return SOFTBUS_ERR;
     }
     DataMasking((char *)uuid, UUID_BUF_LEN, ID_DELIMITER, newUuid);
@@ -305,7 +301,7 @@ int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
     char newBrMac[BT_MAC_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, brMac, BT_MAC_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo brMac failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo brMac failed!");
         return SOFTBUS_ERR;
     }
     DataMasking((char *)brMac, BT_MAC_LEN, MAC_DELIMITER, newBrMac);
@@ -321,7 +317,7 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     char newIpAddr[IP_STR_MAX_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)ipAddr, IP_STR_MAX_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo ipAddr failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo ipAddr failed!");
         return SOFTBUS_ERR;
     }
     DataMasking((char *)ipAddr, IP_STR_MAX_LEN, IP_DELIMITER, newIpAddr);
@@ -335,7 +331,7 @@ int32_t SoftbusDumpPrintNetCapacity(int fd, NodeBasicInfo *nodeInfo)
     key = NODE_KEY_NETWORK_CAPABILITY;
     int32_t netCapacity = 0;
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netCapacity, LNN_COMMON_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo netCapacity failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netCapacity failed!");
         return SOFTBUS_ERR;
     }
     SOFTBUS_DPRINTF(fd, "NetCapacity = %d\n", netCapacity);
@@ -348,7 +344,7 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
     key = NODE_KEY_NETWORK_TYPE;
     int32_t netType = 0;
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)&netType, LNN_COMMON_LEN) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo netType failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetNodeKeyInfo netType failed!");
         return SOFTBUS_ERR;
     }
     SOFTBUS_DPRINTF(fd, "NetType = %d\n", netType);
@@ -358,7 +354,7 @@ int32_t SoftbusDumpPrintNetType(int fd, NodeBasicInfo *nodeInfo)
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
 {
     if (fd <= 0 || nodeInfo == NULL) {
-        LNN_LOGE(LNN_LEDGER, "param is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param is null");
         return;
     }
     SOFTBUS_DPRINTF(fd, "DeviceName = %s\n", nodeInfo->deviceName);
@@ -366,27 +362,27 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
     DataMasking(nodeInfo->networkId, NETWORK_ID_BUF_LEN, ID_DELIMITER, networkId);
     SOFTBUS_DPRINTF(fd, "NetworkId = %s\n", networkId);
     if (SoftbusDumpPrintUdid(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUdid failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintUdid failed!");
         return;
     }
     if (SoftbusDumpPrintUuid(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintUuid failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintUuid failed!");
         return;
     }
     if (SoftbusDumpPrintMac(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintMac failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintMac failed!");
         return;
     }
     if (SoftbusDumpPrintIp(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintIp failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintIp failed!");
         return;
     }
     if (SoftbusDumpPrintNetCapacity(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetCapacity failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintNetCapacity failed!");
         return;
     }
     if (SoftbusDumpPrintNetType(fd, nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintNetType failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftbusDumpPrintNetType failed!");
         return;
     }
 }

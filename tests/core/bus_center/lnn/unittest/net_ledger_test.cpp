@@ -26,13 +26,13 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_conn_interface.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 namespace OHOS {
@@ -64,7 +64,7 @@ void NetLedgerTest::SetUp()
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnInitDistributedLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LNN_LOGI(LNN_TEST, "NetLedgerTest start");
+    LOG_INFO("NetLedgerTest start.");
 }
 
 void NetLedgerTest::TearDown()

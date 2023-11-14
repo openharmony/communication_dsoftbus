@@ -20,6 +20,7 @@
 #include "softbus_adapter_file.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_log_old.h"
 
 /* compress data by GZIP  */
 int32_t DataCompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLen)

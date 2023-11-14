@@ -19,28 +19,27 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane.h"
 #include "lnn_lane_qos.h"
-#include "lnn_log.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-
+#include "softbus_log_old.h"
 
 int32_t LnnInitLaneHub(void)
 {
     if (InitLane() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init lane fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitQos() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init laneQos fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init laneQos fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitTimeSync() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init time sync fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init time sync fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitHeartbeat() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init heart beat fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init heart beat fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -49,7 +48,7 @@ int32_t LnnInitLaneHub(void)
 int32_t LnnInitLaneHubDelay(void)
 {
     if (LnnStartHeartbeatFrameDelay() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "start heartbeat delay fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start heartbeat delay fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

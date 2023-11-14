@@ -18,7 +18,6 @@
 #include <securec.h>
 
 #include "auth_common.h"
-#include "auth_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
@@ -49,7 +48,7 @@ static uint32_t GetAuthRequestWaitNum(AuthRequest *request)
             continue;
         }
         if (request->addTime - item->addTime < AUTH_REQUEST_TIMTOUR) {
-            AUTH_LOGD(AUTH_CONN, "requestId=%u addr same to requestId=%u", request->requestId, item->requestId);
+            ALOGD("requestId=%u addr same to requestId=%u", request->requestId, item->requestId);
             num++;
             continue;
         }
@@ -70,7 +69,7 @@ uint32_t AddAuthRequest(const AuthRequest *request)
     CHECK_NULL_PTR_RETURN_VALUE(request, 0);
     AuthRequest *newRequest = SoftBusCalloc(sizeof(AuthRequest));
     if (newRequest == NULL) {
-        AUTH_LOGE(AUTH_CONN, "malloc AuthRequest fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "malloc AuthRequest fail.");
         return 0;
     }
     *newRequest = *request;
@@ -171,7 +170,7 @@ void DelAuthRequest(uint32_t requestId)
         ReleaseAuthLock();
         return;
     }
-    AUTH_LOGD(AUTH_CONN, "del auth request requestId=%u", requestId);
+    LLOGD("del auth request requestId=%u", requestId);
     ListDelete(&item->node);
     SoftBusFree(item);
     ReleaseAuthLock();
