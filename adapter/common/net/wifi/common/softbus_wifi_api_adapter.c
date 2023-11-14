@@ -18,11 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "lnn_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "wifi_device.h"
 #include "wifi_hid2d.h"
 #include "wifi_p2p.h"
@@ -30,19 +30,19 @@
 static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceWifiConf, SoftBusWifiDevConf *wifiConf)
 {
     if (strcpy_s(wifiConf->ssid, sizeof(wifiConf->ssid), sourceWifiConf->ssid) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        LNN_LOGE(LNN_STATE, "str copy ssid fail");
         return SOFTBUS_ERR;
     }
 
     if (memcpy_s(wifiConf->bssid, sizeof(wifiConf->bssid), sourceWifiConf->bssid,
         sizeof(sourceWifiConf->bssid)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mem copy bssid fail");
+        LNN_LOGE(LNN_STATE, "mem copy bssid fail");
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(wifiConf->preSharedKey, sizeof(wifiConf->preSharedKey),
         sourceWifiConf->preSharedKey) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        LNN_LOGE(LNN_STATE, "str copy ssid fail");
         return SOFTBUS_ERR;
     }
 
@@ -55,19 +55,19 @@ static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceW
 static int32_t ConvertWifiDevConfFromSoftBusWifiConf(const SoftBusWifiDevConf *result, WifiDeviceConfig *wifiConf)
 {
     if (strcpy_s(wifiConf->ssid, sizeof(wifiConf->ssid), result->ssid) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        LNN_LOGE(LNN_STATE, "str copy ssid fail");
         return SOFTBUS_ERR;
     }
 
     if (memcpy_s(wifiConf->bssid, sizeof(wifiConf->bssid),
         result->bssid, sizeof(result->bssid)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mem copy bssid fail");
+        LNN_LOGE(LNN_STATE, "mem copy bssid fail");
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(wifiConf->preSharedKey, sizeof(wifiConf->preSharedKey),
         result->preSharedKey) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        LNN_LOGE(LNN_STATE, "str copy ssid fail");
         return SOFTBUS_ERR;
     }
 
@@ -85,19 +85,19 @@ int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num
     uint32_t i;
 
     if (configList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para configList is NULL");
+        LNN_LOGW(LNN_STATE, "para configList is NULL");
         return SOFTBUS_ERR;
     }
     result = SoftBusMalloc(sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
     if (result == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi device config fail");
+        LNN_LOGE(LNN_STATE, "malloc wifi device config fail");
         return SOFTBUS_ERR;
     }
     (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
                    sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
     retVal = GetDeviceConfigs(result, &wifiConfigSize);
     if (retVal != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi device config fail");
+        LNN_LOGE(LNN_STATE, "malloc wifi device config fail");
         (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
                        sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
         SoftBusFree(result);
@@ -105,7 +105,7 @@ int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num
     }
 
     if (wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi device config size is invalid.");
+        LNN_LOGE(LNN_STATE, "wifi device config size is invalid");
         (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
                        sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
         SoftBusFree(result);
@@ -114,7 +114,7 @@ int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num
 
     for (i = 0; i < wifiConfigSize; i++) {
         if (ConvertSoftBusWifiConfFromWifiDev(result, configList) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert wifi config failed.");
+            LNN_LOGE(LNN_STATE, "convert wifi config failed");
             (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
                            sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
             SoftBusFree(result);
@@ -135,17 +135,17 @@ int32_t SoftBusConnectToDevice(const SoftBusWifiDevConf *wifiConfig)
     WifiDeviceConfig wifiDevConfig;
 
     if (wifiConfig == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para wifiConfig is NULL");
+        LNN_LOGE(LNN_STATE, "para wifiConfig is NULL");
         return SOFTBUS_ERR;
     }
     (void)memset_s(&wifiDevConfig, sizeof(WifiDeviceConfig), 0, sizeof(WifiDeviceConfig));
     if (ConvertWifiDevConfFromSoftBusWifiConf(wifiConfig, &wifiDevConfig) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert wifi config failed.");
+        LNN_LOGE(LNN_STATE, "convert wifi config failed");
         return SOFTBUS_ERR;
     }
 
     if (ConnectToDevice(&wifiDevConfig) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connect to wifi failed.");
+        LNN_LOGE(LNN_STATE, "connect to wifi failed");
         return SOFTBUS_ERR;
     }
 
@@ -166,7 +166,7 @@ int32_t SoftBusStartWifiScan(void)
 
     ret = Scan();
     if (ret != WIFI_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus start wifi scan failed.");
+        LNN_LOGE(LNN_STATE, "softbus start wifi scan failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -206,7 +206,7 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
 
     int index = FindFreeCallbackIndex();
     if (index == MAX_CALLBACK_NUM) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register callback index invalid.");
+        LNN_LOGE(LNN_STATE, "register callback index invalid");
         return SOFTBUS_ERR;
     }
     g_scanResultCb[index] = cb;
@@ -216,7 +216,7 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
         if (ret == WIFI_SUCCESS) {
             g_registerFlag = false;
         } else {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus register wifi event failed.");
+            LNN_LOGE(LNN_STATE, "softbus register wifi event failed");
             return SOFTBUS_ERR;
         }
     }
@@ -226,16 +226,16 @@ int32_t SoftBusRegisterWifiEvent(ISoftBusScanResult *cb)
 static int32_t ConvertSoftBusWifiScanInfoFromWifi(WifiScanInfo *info, SoftBusWifiScanInfo *result, uint32_t *size)
 {
     if (info == NULL || result == NULL || size == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
+        LNN_LOGE(LNN_STATE, "invalid para");
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < (*size); i++) {
         if (strcpy_s(result->ssid, WIFI_MAX_SSID_LEN, info->ssid) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy ssid fail");
+            LNN_LOGE(LNN_STATE, "strcpy ssid fail");
             return SOFTBUS_ERR;
         }
         if (memcpy_s(result->bssid, WIFI_MAC_LEN, info->bssid, sizeof(info->bssid)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy bssid fail");
+            LNN_LOGE(LNN_STATE, "memcpy bssid fail");
             return SOFTBUS_ERR;
         }
         result->securityType =  (int32_t)(info->securityType);
@@ -255,12 +255,12 @@ static int32_t ConvertSoftBusWifiScanInfoFromWifi(WifiScanInfo *info, SoftBusWif
 int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
 {
     if (size == NULL || result == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para size or result is NULL.");
+        LNN_LOGW(LNN_STATE, "para size or result is NULL");
         return SOFTBUS_ERR;
     }
     WifiScanInfo *info = (WifiScanInfo *)SoftBusMalloc(sizeof(WifiScanInfo) * WIFI_MAX_SCAN_HOTSPOT_LIMIT);
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi scan information failed.");
+        LNN_LOGE(LNN_STATE, "malloc wifi scan information failed");
         return SOFTBUS_ERR;
     }
     (void)memset_s(info, sizeof(WifiScanInfo)*WIFI_MAX_SCAN_HOTSPOT_LIMIT, 0,
@@ -268,19 +268,19 @@ int32_t SoftBusGetWifiScanList(SoftBusWifiScanInfo **result, uint32_t *size)
     *size = WIFI_MAX_SCAN_HOTSPOT_LIMIT;
     int32_t ret = GetScanInfoList(info, (unsigned int *)size);
     if (ret != WIFI_SUCCESS || size == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softbus get wifi scan list failed.");
+        LNN_LOGE(LNN_STATE, "softbus get wifi scan list failed");
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
     *result = (SoftBusWifiScanInfo *)SoftBusMalloc(sizeof(SoftBusWifiScanInfo) * (*size));
     if (*result == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc softbus wifi scan information failed.");
+        LNN_LOGE(LNN_STATE, "malloc softbus wifi scan information failed");
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
     (void)memset_s(*result, sizeof(SoftBusWifiScanInfo)* (*size), 0, sizeof(SoftBusWifiScanInfo)* (*size));
     if (ConvertSoftBusWifiScanInfoFromWifi(info, *result, size) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConvertSoftBusWifiScaninfoFromWifi failed.");
+        LNN_LOGE(LNN_STATE, "ConvertSoftBusWifiScaninfoFromWifi failed");
         SoftBusFree(*result);
         *result = NULL;
         SoftBusFree(info);
@@ -315,7 +315,7 @@ int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
         if (ret == WIFI_SUCCESS) {
             g_registerFlag = true;
         } else {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "softBus unRegister wifi event failed.");
+            LNN_LOGE(LNN_STATE, "softBus unRegister wifi event failed");
             return SOFTBUS_ERR;
         }
     }
@@ -325,12 +325,12 @@ int32_t SoftBusUnRegisterWifiEvent(ISoftBusScanResult *cb)
 int32_t SoftBusGetChannelListFor5G(int32_t *channelList, int32_t num)
 {
     if (channelList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para channelList is NULL.");
+        LNN_LOGW(LNN_STATE, "para channelList is NULL");
         return SOFTBUS_ERR;
     }
     int32_t ret = Hid2dGetChannelListFor5G(channelList, num);
     if (ret != WIFI_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get channel 5G list failed.");
+        LNN_LOGE(LNN_STATE, "get channel 5G list failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -341,7 +341,7 @@ SoftBusBand SoftBusGetLinkBand(void)
     WifiLinkedInfo result;
     GetLinkedInfo(&result);
     if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand failed.");
+        LNN_LOGE(LNN_STATE, "get SoftBusGetLinkBand failed");
         return BAND_UNKNOWN;
     }
     if (result.band == BAND_24G) {
@@ -349,7 +349,7 @@ SoftBusBand SoftBusGetLinkBand(void)
     } else if (result.band == BAND_5G) {
         return BAND_5G;
     } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkBand success.");
+        LNN_LOGE(LNN_STATE, "get SoftBusGetLinkBand success");
         return BAND_UNKNOWN;
     }
 }
@@ -358,7 +358,7 @@ int32_t SoftBusGetLinkedInfo(SoftBusWifiLinkedInfo *info)
 {
     WifiLinkedInfo result;
     if (GetLinkedInfo(&result) != WIFI_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetLinkedInfo failed.");
+        LNN_LOGE(LNN_STATE, "get SoftBusGetLinkedInfo failed");
         return SOFTBUS_ERR;
     }
     info->frequency = result.frequency;
@@ -374,7 +374,7 @@ int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
 {
     WifiP2pGroupInfo result;
     if (GetCurrentGroup(&result) != WIFI_SUCCESS) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get SoftBusGetCurrentGroup failed.");
+        LNN_LOGE(LNN_STATE, "get SoftBusGetCurrentGroup failed");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(groupInfo, sizeof(SoftBusWifiP2pGroupInfo), &result, sizeof(WifiP2pGroupInfo)) != EOK) {
