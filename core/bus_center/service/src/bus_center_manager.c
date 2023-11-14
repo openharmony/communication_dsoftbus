@@ -21,19 +21,19 @@
 #include "bus_center_event.h"
 #include "bus_center_decision_center.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_decision_center.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
+#include "lnn_log.h"
+#include "lnn_meta_node_interface.h"
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
-#include "lnn_decision_center.h"
-#include "lnn_meta_node_interface.h"
 #include "softbus_adapter_xcollie.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
@@ -77,10 +77,10 @@ typedef struct {
 static void WatchdogProcess(void)
 {
     if (GetWatchdogFlag()) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "softbus net_builder thread running normally.");
+        LNN_LOGI(LNN_STATE, "softbus net_builder thread running normally");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "softbus net_builder thread exception.");
+    LNN_LOGW(LNN_STATE, "softbus net_builder thread exception");
 }
 
 static LnnLocalConfigInit g_lnnLocalConfigInit = {
@@ -108,10 +108,10 @@ static void ReadDelayConfig(void)
 {
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_UDID_INIT_DELAY_LEN,
         (unsigned char *)&g_lnnLocalConfigInit.delayLen, sizeof(g_lnnLocalConfigInit.delayLen)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn delay init len fail, use default value");
+        LNN_LOGE(LNN_STATE, "get lnn delay init len fail, use default value");
         g_lnnLocalConfigInit.delayLen = DEFAULT_DELAY_LEN;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn delay init len is %u", g_lnnLocalConfigInit.delayLen);
+    LNN_LOGI(LNN_STATE, "lnn delay init len=%u", g_lnnLocalConfigInit.delayLen);
 }
 
 static void BusCenterServerDelayInit(void *para)
@@ -119,7 +119,7 @@ static void BusCenterServerDelayInit(void *para)
     (void)para;
     static int32_t retry = 0;
     if (retry > RETRY_MAX) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try BusCenterServerDelayInit max times");
+        LNN_LOGE(LNN_STATE, "try exceeds max times");
         return;
     }
     int32_t ret = SOFTBUS_OK;
@@ -135,7 +135,7 @@ static void BusCenterServerDelayInit(void *para)
         }
         if (!g_lnnLocalConfigInit.initDelayImpl[i].isInit &&
             g_lnnLocalConfigInit.initDelayImpl[i].implInit() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init delay impl(%u) failed", i);
+            LNN_LOGE(LNN_STATE, "init delay impl(%u) failed", i);
             ret = SOFTBUS_ERR;
         } else {
             g_lnnLocalConfigInit.initDelayImpl[i].isInit = true;
@@ -146,7 +146,7 @@ static void BusCenterServerDelayInit(void *para)
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
         ret = LnnAsyncCallbackDelayHelper(looper, BusCenterServerDelayInit, NULL, g_lnnLocalConfigInit.delayLen);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "BusCenterServerDelayInit LnnAsyncCallbackDelayHelper fail");
+            LNN_LOGE(LNN_STATE, "LnnAsyncCallbackDelayHelper fail");
         }
     }
 }
@@ -157,7 +157,7 @@ static int32_t StartDelayInit(void)
     int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), BusCenterServerDelayInit,
         NULL, g_lnnLocalConfigInit.delayLen);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "StartDelayInit LnnAsyncCallbackDelayHelper fail");
+        LNN_LOGE(LNN_INIT, "call LnnAsyncCallbackDelayHelper fail");
     }
     return ret;
 }
@@ -168,55 +168,55 @@ int32_t BusCenterServerInit(void)
         return SOFTBUS_ERR;
     }
     if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start decision center init fail!");
+        LNN_LOGE(LNN_INIT, "start decision center init fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitBusCenterEvent() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init bus center event failed");
+        LNN_LOGE(LNN_INIT, "init bus center event fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitEventMonitor() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init event monitor fail");
+        LNN_LOGE(LNN_INIT, "init event monitor fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitDiscoveryManager() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init discovery manager fail");
+        LNN_LOGE(LNN_INIT, "init discovery manager fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitNetworkManager() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lnn network manager fail!");
+        LNN_LOGE(LNN_INIT, "init lnn network manager fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitNetBuilder() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init net builder fail!");
+        LNN_LOGE(LNN_INIT, "init net builder fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitMetaNode() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init meta node fail!");
+        LNN_LOGE(LNN_INIT, "init meta node fail");
         return SOFTBUS_ERR;
     }
     SoftBusRunPeriodicalTask(WATCHDOG_TASK_NAME, WatchdogProcess, WATCHDOG_INTERVAL_TIME, WATCHDOG_DELAY_TIME);
     if (LnnInitLaneHub() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init lane hub fail!");
+        LNN_LOGE(LNN_INIT, "init lane hub fail");
         return SOFTBUS_ERR;
     }
     if (InitNodeAddrAllocator() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init nodeAddr failed.");
+        LNN_LOGE(LNN_INIT, "init nodeAddr fail");
         return SOFTBUS_ERR;
     }
     if (RouteLSInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init route failed.");
+        LNN_LOGE(LNN_INIT, "init route fail");
         return SOFTBUS_ERR;
     }
     if (StartDelayInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start delay init fail!");
+        LNN_LOGE(LNN_INIT, "start delay init fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init bus center decision center fail!");
+        LNN_LOGE(LNN_INIT, "init bus center decision center fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server init ok");
+    LNN_LOGI(LNN_INIT, "bus center server init ok");
     return SOFTBUS_OK;
 }
 
@@ -234,5 +234,5 @@ void BusCenterServerDeinit(void)
     DeinitDecisionCenter();
     LnnDeinitNetLedger();
     LnnDeinitMetaNode();
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bus center server deinit");
+    LNN_LOGI(LNN_INIT, "bus center server deinit");
 }
