@@ -474,7 +474,7 @@ typedef struct {
 /**
  * @brief Creates a session server.
  *
- * A maximum of 10 session servers can be created.
+ * A maximum of 32 session servers can be created.
  *
  * @param pkgName Indicates the pointer to the service bundle name.
  * It is the unique identifier of the upper-layer service. The value cannot be empty or exceed 64 characters.
