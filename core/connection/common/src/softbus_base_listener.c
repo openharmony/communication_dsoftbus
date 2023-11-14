@@ -1239,7 +1239,7 @@ static int32_t StartSelectThread(void)
             break;
         }
         state->referenceCount = 1;
-        status = ConnStartActionAsync(state, SelectTask);
+        status = ConnStartActionAsync(state, SelectTask, "OS_selectTsk");
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "start select thread failed: init lock failed, error=%d", status);
             CleanupSelectThreadState(&state);

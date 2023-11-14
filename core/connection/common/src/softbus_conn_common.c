@@ -35,10 +35,11 @@ static const int32_t QUEUE_LIMIT[QUEUE_NUM_PER_PID] = {
     LOW_PRIORITY_DEFAULT_LIMIT,
 };
 
-int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *))
+int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *taskName)
 {
     SoftBusThreadAttr attr;
     SoftBusThreadAttrInit(&attr);
+    attr.taskName = taskName;
     SoftBusThread ignore;
     int32_t status = SoftBusThreadCreate(&ignore, &attr, runnable, arg);
     return status;
