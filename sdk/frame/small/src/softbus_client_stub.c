@@ -153,6 +153,7 @@ static int StartDeathProcTask(void)
 
     threadAttr.detachState = SOFTBUS_THREAD_DETACH;
     threadAttr.policy = SOFTBUS_SCHED_RR;
+    threadAttr.taskName = "OS_deathTsk";
     ret = SoftBusThreadCreate(&tid, &threadAttr, DeathProcTask, NULL);
     if (ret != 0) {
         COMM_LOGE(COMM_SDK, "create DeathProcTask failed, ret[%d]", ret);

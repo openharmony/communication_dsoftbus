@@ -306,6 +306,8 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
             auto itListener = g_streamSocketMap.find(fd);
             if (itListener != g_streamSocketMap.end()) {
                 std::thread([itListener, eventId, tvCount, metricList, &itLock]() {
+                    const std::string threadName = "OS_qosEvent";
+                    pthread_setname_np(pthread_self(), threadName.c_str());
                     std::lock_guard<std::mutex> guard(itLock->second);
                     itListener->second->OnQosEvent(eventId, tvCount, &metricList);
                 }).detach();
@@ -457,26 +459,8 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<u
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
         return false;
     }
-    auto self = this->GetSelf();
-    std::thread([self]() { self->NotifyStreamListener(); }).detach();
 
-    std::thread([self]() {
-        if (!self->Accept()) {
-            self->DestroyStreamSocket();
-            return;
-        }
-        self->DoStreamRecv();
-        self->DestroyStreamSocket();
-    }).detach();
-
-    bool &isDestroyed = isDestroyed_;
-    std::thread([self, &isDestroyed]() {
-        while (!isDestroyed) {
-            self->FillpAppStatistics();
-            std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
-        }
-    }).detach();
-
+    CreateServerProcessThread();
     TRANS_LOGI(TRANS_STREAM,
         "CreateServer end, listenFd=%d, epollFd=%d, streamType=%d", listenFd_, epollFd_, streamType_);
     return true;
@@ -558,21 +542,7 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
     isStreamRecv_ = true;
     TRANS_LOGI(TRANS_STREAM, "Success to connect remote, and create a thread to recv data.");
 
-    auto self = this->GetSelf();
-    std::thread([self]() { self->NotifyStreamListener(); }).detach();
-
-    std::thread([self]() {
-        self->DoStreamRecv();
-        self->DestroyStreamSocket();
-    }).detach();
-
-    bool &isDestroyed = isDestroyed_;
-    std::thread([self, &isDestroyed]() {
-        while (!isDestroyed) {
-            self->FillpAppStatistics();
-            std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
-        }
-    }).detach();
+    CreateClientProcessThread();
     return true;
 }
 
@@ -1303,7 +1273,11 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
     if (streamFd_ == -1) {
         TRANS_LOGI(TRANS_STREAM, "set vtp stack config when streamFd is legal");
         auto self = GetSelf();
-        std::thread([self, type, value]() { self->SetVtpStackConfigDelayed(type, value); }).detach();
+        std::thread([self, type, value]() {
+            const std::string threadName = "OS_setVtpCfg";
+            pthread_setname_np(pthread_self(), threadName.c_str());
+            self->SetVtpStackConfigDelayed(type, value);
+            }).detach();
         return true;
     }
 
@@ -1543,6 +1517,64 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     }
 
     return outLen;
+}
+
+void VtpStreamSocket::CreateServerProcessThread()
+{
+    auto self = this->GetSelf();
+    std::thread([self]() {
+        const std::string threadName = "OS_sntfStmLsn";
+        pthread_setname_np(pthread_self(), threadName.c_str());
+        self->NotifyStreamListener();
+        }).detach();
+
+    std::thread([self]() {
+        const std::string threadName = "OS_sdstyStmSkt";
+        pthread_setname_np(pthread_self(), threadName.c_str());
+        if (!self->Accept()) {
+            self->DestroyStreamSocket();
+            return;
+        }
+        self->DoStreamRecv();
+        self->DestroyStreamSocket();
+        }).detach();
+
+    bool &isDestroyed = isDestroyed_;
+    std::thread([self, &isDestroyed]() {
+        const std::string threadName = "OS_sfillStatic";
+        pthread_setname_np(pthread_self(), threadName.c_str());
+        while (!isDestroyed) {
+            self->FillpAppStatistics();
+            std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
+        }
+        }).detach();
+}
+
+void VtpStreamSocket::CreateClientProcessThread()
+{
+    auto self = this->GetSelf();
+    std::thread([self]() {
+        const std::string threadName = "OS_cntfStmLsn";
+        pthread_setname_np(pthread_self(), threadName.c_str());
+        self->NotifyStreamListener();
+        }).detach();
+
+    std::thread([self]() {
+        const std::string threadName = "OS_cdstyStmSkt";
+        pthread_setname_np(pthread_self(), threadName.c_str());
+        self->DoStreamRecv();
+        self->DestroyStreamSocket();
+        }).detach();
+
+    bool &isDestroyed = isDestroyed_;
+    std::thread([self, &isDestroyed]() {
+        const std::string threadName = "OS_cfillStatic";
+        pthread_setname_np(pthread_self(), threadName.c_str());
+        while (!isDestroyed) {
+            self->FillpAppStatistics();
+            std::this_thread::sleep_for(std::chrono::seconds(FEED_BACK_PERIOD));
+        }
+        }).detach();
 }
 } // namespace SoftBus
 } // namespace Communication
