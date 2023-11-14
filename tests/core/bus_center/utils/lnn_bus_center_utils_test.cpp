@@ -20,11 +20,11 @@
 #include <cstring>
 
 #include "lnn_connection_addr_utils.h"
-#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_def.h"
 #include "softbus_common.h"
+#include "softbus_log_old.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -59,7 +59,7 @@ void LNNConnAddrUtilsTest::TearDownTestCase() {}
 
 void LNNConnAddrUtilsTest::SetUp()
 {
-    LNN_LOGI(LNN_TEST, "LNNConnAddrUtilsTest start");
+    LOG_INFO("LNNConnAddrUtilsTest start.");
 }
 
 void LNNConnAddrUtilsTest::TearDown() {}

@@ -23,6 +23,7 @@
 #include "message_handler.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 constexpr char NETWORKID[] = "ABCDEFG";
 constexpr char OLD_NETWORKID[] = "ABCDEFG";
