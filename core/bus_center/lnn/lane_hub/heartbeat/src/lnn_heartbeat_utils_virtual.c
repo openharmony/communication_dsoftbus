@@ -14,7 +14,7 @@
  */
 
 #include "lnn_heartbeat_utils.h"
-#include "softbus_log_old.h"
+#include "lnn_log.h"
 #include "softbus_errcode.h"
 
 int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen)
@@ -24,6 +24,6 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     (void)brMacHash;
     (void)hashLen;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub GenerateBtMacHash");
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub GenerateBtMacHash");
     return SOFTBUS_NOT_IMPLEMENT;
 }

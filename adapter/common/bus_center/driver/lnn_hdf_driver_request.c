@@ -19,8 +19,8 @@
 #include <hdf_sbuf.h>
 #include <securec.h>
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 #define DRIVER_SERVICE_NAME "hdf_dsoftbus"
 
@@ -33,15 +33,15 @@ static int32_t ParseReply(struct HdfSBuf *rspData, uint8_t *reply, uint32_t repl
         return SOFTBUS_ERR;
     }
     if (!HdfSbufReadBuffer(rspData, (const void **)&data, &dataSize)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read cmd reply fail");
+        LNN_LOGE(LNN_STATE, "read cmd reply fail");
         return SOFTBUS_ERR;
     }
     if (dataSize > replyLen) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "no enough space save reply");
+        LNN_LOGE(LNN_STATE, "no enough space save reply");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(reply, replyLen, data, dataSize) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy reply fail");
+        LNN_LOGE(LNN_STATE, "memcpy reply fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -56,17 +56,17 @@ int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen
     struct HdfSBuf *rspData = NULL;
 
     if (cmd == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid cmd for module %d", moduleId);
+        LNN_LOGW(LNN_STATE, "invalid cmd for module=%d", moduleId);
         return SOFTBUS_INVALID_PARAM;
     }
     softbusService = HdfIoServiceBind(DRIVER_SERVICE_NAME);
     if (softbusService == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind hdf softbus fail for module %d", moduleId);
+        LNN_LOGE(LNN_STATE, "bind hdf softbus fail for module=%d", moduleId);
         return SOFTBUS_ERR;
     }
     if (softbusService->dispatcher == NULL ||
         softbusService->dispatcher->Dispatch == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind hdf softbus fail for module %d", moduleId);
+        LNN_LOGE(LNN_STATE, "bind hdf softbus fail for module=%d", moduleId);
         HdfIoServiceRecycle(softbusService);
         return SOFTBUS_ERR;
     }
@@ -74,16 +74,16 @@ int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen
     rspData = HdfSbufObtainDefaultSize();
     do {
         if (reqData == NULL || rspData == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "obtain sbuf fail for module %d", moduleId);
+            LNN_LOGE(LNN_STATE, "obtain sbuf fail for module=%d", moduleId);
             break;
         }
         if (!HdfSbufWriteBuffer(reqData, cmd, cmdLen)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "write sbuf fail for module %d", moduleId);
+            LNN_LOGE(LNN_STATE, "write sbuf fail for module %d", moduleId);
             break;
         }
         rc = softbusService->dispatcher->Dispatch(&softbusService->object, moduleId, reqData, rspData);
         if (rc != 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send command fail for module %d", moduleId);
+            LNN_LOGE(LNN_STATE, "send command fail for module=%d", moduleId);
         }
     } while (false);
     if (rc == SOFTBUS_OK) {

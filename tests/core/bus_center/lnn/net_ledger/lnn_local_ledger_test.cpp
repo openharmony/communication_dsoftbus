@@ -23,12 +23,12 @@
 #include "bus_center_manager.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_local_net_ledger.c"
+#include "lnn_log.h"
 #include "lnn_node_info.h"
 #include "lnn_local_ledger_deps_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_common.h"
-#include "softbus_log_old.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -52,7 +52,7 @@ void LNNLedgerMockTest::TearDownTestCase()
 
 void LNNLedgerMockTest::SetUp()
 {
-    LOG_INFO("LNNLedgerMockTest start.");
+    LNN_LOGI(LNN_TEST, "LNNLedgerMockTest start");
 }
 
 void LNNLedgerMockTest::TearDown()

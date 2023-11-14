@@ -15,12 +15,12 @@
 
 #include "lnn_meta_node_ledger.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t LnnInitMetaNodeLedger(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "meta node virtual init success");
+    LNN_LOGI(LNN_INIT, "meta node virtual init success");
     return SOFTBUS_OK;
 }
 
