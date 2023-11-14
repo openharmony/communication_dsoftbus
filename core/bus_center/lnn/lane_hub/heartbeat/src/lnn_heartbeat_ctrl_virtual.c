@@ -15,12 +15,12 @@
 
 #include "lnn_heartbeat_ctrl.h"
 
-#include "lnn_log.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 int32_t LnnStartHeartbeatFrameDelay(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "heartbeat(HB) stub process start.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) stub process start.");
     return SOFTBUS_OK;
 }
 
@@ -28,7 +28,7 @@ int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
 {
     (void)param;
 
-    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub set medium param");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub set medium param");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -47,7 +47,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     (void)targetNetworkId;
     (void)mode;
 
-    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub ShiftLNNGear");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub ShiftLNNGear");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -55,24 +55,24 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     (void)type;
 
-    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub update send info");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub update send info");
 }
 
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     (void)groupType;
 
-    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub process auth group created");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group created");
 }
 
 void LnnHbOnTrustedRelationReduced(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub process auth group deleted");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group deleted");
 }
 
 int32_t LnnInitHeartbeat(void)
 {
-    LNN_LOGI(LNN_INIT, "heartbeat(HB) stub init success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) stub init success");
     return SOFTBUS_OK;
 }
 

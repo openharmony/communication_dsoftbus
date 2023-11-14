@@ -14,9 +14,7 @@
  */
 
 #include "lnn_hichain_mock.h"
-
 #include "auth_interface.h"
-#include "auth_log.h"
 #include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_log_old.h"
@@ -37,13 +35,13 @@ void *g_hichainInterface;
 
 LnnHichainInterfaceMock::LnnHichainInterfaceMock()
 {
-    AUTH_LOGI(AUTH_TEST, "construction");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "construction");
     g_hichainInterface = reinterpret_cast<void *>(this);
 }
 
 LnnHichainInterfaceMock::~LnnHichainInterfaceMock()
 {
-    AUTH_LOGI(AUTH_TEST, "delete");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "delete");
     g_hichainInterface = nullptr;
 }
 
@@ -70,7 +68,7 @@ const GroupAuthManager *GetGaInstance(void)
 
 const DeviceGroupManager *GetGmInstance(void)
 {
-    AUTH_LOGI(AUTH_TEST, "GetGmInstance");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "GetGmInstance");
     return GetHichainInterface()->GetGmInstance();
 }
 }
@@ -98,7 +96,7 @@ int32_t LnnHichainInterfaceMock::InvokeAuthDevice(int32_t osAccountId, int64_t a
 int32_t LnnHichainInterfaceMock::AuthDeviceConnSend(int32_t osAccountId, int64_t authReqId, const char *authParams,
     const DeviceAuthCallback *gaCallback)
 {
-    AUTH_LOGI(AUTH_TEST, "AuthDeviceConnSend");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "AuthDeviceConnSend");
     (void)SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
     return HC_SUCCESS;
 }
@@ -155,9 +153,9 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups(
     (void)accountId;
     (void)auth_appId;
     (void)groupId;
-    AUTH_LOGI(AUTH_TEST, "getRelatedGroups test");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "getRelatedGroups test");
     if (!flage) {
-        AUTH_LOGI(AUTH_TEST, "getRelatedGroups test return false");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "getRelatedGroups test return false");
         flage = true;
         return SOFTBUS_ERR;
     }
@@ -179,7 +177,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
     *deviceNum = 1;
     JsonObj *obj = JSON_CreateObject();
     if (obj == NULL) {
-        AUTH_LOGI(AUTH_TEST, "create jsonObject err");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create jsonObject err");
         return SOFTBUS_ERR;
     }
     if (!JSON_AddStringToObject(obj, "groupName", "mygroup<256>E469") ||
@@ -192,7 +190,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
     char* jsons = JSON_PrintUnformatted(obj);
     *returnDevInfoVec = jsons;
 
-    AUTH_LOGI(AUTH_TEST, "getRelatedGroups1 test");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "getRelatedGroups1 test");
     JSON_Delete(obj);
     return SOFTBUS_OK;
 }
@@ -205,7 +203,7 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
     *deviceNum = 1;
     JsonObj *obj = JSON_CreateObject();
     if (obj == NULL) {
-        AUTH_LOGI(AUTH_TEST, "create jsonObject err");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "create jsonObject err");
         return SOFTBUS_ERR;
     }
     if (!JSON_AddStringToObject(obj, "authId", "ABCDEDF00ABCDE0021DD55ACFF")) {
@@ -230,7 +228,7 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices1(
     char jsonsStr[] = "{\"groupId\":\"1111\", \"groupType\":1}";
     char* data = jsonsStr;
     *returnDevInfoVec = data;
-    AUTH_LOGI(AUTH_TEST, "returnDevInfoVec is invalid");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "returnDevInfoVec is invalid");
     if (is_return_device_num) {
         is_return_device_num = false;
         return SOFTBUS_OK;
@@ -242,6 +240,6 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices1(
 void LnnHichainInterfaceMock::destroyInfo(char **returnDevInfoVec)
 {
     (void)returnDevInfoVec;
-    AUTH_LOGI(AUTH_TEST, "destroyInfo test");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "destroyInfo test");
 }
 } // namespace OHOS

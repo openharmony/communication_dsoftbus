@@ -22,7 +22,6 @@
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -31,6 +30,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_transmission_interface.h"
 
 #define MSG_HEAD_LEN 4
@@ -119,13 +119,13 @@ static SyncChannelInfo *CreateSyncChannelInfo(const char *networkId)
 {
     SyncChannelInfo *item = SoftBusMalloc(sizeof(SyncChannelInfo));
     if (item == NULL) {
-        LNN_LOGE(LNN_BUILDER, "malloc sync channel info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc sync channel info fail");
         return NULL;
     }
     ListInit(&item->node);
     ListInit(&item->syncMsgList);
     if (strcpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "copy network id to sync channel info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy network id to sync channel info fail");
         SoftBusFree(item);
         return NULL;
     }
@@ -143,19 +143,19 @@ static SyncInfoMsg *CreateSyncInfoMsg(LnnSyncInfoType type, const uint8_t *msg,
     SyncInfoMsg *syncMsg = NULL;
 
     if (dataLen > MAX_SYNC_INFO_MSG_LEN) {
-        LNN_LOGE(LNN_BUILDER, "sync info msg length too large for type=%d, len=%u",
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync info msg length too large for type: %d, len=%u",
             type, dataLen);
         return NULL;
     }
     syncMsg = SoftBusMalloc(sizeof(SyncInfoMsg) + dataLen);
     if (syncMsg == NULL) {
-        LNN_LOGE(LNN_BUILDER, "malloc sync info msg for type=%d len=%u fail",
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc sync info msg for type: %d len=%u fail",
             type, dataLen);
         return NULL;
     }
     *(int32_t *)syncMsg->data = type;
     if (memcpy_s(syncMsg->data + MSG_HEAD_LEN, dataLen - MSG_HEAD_LEN, msg, len) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "copy sync info msg for type=%d len=%u fail",
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy sync info msg for type: %d len=%u fail",
             type, dataLen);
         SoftBusFree(syncMsg);
         return NULL;
@@ -168,9 +168,9 @@ static SyncInfoMsg *CreateSyncInfoMsg(LnnSyncInfoType type, const uint8_t *msg,
 
 static void SendSyncInfoMsgOnly(const char *networkId, int32_t clientChannelId, SyncInfoMsg *msg)
 {
-    LNN_LOGI(LNN_BUILDER, "only send sync info");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "only send sync info");
     if (TransSendNetworkingMessage(clientChannelId, (char *)msg->data, msg->dataLen, CONN_HIGH) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "trans send data fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "trans send data fail");
     }
     if (msg->complete != NULL) {
         msg->complete((LnnSyncInfoType)(*(uint32_t *)msg->data), networkId,
@@ -182,7 +182,7 @@ static void SendSyncInfoMsgOnly(const char *networkId, int32_t clientChannelId, 
 static void SendSyncInfoMsg(SyncChannelInfo *info, SyncInfoMsg *msg)
 {
     if (TransSendNetworkingMessage(info->clientChannelId, (char *)msg->data, msg->dataLen, CONN_HIGH) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "trans send data fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "trans send data fail");
     }
     SoftBusGetTime(&info->accessTime);
     ListDelete(&msg->node);
@@ -201,9 +201,9 @@ static void CloseUnusedChannel(void *para)
     int64_t diff;
 
     (void)para;
-    LNN_LOGI(LNN_BUILDER, "try close unused channel");
+    LLOGI("try close unused channel");
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "close unused channel lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "close unused channel lock fail");
         return;
     }
     SoftBusGetTime(&now);
@@ -241,19 +241,19 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
     SyncInfoMsg *msg = NULL;
     SyncInfoMsg *msgNext = NULL;
 
-    LNN_LOGI(LNN_BUILDER, "channelId=%d, server=%u", channelId, isServer);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnChannelOpened channelId: %d, server: %u", channelId, isServer);
     if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "peer device not online");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer device not online");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "sync channel opened lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync channel opened lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL) {
         if (!isServer) {
-            LNN_LOGI(LNN_BUILDER, "unexpected client channel opened");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "unexpected client channel opened");
             (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
             return SOFTBUS_INVALID_PARAM;
         }
@@ -292,7 +292,7 @@ static void OnChannelCloseCommon(SyncChannelInfo *info, int32_t channelId)
         info->clientChannelId = INVALID_CHANNEL_ID;
         info->isClientOpened = false;
         if (info->serverChannelId == INVALID_CHANNEL_ID) {
-            LNN_LOGI(LNN_BUILDER, "free empty sync channel info");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "free empty sync channel info");
             ListDelete(&info->node);
             SoftBusFree(info);
         }
@@ -304,18 +304,18 @@ static void OnChannelOpenFailed(int32_t channelId, const char *peerUuid)
     char networkId[NETWORK_ID_BUF_LEN];
     SyncChannelInfo *info = NULL;
 
-    LNN_LOGI(LNN_BUILDER, "open channel fail channelId=%d", channelId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open channel fail channelId: %d", channelId);
     if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "peer device not online");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "peer device not online");
         return;
     }
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "sync channel opened failed lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync channel opened failed lock fail");
         return;
     }
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL || (info->clientChannelId != channelId && info->serverChannelId != channelId)) {
-        LNN_LOGE(LNN_BUILDER, "unexpected channel open fail event");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected channel open fail event");
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return;
     }
@@ -327,14 +327,14 @@ static void OnChannelClosed(int32_t channelId)
 {
     SyncChannelInfo *info = NULL;
 
-    LNN_LOGI(LNN_BUILDER, "channel closed, channelId=%d", channelId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "channel closed, channelId: %d", channelId);
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "sync channel opened failed lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync channel opened failed lock fail");
         return;
     }
     info = FindSyncChannelInfoByChannelId(channelId);
     if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "unexpected channel closed event");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected channel closed event");
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return;
     }
@@ -350,28 +350,28 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
     char networkId[NETWORK_ID_BUF_LEN] = {0};
 
     if (data == NULL) {
-        LNN_LOGE(LNN_BUILDER, "recv NULL data, channelId=%d", channelId);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "recv NULL data, channelId: %d", channelId);
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "recv sync info msg for type=%d, channelId=%d, len=%d",
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv sync info msg for type:%d, channelId:%d, len:%d",
         (LnnSyncInfoType)(*(int32_t *)data), channelId, len);
     if (len <= MSG_HEAD_LEN || len > MAX_SYNC_INFO_MSG_LEN) {
-        LNN_LOGE(LNN_BUILDER, "invalid msg len=%d", len);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid msg len: %d", len);
         return;
     }
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "sync channel opened failed lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync channel opened failed lock fail");
         return;
     }
     info = FindSyncChannelInfoByChannelId(channelId);
     if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "unexpected channel data received event");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unexpected channel data received event");
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return;
     }
     type = (LnnSyncInfoType)(*(int32_t *)data);
     if (type < 0 || type >= LNN_INFO_TYPE_COUNT) {
-        LNN_LOGE(LNN_BUILDER, "received data is exception");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "received data is exception");
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return;
     }
@@ -381,7 +381,7 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
         return;
     }
     if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, info->networkId) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "copy networkId fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy networkId fail");
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return;
     }
@@ -400,7 +400,7 @@ static INetworkingListener g_networkListener = {
 static void LnnSyncManagerHandleOffline(const char *networkId)
 {
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "Lock fail");
+        LLOGE("Lock fail");
         return;
     }
     SyncChannelInfo *item = FindSyncChannelInfoByNetworkId(networkId);
@@ -410,7 +410,7 @@ static void LnnSyncManagerHandleOffline(const char *networkId)
     }
     ListDelete(&item->node);
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
-    LNN_LOGI(LNN_BUILDER, "close sync channel: client=%d server=%d", item->clientChannelId, item->serverChannelId);
+    LLOGI("close sync channel: client=%d server=%d", item->clientChannelId, item->serverChannelId);
     if (item->clientChannelId != INVALID_CHANNEL_ID) {
         (void)TransCloseNetWorkingChannel(item->clientChannelId);
     }
@@ -441,15 +441,15 @@ int32_t LnnInitSyncInfoManager(void)
         g_syncInfoManager.handlers[i] = NULL;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "reg online lister fail");
+        LLOGE("reg online lister fail");
         return SOFTBUS_ERR;
     }
     if (TransRegisterNetworkingChannelListener(CHANNEL_NAME, &g_networkListener) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "reg proxy channel lister fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "reg proxy channel lister fail");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexInit(&g_syncInfoManager.lock, NULL) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "sync info manager mutex init fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync info manager mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -469,15 +469,15 @@ void LnnDeinitSyncInfoManager(void)
 int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
 {
     if (type >= LNN_INFO_TYPE_COUNT || handler == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid sync info hander reg param=%d", type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid sync info hander reg param: %d", type);
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "reg sync info handler lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "reg sync info handler lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     if (g_syncInfoManager.handlers[type] != NULL) {
-        LNN_LOGE(LNN_BUILDER, "sync info already have handler=%d", type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync info already have handler: %d", type);
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -489,15 +489,15 @@ int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handle
 int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
 {
     if (type >= LNN_INFO_TYPE_COUNT || handler == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid sync info hander unreg param=%d", type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid sync info hander unreg param: %d", type);
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "unreg sync info handler lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unreg sync info handler lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     if (g_syncInfoManager.handlers[type] != handler) {
-        LNN_LOGE(LNN_BUILDER, "sync info handler not valid for type=%d", type);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync info handler not valid for type %d", type);
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -514,14 +514,14 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
     }
     info->clientChannelId = TransOpenNetWorkingChannel(CHANNEL_NAME, networkId, NULL);
     if (info->clientChannelId == INVALID_CHANNEL_ID) {
-        LNN_LOGE(LNN_BUILDER, "open sync info channel fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open sync info channel fail");
         SoftBusFree(info);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "open sync info channelId=%d", info->clientChannelId);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open sync info channel: %d", info->clientChannelId);
     SoftBusGetTime(&info->accessTime);
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "send sync info lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send sync info lock fail");
         SoftBusFree(info);
         return SOFTBUS_LOCK_ERR;
     }
@@ -554,7 +554,7 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
 {
     SyncChannelInfo *info = NULL;
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "send sync info lock fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send sync info lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     info = FindSyncChannelInfoByNetworkId(networkId);
@@ -585,9 +585,9 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     SyncInfoMsg *syncMsg = NULL;
     int32_t rc;
 
-    LNN_LOGI(LNN_BUILDER, "send sync info msg for type=%d, len=%d", type, len);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "send sync info msg for type: %d, len=%d", type, len);
     if (type >= LNN_INFO_TYPE_COUNT || networkId == NULL || msg == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid sync info msg param");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid sync info msg param");
         return SOFTBUS_INVALID_PARAM;
     }
     syncMsg = CreateSyncInfoMsg(type, msg, len, complete);

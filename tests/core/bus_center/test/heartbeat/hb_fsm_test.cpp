@@ -25,7 +25,6 @@
 #include "lnn_connection_mock.h"
 #include "lnn_heartbeat_fsm.c"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_log.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_state_machine.h"
 #include "message_handler.h"
@@ -195,7 +194,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveCheckDevStatusMsgTest_01, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     if (strcpy_s(const_cast<char *>(delMsgPara.networkId), sizeof(TEST_NETWORK_ID2), TEST_NETWORK_ID) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_TEST, "strcpy failed");
+        LLOGE("strcpy failed");
     }
     ret = RemoveCheckDevStatusMsg(&ctrlMsgObj, &delMsg);
     EXPECT_FALSE(ret == SOFTBUS_OK);
@@ -207,7 +206,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveCheckDevStatusMsgTest_01, TestSize.Level1)
 
     delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V1;
     if (strcpy_s(const_cast<char *>(delMsgPara.networkId), sizeof(TEST_NETWORK_ID2), TEST_NETWORK_ID2) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_TEST, "strcpy failed");
+        LLOGE("strcpy failed");
     }
     delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
     ret = RemoveCheckDevStatusMsg(&ctrlMsgObj, &delMsg);

@@ -32,6 +32,7 @@
 #include "auth_session_message.c"
 #include "softbus_errcode.h"
 #include "softbus_adapter_json.h"
+#include "softbus_log_old.h"
 #include "softbus_socket.h"
 #include "lnn_lane_score.h"
 
@@ -426,12 +427,12 @@ HWTEST_F(AuthOtherTest, HANDLE_CONNECTION_DATA_TEST_001, TestSize.Level1)
 
 static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
 {
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".", requestId, authId);
+    ALOGI("OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".", requestId, authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 {
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenFailedTest: requestId = %d, reason = %d.", requestId, reason);
+    ALOGI("OnConnOpenFailedTest: requestId = %d, reason = %d.", requestId, reason);
 }
 
 /*

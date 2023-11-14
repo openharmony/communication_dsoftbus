@@ -21,11 +21,11 @@
 #include "auth_hichain.h"
 #include "auth_hichain.c"
 #include "auth_hichain_adapter.h"
-#include "auth_log.h"
 #include "auth_net_ledger_mock.h"
 #include "softbus_app_info.h"
 #include "lnn_hichain_mock.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_socket.h"
 #include "auth_common_mock.h"
 
@@ -49,7 +49,7 @@ void AuthHichainTest::TearDownTestCase() {}
 
 void AuthHichainTest::SetUp()
 {
-    AUTH_LOGI(AUTH_TEST, "AuthHichainTest start");
+    LOG_INFO("AuthHichainTest start.");
 }
 
 void AuthHichainTest::TearDown() {}

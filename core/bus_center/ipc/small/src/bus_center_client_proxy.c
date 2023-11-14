@@ -19,18 +19,18 @@
 #include <stdint.h>
 
 #include "ipc_skeleton.h"
-#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "softbus_log_old.h"
 
 static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 {
     struct CommonScvId svcId = {0};
     if (SERVER_GetIdentityByPkgName(pkgName, &svcId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get bus center callback failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center callback failed.");
         return SOFTBUS_ERR;
     }
     svc->handle = svcId.handle;
@@ -42,18 +42,18 @@ static int32_t GetSvcIdentityByPkgName(const char *pkgName, SvcIdentity *svc)
 static int32_t GetAllClientIdentity(SvcIdentity *svc, int num)
 {
     if (svc == NULL || num == 0) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     struct CommonScvId *svcId = (struct CommonScvId *)SoftBusMalloc(sizeof(struct CommonScvId) * num);
     if (svcId == NULL) {
-        LNN_LOGE(LNN_EVENT, "malloc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc failed");
         return SOFTBUS_ERR;
     }
     (void)memset_s(svcId, sizeof(struct CommonScvId) * num, 0, sizeof(struct CommonScvId) * num);
     if (SERVER_GetAllClientIdentity(svcId, num) != SOFTBUS_OK) {
         SoftBusFree(svcId);
-        LNN_LOGE(LNN_EVENT, "get bus center callback failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center callback failed.");
         return SOFTBUS_ERR;
     }
     for (int i = 0; i < num; i++) {
@@ -68,9 +68,9 @@ static int32_t GetAllClientIdentity(SvcIdentity *svc, int num)
 int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode)
 {
-    LNN_LOGI(LNN_EVENT, "enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnJoinLNNResult ipc server push.");
     if (pkgName == NULL || addr == NULL || (retCode == 0 && networkId == NULL)) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -84,7 +84,7 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
     MessageOption option;
@@ -92,7 +92,7 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_JOIN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnJoinLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -111,9 +111,9 @@ int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t add
 
 int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int retCode)
 {
-    LNN_LOGI(LNN_EVENT, "enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLeaveLNNResult callback ipc server push.");
     if (networkId == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -123,7 +123,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     WriteInt32(&io, retCode);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
     MessageOption option;
@@ -131,7 +131,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_LEAVE_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest fail=%d", ans);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnLeaveLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -147,9 +147,9 @@ int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, 
 
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen)
 {
-    LNN_LOGI(LNN_EVENT, "enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnNodeOnlineStateChanged callback ipc server push.");
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -161,20 +161,20 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     int num;
     int i;
     if (SERVER_GetClientInfoNodeNum(&num) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc num failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback get svc num failed.");
         return SOFTBUS_ERR;
     }
     if (num == 0) {
-        LNN_LOGE(LNN_EVENT, "svc num is 0");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback svc num NULL.");
         return SOFTBUS_ERR;
     }
     SvcIdentity *svc = (SvcIdentity *)SoftBusCalloc(sizeof(SvcIdentity) * num);
     if (svc == NULL) {
-        LNN_LOGE(LNN_EVENT, "malloc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc failed");
         return SOFTBUS_ERR;
     }
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc num failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback get svc num failed.");
         SoftBusFree(svc);
         return SOFTBUS_ERR;
     }
@@ -184,7 +184,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     for (i = 0; i < num; i++) {
         int32_t ans = SendRequest(svc[i], CLIENT_ON_NODE_ONLINE_STATE_CHANGED, &io, NULL, option, NULL);
         if (ans != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OnNodeBasicInfoChanged callback SendRequest failed.");
             SoftBusFree(svc);
             return SOFTBUS_ERR;
         }
@@ -195,9 +195,9 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
 
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type)
 {
-    LNN_LOGI(LNN_EVENT, "enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClinetOnNodeBasicInfoChanged callback ipc server push.");
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -209,20 +209,20 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     int num;
     int i;
     if (SERVER_GetClientInfoNodeNum(&num) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc num failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeBasicInfoChanged callback get svc num failed.");
         return SOFTBUS_ERR;
     }
     if (num == 0) {
-        LNN_LOGE(LNN_EVENT, "svc num NULL");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeBasicInfoChanged callback svc num NULL.");
         return SOFTBUS_ERR;
     }
     SvcIdentity *svc = (SvcIdentity *)SoftBusCalloc(sizeof(SvcIdentity) * num);
     if (svc == NULL) {
-        LNN_LOGE(LNN_EVENT, "malloc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc failed");
         return SOFTBUS_ERR;
     }
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc num failed.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeBasicInfoChanged callback get svc num failed.");
         SoftBusFree(svc);
         return SOFTBUS_ERR;
     }
@@ -232,7 +232,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     for (i = 0; i < num; i++) {
         int32_t ans = SendRequest(svc[i], CLIENT_ON_NODE_BASIC_INFO_CHANGED, &io, NULL, option, NULL);
         if (ans != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClinetOnNodeBasicInfoChanged callback SendRequest failed.");
             SoftBusFree(svc);
             return SOFTBUS_ERR;
         }
@@ -245,9 +245,9 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     uint32_t infoTypeLen, int32_t retCode)
 {
     (void)pid;
-    LNN_LOGI(LNN_EVENT, "enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnTimeSyncResult callback ipc server push.");
     if (pkgName == NULL || info == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -258,7 +258,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     WriteInt32(&io, retCode);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
     MessageOption option;
@@ -266,7 +266,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_TIME_SYNC_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult callback SendRequest failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -276,9 +276,9 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     int32_t reason)
 {
     (void) pid;
-    LNN_LOGI(LNN_EVENT, "enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnPublishLNNResult callback ipc server push.");
     if (pkgName == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -288,7 +288,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     WriteInt32(&io, reason);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnPublishLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
     MessageOption option;
@@ -296,7 +296,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_PUBLISH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnPublishLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -306,9 +306,9 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     int32_t reason)
 {
     (void)pid;
-    LNN_LOGI(LNN_EVENT, "enter");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnRefreshLNNResult callback ipc server push.");
     if (pkgName == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -318,7 +318,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     WriteInt32(&io, reason);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshLNNResult callback get svc failed.");
         return SOFTBUS_ERR;
     }
     MessageOption option;
@@ -326,7 +326,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshLNNResult callback SendRequest failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -336,9 +336,9 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     uint32_t deviceLen)
 {
     (void)pid;
-    LNN_LOGI(LNN_EVENT, "enter.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ClientOnRefreshDeviceFound callback ipc server push.");
     if (pkgName == NULL || device == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid parameters");
         return SOFTBUS_ERR;
     }
     IpcIo io;
@@ -348,7 +348,7 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     WriteBuffer(&io, device, deviceLen);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get svc failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound callback get svc failed.");
         return SOFTBUS_ERR;
     }
     MessageOption option;
@@ -356,7 +356,7 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_DEVICE_FOUND, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound callback SendRequest failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

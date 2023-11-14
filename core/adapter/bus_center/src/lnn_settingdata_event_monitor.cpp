@@ -21,13 +21,13 @@
 #include "datashare_helper.h"
 #include "datashare_predicates.h"
 #include "datashare_result_set.h"
-#include "lnn_async_callback_utils.h"
 #include "lnn_devicename_info.h"
-#include "lnn_log.h"
+#include "lnn_async_callback_utils.h"
 #include "iservice_registry.h"
 #include "message_handler.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "system_ability_definition.h"
 #include "uri.h"
 
@@ -60,42 +60,42 @@ void LnnSettingDataEventMonitor::OnChange()
 static void CreateDataShareHelperInstance(void)
 {
     if (g_dataShareHelper != nullptr) {
-        LNN_LOGE(LNN_STATE, "already inited");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance already inited.");
         return;
     }
 
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
-        LNN_LOGE(LNN_STATE, "saManager NULL");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance saManager NULL");
         return;
     }
 
     sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
     if (remoteObject == nullptr) {
-        LNN_LOGE(LNN_STATE, "remoteObject NULL");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance remoteObject NULL");
         return;
     }
     g_dataShareHelper =  DataShare::DataShareHelper::Creator(remoteObject, SETTINGS_DATA_BASE_URI,
         SETTINGS_DATA_EXT_URI);
     if (g_dataShareHelper == nullptr) {
-        LNN_LOGE(LNN_STATE, "create fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateDataShareHelperInstance create fail.");
         return;
     }
-    LNN_LOGI(LNN_STATE, "exit success.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "CreateDataShareHelperInstance exit success.");
 }
 
 static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
 {
     if (g_dataShareHelper == nullptr) {
-        LNN_LOGI(LNN_STATE, "retry to create datashare intance.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "retry to create datashare intance.");
         OHOS::BusCenter::CreateDataShareHelperInstance();
         if (g_dataShareHelper == nullptr) {
-            LNN_LOGE(LNN_STATE, "GetDeviceNameFromDataShareHelper NULL.");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper NULL.");
             return SOFTBUS_ERR;
         }
     }
 
-    LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper enter.");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataShareHelper enter.");
     int32_t numRows = 0;
     std::string val;
 
@@ -107,12 +107,12 @@ static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
 
     auto resultSet = g_dataShareHelper->Query(*uri, predicates, columns);
     if (resultSet == nullptr) {
-        LNN_LOGE(LNN_STATE, "GetDeviceNameFromDataShareHelper query fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper query fail.");
         return SOFTBUS_ERR;
     }
     resultSet->GetRowCount(numRows);
     if (numRows <= 0) {
-        LNN_LOGE(LNN_STATE, "GetDeviceNameFromDataShareHelper row zero.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetDeviceNameFromDataShareHelper row zero.");
         return SOFTBUS_ERR;
     }
 
@@ -121,23 +121,23 @@ static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
     resultSet->GetColumnIndex(SETTINGS_DATA_FIELD_VALUE, columnIndex);
     resultSet->GetString(columnIndex, val);
     if (strncpy_s(deviceName, len, val.c_str(), strlen(val.c_str())) != EOK) {
-        LNN_LOGE(LNN_STATE, "strncpy_s fail.");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strncpy_s fail.");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper, deviceName=%s.", deviceName);
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "GetDeviceNameFromDataShareHelper, deviceName=%s.", deviceName);
     return SOFTBUS_OK;
 }
 
 static void RegisterNameMonitorHelper(void)
 {
     if (g_dataShareHelper == nullptr) {
-        LNN_LOGE(LNN_STATE, "g_dataShareHelper == NULL");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "RegisterNameMonitorHelper g_dataShareHelper == NULL.");
         return;
     }
     auto uri = std::make_shared<Uri>(SETTINGS_DATA_BASE_URI + "&key=" + PREDICATES_STRING);
     sptr<LnnSettingDataEventMonitor> settingDataObserver = std::make_unique<LnnSettingDataEventMonitor>().release();
     g_dataShareHelper->RegisterObserver(*uri, settingDataObserver);
-    LNN_LOGI(LNN_STATE, "success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "RegisterNameMonitorHelper success");
 }
 }
 }
@@ -145,11 +145,11 @@ static void RegisterNameMonitorHelper(void)
 int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
 {
     if (deviceName == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid para");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid para");
         return SOFTBUS_ERR;
     }
     if (OHOS::BusCenter::GetDeviceNameFromDataShareHelper(deviceName, len) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "GetDeviceNameFromDataShareHelper fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetSettingDeviceName fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -158,7 +158,7 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
 int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
 {
     if (handler == NULL) {
-        LNN_LOGE(LNN_INIT, "handler is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "handler is null");
         return SOFTBUS_ERR;
     }
     g_eventHandler = handler;
@@ -170,12 +170,12 @@ int32_t LnnInitDeviceNameMonitorImpl(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (looper == NULL) {
-        LNN_LOGE(LNN_INIT, "looper is null");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "looper is null");
         return SOFTBUS_ERR;
     }
     int32_t ret = LnnAsyncCallbackDelayHelper(looper, UpdateDeviceName, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init DeviceName LnnAsyncCallbackDelayHelper fail");
     }
     return ret;
 }

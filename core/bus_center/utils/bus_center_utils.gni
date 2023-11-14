@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("../../../dsoftbus.gni")
-import("../../common/dfx/dsoftbus_dfx.gni")
 
 core_bus_center_utils_path = "$dsoftbus_root_path/core/bus_center/utils"
 
@@ -33,9 +32,5 @@ if (dsoftbus_feature_lnn_net || dsoftbus_feature_lnn_meta_node) {
     "$core_bus_center_utils_path/src/lnn_network_id.c",
   ]
 }
-bus_center_utils_inc = [
-  "$core_bus_center_utils_path/include",
-  "$dsoftbus_root_path/core/common/dfx/interface/include",
-]
-bus_center_utils_deps =
-    [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
+bus_center_utils_inc = [ "$core_bus_center_utils_path/include" ]
+bus_center_utils_deps = []

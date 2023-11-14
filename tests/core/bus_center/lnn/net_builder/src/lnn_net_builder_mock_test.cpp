@@ -17,16 +17,16 @@
 #include <securec.h>
 
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder.c"
 #include "lnn_net_builder_deps_mock.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 int32_t LnnInitCipherKeyManager(void)
 {
-    LNN_LOGI(LNN_TEST, "init virtual lnn cipherkey manager");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lnn cipherkey manager");
     return SOFTBUS_OK;
 }
 

@@ -15,18 +15,18 @@
 
 #include "lnn_time_sync_impl.h"
 
-#include "lnn_log.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 int32_t LnnTimeSyncImplInit(void)
 {
-    LNN_LOGI(LNN_INIT, "time sync impl stub init success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "time sync impl stub init success");
     return SOFTBUS_OK;
 }
 
 void LnnTimeSyncImplDeinit(void)
 {
-    LNN_LOGI(LNN_INIT, "time sync impl stub deinit");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "time sync impl stub deinit");
 }
 
 int32_t LnnStartTimeSyncImpl(const char *targetNetworkId, TimeSyncAccuracy accuracy,
@@ -36,13 +36,13 @@ int32_t LnnStartTimeSyncImpl(const char *targetNetworkId, TimeSyncAccuracy accur
     (void)accuracy;
     (void)period;
     (void)callback;
-    LNN_LOGE(LNN_CLOCK, "start time sync stub impl");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start time sync stub impl");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnStopTimeSyncImpl(const char *targetNetworkId)
 {
     (void)targetNetworkId;
-    LNN_LOGE(LNN_CLOCK, "stop time sync stub impl");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop time sync stub impl");
     return SOFTBUS_NOT_IMPLEMENT;
 }
