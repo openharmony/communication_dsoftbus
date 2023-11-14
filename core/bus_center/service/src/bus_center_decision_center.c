@@ -182,6 +182,7 @@ void LnnDCProcessOnlineState(bool isOnline, const NodeBasicInfo *info)
         AnonymizeFree(anonyNetworkId);
         return;
     }
+    AnonymizeFree(anonyNetworkId);
     ConnectOption option = { 0 };
     option.type = CONNECT_BR;
     if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, LnnGetBtMac(&nodeInfo)) == EOK) {
