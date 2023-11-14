@@ -2545,8 +2545,6 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 {
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
-    // udid hash hex strLen report to ohter service is 8, same as ble
-    device->devId[SHORT_UDID_HASH_LEN] = '\0';
     LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
         addtions->medium, device->devId, device->isOnline);
 }
