@@ -22,12 +22,12 @@
 #include "bus_center_adapter.h"
 #include "bus_center_info_key.h"
 #include "parameter.h"
+#include "lnn_log.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_log.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 
@@ -53,7 +53,7 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
     for (id = 0; id < sizeof(g_typeConvertMap) / sizeof(TypeInfo); id++) {
         if (strcmp(g_typeConvertMap[id].inBuf, inBuf) == EOK) {
             if (strcpy_s(outBuf, outLen, g_typeConvertMap[id].outBuf) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcps_s fail");
+                LNN_LOGE(LNN_STATE, "strcps_s fail");
                 return SOFTBUS_ERR;
             }
             return SOFTBUS_OK;
@@ -65,21 +65,21 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
 int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "fail: para error!");
+        LNN_LOGE(LNN_STATE, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     char localUdid[UDID_BUF_LEN] = {0};
     const char *devType = NULL;
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set default devicename in netledger init");
+            LNN_LOGI(LNN_STATE, "set default devicename in netledger init");
             if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;
         case COMM_DEVICE_KEY_UDID:
             if (GetDevUdid(localUdid, UDID_BUF_LEN) != 0) {
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDevUdid failed!");
+                LNN_LOGE(LNN_STATE, "GetDevUdid failed");
                 return SOFTBUS_ERR;
             }
             if (strncpy_s(value, len, localUdid, UDID_BUF_LEN) != EOK) {
@@ -91,14 +91,14 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
             if (devType != NULL) {
                 char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
                 if (SoftBusConvertDeviceType(devType, softBusDevType, len) != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert device type fail");
+                    LNN_LOGE(LNN_STATE, "convert device type fail");
                     return SOFTBUS_ERR;
                 }
                 if (strcpy_s(value, len, softBusDevType) != EOK) {
                     return SOFTBUS_ERR;
                 }
             } else {
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "GetDeviceType failed!");
+                LNN_LOGE(LNN_STATE, "GetDeviceType failed");
                 return SOFTBUS_ERR;
             }
             break;

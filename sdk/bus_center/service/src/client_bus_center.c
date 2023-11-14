@@ -19,22 +19,22 @@
 #include <string.h>
 
 #include "client_trans_session_manager.h"
+#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 
 static int32_t CommonInit(const char *pkgName)
 {
     if (InitSoftBus(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init softbus failed");
+        LNN_LOGE(LNN_INIT, "init softbus failed");
         return SOFTBUS_NETWORK_NOT_INIT;
     }
     if (CheckPackageName(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "check packageName failed");
+        LNN_LOGE(LNN_INIT, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -70,23 +70,23 @@ static bool IsValidNodeStateCb(INodeStateCb *callback)
 static int32_t PublishInfoCheck(const PublishInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mode is invalid");
+        LNN_LOGE(LNN_STATE, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->medium < AUTO) || (info->medium > COAP)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "medium is invalid");
+        LNN_LOGE(LNN_STATE, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "freq is invalid");
+        LNN_LOGE(LNN_STATE, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (info->capability == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "capability is invalid");
+        LNN_LOGE(LNN_STATE, "capability is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "data is invalid");
+        LNN_LOGE(LNN_STATE, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (info->dataLen == 0) {
@@ -95,7 +95,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
     if ((info->capabilityData != NULL) &&
         ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strnlen((char *)(info->capabilityData), MAX_CAPABILITYDATA_LEN) == MAX_CAPABILITYDATA_LEN))) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        LNN_LOGE(LNN_STATE, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -104,23 +104,23 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
 static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "mode is invalid");
+        LNN_LOGE(LNN_STATE, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->medium < AUTO) || (info->medium > COAP)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "medium is invalid");
+        LNN_LOGE(LNN_STATE, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "freq is invalid");
+        LNN_LOGE(LNN_STATE, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (info->capability == NULL) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "capability is invalid");
+        LNN_LOGE(LNN_STATE, "capability is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data is invalid");
+        LNN_LOGE(LNN_STATE, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (info->dataLen == 0) {
@@ -129,7 +129,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
     if ((info->capabilityData != NULL) &&
         ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strnlen((char *)(info->capabilityData), MAX_CAPABILITYDATA_LEN) == MAX_CAPABILITYDATA_LEN))) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "data exceeds the maximum length");
+        LNN_LOGE(LNN_STATE, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -138,7 +138,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 int32_t GetAllNodeDeviceInfo(const char *pkgName, NodeBasicInfo **info, int32_t *infoNum)
 {
     if (pkgName == NULL || info == NULL || infoNum == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: params are null");
+        LNN_LOGE(LNN_STATE, "params are null");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -159,7 +159,7 @@ void FreeNodeInfo(NodeBasicInfo *info)
 int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
 {
     if (pkgName == NULL || info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: params are null");
+        LNN_LOGE(LNN_STATE, "params are null");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -173,11 +173,11 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     uint8_t *info, int32_t infoLen)
 {
     if (pkgName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: pkgName is null");
+        LNN_LOGE(LNN_STATE, "pkgName is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid params");
+        LNN_LOGE(LNN_STATE, "invalid params");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -191,11 +191,11 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
 int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     if (pkgName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: pkgName is null");
+        LNN_LOGE(LNN_STATE, "pkgName is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!IsValidString(networkId, NETWORK_ID_BUF_LEN)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid params");
+        LNN_LOGE(LNN_STATE, "invalid params");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -208,7 +208,7 @@ int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16
 int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 {
     if (pkgName == NULL || target == NULL || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : params are NULL!");
+        LNN_LOGE(LNN_STATE, "params are NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -221,7 +221,7 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb)
 {
     if (pkgName == NULL || customData == NULL || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : params are NULL!");
+        LNN_LOGE(LNN_STATE, "params are NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -232,7 +232,7 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
         ret = ClientGetChannelBySessionId(target->info.session.sessionId, &target->info.session.channelId,
             &target->info.session.type, NULL);
         if (ret != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : get channel error!");
+            LNN_LOGE(LNN_STATE, "get channel error");
             return ret;
         }
     }
@@ -242,7 +242,7 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
     if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
+        LNN_LOGE(LNN_STATE, "networkId or cb is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     return LeaveLNNInner(pkgName, networkId, cb);
@@ -251,7 +251,7 @@ int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb
 int32_t LeaveMetaNode(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb)
 {
     if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail : networkId or cb is NULL!");
+        LNN_LOGE(LNN_STATE, "networkId or cb is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     return LeaveMetaNodeInner(pkgName, networkId, cb);
@@ -260,7 +260,7 @@ int32_t LeaveMetaNode(const char *pkgName, const char *networkId, OnLeaveMetaNod
 int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback)
 {
     if (pkgName == NULL || IsValidNodeStateCb(callback) == false) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -273,7 +273,7 @@ int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback)
 int32_t UnregNodeDeviceStateCb(INodeStateCb *callback)
 {
     if (callback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para callback = null!");
+        LNN_LOGE(LNN_STATE, "para callback = null");
         return SOFTBUS_INVALID_PARAM;
     }
     return UnregNodeDeviceStateCbInner(callback);
@@ -284,7 +284,7 @@ int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSync
 {
     if (pkgName == NULL || !IsValidString(targetNetworkId, NETWORK_ID_BUF_LEN) ||
         cb == NULL || cb->onTimeSyncResult == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -297,7 +297,7 @@ int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSync
 int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     if (pkgName == NULL || !IsValidString(targetNetworkId, NETWORK_ID_BUF_LEN)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -310,7 +310,7 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
 int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb)
 {
     if (pkgName == NULL || info == NULL || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -326,7 +326,7 @@ int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishC
 int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
 {
     if (pkgName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -339,7 +339,7 @@ int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
 int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
 {
     if (pkgName == NULL || info == NULL || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -355,7 +355,7 @@ int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefres
 int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     if (pkgName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: invalid parameters");
+        LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -368,7 +368,7 @@ int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId)
 int32_t ActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
 {
     if (pkgName == NULL || info == NULL || metaNodeId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid active meta node para");
+        LNN_LOGE(LNN_STATE, "invalid active meta node para");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -381,7 +381,7 @@ int32_t ActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char
 int32_t DeactiveMetaNode(const char *pkgName, const char *metaNodeId)
 {
     if (pkgName == NULL || metaNodeId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid deactive meta node para");
+        LNN_LOGE(LNN_STATE, "invalid deactive meta node para");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -394,7 +394,7 @@ int32_t DeactiveMetaNode(const char *pkgName, const char *metaNodeId)
 int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum)
 {
     if (pkgName == NULL || infos == NULL || infoNum == NULL || *infoNum > MAX_META_NODE_NUM) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid query meta node info para");
+        LNN_LOGE(LNN_STATE, "invalid query meta node info para");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -407,7 +407,7 @@ int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *in
 int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     if (pkgName == NULL || callerId == NULL || mode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid shift lnn gear para");
+        LNN_LOGE(LNN_STATE, "invalid shift lnn gear para");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
@@ -416,12 +416,12 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
     }
     size_t len = strnlen(callerId, CALLER_ID_MAX_LEN);
     if (len == 0 || len >= CALLER_ID_MAX_LEN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid shift lnn gear callerId len:%d", len);
+        LNN_LOGE(LNN_STATE, "invalid shift lnn gear callerId len:%d", len);
         return SOFTBUS_INVALID_PARAM;
     }
     if (targetNetworkId != NULL &&
         strnlen(targetNetworkId, NETWORK_ID_BUF_LEN) != NETWORK_ID_BUF_LEN - 1) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid shift lnn gear targetNetworkId");
+        LNN_LOGE(LNN_STATE, "invalid shift lnn gear targetNetworkId");
         return SOFTBUS_INVALID_PARAM;
     }
     return ShiftLNNGearInner(pkgName, callerId, targetNetworkId, mode);
