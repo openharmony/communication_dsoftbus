@@ -16,7 +16,7 @@
 #include "lnn_lane_deps_mock.h"
 #include "softbus_error_code.h"
 
-const uint16_t SHA_HASH_LEN = 32;
+const static uint16_t SHA_HASH_LEN = 32;
 
 using namespace testing::ext;
 using namespace testing;
