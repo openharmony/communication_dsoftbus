@@ -388,6 +388,7 @@ static int32_t SyncElectMessage(const char *networkId)
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGW(LNN_BUILDER, "no ip networking, dont sync elect msg, networkId=%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, masterUdid, UDID_BUF_LEN) != SOFTBUS_OK ||
