@@ -17,16 +17,16 @@
 
 #include <stdint.h>
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 
 #define DEFAUTL_LNN_FEATURE 0x3E2 // 0x3EA
 
 int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 {
     if (feature == NULL || capaBit >= BIT_FEATURE_COUNT) {
-        LLOGE("in para error");
+        LNN_LOGE(LNN_LEDGER, "in para error");
         return SOFTBUS_INVALID_PARAM;
     }
     *feature = (*feature) | (1 << (uint64_t)capaBit);
@@ -36,7 +36,7 @@ int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 {
     if (feature == NULL || capaBit >= BIT_FEATURE_COUNT) {
-        LLOGE("in para error");
+        LNN_LOGE(LNN_LEDGER, "in para error");
         return SOFTBUS_INVALID_PARAM;
     }
     *feature = (*feature) & (~(1 << (uint64_t)capaBit));
@@ -53,9 +53,9 @@ uint64_t LnnGetFeatureCapabilty(void)
     uint64_t configValue;
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_SUPPORT_FEATURE,
         (unsigned char*)&configValue, sizeof(configValue)) != SOFTBUS_OK) {
-        LLOGE("get lnn feature fail, use default value");
+        LNN_LOGE(LNN_LEDGER, "get lnn feature fail, use default value");
         configValue = DEFAUTL_LNN_FEATURE;
     }
-    LLOGI("lnn feature is %lu", configValue);
+    LNN_LOGI(LNN_LEDGER, "lnn feature is %lu", configValue);
     return configValue;
 }
