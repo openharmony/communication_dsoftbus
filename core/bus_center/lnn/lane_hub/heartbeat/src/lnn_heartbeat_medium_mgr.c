@@ -374,7 +374,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     }
     (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BR);
     (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BLE);
-    if ((ret = LnnSaveRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
+    if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret:%d", ret);
         return true;
     }
