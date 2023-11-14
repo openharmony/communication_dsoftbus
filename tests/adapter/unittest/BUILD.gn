@@ -12,7 +12,6 @@
 # limitations under the License.
 
 defines = []
-import("../../../core/common/dfx/dsoftbus_dfx.gni")
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   import("//build/lite/config/test.gni")
@@ -322,6 +321,7 @@ if (defined(ohos_lite)) {
     module_out_path = module_output_path
     sources = [
       "$dsoftbus_root_path/adapter/common/net/wifi/common/softbus_wifi_api_adapter.c",
+      "$dsoftbus_root_path/core/common/log/softbus_log_old.c",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/wifi_mock.cpp",
       "softbus_wifi_api_test.cpp",
     ]
@@ -341,11 +341,9 @@ if (defined(ohos_lite)) {
       "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
       "//foundation/systemabilitymgr/samgr/adapter/interfaces/innerkits/include",
       "$dsoftbus_root_path/core/common/include",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
     ]
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
       "../../../adapter:softbus_adapter",
       "//third_party/googletest:gmock",
       "//third_party/googletest:gtest_main",
@@ -368,6 +366,7 @@ if (defined(ohos_lite)) {
     sources = [
       "$dsoftbus_root_path/adapter/common/kernel/liteos_m/softbus_adapter_mem.c",
       "$dsoftbus_root_path/adapter/common/log/softbus_adapter_log.c",
+      "$dsoftbus_root_path/core/common/log/softbus_log_old.c",
       "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/network_mock.cpp",
@@ -396,7 +395,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/interface/include",
     ]
     deps = [
-      "//foundation/communication/dsoftbus/core/common/dfx/log:softbus_dfx_log",
       "//third_party/googletest:gmock",
       "//third_party/googletest:gtest_main",
     ]
@@ -422,10 +420,8 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include/",
       "$dsoftbus_root_path/core/bus_center/utils/include/",
       "$dsoftbus_root_path/adapter/common/net/hdi/include/",
-      "$dsoftbus_root_path/core/common/dfx/interface/include",
     ]
     deps = [
-      "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
       "$dsoftbus_root_path/core/frame:softbus_server",
       "../../../adapter:softbus_adapter",
       "//third_party/googletest:gtest_main",

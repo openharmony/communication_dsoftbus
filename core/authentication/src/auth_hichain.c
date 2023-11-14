@@ -16,11 +16,8 @@
 #include "auth_hichain.h"
 
 #include <securec.h>
-
-#include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_hichain_adapter.h"
-#include "auth_log.h"
 #include "auth_session_fsm.h"
 #include "device_auth.h"
 #include "bus_center_manager.h"
@@ -44,7 +41,7 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
 {
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "create json fail");
+        ALOGE("create json fail.");
         return NULL;
     }
     if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
@@ -53,21 +50,21 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
         !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, isClient) ||
         !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false) ||
         !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, KEY_LENGTH)) {
-        AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
+        ALOGE("add json object fail.");
         cJSON_Delete(msg);
         return NULL;
     }
 #ifdef AUTH_ACCOUNT
-    AUTH_LOGI(AUTH_HICHAIN, "in account auth mode");
+    ALOGI("in account auth mode");
     if (!AddStringToJsonObject(msg, FIELD_UID_HASH, uid)) {
-        AUTH_LOGE(AUTH_HICHAIN, "add uid into json fail");
+        ALOGE("add uid into json fail.");
         cJSON_Delete(msg);
         return NULL;
     }
 #endif
     char *data = cJSON_PrintUnformatted(msg);
     if (data == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "cJSON_PrintUnformatted fail");
+        ALOGE("cJSON_PrintUnformatted fail.");
     }
     cJSON_Delete(msg);
     return data;
@@ -75,9 +72,9 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
 
 static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnTransmit: authSeq=%" PRId64 ", len=%u", authSeq, len);
+    ALOGI("hichain OnTransmit: authSeq=%" PRId64 ", len=%u.", authSeq, len);
     if (AuthSessionPostAuthData(authSeq, data, len) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain OnTransmit fail: authSeq=%" PRId64, authSeq);
+        ALOGE("hichain OnTransmit fail: authSeq=%" PRId64, authSeq);
         return false;
     }
     return true;
@@ -85,9 +82,9 @@ static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 
 static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnSessionKeyReturned: authSeq=%" PRId64 ", len=%u", authSeq, sessionKeyLen);
+    ALOGI("hichain OnSessionKeyReturned: authSeq=%" PRId64 ", len=%u.", authSeq, sessionKeyLen);
     if (sessionKey == NULL || sessionKeyLen > SESSION_KEY_LENGTH) {
-        AUTH_LOGW(AUTH_HICHAIN, "invalid sessionKey");
+        ALOGE("invalid sessionKey.");
         return;
     }
     (void)AuthSessionSaveSessionKey(authSeq, sessionKey, sessionKeyLen);
@@ -97,7 +94,7 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 {
     (void)operationCode;
     (void)returnData;
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnFinish: authSeq=%" PRId64, authSeq);
+    ALOGI("hichain OnFinish: authSeq=%" PRId64 ".", authSeq);
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
 
@@ -105,17 +102,17 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
 {
     (void)operationCode;
     (void)errorReturn;
-    AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%" PRId64 ", errCode=%d", authSeq, errCode);
+    ALOGE("hichain OnError: authSeq=%" PRId64 ", errCode=%d.", authSeq, errCode);
     (void)AuthSessionHandleAuthError(authSeq, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
 
 static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
 {
     (void)reqParams;
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnRequest: authSeq=%" PRId64 ", operationCode=%d", authSeq, operationCode);
+    ALOGI("hichain OnRequest: authSeq=%" PRId64 ", operationCode=%d.", authSeq, operationCode);
     char udid[UDID_BUF_LEN] = {0};
     if (AuthSessionGetUdid(authSeq, udid, sizeof(udid)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "get udid fail");
+        ALOGE("get udid fail.");
         return NULL;
     }
     cJSON *msg = cJSON_CreateObject();
@@ -129,13 +126,13 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         !AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, udid) ||
         !AddStringToJsonObject(msg, FIELD_DEVICE_ID, localUdid) ||
         !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false)) {
-        AUTH_LOGE(AUTH_HICHAIN, "pack request msg fail");
+        ALOGE("pack request msg fail.");
         cJSON_Delete(msg);
         return NULL;
     }
     char *msgStr = cJSON_PrintUnformatted(msg);
     if (msgStr == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "cJSON_PrintUnformatted fail");
+        ALOGE("cJSON_PrintUnformatted fail.");
         cJSON_Delete(msg);
         return NULL;
     }
@@ -155,17 +152,17 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
 {
     cJSON *msg = cJSON_Parse(groupInfoStr);
     if (msg == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "parse json fail");
+        ALOGE("parse json fail.");
         return SOFTBUS_ERR;
     }
     if (!GetJsonObjectStringItem(msg, FIELD_GROUP_ID, groupInfo->groupId, GROUPID_BUF_LEN)) {
-        AUTH_LOGE(AUTH_HICHAIN, "get FIELD_GROUP_ID fail");
+        ALOGE("get FIELD_GROUP_ID fail.");
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
     int32_t groupType = 0;
     if (!GetJsonObjectNumberItem(msg, FIELD_GROUP_TYPE, &groupType)) {
-        AUTH_LOGE(AUTH_HICHAIN, "get FIELD_GROUP_TYPE fail");
+        ALOGE("get FIELD_GROUP_TYPE fail.");
         cJSON_Delete(msg);
         return SOFTBUS_ERR;
     }
@@ -177,14 +174,14 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
 static void OnGroupCreated(const char *groupInfo)
 {
     if (groupInfo == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "invalid group info");
+        ALOGE("invalid group info.");
         return;
     }
     GroupInfo info;
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupCreated, type=%d", info.groupType);
+    ALOGI("hichain OnGroupCreated, type=%d", info.groupType);
     if (g_dataChangeListener.onGroupCreated != NULL) {
         g_dataChangeListener.onGroupCreated(info.groupId, (int32_t)info.groupType);
     }
@@ -193,10 +190,10 @@ static void OnGroupCreated(const char *groupInfo)
 static void OnDeviceBound(const char *udid, const char *groupInfo)
 {
     if (udid == NULL || groupInfo == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "invalid udid");
+        ALOGE("invalid udid");
         return;
     }
-    AUTH_LOGI(AUTH_HICHAIN, "hichain onDeviceBound");
+    ALOGI("hichain onDeviceBound");
     if (g_dataChangeListener.onDeviceBound != NULL) {
         g_dataChangeListener.onDeviceBound(udid, groupInfo);
     }
@@ -205,14 +202,14 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
 static void OnGroupDeleted(const char *groupInfo)
 {
     if (groupInfo == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "invalid group info");
+        ALOGE("invalid group info.");
         return;
     }
     GroupInfo info;
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupDeleted, type=%d", info.groupType);
+    ALOGI("hichain OnGroupDeleted, type=%d", info.groupType);
     if (g_dataChangeListener.onGroupDeleted != NULL) {
         g_dataChangeListener.onGroupDeleted(info.groupId);
     }
@@ -221,13 +218,12 @@ static void OnGroupDeleted(const char *groupInfo)
 static void OnDeviceNotTrusted(const char *udid)
 {
     if (udid == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "hichain get invalid udid");
+        ALOGE("hichain OnDeviceNotTrusted get invalid udid.");
         return;
     }
-    char *anonyUdid = NULL;
-    Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%s", anonyUdid);
-    AnonymizeFree(anonyUdid);
+    char *anoyUdid = NULL;
+    ALOGI("hichain OnDeviceNotTrusted, udid:%s", ToSecureStrDeviceID(udid, &anoyUdid));
+    SoftBusFree(anoyUdid);
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
         g_dataChangeListener.onDeviceNotTrusted(udid);
     }
@@ -247,7 +243,7 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
     hichainListener.onDeviceNotTrusted = OnDeviceNotTrusted;
     hichainListener.onDeviceBound = OnDeviceBound;
     if (RegChangeListener(AUTH_APPID, &hichainListener) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain regDataChangeListener fail");
+        ALOGE("hichain regDataChangeListener fail.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -257,7 +253,7 @@ void UnregTrustDataChangeListener(void)
 {
     int32_t ret = UnregChangeListener(AUTH_APPID);
     if (ret != 0) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain unRegDataChangeListener err=%d", ret);
+        ALOGE("hichain unRegDataChangeListener fail(err=%d).", ret);
     }
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
@@ -265,20 +261,20 @@ void UnregTrustDataChangeListener(void)
 int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
 {
     if (udid == NULL || uid == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "udid/uid is invalid");
+        ALOGE("udid/uid is invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
     char *authParams = GenDeviceLevelParam(udid, uid, true);
     if (authParams == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
+        ALOGE("generate auth param fail.");
         return SOFTBUS_ERR;
     }
     if (AuthDevice(authSeq, authParams, &g_hichainCallback) == SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");
+        ALOGI("hichain call authDevice succ");
         cJSON_free(authParams);
         return SOFTBUS_OK;
     }
-    AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed");
+    ALOGE("hichain call authDevice failed");
     cJSON_free(authParams);
     return SOFTBUS_ERR;
 }
@@ -290,7 +286,7 @@ int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
     }
     int32_t ret = ProcessAuthData(authSeq, data, len, &g_hichainCallback);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%d", ret);
+        ALOGE("hichain processData fail(err = %d).", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -300,7 +296,7 @@ void HichainDestroy(void)
 {
     UnregTrustDataChangeListener();
     DestroyDeviceAuth();
-    AUTH_LOGI(AUTH_HICHAIN, "hichain destroy succ");
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "hichain destroy succ.");
 }
 
 void HichainCancelRequest(int64_t authReqId)

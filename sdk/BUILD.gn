@@ -65,7 +65,6 @@ config("dsoftbus_sdk_interface") {
     "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
   ]
 
   if (enhanced_kits_broadcast) {

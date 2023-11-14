@@ -21,7 +21,6 @@
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
-#include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
 #include "bus_center_manager.h"
@@ -59,9 +58,9 @@ static ModuleListener g_moduleListener[] = {
 
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
 {
-    AUTH_LOGI(AUTH_CONN, "Trans: add listener, module=%d", module);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: add listener, module = %d.", module);
     if (listener == NULL || listener->onDataReceived == NULL) {
-        AUTH_LOGE(AUTH_CONN, "Trans: invalid listener");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthTrans: invalid listener.");
         return SOFTBUS_INVALID_PARAM;
     }
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
@@ -71,13 +70,13 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
             return SOFTBUS_OK;
         }
     }
-    AUTH_LOGE(AUTH_CONN, "Trans: unknown module=%d", module);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "AuthTrans: unknown module(=%d).", module);
     return SOFTBUS_ERR;
 }
 
 void UnregAuthTransListener(int32_t module)
 {
-    AUTH_LOGI(AUTH_CONN, "Trans: remove listener, module=%d", module);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: remove listener, module=%d.", module);
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].module == module) {
             g_moduleListener[i].listener.onDataReceived = NULL;
@@ -98,7 +97,7 @@ static void NotifyTransDataReceived(int64_t authId,
         }
     }
     if (listener == NULL || listener->onDataReceived == NULL) {
-        AUTH_LOGI(AUTH_CONN, "Trans: onDataReceived not found");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "AuthTrans: onDataReceived not found.");
         return;
     }
     AuthTransData transData = {
@@ -187,18 +186,18 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     const AuthConnInfo *connInfo, int32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
     if (udidHash == NULL || connInfo == NULL || nodeInfo == NULL || authId == NULL) {
-        AUTH_LOGW(AUTH_CONN, "restore manager fail because para error");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "restore manager fail because para error");
         return SOFTBUS_ERR;
     }
     // get device key
     AuthDeviceKeyInfo keyInfo = {0};
     if (AuthFindDeviceKey(udidHash, connInfo->type, &keyInfo) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_KEY, "restore manager fail because device key not exist");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "restore manager fail because device key not exist");
         return SOFTBUS_ERR;
     }
     if (SoftBusGenerateStrHash((unsigned char *)nodeInfo->deviceInfo.deviceUdid,
         strlen(nodeInfo->deviceInfo.deviceUdid), (unsigned char *)connInfo->info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_KEY, "restore manager fail because generate strhash");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "restore manager fail because generate strhash");
         return SOFTBUS_ERR;
     }
     AuthSessionInfo info;
@@ -212,11 +211,11 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     info.version = SOFTBUS_NEW_V2;
     if (strcpy_s(info.uuid, sizeof(info.uuid), nodeInfo->uuid) != EOK ||
         strcpy_s(info.udid, sizeof(info.udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
-        AUTH_LOGW(AUTH_KEY, "restore manager fail because copy uuid/udid fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_WARN, "restore manager fail because copy uuid/udid fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), keyInfo.deviceKey, sizeof(keyInfo.deviceKey)) != EOK) {
-        AUTH_LOGE(AUTH_KEY, "restore manager fail because memcpy device key");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "restore manager fail because memcpy device key");
         return SOFTBUS_MEM_ERR;
     }
     sessionKey.len = keyInfo.keyLen;
@@ -294,7 +293,7 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer)
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
 {
     if (isMetaAuth == NULL) {
-        AUTH_LOGW(AUTH_CONN, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthManager *auth = GetAuthManagerByAuthId(authId);
@@ -311,7 +310,7 @@ int32_t AuthGetGroupType(const char *udid, const char *uuid)
 {
     int32_t type = 0;
     if (udid == NULL || uuid == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "udid or uuid is null");
+        ALOGI("udid or uuid is null!");
         return type;
     }
     type |= CheckDeviceInGroupByType(udid, uuid, AUTH_GROUP_ACCOUNT) ? GROUP_TYPE_ACCOUNT : 0;
@@ -328,28 +327,27 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
     (void)memset_s(&defaultInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
 
     if (device == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "device is null");
+        ALOGE("device is null");
         return false;
     }
     if (memcmp(device->devId, defaultInfo.devId, SHA_256_HASH_LEN) == 0) {
-        AUTH_LOGW(AUTH_HICHAIN, "devId is empty");
+        ALOGI("devId is empty");
         return false;
     }
     if (memcmp(device->accountHash, defaultInfo.accountHash, SHORT_ACCOUNT_HASH_LEN) == 0) {
-        AUTH_LOGI(AUTH_HICHAIN, "devId accountHash is empty");
+        ALOGI("devId accountHash is empty");
         return true;
     }
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "get local accountHash fail");
+        ALOGE("get local accountHash fail");
         return false;
     }
     if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
-        AUTH_LOGD(AUTH_HICHAIN, "account:%02X%02X is same, continue verify progress",
-            device->accountHash[0], device->accountHash[1]);
+        ALOGD("account:%02X%02X is same, continue verify progress", device->accountHash[0], device->accountHash[1]);
         return true;
     }
     if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, false)) {
-        AUTH_LOGD(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
+        ALOGI("device is potential trusted, continue verify progress");
         return true;
     }
     return false;
@@ -361,11 +359,11 @@ TrustedReturnType AuthHasTrustedRelation(void)
     char *udidArray = NULL;
 
     if (LnnGetTrustedDevInfoFromDb(&udidArray, &num) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "auth get trusted dev info fail");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth get trusted dev info fail");
         return TRUSTED_RELATION_IGNORE;
     }
     SoftBusFree(udidArray);
-    AUTH_LOGD(AUTH_CONN, "auth get trusted relation num=%d", num);
+    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_DBG, "auth get trusted relation num:%d", num);
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 
@@ -392,7 +390,7 @@ void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType)
             linkType = AUTH_LINK_TYPE_P2P;
             break;
         default:
-            AUTH_LOGE(AUTH_KEY, "unkown support discType=%d", discoveryType);
+            ALOGE("unkown support type:%d", discoveryType);
             return;
     }
     AuthRemoveDeviceKey(udid, (int32_t)linkType);
@@ -406,12 +404,12 @@ int32_t AuthInit(void)
     };
     int32_t ret = AuthDeviceInit(&callBack);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_INIT, "auth device init failed");
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "auth device init failed");
         return ret;
     }
     ret = CustomizedSecurityProtocolInit();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
-        AUTH_LOGI(AUTH_INIT, "customized protocol init failed, ret=%d", ret);
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "customized protocol init failed, ret: %d", ret);
         return ret;
     }
     AuthLoadDeviceKey();
