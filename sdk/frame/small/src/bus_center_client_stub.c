@@ -19,26 +19,26 @@
 
 #include "client_bus_center_manager.h"
 #include "ipc_skeleton.h"
-#include "lnn_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
     uint32_t addrSize;
     ReadUint32(data, &addrSize);
     if (addrSize != sizeof(ConnectionAddr)) {
-        LNN_LOGE(LNN_EVENT, "read addrSize=%d failed", addrSize);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnJoinLNNResult read addrSize:%d failed!", addrSize);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)ReadBuffer(data, addrSize);
     if (addr == NULL) {
-        LNN_LOGE(LNN_EVENT, "read addr failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnJoinLNNResult read addr failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode = 0;
@@ -48,13 +48,13 @@ int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
     if (retCode == 0) {
         networkId = (const char *)ReadString(data, &networkIdLen);
         if (networkId == NULL) {
-            LNN_LOGE(LNN_EVENT, "read networkId failed");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnJoinLNNResult read networkId failed!");
             return SOFTBUS_ERR;
         }
     }
     int32_t retReply = LnnOnJoinResult(addr, networkId, retCode);
     if (retReply != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "LnnOnJoinResult failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnJoinLNNResult LnnOnJoinResult failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -70,20 +70,20 @@ int32_t ClientOnJoinMetaNodeResult(IpcIo *data, IpcIo *reply)
 int32_t ClientOnLeaveLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
     size_t networkIdLen;
     const char *networkId = (const char *)ReadString(data, &networkIdLen);
     if (networkId == NULL) {
-        LNN_LOGE(LNN_EVENT, "read networkId failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnLeaveLNNResult read networkId failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode = 0;
     ReadInt32(data, &retCode);
     int32_t retReply = LnnOnLeaveResult(networkId, retCode);
     if (retReply != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "LnnOnLeaveResult failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnLeaveLNNResult LnnOnLeaveResult failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -99,7 +99,7 @@ int32_t ClientOnLeaveMetaNodeResult(IpcIo *data, IpcIo *reply)
 int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
 {
     if (data== NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
     bool isOnline;
@@ -107,18 +107,19 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(NodeBasicInfo)) {
-        LNN_LOGE(LNN_EVENT,
-            "read infoSize=%d failed", infoSize);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeOnlineStateChanged read infoSize:%d failed!", infoSize);
         return SOFTBUS_ERR;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "read basic info failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeOnlineStateChanged read basic info failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = LnnOnNodeOnlineStateChanged("", isOnline, info);
     if (retReply != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "LnnOnNodeOnlineStateChanged failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeOnlineStateChanged LnnOnNodeOnlineStateChanged failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -127,7 +128,7 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
 int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
@@ -136,19 +137,19 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(NodeBasicInfo)) {
-        LNN_LOGE(LNN_EVENT,
-            "read infoSize=%d failed", infoSize);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeBasicInfoChanged read infoSize:%d failed!", infoSize);
         return SOFTBUS_ERR;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "read basic info failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnNodeBasicInfoChanged read basic info failed!");
         return SOFTBUS_ERR;
     }
     int32_t retReply = LnnOnNodeBasicInfoChanged("", info, type);
     if (retReply != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT,
-            "LnnOnNodeBasicInfoChanged failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnNodeBasicInfoChanged LnnOnNodeBasicInfoChanged failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -157,19 +158,19 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
 int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return SOFTBUS_ERR;
     }
 
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(TimeSyncResultInfo)) {
-        LNN_LOGE(LNN_EVENT, "read infoSize=%d failed", infoSize);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult read infoSize:%d failed!", infoSize);
         return SOFTBUS_ERR;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "read info failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult read info failed!");
         return SOFTBUS_ERR;
     }
     int32_t retCode = 0;
@@ -177,7 +178,7 @@ int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 
     int32_t retReply = LnnOnTimeSyncResult(info, retCode);
     if (retReply != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "LnnOnTimeSyncResult failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnTimeSyncResult LnnOnTimeSyncResult failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -186,7 +187,7 @@ int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
 void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (reply == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     int32_t publishId;
@@ -199,7 +200,7 @@ void ClientOnPublishLNNResult(IpcIo *data, IpcIo *reply)
 void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     int32_t refreshId;
@@ -212,19 +213,19 @@ void ClientOnRefreshLNNResult(IpcIo *data, IpcIo *reply)
 void ClientOnRefreshDeviceFound(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        LNN_LOGE(LNN_EVENT, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
         return;
     }
     uint32_t infoSize;
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(DeviceInfo)) {
-        LNN_LOGE(LNN_EVENT,
-            "read infoSize=%d failed", infoSize);
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
+            "ClientOnRefreshDeviceFound read infoSize:%d failed!", infoSize);
         return;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT, "read info failed");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientOnRefreshDeviceFound read info failed!");
         return;
     }
     LnnOnRefreshDeviceFound(info);

@@ -18,12 +18,12 @@
 #include <securec.h>
 #include <string.h>
 
-#include "lnn_deviceinfo_to_profile.h"
-#include "lnn_log.h"
 #include "lnn_network_id.h"
+#include "lnn_deviceinfo_to_profile.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 typedef struct {
@@ -63,14 +63,14 @@ static MetaNodeStorageInfo *CreateMetaNodeStorageInfo(const MetaNodeConfigInfo *
 {
     MetaNodeStorageInfo *storageInfo = SoftBusMalloc(sizeof(MetaNodeStorageInfo));
     if (storageInfo == NULL) {
-        LNN_LOGE(LNN_LEDGER, "create meta node storage info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create meta node storage info fail");
         return NULL;
     }
     ListInit(&storageInfo->node);
     storageInfo->info.configInfo = *info;
     storageInfo->info.isOnline = false;
     if (strncpy_s(storageInfo->info.metaNodeId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "copy meta node id fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy meta node id fail");
         SoftBusFree(storageInfo);
         return NULL;
     }
@@ -83,22 +83,22 @@ int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
     int32_t rc = SOFTBUS_ERR;
 
     if (!CheckMetaNodeConfigInfo(info) || metaNodeId == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnActiveMetaNode: para is invalid");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnActiveMetaNode: para is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnActiveMetaNode: lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnActiveMetaNode: lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     do {
         storageInfo = FindMetaNodeStorageInfo(info->udid, true);
         if (storageInfo == NULL) {
             if (g_metaNodeList->cnt >= MAX_META_NODE_NUM) {
-                LNN_LOGE(LNN_LEDGER, "meta node exceed maximum");
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "meta node exceed maximum");
                 break;
             }
             if (LnnGenLocalNetworkId(metaNodeId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_LEDGER, "generate meta node id fail");
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate meta node id fail");
                 break;
             }
             storageInfo = CreateMetaNodeStorageInfo(info, metaNodeId);
@@ -108,21 +108,21 @@ int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
             ListAdd(&g_metaNodeList->list, &storageInfo->node);
             g_metaNodeList->cnt++;
             InsertMetaNodeInfoToProfile(&storageInfo->info);
-            LNN_LOGI(LNN_LEDGER, "active a mete node");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "active a mete node");
         } else {
             if (strncpy_s(metaNodeId, NETWORK_ID_BUF_LEN, storageInfo->info.metaNodeId,
                 strlen(storageInfo->info.metaNodeId)) != EOK) {
-                LNN_LOGE(LNN_LEDGER, "copy meta node id fail");
+                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy meta node id fail");
                 break;
             }
             storageInfo->info.configInfo = *info;
             UpdateMetaNodeProfile(&storageInfo->info);
-            LNN_LOGI(LNN_LEDGER, "update a mete node");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "update a mete node");
         }
         rc = SOFTBUS_OK;
     } while (false);
     if (SoftBusMutexUnlock(&g_metaNodeList->lock) != 0) {
-        LNN_LOGE(LNN_LEDGER, "LnnActiveMetaNode: unlock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnActiveMetaNode: unlock failed");
     }
     return rc;
 }
@@ -133,11 +133,11 @@ int32_t LnnDeactiveMetaNode(const char *metaNodeId)
     int32_t rc = SOFTBUS_OK;
 
     if (metaNodeId == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnDeactiveMetaNode: para is invalid");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnDeactiveMetaNode: para is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnDeactiveMetaNode: lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnDeactiveMetaNode: lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     storageInfo = FindMetaNodeStorageInfo(metaNodeId, false);
@@ -146,13 +146,13 @@ int32_t LnnDeactiveMetaNode(const char *metaNodeId)
         g_metaNodeList->cnt--;
         SoftBusFree(storageInfo);
         DeleteFromProfile(storageInfo->info.configInfo.udid);
-        LNN_LOGI(LNN_LEDGER, "deactive a mete node");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "deactive a mete node");
     } else {
-        LNN_LOGE(LNN_LEDGER, "meta node not exist");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "meta node not exist");
         rc = SOFTBUS_ERR;
     }
     if (SoftBusMutexUnlock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnDeactiveMetaNode: unlock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnDeactiveMetaNode: unlock failed");
     }
     return rc;
 }
@@ -163,15 +163,15 @@ int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
     int32_t i = 0;
 
     if (infos == NULL || infoNum == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetAllMetaNodeInfo: para is invalid");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetAllMetaNodeInfo: para is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetAllMetaNodeInfo: lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetAllMetaNodeInfo: lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (*infoNum < (int32_t)g_metaNodeList->cnt) {
-        LNN_LOGE(LNN_LEDGER, "meta node info num too small");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "meta node info num too small");
         (void)SoftBusMutexUnlock(&g_metaNodeList->lock);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -181,7 +181,7 @@ int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
     }
     *infoNum = i;
     if (SoftBusMutexUnlock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetAllMetaNodeInfo: unlock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetAllMetaNodeInfo: unlock failed");
     }
     return SOFTBUS_OK;
 }
@@ -191,11 +191,11 @@ int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
     MetaNodeStorageInfo *item = NULL;
     int32_t ret = SOFTBUS_ERR;
     if (networkId == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetMetaNodeInfoByNetworkId: lock failed");
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
@@ -203,7 +203,7 @@ int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
             continue;
         }
         if (strcpy_s(udid, UDID_BUF_LEN, item->info.configInfo.udid) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "meta node udid copy error");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "meta node udid copy error");
             ret = SOFTBUS_ERR;
             break;
         }
@@ -211,7 +211,7 @@ int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
         break;
     }
     if (SoftBusMutexUnlock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: unlock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetMetaNodeInfoByNetworkId: unlock failed");
     }
     return ret;
 }
@@ -222,11 +222,11 @@ int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeI
     MetaNodeStorageInfo *item = NULL;
     int32_t ret = SOFTBUS_ERR;
     if (networkId == NULL) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetMetaNodeInfoByNetworkId: lock failed");
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
@@ -234,7 +234,7 @@ int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeI
             continue;
         }
         if (memcpy_s(nodeInfo, sizeof(MetaNodeInfo), &item->info, sizeof(MetaNodeInfo)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy reply fail");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy reply fail");
             ret = SOFTBUS_ERR;
             break;
         }
@@ -242,7 +242,7 @@ int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeI
         break;
     }
     if (SoftBusMutexUnlock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: unlock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetMetaNodeInfoByNetworkId: unlock failed");
     }
     return ret;
 }
@@ -253,10 +253,10 @@ int32_t LnnInitMetaNodeLedger(void)
         g_metaNodeList = CreateSoftBusList();
     }
     if (g_metaNodeList == NULL) {
-        LNN_LOGE(LNN_LEDGER, "create meta node list failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create meta node list failed");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "meta node init success");
+    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "meta node init success");
     return SOFTBUS_OK;
 }
 
@@ -269,7 +269,7 @@ void LnnDeinitMetaNodeLedger(void)
     MetaNodeStorageInfo *item = NULL;
     MetaNodeStorageInfo *next = NULL;
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "lock failed");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock failed");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_metaNodeList->list, MetaNodeStorageInfo, node) {

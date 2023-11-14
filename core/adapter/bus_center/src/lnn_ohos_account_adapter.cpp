@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
 #include "securec.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 #define ACCOUNT_STRTOLL_BASE 10
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
@@ -26,30 +26,30 @@
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 {
     if (id == nullptr || len == nullptr || idLen == 0) {
-        LNN_LOGE(LNN_STATE, "invalid parameter");
+        LLOGE("invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
 
     auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOhosAccountInfo();
     if (!accountInfo.first) {
-        LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed");
+        LLOGE("QueryOhosAccountInfo failed");
         return SOFTBUS_ERR;
     }
 
     if (accountInfo.second.name_.empty()) {
-        LNN_LOGE(LNN_STATE, "accountInfo uid is empty");
+        LLOGE("accountInfo uid is empty");
         return SOFTBUS_ERR;
     }
 
     *len = accountInfo.second.name_.length();
-    LNN_LOGI(LNN_STATE, "uid=%s len=%d", accountInfo.second.name_.c_str(), *len);
+    LLOGI("uid:%s len:%d", accountInfo.second.name_.c_str(), *len);
 
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
-        LNN_LOGE(LNN_STATE, "not login account");
+        LLOGE("not login account");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
-        LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%d len=%d", idLen, *len);
+        LLOGE("memcpy_s uid failed, idLen:%d len:%d", idLen, *len);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -59,24 +59,24 @@ int64_t GetCurrentAccount(void)
 {
     auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOhosAccountInfo();
     if (!accountInfo.first) {
-        LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed");
+        LLOGE("QueryOhosAccountInfo failed");
         return 0;
     }
 
     if (accountInfo.second.name_.empty()) {
-        LNN_LOGE(LNN_STATE, "accountInfo name_ is empty");
+        LLOGE("accountInfo name_ is empty");
         return 0;
     }
 
-    LNN_LOGI(LNN_STATE, "name_=%s", accountInfo.second.name_.c_str());
+    LLOGI("name_:%s", accountInfo.second.name_.c_str());
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(),
         accountInfo.second.name_.length()) == 0) {
-        LNN_LOGE(LNN_STATE, "not login account");
+        LLOGE("not login account");
         return 0;
     }
     int64_t account = strtoll(accountInfo.second.name_.c_str(), nullptr, ACCOUNT_STRTOLL_BASE);
     if (account == 0) {
-        LNN_LOGE(LNN_STATE, "strtoll failed");
+        LLOGE("strtoll failed");
     }
 
     return account;
@@ -87,9 +87,9 @@ int32_t GetActiveOsAccountIds(void)
     std::vector<int32_t> accountId;
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountId);
     if (ret != SOFTBUS_OK || accountId.empty()) {
-        LNN_LOGE(LNN_STATE, "QueryActiveOsAccountIds failed");
+        LLOGE("QueryActiveOsAccountIds failed");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "GetActiveOsAccountIds id=%d", accountId[0]);
+    LLOGI("GetActiveOsAccountIds is[%d]", accountId[0]);
     return accountId[0];
 }

@@ -27,6 +27,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 
 constexpr char DEVICE_IP1[MAX_ADDR_LEN] = "127.0.0.1";

@@ -20,7 +20,6 @@
 #include "bus_center_manager.h"
 #include "cJSON.h"
 #include "common_list.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_node_info.h"
@@ -35,6 +34,7 @@
 #include "softbus_errcode.h"
 #include "message_handler.h"
 #include "softbus_json_utils.h"
+#include "softbus_log_old.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"
 #define JSON_KEY_P2P_MAC "P2P_MAC"
@@ -59,27 +59,27 @@ static char *GetP2pInfoMsgTest(const P2pInfo *info)
 {
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        LNN_LOGE(LNN_TEST, "create p2p info json fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create p2p info json fail.");
         return NULL;
     }
     if (!AddNumberToJsonObject(json, JSON_KEY_P2P_ROLE, info->p2pRole)) {
-        LNN_LOGE(LNN_TEST, "add p2p role fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add p2p role fail.");
         cJSON_Delete(json);
         return NULL;
     }
     if (!AddStringToJsonObject(json, JSON_KEY_P2P_MAC, info->p2pMac)) {
-        LNN_LOGE(LNN_TEST, "add p2p mac fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add p2p mac fail.");
         cJSON_Delete(json);
         return NULL;
     }
     if (!AddStringToJsonObject(json, JSON_KEY_GO_MAC, info->goMac)) {
-        LNN_LOGE(LNN_TEST, "add go mac fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add go mac fail.");
         cJSON_Delete(json);
         return NULL;
     }
     char *msg = cJSON_PrintUnformatted(json);
     if (msg == NULL) {
-        LNN_LOGE(LNN_TEST, "unformat p2p info fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "unformat p2p info fail");
     }
     cJSON_Delete(json);
     return msg;
@@ -192,7 +192,7 @@ HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_002, TestSize.Level1)
     char msg[65] = {0};
     *(int32_t *)msg = 6;
     if (memcpy_s(msg + sizeof(int32_t), LEN - sizeof(int32_t), p2pMsg, strlen(p2pMsg) + 1) != EOK) {
-        LNN_LOGE(LNN_TEST, "copy sync info msg for type:");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy sync info msg for type:");
     }
     cJSON_free(p2pMsg);
     LnnTransInterfaceMock::g_networkListener->onChannelOpenFailed(CHANNELID, UUID);
