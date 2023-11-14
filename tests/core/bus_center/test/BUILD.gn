@@ -68,6 +68,7 @@ ohos_unittest("HeartBeatMediumTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
@@ -137,6 +138,7 @@ ohos_unittest("HeartBeatFSMTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
@@ -184,6 +186,7 @@ ohos_unittest("HeartBeatStrategyTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
@@ -254,6 +257,7 @@ ohos_unittest("HeartBeatUtilsTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
@@ -323,6 +327,7 @@ ohos_unittest("HeartBeatCtrlTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
@@ -371,6 +376,7 @@ ohos_unittest("ClientProxyTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//third_party/googletest:gmock",
@@ -426,6 +432,7 @@ ohos_unittest("BusCenterIpcTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core:ipc_core",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",

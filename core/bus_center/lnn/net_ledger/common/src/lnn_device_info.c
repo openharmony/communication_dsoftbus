@@ -19,9 +19,9 @@
 #include <string.h>
 
 #include <securec.h>
+#include "lnn_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 #define DEVICE_TYPE_MAX_LENGTH 3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH  (DEVICE_TYPE_MAX_LENGTH * 4)
@@ -52,7 +52,7 @@ static char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};
 const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceName para error.");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return NULL;
     }
     return info->deviceName;
@@ -61,11 +61,11 @@ const char *LnnGetDeviceName(const DeviceBasicInfo *info)
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
 {
     if (info == NULL || name == NULL || strlen(name) > DEVICE_NAME_BUF_LEN - 1) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnSetDeviceName para error.");
+        LNN_LOGE(LNN_LEDGER, "LnnSetDeviceName para error");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(info->deviceName, DEVICE_NAME_BUF_LEN, name, strlen(name)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s fail:strncpy_s fail!", __func__);
+        LNN_LOGE(LNN_LEDGER, "strncpy_s fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -74,7 +74,7 @@ int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name)
 int32_t LnnGetDeviceTypeId(const DeviceBasicInfo *info, uint16_t *typeId)
 {
     if (info == NULL || typeId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetDeviceTypeId para error.");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     *typeId = info->deviceTypeId;
@@ -136,7 +136,7 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
 {
     int mstRet;
     if (deviceType == NULL || typeId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnConvertDeviceTypeToId para error.");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t count = sizeof(g_typeToIdMap) / sizeof(TypeToId);
@@ -150,14 +150,14 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
         mstRet = memset_s(g_stringTypeId, sizeof(g_stringTypeId), 0, DEVICE_TYPE_MAX_LENGTH);
         if (mstRet != EOK) {
             *typeId = TYPE_UNKNOW_ID;
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnConvertDeviceTypeToId memset_s fail.");
+            LNN_LOGE(LNN_LEDGER, "memset_s fail");
             return SOFTBUS_ERR;
         }
         *typeId = ConvertStringToInt(deviceType, typeId);
         if (*typeId != TYPE_UNKNOW_ID) {
             return SOFTBUS_OK;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert string to int fail.");
+        LNN_LOGE(LNN_LEDGER, "convert string to int fail");
     }
     *typeId = TYPE_UNKNOW_ID;
     return SOFTBUS_ERR;
@@ -174,6 +174,6 @@ char *LnnConvertIdToDeviceType(uint16_t typeId)
     if ((typeId <= ONE_BIT_MAX_HEX << LEFT_SHIFT_DEVICE_TYPE_LENGTH) && (typeId > 0)) {
         return ConvertIntToHexString(typeId);
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "typeId not exist");
+    LNN_LOGE(LNN_LEDGER, "typeId not exist");
     return NULL;
 }

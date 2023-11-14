@@ -17,13 +17,14 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "common_list.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_log.h"
 #include "lnn_select_rule.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
@@ -79,12 +80,12 @@ static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink
             GetStreamDefaultLink(defaultLink, &index);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lane type:[%d] is not supported", transType);
+            LNN_LOGE(LNN_LANE, "lane type=%d is not supported", transType);
             return SOFTBUS_ERR;
     }
     *linkNum = 0;
     if (memcpy_s(optLink, optLinkMaxNum * sizeof(LaneLinkType), defaultLink, sizeof(defaultLink)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy default linkList to optinal fail");
+        LNN_LOGE(LNN_LANE, "memcpy default linkList to optinal fail");
         return SOFTBUS_MEM_ERR;
     }
     *linkNum = index;
@@ -112,12 +113,12 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
         return false;
     }
     if (isIgnoreScore) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ignore score");
+        LNN_LOGI(LNN_LANE, "ignore score");
         return true;
     }
 
     if (linkAttr->GetLinkScore(networkId, expectedBw) <= UNACCEPT_SCORE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "curr score is unaccept, linkType:%d", linkType);
+        LNN_LOGE(LNN_LANE, "curr score is unaccept, linkType=%d", linkType);
         return false;
     }
     return true;
@@ -153,7 +154,7 @@ static char *GetLinkTypeStrng(LaneLinkType preferredLink)
 
 static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
 {
-    LLOGD("the %u priority link: %s", priority, GetLinkTypeStrng(preferredLink));
+    LNN_LOGD(LNN_LANE, "the %u priority link=%s", priority, GetLinkTypeStrng(preferredLink));
 }
 
 static bool IsIgnoreLinkScore(const char *networkId, LaneLinkType *list, uint32_t num)
@@ -163,11 +164,11 @@ static bool IsIgnoreLinkScore(const char *networkId, LaneLinkType *list, uint32_
     }
     NodeInfo node = {0};
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
-        LLOGW("can not get peer node");
+        LNN_LOGW(LNN_LANE, "can not get peer node");
         return false;
     }
     if (node.discoveryType == (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) {
-        LLOGI("lnn discoveryType is only wifi");
+        LNN_LOGI(LNN_LANE, "lnn discoveryType is only wifi");
         return true;
     }
     for (uint32_t i = 0; i < num; i++) {
@@ -212,7 +213,7 @@ static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *re
     (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
     uint32_t optLinkNum = LANE_LINK_TYPE_BUTT;
     if (GetLaneDefaultLink(request->transType, optionalLink, &optLinkNum) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get defaultLinkList fail");
+        LNN_LOGE(LNN_LANE, "get defaultLinkList fail");
         return;
     }
     *resNum = 0;
@@ -228,12 +229,14 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
     LanePreferredLinkList *recommendList, const uint32_t *listNum)
 {
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL) || (listNum == NULL)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneSelect params invalid");
+        LNN_LOGE(LNN_LANE, "laneSelect params invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device not online, cancel selectLane, networkId:%s",
-            AnonymizesNetworkID(networkId));
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -249,14 +252,14 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     uint32_t resNum = 0;
     (void)memset_s(resList, sizeof(resList), -1, sizeof(resList));
     if ((request->list.linkTypeNum > 0) && (request->list.linkTypeNum <= LANE_LINK_TYPE_BUTT)) {
-        LLOGI("Select lane by preferred linklist");
+        LNN_LOGI(LNN_LANE, "Select lane by preferred linklist");
         SelectByPreferredLink(networkId, request, resList, &resNum);
     } else {
-        LLOGI("Select lane by default linklist");
+        LNN_LOGI(LNN_LANE, "Select lane by default linklist");
         SelectByDefaultLink(networkId, request, resList, &resNum);
     }
     if (resNum == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "there is none linkResource can be used");
+        LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         *listNum = 0;
         return SOFTBUS_ERR;
     }

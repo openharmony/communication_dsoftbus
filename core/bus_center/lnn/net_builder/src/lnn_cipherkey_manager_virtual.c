@@ -15,18 +15,18 @@
 
 #include "lnn_cipherkey_manager.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t LnnInitCipherKeyManager(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lnn cipherkey manager");
+    LNN_LOGI(LNN_INIT, "init virtual lnn cipherkey manager");
     return SOFTBUS_OK;
 }
 
 void LnnDeinitCipherKeyManager(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Deinit virtual lnn cipherkey manager");
+    LNN_LOGI(LNN_INIT, "Deinit virtual lnn cipherkey manager");
 }
 
 bool GetCipherKeyByNetworkId(const char *networkId, int32_t seq, uint32_t tableIndex, unsigned char *key,

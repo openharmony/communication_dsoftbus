@@ -15,18 +15,18 @@
 
 #include "lnn_fast_offline.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 int32_t LnnInitFastOffline(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lnn fast offline");
+    LNN_LOGI(LNN_INIT, "init virtual lnn fast offline");
     return SOFTBUS_OK;
 }
 
 void LnnDeinitFastOffline(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Deinit virtual lnn fast offline");
+    LNN_LOGI(LNN_INIT, "Deinit virtual lnn fast offline");
 }
 
 int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete)
@@ -38,11 +38,11 @@ int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, Lnn
 
 int32_t LnnBleFastOfflineOnceBegin(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnBleFastOfflineOnceBegin virtual ok!");
+    LNN_LOGI(LNN_BUILDER, "LnnBleFastOfflineOnceBegin virtual ok");
     return SOFTBUS_OK;
 }
 
 void LnnIpAddrChangeEventHandler(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LnnIpAddrChangeEventHandler virtual ok!");
+    LNN_LOGI(LNN_BUILDER, "LnnIpAddrChangeEventHandler virtual ok");
 }

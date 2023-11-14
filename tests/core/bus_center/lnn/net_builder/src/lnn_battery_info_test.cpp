@@ -26,7 +26,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "lnn_battery_info.c"
 
 #define TEST_VALID_PEER_NETWORKID "12345678"
