@@ -192,6 +192,7 @@ static int32_t CoapSendRequestEx(CoapCtxType *ctx, uint8_t coapType, const char 
         DFINDER_LOGE(TAG, "pack to pdu failed");
         goto SESSION_RELEASE;
     }
+    DFINDER_LOGD("MYCOAP", "send coap pdu mid: %d", coap_pdu_get_mid(pdu));
     DFINDER_MGT_REQ_LOG(&coapRequest);
     tid = coap_send(session, pdu);
     if (tid == COAP_INVALID_TID) {
@@ -354,6 +355,7 @@ static void HndPostServiceDiscover(coap_resource_t *resource, coap_session_t *se
         DFINDER_LOGD(TAG, "invalid params");
         return;
     }
+    DFINDER_LOGD("MYCOAP", "recv coap pdu mid: %d", coap_pdu_get_mid(request));
     if (HndPostServiceDiscoverEx(session, request, response) != NSTACKX_EOK) {
         IncStatistics(STATS_HANDLE_DEVICE_DISCOVER_MSG_FAILED);
     }
