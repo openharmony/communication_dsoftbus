@@ -323,7 +323,7 @@ bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *arr
     }
     cJSON *arrayObj = cJSON_CreateIntArray(array, arrayLen);
     if (arrayObj == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Cannot create cJSON array object [%s]", string);
+        COMM_LOGE(COMM_EVENT, "Cannot create cJSON array object [%s]", string);
         return true;
     }
     if (!cJSON_AddItemToObject((cJSON *)json, string, arrayObj)) {
