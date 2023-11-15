@@ -65,6 +65,11 @@ void Anonymize(const char *plainStr, char **anonymizedStr)
         return;
     }
     size_t len = strlen(plainStr);
+    if (len == 0) {
+        const char *retStr = "EMPTY";
+        AnonymizedString(anonymizedStr, strlen(retStr) + 1, "%s", retStr);
+        return;
+    }
     if (len < 2) {
         const char *retStr = WILDCARD;
         AnonymizedString(anonymizedStr, strlen(retStr) + 1, "%s", retStr);

@@ -41,6 +41,51 @@ HWTEST_F(DiscLogTest, DiscLogTest001, TestSize.Level0)
     EXPECT_EQ(0xd0057a0, label.domain);
     EXPECT_STREQ("DiscInit", label.tag);
 
+    label = DISC_LABELS[DISC_CONTROL];
+    EXPECT_EQ(DISC_CONTROL, label.label);
+    EXPECT_EQ(0xd0057a1, label.domain);
+    EXPECT_STREQ("DiscControl", label.tag);
+
+    label = DISC_LABELS[DISC_LNN];
+    EXPECT_EQ(DISC_LNN, label.label);
+    EXPECT_EQ(0xd0057a2, label.domain);
+    EXPECT_STREQ("DiscLnn", label.tag);
+
+    label = DISC_LABELS[DISC_BLE];
+    EXPECT_EQ(DISC_BLE, label.label);
+    EXPECT_EQ(0xd0057a3, label.domain);
+    EXPECT_STREQ("DiscBle", label.tag);
+
+    label = DISC_LABELS[DISC_BLE_ADAPTER];
+    EXPECT_EQ(DISC_BLE_ADAPTER, label.label);
+    EXPECT_EQ(0xd0057a4, label.domain);
+    EXPECT_STREQ("DiscBleAdapter", label.tag);
+
+    label = DISC_LABELS[DISC_COAP];
+    EXPECT_EQ(DISC_COAP, label.label);
+    EXPECT_EQ(0xd0057a5, label.domain);
+    EXPECT_STREQ("DiscCoap", label.tag);
+
+    label = DISC_LABELS[DISC_DFINDER];
+    EXPECT_EQ(DISC_DFINDER, label.label);
+    EXPECT_EQ(0xd0057a6, label.domain);
+    EXPECT_STREQ("DiscDfinder", label.tag);
+
+    label = DISC_LABELS[DISC_ABILITY];
+    EXPECT_EQ(DISC_ABILITY, label.label);
+    EXPECT_EQ(0xd0057a7, label.domain);
+    EXPECT_STREQ("DiscAbility", label.tag);
+
+    label = DISC_LABELS[DISC_USB];
+    EXPECT_EQ(DISC_USB, label.label);
+    EXPECT_EQ(0xd0057a8, label.domain);
+    EXPECT_STREQ("DiscUsb", label.tag);
+
+    label = DISC_LABELS[DISC_USB_ADAPTER];
+    EXPECT_EQ(DISC_USB_ADAPTER, label.label);
+    EXPECT_EQ(0xd0057a9, label.domain);
+    EXPECT_STREQ("DiscUsbAdapter", label.tag);
+
     label = DISC_LABELS[DISC_TEST];
     EXPECT_EQ(DISC_TEST, label.label);
     EXPECT_EQ(DOMAIN_ID_TEST, label.domain);
