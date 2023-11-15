@@ -122,8 +122,8 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
         DFINDER_LOGE(TAG, "update remote node by deviceinfo failed");
         return NSTACKX_EFAILED;
     }
-    // each unicast received should be reported, even if the content is the same
-    if (!receiveBcast) {
+    // for non-automatic reply businessType, report each unicast received, even if the content is same
+    if (!receiveBcast && (CheckBusinessTypeReplyUnicast(deviceInfo->businessType) != NSTACKX_EOK)) {
         DeviceInfoNotify(deviceInfo);
         return NSTACKX_EOK;
     }
