@@ -25,6 +25,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
 #include "lnn_physical_subnet_manager.h"
@@ -32,7 +33,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","
@@ -80,7 +80,7 @@ int32_t __attribute__((weak)) RegistNewIPProtocolManager(void)
 
 int32_t __attribute__((weak)) RegistBtProtocolManager(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "regist virtual bt protocol manager");
+    LNN_LOGW(LNN_BUILDER, "regist virtual bt protocol manager");
     return SOFTBUS_OK;
 }
 
@@ -91,18 +91,18 @@ static LnnProtocolManager *g_networkProtocols[LNN_NETWORK_MAX_PROTOCOL_COUNT] = 
 static LnnNetIfMgr *CreateNetifMgr(const char *netIfName)
 {
     if (netIfName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters invalid!");
+        LNN_LOGE(LNN_BUILDER, "parameters invalid");
         return NULL;
     }
     LnnNetIfMgr *netIfMgr = (LnnNetIfMgr *)SoftBusCalloc(sizeof(LnnNetIfMgr));
     if (netIfMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc LnnNetIfMgr");
+        LNN_LOGE(LNN_BUILDER, "malloc LnnNetIfMgr fail");
         return NULL;
     }
     do {
         ListInit(&netIfMgr->node);
         if (strncpy_s(netIfMgr->ifName, NET_IF_NAME_LEN, netIfName, strlen(netIfName)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy netIfName fail");
+            LNN_LOGE(LNN_BUILDER, "copy netIfName fail");
             break;
         }
         return netIfMgr;
@@ -115,11 +115,11 @@ static LnnNetIfMgr *CreateNetifMgr(const char *netIfName)
 static int32_t RegistNetIfMgr(LnnNetIfNameType type, LnnNetIfManagerBuilder builder)
 {
     if (type >= LNN_MAX_NUM_TYPE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:type too big!", __func__);
+        LNN_LOGE(LNN_BUILDER, "type too big");
         return SOFTBUS_ERR;
     }
     if (g_netifBuilders[type] != NULL && g_netifBuilders[type] != builder) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:type already registed!", __func__);
+        LNN_LOGE(LNN_BUILDER, "type already registed");
         return SOFTBUS_ERR;
     }
     g_netifBuilders[type] = builder;
@@ -137,7 +137,7 @@ static LnnNetIfMgr *NetifMgrFactory(LnnNetIfNameType type, const char *ifName)
         return NULL;
     }
     if (g_netifBuilders[type] == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netif type %d not supportted!", type);
+        LNN_LOGE(LNN_BUILDER, "netif type=%d not supportted", type);
         return NULL;
     }
     LnnNetIfMgr *netifMgr = g_netifBuilders[type](ifName);
@@ -154,7 +154,7 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
     char *value1 = NULL;
     char *value2 = NULL;
     if (buf == NULL || bufLen == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters invaild!");
+        LNN_LOGE(LNN_BUILDER, "parameters invaild");
         return SOFTBUS_ERR;
     }
     char *key = strtok_s(buf, LNN_DELIMITER_OUTSIDE, &outerPtr);
@@ -164,10 +164,10 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
 
         LnnNetIfMgr *netIfMgr = NetifMgrFactory((LnnNetIfNameType)atoi(value1), value2);
         if (netIfMgr != NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "Create netif mgr [%s],[%s]", value1, value2);
+            LNN_LOGW(LNN_BUILDER, "Create netif mgr [%s],[%s]", value1, value2);
             ListTailInsert(&g_netIfNameList, &netIfMgr->node);
         } else {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Create netif mgr failed!,[%s],[%s]", value1, value2);
+            LNN_LOGE(LNN_BUILDER, "Create netif mgr failed,[%s],[%s]", value1, value2);
         }
         key = strtok_s(NULL, LNN_DELIMITER_OUTSIDE, &outerPtr);
     }
@@ -178,25 +178,25 @@ static int32_t SetIfNameDefaultVal(void)
 {
     LnnNetIfMgr *netIfMgr = NetifMgrFactory(LNN_ETH_TYPE, LNN_DEFAULT_IF_NAME_ETH);
     if (netIfMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default ETH port failed!");
+        LNN_LOGE(LNN_BUILDER, "add default ETH port failed");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     netIfMgr = NetifMgrFactory(LNN_WLAN_TYPE, LNN_DEFAULT_IF_NAME_WLAN);
     if (netIfMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default ETH port failed!");
+        LNN_LOGE(LNN_BUILDER, "add default ETH port failed");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     netIfMgr = NetifMgrFactory(LNN_BR_TYPE, LNN_DEFAULT_IF_NAME_BR);
     if (netIfMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default BR netIfMgr failed!");
+        LNN_LOGE(LNN_BUILDER, "add default BR netIfMgr failed");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
     netIfMgr = NetifMgrFactory(LNN_BLE_TYPE, LNN_DEFAULT_IF_NAME_BLE);
     if (netIfMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add default BLE netIfMgr failed!");
+        LNN_LOGE(LNN_BUILDER, "add default BLE netIfMgr failed");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_netIfNameList, &netIfMgr->node);
@@ -207,15 +207,15 @@ static int32_t LnnInitManagerByConfig(void)
 {
     char netIfName[LNN_MAX_IF_NAME_LEN] = {0};
     if (SoftbusGetConfig(SOFTBUS_STR_LNN_NET_IF_NAME, (unsigned char *)netIfName, sizeof(netIfName)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn net ifName fail, use default value");
+        LNN_LOGE(LNN_BUILDER, "get lnn net ifName fail, use default value");
         if (SetIfNameDefaultVal() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "default value set fail");
+            LNN_LOGE(LNN_BUILDER, "default value set fail");
             return SOFTBUS_ERR;
         }
         return SOFTBUS_OK;
     }
     if (ParseIfNameConfig(netIfName, strlen(netIfName)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ifName str parse fail!");
+        LNN_LOGE(LNN_BUILDER, "ifName str parse fail!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -224,7 +224,7 @@ static int32_t LnnInitManagerByConfig(void)
 static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_USER_STATE_CHANGED) {
-        LLOGE("wifi user background state change evt handler get invalid param");
+        LNN_LOGE(LNN_BUILDER, "wifi user background state change evt handler get invalid param");
         return;
     }
     bool addrType[CONNECTION_ADDR_MAX] = {0};
@@ -233,17 +233,17 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
     switch (userState) {
         case SOFTBUS_USER_FOREGROUND:
             g_backgroundState = userState;
-            LLOGI("wifi handle SOFTBUS_USER_FOREGROUND");
+            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_USER_FOREGROUND");
             RestartCoapDiscovery();
             break;
         case SOFTBUS_USER_BACKGROUND:
             g_backgroundState = userState;
-            LLOGI("wifi handle SOFTBUS_USER_BACKGROUND");
+            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_USER_BACKGROUND");
             for (int32_t i = 0; i < CONNECTION_ADDR_MAX; i++) {
                 addrType[i] = true;
             }
             if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
-                LLOGE("LNN leave network fail");
+                LNN_LOGE(LNN_BUILDER, "LNN leave network fail");
             }
             break;
         default:
@@ -254,11 +254,11 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
 static void NetLockStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_SCREEN_LOCK_CHANGED) {
-        LLOGE("wifi user background state change evt handler get invalid param");
+        LNN_LOGE(LNN_BUILDER, "wifi user background state change evt handler get invalid param");
         return;
     }
     if (g_isUnLock) {
-        LLOGI("ignore wifi SOFTBUS_SCREEN_UNLOCK");
+        LNN_LOGI(LNN_BUILDER, "ignore wifi SOFTBUS_SCREEN_UNLOCK");
         return;
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
@@ -266,11 +266,11 @@ static void NetLockStateEventHandler(const LnnEventBasicInfo *info)
     switch (userState) {
         case SOFTBUS_SCREEN_UNLOCK:
             g_isUnLock = true;
-            LLOGI("wifi handle SOFTBUS_SCREEN_UNLOCK");
+            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_SCREEN_UNLOCK");
             RestartCoapDiscovery();
             break;
         case SOFTBUS_SCREEN_LOCK:
-            LLOGI("ignore wifi SOFTBUS_SCREEN_LOCK");
+            LNN_LOGI(LNN_BUILDER, "ignore wifi SOFTBUS_SCREEN_LOCK");
             break;
         default:
             return;
@@ -280,17 +280,17 @@ static void NetLockStateEventHandler(const LnnEventBasicInfo *info)
 static void NetOOBEStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_OOBE_STATE_CHANGED) {
-        LLOGE("OOBE state change evt handler get invalid param");
+        LNN_LOGE(LNN_BUILDER, "OOBE state change evt handler get invalid param");
         return;
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusOOBEState state = (SoftBusOOBEState)event->status;
     switch (state) {
         case SOFTBUS_OOBE_RUNNING:
-            LLOGI("wifi handle SOFTBUS_OOBE_RUNNING");
+            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_RUNNING");
             break;
         case SOFTBUS_OOBE_END:
-            LLOGI("wifi handle SOFTBUS_OOBE_END");
+            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
             g_isOOBEEnd = true;
             RestartCoapDiscovery();
             break;
@@ -318,7 +318,7 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
 
     if (protocolMgr == NULL || protocolMgr->getListenerModule == NULL || protocolMgr->init == NULL ||
         protocolMgr->enable == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:bad input protocol!", __func__);
+        LNN_LOGE(LNN_BUILDER, "bad input protocol");
         return SOFTBUS_ERR;
     }
     for (uint8_t i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
@@ -328,11 +328,11 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
         if (protocolMgr->init != NULL) {
             ret = protocolMgr->init(protocolMgr);
             if (ret != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init network protocol failed! ret=%d", ret);
+                LNN_LOGE(LNN_BUILDER, "init network protocol failed! ret=%d", ret);
                 break;
             }
         } else {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "network protocol (supportedNetif=%u) have no init",
+            LNN_LOGW(LNN_BUILDER, "network protocol (supportedNetif=%u) have no init",
                 protocolMgr->supportedNetif);
         }
         g_networkProtocols[i] = protocolMgr;
@@ -345,7 +345,7 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
 {
     uint8_t i;
     if (protocolMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
+        LNN_LOGE(LNN_BUILDER, "protocoMgr is null");
         return SOFTBUS_ERR;
     }
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
@@ -357,7 +357,7 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
             return SOFTBUS_OK;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:no such protocol!", __func__);
+    LNN_LOGE(LNN_BUILDER, "no such protocol!");
     return SOFTBUS_ERR;
 }
 
@@ -395,37 +395,37 @@ void RestartCoapDiscovery(void)
     char ifName[NET_IF_NAME_LEN] = {0};
     int32_t authPort = 0;
     if (!LnnIsAutoNetWorkingEnabled()) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "network is disabled yet, dont restart coap discovery");
+        LNN_LOGW(LNN_BUILDER, "network is disabled yet, dont restart coap discovery");
         return;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifName error!");
+        LNN_LOGE(LNN_BUILDER, "get local ifName error!");
         return;
     }
     if (strncmp(ifName, LNN_LOOPBACK_IFNAME, strlen(LNN_LOOPBACK_IFNAME)) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "ip invalid now, stop restart coap discovery");
+        LNN_LOGI(LNN_BUILDER, "ip invalid now, stop restart coap discovery");
         return;
     }
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local auth port failed.");
+        LNN_LOGE(LNN_BUILDER, "get local auth port failed.");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open previous discovery again");
+    LNN_LOGI(LNN_BUILDER, "open previous discovery again");
     DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
     LnnStopPublish();
     if (LnnStartPublish() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start publish failed");
+        LNN_LOGE(LNN_BUILDER, "start publish failed");
     }
     LnnStopDiscovery();
     if (LnnStartDiscovery() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed");
+        LNN_LOGE(LNN_BUILDER, "start discovery failed");
     }
 }
 
 static void OnGroupCreated(const char *groupId, int32_t groupType)
 {
     (void)groupId;
-    LLOGD("wifi handle OnGroupCreated");
+    LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupCreated");
     LnnUpdateOhosAccount();
     LnnHbOnTrustedRelationIncreased(groupType);
     RestartCoapDiscovery();
@@ -434,7 +434,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
 static void OnGroupDeleted(const char *groupId)
 {
     (void)groupId;
-    LLOGD("wifi handle OnGroupDeleted");
+    LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupDeleted");
     LnnOnOhosAccountLogout();
     LnnHbOnTrustedRelationReduced();
 }
@@ -443,11 +443,11 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
 {
     (void)groupInfo;
     if (LnnGetOnlineStateById(udid, CATEGORY_UDID)) {
-        LLOGD("device is online, no need to start discovery");
+        LNN_LOGD(LNN_BUILDER, "device is online, no need to start discovery");
         return;
     }
     LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
-    LLOGD("wifi handle OnDeviceBound");
+    LNN_LOGD(LNN_BUILDER, "wifi handle OnDeviceBound");
     RestartCoapDiscovery();
 }
 
@@ -474,7 +474,7 @@ static void RestoreBrNetworkDevices(void)
     DeviceNightMode *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_nightOnCache, DeviceNightMode, node) {
         if (LnnNotifyDiscoveryDevice(&(item->addrs), true) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify device found failed\n");
+            LNN_LOGE(LNN_BUILDER, "notify device found failed\n");
         }
         ListDelete(&item->node);
         SoftBusFree(item);
@@ -488,23 +488,23 @@ static void SaveBrNetworkDevices(void)
     int32_t infoNum = 0;
     NodeBasicInfo *netInfo = NULL;
     if (LnnGetAllOnlineNodeInfo(&netInfo, &infoNum) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "night mode on: get all online node info fail.");
+        LNN_LOGE(LNN_BUILDER, "night mode on: get all online node info fail.");
     }
 
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     for (int32_t i = 0; i < infoNum; i++) {
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "night mode on: GetRemoteNodeInfo fail.");
+            LNN_LOGE(LNN_BUILDER, "night mode on: GetRemoteNodeInfo fail.");
             continue;
         }
         if (!LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BR)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "night mode on: ignore no br network device.");
+            LNN_LOGD(LNN_BUILDER, "night mode on: ignore no br network device.");
             continue;
         }
         DeviceNightMode *modeInfo = (DeviceNightMode *)SoftBusMalloc(sizeof(DeviceNightMode));
         if (strcpy_s(modeInfo->addrs.info.br.brMac, BT_MAC_LEN, nodeInfo.connectInfo.macAddr) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "night mode on: str copy fail.");
+            LNN_LOGE(LNN_BUILDER, "night mode on: str copy fail.");
             SoftBusFree(modeInfo);
             continue;
         }
@@ -518,31 +518,31 @@ static void NightModeChangeEventHandler(const LnnEventBasicInfo *info)
 {
     bool addrType[CONNECTION_ADDR_MAX] = {0};
     if (info == NULL || info->event != LNN_EVENT_NIGHT_MODE_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event");
+        LNN_LOGE(LNN_BUILDER, "not interest event");
         return;
     }
     if (g_nightOnCache == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "init g_nightOnCache");
+        LNN_LOGD(LNN_BUILDER, "init g_nightOnCache");
         g_nightOnCache = (ListNode *)SoftBusMalloc(sizeof(ListNode));
         ListInit(g_nightOnCache);
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     if (event->status == SOFTBUS_NIGHT_MODE_OFF) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi handle SOFTBUS_NIGHT_MODE_OFF");
+        LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_NIGHT_MODE_OFF");
         g_isNightMode = false;
         RestartCoapDiscovery();
         RestoreBrNetworkDevices();
         return;
     }
     if (event->status == SOFTBUS_NIGHT_MODE_ON) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi handle SOFTBUS_NIGHT_MODE_ON");
+        LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_NIGHT_MODE_ON");
         g_isNightMode = true;
         SaveBrNetworkDevices();
         for (int32_t i = 0; i < CONNECTION_ADDR_MAX; i++) {
             addrType[i] = true;
         }
         if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave network fail");
+            LNN_LOGE(LNN_BUILDER, "LNN leave network fail");
         }
     }
 }
@@ -550,20 +550,20 @@ static void NightModeChangeEventHandler(const LnnEventBasicInfo *info)
 static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_ACCOUNT_CHANGED) {
-        LLOGE("account state change evt handler get invalid param");
+        LNN_LOGE(LNN_BUILDER, "account state change evt handler get invalid param");
         return;
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent*)info;
     SoftBusAccountState accountState = (SoftBusAccountState)event->status;
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
-            LLOGI("wifi handle SOFTBUS_ACCOUNT_LOG_IN");
+            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_IN");
             LnnUpdateOhosAccount();
             LnnHbOnTrustedRelationIncreased(AUTH_IDENTICAL_ACCOUNT_GROUP);
             RestartCoapDiscovery();
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
-            LLOGI("wifi handle SOFTBUS_ACCOUNT_LOG_OUT");
+            LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_ACCOUNT_LOG_OUT");
             LnnOnOhosAccountLogout();
             LnnHbOnTrustedRelationReduced();
             break;
@@ -581,66 +581,66 @@ int32_t LnnInitNetworkManager(void)
 
     int32_t ret = LnnInitManagerByConfig();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Read net config failed!ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "Read net config failed,ret=%d", ret);
         return ret;
     }
     // Regist default protocols
     ret = RegistIPProtocolManager();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist ip protocol manager failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "regist ip protocol manager failed,ret=%d", ret);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "IP protocol registed.");
+    LNN_LOGI(LNN_BUILDER, "IP protocol registed.");
     ret = RegistBtProtocolManager();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist bt protocol manager failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "regist bt protocol manager failed,ret=%d", ret);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BT protocol registed.");
+    LNN_LOGI(LNN_BUILDER, "BT protocol registed.");
     ret = RegistNewIPProtocolManager();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "regist newip protocol manager failed,ret=%d\n", ret);
+        LNN_LOGE(LNN_BUILDER, "regist newip protocol manager failed,ret=%d", ret);
         return ret;
     }
     ret = RegGroupChangeListener(&g_groupChangeListener);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register group change listener fail");
+        LNN_LOGE(LNN_BUILDER, "register group change listener fail");
         return ret;
     }
     ret = LnnInitPhysicalSubnetManager();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init subnet manager failed!,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "init subnet manager failed,ret=%d", ret);
         return ret;
     }
     ProtocolType type = 0;
     if (!LnnVisitProtocol(GetAllProtocols, &type)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get all protocol failed!");
+        LNN_LOGE(LNN_BUILDER, "Get all protocol failed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set supported protocol to %" PRIu64 ".", type);
+    LNN_LOGI(LNN_BUILDER, "set supported protocol to %" PRIu64 ".", type);
     ret = LnnSetLocalNum64Info(NUM_KEY_TRANS_PROTOCOLS, (int64_t)type);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set supported protocol failed!,ret=%d\n", ret);
+        LNN_LOGE(LNN_BUILDER, "set supported protocol failed,ret=%d", ret);
         return ret;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register night mode change event handler failed");
+        LNN_LOGE(LNN_BUILDER, "register night mode change event handler fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, NetUserStateEventHandler) != SOFTBUS_OK) {
-        LLOGE("Net regist user background evt handler fail!");
+        LNN_LOGE(LNN_BUILDER, "Net regist user background evt handler fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, NetLockStateEventHandler) != SOFTBUS_OK) {
-        LLOGE("Net regist user unlock evt handler fail!");
+        LNN_LOGE(LNN_BUILDER, "Net regist user unlock evt handler fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler) != SOFTBUS_OK) {
-        LLOGE("Net regist OOBE state evt handler fail!");
+        LNN_LOGE(LNN_BUILDER, "Net regist OOBE state evt handler fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler) != SOFTBUS_OK) {
-        LLOGE("Net regist account change evt handler fail!");
+        LNN_LOGE(LNN_BUILDER, "Net regist account change evt handler fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -651,10 +651,10 @@ static void RetryCheckOOBEState(void *para)
     (void)para;
 
     if (!IsOOBEState()) {
-        LLOGI("wifi handle SOFTBUS_OOBE_END");
+        LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
         LnnNotifyOOBEStateChangeEvent(SOFTBUS_OOBE_END);
     } else {
-        LLOGD("check OOBE again after a delay of %" PRIu64 " ms", LNN_CHECK_OOBE_DELAY_LEN);
+        LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay of %" PRIu64 " ms", LNN_CHECK_OOBE_DELAY_LEN);
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryCheckOOBEState, NULL, LNN_CHECK_OOBE_DELAY_LEN);
     }
 }
@@ -665,7 +665,7 @@ int32_t LnnInitNetworkManagerDelay(void)
 
     char udid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local udid error!");
+        LNN_LOGE(LNN_INIT, "get local udid error");
         return SOFTBUS_ERR;
     }
     LnnNetIfMgr *item = NULL;
@@ -677,11 +677,10 @@ int32_t LnnInitNetworkManagerDelay(void)
             if ((g_networkProtocols[i]->supportedNetif & item->type) != 0) {
                 int32_t ret = g_networkProtocols[i]->enable(g_networkProtocols[i], item);
                 if (ret != SOFTBUS_OK) {
-                    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "enable protocol (%d) for netif %s failed", i,
+                    LNN_LOGE(LNN_INIT, "enable protocol=%d for netif %s failed", i,
                         item->ifName);
                 }
-                SoftBusLog(
-                    SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "enable protocol (%d) for netif %s success", i, item->ifName);
+                LNN_LOGI(LNN_INIT, "enable protocol=%d for netif %s success", i, item->ifName);
             }
         }
     }
@@ -697,10 +696,10 @@ bool LnnIsAutoNetWorkingEnabled(void)
     bool isConfigEnabled = false;
     if (SoftbusGetConfig(SOFTBUS_INT_AUTO_NETWORKING_SWITCH, (unsigned char *)&isConfigEnabled,
         sizeof(isConfigEnabled)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Cannot get autoNetworkingSwitch from config file");
+        LNN_LOGE(LNN_BUILDER, "Cannot get autoNetworkingSwitch from config file");
         return true;
     }
-    LLOGI("wifi condition state: config=%d, background=%d, nightMode=%d, OOBEEnd=%d, unlock=%d",
+    LNN_LOGI(LNN_BUILDER, "wifi condition state:config=%d, background=%d, nightMode=%d, OOBEEnd=%d, unlock=%d",
         isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock);
     return isConfigEnabled && (g_backgroundState == SOFTBUS_USER_FOREGROUND) && !g_isNightMode &&
         g_isOOBEEnd && g_isUnLock;
@@ -720,7 +719,7 @@ void LnnDeinitNetworkManager(void)
     }
     uint32_t i;
     if (LnnClearNetConfigList() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "deinit network manager failed");
+        LNN_LOGE(LNN_INIT, "deinit network manager failed");
     }
     LnnDeinitPhysicalSubnetManager();
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
@@ -740,7 +739,7 @@ void LnnDeinitNetworkManager(void)
 int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
 {
     if (ifName == NULL || type == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
+        LNN_LOGE(LNN_BUILDER, "parameters is NULL");
         return SOFTBUS_ERR;
     }
     LnnNetIfMgr *netif = NULL;
@@ -756,7 +755,7 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 {
     if (type == NULL || ifName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parameters are NULL!");
+        LNN_LOGE(LNN_BUILDER, "parameters is NULL");
         return SOFTBUS_ERR;
     }
     LnnNetIfType netifType;
@@ -803,12 +802,11 @@ ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode 
 {
     struct FindProtocolByTypeRequest request = {.protocol = protocol, .manager = NULL};
     if (LnnVisitProtocol(FindProtocolByType, &request)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: not such protocol! protocolId=%d", __func__, protocol);
+        LNN_LOGE(LNN_BUILDER, "not such protocol! protocolId=%d", protocol);
         return UNUSE_BUTT;
     }
     if (request.manager == NULL || request.manager->getListenerModule == NULL) {
-        SoftBusLog(
-            SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol manager is null! protocolId=%d", __func__, protocol);
+        LNN_LOGE(LNN_BUILDER, "protocol manager is null, protocolId=%d", protocol);
         return UNUSE_BUTT;
     }
     return request.manager->getListenerModule(mode);

@@ -23,7 +23,6 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
-#include "softbus_log_old.h"
 #include <gmock/gmock.h>
 #include <mutex>
 
