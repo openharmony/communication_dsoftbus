@@ -835,7 +835,9 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     char *anonyUdid = NULL;
     char *anonyNetworkId = NULL;
     Anonymize(connFsm->connInfo.peerNetworkId, &anonyNetworkId);
-    Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
+    if (isNodeInfoValid) {
+        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
+    }
     LNN_LOGI(LNN_BUILDER, "[id=%u][networkId=%s][udid=%s][deviceName=%s][peer%s]online state enter",
         connFsm->id, anonyNetworkId,
         isNodeInfoValid ? anonyUdid : "",
@@ -940,7 +942,9 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     char *anonyUdid = NULL;
     char *anonyNetworkId = NULL;
     Anonymize(connFsm->connInfo.peerNetworkId, &anonyNetworkId);
-    Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
+    if (isNodeInfoValid) {
+        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
+    }
     LNN_LOGI(LNN_BUILDER, "[id=%u][networkId=%s][udid=%s][deviceName=%s][peer%s]leaving state enter",
         connFsm->id, anonyNetworkId,
         isNodeInfoValid ? anonyUdid : "",
