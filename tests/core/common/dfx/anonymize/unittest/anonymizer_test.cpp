@@ -23,18 +23,18 @@ using namespace std;
 using namespace testing::ext;
 
 namespace {
-static const char *TEST_PLAIN_PACKET_ID = "start.sjgDTUJlzPAvUJWsugNt6bOUT6IJsE9zz2xWrj34kUhwZLoF9L5t7WNolk2jKmIP.end";
-static const char *TEST_ANONYMIZED_PACKET_ID = "start.*z2xWrj34kUhwZLoF9L5t7WNolk2jKmIP.end";
-static const char *TEST_PLAIN_PACKET_IDT = "start.\"uz8jUyq9enjB488uUyiqwutwfGiXbK0j\".end";
-static const char *TEST_ANONYMIZED_PACKET_IDT = "start.*UyiqwutwfGiXbK0j\".end";
-static const char *TEST_PLAIN_PACKET_IP = "start.10.11.12.13.end";
-static const char *TEST_ANONYMIZED_PACKET_IP = "start.*12.13.end";
-static const char *TEST_PLAIN_PACKET_MAC = "start.dd-15-bc-b9-f2-04.end";
-static const char *TEST_ANONYMIZED_PACKET_MAC = "start.*b9-f2-04.end";
-static const char *TEST_PLAIN_PACKET_MAC_CAPS = "start.91-1E-DD-EF-76-48.end";
-static const char *TEST_ANONYMIZED_PACKET_MAC_CAPS = "start.*EF-76-48.end";
-static const char *TEST_PLAIN_PACKET_KEY = "start.bDUnXjCTqbaCVxA7OSGImOLU8ZkpwRtbckfkqYpHiLx=.end";
-static const char *TEST_ANONYMIZED_PACKET_KEY = "start.*LU8ZkpwRtbckfkqYpHiLx=.end";
+const char *TEST_PLAIN_PACKET_ID = "start.sjgDTUJlzPAvUJWsugNt6bOUT6IJsE9zz2xWrj34kUhwZLoF9L5t7WNolk2jKmIP.end";
+const char *TEST_ANONYMIZED_PACKET_ID = "start.*z2xWrj34kUhwZLoF9L5t7WNolk2jKmIP.end";
+const char *TEST_PLAIN_PACKET_IDT = "start.\"uz8jUyq9enjB488uUyiqwutwfGiXbK0j\".end";
+const char *TEST_ANONYMIZED_PACKET_IDT = "start.*UyiqwutwfGiXbK0j\".end";
+const char *TEST_PLAIN_PACKET_IP = "start.10.11.12.13.end";
+const char *TEST_ANONYMIZED_PACKET_IP = "start.*12.13.end";
+const char *TEST_PLAIN_PACKET_MAC = "start.dd-15-bc-b9-f2-04.end";
+const char *TEST_ANONYMIZED_PACKET_MAC = "start.*b9-f2-04.end";
+const char *TEST_PLAIN_PACKET_MAC_CAPS = "start.91-1E-DD-EF-76-48.end";
+const char *TEST_ANONYMIZED_PACKET_MAC_CAPS = "start.*EF-76-48.end";
+const char *TEST_PLAIN_PACKET_KEY = "start.bDUnXjCTqbaCVxA7OSGImOLU8ZkpwRtbckfkqYpHiLx=.end";
+const char *TEST_ANONYMIZED_PACKET_KEY = "start.*LU8ZkpwRtbckfkqYpHiLx=.end";
 } // namespace
 
 namespace OHOS {
@@ -222,6 +222,21 @@ HWTEST_F(AnonymizerTest, AnonymizeTest012, TestSize.Level0)
     char *anonymizedStr;
     AnonymizePacket(plainStr, &anonymizedStr);
     EXPECT_STREQ(expectedStr, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeTest013
+ * @tc.desc: Test plainStr is empty
+ * @tc.type: FUNC
+ * @tc.require: I8DW1W
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTest013, TestSize.Level0)
+{
+    const char *plainStr = "";
+    char *anonymizedStr;
+    Anonymize(plainStr, &anonymizedStr);
+    EXPECT_STREQ("EMPTY", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
 } // namespace OHOS
