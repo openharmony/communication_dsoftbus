@@ -18,8 +18,9 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
+#include "lnn_log.h"
 #include "softbus_def.h"
-#include "softbus_log_old.h"
 
 #define LNN_MAX_PRINT_ADDR_LEN 100
 #define SHORT_UDID_HASH_LEN 8
@@ -59,14 +60,14 @@ bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *
 bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
 {
     if (addr == NULL || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or option is null");
+        LNN_LOGW(LNN_STATE, "addr or option is null");
         return false;
     }
     if (addr->type == CONNECTION_ADDR_BR) {
         option->type = CONNECT_BR;
         if (strncpy_s(option->brOption.brMac, BT_MAC_LEN, addr->info.br.brMac,
             strlen(addr->info.br.brMac)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to addr fail");
+            LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
             return false;
         }
         return true;
@@ -75,7 +76,7 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
         option->type = CONNECT_BLE;
         if (strncpy_s(option->bleOption.bleMac, BT_MAC_LEN, addr->info.ble.bleMac,
             strlen(addr->info.ble.bleMac)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to addr fail");
+            LNN_LOGE(LNN_STATE, "copy ble mac to addr fail");
             return false;
         }
         return true;
@@ -84,14 +85,14 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
         option->type = CONNECT_TCP;
         if (strncpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), addr->info.ip.ip,
             strlen(addr->info.ip.ip)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip  to addr fail");
+            LNN_LOGE(LNN_STATE, "copy ip to addr fail");
             return false;
         }
         option->socketOption.port = addr->info.ip.port;
         option->socketOption.protocol = LNN_PROTOCOL_IP;
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", addr->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%d", addr->type);
     return false;
 }
 
@@ -99,14 +100,14 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option,
     ConnectionAddrType hintType)
 {
     if (addr == NULL || option == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or option is null");
+        LNN_LOGW(LNN_STATE, "addr or option is null");
         return false;
     }
     if (option->type == CONNECT_BR) {
         addr->type = CONNECTION_ADDR_BR;
         if (strncpy_s(addr->info.br.brMac, BT_MAC_LEN, option->brOption.brMac,
             strlen(option->brOption.brMac)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to addr fail");
+            LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
             return false;
         }
         return true;
@@ -115,26 +116,26 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option,
         addr->type = CONNECTION_ADDR_BLE;
         if (strncpy_s(addr->info.ble.bleMac, BT_MAC_LEN, option->bleOption.bleMac,
             strlen(option->bleOption.bleMac)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to addr fail");
+            LNN_LOGE(LNN_STATE, "copy ble mac to addr fail");
             return false;
         }
         return true;
     }
     if (option->type == CONNECT_TCP) {
         if (option->socketOption.protocol != LNN_PROTOCOL_IP) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "only ip is supportted");
+            LNN_LOGE(LNN_STATE, "only ip is supportted");
             return false;
         }
         addr->type = hintType;
         if (strncpy_s(addr->info.ip.ip, IP_LEN, option->socketOption.addr,
             strlen(option->socketOption.addr)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip to addr fail");
+            LNN_LOGE(LNN_STATE, "copy ip to addr fail");
             return false;
         }
         addr->info.ip.port = (uint16_t)option->socketOption.port;
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", option->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%d", option->type);
     return false;
 }
 
@@ -171,13 +172,13 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
 bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
 {
     if (addr == NULL || connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or connInfo is null");
+        LNN_LOGW(LNN_STATE, "addr or connInfo is null");
         return false;
     }
     if (addr->type == CONNECTION_ADDR_BR) {
         connInfo->type = AUTH_LINK_TYPE_BR;
         if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, addr->info.br.brMac) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to connInfo fail");
+            LNN_LOGE(LNN_STATE, "copy br mac to connInfo fail");
             return false;
         }
         return true;
@@ -186,7 +187,7 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
         connInfo->type = AUTH_LINK_TYPE_BLE;
         if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, addr->info.ble.bleMac) != EOK ||
             memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, addr->info.ble.udidHash, UDID_HASH_LEN)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to connInfo fail");
+            LNN_LOGE(LNN_STATE, "copy ble mac to connInfo fail");
             return false;
         }
         connInfo->info.bleInfo.protocol = addr->info.ble.protocol;
@@ -196,13 +197,13 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
     if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
         connInfo->type = AUTH_LINK_TYPE_WIFI;
         if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, addr->info.ip.ip) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip to connInfo fail");
+            LNN_LOGE(LNN_STATE, "copy ip to connInfo fail");
             return false;
         }
         connInfo->info.ipInfo.port = addr->info.ip.port;
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", addr->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%d", addr->type);
     return false;
 }
 
@@ -210,13 +211,13 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
     ConnectionAddrType hintType)
 {
     if (addr == NULL || connInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addr or connInfo is null");
+        LNN_LOGW(LNN_STATE, "addr or connInfo is null");
         return false;
     }
     if (connInfo->type == AUTH_LINK_TYPE_BR) {
         addr->type = CONNECTION_ADDR_BR;
         if (strcpy_s(addr->info.br.brMac, BT_MAC_LEN, connInfo->info.brInfo.brMac) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy br mac to addr fail");
+            LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
             return false;
         }
         return true;
@@ -224,7 +225,7 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
     if (connInfo->type == AUTH_LINK_TYPE_BLE) {
         addr->type = CONNECTION_ADDR_BLE;
         if (strcpy_s(addr->info.ble.bleMac, BT_MAC_LEN, connInfo->info.bleInfo.bleMac) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ble mac to addr fail");
+            LNN_LOGE(LNN_STATE, "copy ble mac to addr fail");
             return false;
         }
         addr->info.ble.protocol = connInfo->info.bleInfo.protocol;
@@ -234,13 +235,13 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
     if (connInfo->type == AUTH_LINK_TYPE_WIFI) {
         addr->type = hintType;
         if (strcpy_s(addr->info.ip.ip, IP_LEN, connInfo->info.ipInfo.ip) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy ip to addr fail");
+            LNN_LOGE(LNN_STATE, "copy ip to addr fail");
             return false;
         }
         addr->info.ip.port = (uint16_t)connInfo->info.ipInfo.port;
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not supported type: %d", connInfo->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%d", connInfo->type);
     return false;
 }
 
@@ -248,31 +249,39 @@ const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
 {
     int32_t ret = 0;
     static char printAddr[LNN_MAX_PRINT_ADDR_LEN] = {0};
+    char *anonyIp = NULL;
+    char *anonyMac = NULL;
 
     if (addr == NULL) {
-        LLOGE("print connection addr get invalid param");
+        LNN_LOGW(LNN_STATE, "print connection addr get invalid param");
         return "Addr=";
     }
     switch (addr->type) {
         case CONNECTION_ADDR_WLAN:
         case CONNECTION_ADDR_ETH:
+            Anonymize(addr->info.ip.ip, &anonyIp);
             ret = sprintf_s(printAddr, sizeof(printAddr),
-                "Ip=*.*.*%s", AnonymizesIp(addr->info.ip.ip));
+                "Ip=*.*.*%s", anonyIp);
+            AnonymizeFree(anonyIp);
             break;
         case CONNECTION_ADDR_BR:
+            Anonymize(addr->info.br.brMac, &anonyMac);
             ret = sprintf_s(printAddr, sizeof(printAddr),
-                "BrMac=**:**:**:**:%s", AnonymizesMac(addr->info.br.brMac));
+                "BrMac=**:**:**:**:%s", anonyMac);
+            AnonymizeFree(anonyMac);
             break;
         case CONNECTION_ADDR_BLE:
+            Anonymize(addr->info.ble.bleMac, &anonyMac);
             ret = sprintf_s(printAddr, sizeof(printAddr),
-                "BleMac=**:**:**:**:%s", AnonymizesMac(addr->info.ble.bleMac));
+                "BleMac=**:**:**:**:%s", anonyMac);
+            AnonymizeFree(anonyMac);
             break;
         default:
-            LLOGW("print invalid connection addr type");
+            LNN_LOGW(LNN_STATE, "print invalid connection addr type");
             return "Addr=";
     }
     if (ret < 0) {
-        LLOGE("sprintf_s connection addr failed");
+        LNN_LOGE(LNN_STATE, "sprintf_s connection addr failed");
         return "Addr=";
     }
     return printAddr;

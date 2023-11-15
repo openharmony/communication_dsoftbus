@@ -22,13 +22,13 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_fsm.h"
+#include "lnn_log.h"
 
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
@@ -97,7 +97,7 @@ static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeLis
         if (dumpCount > HB_DUMP_GEAR_MODE_LIST_MAX_NUM) {
             break;
         }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "DumpGearModeSettingList count:%d [callerId=%s, cycle=%d, "
+        LNN_LOGD(LNN_HEART_BEAT, "DumpGearModeSettingList count:%d [callerId=%s, cycle=%d, "
             "duration=%d, wakeupFlag=%d, lifetimeStamp=%" PRId64 ", needClean:%s]", dumpCount, info->callerId,
             info->mode.cycle, info->mode.duration, info->mode.wakeupFlag, info->lifetimeStamp,
             info->lifetimeStamp != HB_GEARMODE_LIFETIME_PERMANENT && info->lifetimeStamp <= nowTime ? "true" : "false");
@@ -117,7 +117,7 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
     DumpGearModeSettingList(nowTime, gearModeList);
     LIST_FOR_EACH_ENTRY_SAFE(info, nextInfo, gearModeList, GearModeStorageInfo, node) {
         if (*gearModeCnt == 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get Gearmode from setting list is empty");
+            LNN_LOGD(LNN_HEART_BEAT, "HB get Gearmode from setting list is empty");
             return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
         }
         if (info->lifetimeStamp < nowTime && info->lifetimeStamp != HB_GEARMODE_LIFETIME_PERMANENT) {
@@ -135,13 +135,13 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
             continue;
         }
         if (memcpy_s(mode, sizeof(GearMode), &info->mode, sizeof(GearMode)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode from setting list memcpy_s err");
+            LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode from setting list memcpy_s err");
             return SOFTBUS_MEM_ERR;
         }
         callerId = info->callerId;
     }
     if (callerId != NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get Gearmode from list, id:%s, cycle:%d, duration:%d, "
+        LNN_LOGD(LNN_HEART_BEAT, "HB get Gearmode from list, id:%s, cycle=%d, duration=%d, "
         "wakeupFlag:%d", callerId, mode->cycle, mode->duration, mode->wakeupFlag);
     }
     return SOFTBUS_OK;
@@ -153,7 +153,7 @@ static LnnHeartbeatParamManager *GetParamMgrByTypeLocked(LnnHeartbeatType type)
 
     id = LnnConvertHbTypeToId(type);
     if (id == HB_INVALID_TYPE_ID) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get param mgr convert type fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get param mgr convert type fail");
         return NULL;
     }
     return g_hbParamMgr[id];
@@ -164,31 +164,31 @@ int32_t LnnGetGearModeBySpecificType(GearMode *mode, LnnHeartbeatType type)
     LnnHeartbeatParamManager *paramMgr = NULL;
 
     if (mode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode invalid param!");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memset_s(mode, sizeof(GearMode), 0, sizeof(GearMode) != EOK)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode memset_s err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode memset_s err");
         return SOFTBUS_MEM_ERR;
     }
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode lock mutex fail!");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
     paramMgr = GetParamMgrByTypeLocked(type);
     if (paramMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode get NULL paramMgr");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode get NULL paramMgr");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_ERR;
     }
     if (IsListEmpty(&paramMgr->gearModeList)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB get Gearmode from setting list is empty");
+        LNN_LOGD(LNN_HEART_BEAT, "HB get Gearmode from setting list is empty");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
     }
     int32_t ret = GetGearModeFromSettingList(mode, &paramMgr->gearModeList, &paramMgr->gearModeCnt);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get Gearmode from setting list err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode from setting list err");
     }
     (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
     return ret;
@@ -200,23 +200,23 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
 
     info = (GearModeStorageInfo *)SoftBusCalloc(sizeof(GearModeStorageInfo));
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB first set Gearmode calloc storage info err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB first set Gearmode calloc storage info err");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&info->node);
     if (memcpy_s(&info->mode, sizeof(GearMode), mode, sizeof(GearMode)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB first set Gearmode memcpy_s err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB first set Gearmode memcpy_s err");
         SoftBusFree(info);
         return SOFTBUS_MEM_ERR;
     }
     info->callerId = (char *)SoftBusCalloc(strlen(callerId) + 1);
     if (info->callerId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB first set Gearmode malloc callerId err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB first set Gearmode malloc callerId err");
         SoftBusFree(info);
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s((char *)info->callerId, strlen(callerId) + 1, callerId) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB first set Gearmode strcpy_s callerId err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB first set Gearmode strcpy_s callerId err");
         SoftBusFree((char *)info->callerId);
         SoftBusFree(info);
         return SOFTBUS_ERR;
@@ -239,17 +239,17 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
     LnnHeartbeatParamManager *paramMgr = NULL;
 
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set Gearmode lock mutex fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set Gearmode lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
     paramMgr = GetParamMgrByTypeLocked(type);
     if (paramMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set Gearmode get NULL paramMgr");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set Gearmode get NULL paramMgr");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_ERR;
     }
     if (paramMgr->gearModeCnt > HB_GEARMODE_MAX_SET_CNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB set Gearmode cnt exceed MAX_CNT %d", HB_GEARMODE_MAX_SET_CNT);
+        LNN_LOGW(LNN_HEART_BEAT, "HB set Gearmode cnt exceed MAX_CNT %d", HB_GEARMODE_MAX_SET_CNT);
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_ERR;
     }
@@ -260,7 +260,7 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
             continue;
         }
         if (memcpy_s(&info->mode, sizeof(GearMode), mode, sizeof(GearMode)) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set Gearmode memcpy_s err");
+            LNN_LOGE(LNN_HEART_BEAT, "HB set Gearmode memcpy_s err");
             (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
             return SOFTBUS_MEM_ERR;
         }
@@ -269,7 +269,7 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
         return SOFTBUS_OK;
     }
     if (FirstSetGearModeByCallerId(callerId, nowTime, &paramMgr->gearModeList, mode) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set Gearmode by callerId err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set Gearmode by callerId err");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_ERR;
     }
@@ -300,11 +300,11 @@ static bool VisitClearNoneSplitHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
 static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara,
     const GearMode *mode, LnnHeartbeatType registedHbType, bool isRelayV0)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "SendEachSeparately enter, hbType=%d isRelayV0=%d", registedHbType,
+    LNN_LOGD(LNN_HEART_BEAT, "SendEachSeparately enter, hbType=%d isRelayV0=%d", registedHbType,
         isRelayV0);
     bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once first begin fail, hbType:%d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%d", registedHbType);
         return SOFTBUS_ERR;
     }
 
@@ -324,14 +324,14 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
         }
         if (i == sendCnt - 1) {
             if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", splitHbType);
+                LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType=%d", splitHbType);
                 return SOFTBUS_ERR;
             }
             msgPara->isSyncData = true;
             if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara,
                 i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
                 msgPara->isSyncData = false;
-                SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once begin fail, hbType:%d", splitHbType);
+                LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%d", splitHbType);
                 return SOFTBUS_ERR;
             }
         }
@@ -341,11 +341,11 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
     endData.isLastEnd = true;
     if (LnnPostSendEndMsgToHbFsm(hbFsm, &endData, isRelayV0 ? HB_SEND_RELAY_LEN : HB_SEND_ONCE_LEN) != SOFTBUS_OK) {
         msgPara->isSyncData = false;
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once last end fail, hbType:%d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%d", registedHbType);
         return SOFTBUS_ERR;
     }
     msgPara->isSyncData = false;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "SendEachSeparately exit");
+    LNN_LOGD(LNN_HEART_BEAT, "SendEachSeparately exit");
     return SOFTBUS_OK;
 }
 
@@ -354,7 +354,7 @@ static bool VisitClearUnRegistedHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTy
     (void)data;
 
     if (!LnnIsHeartbeatEnable(eachType)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB heartbeat is disabled, hbType(%d)", eachType);
+        LNN_LOGD(LNN_HEART_BEAT, "HB heartbeat is disabled, hbType=%d", eachType);
         *typeSet &= ~eachType;
     }
     return true;
@@ -367,34 +367,34 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
     LnnHeartbeatType registedHbType = msgPara->hbType;
     bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
     if (GetScreenState() == SOFTBUS_SCREEN_OFF && !wakeupFlag && !msgPara->isRelay) {
-        LLOGW("screen state is off and not wakeup adv");
+        LNN_LOGW(LNN_HEART_BEAT, "screen state is off and not wakeup adv");
         return SOFTBUS_OK;
     }
     (void)LnnVisitHbTypeSet(VisitClearUnRegistedHbType, &registedHbType, NULL);
     if (registedHbType < HEARTBEAT_TYPE_MIN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB send once get hbType(%d) is not available", msgPara->hbType);
+        LNN_LOGW(LNN_HEART_BEAT, "HB send once get hbType=%d is not available", msgPara->hbType);
         return SOFTBUS_OK;
     }
     LnnRemoveSendEndMsg(hbFsm, registedHbType, wakeupFlag, msgPara->isRelay, &isRemoved);
     if (!isRemoved) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB send once is beginning, hbType:%d, wakeupFlag:%d, isRelay:%d",
+        LNN_LOGW(LNN_HEART_BEAT, "HB send once is beginning, hbType=%d, wakeupFlag=%d, isRelay=%d",
             msgPara->hbType, wakeupFlag, msgPara->isRelay);
         return SOFTBUS_OK;
     }
     LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
     bool isRelayV0 = msgPara->isRelay && registedHbType == HEARTBEAT_TYPE_BLE_V0;
     if (SendEachSeparately(hbFsm, msgPara, mode, registedHbType, isRelayV0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send each separately fail, hbType:%d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send each separately fail, hbType=%d", registedHbType);
         return SOFTBUS_ERR;
     }
     if (isRelayV0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB send once but dont check status, hbType:%d", registedHbType);
+        LNN_LOGD(LNN_HEART_BEAT, "HB send once but dont check status, hbType=%d", registedHbType);
         return SOFTBUS_OK;
     }
     LnnCheckDevStatusMsgPara checkMsg = {.hbType = registedHbType, .hasNetworkId = false, .isWakeUp = wakeupFlag};
     LnnRemoveCheckDevStatusMsg(hbFsm, &checkMsg);
     if (LnnPostCheckDevStatusMsgToHbFsm(hbFsm, &checkMsg, HB_CHECK_DELAY_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once post check msg fail, hbType:%d", registedHbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once post check msg fail, hbType=%d", registedHbType);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -404,11 +404,11 @@ static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
     if (msgPara->strategyType != STRATEGY_HB_SEND_SINGLE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB single send get invaild strategy");
+        LNN_LOGE(LNN_HEART_BEAT, "HB single send get invaild strategy");
         return SOFTBUS_INVALID_PARAM;
     }
     if (ProcessSendOnceStrategy(hbFsm, msgPara, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB single send process send once fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB single send process send once fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -419,15 +419,15 @@ static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
     if (msgPara->strategyType != STRATEGY_HB_SEND_FIXED_PERIOD) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fixed period send get invaild strategy");
+        LNN_LOGE(LNN_HEART_BEAT, "HB fixed period send get invaild strategy");
         return SOFTBUS_INVALID_PARAM;
     }
     if (ProcessSendOnceStrategy(hbFsm, msgPara, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fixed period send once fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB fixed period send once fail");
         return SOFTBUS_ERR;
     }
     if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, msgPara, (uint64_t)LOW_FREQ_CYCLE * HB_TIME_FACTOR) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB fixed period send loop msg fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB fixed period send loop msg fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -440,26 +440,26 @@ static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
     if (msgPara->hbType != HEARTBEAT_TYPE_BLE_V0 || msgPara->strategyType != STRATEGY_HB_SEND_ADJUSTABLE_PERIOD) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB adjustable send get invaild strategy");
+        LNN_LOGE(LNN_HEART_BEAT, "HB adjustable send get invaild strategy");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnRemoveProcessSendOnceMsg(hbFsm, msgPara->hbType, msgPara->strategyType);
     ret = LnnGetGearModeBySpecificType(&mode, HEARTBEAT_TYPE_BLE_V0);
     if (ret == SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "HB adjustable period strategy is end");
+        LNN_LOGD(LNN_HEART_BEAT, "HB adjustable period strategy is end");
         return SOFTBUS_OK;
     }
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB adjustable send get Gearmode err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB adjustable send get Gearmode err");
         return SOFTBUS_ERR;
     }
     if (ProcessSendOnceStrategy(hbFsm, msgPara, &mode) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB adjustable send once fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB adjustable send once fail");
         return SOFTBUS_ERR;
     }
     uint64_t delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR;
     if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, (const LnnProcessSendOnceMsgPara *)obj, delayMillis) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB adjustable send loop msg fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB adjustable send loop msg fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -476,7 +476,7 @@ static int32_t RegistParamMgrBySpecificType(LnnHeartbeatType type)
     };
     paramMgr = (LnnHeartbeatParamManager *)SoftBusCalloc(sizeof(LnnHeartbeatParamManager));
     if (paramMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist param mgr malloc paramMgr fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB regist param mgr malloc paramMgr fail");
         return SOFTBUS_MALLOC_ERR;
     }
     paramMgr->type = type;
@@ -487,7 +487,7 @@ static int32_t RegistParamMgrBySpecificType(LnnHeartbeatType type)
 
     if (type != HEARTBEAT_TYPE_BLE_V0 && type != HEARTBEAT_TYPE_BLE_V3) {
         if (FirstSetGearModeByCallerId(HB_DEFAULT_CALLER_ID, 0, &paramMgr->gearModeList, &mode) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist param mgr set default Gearmode fail");
+            LNN_LOGE(LNN_HEART_BEAT, "HB regist param mgr set default Gearmode fail");
             SoftBusFree(paramMgr);
             return SOFTBUS_ERR;
         }
@@ -508,7 +508,7 @@ static bool VisitRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType each
         return true;
     }
     if (RegistParamMgrBySpecificType(eachType) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist paramMgr by type(%d) err", eachType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB regist paramMgr by type(%d) err", eachType);
         return false;
     }
     return true;
@@ -517,7 +517,7 @@ static bool VisitRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType each
 int32_t LnnRegistParamMgrByType(LnnHeartbeatType type)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist paramMgr lock mutex fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB regist paramMgr lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
     (void)LnnVisitHbTypeSet(VisitRegistParamMgr, &type, NULL);
@@ -563,7 +563,7 @@ static bool VisitUnRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType ea
 void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB unRegist paramMgr lock mutex fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB unRegist paramMgr lock mutex fail");
         return;
     }
     (void)LnnVisitHbTypeSet(VisitUnRegistParamMgr, &type, NULL);
@@ -575,16 +575,16 @@ int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
     LnnHeartbeatParamManager *paramMgr = NULL;
 
     if (param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param get invalid param");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param lock mutex fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set medium param lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
     paramMgr = GetParamMgrByTypeLocked(param->type);
     if (paramMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param get NULL paramMgr");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set medium param get NULL paramMgr");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_ERR;
     }
@@ -592,12 +592,12 @@ int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
         paramMgr->param = (LnnHeartbeatMediumParam *)SoftBusCalloc(sizeof(LnnHeartbeatMediumParam));
     }
     if (paramMgr->param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param calloc err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set medium param calloc err");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s(paramMgr->param, sizeof(LnnHeartbeatMediumParam), param, sizeof(LnnHeartbeatMediumParam)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param memcpy_s err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set medium param memcpy_s err");
         SoftBusFree(paramMgr->param);
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_MEM_ERR;
@@ -605,7 +605,7 @@ int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
 
     int32_t ret = LnnPostSetMediumParamMsgToHbFsm(g_hbFsm, paramMgr->param);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB set medium param via mgr err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB set medium param via mgr err");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return ret;
     }
@@ -618,25 +618,25 @@ int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeart
     const LnnHeartbeatParamManager *paramMgr = NULL;
 
     if (param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get medium param get invalid param");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memset_s(param, sizeof(LnnHeartbeatMediumParam), 0, sizeof(LnnHeartbeatMediumParam) != EOK)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get medium param memset_s err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get medium param memset_s err");
         return SOFTBUS_MEM_ERR;
     }
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get medium param lock mutex fail!");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get medium param lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
     paramMgr = GetParamMgrByTypeLocked(type);
     if (paramMgr == NULL || paramMgr->param == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get medium param get NULL paramMgr");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get medium param get NULL paramMgr");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(param, sizeof(LnnHeartbeatMediumParam), paramMgr->param, sizeof(LnnHeartbeatMediumParam)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get medium param memcpy_s err");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get medium param memcpy_s err");
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_MEM_ERR;
     }
@@ -648,11 +648,11 @@ int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatTy
     LnnHeartbeatStrategyType strategyType)
 {
     if (mgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get strategy mgr invalid param");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get strategy mgr invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnCheckSupportedHbType(&hbType, &g_hbStrategyMgr[strategyType].supportType)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get strategy mgr type(%d) not support hbType(%d)",
+        LNN_LOGE(LNN_HEART_BEAT, "HB get strategy mgr type(%d) not support hbType=%d",
             strategyType, hbType);
         return SOFTBUS_ERR;
     }
@@ -667,14 +667,14 @@ int32_t LnnStartNewHbStrategyFsm(void)
 
     hbFsm = LnnCreateHeartbeatFsm();
     if (hbFsm == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start strategy fsm create fsm fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB start strategy fsm create fsm fail");
         return SOFTBUS_ERR;
     }
     /* If udp heartbeat deployed, use HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V1 */
     hbFsm->hbType = HEARTBEAT_TYPE_BLE_V1;
     hbFsm->strategyType = STRATEGY_HB_SEND_FIXED_PERIOD;
     if (LnnStartHeartbeatFsm(hbFsm) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start strategy fsm start fsm fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB start strategy fsm start fsm fail");
         return SOFTBUS_ERR;
     }
     g_hbFsm = hbFsm;
@@ -688,7 +688,7 @@ static bool IsSupportBurstFeature(const char *networkId)
     uint64_t peerFeature;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK ||
         LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &peerFeature) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "get local or remote feature fail");
+        LNN_LOGI(LNN_HEART_BEAT, "get local or remote feature fail");
         return false;
     }
     if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
@@ -707,11 +707,11 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
         return SOFTBUS_INVALID_PARAM;
     }
     if (IsSupportBurstFeature(networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "target device support burst, dont't need post offline info");
+        LNN_LOGI(LNN_HEART_BEAT, "target device support burst, dont't need post offline info");
         return SOFTBUS_OK;
     }
     if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start offline timing strcpy_s networkId fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB start offline timing strcpy_s networkId fail");
         return SOFTBUS_ERR;
     }
     msgPara.addrType = addrType;
@@ -734,7 +734,7 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
         .addrType = addrType,
     };
     if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop offline timing strcpy_s networkId fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB stop offline timing strcpy_s networkId fail");
         return SOFTBUS_ERR;
     }
     msgPara.hasNetworkId = true;
@@ -744,21 +744,21 @@ int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType a
 
 int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
 {
-    LLOGI("start screen changed offline timing");
+    LNN_LOGI(LNN_HEART_BEAT, "start screen changed offline timing");
     if (networkId == NULL || addrType >= CONNECTION_ADDR_MAX) {
-        LLOGE("invalid param");
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnCheckDevStatusMsgPara msgPara = {0};
     if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-        LLOGE("HB start offline timing strcpy_s networkId fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB start offline timing strcpy_s networkId fail");
         return SOFTBUS_ERR;
     }
     msgPara.hasNetworkId = true;
     msgPara.hbType = LnnConvertConnAddrTypeToHbType(addrType);
 
     if (LnnPostScreenOffCheckDevMsgToHbFsm(g_hbFsm, &msgPara, HB_OFFLINE_PERIOD * HB_OFFLINE_TIME) != SOFTBUS_OK) {
-        LLOGE("post screen off check dev msg failed");
+        LNN_LOGE(LNN_HEART_BEAT, "post screen off check dev msg failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -774,7 +774,7 @@ int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrTy
         .addrType = addrType,
     };
     if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop offline timing strcpy_s networkId fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB stop offline timing strcpy_s networkId fail");
         return SOFTBUS_ERR;
     }
     msgPara.hasNetworkId = true;
@@ -791,7 +791,7 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
         .strategyType = strategyType,
     };
     if (LnnPostNextSendOnceMsgToHbFsm(g_hbFsm, &msgPara, 0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB start heartbeat fail, type:%d", hbType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB start heartbeat fail, type:%d", hbType);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -799,15 +799,15 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
 
 int32_t LnnStartHeartbeat(uint64_t delayMillis)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) process start delay %" PRIu64 " msec.", delayMillis);
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat(HB) process start delay %" PRIu64 " msec", delayMillis);
     return LnnPostStartMsgToHbFsm(g_hbFsm, delayMillis);
 }
 
 int32_t LnnStopV0HeartbeatAndNotTransState()
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB only stop heartbeat V0");
+    LNN_LOGI(LNN_HEART_BEAT, "HB only stop heartbeat V0");
     if (LnnPostStopMsgToHbFsm(g_hbFsm, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat by type post msg fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB stop heartbeat by type post msg fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -816,7 +816,7 @@ int32_t LnnStopV0HeartbeatAndNotTransState()
 int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
 {
     if (LnnPostStopMsgToHbFsm(g_hbFsm, type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB stop heartbeat by type post msg fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB stop heartbeat by type post msg fail");
         return SOFTBUS_ERR;
     }
     LnnHbClearRecvList();
@@ -830,7 +830,7 @@ int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
 int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType type)
 {
     if (type <= HEARTBEAT_TYPE_MIN || type >= HEARTBEAT_TYPE_MAX) {
-        LLOGE("HB send once get hbType(%d) is not available", type);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once get hbType=%d is not available", type);
         return SOFTBUS_ERR;
     }
     LnnHeartbeatSendEndData endData = {
@@ -840,7 +840,7 @@ int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType type)
         .isLastEnd = true,
     };
     if (LnnPostSendEndMsgToHbFsm(g_hbFsm, &endData, 0) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB send once end fail, hbType:%d", type);
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once end fail, hbType:%d", type);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -853,7 +853,7 @@ static bool VisitEnableHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachTy
 
     paramMgr = GetParamMgrByTypeLocked(eachType);
     if (paramMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "HB enable hbType(%d) get param mgr is NULL", eachType);
+        LNN_LOGW(LNN_HEART_BEAT, "HB enable hbType=%d get param mgr is NULL", eachType);
         return true;
     }
     paramMgr->isEnable = *isEnable;
@@ -863,7 +863,7 @@ static bool VisitEnableHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachTy
 int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
 {
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB enable hbType lock mutex fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB enable hbType lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
     (void)LnnVisitHbTypeSet(VisitEnableHbType, &type, &isEnable);
@@ -877,7 +877,7 @@ bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
     LnnHeartbeatParamManager *paramMgr = NULL;
 
     if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB get param regist status lock mutex fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get param regist status lock mutex fail");
         return false;
     }
     paramMgr = GetParamMgrByTypeLocked(type);
@@ -899,15 +899,15 @@ int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
 int32_t LnnHbStrategyInit(void)
 {
     if (SoftBusMutexInit(&g_hbStrategyMutex, NULL) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB strategy module init mutex fail!");
+        LNN_LOGE(LNN_HEART_BEAT, "HB strategy module init mutex fail!");
         return SOFTBUS_ERR;
     }
     if (LnnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist ble strategy fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB regist ble strategy fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist udp/tcp strategy fail");
+        LNN_LOGE(LNN_HEART_BEAT, "HB regist udp/tcp strategy fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
