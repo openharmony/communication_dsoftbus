@@ -58,6 +58,13 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub update send info");
 }
 
+void LnnHbOnTrustedRelationChanged(int32_t groupType)
+{
+    (void)groupType;
+
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub process auth OnDeviceBound");
+}
+
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     (void)groupType;
