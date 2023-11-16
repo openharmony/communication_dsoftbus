@@ -326,9 +326,8 @@ static void SearchedMsgHandler(const CommonStatusContext *ctx)
             break;
         }
 
-        rc = SoftbusGattcRegisterNotification(
-            ctx->underlayerHandle, &connection->gattService.serviceUuid, &connection->gattService.connCharacteristicUuid,
-            &connection->gattService.descriptorUuid);
+        rc = SoftbusGattcRegisterNotification(ctx->underlayerHandle, &connection->gattService.serviceUuid,
+          &connection->gattService.connCharacteristicUuid, &connection->gattService.descriptorUuid);
         if (rc != SOFTBUS_OK) {
             CONN_LOGW(CONN_BLE, "underlay register conn characteristic notification failed, connId=%u, handle=%d, "
                 "err=%d", connection->connectionId, ctx->underlayerHandle, rc);
@@ -520,7 +519,8 @@ static void MtuSettedMsgHandler(const MtuConfiguredContext *ctx)
     int32_t status = ctx->common.status;
     ConnBleConnection *connection = BleGetConnectionByHandle(underlayerHandle);
     if (connection == NULL) {
-        CONN_LOGW(CONN_BLE, "connection not exist, handle=%d, isSoftbusConnect=%d", underlayerHandle, g_isSoftbusConnect);
+        CONN_LOGW(CONN_BLE, "connection not exist, handle=%d, isSoftbusConnect=%d",
+            underlayerHandle, g_isSoftbusConnect);
         (void)SoftbusGattcUnRegister(underlayerHandle);
         return;
     }
@@ -602,7 +602,8 @@ static void DisconnectedMsgHandler(const CommonStatusContext *ctx)
     }
 
     if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "connection not exist, handle=%d, isSoftbusDisconnect=%d", ctx->underlayerHandle, g_isSoftbusDisconnect);
+        CONN_LOGE(CONN_BLE, "connection not exist, handle=%d, isSoftbusDisconnect=%d",
+            ctx->underlayerHandle, g_isSoftbusDisconnect);
         return;
     }
     uint32_t connectionId = connection->connectionId;
@@ -648,7 +649,8 @@ static void ClientWaitDiconnetTimeoutMsgHandler(uint32_t connectionId)
         (void)SoftbusGattcUnRegister(underlayerHandle);
     } while (false);
     ReturnConnection(connection->serviceId, connection);
-    g_clientEventListener[connection->serviceId].onClientConnectionClosed(connectionId, SOFTBUS_CONN_BLE_DISCONNECT_WAIT_TIMEOUT_ERR);
+    g_clientEventListener[connection->serviceId].onClientConnectionClosed(connectionId,
+        SOFTBUS_CONN_BLE_DISCONNECT_WAIT_TIMEOUT_ERR);
 }
 
 static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBusGattcNotify *param, int32_t status)
@@ -670,7 +672,8 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     }
 
     bool isConnCharacteristic = false;
-    if (memcmp(param->charaUuid.uuid, connection->gattService.connCharacteristicUuid.uuid, param->charaUuid.uuidLen) == 0) {
+    if (memcmp(param->charaUuid.uuid, connection->gattService.connCharacteristicUuid.uuid,
+        param->charaUuid.uuidLen) == 0) {
         isConnCharacteristic = true;
     } else if (memcmp(param->charaUuid.uuid, connection->gattService.netUuid.uuid, param->charaUuid.uuidLen) == 0) {
         isConnCharacteristic = false;
@@ -683,14 +686,15 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     uint32_t valueLen = 0;
     uint8_t *value = NULL;
     if (serviceId == SOFTBUS_GATT_SERVICE) {
-        value = ConnGattTransRecv(connection->connectionId, param->data, param->dataLen, &connection->buffer, &valueLen);
+        value = ConnGattTransRecv(connection->connectionId,
+            param->data, param->dataLen, &connection->buffer, &valueLen);
     } else {
         value = SoftBusCalloc(sizeof(uint8_t) * param->dataLen);
         valueLen = param->dataLen;
         CONN_CHECK_AND_RETURN_LOG(value != NULL, "legacy malloc value failed, connId=%u, dataLen=%u",
             connection->connectionId, valueLen);
         if (memcpy_s(value, valueLen, param->data, valueLen) != EOK) {
-            CLOGE("legacy memcpy failed, connId=%u, dataLen=%u", connection->connectionId, valueLen);
+            CONN_LOGE(CONN_BLE, "legacy memcpy failed, connId=%u, dataLen=%u", connection->connectionId, valueLen);
             SoftBusFree(value);
             ReturnConnection(serviceId, connection);
             return;
@@ -700,7 +704,8 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
         ReturnConnection(serviceId, connection);
         return;
     }
-    g_clientEventListener[serviceId].onClientDataReceived(connection->connectionId, isConnCharacteristic, value, valueLen);
+    g_clientEventListener[serviceId].onClientDataReceived(connection->connectionId,
+        isConnCharacteristic, value, valueLen);
     ReturnConnection(serviceId, connection);
 }
 
@@ -837,14 +842,15 @@ static int BleCompareGattClientLooperEventFunc(const SoftBusMessage *msg, void *
 int32_t RegisterClientListener(const ConnBleClientEventListener *listener, GattServiceType serviceId)
 {
     if (serviceId <= GATT_SERVICE_TYPE_UNKOWN || serviceId >= GATT_SERVICE_MAX) {
-        CLOGE("serviceId=%d is invalid", serviceId);
+        CONN_LOGE(CONN_BLE, "serviceId=%d is invalid", serviceId);
         return SOFTBUS_INVALID_PARAM;
     }
     g_clientEventListener[serviceId] = *listener;
     return SOFTBUS_OK;
 }
 
-int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId)
+int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEventListener *listener,
+    GattServiceType serviceId)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(looper != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble client failed: invalid param, looper is null");
