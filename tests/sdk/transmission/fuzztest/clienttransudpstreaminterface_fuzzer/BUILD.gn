@@ -26,6 +26,7 @@ ohos_fuzztest("ClientTransUdpStreamInterfaceFuzzTest") {
     "../../../../../sdk/transmission/trans_channel/udp/stream/adaptor/include",
     "../../../../../interfaces/kits/transport",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../adapter/common/include",
     "../../../../../core/transmission/common/include",
     "//commonlibrary/c_utils/base/include",

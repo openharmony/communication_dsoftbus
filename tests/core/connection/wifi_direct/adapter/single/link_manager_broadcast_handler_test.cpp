@@ -22,7 +22,7 @@
 #include "link_manager_broadcast_handler.h"
 #include "link_manager_broadcast_handler.c"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_network_utils.h"

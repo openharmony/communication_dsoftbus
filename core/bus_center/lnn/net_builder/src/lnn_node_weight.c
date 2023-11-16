@@ -19,10 +19,10 @@
 
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"
+#include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define MAX_WEIGHT_VALUE        1000
 #define BASE_WEIGHT_PHONE_VALUE 2000
@@ -42,7 +42,7 @@ int32_t LnnGetLocalWeight(void)
         return weight;
     }
     if (SoftBusGenerateRandomArray(&randVal, sizeof(randVal)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "generate random weight fail");
+        LNN_LOGE(LNN_BUILDER, "generate random weight fail");
         return randVal;
     }
     weight = (int32_t)((randVal * MAX_WEIGHT_VALUE) / UINT8_MAX);
@@ -72,7 +72,7 @@ int32_t LnnGetLocalWeight(void)
         default:
             break;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "generate local weight = %d", weight);
+    LNN_LOGD(LNN_BUILDER, "generate local weight=%d", weight);
     isGenWeight = true;
     return weight;
 }
@@ -84,7 +84,7 @@ int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1, int32_t w
         return weight1 - weight2;
     }
     if (masterUdid1 == NULL || masterUdid2 == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:nullptr", __func__);
+        LNN_LOGE(LNN_BUILDER, "nullptr");
         return weight1 - weight2;
     }
     return strcmp(masterUdid1, masterUdid2);

@@ -16,14 +16,14 @@
 #include "disc_client_stub.h"
 
 #include "client_disc_manager.h"
+#include "disc_log.h"
 #include "ipc_skeleton.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int32_t ClientOnDiscoverySuccess(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        DISC_LOGW(DISC_CONTROL, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -36,7 +36,7 @@ int32_t ClientOnDiscoverySuccess(IpcIo *data, IpcIo *reply)
 int32_t ClientOnDiscoverFailed(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        DISC_LOGW(DISC_CONTROL, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -51,7 +51,7 @@ int32_t ClientOnDiscoverFailed(IpcIo *data, IpcIo *reply)
 int32_t ClientOnDeviceFound(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        DISC_LOGW(DISC_CONTROL, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -66,7 +66,7 @@ int32_t ClientOnDeviceFound(IpcIo *data, IpcIo *reply)
 int32_t ClientOnPublishSuccess(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        DISC_LOGW(DISC_CONTROL, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -79,7 +79,7 @@ int32_t ClientOnPublishSuccess(IpcIo *data, IpcIo *reply)
 int32_t ClientOnPublishFail(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        DISC_LOGW(DISC_CONTROL, "%s:invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
     }
 

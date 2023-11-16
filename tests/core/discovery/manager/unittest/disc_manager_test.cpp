@@ -21,8 +21,8 @@
 #include <securec.h>
 #include <cstdint>
 
+#include "disc_log.h"
 #include "disc_manager.h"
-#include "softbus_log.h"
 #include "nstackx.h"
 #include "disc_coap.h"
 #include "softbus_errcode.h"
@@ -33,10 +33,10 @@
 #define ERRO_CAPDATA_LEN        (MAX_CAPABILITYDATA_LEN + 1)
 #define TEST_ASSERT_TRUE(ret)  \
     if (ret) {                 \
-        LOG_INFO("[succ]\n");    \
+        DISC_LOGI(DISC_TEST, "[succ]\n");    \
         g_succTestCount++;       \
     } else {                   \
-        LOG_INFO("[error]\n");    \
+        DISC_LOGI(DISC_TEST, "[error]\n");    \
         g_failTestCount++;       \
     }
 
@@ -94,7 +94,7 @@ static int32_t TestDeviceFound(const char *packageName, const DeviceInfo *device
 {
     (void)addtions;
     g_devieceFoundCount++;
-    LOG_INFO("[device found]success!\n");
+    DISC_LOGI(DISC_TEST, "[device found]success!\n");
     return 0;
 }
 
@@ -103,7 +103,7 @@ static void TestInnerDeviceFound(const DeviceInfo *device, const InnerDeviceInfo
     (void)device;
     (void)addtions;
     g_devieceFoundCount++;
-    LOG_INFO("[inner device found]success!\n");
+    DISC_LOGI(DISC_TEST, "[inner device found]success!\n");
 }
 
 static DiscInnerCallback g_innerCallback = {

@@ -17,6 +17,7 @@
 #define BUS_CENTER_CLIENT_PROXY_H
 
 #include <stdint.h>
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -34,7 +35,7 @@ typedef struct {
 int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode);
 int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
-    const char *networkId, int32_t retCode);
+    MetaBasicInfo *metaInfo, int32_t retCode);
 int32_t ClientOnLeaveLNNResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode);
 int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode);
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);

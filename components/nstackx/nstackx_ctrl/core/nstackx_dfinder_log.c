@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ uint32_t GetDFinderLogLevel(void)
 void SetDFinderLogLevel(uint32_t logLevel)
 {
     if (logLevel >= DFINDER_LOG_LEVEL_END) {
-        LOGE(TAG, "invalid loglevel:%u", logLevel);
+        DFINDER_LOGE(TAG, "invalid loglevel:%u", logLevel);
         return;
     }
     g_dfinderLogLevel = logLevel;

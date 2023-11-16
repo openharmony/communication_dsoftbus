@@ -15,12 +15,12 @@
 
 #include "lnn_network_manager.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int32_t LnnInitNetworkManager(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual lnn network manager");
+    LNN_LOGI(LNN_INIT, "init virtual lnn network manager");
     return SOFTBUS_OK;
 }
 

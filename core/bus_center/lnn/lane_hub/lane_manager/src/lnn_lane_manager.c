@@ -21,11 +21,11 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_info.h"
 #include "lnn_lane_link.h"
+#include "lnn_log.h"
 #include "lnn_smart_communication.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 typedef struct {
@@ -41,13 +41,13 @@ LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLan
 {
     if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || netWorkId == NULL ||
         laneNum == 0 || laneNum > LNN_REQUEST_MAX_LANE_NUM) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error, prop = %d, laneNum = %u", prop, laneNum);
+        LNN_LOGW(LNN_LANE, "param error, prop=%d, laneNum=%u", prop, laneNum);
         return NULL;
     }
     uint32_t memLen = sizeof(LnnLanesObject) + sizeof(int32_t) * laneNum;
     LnnLanesObject *lanesObject = (LnnLanesObject *)SoftBusMalloc(memLen);
     if (lanesObject == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SoftBusMalloc error.");
+        LNN_LOGE(LNN_LANE, "SoftBusMalloc error");
         return NULL;
     }
     (void)memset_s(lanesObject, memLen, 0, memLen);
@@ -57,7 +57,7 @@ LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLan
     for (uint32_t i = 0; i < laneNum; i++) {
         int32_t laneId = LnnGetRightLane(netWorkId, pid, prop, linkList);
         if (laneId < 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRightLane error. laneId = %d", laneId);
+            LNN_LOGE(LNN_LANE, "LnnGetRightLane error. laneId=%d", laneId);
             lanesObject->laneNum = i;
             LnnReleaseLanesObject(lanesObject);
             return NULL;
@@ -83,7 +83,7 @@ void LnnReleaseLanesObject(LnnLanesObject *lanesObject)
 int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num)
 {
     if (lanesObject == NULL || num >= lanesObject->laneNum) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error. num = %u", num);
+        LNN_LOGW(LNN_LANE, "param error. num=%u", num);
         return SOFTBUS_ERR;
     }
     return lanesObject->laneId[num];
@@ -92,7 +92,7 @@ int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num)
 uint32_t LnnGetLaneNum(LnnLanesObject *lanesObject)
 {
     if (lanesObject == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
+        LNN_LOGW(LNN_LANE, "param error");
         return SOFTBUS_ERR;
     }
     return lanesObject->laneNum;
@@ -104,7 +104,7 @@ static int32_t AddLaneQosObserverItem(LnnLanesObject *object, LnnLaneQosObserver
     SoftBusList *list = g_laneQosObserver;
     item = (LaneObserverListItem *)SoftBusMalloc(sizeof(LaneObserverListItem));
     if (item == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: malloc LaneQosObserver list item");
+        LNN_LOGE(LNN_LANE, "malloc LaneQosObserver item fail");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&item->node);
@@ -135,11 +135,11 @@ static void ClearLaneQosObserverList(const LnnLanesObject *object)
 int32_t LnnLaneQosObserverAttach(LnnLanesObject *object, LnnLaneQosObserverNotify notify)
 {
     if (object == NULL || notify == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
+        LNN_LOGW(LNN_LANE, "param error");
         return SOFTBUS_ERR;
     }
     if (AddLaneQosObserverItem(object, notify) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddLaneQosObserverItem failed");
+        LNN_LOGE(LNN_LANE, "AddLaneQosObserverItem failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -148,7 +148,7 @@ int32_t LnnLaneQosObserverAttach(LnnLanesObject *object, LnnLaneQosObserverNotif
 void LnnLaneQosObserverDetach(LnnLanesObject *object)
 {
     if (object == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
+        LNN_LOGE(LNN_LANE, "param error");
     }
     ClearLaneQosObserverList(object);
 }
@@ -169,28 +169,28 @@ static void LaneMonitorCallback(int32_t laneId, int32_t socre)
 int32_t LnnInitLaneManager(void)
 {
     if (LnnLanesInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnLanesInit error");
+        LNN_LOGE(LNN_INIT, "LnnLanesInit error");
         return SOFTBUS_ERR;
     }
     if (g_laneQosObserver == NULL) {
         g_laneQosObserver = CreateSoftBusList();
         if (g_laneQosObserver == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "CreateSoftBusList error");
+            LNN_LOGE(LNN_INIT, "CreateSoftBusList error");
             return SOFTBUS_ERR;
         }
     }
     if (LnnRegisterLaneMonitor(LaneMonitorCallback) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnRegisterLaneMonitor error");
+        LNN_LOGE(LNN_INIT, "LnnRegisterLaneMonitor error");
         DestroySoftBusList(g_laneQosObserver);
         g_laneQosObserver = NULL;
         return SOFTBUS_ERR;
     }
     if (LnnLanePendingInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnLanePendingInit error");
+        LNN_LOGE(LNN_INIT, "LnnLanePendingInit error");
         DestroySoftBusList(g_laneQosObserver);
         g_laneQosObserver = NULL;
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "InitLaneManager success");
+    LNN_LOGI(LNN_INIT, "InitLaneManager success");
     return SOFTBUS_OK;
 }

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 
@@ -28,7 +28,7 @@ int32_t ConnBleDirectPipelineClose(int32_t channelId)
 
 int32_t ConnBleDirectPipelineInit(ConnBleDirectPipelineCallback* cb)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "do not support ble direct pipeline");
+    CONN_LOGW(CONN_BLE, "do not support ble direct pipeline");
     return SOFTBUS_OK;
 }
 

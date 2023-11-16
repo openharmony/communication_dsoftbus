@@ -30,6 +30,7 @@
 #include <sys/ioctl.h>
 
 #include "bus_center_event.h"
+#include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "securec.h"
 #include "softbus_adapter_errcode.h"
@@ -38,7 +39,6 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #undef NLMSG_OK
 #define NLMSG_OK(nlh, len)                                                                               \
@@ -56,17 +56,17 @@ static int32_t CreateNetlinkSocket(void)
     int32_t ret = SoftBusSocketCreate(SOFTBUS_PF_NETLINK, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_CLOEXEC,
         NETLINK_ROUTE, &sockFd);
     if (ret != SOFTBUS_ADAPTER_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open netlink socket failed");
+        LNN_LOGE(LNN_BUILDER, "open netlink socket failed");
         return SOFTBUS_ERR;
     }
     if (SoftBusSocketSetOpt(sockFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUFFORCE, &sz, sizeof(sz)) < 0 &&
         SoftBusSocketSetOpt(sockFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUF, &sz, sizeof(sz)) < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set uevent socket SO_RCVBUF option failed");
+        LNN_LOGE(LNN_BUILDER, "set uevent socket SO_RCVBUF option failed");
         SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
     if (memset_s(&nladdr, sizeof(nladdr), 0, sizeof(nladdr)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init sockaddr_nl failed");
+        LNN_LOGE(LNN_BUILDER, "init sockaddr_nl failed");
         SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
@@ -75,7 +75,7 @@ static int32_t CreateNetlinkSocket(void)
     nladdr.nl_pid = 0;
     nladdr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
     if (SoftBusSocketBind(sockFd, (SoftBusSockAddr *)&nladdr, sizeof(nladdr)) < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bind netlink socket failed");
+        LNN_LOGE(LNN_BUILDER, "bind netlink socket failed");
         SoftBusSocketClose(sockFd);
         return SOFTBUS_ERR;
     }
@@ -95,7 +95,7 @@ static void ParseRtAttr(struct rtattr **tb, int max, struct rtattr *attr, int le
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
     if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct ifaddrmsg))) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Wrong len");
+        LNN_LOGE(LNN_BUILDER, "Wrong len");
         return;
     }
     struct ifaddrmsg *ifa = (struct ifaddrmsg *)NLMSG_DATA(nlh);
@@ -103,15 +103,15 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
     char ifnameBuffer[NET_IF_NAME_LEN];
     char *ifName = if_indextoname(ifa->ifa_index, ifnameBuffer);
     if (ifName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "invalid iface index");
+        LNN_LOGE(LNN_BUILDER, "invalid iface index");
         return;
     }
     if (LnnGetNetIfTypeByName(ifName, &type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetNetIfTypeByName error");
+        LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "network addr changed, type:%d", type);
+        LNN_LOGE(LNN_BUILDER, "network addr changed, netifType=%d", type);
         LnnNotifyAddressChangedEvent(ifName);
     }
 }
@@ -127,17 +127,16 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     ParseRtAttr(tb, IFLA_MAX, IFLA_RTA(ifinfo), len);
 
     if (tb[IFLA_IFNAME] == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "netlink msg is invalid");
+        LNN_LOGE(LNN_BUILDER, "netlink msg is invalid");
         return;
     }
 
     if (LnnGetNetIfTypeByName((const char *)RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ProcessAddrEvent LnnGetNetIfTypeByName error");
+        LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        SoftBusLog(
-            SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "%s:link status changed, type:%d", RTA_DATA(tb[IFLA_IFNAME]), type);
+        LNN_LOGW(LNN_BUILDER, "%s:link status changed, netifType=%d", RTA_DATA(tb[IFLA_IFNAME]), type);
         LnnNotifyAddressChangedEvent((const char *)RTA_DATA(tb[IFLA_IFNAME]));
     }
 }
@@ -146,10 +145,10 @@ static void *NetlinkMonitorThread(void *para)
 {
     struct nlmsghdr *nlh = NULL;
     (void)para;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread start");
+    LNN_LOGI(LNN_BUILDER, "netlink monitor thread start");
     int32_t sockFd = CreateNetlinkSocket();
     if (sockFd < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create netlink socket failed");
+        LNN_LOGE(LNN_BUILDER, "create netlink socket failed");
         return NULL;
     }
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(DEFAULT_NETLINK_RECVBUF * sizeof(uint8_t));
@@ -164,16 +163,16 @@ static void *NetlinkMonitorThread(void *para)
             continue;
         }
         if (len < 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "recv netlink socket error");
+            LNN_LOGE(LNN_BUILDER, "recv netlink socket error");
             break;
         }
         if (len < (int32_t)sizeof(struct nlmsghdr)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "recv buffer not enough");
+            LNN_LOGE(LNN_BUILDER, "recv buffer not enough");
             continue;
         }
         nlh = (struct nlmsghdr *)buffer;
         while (NLMSG_OK(nlh, len) && nlh->nlmsg_type != NLMSG_DONE) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "nlmsg_type: %d", nlh->nlmsg_type);
+            LNN_LOGI(LNN_BUILDER, "nlmsg_type=%d", nlh->nlmsg_type);
             switch (nlh->nlmsg_type) {
                 case RTM_NEWADDR:
                 case RTM_DELADDR:
@@ -191,7 +190,7 @@ static void *NetlinkMonitorThread(void *para)
     }
     SoftBusSocketClose(sockFd);
     SoftBusFree(buffer);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "netlink monitor thread exit");
+    LNN_LOGI(LNN_BUILDER, "netlink monitor thread exit");
     return NULL;
 }
 
@@ -199,7 +198,7 @@ int32_t LnnInitNetlinkMonitorImpl(void)
 {
     SoftBusThread tid;
     if (SoftBusThreadCreate(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create ip change monitor thread failed");
+        LNN_LOGE(LNN_INIT, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -18,7 +18,7 @@
 
 #include "cJSON.h"
 #include "json_protocol.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_protocol_factory.h"
 #include "wifi_direct_protocol.h"

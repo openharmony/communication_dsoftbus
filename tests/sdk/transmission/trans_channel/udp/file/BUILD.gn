@@ -39,6 +39,13 @@ if (defined(ohos_lite)) {
 
   ###########################palTest###########################
   ohos_executable("dsoftbus_app_dfile") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    branch_protector_ret = "pac_ret"
+
     install_enable = true
     sources = [ "dsoftbus_app_dfile.cpp" ]
 

@@ -14,11 +14,11 @@
  */
 
 #include <gtest/gtest.h>
+#include "disc_log.h"
 #include "nstackx_adapter_mock.h"
 
 #include "softbus_error_code.h"
 #include "nstackx_error.h"
-#include "softbus_log.h"
 #include "lnn_local_net_ledger.h"
 
 #include "disc_nstackx_adapter.h"
@@ -40,16 +40,16 @@ public:
 
 HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
 {
-    DLOGI("DiscCoapRegisterServiceData002 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 begin ----");
     DiscNstackxInit();
     int32_t ret = LnnInitLocalLedger();
-    DLOGI("LnnInitLocalLedger called  ret = %d", ret);
+    DISC_LOGI(DISC_TEST, "LnnInitLocalLedger called  ret = %d", ret);
 
     AdapterMock adapterMock;
     EXPECT_CALL(adapterMock, NSTACKX_RegisterServiceData(NotNull())).WillRepeatedly(Return(!SOFTBUS_OK));
 
     uint32_t dataLen = 0;
     EXPECT_EQ(DiscCoapRegisterServiceData(nullptr, dataLen), SOFTBUS_ERR);
-    DLOGI("DiscCoapRegisterServiceData002 end ----");
+    DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 end ----");
 }
 }

@@ -16,7 +16,7 @@
 #include "inner_link.h"
 #include <securec.h>
 #include <string.h>
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
@@ -25,8 +25,6 @@
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "protocol/wifi_direct_protocol_factory.h"
-
-#define LOG_LABEL "[WD] IL: "
 
 #define IL_TAG_CONNECT_TYPE 1
 #define IL_TAG_STATE 2
@@ -132,11 +130,11 @@ static bool Marshalling(struct InnerLink *self, struct WifiDirectProtocol *proto
                     break;
                 }
             default:
-                CLOGI(LOG_LABEL "no need to pack for type=%d", keyProperty->type);
+                CONN_LOGI(CONN_WIFI_DIRECT, "no need to pack for type=%d", keyProperty->type);
                 continue;
         }
 
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "marshalling failed");
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling failed");
     }
 
     return true;
@@ -151,7 +149,8 @@ static bool Unmarshalling(struct InnerLink *self, struct WifiDirectProtocol *pro
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = true;
         enum InnerLinkKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOG(key < IL_KEY_MAX, false, LOG_LABEL "key out of range, tag=%d", keyProperty.tag);
+        CONN_CHECK_AND_RETURN_RET_LOGW(key < IL_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+            keyProperty.tag);
 
         enum InfoContainerEntryType type = keyProperty.type;
         switch (type) {
@@ -174,9 +173,9 @@ static bool Unmarshalling(struct InnerLink *self, struct WifiDirectProtocol *pro
                 }
             case STRING: {
                 char *string = SoftBusCalloc(size + 1);
-                CONN_CHECK_AND_RETURN_RET_LOG(string, false, LOG_LABEL "alloc failed");
+                CONN_CHECK_AND_RETURN_RET_LOGE(string, false, CONN_WIFI_DIRECT, "alloc failed");
                 if (memcpy_s(string, size + 1, data, size) != EOK) {
-                    CLOGE("string memcpy fail");
+                    CONN_LOGE(CONN_WIFI_DIRECT, "string memcpy fail");
                     SoftBusFree(string);
                     return false;
                 }
@@ -185,10 +184,10 @@ static bool Unmarshalling(struct InnerLink *self, struct WifiDirectProtocol *pro
             }
                 break;
             default:
-                CLOGI(LOG_LABEL "no need to unpack for type=%d", type);
+                CONN_LOGI(CONN_WIFI_DIRECT, "no need to unpack for type=%d", type);
                 continue;
         }
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
     }
 
     return true;
@@ -196,16 +195,16 @@ static bool Unmarshalling(struct InnerLink *self, struct WifiDirectProtocol *pro
 
 static int32_t GetLink(struct InnerLink *self, int32_t requestId, int32_t pid, struct WifiDirectLink *link)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(link, SOFTBUS_INVALID_PARAM, "link is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(link, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "link is null");
 
     link->linkId = GetLinkManager()->generateLinkId(self, requestId, pid);
     link->connectType = self->getInt(self, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_INVALID);
 
     int32_t ret = self->getLocalIpString(self, link->localIp, sizeof(link->localIp));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "get local ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get local ip failed");
 
     ret = self->getRemoteIpString(self, link->remoteIp, sizeof(link->remoteIp));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, "get remote ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get remote ip failed");
 
     return SOFTBUS_OK;
 }
@@ -226,7 +225,7 @@ static void PutLocalIpString(struct InnerLink *self, const char *ipString)
 {
     struct WifiDirectIpv4Info ipv4;
     int32_t ret = WifiDirectIpStringToIpv4(ipString, &ipv4);
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "ip to ipv4 failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "ip to ipv4 failed");
     self->putRawData(self, IL_KEY_LOCAL_IPV4, &ipv4, sizeof(ipv4));
 }
 
@@ -234,14 +233,14 @@ static void PutRemoteIpString(struct InnerLink *self, const char *ipString)
 {
     struct WifiDirectIpv4Info ipv4;
     int32_t ret = WifiDirectIpStringToIpv4(ipString, &ipv4);
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "ip to ipv4 failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "ip to ipv4 failed");
     self->putRawData(self, IL_KEY_REMOTE_IPV4, &ipv4, sizeof(ipv4));
 }
 
 static void IncreaseReference(struct InnerLink *self)
 {
     self->reference++;
-    CLOGI(LOG_LABEL "reference=%d IS_BEING_USED_BY_LOCAL=true", self->reference);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%d IS_BEING_USED_BY_LOCAL=true", self->reference);
     self->putBoolean(self, IL_KEY_IS_BEING_USED_BY_LOCAL, true);
 }
 
@@ -251,10 +250,10 @@ static void DecreaseReference(struct InnerLink *self)
         self->reference--;
     }
 
-    CLOGI(LOG_LABEL "reference=%d", self->reference);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%d", self->reference);
     if (self->reference == 0) {
         self->putBoolean(self, IL_KEY_IS_BEING_USED_BY_LOCAL, false);
-        CLOGI(LOG_LABEL "IS_BEING_USED_BY_LOCAL=false");
+        CONN_LOGI(CONN_WIFI_DIRECT, "IS_BEING_USED_BY_LOCAL=false");
     }
 }
 
@@ -266,7 +265,7 @@ static int32_t GetReference(struct InnerLink *self)
 static void AddId(struct InnerLink *self, int32_t linkId, int32_t requestId, int32_t pid)
 {
     struct LinkIdStruct *item = SoftBusCalloc(sizeof(*item));
-    CONN_CHECK_AND_RETURN_LOG(item, "malloc LinkId struct failed");
+    CONN_CHECK_AND_RETURN_LOGE(item, CONN_WIFI_DIRECT, "malloc LinkId struct failed");
 
     ListInit(&item->node);
     item->id = linkId;
@@ -308,9 +307,9 @@ static bool ContainId(struct InnerLink *self, int32_t linkId)
 static void DumpLinkId(struct InnerLink *self)
 {
     struct LinkIdStruct *item = NULL;
-    CLOGI(LOG_LABEL "reference=%d", self->reference);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%d", self->reference);
     LIST_FOR_EACH_ENTRY(item, &self->idList, struct LinkIdStruct, node) {
-        CLOGI(LOG_LABEL "linkId=%d requestId=%d pid=%d", item->id, item->requestId, item->pid);
+        CONN_LOGI(CONN_WIFI_DIRECT, "linkId=%d requestId=%d pid=%d", item->id, item->requestId, item->pid);
     }
 }
 
@@ -329,13 +328,13 @@ static bool IsProtected(struct InnerLink *self)
 {
     enum InnerLinkState state = (enum InnerLinkState)self->getInt(self, IL_KEY_STATE, INNER_LINK_STATE_INVALID);
     if (state != INNER_LINK_STATE_CONNECTED) {
-        CLOGI(LOG_LABEL "state=%d", state);
+        CONN_LOGI(CONN_WIFI_DIRECT, "state=%d", state);
         return false;
     }
 
     uint64_t currentTime = SoftBusGetSysTimeMs();
     uint64_t *changeTime = self->getRawData(self, IL_KEY_STATE_CHANGE_TIME, NULL, NULL);
-    CLOGI(LOG_LABEL "changeTime=%zu curTime=%zu", *changeTime, currentTime);
+    CONN_LOGI(CONN_WIFI_DIRECT, "changeTime=%zu curTime=%zu", *changeTime, currentTime);
     if (currentTime && currentTime - PROTECT_DURATION_MS < *changeTime) {
         return true;
     }

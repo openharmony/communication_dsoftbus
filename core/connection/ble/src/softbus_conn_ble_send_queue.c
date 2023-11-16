@@ -19,13 +19,13 @@
 
 #include "common_list.h"
 #include "securec.h"
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_ble_send_queue.h"
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 
@@ -83,7 +83,7 @@ static int32_t GetPriority(int32_t flag)
 
 int32_t ConnBleEnqueueNonBlock(const void *msg)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(msg != NULL, SOFTBUS_INVALID_PARAM, "msg is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "msg is null");
     SendQueueNode *queueNode = (SendQueueNode *)msg;
     int32_t priority = GetPriority(queueNode->flag);
     if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
@@ -111,7 +111,7 @@ int32_t ConnBleEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         ConnectionQueue *newQueue = CreateBleQueue(queueNode->pid);
         if (newQueue == NULL) {
-            CLOGE("ConnBleEnqueueNonBlock CreateBleQueue failed");
+            CONN_LOGE(CONN_BLE, "ConnBleEnqueueNonBlock CreateBleQueue failed");
             goto END;
         }
         ListTailInsert(&g_bleQueueList, &(newQueue->node));
@@ -165,9 +165,9 @@ int32_t ConnBleDequeueBlock(void **msg)
             status = SOFTBUS_OK;
             break;
         }
-        CLOGI("ble queue is empty, dequeue start wait...");
+        CONN_LOGI(CONN_BLE, "ble queue is empty, dequeue start wait...");
         if (SoftBusCondWait(&g_sendCond, &g_bleQueueLock, NULL) != SOFTBUS_OK) {
-            CLOGI("BleSendCondWait failed");
+            CONN_LOGI(CONN_BLE, "BleSendCondWait failed");
             status = SOFTBUS_ERR;
             break;
         }
@@ -195,7 +195,7 @@ int32_t ConnBleInitSendQueue(void)
     }
     g_innerQueue = CreateBleQueue(0);
     if (g_innerQueue == NULL) {
-        CLOGE("BleQueueInit CreateBleQueue(0) failed");
+        CONN_LOGE(CONN_INIT, "BleQueueInit CreateBleQueue(0) failed");
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);

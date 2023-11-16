@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "softbus_client_info_manager.h"
 #include "permission_status_change_cb.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_server.h"
 
 namespace OHOS {
@@ -34,11 +34,10 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
     const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid)
 {
     if (pkgName.empty() || object == nullptr || abilityDeath == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name, object or abilityDeath is nullptr\n");
+        COMM_LOGE(COMM_SVC, "package name, object or abilityDeath is nullptr\n");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-        "mark-- add SoftbusAddService, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGE(COMM_SVC, "mark-- add SoftbusAddService, pid=%d, pkgname=%s", pid, pkgName.c_str());
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     std::pair<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> clientObject(object, abilityDeath);
     ClientObjPair clientObjPair(pid, clientObject);
@@ -55,11 +54,10 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
     int32_t* pid)
 {
     if (object == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "RemoveService object is nullptr\n");
+        COMM_LOGE(COMM_SVC, "RemoveService object is nullptr\n");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-        "mark-- SoftbusRemoveService, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGE(COMM_SVC, "mark-- SoftbusRemoveService, pid=%d, pkgname=%s", pid, pkgName.c_str());
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
         if (iter->second.second.first == object) {
@@ -80,22 +78,21 @@ sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::s
     if (iter != clientObjectMap_.end()) {
         return iter->second.second.first;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusClientProxy client proxy is nullptr\n");
+    COMM_LOGE(COMM_SVC, "GetSoftbusClientProxy client proxy is nullptr\n");
     return nullptr;
 }
 
 sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName, int32_t pid)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-        "mark--GetSoftbusClientProxy, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGE(COMM_SVC, "mark--GetSoftbusClientProxy, pid=%d, pkgname=%s", pid, pkgName.c_str());
     ClientObjRange range = clientObjectMap_.equal_range(pkgName);
     for (auto iter = range.first; iter != range.second; iter++) {
         if (pid == iter->second.first) {
             return iter->second.second.first;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetSoftbusClientProxy with pid is nullptr\n");
+    COMM_LOGE(COMM_SVC, "GetSoftbusClientProxy with pid is nullptr\n");
     return nullptr;
 }
 

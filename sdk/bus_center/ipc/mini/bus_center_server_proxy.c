@@ -18,20 +18,20 @@
 #include "securec.h"
 
 #include "lnn_bus_center_ipc.h"
+#include "lnn_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
 
 int32_t BusCenterServerProxyInit(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center get server proxy ok");
+    LNN_LOGE(LNN_EVENT, "bus center get server proxy ok");
     return SOFTBUS_OK;
 }
 
 void BusCenterServerProxyDeInit(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bus center delete server proxy ok");
+    LNN_LOGE(LNN_EVENT, "bus center delete server proxy ok");
 }
 
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)

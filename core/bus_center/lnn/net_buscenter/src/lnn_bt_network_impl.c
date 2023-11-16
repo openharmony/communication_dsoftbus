@@ -16,8 +16,10 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager.h"
@@ -25,7 +27,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 #define LNN_BT_PROTOCOL_PRI 10
@@ -51,7 +52,7 @@ static void TransactBtSubnetState(LnnPhysicalSubnet *subnet, BtSubnetManagerEven
         [BT_SUBNET_MANAGER_EVENT_IF_DOWN] = {LNN_SUBNET_SHUTDOWN, subnet->status},
     };
     subnet->status = transactMap[event][isAccepted ? BT_EVENT_RESULT_ACCEPTED : BT_EVENT_RESULT_REJECTED];
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "subnet %s trans state from %d to %d", subnet->ifName,
+    LNN_LOGD(LNN_BUILDER, "subnet %s trans state from %d to %d", subnet->ifName,
         lastStatus, subnet->status);
 }
 
@@ -65,12 +66,12 @@ static int32_t GetAvailableBtMac(char *macStr, uint32_t len)
     }
     ret = SoftBusGetBtMacAddr(&mac);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get bt mac addr fail");
+        LNN_LOGE(LNN_BUILDER, "get bt mac addr fail");
         return ret;
     }
     ret = ConvertBtMacToStr(macStr, len, mac.addr, sizeof(mac.addr));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert bt mac to str fail");
+        LNN_LOGE(LNN_BUILDER, "convert bt mac to str fail");
         return ret;
     }
     return SOFTBUS_OK;
@@ -81,14 +82,17 @@ static int32_t EnableBtSubnet(LnnPhysicalSubnet *subnet)
     char macStr[BT_MAC_LEN] = {0};
 
     if (subnet->status == LNN_SUBNET_RUNNING) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bt running return ok");
+        LNN_LOGI(LNN_BUILDER, "bt running return ok");
         return SOFTBUS_OK;
     }
     if (GetAvailableBtMac(macStr, sizeof(macStr)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get available bt mac fail");
+        LNN_LOGE(LNN_BUILDER, "get available bt mac fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "btmac is %s", AnonymizesMac(macStr));
+    char *anonyMac = NULL;
+    Anonymize(macStr, &anonyMac);
+    LNN_LOGI(LNN_BUILDER, "btmac is %s", anonyMac);
+    AnonymizeFree(anonyMac);
     return LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr);
 }
 
@@ -102,10 +106,10 @@ static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
     if (subnet->status != LNN_SUBNET_RUNNING) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN br subnet is disable, start leave br network");
+    LNN_LOGI(LNN_BUILDER, "br subnet is disable, start leave br network");
     ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave br network fail, ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "leave br network fail, ret=%d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -121,10 +125,10 @@ static int32_t DisableBleSubnet(LnnPhysicalSubnet *subnet)
     if (subnet->status != LNN_SUBNET_RUNNING) {
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN ble subnet is disable, start leave ble network");
+    LNN_LOGI(LNN_BUILDER, "ble subnet is disable, start leave ble network");
     ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave ble network fail, ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "leave ble network fail, ret=%d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -148,7 +152,7 @@ static BtSubnetManagerEvent GetBtRegistEvent(void)
     char macStr[BT_MAC_LEN] = {0};
 
     if (!SoftBusGetBtState()) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "bluetooth is not enabled yet");
+        LNN_LOGD(LNN_BUILDER, "bluetooth is not enabled yet");
         return BT_SUBNET_MANAGER_EVENT_IF_DOWN;
     }
     return GetAvailableBtMac(macStr, sizeof(macStr)) == SOFTBUS_OK ?
@@ -199,7 +203,7 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
             }
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "discard unexpected event %d", event);
+            LNN_LOGW(LNN_BUILDER, "discard unexpected event %d", event);
             return;
     }
     TransactBtSubnetState(subnet, event, (ret == SOFTBUS_OK));
@@ -211,7 +215,7 @@ static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self,
     LnnGetNetIfTypeByName(ifName, &type);
     LnnPhysicalSubnet *subnet = (LnnPhysicalSubnet *)SoftBusCalloc(sizeof(LnnPhysicalSubnet));
     if (subnet == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:calloc bt subnet fail", __func__);
+        LNN_LOGE(LNN_BUILDER, "calloc bt subnet fail");
         return NULL;
     }
 
@@ -224,7 +228,7 @@ static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self,
 
         int32_t ret = strcpy_s(subnet->ifName, sizeof(subnet->ifName), ifName);
         if (ret != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:copy ifName failed! ret=%d", __func__, ret);
+            LNN_LOGE(LNN_BUILDER, "copy ifName failed! ret=%d", ret);
             break;
         }
         return subnet;
@@ -261,7 +265,7 @@ static void BtNetworkInfoUpdate(SoftBusBtState btState)
 static void BtStateChangedEvtHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_BT_STATE_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:not interest event", __func__);
+        LNN_LOGE(LNN_BUILDER, "not interest event");
         return;
     }
 
@@ -274,26 +278,28 @@ static void LeaveSpecificBrNetwork(const char *btMac)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     if (LnnGetNetworkIdByBtMac(btMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "networkId not found by btMac.");
+        LNN_LOGW(LNN_BUILDER, "networkId not found by btMac");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-        "LNN start leave specific br network: %s.", AnonymizesNetworkID(networkId));
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "start leave specific br networkId=%s", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave br network fail(=%d).", ret);
+        LNN_LOGE(LNN_BUILDER, "leave br network fail=%d", ret);
     }
 }
 
 static void BtAclStateChangedEvtHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_BT_ACL_STATE_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "bt acl state event handler get invalid param");
+        LNN_LOGE(LNN_BUILDER, "bt acl state event handler get invalid param");
         return;
     }
 
     const LnnMonitorBtAclStateChangedEvent *event = (const LnnMonitorBtAclStateChangedEvent *)info;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "BtAclStateChange: %d", event->status);
+    LNN_LOGI(LNN_BUILDER, "BtAclStateChange=%d", event->status);
     switch (event->status) {
         case SOFTBUS_BR_ACL_CONNECTED:
             /* do nothing */
@@ -310,11 +316,11 @@ int32_t LnnInitBtProtocol(struct LnnProtocolManager *self)
 {
     (void)self;
     if (LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangedEvtHandler) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register bt state change event handler failed");
+        LNN_LOGE(LNN_INIT, "register bt state change event handler failed");
         return SOFTBUS_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_BT_ACL_STATE_CHANGED, BtAclStateChangedEvtHandler) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register bt acl state change event handler failed");
+        LNN_LOGE(LNN_INIT, "register bt acl state change event handler failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -325,18 +331,18 @@ int32_t LnnEnableBtProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     (void)self;
 
     if (netifMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:netifMgr null ptr!", __func__);
+        LNN_LOGE(LNN_BUILDER, "netifMgr is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnPhysicalSubnet *manager = CreateBtSubnetManager(self, netifMgr->ifName);
     if (manager == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:create bt subnet mgr fail", __func__);
+        LNN_LOGE(LNN_BUILDER, "create bt subnet mgr fail");
         return SOFTBUS_ERR;
     }
 
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:regist subnet manager failed! ret=%d", __func__, ret);
+        LNN_LOGE(LNN_BUILDER, "regist subnet manager failed!ret=%d", ret);
         manager->destroy(manager);
         return ret;
     }
@@ -354,7 +360,7 @@ void LnnDeinitBtNetwork(struct LnnProtocolManager *self)
     LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangedEvtHandler);
     LnnUnregisterEventHandler(LNN_EVENT_BT_ACL_STATE_CHANGED, BtAclStateChangedEvtHandler);
     LnnUnregistPhysicalSubnetByType(LNN_PROTOCOL_BR | LNN_PROTOCOL_BLE);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "%s:bt network deinited", __func__);
+    LNN_LOGW(LNN_INIT, "bt network deinited");
 }
 
 static LnnProtocolManager g_btProtocol = {
