@@ -885,7 +885,7 @@ static int32_t DoRetryAction(enum BleServerState expect)
                 interface->bleServerStartService(service, SOFTBUS_GATT_SERVICE);
             } else {
                 interface->bleServerStopService(SOFTBUS_GATT_SERVICE);
-            }     
+            }
         }
     }
 

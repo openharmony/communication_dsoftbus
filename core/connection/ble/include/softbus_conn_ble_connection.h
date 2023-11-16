@@ -172,8 +172,10 @@ typedef struct {
     int32_t (*bleServerSend)(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
     int32_t (*bleServerConnect)(ConnBleConnection *connection);
     int32_t (*bleServerDisconnect)(ConnBleConnection *connection);
-    int32_t (*bleClientInitModule)(SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId);
-    int32_t (*bleServerInitModule)(SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId);
+    int32_t (*bleClientInitModule)(
+        SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId);
+    int32_t (*bleServerInitModule)(
+        SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId);
 } BleUnifyInterface;
 
 ConnBleConnection *ConnBleCreateConnection(

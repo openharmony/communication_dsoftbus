@@ -23,6 +23,7 @@ ConnBleConnection *LegacyBleCreateConnection(const char *addr, ConnSideType side
 {
     if (g_connection == NULL) {
         g_connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+        CONN_CHECK_AND_RETURN_RET_LOG(g_connection != NULL, NULL, "ble connection calloc failed");
         g_connection->side = side;
         g_connection->underlayerHandle = underlayerHandle;
     }
@@ -39,17 +40,16 @@ ConnBleConnection *LegacyBleGetConnectionById(uint32_t connectinId)
     return g_connection;
 }
 
-int32_t LegacyBleSaveConnection(ConnBleConnection *conenction)
+int32_t LegacyBleSaveConnection(ConnBleConnection *connection)
 {
     return SOFTBUS_OK;
 }
 
-void LegacyBleReturnConnection(ConnBleConnection **conenction)
+void LegacyBleReturnConnection(ConnBleConnection **connection)
 {
-
 }
 
-void LegacyBleRemoveConnection(ConnBleConnection *conenction)
+void LegacyBleRemoveConnection(ConnBleConnection *connection)
 {
     SoftBusFree(g_connection);
 }

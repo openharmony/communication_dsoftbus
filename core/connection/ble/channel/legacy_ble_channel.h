@@ -30,9 +30,9 @@ ConnBleConnection *LegacyBleCreateConnection(const char *addr, ConnSideType side
     int32_t underlayerHandle, bool fastestConnectEnable);
 ConnBleConnection *LegacyBleGetConnectionByHandle(int32_t underlayerHandle, ConnSideType side);
 ConnBleConnection *LegacyBleGetConnectionById(uint32_t connectinId);
-int32_t LegacyBleSaveConnection(ConnBleConnection *conenction);
-void LegacyBleReturnConnection(ConnBleConnection **conenction);
-void LegacyBleRemoveConnection(ConnBleConnection *conenction);
+int32_t LegacyBleSaveConnection(ConnBleConnection *connection);
+void LegacyBleReturnConnection(ConnBleConnection **connection);
+void LegacyBleRemoveConnection(ConnBleConnection *connection);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
