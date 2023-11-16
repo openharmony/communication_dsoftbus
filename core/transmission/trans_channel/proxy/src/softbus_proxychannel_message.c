@@ -321,10 +321,6 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataIn
     if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inData == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (msg->type != PROXYCHANNEL_MSG_TYPE_NORMAL) {
-        PrintAnonymousPacket(TRANS_CTRL,
-            "TransProxyPackMessage, payload: ", (const char *)dataInfo->inData);
-    }
 
     int32_t ret;
     if ((msg->cipher & ENCRYPTED) == 0) {
