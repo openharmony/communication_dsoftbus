@@ -672,7 +672,6 @@ static void OnAuthDataRecv(int64_t authId, const AuthTransData *data)
     if (data->module != MODULE_P2P_LISTEN) {
         return;
     }
-    PrintAnonymousPacket(TRANS_CTRL, "OnAuthDataRecv data: ", (const char *)data->data);
 
     cJSON *json = cJSON_ParseWithLength((const char *)(data->data), data->len);
     if (json == NULL) {

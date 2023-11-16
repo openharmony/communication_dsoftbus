@@ -248,7 +248,6 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");
         return SOFTBUS_MALLOC_ERR;
     }
-    PrintAnonymousPacket(TRANS_BYTES, "TransTdcPostBytes, data: ", data);
     if (PackBytes(channelId, data, packetHead, buffer, bufferLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_BYTES, "Pack Bytes error.");
         SoftBusFree(buffer);
@@ -902,7 +901,6 @@ static int32_t ProcessReceivedData(int32_t channelId)
     node->w = node->w - sizeof(TdcPacketHead) - pktHead->dataLen;
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
 
-    PrintAnonymousPacket(TRANS_CTRL, "TdcProcessReceivedData, data: ", (char *)data);
     int32_t ret = ProcessMessage(channelId, flags, seq, (char *)data);
     SoftBusFree(data);
     return ret;
