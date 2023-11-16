@@ -12,20 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_errcode.h"
 
 int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "do not support ble direct connection");
+    CONN_LOGW(CONN_BLE, "do not support ble direct connection");
     return SOFTBUS_ERR;
 }
 
 bool ConnBleDirectIsEnable(BleProtocolType protocol)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_WARN, "do not support ble direct connection");
+    CONN_LOGW(CONN_BLE, "do not support ble direct connection");
     return false;
 }
 

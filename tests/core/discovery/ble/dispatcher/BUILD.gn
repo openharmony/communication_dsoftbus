@@ -14,6 +14,7 @@
 import("//build/lite/config/component/lite_component.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
+import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/discovery"
@@ -31,6 +32,7 @@ ohos_unittest("DiscBleDispatcherTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",

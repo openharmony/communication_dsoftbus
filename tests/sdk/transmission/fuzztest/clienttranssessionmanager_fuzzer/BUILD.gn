@@ -24,6 +24,7 @@ ohos_fuzztest("ClientTransSessionManagerFuzzTest") {
   include_dirs = [
     "../../../../../adapter/common/include",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../core/common/inner_communication",
     "../../../../../core/transmission/common/include",
     "../../../../../interfaces/inner_kits/transport",

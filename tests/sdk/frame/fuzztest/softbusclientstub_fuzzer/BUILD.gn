@@ -15,6 +15,7 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
+import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 import("../../../../../sdk/bus_center/bus_center_sdk.gni")
 import("../../../../../sdk/discovery/disc_sdk.gni")
@@ -30,6 +31,7 @@ common_client_inc = bus_center_sdk_inc + disc_sdk_inc +
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_deps += [
+  "$dsoftbus_dfx_path/log:softbus_dfx_log",
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
 ]
@@ -63,6 +65,13 @@ config("dsoftbus_sdk_interface") {
 }
 
 ohos_static_library("softbus_client_static") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
   sources = common_client_src
   include_dirs = common_client_inc
   deps = common_client_deps

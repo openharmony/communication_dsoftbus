@@ -23,10 +23,10 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "stream_adaptor.h"
 #include "stream_adaptor_listener.h"
 #include "stream_common.h"
+#include "trans_log.h"
 
 using namespace OHOS;
 
@@ -51,7 +51,7 @@ static inline void ConvertStreamFrameInfo(const StreamFrameInfo *inFrameInfo,
 int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamData *ext, const StreamFrameInfo *param)
 {
     if (inData == nullptr || inData->buf == nullptr || param == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid argument!");
+        TRANS_LOGE(TRANS_STREAM, "invalid argument!");
         return SOFTBUS_ERR;
     }
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
@@ -59,7 +59,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
         std::lock_guard<std::mutex> lock(g_mutex);
         auto it = g_adaptorMap.find(channelId);
         if (it == g_adaptorMap.end()) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "adaptor not existed!");
+            TRANS_LOGE(TRANS_STREAM, "adaptor not existed!");
             return SOFTBUS_ERR;
         }
         adaptor = it->second;
@@ -68,13 +68,12 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
     std::unique_ptr<IStream> stream = nullptr;
     if (adaptor->GetStreamType() == RAW_STREAM) {
         ssize_t dataLen = inData->bufLen + adaptor->GetEncryptOverhead();
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_DBG,
-            "bufLen = %d, GetEncryptOverhead() = %zd", inData->bufLen, adaptor->GetEncryptOverhead());
+        TRANS_LOGD(TRANS_STREAM,
+            "bufLen=%d, encryptOverhead=%zd", inData->bufLen, adaptor->GetEncryptOverhead());
         std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
         ssize_t encLen = adaptor->Encrypt(inData->buf, inData->bufLen, data.get(), dataLen, adaptor->GetSessionKey());
         if (encLen != dataLen) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-                "encrypted failed, dataLen = %zd, encryptLen = %zd", dataLen, encLen);
+            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%zd, encLen=%zd", dataLen, encLen);
             return SOFTBUS_ERR;
         }
 
@@ -92,7 +91,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
         };
         int32_t ret = memcpy_s(data.buffer.get(), data.bufLen, inData->buf, inData->bufLen);
         if (ret != EOK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy data! ret: %d", ret);
+            TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data! ret=%d", ret);
             return SOFTBUS_ERR;
         }
         if (ext != nullptr && ext->bufLen > 0) {
@@ -100,7 +99,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
             data.extLen = ext->bufLen;
             ret = memcpy_s(data.extBuffer.get(), data.extLen, ext->buf, ext->bufLen);
             if (ret != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to memcpy ext! ret: %d", ret);
+                TRANS_LOGE(TRANS_STREAM, "Failed to memcpy ext! ret=%d", ret);
                 return SOFTBUS_ERR;
             }
         }
@@ -109,11 +108,11 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
         ConvertStreamFrameInfo(param, &outFrameInfo);
         stream = IStream::MakeCommonStream(data, outFrameInfo);
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Do not support");
+        TRANS_LOGE(TRANS_STREAM, "Do not support");
     }
 
     if (stream == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "make stream failed, stream is nullptr");
+        TRANS_LOGE(TRANS_STREAM, "make stream failed, stream is nullptr");
         return SOFTBUS_ERR;
     }
     return adaptor->GetStreamManager()->Send(std::move(stream)) ? SOFTBUS_OK : SOFTBUS_ERR;
@@ -122,14 +121,14 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
 int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam *param, const IStreamListener *callback)
 {
     if (channelId < 0 || param == nullptr || param->pkgName == nullptr || callback == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StartVtpStreamChannelServer invalid channelId or pkgName");
+        TRANS_LOGE(TRANS_STREAM, "invalid channelId or pkgName");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "cId=%d Start Channel Server.", channelId);
+    TRANS_LOGI(TRANS_STREAM, "channelId=%d Start Channel Server.", channelId);
     int32_t ret = SOFTBUS_ERR;
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "adaptor already existed!");
+        TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
         return SOFTBUS_ERR;
     }
 
@@ -141,7 +140,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
             it = g_adaptorMap.emplace(std::pair<int, std::shared_ptr<StreamAdaptor>>(channelId,
                 std::make_shared<StreamAdaptor>(pkgStr))).first;
         } else {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "adaptor already existed!");
+            TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
             return SOFTBUS_ERR;
         }
     }
@@ -167,14 +166,14 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
 int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam *param, const IStreamListener *callback)
 {
     if (channelId < 0 || param == nullptr || param->pkgName == nullptr || callback == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channelId or pkgName");
+        TRANS_LOGE(TRANS_STREAM, "invalid channelId or pkgName");
         return SOFTBUS_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "StartChannelClient cId=%d.", channelId);
+    TRANS_LOGI(TRANS_STREAM, "StartChannelClient channelId=%d.", channelId);
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "adaptor already existed!");
+        TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
         return SOFTBUS_ERR;
     }
 
@@ -186,7 +185,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
             it = g_adaptorMap.emplace(std::pair<int, std::shared_ptr<StreamAdaptor>>(channelId,
                 std::make_shared<StreamAdaptor>(pkgStr))).first;
         } else {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "adaptor already existed!");
+            TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
             return SOFTBUS_ERR;
         }
     }
@@ -207,7 +206,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     if (ret > 0) {
         newAdaptor->SetAliveState(true);
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateStreamClientChannel failed, ret:%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "CreateStreamClientChannel failed, ret=%d", ret);
         CloseVtpStreamChannel(channelId, param->pkgName);
     }
 
@@ -216,11 +215,11 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
 
 int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close stream channelid=%d", channelId);
+    TRANS_LOGI(TRANS_STREAM, "close stream channelId=%d", channelId);
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
 
     if (channelId < 0 || pkgName == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid channelId or pkgName");
+        TRANS_LOGE(TRANS_STREAM, "invalid channelId or pkgName");
         return SOFTBUS_ERR;
     }
 
@@ -228,7 +227,7 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
         std::lock_guard<std::mutex> lock(g_mutex);
         auto it = g_adaptorMap.find(channelId);
         if (it == g_adaptorMap.end()) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "adaptor not existed!");
+            TRANS_LOGE(TRANS_STREAM, "adaptor not existed!");
             return SOFTBUS_ERR;
         }
         adaptor = it->second;
@@ -237,7 +236,7 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 
     bool alive = adaptor->GetAliveState();
     if (!alive) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "VtpStreamChannel already closed");
+        TRANS_LOGE(TRANS_STREAM, "VtpStreamChannel already closed");
         return SOFTBUS_ERR;
     }
 

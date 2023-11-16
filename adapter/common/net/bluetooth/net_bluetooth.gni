@@ -18,10 +18,8 @@ adapter_ble_inc = [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common",
-  "$dsoftbus_root_path/adapter/common/net/bluetooth/include/legacy_ble_channel.h",
 ]
 adapter_ble_src = [
-  "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_client.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_server.c",

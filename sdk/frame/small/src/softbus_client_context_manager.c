@@ -15,9 +15,9 @@
 
 #include "softbus_client_context_manager.h"
 
+#include "comm_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 typedef struct {
     unsigned int handle;
@@ -34,7 +34,7 @@ int ClientContextInit(void)
     }
     g_clientCtx = SoftBusCalloc(sizeof(SoftBusClientContext));
     if (g_clientCtx == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed.");
+        COMM_LOGE(COMM_SDK, "malloc failed.");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -53,7 +53,7 @@ void ClientContextDeinit(void)
 void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int cookie)
 {
     if (g_clientCtx == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client ctx not init");
+        COMM_LOGE(COMM_SDK, "client ctx not init");
         return;
     }
 
@@ -65,12 +65,12 @@ void SetClientIdentity(unsigned int handle, unsigned int token, unsigned int coo
 int GetClientIdentity(unsigned int *handle, unsigned int *token, unsigned int *cookie)
 {
     if (handle == NULL || token == NULL || cookie == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_SDK, "invalid param");
         return SOFTBUS_ERR;
     }
 
     if (g_clientCtx == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client ctx not init");
+        COMM_LOGE(COMM_SDK, "client ctx not init");
         return SOFTBUS_ERR;
     }
 

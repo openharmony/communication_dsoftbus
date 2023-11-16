@@ -16,15 +16,13 @@
 #include "interface_info.h"
 #include <string.h>
 #include "securec.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "protocol/wifi_direct_protocol.h"
 #include "utils/wifi_direct_network_utils.h"
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
-
-#define LOG_LABEL "[WD] II: "
 
 #define II_TAG_DYNAMIC_MAC 0
 #define II_TAG_INTERFACE_NAME 1
@@ -112,7 +110,7 @@ static bool MarshallingString(struct WifiDirectProtocol *protocol,
         uint8_t mac[MAC_ADDR_ARRAY_SIZE];
         size_t macSize = sizeof(mac);
         if (GetWifiDirectNetWorkUtils()->macStringToArray((char *)value, mac, &macSize) != SOFTBUS_OK) {
-            CLOGE(LOG_LABEL "mac string to bytes failed");
+            CONN_LOGW(CONN_WIFI_DIRECT, "mac string to bytes failed");
             return false;
         }
         ret = protocol->writeData(protocol, keyProperty, mac, macSize);
@@ -128,15 +126,15 @@ static bool UnmarshallingString(struct InterfaceInfo *self, size_t key, uint8_t 
     if (key == II_KEY_DYNAMIC_MAC || key == II_KEY_BASE_MAC) {
         char macStr[MAC_ADDR_STR_LEN];
         if (GetWifiDirectNetWorkUtils()->macArrayToString(data, size, macStr, sizeof(macStr)) != SOFTBUS_OK) {
-            CLOGE(LOG_LABEL "mac bytes to string failed");
+            CONN_LOGW(CONN_WIFI_DIRECT, "mac bytes to string failed");
             return false;
         }
         self->putString(self, key, macStr);
     } else {
         char *string = SoftBusCalloc(size + 1);
-        CONN_CHECK_AND_RETURN_RET_LOG(string, false, LOG_LABEL "alloc failed");
+        CONN_CHECK_AND_RETURN_RET_LOGE(string, false, CONN_WIFI_DIRECT, "alloc failed");
         if (memcpy_s(string, size + 1, data, size) != EOK) {
-            CLOGE(LOG_LABEL "memcpy data failed");
+            CONN_LOGE(CONN_WIFI_DIRECT, "memcpy data failed");
             SoftBusFree(string);
             return false;
         }
@@ -162,7 +160,7 @@ static bool Marshalling(struct InterfaceInfo *self, struct WifiDirectProtocol *p
         struct InfoContainerKeyProperty *keyProperty = self->keyProperties + key;
         if (protocolType == WIFI_DIRECT_PROTOCOL_TLV && (key == II_KEY_BASE_MAC || key == II_KEY_DYNAMIC_MAC)) {
             ret = MarshallingMacAddress(self, protocol, key);
-            CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "mac address marshalling failed, key=%d", key);
+            CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "mac address marshalling failed, key=%d", key);
             continue;
         }
 
@@ -191,7 +189,7 @@ static bool Marshalling(struct InterfaceInfo *self, struct WifiDirectProtocol *p
                 break;
         }
 
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "marshalling failed, key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling failed, key=%d", key);
     }
 
     return true;
@@ -207,14 +205,16 @@ static bool Unmarshalling(struct InterfaceInfo *self, struct WifiDirectProtocol 
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = false;
         enum InterfaceInfoKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOG(key < II_KEY_MAX, false, LOG_LABEL "key out of range, tag=%d", keyProperty.tag);
+        CONN_CHECK_AND_RETURN_RET_LOGW(key < II_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+            keyProperty.tag);
         if (!data || !size) {
             continue;
         }
 
         if (protocolType == WIFI_DIRECT_PROTOCOL_TLV && (key == II_KEY_BASE_MAC || key == II_KEY_DYNAMIC_MAC)) {
             ret = UnmarshallingMacAddress(self, key, data, size);
-            CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "mac address unmarshalling failed key=%d", key);
+            CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "mac address unmarshalling failed key=%d",
+                key);
             continue;
         }
 
@@ -242,7 +242,7 @@ static bool Unmarshalling(struct InterfaceInfo *self, struct WifiDirectProtocol 
 
         data = NULL;
         size = 0;
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
     }
 
     return true;
@@ -268,7 +268,7 @@ static void PutIpString(struct InterfaceInfo *self, const char *ipString)
 {
     struct WifiDirectIpv4Info ipv4;
     int32_t ret = WifiDirectIpStringToIpv4(ipString, &ipv4);
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "ip to ipv4 failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "ip to ipv4 failed");
     self->putRawData(self, II_KEY_IPV4, &ipv4, sizeof(ipv4));
 }
 
@@ -280,7 +280,7 @@ static int32_t GetP2pGroupConfig(struct InterfaceInfo *self, char *buffer, size_
                             self->getString(self, II_KEY_PSK, ""),
                             self->getInt(self, II_KEY_CENTER_20M, 0));
     if (ret < 0) {
-        CLOGE(LOG_LABEL "format group config failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "format group config failed");
         return SOFTBUS_ERR;
     }
 
@@ -292,8 +292,8 @@ static int32_t SetP2pGroupConfig(struct InterfaceInfo *self, char *groupConfig)
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX] = {0};
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
     int32_t ret = GetWifiDirectNetWorkUtils()->splitString(groupConfig, "\n", configs, &configsSize);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK && configsSize > P2P_GROUP_CONFIG_INDEX_FREQ,
-        SOFTBUS_ERR, "split group config failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK && configsSize > P2P_GROUP_CONFIG_INDEX_FREQ, SOFTBUS_ERR,
+        CONN_WIFI_DIRECT, "split group config failed");
 
     self->putString(self, II_KEY_SSID, configs[P2P_GROUP_CONFIG_INDEX_SSID]);
     if (!self->get(self, II_KEY_DYNAMIC_MAC, NULL, NULL)) {
@@ -310,15 +310,15 @@ static void IncreaseRefCount(struct InterfaceInfo *self)
     int32_t count = self->getInt(self, II_KEY_REUSE_COUNT, 0);
     count++;
     self->putInt(self, II_KEY_REUSE_COUNT, count);
-    CLOGI(LOG_LABEL "reuseCount=%d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%d", count);
 }
 
 static void DecreaseRefCount(struct InterfaceInfo *self)
 {
     int32_t count = self->getInt(self, II_KEY_REUSE_COUNT, 0);
-    count--;
+    --count;
     self->putInt(self, II_KEY_REUSE_COUNT, count);
-    CLOGI(LOG_LABEL "reuseCount=%d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%d", count);
 }
 
 /* private method implement */
@@ -342,14 +342,14 @@ static bool MarshallingMacAddress(struct InterfaceInfo *self, struct WifiDirectP
 {
     char *addressString = self->getString(self, key, "");
     if (strlen(addressString) == 0) {
-        CLOGI(LOG_LABEL "empty address string");
+        CONN_LOGI(CONN_WIFI_DIRECT, "empty address string");
         return true;
     }
 
     size_t addressSize = MAC_ADDR_ARRAY_SIZE;
     uint8_t address[MAC_ADDR_ARRAY_SIZE];
     int32_t ret = GetWifiDirectNetWorkUtils()->macStringToArray(addressString, address, &addressSize);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "mac string to array failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "mac string to array failed");
 
     protocol->writeData(protocol, &InterfaceInfoKeyProperties[key], address, addressSize);
     return true;
@@ -357,10 +357,10 @@ static bool MarshallingMacAddress(struct InterfaceInfo *self, struct WifiDirectP
 
 static bool UnmarshallingMacAddress(struct InterfaceInfo *self, enum InterfaceInfoKey key, uint8_t *data, size_t size)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(size == MAC_ADDR_ARRAY_SIZE, false, LOG_LABEL "size=%d is invalid", size);
+    CONN_CHECK_AND_RETURN_RET_LOGW(size == MAC_ADDR_ARRAY_SIZE, false, CONN_WIFI_DIRECT, "size=%d is invalid", size);
     char address[MAC_ADDR_STR_LEN] = {0};
     int32_t ret = GetWifiDirectNetWorkUtils()->macArrayToString(data, size, address, sizeof(address));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "mac array to string failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "mac array to string failed");
     self->putString(self, key, address);
     return true;
 }

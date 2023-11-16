@@ -70,6 +70,13 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 
   ohos_shared_library("nstackx_congestion.open") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    branch_protector_ret = "pac_ret"
+
     cflags = [
       "-Wall",
       "-DMBEDTLS_INCLUDED",

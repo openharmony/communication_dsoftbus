@@ -14,14 +14,14 @@
  */
 
 #include "lnn_lane_score.h"
-#include "softbus_log.h"
+#include "lnn_log.h"
 #include "softbus_errcode.h"
 
 #define VIRTUAL_DEFAULT_SCORE 60
 
 int32_t LnnInitScore(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init laneScore virtual");
+    LNN_LOGI(LNN_INIT, "init laneScore virtual");
     return SOFTBUS_OK;
 }
 

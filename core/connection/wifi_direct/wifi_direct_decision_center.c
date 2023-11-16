@@ -21,8 +21,6 @@
 #include "protocol/wifi_direct_protocol_factory.h"
 #include "processor/wifi_direct_processor_factory.h"
 
-#define LOG_LABEL "[WD] DC: "
-
 static struct WifiDirectProtocol* GetProtocol(struct WifiDirectNegotiateChannel *channel)
 {
     (void)channel;
@@ -55,7 +53,8 @@ static struct WifiDirectProcessor* GetProcessorByNegoChannelAndConnectType(struc
 static struct WifiDirectProcessor* GetProcessorByNegotiateMessage(struct NegotiateMessage *msg)
 {
     (void)msg;
-    return NULL;
+    struct WifiDirectProcessorFactory *factory = GetWifiDirectProcessorFactory();
+    return factory->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1);
 }
 
 /* static public method */

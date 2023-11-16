@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,10 +123,10 @@ static cJSON* CheckAnonymizeJsonData(cJSON *data, const char * const jsonKey)
 
 static int32_t GetAnonymizedDeviceId(char *srcStr, char *dstStr, size_t dstLen)
 {
-    int lenFlag = strlen(srcStr) / DFINDER_MGT_UUID_LEN;
-    int len = (lenFlag > 0) ? DFINDER_MGT_UUID_LEN : strlen(srcStr);
+    size_t lenFlag = strlen(srcStr) / DFINDER_MGT_UUID_LEN;
+    size_t len = (lenFlag > 0) ? DFINDER_MGT_UUID_LEN : strlen(srcStr);
     int ret = 0;
-    int wroteLen = 0;
+    uint32_t wroteLen = 0;
     DUMP_MSG_ADD_CHECK(ret, dstStr, wroteLen, dstLen, "%.*s******", len, srcStr);
     return NSTACKX_EOK;
 }
@@ -142,7 +142,10 @@ static int32_t AnonymizeDeviceIdJsonData(cJSON  *data)
         DFINDER_LOGE(TAG, "get anonymize device id failed");
         return NSTACKX_EFAILED;
     }
-    cJSON_ReplaceItemInObjectCaseSensitive(data, JSON_DEVICE_ID, cJSON_CreateString(anonyDevId));
+    if (!cJSON_ReplaceItemInObjectCaseSensitive(data, JSON_DEVICE_ID, cJSON_CreateString(anonyDevId))) {
+        DFINDER_LOGE(TAG, "replace device id in json failed");
+        return NSTACKX_EFAILED;
+    }
     return NSTACKX_EOK;
 }
 
@@ -158,7 +161,10 @@ static int32_t AnonymizeIpJsonData(cJSON *data)
         DFINDER_LOGE(TAG, "get anonymized ip failed");
         return NSTACKX_EFAILED;
     }
-    cJSON_ReplaceItemInObjectCaseSensitive(data, JSON_DEVICE_WLAN_IP, cJSON_CreateString(ipStr));
+    if (!cJSON_ReplaceItemInObjectCaseSensitive(data, JSON_DEVICE_WLAN_IP, cJSON_CreateString(ipStr))) {
+        DFINDER_LOGE(TAG, "replace device wlan ip in json failed");
+        return NSTACKX_EFAILED;
+    }
     return NSTACKX_EOK;
 }
 
@@ -222,16 +228,12 @@ static char *ParseCoapRequestData(const char *reqData, size_t dataLen)
         DFINDER_LOGE(TAG, "illegal coap request data");
         return NULL;
     }
-    char *dupReqData = (char *)calloc(dataLen + 1, sizeof(char));
+    char *dupReqData = (char *)malloc(dataLen);
     if (dupReqData == NULL) {
         DFINDER_LOGE(TAG, "malloc for duplicate request data failed");
         return NULL;
     }
-    if (memcpy_s(dupReqData, dataLen + 1, reqData, dataLen) != EOK) {
-        DFINDER_LOGE(TAG, "memcpy for duplicate request data failed");
-        free(dupReqData);
-        return NULL;
-    }
+    (void)memcpy_s(dupReqData, dataLen, reqData, dataLen);
     char *formatString = NULL;
     cJSON *data = cJSON_Parse(dupReqData);
     if (data == NULL) {
@@ -273,6 +275,7 @@ void DFinderMgtReqLog(CoapRequest *coapRequest)
         return;
     }
     DFINDER_LOGI(TAG, "coap msg type: %s, coap req data: %s", GetCoapReqTypeStr(coapRequest->type), coapReqData);
+    cJSON_free(coapReqData);
 }
 
 static int32_t UnpackLogToStr(DeviceInfo *dev, char *msg, uint32_t size)
@@ -293,11 +296,11 @@ static int32_t UnpackLogToStr(DeviceInfo *dev, char *msg, uint32_t size)
         return NSTACKX_EFAILED;
     }
 
-    int wroteLen = 0;
+    uint32_t wroteLen = 0;
     int ret = 0;
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "deviceId: %s ", anonyDevId);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "devicename: %s, ", dev->deviceName);
-    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "type: %hhu, ", dev->deviceType);
+    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "type: %u, ", dev->deviceType);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "hicomversion: %s, ", dev->version);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "mode: %s, ", GetModeTypeStr(dev->mode));
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size,
@@ -316,6 +319,11 @@ static int32_t UnpackLogToStr(DeviceInfo *dev, char *msg, uint32_t size)
 void DFinderMgtUnpackLog(DeviceInfo *dev)
 {
     if (!g_mgtMsgLog) {
+        return;
+    }
+
+    if (dev == NULL) {
+        DFINDER_LOGE(TAG, "invalid deviceInfo");
         return;
     }
 

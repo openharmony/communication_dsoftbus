@@ -274,4 +274,22 @@ HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, Test
     NotifyDeviceDisplayNameChange(NETWORKID, NODE_UDID);
     NotifyDeviceDisplayNameChange(NETWORKID, NODE_UDID);
 }
+
+/*
+* @tc.name: IS_DEVICE_NEED_SYNC_NICK_NAME_TEST_001
+* @tc.desc: Is Device Need Sync Nick Name test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNDeviceNameInfoTest, IS_DEVICE_NEED_SYNC_NICK_NAME_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+    bool ret = IsDeviceNeedSyncNickName(NETWORKID);
+    EXPECT_FALSE(ret);
+    ret = IsDeviceNeedSyncNickName(NETWORKID);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS

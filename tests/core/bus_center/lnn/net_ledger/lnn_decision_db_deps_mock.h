@@ -28,7 +28,6 @@
 #include "softbus_adapter_file.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 namespace OHOS {

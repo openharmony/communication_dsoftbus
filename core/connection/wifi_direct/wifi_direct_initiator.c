@@ -14,7 +14,6 @@
  */
 
 #include "wifi_direct_initiator.h"
-#include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_defines.h"
 #include "wifi_direct_manager.h"
@@ -22,14 +21,13 @@
 #include "broadcast_receiver.h"
 #include "broadcast_handler.h"
 #include "command/wifi_direct_command_manager.h"
+#include "conn_log.h"
 #include "channel/default_negotiate_channel.h"
 #include "channel/fast_connect_negotiate_channel.h"
 #include "data/resource_manager.h"
 #include "data/link_manager.h"
 #include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_work_queue.h"
-
-#define LOG_LABEL "[WD] Init: "
 
 typedef int32_t (*WifiDirectSubInitFunc)(void);
 
@@ -52,18 +50,15 @@ int32_t WifiDirectInit(void)
     bool hasFailure = false;
     for (size_t i = 0; i < ARRAY_SIZE(g_subInitFunctions); i++) {
         if (g_subInitFunctions[i]() == SOFTBUS_OK) {
-            CLOGI(LOG_LABEL "%d success", i);
+            CONN_LOGI(CONN_INIT, "%d success", i);
             continue;
         }
-        CLOGE(LOG_LABEL "%d init failed", i);
+        CONN_LOGE(CONN_INIT, "%d init failed", i);
         hasFailure = true;
     }
 
-    if (hasFailure) {
-        CLOGE(LOG_LABEL "init has failure");
-        return SOFTBUS_ERR;
+    if (hasFailure == false) {
+        CONN_LOGI(CONN_INIT, "all init success");
     }
-
-    CLOGI(LOG_LABEL "all init success");
     return SOFTBUS_OK;
 }

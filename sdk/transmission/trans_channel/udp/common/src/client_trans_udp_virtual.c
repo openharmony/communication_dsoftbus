@@ -42,15 +42,16 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
     (void)errCode;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
-int32_t TransOnUdpChannelClosed(int32_t channelId)
+int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
     (void)channelId;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ClientTransCloseUdpChannel(int32_t channelId)
+int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
     (void)channelId;
+    (void)reason;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

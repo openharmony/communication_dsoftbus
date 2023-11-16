@@ -26,6 +26,7 @@ ohos_fuzztest("SendFileFuzzTest") {
     "../../../../../core/common/inner_communication",
     "../../../../../adapter/common/include",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../interfaces/kits/common",
     "../../../../../interfaces/inner_kits/transport",
     "//commonlibrary/c_utils/base/include",

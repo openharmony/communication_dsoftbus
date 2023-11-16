@@ -21,7 +21,6 @@
 #include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 namespace OHOS {
 using namespace testing;

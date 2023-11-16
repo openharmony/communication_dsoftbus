@@ -16,10 +16,10 @@
 #include "lnn_net_capability.h"
 
 #include <stdint.h>
+#include "lnn_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
 #define DEFAUTL_LNN_CAPBILITY 0x16
@@ -27,7 +27,7 @@
 bool LnnHasCapability(uint32_t capability, NetCapability type)
 {
     if (type >= BIT_COUNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
+        LNN_LOGE(LNN_LEDGER, "in para error");
         return false;
     }
     uint32_t cap = 0;
@@ -41,7 +41,7 @@ bool LnnHasCapability(uint32_t capability, NetCapability type)
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 {
     if (capability == NULL || type >= BIT_COUNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
+        LNN_LOGE(LNN_LEDGER, "in para error");
         return SOFTBUS_INVALID_PARAM;
     }
     *capability = (*capability) | (1 << (uint32_t)type);
@@ -51,7 +51,7 @@ int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
 int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
 {
     if (capability == NULL || type >= BIT_COUNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "in para error!");
+        LNN_LOGE(LNN_LEDGER, "in para error");
         return SOFTBUS_INVALID_PARAM;
     }
     *capability = (*capability) & (~(1 << (uint32_t)type));
@@ -65,10 +65,10 @@ uint32_t LnnGetNetCapabilty(void)
 
     if (SoftbusGetConfig(SOFTBUS_INT_LNN_SUPPORT_CAPABILITY,
         (unsigned char *)&configValue, sizeof(configValue)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get lnn capbility fail, use default value");
+        LNN_LOGE(LNN_LEDGER, "get lnn capbility fail, use default value");
         configValue = DEFAUTL_LNN_CAPBILITY;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn capbility is %u", configValue);
+    LNN_LOGI(LNN_LEDGER, "lnn capbility is %u", configValue);
     if ((configValue & (1 << BIT_BLE)) != 0) {
         (void)LnnSetNetCapability(&capability, BIT_BLE);
     }

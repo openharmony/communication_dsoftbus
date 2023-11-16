@@ -14,8 +14,10 @@
  */
 
 #include "lnn_trans_mock.h"
+
+#include "lnn_log.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -45,13 +47,13 @@ int TransRegisterNetworkingChannelListener(const char *sessionName, const INetwo
 int32_t TransOpenNetWorkingChannel(const char *sessionName, const char *peerNetworkId,
     const LanePreferredLinkList *preferred)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TransOpenNetWorkingChannel enter");
+    LNN_LOGI(LNN_TEST, "TransOpenNetWorkingChannel enter");
     return GetTransInterface()->TransOpenNetWorkingChannel(sessionName, peerNetworkId);
 }
 
 int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dataLen, int32_t priority)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "TransSendNetworkingMessage enter");
+    LNN_LOGI(LNN_TEST, "TransSendNetworkingMessage enter");
     return GetTransInterface()->TransSendNetworkingMessage(channelId, data, dataLen, priority);
 }
 
@@ -63,7 +65,7 @@ int32_t TransCloseNetWorkingChannel(int32_t channelId)
 int32_t LnnTransInterfaceMock::ActionOfTransRegister(const INetworkingListener *listener)
 {
     if (listener == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "listener is invalid para");
+        LNN_LOGE(LNN_TEST, "listener is invalid para");
         return SOFTBUS_ERR;
     }
     g_networkListener = listener;

@@ -23,11 +23,11 @@
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_log.h"
 #include "want.h"
 #include "wifi_msg.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "wifi_event.h"
 #include "wifi_ap_msg.h"
 
@@ -53,7 +53,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
     SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "notify wifiservice event %s, code(%d)", action.c_str(), code);
+    LNN_LOGI(LNN_BUILDER, "notify wifiservice event=%s, code=%d", action.c_str(), code);
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
         switch (code) {
             case int(OHOS::Wifi::ConnState::OBTAINING_IPADDR):
@@ -151,24 +151,24 @@ static void LnnSubscribeWifiService(void *para)
     (void)para;
     static int32_t retry = 0;
     if (retry > RETRY_MAX) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "try subscribe wifiservice event max times");
+        LNN_LOGE(LNN_BUILDER, "try subscribe wifiservice event max times");
         return;
     }
     OHOS::EventFwk::SubscribeEvent *subscriberPtr = new OHOS::EventFwk::SubscribeEvent();
     if (subscriberPtr == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "SubscribeEvent init fail");
+        LNN_LOGE(LNN_BUILDER, "SubscribeEvent init fail");
         return;
     }
     if (subscriberPtr->SubscribeWifiConnStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeAPConnStateEvent() == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "subscribe wifiservice conn and power state success");
+        LNN_LOGI(LNN_BUILDER, "subscribe wifiservice conn and power state success");
     } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "subscribe wifiservice event fail");
+        LNN_LOGE(LNN_BUILDER, "subscribe wifiservice event fail");
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
         if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, DELAY_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
+            LNN_LOGE(LNN_BUILDER, "LnnAsyncCallbackDelayHelper fail");
         }
     }
     delete subscriberPtr;
@@ -179,7 +179,7 @@ int32_t LnnInitWifiServiceMonitorImpl(void)
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init wifiservice LnnAsyncCallbackDelayHelper fail");
+        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
     }
     return ret;
 }

@@ -34,7 +34,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "softbus_server_frame.h"
 #include "softbus_trans_def.h"
@@ -415,5 +414,372 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
 
     SoftBusFree(tmp);
     tmp = nullptr;
+}
+
+/**
+ * @tc.name: PackTdcPacketHeadTest001
+ * @tc.desc: PackTdcPacketHead
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, PackTdcPacketHeadTest001, TestSize.Level1)
+{
+    TdcPacketHead data;
+    PackTdcPacketHead(&data);
+    EXPECT_TRUE(1);
+}
+
+/**
+ * @tc.name: UnpackTdcPacketHeadTest001
+ * @tc.desc: UnpackTdcPacketHead
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, UnpackTdcPacketHeadTest001, TestSize.Level1)
+{
+    TdcPacketHead data;
+    UnpackTdcPacketHead(&data);
+    EXPECT_TRUE(1);
+}
+
+/**
+ * @tc.name: SwitchCipherTypeToAuthLinkTypeTest001
+ * @tc.desc: SwitchCipherTypeToAuthLinkType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkTypeTest001, TestSize.Level1)
+{
+    uint32_t cipherFlag = FLAG_BR;
+    AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_BR);
+
+    cipherFlag = FLAG_BLE;
+    linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_BLE);
+
+    cipherFlag = FLAG_P2P;
+    linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_P2P);
+
+    cipherFlag = FLAG_WIFI;
+    linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_WIFI);
+}
+
+/**
+ * @tc.name: NotifyChannelClosedTest001
+ * @tc.desc: NotifyChannelClosed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelClosedTest001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    int32_t ret = NotifyChannelClosed(appInfo, 1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: NotifyChannelOpenedTest001
+ * @tc.desc: NotifyChannelOpened, wrong input
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest001, TestSize.Level1)
+{
+    int32_t channelId = -1;
+    int32_t ret = NotifyChannelOpened(channelId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: NotifyChannelOpenedTest002
+ * @tc.desc: NotifyChannelOpened
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+
+    SessionConn *con = TestSetSessionConn();
+    EXPECT_NE(con, NULL);
+    con->channelId = channelId;
+    int32_t ret = TransTdcAddSessionConn(con);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+
+    ret = NotifyChannelOpened(channelId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    SoftBusFree(con);
+}
+
+/**
+ * @tc.name: NotifyChannelOpenedTest003
+ * @tc.desc: NotifyChannelOpened
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest003, TestSize.Level1)
+{
+    int32_t channelId = 1;
+
+    SessionConn *con = TestSetSessionConn();
+    EXPECT_NE(con, NULL);
+    con->channelId = channelId;
+    int32_t ret = TransTdcAddSessionConn(con);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    con->appInfo.routeType = WIFI_STA;
+    ret = NotifyChannelOpened(channelId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    SoftBusFree(con);
+}
+
+/**
+ * @tc.name: NotifyChannelOpenedTest004
+ * @tc.desc: NotifyChannelOpened
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest004, TestSize.Level1)
+{
+    int32_t channelId = 1;
+
+    SessionConn *con = TestSetSessionConn();
+    EXPECT_NE(con, NULL);
+    con->channelId = channelId;
+    int32_t ret = TransTdcAddSessionConn(con);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    con->appInfo.routeType = WIFI_P2P;
+    ret = NotifyChannelOpened(channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
+    SoftBusFree(con);
+}
+
+/**
+ * @tc.name: NotifyChannelOpenedTest005
+ * @tc.desc: NotifyChannelOpened
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest005, TestSize.Level1)
+{
+    int32_t channelId = 1;
+
+    SessionConn *con = TestSetSessionConn();
+    EXPECT_NE(con, NULL);
+    con->channelId = channelId;
+    int32_t ret = TransTdcAddSessionConn(con);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    con->serverSide = false;
+    ret = NotifyChannelOpened(channelId);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    SoftBusFree(con);
+}
+
+/**
+ * @tc.name: SendFailToFlushDeviceTest001
+ * @tc.desc: SendFailToFlushDevice
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, SendFailToFlushDeviceTest001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    conn->appInfo.routeType = WIFI_STA;
+    conn->appInfo.peerData.deviceId[0] = '\0';
+    SendFailToFlushDevice(conn);
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: TransTdcPostFisrtDataTest001
+ * @tc.desc: TransTdcPostFisrtData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtDataTest001, TestSize.Level1)
+{
+    SessionConn *con = TestSetSessionConn();
+    EXPECT_NE(con, NULL);
+
+    int32_t ret = TransTdcPostFisrtData(con);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    SoftBusFree(con);
+}
+
+/**
+ * @tc.name: FindConfigTypeTest001
+ * @tc.desc: FindConfigType, normal input
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, FindConfigTypeTest001, TestSize.Level1)
+{
+    int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
+    int32_t bussinessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = FindConfigType(channelType, bussinessType);
+    EXPECT_EQ(ret, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH);
+}
+
+/**
+ * @tc.name: FindConfigTypeTest002
+ * @tc.desc: FindConfigType, wrong input
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, FindConfigTypeTest002, TestSize.Level1)
+{
+    int32_t channelType = -1;
+    int32_t bussinessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = FindConfigType(channelType, bussinessType);
+    EXPECT_EQ(ret, SOFTBUS_CONFIG_TYPE_MAX);
+}
+
+/**
+ * @tc.name: TransTdcProcessDataConfigTest001
+ * @tc.desc: TransTdcProcessDataConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfigTest001, TestSize.Level1)
+{
+    int32_t ret = TransTdcProcessDataConfig(NULL);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    AppInfo *appInfo = TestSetAppInfo();
+    ASSERT_TRUE(appInfo != nullptr);
+
+    appInfo->businessType = BUSINESS_TYPE_BUTT;
+    ret = TransTdcProcessDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo->businessType = BUSINESS_TYPE_MESSAGE;
+    appInfo->myData.dataConfig = 2;
+    ret = TransTdcProcessDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo->myData.dataConfig = 0;
+    ret = TransTdcProcessDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: TransTdcPostReplyMsgTest001
+ * @tc.desc: TransTdcPostReplyMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostReplyMsgTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t seq = 1;
+    uint32_t flags = 1;
+
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: OpenDataBusRequestReplyTest001
+ * @tc.desc: OpenDataBusRequestReply
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t seq = 1;
+    uint32_t flags = 1;
+
+    int32_t ret = OpenDataBusRequestReply(NULL, channelId, seq, flags);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: OpenDataBusRequestErrorTest001
+ * @tc.desc: OpenDataBusRequestError
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t seq = 1;
+    uint32_t flags = 1;
+    int32_t errCode = -1;
+
+    int32_t ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: OpenDataBusRequestOutSessionNameTest001
+ * @tc.desc: OpenDataBusRequestOutSessionName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestOutSessionNameTest001, TestSize.Level1)
+{
+    char *mySessionName = nullptr;
+    char *peerSessionName = nullptr;
+    OpenDataBusRequestOutSessionName(mySessionName, peerSessionName);
+}
+
+/**
+ * @tc.name: NotifyFastDataRecvTest001
+ * @tc.desc: NotifyFastDataRecv
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, NotifyFastDataRecvTest001, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    EXPECT_NE(conn, nullptr);
+
+    int32_t channelId = 1;
+    NotifyFastDataRecv(conn, channelId);
+
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: TransTdcFillDataConfigTest001
+ * @tc.desc: TransTdcFillDataConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSize.Level1)
+{
+    int32_t ret = TransTdcFillDataConfig(NULL);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    AppInfo *appInfo = TestSetAppInfo();
+    EXPECT_NE(appInfo, nullptr);
+
+    appInfo->businessType = BUSINESS_TYPE_BUTT;
+    ret = TransTdcFillDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo->peerData.dataConfig = 1;
+    ret = TransTdcFillDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo->peerData.dataConfig = 1;
+    appInfo->businessType = BUSINESS_TYPE_BYTE;
+    appInfo->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    ret = TransTdcFillDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo->peerData.dataConfig = 0;
+    ret = TransTdcFillDataConfig(appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(appInfo);
 }
 }

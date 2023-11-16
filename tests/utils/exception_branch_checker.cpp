@@ -14,7 +14,7 @@
  */
 
 #include "exception_branch_checker.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "securec.h"
 
 static constexpr int32_t LOG_BUF_LEN = 512;
